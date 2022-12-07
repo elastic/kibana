@@ -61,5 +61,8 @@
     "@kbn/monaco",
     "@kbn/language-documentation-popover",
     "@kbn/core-saved-objects-common",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

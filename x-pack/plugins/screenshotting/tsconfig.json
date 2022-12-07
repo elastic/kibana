@@ -21,5 +21,8 @@
     "@kbn/std",
     "@kbn/i18n",
     "@kbn/utils",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

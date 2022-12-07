@@ -74,5 +74,8 @@
     "@kbn/ci-stats-reporter",
     "@kbn/optimizer-webpack-helpers",
     "@kbn/storybook",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

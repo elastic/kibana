@@ -29,5 +29,8 @@
     "@kbn/config-schema",
     "@kbn/core-http-server",
     "@kbn/core-http-router-server-internal",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

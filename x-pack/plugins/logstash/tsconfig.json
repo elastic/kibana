@@ -24,5 +24,8 @@
     "@kbn/test-jest-helpers",
     "@kbn/es-ui-shared-plugin",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

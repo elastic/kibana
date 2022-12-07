@@ -15,4 +15,7 @@
     "@kbn/axe-config",
     "@kbn/utils"
   ],
+  "exclude": [
+    "target/**/*",
+  ],
 }

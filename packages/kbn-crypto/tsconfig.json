@@ -10,5 +10,8 @@
   "include": ["**/*.ts"],
   "kbn_references": [
     "@kbn/dev-utils"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

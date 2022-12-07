@@ -27,5 +27,8 @@
     "@kbn/core-test-helpers-http-setup-browser",
     "@kbn/config-schema",
     "@kbn/utility-types-jest",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -14,5 +14,8 @@
     { "path": "../cli_plugin/tsconfig.json" },
     "@kbn/utils",
     "@kbn/repo-info",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

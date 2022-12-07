@@ -15,5 +15,8 @@
     "@kbn/core-fatal-errors-browser-mocks",
     "@kbn/core-injected-metadata-browser-mocks",
     "@kbn/core-http-browser-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -17,5 +17,8 @@
     "@kbn/std",
     "@kbn/core-execution-context-common",
     "@kbn/tinymath",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

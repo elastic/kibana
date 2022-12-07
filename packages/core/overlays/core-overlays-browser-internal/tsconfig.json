@@ -20,5 +20,8 @@
     "@kbn/core-i18n-browser",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-overlays-browser"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

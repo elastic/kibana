@@ -19,5 +19,8 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-base-browser-mocks",
     "@kbn/core-injected-metadata-browser-mocks"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -20,5 +20,8 @@
     "@kbn/ftr-screenshot-filename",
     "@kbn/jest-serializers",
     "@kbn/journeys"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

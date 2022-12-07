@@ -26,5 +26,8 @@
     "@kbn/rison",
     "@kbn/datemath",
     "@kbn/monaco",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

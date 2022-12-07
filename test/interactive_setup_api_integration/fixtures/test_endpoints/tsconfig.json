@@ -7,7 +7,9 @@
   "include": [
     "server/**/*.ts",
   ],
-  "exclude": [],
+  "exclude": [
+    "target/**/*",
+  ],
   "kbn_references": [
     "@kbn/core",
   ],

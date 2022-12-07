@@ -15,5 +15,8 @@
     "@kbn/utility-types",
     "@kbn/logging-mocks",
     "@kbn/core-plugins-browser-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -14,5 +14,8 @@
     "@kbn/utils",
     "@kbn/config",
     "@kbn/utility-types"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -29,5 +29,8 @@
     "@kbn/analytics-shippers-elastic-v3-server",
     "@kbn/config-schema",
     "@kbn/utils",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

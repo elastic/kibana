@@ -16,5 +16,8 @@
     "@kbn/expressions-plugin",
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

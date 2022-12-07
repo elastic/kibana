@@ -17,5 +17,8 @@
     "@kbn/core-base-server-internal",
     "@kbn/core-logging-common-internal",
     "@kbn/core-logging-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -15,5 +15,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/ml-is-populated-object",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

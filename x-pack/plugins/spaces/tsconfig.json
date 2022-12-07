@@ -26,5 +26,8 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/test",
     "@kbn/utils",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

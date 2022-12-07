@@ -2,5 +2,8 @@
   "extends": "../../shared/cypress/tsconfig.json",
   "kbn_references": [{ "path": "../../shared/cypress/tsconfig.json" }],
   "compilerOptions": { "outDir": "target/types" },
-  "include": ["./**/*"]
+  "include": ["./**/*"],
+  "exclude": [
+    "target/**/*",
+  ]
 }

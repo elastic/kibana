@@ -26,5 +26,8 @@
     "@kbn/core-capabilities-browser-internal",
     "@kbn/core-application-common",
     "@kbn/core-application-browser"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

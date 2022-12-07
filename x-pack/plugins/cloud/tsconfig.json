@@ -15,5 +15,8 @@
     "@kbn/usage-collection-plugin",
     "@kbn/analytics-client",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

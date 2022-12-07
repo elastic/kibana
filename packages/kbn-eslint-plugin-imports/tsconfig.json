@@ -15,5 +15,8 @@
     "@kbn/dev-utils",
     "@kbn/import-resolver",
     "@kbn/repo-source-classifier"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

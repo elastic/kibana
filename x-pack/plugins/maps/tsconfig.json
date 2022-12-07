@@ -63,5 +63,8 @@
     "@kbn/custom-integrations-plugin",
     "@kbn/config-schema",
     "@kbn/field-types",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

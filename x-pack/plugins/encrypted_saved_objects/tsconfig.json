@@ -11,5 +11,8 @@
     "@kbn/utility-types",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-common",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

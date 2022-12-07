@@ -17,5 +17,8 @@
     "@kbn/i18n-react",
     "@kbn/i18n",
     "@kbn/shared-ux-avatar-solution"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

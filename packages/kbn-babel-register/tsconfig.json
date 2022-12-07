@@ -16,5 +16,8 @@
     "@kbn/package-map",
     "@kbn/repo-info",
     "@kbn/babel-transform"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

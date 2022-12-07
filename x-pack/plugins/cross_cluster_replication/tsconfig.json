@@ -29,5 +29,8 @@
     "@kbn/analytics",
     "@kbn/test-jest-helpers",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

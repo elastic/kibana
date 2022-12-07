@@ -12,5 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/utils"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

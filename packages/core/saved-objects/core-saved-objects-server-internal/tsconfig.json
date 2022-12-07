@@ -29,5 +29,8 @@
     "@kbn/core-usage-data-base-server-internal",
     "@kbn/core-deprecations-server",
     "@kbn/core-node-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

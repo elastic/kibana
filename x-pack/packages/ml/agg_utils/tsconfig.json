@@ -16,5 +16,8 @@
     "@kbn/field-types",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-string-hash"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

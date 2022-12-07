@@ -17,5 +17,8 @@
     "@kbn/tooling-log",
     "@kbn/ui-shared-deps-npm",
     "@kbn/utils"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

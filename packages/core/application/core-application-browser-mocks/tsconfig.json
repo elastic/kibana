@@ -19,5 +19,8 @@
     "@kbn/core-application-browser-internal",
     "@kbn/core-capabilities-browser-mocks",
     "@kbn/core-theme-browser-mocks"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

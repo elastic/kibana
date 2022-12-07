@@ -15,5 +15,8 @@
     "@kbn/core-base-server-internal",
     "@kbn/core-base-server-mocks",
     "@kbn/core-doc-links-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

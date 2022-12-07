@@ -34,5 +34,8 @@
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/expect",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

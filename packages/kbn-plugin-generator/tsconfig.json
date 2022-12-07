@@ -11,7 +11,8 @@
     "**/*.ts"
   ],
   "exclude": [
-    "template/*"
+    "template/*",
+    "target/**/*",
   ],
   "kbn_references": [
     "@kbn/utils",

@@ -27,5 +27,8 @@
     "@kbn/i18n-react",
     "@kbn/coloring",
     "@kbn/config-schema",
-    ]
+    ],
+  "exclude": [
+    "target/**/*",
+  ]
   }

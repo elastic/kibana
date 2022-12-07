@@ -11,5 +11,8 @@
     "@kbn/config-schema",
     "@kbn/std",
     "@kbn/core-http-server",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

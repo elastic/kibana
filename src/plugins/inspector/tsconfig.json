@@ -12,5 +12,8 @@
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
     "@kbn/monaco",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

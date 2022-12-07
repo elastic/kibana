@@ -148,4 +148,7 @@
     "@kbn/doc-links",
     "@kbn/core-status-server-internal",
   ],
+  "exclude": [
+    "target/**/*",
+  ],
 }

@@ -26,5 +26,8 @@
     "@kbn/i18n-react",
     "@kbn/analytics",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

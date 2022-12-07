@@ -15,5 +15,8 @@
     "@kbn/utils",
     "@kbn/repo-info",
     "@kbn/jest-serializers",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

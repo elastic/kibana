@@ -19,5 +19,8 @@
     "@kbn/i18n",
     "@kbn/utility-types",
     "@kbn/std",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

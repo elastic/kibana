@@ -27,5 +27,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-elasticsearch-client-server-internal",
     "@kbn/core-test-helpers-deprecations-getters"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

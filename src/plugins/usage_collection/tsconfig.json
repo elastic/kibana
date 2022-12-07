@@ -20,5 +20,8 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/core-http-server-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

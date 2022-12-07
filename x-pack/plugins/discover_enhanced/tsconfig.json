@@ -20,5 +20,8 @@
     "@kbn/es-query",
     "@kbn/unified-search-plugin",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

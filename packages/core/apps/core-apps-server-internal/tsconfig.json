@@ -23,5 +23,8 @@
     "@kbn/core-http-server",
     "@kbn/core-lifecycle-server-internal",
     "@kbn/core-plugins-base-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

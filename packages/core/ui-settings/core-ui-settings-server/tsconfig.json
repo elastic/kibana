@@ -13,5 +13,8 @@
   "kbn_references": [
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-ui-settings-common"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

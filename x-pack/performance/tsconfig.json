@@ -6,4 +6,7 @@
     "types": ["node", "jest"]
   },
   "include": ["**/*.ts"],
+  "exclude": [
+    "target/**/*",
+  ],
 }

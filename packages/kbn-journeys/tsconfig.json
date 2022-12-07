@@ -15,5 +15,8 @@
     "@kbn/ftr-screenshot-filename",
     "@kbn/test",
     "@kbn/utils"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -15,5 +15,8 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-resources-server",
     "@kbn/core-http-resources-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

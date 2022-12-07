@@ -15,5 +15,8 @@
   "kbn_references": [
     "@kbn/shared-ux-page-no-data-config-mocks",
     "@kbn/shared-ux-storybook-mock"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -17,5 +17,8 @@
     "@kbn/es-query",
     "@kbn/monaco",
     "@kbn/std",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

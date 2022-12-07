@@ -21,5 +21,8 @@
     "@kbn/logging",
     "@kbn/logging-mocks",
     "@kbn/utility-types",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

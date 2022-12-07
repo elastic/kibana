@@ -31,5 +31,8 @@
     "@kbn/logging-mocks",
     "@kbn/logging",
     "@kbn/securitysolution-io-ts-utils",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

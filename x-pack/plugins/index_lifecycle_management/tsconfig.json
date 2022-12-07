@@ -34,5 +34,8 @@
     "@kbn/i18n-react",
     "@kbn/core-http-browser",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

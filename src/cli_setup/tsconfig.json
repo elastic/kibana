@@ -15,5 +15,8 @@
     "@kbn/core",
     "@kbn/core-elasticsearch-client-server-internal",
     "@kbn/core-elasticsearch-server-internal",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

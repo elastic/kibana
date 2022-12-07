@@ -25,5 +25,8 @@
     "@kbn/core-overlays-browser",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-page-kibana-template"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

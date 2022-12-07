@@ -23,5 +23,8 @@
     "@kbn/utils",
     "@kbn/utility-types",
     "@kbn/utility-types-jest"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

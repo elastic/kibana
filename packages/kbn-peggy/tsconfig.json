@@ -11,5 +11,8 @@
   "include": [
     "index.js",
     "types.ts",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

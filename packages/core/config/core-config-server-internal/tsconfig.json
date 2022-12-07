@@ -16,5 +16,8 @@
     "@kbn/config-mocks",
     "@kbn/core-base-server-internal",
     "@kbn/core-test-helpers-deprecations-getters"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

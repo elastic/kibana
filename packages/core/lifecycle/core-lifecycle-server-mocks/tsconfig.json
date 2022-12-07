@@ -31,5 +31,8 @@
     "@kbn/core-status-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/core-usage-data-server-mocks"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

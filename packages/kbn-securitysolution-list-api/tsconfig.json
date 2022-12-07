@@ -14,5 +14,8 @@
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/securitysolution-list-constants"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

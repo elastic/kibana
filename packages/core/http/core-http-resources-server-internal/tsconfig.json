@@ -17,5 +17,8 @@
     "@kbn/core-http-resources-server",
     "@kbn/core-rendering-server-internal",
     "@kbn/core-http-request-handler-context-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -23,5 +23,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-usage-data-base-server-internal",
     "@kbn/core-deprecations-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

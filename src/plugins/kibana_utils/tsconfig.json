@@ -20,5 +20,8 @@
     "@kbn/test-jest-helpers",
     "@kbn/rison",
     "@kbn/crypto-browser",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

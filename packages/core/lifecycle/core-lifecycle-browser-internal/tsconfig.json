@@ -15,5 +15,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-application-browser-internal",
     "@kbn/core-injected-metadata-browser-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

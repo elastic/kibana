@@ -38,5 +38,8 @@
     "@kbn/logging-mocks",
     "@kbn/utility-types",
     "@kbn/core-elasticsearch-client-server-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

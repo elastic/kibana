@@ -14,5 +14,8 @@
     "@kbn/safer-lodash-set",
     "@kbn/config",
     "@kbn/config-mocks"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

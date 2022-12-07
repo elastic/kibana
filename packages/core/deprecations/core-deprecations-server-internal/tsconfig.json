@@ -25,5 +25,8 @@
     "@kbn/core-saved-objects-server-internal",
     "@kbn/core-deprecations-common",
     "@kbn/core-deprecations-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

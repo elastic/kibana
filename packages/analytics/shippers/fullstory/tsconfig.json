@@ -13,5 +13,8 @@
   "kbn_references": [
     "@kbn/analytics-client",
     "@kbn/logging-mocks"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -13,5 +13,8 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/crypto"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

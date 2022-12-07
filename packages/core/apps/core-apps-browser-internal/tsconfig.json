@@ -26,5 +26,8 @@
     "@kbn/core-theme-browser-internal",
     "@kbn/core-mount-utils-browser-internal",
     "@kbn/core-status-common-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

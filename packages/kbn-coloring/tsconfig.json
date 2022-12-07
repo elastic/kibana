@@ -20,5 +20,8 @@
     "@kbn/interpreter",
     "@kbn/utility-types",
     "@kbn/shared-ux-utility"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

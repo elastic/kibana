@@ -17,6 +17,9 @@
     "@kbn/telemetry-collection-manager-plugin",
     "@kbn/telemetry-plugin",
     "@kbn/usage-collection-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }
 

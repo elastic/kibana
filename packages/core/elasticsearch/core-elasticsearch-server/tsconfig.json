@@ -14,5 +14,8 @@
     "@kbn/utility-types",
     "@kbn/es-errors",
     "@kbn/core-http-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

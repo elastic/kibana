@@ -20,5 +20,8 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-http-router-server-internal",
     "@kbn/core-http-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

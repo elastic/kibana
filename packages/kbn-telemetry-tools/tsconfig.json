@@ -16,5 +16,8 @@
     "@kbn/eslint-plugin-imports",
     "@kbn/utility-types",
     "@kbn/utils"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

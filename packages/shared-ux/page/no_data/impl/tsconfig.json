@@ -18,5 +18,8 @@
     "@kbn/shared-ux-card-no-data",
     "@kbn/shared-ux-page-no-data-types",
     "@kbn/shared-ux-prompt-no-data-views"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

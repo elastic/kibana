@@ -15,5 +15,8 @@
   "kbn_references": [
     "@kbn/shared-ux-utility",
     "@kbn/shared-ux-router-types"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

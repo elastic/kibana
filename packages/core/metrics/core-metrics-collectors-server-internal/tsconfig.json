@@ -14,5 +14,8 @@
     "@kbn/logging",
     "@kbn/core-metrics-server",
     "@kbn/core-elasticsearch-client-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -14,5 +14,8 @@
     "@kbn/dev-utils",
     "@kbn/optimizer",
     "@kbn/utils"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

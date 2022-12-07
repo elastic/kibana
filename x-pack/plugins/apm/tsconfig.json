@@ -75,5 +75,8 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/field-types",
     "@kbn/core-http-server-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

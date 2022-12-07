@@ -15,5 +15,8 @@
     "@kbn/storybook",
     "@kbn/ambient-ui-types",
     "@kbn/ambient-storybook-types"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

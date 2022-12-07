@@ -40,5 +40,8 @@
     "@kbn/core-apps-browser-internal",
     "@kbn/core-lifecycle-browser-internal",
     "@kbn/core-plugins-browser-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -9,5 +9,8 @@
   ],
   "kbn_references": [
     "@kbn/core",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

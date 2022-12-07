@@ -50,5 +50,8 @@
     "@kbn/ml-agg-utils",
     "@kbn/test-jest-helpers",
     "@kbn/field-types",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

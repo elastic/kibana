@@ -39,5 +39,8 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/react-field",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

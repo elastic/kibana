@@ -44,5 +44,8 @@
     "@kbn/utility-types",
     "@kbn/ml-string-hash",
     "@kbn/ui-theme",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

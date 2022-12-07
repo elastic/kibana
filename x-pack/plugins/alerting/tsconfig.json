@@ -36,5 +36,8 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-saved-objects-common",
     "@kbn/securitysolution-rules",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

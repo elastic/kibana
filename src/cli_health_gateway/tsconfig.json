@@ -11,5 +11,8 @@
     { "path": "../cli/tsconfig.json" },
     "@kbn/repo-info",
     "@kbn/health-gateway-server",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

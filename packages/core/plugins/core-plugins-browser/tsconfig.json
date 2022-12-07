@@ -15,5 +15,8 @@
     "@kbn/config",
     "@kbn/core-base-common",
     "@kbn/core-lifecycle-browser"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

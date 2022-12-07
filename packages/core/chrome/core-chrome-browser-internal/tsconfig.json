@@ -24,5 +24,8 @@
     "@kbn/core-application-browser",
     "@kbn/core-application-browser-internal",
     "@kbn/core-chrome-browser"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

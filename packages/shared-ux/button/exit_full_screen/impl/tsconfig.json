@@ -18,5 +18,8 @@
     "@kbn/i18n",
     "@kbn/shared-ux-utility",
     "@kbn/shared-ux-button-exit-full-screen-types"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

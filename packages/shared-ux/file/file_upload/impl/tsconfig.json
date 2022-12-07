@@ -19,5 +19,8 @@
     "@kbn/shared-ux-file-context",
     "@kbn/shared-ux-file-util",
     "@kbn/shared-ux-file-types"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

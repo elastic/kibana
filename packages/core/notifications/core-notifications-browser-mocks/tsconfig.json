@@ -14,5 +14,8 @@
     "@kbn/utility-types-jest",
     "@kbn/core-notifications-browser",
     "@kbn/core-notifications-browser-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

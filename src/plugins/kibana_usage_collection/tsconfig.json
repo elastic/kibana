@@ -19,5 +19,8 @@
     "@kbn/i18n",
     "@kbn/logging",
     "@kbn/core-test-helpers-kbn-server",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

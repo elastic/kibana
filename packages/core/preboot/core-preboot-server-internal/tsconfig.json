@@ -18,5 +18,8 @@
     "@kbn/config",
     "@kbn/config-mocks",
     "@kbn/core-logging-server-mocks"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

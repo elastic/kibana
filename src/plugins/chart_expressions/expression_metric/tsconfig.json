@@ -26,5 +26,8 @@
     "@kbn/ui-theme",
     "@kbn/kibana-react-plugin",
     "@kbn/analytics",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

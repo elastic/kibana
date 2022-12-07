@@ -14,5 +14,8 @@
   ],
   "kbn_references": [
     "@kbn/ambient-ui-types"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

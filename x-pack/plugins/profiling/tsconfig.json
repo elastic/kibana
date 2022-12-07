@@ -54,5 +54,8 @@
     // "@kbn/es-ui-shared-plugin",
     // "@kbn/infra-plugin",
     // "@kbn/kibana-utils-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

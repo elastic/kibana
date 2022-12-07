@@ -13,5 +13,8 @@
   "kbn_references": [
     "@kbn/some-dev-log",
     "@kbn/jest-serializers"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -20,4 +20,7 @@
     "@kbn/std",
     "@kbn/utils"
   ],
+  "exclude": [
+    "target/**/*",
+  ],
 }

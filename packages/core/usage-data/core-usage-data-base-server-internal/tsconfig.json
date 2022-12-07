@@ -14,5 +14,8 @@
     "@kbn/core-http-server",
     "@kbn/core-usage-data-server",
     "@kbn/core-saved-objects-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

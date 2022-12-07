@@ -18,5 +18,8 @@
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
     "@kbn/ui-theme",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

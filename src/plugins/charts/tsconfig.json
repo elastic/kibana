@@ -15,5 +15,8 @@
     "@kbn/ui-theme",
     "@kbn/shared-ux-utility",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

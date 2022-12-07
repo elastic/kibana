@@ -13,5 +13,8 @@
   "kbn_references": [
     "@kbn/safer-lodash-set",
     "@kbn/utils"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

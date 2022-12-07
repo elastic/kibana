@@ -16,5 +16,8 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/home-sample-data-card"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

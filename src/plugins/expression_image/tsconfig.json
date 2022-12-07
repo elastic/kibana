@@ -17,5 +17,8 @@
     "@kbn/expect",
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

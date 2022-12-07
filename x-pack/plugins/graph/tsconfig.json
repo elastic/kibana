@@ -41,5 +41,8 @@
     "@kbn/std",
     "@kbn/utility-types",
     "@kbn/react-field",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

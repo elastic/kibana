@@ -19,5 +19,8 @@
     "@kbn/core-http-server-internal",
     "@kbn/core-capabilities-common",
     "@kbn/core-capabilities-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

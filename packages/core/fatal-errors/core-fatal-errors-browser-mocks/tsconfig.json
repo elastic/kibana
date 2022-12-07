@@ -15,5 +15,8 @@
     "@kbn/core-fatal-errors-browser",
     "@kbn/core-fatal-errors-browser-internal",
     "@kbn/utility-types"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

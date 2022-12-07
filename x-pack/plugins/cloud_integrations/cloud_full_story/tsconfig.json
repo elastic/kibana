@@ -14,5 +14,8 @@
     "@kbn/core",
     "@kbn/cloud-plugin",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

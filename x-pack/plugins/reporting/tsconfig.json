@@ -36,5 +36,8 @@
     "@kbn/core-http-server",
     "@kbn/core-test-helpers-test-utils",
     "@kbn/expressions-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

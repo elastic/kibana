@@ -24,5 +24,8 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/monaco",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

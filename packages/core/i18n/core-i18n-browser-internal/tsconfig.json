@@ -16,5 +16,8 @@
     "@kbn/i18n-react",
     "@kbn/core-injected-metadata-browser-internal",
     "@kbn/core-i18n-browser"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

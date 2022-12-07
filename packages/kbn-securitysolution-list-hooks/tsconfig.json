@@ -17,5 +17,8 @@
     "@kbn/securitysolution-list-constants",
     "@kbn/securitysolution-list-utils",
     "@kbn/securitysolution-utils"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

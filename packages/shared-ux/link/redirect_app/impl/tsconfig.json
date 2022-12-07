@@ -16,5 +16,8 @@
   ],
   "kbn_references": [
     "@kbn/shared-ux-utility"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

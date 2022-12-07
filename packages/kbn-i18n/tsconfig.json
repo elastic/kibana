@@ -15,6 +15,7 @@
     "types/intl_relativeformat.d.ts"
   ],
   "exclude": [
-    "**/__fixtures__/**/*"
+    "**/__fixtures__/**/*",
+    "target/**/*",
   ]
 }

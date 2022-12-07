@@ -15,5 +15,8 @@
   "kbn_references": [
     "@kbn/dev-utils",
     "@kbn/tooling-log"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

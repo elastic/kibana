@@ -14,5 +14,8 @@
     "@kbn/utils",
     "@kbn/dev-cli-runner",
     "@kbn/managed-vscode-config"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -16,5 +16,8 @@
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-execution-context-common",
     "@kbn/core-execution-context-browser"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

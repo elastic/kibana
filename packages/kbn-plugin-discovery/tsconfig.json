@@ -11,5 +11,8 @@
   "include": [
     "**/*.js",
     "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

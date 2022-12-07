@@ -11,7 +11,8 @@
     "**/*.ts",
   ],
   "exclude": [
-    "**/__fixtures__/**"
+    "**/__fixtures__/**",
+    "target/**/*",
   ],
   "kbn_references": [
     "@kbn/plugin-discovery",

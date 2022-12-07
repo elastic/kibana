@@ -16,5 +16,8 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/data-plugin",
     "@kbn/utility-types",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

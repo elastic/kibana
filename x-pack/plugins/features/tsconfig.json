@@ -15,5 +15,8 @@
     "@kbn/std",
     "@kbn/config-schema",
     "@kbn/i18n",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

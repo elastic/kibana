@@ -14,5 +14,8 @@
     "@kbn/utility-types",
     "@kbn/core-ui-settings-server",
     "@kbn/core-ui-settings-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

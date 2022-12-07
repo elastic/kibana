@@ -30,5 +30,8 @@
     "@kbn/config-schema",
     "@kbn/expect",
     "@kbn/std",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

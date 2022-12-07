@@ -20,5 +20,8 @@
     "@kbn/core-injected-metadata-browser-internal",
     "@kbn/crypto-browser",
     "@kbn/std"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

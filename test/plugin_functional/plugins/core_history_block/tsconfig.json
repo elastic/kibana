@@ -4,7 +4,9 @@
     "outDir": "target/types"
   },
   "include": ["index.ts", "public/**/*.ts", "public/**/*.tsx", "../../../../typings/**/*"],
-  "exclude": [],
+  "exclude": [
+    "target/**/*",
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-react-plugin"

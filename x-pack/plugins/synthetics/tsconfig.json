@@ -69,5 +69,8 @@
     "@kbn/core-saved-objects-common",
     "@kbn/features-plugin",
     "@kbn/bfetch-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

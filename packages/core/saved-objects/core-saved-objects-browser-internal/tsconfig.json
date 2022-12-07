@@ -18,5 +18,8 @@
     "@kbn/core-saved-objects-browser",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-api-browser"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

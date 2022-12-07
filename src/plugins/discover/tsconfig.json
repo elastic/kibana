@@ -57,5 +57,8 @@
     "@kbn/rison",
     "@kbn/config-schema",
     "@kbn/storybook",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

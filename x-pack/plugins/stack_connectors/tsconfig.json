@@ -26,5 +26,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/securitysolution-io-ts-utils",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -31,5 +31,8 @@
     "@kbn/core-status-server-internal",
     "@kbn/core-usage-data-base-server-internal",
     "@kbn/core-usage-data-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

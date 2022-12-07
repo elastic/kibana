@@ -12,6 +12,7 @@
   ],
   "exclude": [
     "server/assets/*.js",
+    "target/**/*",
   ],
   "kbn_references": [
     "@kbn/core",

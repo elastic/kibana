@@ -13,6 +13,7 @@
   ],
   "exclude": [
     "**/*.config.js",
+    "target/**/*",
   ],
   "kbn_references": [
     "@kbn/repo-info"

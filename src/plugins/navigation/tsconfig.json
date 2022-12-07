@@ -12,5 +12,8 @@
     "@kbn/es-query",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

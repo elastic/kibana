@@ -3,7 +3,10 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "exclude": ["public/applications/**/cypress/**/*"],
+  "exclude": [
+    "public/applications/**/cypress/**/*",
+    "target/**/*",
+  ],
   "include": [
     "common/**/*",
     "public/**/*",

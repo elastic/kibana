@@ -11,5 +11,8 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/global-search-plugin"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

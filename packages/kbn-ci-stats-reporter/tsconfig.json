@@ -14,5 +14,8 @@
     "@kbn/tooling-log",
     "@kbn/ci-stats-core",
     "@kbn/some-dev-log"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

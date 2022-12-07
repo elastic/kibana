@@ -17,5 +17,8 @@
     "scripts/**/*",
     "pipelines/flaky_tests/groups.json",
     "pull_requests.json"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

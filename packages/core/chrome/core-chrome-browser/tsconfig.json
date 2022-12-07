@@ -14,5 +14,8 @@
   "kbn_references": [
     "@kbn/core-mount-utils-browser",
     "@kbn/core-application-common"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

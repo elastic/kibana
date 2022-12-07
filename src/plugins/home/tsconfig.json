@@ -31,5 +31,8 @@
     "@kbn/ebt-tools",
     "@kbn/core-analytics-server",
     "@kbn/storybook",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

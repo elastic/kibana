@@ -18,5 +18,8 @@
     "@kbn/std",
     "@kbn/i18n",
     "@kbn/analytics-client",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

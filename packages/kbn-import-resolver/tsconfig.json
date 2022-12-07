@@ -15,5 +15,8 @@
     "@kbn/utils",
     "@kbn/dev-utils",
     "@kbn/package-map"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -28,5 +28,8 @@
     "@kbn/react-field",
     "@kbn/config-schema",
     "@kbn/storybook",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -11,5 +11,8 @@
     { "path": "../cli_keystore/tsconfig.json" },
     "@kbn/repo-info",
     "@kbn/utils",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

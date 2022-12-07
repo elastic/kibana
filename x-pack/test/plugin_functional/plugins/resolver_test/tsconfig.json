@@ -8,7 +8,7 @@
     "**/*.tsx",
   ],
   "exclude": [
-    "./target"
+    "target/**/*",
   ],
   "kbn_references": [
     "@kbn/core",

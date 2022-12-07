@@ -14,5 +14,8 @@
     "@kbn/utility-types",
     "@kbn/core-analytics-browser",
     "@kbn/core-analytics-browser-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

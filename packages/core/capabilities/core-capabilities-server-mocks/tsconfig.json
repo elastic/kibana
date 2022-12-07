@@ -15,5 +15,8 @@
     "@kbn/core-capabilities-common",
     "@kbn/core-capabilities-server",
     "@kbn/core-capabilities-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

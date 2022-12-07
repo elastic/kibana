@@ -14,5 +14,8 @@
     "@kbn/dev-cli-errors",
     "@kbn/tooling-log",
     "@kbn/stdio-dev-helpers"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

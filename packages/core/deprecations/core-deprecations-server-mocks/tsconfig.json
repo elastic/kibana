@@ -14,5 +14,8 @@
     "@kbn/utility-types",
     "@kbn/core-deprecations-server",
     "@kbn/core-deprecations-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

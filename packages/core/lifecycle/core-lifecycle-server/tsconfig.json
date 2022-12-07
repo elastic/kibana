@@ -28,5 +28,8 @@
     "@kbn/core-status-server",
     "@kbn/core-ui-settings-server",
     "@kbn/core-usage-data-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

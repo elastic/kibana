@@ -12,5 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/core-node-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

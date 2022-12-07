@@ -8,5 +8,8 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["cypress", "cypress-axe", "node"]
-  }
+  },
+  "exclude": [
+    "target/**/*",
+  ]
 }

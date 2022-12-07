@@ -49,5 +49,8 @@
     "@kbn/core-saved-objects-api-browser",
     "@kbn/core-overlays-browser",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

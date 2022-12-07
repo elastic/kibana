@@ -17,5 +17,8 @@
     "@kbn/core-http-browser",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-application-browser"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

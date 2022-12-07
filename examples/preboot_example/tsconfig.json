@@ -8,5 +8,8 @@
     "@kbn/core",
     "@kbn/core-http-browser",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

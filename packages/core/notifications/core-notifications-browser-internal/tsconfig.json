@@ -23,5 +23,8 @@
     "@kbn/core-overlays-browser",
     "@kbn/core-notifications-browser",
     "@kbn/core-mount-utils-browser-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

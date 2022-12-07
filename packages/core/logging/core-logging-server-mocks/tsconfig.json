@@ -16,5 +16,8 @@
     "@kbn/logging-mocks",
     "@kbn/core-logging-server",
     "@kbn/core-logging-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

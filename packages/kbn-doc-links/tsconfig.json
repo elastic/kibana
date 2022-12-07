@@ -13,4 +13,7 @@
   "kbn_references": [
     "@kbn/std"
   ],
+  "exclude": [
+    "target/**/*",
+  ],
 }

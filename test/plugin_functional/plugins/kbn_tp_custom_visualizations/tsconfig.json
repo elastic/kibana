@@ -9,7 +9,9 @@
     "public/**/*.tsx",
     "../../../../typings/**/*"
   ],
-  "exclude": [],
+  "exclude": [
+    "target/**/*",
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",

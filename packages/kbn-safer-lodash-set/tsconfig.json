@@ -6,4 +6,7 @@
   "include": [
     "**/*",
   ],
+  "exclude": [
+    "target/**/*",
+  ],
 }

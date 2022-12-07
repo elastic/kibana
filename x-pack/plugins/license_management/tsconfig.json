@@ -25,5 +25,8 @@
     "@kbn/i18n",
     "@kbn/config-schema",
     "@kbn/test-jest-helpers",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

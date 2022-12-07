@@ -11,5 +11,8 @@
   ],
   "kbn_references": [
     { "path": "../../tsconfig.json" },
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -16,5 +16,8 @@
     "@kbn/utility-types-jest",
     "@kbn/core-chrome-browser",
     "@kbn/core-chrome-browser-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -3,7 +3,10 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "exclude": ["cypress.config.ts"],
+  "exclude": [
+    "cypress.config.ts",
+    "target/**/*",
+  ],
   "include": [
     // add all the folders contains files to be compiled
     "common/**/*",

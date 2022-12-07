@@ -19,5 +19,8 @@
     "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/logging-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

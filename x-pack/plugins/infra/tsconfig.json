@@ -53,5 +53,8 @@
     "@kbn/logging-mocks",
     "@kbn/field-types",
     "@kbn/es-types",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

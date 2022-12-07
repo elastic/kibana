@@ -32,5 +32,8 @@
     "@kbn/core-status-server",
     "@kbn/core-status-common",
     "@kbn/core-status-common-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

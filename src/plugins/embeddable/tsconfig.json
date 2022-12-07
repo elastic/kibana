@@ -27,5 +27,8 @@
     "@kbn/expressions-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/analytics",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

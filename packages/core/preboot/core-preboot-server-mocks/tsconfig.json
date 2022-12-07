@@ -14,5 +14,8 @@
     "@kbn/utility-types",
     "@kbn/core-preboot-server-internal",
     "@kbn/core-preboot-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -12,5 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/securitysolution-io-ts-utils"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

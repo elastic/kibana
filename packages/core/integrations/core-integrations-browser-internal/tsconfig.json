@@ -15,5 +15,8 @@
   "kbn_references": [
     "@kbn/core-base-browser-internal",
     "@kbn/core-ui-settings-browser"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

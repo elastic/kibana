@@ -45,5 +45,8 @@
     "@kbn/core-lifecycle-server-internal",
     "@kbn/core-plugins-server-internal",
     "@kbn/core-apps-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

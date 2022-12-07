@@ -13,5 +13,8 @@
   "kbn_references": [
     "@kbn/shared-ux-storybook-mock",
     "@kbn/shared-ux-markdown-types"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -31,5 +31,8 @@
     "@kbn/core-doc-links-browser-mocks",
     "@kbn/core-execution-context-browser-mocks",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -14,5 +14,8 @@
     "@kbn/utility-types",
     "@kbn/core-http-server",
     "@kbn/core-http-context-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

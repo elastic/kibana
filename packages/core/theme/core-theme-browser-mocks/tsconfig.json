@@ -15,5 +15,8 @@
     "@kbn/utility-types",
     "@kbn/core-theme-browser",
     "@kbn/core-theme-browser-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

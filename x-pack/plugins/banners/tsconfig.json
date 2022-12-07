@@ -11,5 +11,8 @@
     "@kbn/licensing-plugin",
     "@kbn/config-schema",
     "@kbn/i18n",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

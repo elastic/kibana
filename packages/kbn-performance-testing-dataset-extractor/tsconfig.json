@@ -15,5 +15,8 @@
     "@kbn/dev-cli-runner",
     "@kbn/tooling-log",
     "@kbn/journeys"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

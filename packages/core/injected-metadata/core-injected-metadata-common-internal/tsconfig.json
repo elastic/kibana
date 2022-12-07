@@ -15,5 +15,8 @@
     "@kbn/config",
     "@kbn/ui-shared-deps-npm",
     "@kbn/core-base-common"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

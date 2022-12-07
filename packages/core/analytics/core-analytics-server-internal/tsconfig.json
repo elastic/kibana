@@ -15,5 +15,8 @@
     "@kbn/ebt-tools",
     "@kbn/core-base-server-internal",
     "@kbn/core-analytics-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

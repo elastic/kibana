@@ -19,5 +19,8 @@
     "@kbn/i18n",
     "@kbn/coloring",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

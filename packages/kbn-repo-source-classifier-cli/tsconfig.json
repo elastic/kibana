@@ -17,5 +17,8 @@
     "@kbn/repo-source-classifier",
     "@kbn/get-repo-files",
     "@kbn/utils"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

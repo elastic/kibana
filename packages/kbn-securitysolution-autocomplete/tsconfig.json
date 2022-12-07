@@ -17,4 +17,7 @@
     "@kbn/securitysolution-list-utils",
     "@kbn/doc-links"
   ],
+  "exclude": [
+    "target/**/*",
+  ],
 }

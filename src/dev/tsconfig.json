@@ -8,7 +8,7 @@
     "**/*.ts",
   ],
   "exclude": [
-    "target/types/**/*"
+    "target/**/*",
   ],
   "kbn_references": [
     "@kbn/core",

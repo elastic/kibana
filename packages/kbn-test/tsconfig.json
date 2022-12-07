@@ -11,7 +11,8 @@
   ],
   "exclude": [
     "types/**/*",
-    "**/__fixtures__/**/*"
+    "**/__fixtures__/**/*",
+    "target/**/*",
   ],
   "kbn_references": [
     "@kbn/dev-utils",

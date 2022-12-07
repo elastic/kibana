@@ -27,5 +27,8 @@
     "@kbn/chart-icons",
     "@kbn/kibana-react-plugin",
     "@kbn/analytics",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

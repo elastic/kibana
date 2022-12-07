@@ -18,5 +18,8 @@
     "@kbn/core-metrics-server",
     "@kbn/core-metrics-collectors-server-internal",
     "@kbn/core-elasticsearch-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

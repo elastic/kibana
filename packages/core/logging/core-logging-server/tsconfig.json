@@ -13,5 +13,8 @@
   "kbn_references": [
     "@kbn/logging",
     "@kbn/config-schema"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

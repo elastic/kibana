@@ -17,5 +17,8 @@
     "@kbn/config",
     "@kbn/core-lifecycle-server-internal",
     "@kbn/core-root-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

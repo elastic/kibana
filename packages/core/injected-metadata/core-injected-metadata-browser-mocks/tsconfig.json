@@ -14,5 +14,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-injected-metadata-browser-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

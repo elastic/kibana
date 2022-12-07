@@ -13,5 +13,8 @@
   "kbn_references": [
     "@kbn/core-metrics-server",
     "@kbn/core-metrics-collectors-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

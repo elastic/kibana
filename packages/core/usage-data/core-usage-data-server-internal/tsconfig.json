@@ -26,5 +26,8 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-usage-data-server",
     "@kbn/core-usage-data-base-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -15,5 +15,8 @@
     "@kbn/bazel-packages",
     "@kbn/utils",
     "@kbn/sort-package-json"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

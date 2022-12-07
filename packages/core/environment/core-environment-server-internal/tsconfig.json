@@ -18,5 +18,8 @@
     "@kbn/core-base-server-internal",
     "@kbn/core-analytics-server",
     "@kbn/core-logging-server-mocks"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

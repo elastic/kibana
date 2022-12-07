@@ -11,5 +11,8 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/utility-types-jest",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

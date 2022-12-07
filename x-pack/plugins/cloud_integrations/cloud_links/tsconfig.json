@@ -16,5 +16,8 @@
     "@kbn/security-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

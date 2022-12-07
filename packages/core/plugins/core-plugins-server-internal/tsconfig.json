@@ -31,5 +31,8 @@
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-node-server-mocks"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

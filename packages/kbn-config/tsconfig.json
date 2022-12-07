@@ -20,5 +20,8 @@
     "@kbn/i18n",
     "@kbn/plugin-discovery",
     "@kbn/doc-links"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

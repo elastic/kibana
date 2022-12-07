@@ -18,5 +18,8 @@
     "@kbn/core-http-browser",
     "@kbn/core-http-browser-mocks",
     "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

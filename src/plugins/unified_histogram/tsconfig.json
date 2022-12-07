@@ -24,5 +24,8 @@
     "@kbn/datemath",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/shared-ux-utility",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

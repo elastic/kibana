@@ -43,5 +43,8 @@
     "@kbn/config-schema",
     "@kbn/alerting-plugin",
     "@kbn/rule-data-utils",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }
