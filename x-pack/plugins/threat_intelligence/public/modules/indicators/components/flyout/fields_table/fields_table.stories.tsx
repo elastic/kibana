@@ -20,14 +20,14 @@ export default {
 
 export function WithIndicators() {
   const indicator = generateMockIndicator();
-  const kqlBarIntegration = {
+  const context = {
     kqlBarIntegration: false,
   };
 
   return (
     <StoryProvidersComponent>
       <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+        <IndicatorsFlyoutContext.Provider value={context}>
           <IndicatorFieldsTable
             fields={['threat.indicator.type']}
             indicator={indicator}
@@ -41,14 +41,14 @@ export function WithIndicators() {
 
 export function NoFilterButtons() {
   const indicator = generateMockIndicator();
-  const kqlBarIntegration = {
+  const context = {
     kqlBarIntegration: true,
   };
 
   return (
     <StoryProvidersComponent>
       <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+        <IndicatorsFlyoutContext.Provider value={context}>
           <IndicatorFieldsTable
             fields={['threat.indicator.type']}
             indicator={indicator}
