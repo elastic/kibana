@@ -153,7 +153,6 @@ describe('useRuleFromTimeline', () => {
       expect(result.current.loading).toEqual(true);
       await waitForNextUpdate();
       expect(setRuleQuery).toHaveBeenCalled();
-      // mockDispatch.mock.calls.forEach((call) => console.log('CALL', call[0]));
 
       expect(mockDispatch).toHaveBeenCalledTimes(4);
       expect(mockDispatch).toHaveBeenNthCalledWith(1, {
