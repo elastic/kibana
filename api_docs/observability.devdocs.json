@@ -7550,7 +7550,7 @@
         "label": "kqlQuery",
         "description": [],
         "signature": [
-          "(kql: string) => ",
+          "(kql: string | undefined) => ",
           "QueryDslQueryContainer",
           "[]"
         ],
@@ -7566,12 +7566,12 @@
             "label": "kql",
             "description": [],
             "signature": [
-              "string"
+              "string | undefined"
             ],
             "path": "x-pack/plugins/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
