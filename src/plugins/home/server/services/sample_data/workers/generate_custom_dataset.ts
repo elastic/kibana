@@ -24,17 +24,17 @@ function getRandomInt(min: number, max: number) {
 }
 
 function getDataForFormat(
-  format: { name: string; type: string },
+  format: { name: string; type: string; distinctValues: number },
   fieldValues: Map<string, Set<string>>
 ): {
   key: string;
   value: string;
 } {
-  const { name, type } = format;
+  const { name, type, distinctValues } = format;
 
   // decide whether to generate a new value or pick existing
   const generate = fieldValues.has(name) ? faker.datatype.boolean() : true;
-  if (!generate || (fieldValues.has(name) && fieldValues.get(name)!.size > 30)) {
+  if (!generate || (fieldValues.has(name) && fieldValues.get(name)!.size > distinctValues)) {
     // pick one of the existing values
     const setItems = Array.from(fieldValues.get(name)!);
     const index = getRandomInt(0, setItems.length - 1);
@@ -53,6 +53,9 @@ function getDataForFormat(
       break;
     case 'city':
       retVal = faker.address.city();
+      break;
+    case 'state':
+      retVal = faker.address.state();
       break;
     case 'color':
       retVal = faker.color.human();
@@ -76,16 +79,9 @@ function getDataForFormat(
 
 function generateDoc(fieldValues: Map<string, Set<string>>) {
   const res = {} as Record<string, any>;
-  // const format = JSON.parse(fieldFormat);
-  const format = [
-    {
-      name: 'Country',
-      type: 'country',
-    },
-    { name: 'County', type: 'county' },
-    { name: 'City', type: 'city' },
-  ];
-  format.forEach((f) => {
+  const format = JSON.parse(fieldFormat);
+
+  format.forEach((f: { name: string; type: string; distinctValues: number }) => {
     const { key, value } = getDataForFormat(f, fieldValues);
     res[key] = value;
   });
@@ -93,7 +89,7 @@ function generateDoc(fieldValues: Map<string, Set<string>>) {
   return res;
 }
 
-export const generateTestData = (size: number, fieldValues: Map<string, string[]>) => {
+export const generateTestData = (size: number, fieldValues: Map<string, Set<string>>) => {
   const tsStart = new Date().toISOString();
   const items = [];
   for (let i = 1; i <= size; i++) {
@@ -110,7 +106,7 @@ parentPort!.on('message', async (message) => {
     try {
       const size = 1000;
       const fieldValues = new Map<string, Set<string>>();
-      for (let i = 0; i < numberOfDocuments; i += size) {
+      for (let i = 0; i < 10000; i += size) {
         const items = generateTestData(size, fieldValues);
         parentPort!.postMessage({ status: 'GENERATED_ITEMS', items: JSON.stringify(items) });
         logger.info('Sent message');

@@ -59,7 +59,7 @@ export interface LargeDataSetParams {
 
 export interface CustomDatasetParams {
   nrOfDocuments: number;
-  fieldFormat: Array<{ name: string; type: string }>;
+  fieldFormat: Array<{ name: string; type: string; distinctValues: number }>;
 }
 
 /**
@@ -148,6 +148,7 @@ export const SampleDataTabKibanaProvider: FC<SampleDataTabKibanaDependencies> = 
   };
 
   const installCustomDataset = async (params: CustomDatasetParams) => {
+    console.log('Calli');
     await http.post(`${URL_SAMPLE_DATA_API}/custom_dataset`, {
       body: JSON.stringify(params),
     });
