@@ -47,13 +47,33 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetPackagePoliciesRequestSchema.query>
 > = async (context, request, response) => {
-  const { client: soClient } = await (await context.fleet).getSoClient();
+  const { client: soClient, limitedToPackages } = await (await context.fleet).getSoClient();
 
   try {
     const { items, total, page, perPage } = await packagePolicyService.list(
       soClient,
       request.query
     );
+
+    const packagePolicies: boolean[] = items.map((item) => {
+      if (limitedToPackages && limitedToPackages.length) {
+        const packageName = item?.package?.name;
+        return !!packageName && limitedToPackages.includes(packageName);
+      }
+      return false;
+    });
+
+    if (!packagePolicies.length || !packagePolicies.every((item) => item)) {
+      return response.forbidden({
+        body: {
+          message: `Data for package names ${items
+            .map((item) => item.package?.name)
+            .join(', ')} is not authorized.`,
+        },
+      });
+    }
+
+    // TODO: maybe filter out the items based on allowed packages?
     return response.ok({
       body: {
         items,
