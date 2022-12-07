@@ -21,18 +21,16 @@ export interface LintOptions {
   pkgDirMap: Map<string, string>;
 }
 
-export function getLintedProjects(log: SomeDevLog, options: LintOptions) {
+export async function getLintedProjects(log: SomeDevLog, options: LintOptions) {
   let projects: Project[] | undefined;
   let errorCount = 0;
   const fsCache = new Map<string, string>();
   const linted = new Set<string>();
 
   lintProjects: while (!projects || projects.length > linted.size) {
-    projects = projects
-      ? Project.reload(projects, fsCache)
-      : Array.from(new Set(PROJECTS.flatMap((p) => p.getProjectsDeep())));
+    projects = projects ? Project.reload(projects, fsCache) : Array.from(PROJECTS);
 
-    for (const project of projects) {
+    for await (const project of projects) {
       if (linted.has(project.tsConfigPath)) {
         continue;
       }
@@ -50,8 +48,14 @@ export function getLintedProjects(log: SomeDevLog, options: LintOptions) {
             continue;
           }
 
-          const update = error.fix(fixedJsonc);
-          if (update !== fixedJsonc) {
+          let update;
+          try {
+            update = error.fix(fixedJsonc);
+          } catch (e) {
+            log.debug(`error fixing project:`, e);
+          }
+
+          if (update !== undefined && update !== fixedJsonc) {
             fixedJsonc = update;
           } else {
             unfixedErrors.push(error);
@@ -61,6 +65,7 @@ export function getLintedProjects(log: SomeDevLog, options: LintOptions) {
         if (fixedJsonc !== jsonc) {
           Fs.writeFileSync(project.tsConfigPath, fixedJsonc, 'utf8');
           fsCache.delete(project.tsConfigPath);
+          log.debug('fixed', project.tsConfigPath, 'reloading');
           continue lintProjects;
         }
 
@@ -76,6 +81,18 @@ export function getLintedProjects(log: SomeDevLog, options: LintOptions) {
         }
       }
     }
+  }
+
+  if (errorCount) {
+    if (options.fix) {
+      log.error(`Found ${errorCount} un-fixable errors when linting projects.`);
+    } else {
+      log.error(
+        `Found ${errorCount} errors when linting projects. Pass --fix to try auto-fixing them.`
+      );
+    }
+  } else {
+    log.success('All TS projects linted successfully');
   }
 
   return {

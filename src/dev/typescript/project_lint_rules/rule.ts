@@ -40,6 +40,7 @@ export class Rule {
 
   check(project: Project, jsonc: string, options: LintOptions) {
     const failures: NamedViolation[] = [];
+
     const ctx: RuleContext = {
       err: (msg: string, fix?: (source: string) => string) => {
         failures.push({

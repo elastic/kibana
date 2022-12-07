@@ -38,7 +38,7 @@ export async function runCheckTsProjectsCli() {
       const stats = new Stats();
       const pkgMap = readPackageMap();
       const pkgDirMap = new Map(Array.from(pkgMap).map(([k, v]) => [v, k]));
-      const { lintingErrorCount, projects } = getLintedProjects(log, {
+      const { lintingErrorCount, projects } = await getLintedProjects(log, {
         fix: flagsReader.boolean('fix'),
         pkgMap,
         pkgDirMap,
