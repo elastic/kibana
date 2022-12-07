@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
 import { euiLightVars } from '@kbn/ui-theme';
 import {
   EuiFlexGroup,
@@ -20,29 +20,29 @@ import React, { MouseEvent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertsSummaryWidgetUIProps } from './types';
 
-const onClickWrapper = (
-  event: MouseEvent<HTMLAnchorElement | HTMLDivElement>,
-  onClick: () => void
-) => {
-  event.preventDefault();
-  event.stopPropagation();
-
-  onClick();
-};
-
 export const AlertsSummaryWidgetUI = ({
   active,
   recovered,
   timeRange,
   onClick,
 }: AlertsSummaryWidgetUIProps) => {
+  const handleClick = (
+    event: MouseEvent<HTMLAnchorElement | HTMLDivElement>,
+    status?: AlertStatus
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    onClick(status);
+  };
+
   return (
     <EuiPanel
       element="div"
       data-test-subj="ruleAlertsSummary"
       hasShadow={false}
       hasBorder
-      onClick={(event: MouseEvent<HTMLDivElement>) => onClickWrapper(event, onClick)}
+      onClick={handleClick}
     >
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
@@ -69,11 +69,7 @@ export const AlertsSummaryWidgetUI = ({
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
                 <EuiFlexItem>
-                  <EuiLink
-                    onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
-                      onClickWrapper(event, onClick)
-                    }
-                  >
+                  <EuiLink onClick={handleClick}>
                     <EuiText color={euiLightVars.euiTextColor}>
                       <h3 data-test-subj="totalAlertsCount">{active + recovered}</h3>
                     </EuiText>
@@ -88,7 +84,7 @@ export const AlertsSummaryWidgetUI = ({
                 <EuiFlexItem>
                   <EuiLink
                     onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
-                      onClickWrapper(event, () => onClick(ALERT_STATUS_ACTIVE))
+                      handleClick(event, ALERT_STATUS_ACTIVE)
                     }
                   >
                     <EuiText color={euiLightVars.euiColorDangerText}>
@@ -105,7 +101,7 @@ export const AlertsSummaryWidgetUI = ({
                 <EuiFlexItem>
                   <EuiLink
                     onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
-                      onClickWrapper(event, () => onClick(ALERT_STATUS_RECOVERED))
+                      handleClick(event, ALERT_STATUS_RECOVERED)
                     }
                   >
                     <EuiFlexItem>
