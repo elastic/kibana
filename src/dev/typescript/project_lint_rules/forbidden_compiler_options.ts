@@ -9,7 +9,7 @@
 import { Rule } from './rule';
 import { removeCompilerOption } from './compiler_options';
 
-const NAMES = ['declaration', 'emitDeclarationOnly', 'skipLibCheck'];
+const NAMES = ['declaration', 'emitDeclarationOnly', 'skipLibCheck', 'target'];
 
 export const forbiddenCompilerOptions = Rule.create('forbiddenCompilerOptions', {
   check(project) {
