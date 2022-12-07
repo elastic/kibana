@@ -8,8 +8,8 @@
 import { useCallback, useMemo } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 
-import type { SLO, SLOList } from '../../../typings/slo';
-import { useDataFetcher } from '../../../hooks/use_data_fetcher';
+import type { SLO, SLOList } from '../../typings/slo';
+import { useDataFetcher } from '../use_data_fetcher';
 
 const EMPTY_LIST = {
   results: [],
@@ -18,28 +18,42 @@ const EMPTY_LIST = {
   perPage: 0,
 };
 
-export const useFetchSloList = (): [boolean, SLOList] => {
-  const params = useMemo(() => ({}), []);
-  const shouldExecuteApiCall = useCallback((apiCallParams: {}) => true, []);
+interface SLOListParams {
+  name?: string;
+}
 
-  const { loading, data: sloList } = useDataFetcher<{}, SLOList>({
+interface UseFetchSloListResponse {
+  loading: boolean;
+  sloList: SLOList;
+}
+
+const useFetchSloList = (name?: string): UseFetchSloListResponse => {
+  const params: SLOListParams = useMemo(() => ({ name }), [name]);
+  const shouldExecuteApiCall = useCallback(
+    (apiCallParams: SLOListParams) => apiCallParams.name === params.name,
+    [params]
+  );
+
+  const { loading, data: sloList } = useDataFetcher<SLOListParams, SLOList>({
     paramsForApiCall: params,
     initialDataState: EMPTY_LIST,
     executeApiCall: fetchSloList,
     shouldExecuteApiCall,
   });
 
-  return [loading, sloList];
+  return { loading, sloList };
 };
 
 const fetchSloList = async (
-  params: {},
+  params: SLOListParams,
   abortController: AbortController,
   http: HttpSetup
 ): Promise<SLOList> => {
   try {
     const response = await http.get<Record<string, unknown>>(`/api/observability/slos`, {
-      query: {},
+      query: {
+        ...(params.name && { name: params.name }),
+      },
       signal: abortController.signal,
     });
     if (response !== undefined) {
@@ -78,3 +92,6 @@ function toSLO(result: any): SLO {
     },
   };
 }
+
+export { useFetchSloList };
+export type { UseFetchSloListResponse };
