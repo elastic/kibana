@@ -25,7 +25,6 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -33,13 +32,7 @@ describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mount = useMountAppended();
 
   const defaultProps = {
@@ -56,13 +49,7 @@ describe('NetworkTopNFlow Table Component', () => {
   };
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('rendering', () => {
