@@ -15,5 +15,6 @@
     "@kbn/test",
     "@kbn/dev-utils",
     "@kbn/observability-plugin",
+    "@kbn/ux-plugin",
   ]
 }
