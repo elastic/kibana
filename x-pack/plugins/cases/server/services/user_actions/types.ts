@@ -98,9 +98,22 @@ export interface Attributes {
   payload: Record<string, unknown>;
 }
 
-export interface BuilderReturnValue {
+export interface SavedObjectParameters {
   attributes: Attributes;
   references: SavedObjectReference[];
+}
+
+export interface EventDetails {
+  getMessage: (storedUserActionId?: string) => string;
+  action: UserAction;
+  descriptiveAction: string;
+  savedObjectId: string;
+  savedObjectType: string;
+}
+
+export interface UserActionEvent {
+  parameters: SavedObjectParameters;
+  eventDetails: EventDetails;
 }
 
 export type CommonBuilderArguments = CommonArguments & {
