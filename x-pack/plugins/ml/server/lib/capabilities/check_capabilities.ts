@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
-// import { memoize } from 'lodash';
+import { once } from 'lodash';
 import type { MlClient } from '../ml_client';
 import { mlLog } from '../log';
 import {
@@ -65,16 +65,13 @@ export function hasMlCapabilitiesProvider(
   resolveMlCapabilities: ResolveMlCapabilities,
   request: KibanaRequest
 ) {
-  let mlCapabilitiesResolverPromise: ReturnType<ResolveMlCapabilities> | null = null;
   let mlCapabilities: MlCapabilities | null = null;
+
+  const resolveMlCapabilitiesOnce = once(resolveMlCapabilities);
 
   return async (capabilities: MlCapabilitiesKey[]) => {
     try {
-      if (mlCapabilitiesResolverPromise === null) {
-        mlCapabilitiesResolverPromise = resolveMlCapabilities(request);
-      }
-
-      mlCapabilities = await mlCapabilitiesResolverPromise;
+      mlCapabilities = await resolveMlCapabilitiesOnce(request);
     } catch (e) {
       mlLog.error(e);
       throw new UnknownMLCapabilitiesError(`Unable to perform ML capabilities check ${e}`);
