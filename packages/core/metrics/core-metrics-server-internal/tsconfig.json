@@ -21,7 +21,6 @@
     "@kbn/core-metrics-collectors-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-metrics-server-mocks",
     "@kbn/core-elasticsearch-client-server-internal",
     "@kbn/config-mocks",
     "@kbn/core-base-server-mocks",
