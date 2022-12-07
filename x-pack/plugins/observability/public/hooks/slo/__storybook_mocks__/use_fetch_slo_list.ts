@@ -5,23 +5,12 @@
  * 2.0.
  */
 
+import { sloList } from '../../../../common/data/sli_list';
 import { UseFetchSloListResponse } from '../use_fetch_slo_list';
 
 export const useFetchSloList = (name?: string): UseFetchSloListResponse => {
   return {
     loading: false,
-    sloList: {
-      results: [
-        {
-          id: 'mock-id',
-          name: 'Great SLO',
-          objective: { target: 0.8 },
-          summary: { sliValue: 0.7, errorBudget: { remaining: 2 } },
-        },
-      ],
-      total: 20,
-      page: 1,
-      perPage: 50,
-    },
+    sloList,
   };
 };
