@@ -73,8 +73,9 @@ export class EditInLensAction implements Action<EditInLensContext> {
     if (isVisualizeEmbeddable(embeddable)) {
       const vis = embeddable.getVis();
       const navigateToLensConfig = await vis.type.navigateToLens?.(vis, this.timefilter);
-      const searchFilters = vis.data.searchSource?.getField('filter');
-      const searchQuery = vis.data.searchSource?.getField('query');
+      const parentSearchSource = vis.data.searchSource?.getParent();
+      const searchFilters = parentSearchSource?.getField('filter');
+      const searchQuery = parentSearchSource?.getField('query');
       const updatedWithMeta = {
         ...navigateToLensConfig,
         title:

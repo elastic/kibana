@@ -53,7 +53,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(embeddableCount).to.eql(originalEmbeddableCount);
       });
 
+      const titles = await dashboard.getPanelTitles();
+
+      expect(titles[0]).to.be('Area visualization (converted)');
+
       expect(await dashboard.isNotificationExists(0)).to.be(false);
+    });
+
+    it('should not show notification in context menu if visualization can not be converted', async () => {
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAggBasedVisualizations();
+      await dashboardAddPanel.clickVisType('timelion');
+      await testSubjects.exists('visualizesaveAndReturnButton');
+      await testSubjects.click('visualizesaveAndReturnButton');
+      await dashboard.waitForRenderComplete();
+      expect(await dashboard.isNotificationExists(1)).to.be(false);
     });
   });
 }

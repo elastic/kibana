@@ -421,8 +421,9 @@ export function App({
   }, []);
 
   const returnToOriginSwitchLabelForContext =
-    (initialContext?.originatingApp === 'dashboards' ||
-      initialContext?.originatingApp === 'canvas') &&
+    initialContext &&
+    'isEmbeddable' in initialContext &&
+    initialContext.isEmbeddable &&
     !persistedDoc
       ? i18n.translate('xpack.lens.app.replacePanel', {
           defaultMessage: 'Replace panel on {originatingApp}',

@@ -56,7 +56,7 @@ function getLensTopNavConfig(options: {
   savingToDashboardPermitted: boolean;
   contextOriginatingApp?: string;
   isSaveable: boolean;
-  showReplaceInDashbord: boolean;
+  showReplaceInDashboard: boolean;
   showReplaceInCanvas: boolean;
 }): TopNavMenuData[] {
   const {
@@ -71,7 +71,7 @@ function getLensTopNavConfig(options: {
     tooltips,
     contextOriginatingApp,
     isSaveable,
-    showReplaceInDashbord,
+    showReplaceInDashboard,
     showReplaceInCanvas,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
@@ -182,10 +182,10 @@ function getLensTopNavConfig(options: {
 
   topNavMenu.push({
     label: saveButtonLabel,
-    iconType: (showReplaceInDashbord || showReplaceInCanvas ? false : !showSaveAndReturn)
+    iconType: (showReplaceInDashboard || showReplaceInCanvas ? false : !showSaveAndReturn)
       ? 'save'
       : undefined,
-    emphasize: showReplaceInDashbord || showReplaceInCanvas ? false : !showSaveAndReturn,
+    emphasize: showReplaceInDashboard || showReplaceInCanvas ? false : !showSaveAndReturn,
     run: actions.showSaveModal,
     testId: 'lnsApp_saveButton',
     description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
@@ -210,7 +210,7 @@ function getLensTopNavConfig(options: {
     });
   }
 
-  if (showReplaceInDashbord) {
+  if (showReplaceInDashboard) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.replaceInDashboard', {
         defaultMessage: 'Replace in dashboard',
@@ -495,7 +495,7 @@ export const LensTopNavMenu = ({
   const lensStore = useStore();
 
   const topNavConfig = useMemo(() => {
-    const showReplaceInDashbord =
+    const showReplaceInDashboard =
       initialContext?.originatingApp === 'dashboards' &&
       !(initialInput as LensByReferenceInput)?.savedObjectId;
     const showReplaceInCanvas =
@@ -503,7 +503,7 @@ export const LensTopNavMenu = ({
       !(initialInput as LensByReferenceInput)?.savedObjectId;
     const baseMenuEntries = getLensTopNavConfig({
       showSaveAndReturn:
-        !(showReplaceInDashbord || showReplaceInCanvas) &&
+        !(showReplaceInDashboard || showReplaceInCanvas) &&
         (Boolean(
           isLinkedToOriginatingApp &&
             // Temporarily required until the 'by value' paradigm is default.
@@ -519,7 +519,7 @@ export const LensTopNavMenu = ({
       savingToDashboardPermitted,
       isSaveable,
       contextOriginatingApp,
-      showReplaceInDashbord,
+      showReplaceInDashboard,
       showReplaceInCanvas,
       tooltips: {
         showExportWarning: () => {

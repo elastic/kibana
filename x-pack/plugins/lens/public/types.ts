@@ -248,8 +248,8 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   vizEditorOriginatingAppUrl?: string;
   originatingApp?: string;
   isVisualizeAction: boolean;
-  searchQuery: Query;
-  searchFilters: Filter[];
+  searchQuery?: Query;
+  searchFilters?: Filter[];
   title?: string;
   isEmbeddable?: boolean;
 } & NavigateToLensContext<T>;
