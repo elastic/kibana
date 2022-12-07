@@ -251,7 +251,7 @@ export const DatePickerWrapper: FC<{
         css={
           compact &&
           css`
-            max-width: 500px;
+            max-width: 540px;
           `
         }
       >

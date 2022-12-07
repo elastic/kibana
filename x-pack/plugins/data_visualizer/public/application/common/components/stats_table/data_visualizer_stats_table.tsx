@@ -136,6 +136,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   const columns = useMemo(() => {
     const expanderColumn: EuiTableComputedColumnType<DataVisualizerTableItem> = {
       name:
+        // EUI will automatically show an expander button when table is mobile view (where width <700)
+        // so we need to not render any addition button
         dimensions.breakPoint !== 'small' ? (
           <EuiButtonIcon
             data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
