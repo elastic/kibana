@@ -16,7 +16,18 @@ export const AssertPathLength: Task = {
   description: 'Checking Windows for paths > 200 characters',
 
   async run(config, log, build) {
-    const buildRoot = build.resolvePath();
+    const win = config.getTargetPlatforms().find((p) => p.isWindows());
+
+    const buildRoot = process.env.CI
+      ? build.resolvePath()
+      : win
+      ? build.resolvePathForPlatform(win)
+      : undefined;
+
+    if (!buildRoot) {
+      return;
+    }
+
     await scan$(buildRoot)
       .pipe(
         map((path) => relative(buildRoot, path)),
