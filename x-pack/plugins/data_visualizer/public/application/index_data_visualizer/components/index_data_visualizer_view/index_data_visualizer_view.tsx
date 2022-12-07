@@ -26,6 +26,7 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
 import { throttle } from 'lodash';
+import { useCurrentEuiTheme } from '../../../common/components/multi_select_picker/multi_select_picker';
 import { DV_RANDOM_SAMPLER_PREFERENCE, useStorage } from '../../hooks/use_storage';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
@@ -121,6 +122,8 @@ export interface IndexDataVisualizerViewProps {
 }
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
+  const euiTheme = useCurrentEuiTheme();
+
   const [panelWidth, setPanelWidth] = useState(1600);
   const [savedRandomSamplerPreference, saveRandomSamplerPreference] =
     useStorage<RandomSamplerOption>(
@@ -389,7 +392,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     ]
   );
 
-  const wizardPanelWidth = '280px';
+  const wizardPanelWidth = '240px';
 
   const fieldsCountStats: TotalFieldsStats | undefined = useMemo(() => {
     let _visibleFieldsCount = 0;
@@ -491,11 +494,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     <div
                       data-test-subj="dataViewTitleHeader"
                       css={css`
-                        min-width: 300px;
                         padding: $euiSizeS 0;
                         display: flex;
                         flex-direction: row;
                         align-items: center;
+                        margin-right: ${euiTheme.euiSize};
                       `}
                     >
                       <EuiTitle size={'s'}>
@@ -569,8 +572,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
                     {overallStats?.totalCount !== undefined && (
                       <>
-                        <EuiSpacer size={'m'} />
-                        <EuiFlexItem grow={true}>
+                        <EuiSpacer size="m" />
+                        <EuiFlexGroup gutterSize="s" direction="column">
                           <DocumentCountContent
                             documentCountStats={documentCountStats}
                             totalCount={overallStats.totalCount}
@@ -584,18 +587,18 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                             randomSamplerPreference={savedRandomSamplerPreference}
                             setRandomSamplerPreference={saveRandomSamplerPreference}
                           />
-                        </EuiFlexItem>
+                        </EuiFlexGroup>
                       </>
                     )}
-                    <EuiSpacer size={'m'} />
+                    <EuiSpacer size="m" />
                     <FieldCountPanel
                       showEmptyFields={showEmptyFields}
                       toggleShowEmptyFields={toggleShowEmptyFields}
                       fieldsCountStats={fieldsCountStats}
                       metricsStats={metricsStats}
                     />
-                    <EuiSpacer size={'m'} />
-                    <EuiProgress value={progress} max={100} size={'xs'} />
+                    <EuiSpacer size="m" />
+                    <EuiProgress value={progress} max={100} size="xs" />
                     <DataVisualizerTable<FieldVisConfig>
                       items={configs}
                       pageState={dataVisualizerListState}

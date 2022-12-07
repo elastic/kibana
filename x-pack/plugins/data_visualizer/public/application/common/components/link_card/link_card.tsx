@@ -62,10 +62,10 @@ export const LinkCard: FC<LinkCardProps> = ({
         color="subdued"
         {...linkHrefAndOnClickProps}
       >
-        <EuiFlexGroup gutterSize="l" responsive={true}>
-          <EuiFlexItem grow={false} style={{ paddingTop: '8px' }}>
+        <EuiFlexGroup gutterSize="s" responsive={true}>
+          <EuiFlexItem grow={false} style={{ paddingTop: '4px' }}>
             {typeof icon === 'string' ? (
-              <EuiIcon size="xl" type={icon} aria-label={iconAreaLabel} />
+              <EuiIcon size="m" type={icon} aria-label={iconAreaLabel} />
             ) : (
               icon
             )}
