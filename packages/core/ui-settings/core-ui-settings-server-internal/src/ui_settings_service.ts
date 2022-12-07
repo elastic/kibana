@@ -16,17 +16,17 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
-import { UiSettingsClient } from './ui_settings_client';
+import { UiSettingsClient } from './clients/ui_settings_client';
 import type {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from './types';
 import type { InternalUiSettingsRequestHandlerContext } from './internal_types';
-import { uiSettingsType } from './saved_objects';
+import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
-import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
+import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -71,6 +71,7 @@ export class UiSettingsService
     this.log.debug('Setting up ui settings service');
 
     savedObjects.registerType(uiSettingsType);
+    savedObjects.registerType(uiSettingsGlobalType);
     registerRoutes(http.createRouter<InternalUiSettingsRequestHandlerContext>(''));
 
     const config = await firstValueFrom(this.config$);
