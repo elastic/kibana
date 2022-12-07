@@ -111,6 +111,11 @@ export const mockState: SyntheticsAppState = {
   browserJourney: getBrowserJourneyMockSlice(),
   networkEvents: {},
   pingStatus: getPingStatusesMockSlice(),
+  agentPolicies: {
+    loading: false,
+    error: null,
+    data: null,
+  },
 };
 
 function getBrowserJourneyMockSlice() {
