@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 import {
+  checkHitCount,
   sendCompleteMsg,
   sendErrorMsg,
+  sendErrorTo,
   sendLoadingMsg,
   sendNoResultsFoundMsg,
   sendPartialMsg,
@@ -16,6 +18,7 @@ import { FetchStatus } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import { DataMainMsg, RecordRawType } from './use_saved_search';
 import { filter } from 'rxjs/operators';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 describe('test useSavedSearch message generators', () => {
   test('sendCompleteMsg', (done) => {
@@ -62,7 +65,10 @@ describe('test useSavedSearch message generators', () => {
         done();
       }
     });
-    sendLoadingMsg(main$, RecordRawType.DOCUMENT);
+    sendLoadingMsg(main$, {
+      foundDocuments: true,
+      recordRawType: RecordRawType.DOCUMENT,
+    });
   });
   test('sendErrorMsg', (done) => {
     const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.PARTIAL });
@@ -91,5 +97,37 @@ describe('test useSavedSearch message generators', () => {
       }
     });
     sendCompleteMsg(main$, false);
+  });
+
+  test('sendErrorTo', (done) => {
+    const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.PARTIAL });
+    const data = dataPluginMock.createStartContract();
+    const error = new Error('Pls help!');
+    main$.subscribe((value) => {
+      expect(data.search.showError).toBeCalledWith(error);
+      expect(value.fetchStatus).toBe(FetchStatus.ERROR);
+      expect(value.error).toBe(error);
+      done();
+    });
+    sendErrorTo(data, main$)(error);
+  });
+
+  test('checkHitCount with hits', (done) => {
+    const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.LOADING });
+    main$.subscribe((value) => {
+      expect(value.fetchStatus).toBe(FetchStatus.PARTIAL);
+      done();
+    });
+    checkHitCount(main$, 100);
+  });
+
+  test('checkHitCount without hits', (done) => {
+    const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.LOADING });
+    main$.subscribe((value) => {
+      expect(value.fetchStatus).toBe(FetchStatus.COMPLETE);
+      expect(value.foundDocuments).toBe(false);
+      done();
+    });
+    checkHitCount(main$, 0);
   });
 });
