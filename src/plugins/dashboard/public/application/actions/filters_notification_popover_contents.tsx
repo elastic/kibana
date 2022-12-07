@@ -13,12 +13,7 @@ import { EuiCodeBlock, EuiFlexGroup, EuiForm, EuiFormRow, EuiLoadingContent } fr
 import { FilterableEmbeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { css } from '@emotion/react';
-import {
-  type AggregateQuery,
-  type Filter,
-  getAggregateQueryMode,
-  isOfQueryType,
-} from '@kbn/es-query';
+import { type AggregateQuery, type Filter } from '@kbn/es-query';
 
 import { FiltersNotificationActionContext } from './filters_notification_action';
 import { dashboardFilterNotificationAction } from '../../dashboard_strings';
@@ -42,9 +37,10 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
 
   useMount(() => {
     Promise.all([
+      import('@kbn/es-query'),
       (embeddable as IEmbeddable & FilterableEmbeddable).getFilters(),
       (embeddable as IEmbeddable & FilterableEmbeddable).getQuery(),
-    ]).then(([embeddableFilters, embeddableQuery]) => {
+    ]).then(([{ isOfQueryType, getAggregateQueryMode }, embeddableFilters, embeddableQuery]) => {
       setFilters(embeddableFilters);
       if (embeddableQuery) {
         if (isOfQueryType(embeddableQuery)) {
