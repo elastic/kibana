@@ -6,24 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/logging';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
-import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
-import { CannotOverrideError } from './ui_settings_errors';
-import { Cache } from './cache';
+import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
+import { CannotOverrideError } from '../ui_settings_errors';
+import { Cache } from '../cache';
+import { UiSettingsServiceOptions } from '../types';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
-
-export interface UiSettingsServiceOptions {
-  type: string;
-  id: string;
-  buildNum: number;
-  savedObjectsClient: SavedObjectsClientContract;
-  overrides?: Record<string, any>;
-  defaults?: Record<string, UiSettingsParams>;
-  log: Logger;
-}
 
 interface ReadOptions {
   autoCreateOrUpgradeIfMissing?: boolean;
@@ -36,7 +24,10 @@ interface UserProvidedValue<T = unknown> {
 
 type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
 
-export class UiSettingsClient extends BaseUiSettingsClient {
+/**
+ * Common logic for setting / removing keys in a {@link IUiSettingsClient} implementation
+ */
+export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private readonly type: UiSettingsServiceOptions['type'];
   private readonly id: UiSettingsServiceOptions['id'];
   private readonly buildNum: UiSettingsServiceOptions['buildNum'];
@@ -44,9 +35,8 @@ export class UiSettingsClient extends BaseUiSettingsClient {
   private readonly cache: Cache;
 
   constructor(options: UiSettingsServiceOptions) {
-    const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
-    super({ overrides, defaults, log });
-
+    super(options);
+    const { savedObjectsClient, type, id, buildNum } = options;
     this.type = type;
     this.id = id;
     this.buildNum = buildNum;
@@ -97,7 +87,7 @@ export class UiSettingsClient extends BaseUiSettingsClient {
   }
 
   private assertUpdateAllowed(key: string) {
-    if (this.isOverridden(key)) {
+    if (this.overrides.hasOwnProperty(key)) {
       throw new CannotOverrideError(`Unable to update "${key}" because it is overridden`);
     }
   }
@@ -117,7 +107,7 @@ export class UiSettingsClient extends BaseUiSettingsClient {
     // validate value read from saved objects as it can be changed via SO API
     const filteredValues: UserProvided<T> = {};
     for (const [key, userValue] of Object.entries(values)) {
-      if (userValue === null || this.isOverridden(key)) continue;
+      if (userValue === null || this.overrides.hasOwnProperty(key)) continue;
       try {
         this.validateKey(key, userValue);
         filteredValues[key] = {
@@ -151,6 +141,7 @@ export class UiSettingsClient extends BaseUiSettingsClient {
         buildNum: this.buildNum,
         log: this.log,
         handleWriteErrors: false,
+        type: this.type,
       });
 
       await this.write({
@@ -174,6 +165,7 @@ export class UiSettingsClient extends BaseUiSettingsClient {
           buildNum: this.buildNum,
           log: this.log,
           handleWriteErrors: true,
+          type: this.type,
         });
 
         if (!failedUpgradeAttributes) {

@@ -10,7 +10,7 @@ import { chunk } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { Logger, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { convertRuleIdsToKueryNode } from '../../lib';
-import { BulkOperationError } from '../rules_client';
+import { BulkOperationError } from '../types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 import { RawRule } from '../../types';
 

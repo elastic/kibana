@@ -6,11 +6,5 @@
  * Side Public License, v 1.
  */
 
-import type { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
-
-export const mockCreateOrUpgradeSavedConfig = jest.fn() as jest.MockedFunction<
-  typeof createOrUpgradeSavedConfig
->;
-jest.mock('./create_or_upgrade_saved_config', () => ({
-  createOrUpgradeSavedConfig: mockCreateOrUpgradeSavedConfig,
-}));
+require('../src/setup_node_env');
+require('../src/dev/performance/run_scalability_cli');
