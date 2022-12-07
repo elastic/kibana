@@ -9,11 +9,7 @@ import { deepFreeze } from '@kbn/std';
 
 import type { RouteMethod } from '@kbn/core-http-server';
 
-import {
-  AGENT_POLICY_API_ROOT,
-  PACKAGE_POLICY_API_ROOT,
-  PACKAGE_POLICY_API_ROUTES,
-} from '../../../common';
+import { PACKAGE_POLICY_API_ROUTES } from '../../../common';
 
 import type { FleetRouteRequiredAuthz } from './types';
 
@@ -135,23 +131,45 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
 /**
  * Retrieves the required fleet route authz
  * in order to grant access to the given api route
- * replaces the actual policy id with the route path pattern placeholder
  * @param routeMethod
  * @param routePath
- * @param policyIds
  */
 export const getRouteRequiredAuthz = (
   routeMethod: RouteMethod,
-  routePath: string,
-  policyIds?: { packagePolicyId?: string; agentPolicyId?: string }
-): FleetRouteRequiredAuthz => {
-  let key = `${routeMethod}:${routePath}`;
+  routePath: string
+): FleetRouteRequiredAuthz | undefined => {
+  const key = `${routeMethod}:${routePath}`;
 
-  if (routePath.includes(PACKAGE_POLICY_API_ROOT) && policyIds?.packagePolicyId) {
-    key = key.replace(policyIds?.packagePolicyId, '{packagePolicyId}');
-  } else if (routePath.includes(AGENT_POLICY_API_ROOT) && policyIds?.agentPolicyId) {
-    key = key.replace(policyIds?.agentPolicyId, '{agentPolicyId}');
+  if (typeof ROUTE_AUTHZ_REQUIREMENTS[key] !== 'undefined') {
+    return ROUTE_AUTHZ_REQUIREMENTS[key];
   }
 
-  return ROUTE_AUTHZ_REQUIREMENTS[key];
+  for (const k of Object.keys(ROUTE_AUTHZ_REQUIREMENTS)) {
+    if (pathMatchesPattern(k, key)) {
+      return ROUTE_AUTHZ_REQUIREMENTS[k];
+    }
+  }
+};
+
+const pathMatchesPattern = (pathPattern: string, path: string): boolean => {
+  // No path params - pattern is single path
+  if (pathPattern === path) {
+    return true;
+  }
+
+  // If pathPattern has params (`{value}`), then see if `path` matches it
+  if (/{.*?}/.test(pathPattern)) {
+    const pathParts = path.split(/\//);
+    const patternParts = pathPattern.split(/\//);
+
+    if (pathParts.length !== patternParts.length) {
+      return false;
+    }
+
+    return pathParts.every((part, index) => {
+      return part === patternParts[index] || /{.*?}/.test(patternParts[index]);
+    });
+  }
+
+  return false;
 };

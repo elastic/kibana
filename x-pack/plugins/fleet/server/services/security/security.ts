@@ -137,7 +137,7 @@ interface RouteAuthz {
  */
 export const calculateRouteAuthz = (
   fleetAuthz: FleetAuthz,
-  requiredAuthz: FleetRouteRequiredAuthz
+  requiredAuthz: FleetRouteRequiredAuthz | undefined
 ): RouteAuthz => {
   const response: RouteAuthz = {
     granted: false,
@@ -148,6 +148,10 @@ export const calculateRouteAuthz = (
 
   const isPrivilegeGranted = (flattenPrivilegeKey: string): boolean =>
     fleetAuthzFlatten[flattenPrivilegeKey] === true;
+
+  if (typeof requiredAuthz === 'undefined') {
+    return response;
+  }
 
   if (requiredAuthz.all) {
     response.granted = Object.keys(flatten(requiredAuthz.all)).every(isPrivilegeGranted);

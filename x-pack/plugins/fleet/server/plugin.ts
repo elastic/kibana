@@ -347,10 +347,7 @@ export class FleetPlugin
         const authz = await getAuthzFromRequest(request);
         const esClient = coreContext.elasticsearch.client;
 
-        const routeRequiredAuthz = getRouteRequiredAuthz(request.route.method, request.route.path, {
-          agentPolicyId: (request.params as { agentPolicyId: string }).agentPolicyId,
-          packagePolicyId: (request.params as { packagePolicyId: string }).packagePolicyId,
-        });
+        const routeRequiredAuthz = getRouteRequiredAuthz(request.route.method, request.route.path);
         const routeAuthz = routeRequiredAuthz
           ? calculateRouteAuthz(authz, routeRequiredAuthz)
           : undefined;
