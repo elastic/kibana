@@ -93,7 +93,6 @@ export const UseCaseCard = ({
       betaBadgeProps={{
         label: constants[useCase].betaBadgeLabel,
       }}
-      style={{ background: '#f7f8fc' }}
     />
   );
 };
