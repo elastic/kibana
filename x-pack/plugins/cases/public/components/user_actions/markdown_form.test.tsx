@@ -16,6 +16,7 @@ const onChangeEditable = jest.fn();
 const onSaveContent = jest.fn();
 
 const newValue = 'Hello from Tehas';
+const emptyValue = '';
 const hyperlink = `[hyperlink](http://elastic.co)`;
 const draftStorageKey = `cases.caseView.caseId.markdown-id.markdownEditor`;
 const defaultProps = {
@@ -64,6 +65,7 @@ describe('UserActionMarkdown ', () => {
       expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
     });
   });
+
   it('Does not call onSaveContent if no change from current text', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -78,6 +80,28 @@ describe('UserActionMarkdown ', () => {
     });
     expect(onSaveContent).not.toHaveBeenCalled();
   });
+
+  it('Save button disabled if current text is empty', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <UserActionMarkdown {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper
+      .find(`.euiMarkdownEditorTextArea`)
+      .first()
+      .simulate('change', {
+        target: { value: emptyValue },
+      });
+
+    await waitFor(() => {
+      expect(
+        wrapper.find(`button[data-test-subj="user-action-save-markdown"]`).first().prop('disabled')
+      ).toBeTruthy();
+    });
+  });
+
   it('Cancel button click calls only onChangeEditable', async () => {
     const wrapper = mount(
       <TestProviders>

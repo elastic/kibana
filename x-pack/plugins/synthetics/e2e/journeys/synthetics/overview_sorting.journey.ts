@@ -13,7 +13,7 @@ import {
 } from './services/add_monitor';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 
-journey('Overview Sorting', async ({ page, params }) => {
+journey('OverviewSorting', async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const testMonitor1 = 'acb'; // second alpha, first created
   const testMonitor2 = 'aCd'; // third alpha, second created
@@ -40,12 +40,11 @@ journey('Overview Sorting', async ({ page, params }) => {
     expect(await invalid.isVisible()).toBeFalsy();
   });
 
-  step('sort alpbhaetical asc', async () => {
+  step('sort alphabetical asc', async () => {
     await syntheticsApp.navigateToOverview();
     await page.waitForSelector(`[data-test-subj="syntheticsOverviewGridItem"]`);
     await page.click('[data-test-subj="syntheticsOverviewSortButton"]');
     await page.click('button:has-text("Alphabetical")');
-    await page.waitForSelector('text=Loading');
     await page.waitForSelector(`text=${testMonitor1}`);
     await page.waitForSelector(`text=${testMonitor2}`);
     await page.waitForSelector(`text=${testMonitor3}`);
@@ -61,7 +60,7 @@ journey('Overview Sorting', async ({ page, params }) => {
     expect(await correctThirdMonitor.count()).toBe(1);
   });
 
-  step('sort alpbhaetical desc', async () => {
+  step('sort alphabetical desc', async () => {
     await page.waitForSelector(`[data-test-subj="syntheticsOverviewGridItem"]`);
     await page.click('[data-test-subj="syntheticsOverviewSortButton"]');
     await page.click('button:has-text("Z -> A")');

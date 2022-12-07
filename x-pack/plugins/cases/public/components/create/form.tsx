@@ -40,6 +40,8 @@ import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { Severity } from './severity';
 import { Assignees } from './assignees';
+import { useCancelCreationAction } from './use_cancel_creation_action';
+import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
 
 interface ContainerProps {
   big?: boolean;
@@ -189,11 +191,16 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     attachments,
     initialValue,
   }) => {
+    const { showConfirmationModal, onOpenModal, onConfirmModal, onCancelModal } =
+      useCancelCreationAction({
+        onConfirmationCallback: onCancel,
+      });
+
     const storage = useMemo(() => new Storage(window.sessionStorage), []);
 
-    const handleOnCancel = (): void => {
+    const handleOnConfirmModal = (): void => {
       storage.remove(draftStorageKey);
-      onCancel();
+      onConfirmModal();
     };
 
     const handleOnSuccess = (theCase: Case): Promise<void> => {
@@ -218,18 +225,25 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
             <EuiFlexGroup
               alignItems="center"
               justifyContent="flexEnd"
-              gutterSize="xs"
+              gutterSize="l"
               responsive={false}
             >
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="create-case-cancel"
                   iconType="cross"
-                  onClick={handleOnCancel}
+                  onClick={onOpenModal}
                   size="s"
                 >
                   {i18n.CANCEL}
                 </EuiButtonEmpty>
+                {showConfirmationModal && (
+                  <CancelCreationConfirmationModal
+                    title={i18n.MODAL_TITLE}
+                    onConfirm={handleOnConfirmModal}
+                    onCancel={onCancelModal}
+                  />
+                )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SubmitCaseButton />
