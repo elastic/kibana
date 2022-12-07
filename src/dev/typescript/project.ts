@@ -23,10 +23,6 @@ function makeMatchers(directory: string, patterns: string[]) {
   );
 }
 
-function testMatchers(matchers: IMinimatch[], path: string) {
-  return matchers.some((matcher) => matcher.match(path));
-}
-
 export interface ProjectOptions {
   name?: string;
   disableTypeCheck?: boolean;
@@ -35,12 +31,11 @@ export interface ProjectOptions {
 interface LoadOptions {
   history?: string[];
   cache?: Map<string, Project>;
-  fsCache?: Map<string, string>;
   skipConfigValidation?: boolean;
 }
 
 export class Project {
-  static reload(projects: Iterable<Project>, fsCache: Map<string, string>) {
+  static reload(projects: Iterable<Project>) {
     const cache = new Map<string, Project>();
     return Array.from(projects).map((proj) =>
       Project.load(
@@ -49,7 +44,7 @@ export class Project {
           disableTypeCheck: proj.disableTypeCheck,
           name: proj.name,
         },
-        { cache, fsCache }
+        { cache }
       )
     );
   }
@@ -65,14 +60,7 @@ export class Project {
       return cached;
     }
 
-    const fsCache = loadOptions.fsCache ?? new Map<string, string>();
-    let jsonc = fsCache.get(tsConfigPath);
-    if (jsonc === undefined) {
-      jsonc = Fs.readFileSync(tsConfigPath, 'utf8');
-      fsCache.set(tsConfigPath, jsonc);
-    }
-    const config = parseTsConfig(tsConfigPath, jsonc);
-
+    const config = parseTsConfig(tsConfigPath, Fs.readFileSync(tsConfigPath, 'utf8'));
     if (!loadOptions?.skipConfigValidation) {
       if (config.files) {
         throw new Error(`${tsConfigPath} must not use "files" key`);
@@ -110,7 +98,6 @@ export class Project {
           skipConfigValidation: true,
           history: [...(loadOptions.history ?? []), tsConfigPath],
           cache,
-          fsCache,
         }
       );
     }
@@ -166,39 +153,5 @@ export class Project {
 
   private getExclude(): IMinimatch[] {
     return this.exclude ? this.exclude : this.baseProject?.getExclude() ?? [];
-  }
-
-  public isAbsolutePathSelected(path: string) {
-    return testMatchers(this.getExclude(), path) ? false : testMatchers(this.getInclude(), path);
-  }
-
-  public getOutDir(): string | undefined {
-    if (this.config.compilerOptions?.outDir) {
-      return Path.resolve(this.directory, this.config.compilerOptions.outDir);
-    }
-    if (this.baseProject) {
-      return this.baseProject.getOutDir();
-    }
-    return undefined;
-  }
-
-  public getRefdPaths(): string[] {
-    if (this.config.references) {
-      return (this.config.references as Array<{ path: string }>).map(({ path }) =>
-        Path.resolve(this.directory, path)
-      );
-    }
-
-    return this.baseProject ? this.baseProject.getRefdPaths() : [];
-  }
-
-  public getConfigPaths(): string[] {
-    return this.baseProject
-      ? [this.tsConfigPath, ...this.baseProject.getConfigPaths()]
-      : [this.tsConfigPath];
-  }
-
-  public getProjectsDeep(): Project[] {
-    return this.baseProject ? [this, ...this.baseProject.getProjectsDeep()] : [this];
   }
 }

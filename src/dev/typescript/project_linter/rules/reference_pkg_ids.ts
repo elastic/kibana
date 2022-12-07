@@ -9,20 +9,25 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
+import { readPackageMap } from '@kbn/package-map';
 
-import { Rule } from './rule';
+import { Rule } from '../lib/rule';
 
 const PATH_RE = /{[^\"]*"path":\s*("[^"]+"),?[^\}]*}/g;
 
 export const refPkgsIds = Rule.create('refPkgIds', {
-  check(proj, jsonc, options) {
-    function getPkgIdJson(tsconfigPath: string) {
-      const repoRelRef = Path.relative(REPO_ROOT, Path.dirname(tsconfigPath)) || '.';
-      const pkgId = options.pkgDirMap.get(repoRelRef);
+  check(proj, jsonc) {
+    const dirsToPkgIds = this.getCache(() => {
+      const pkgMap = readPackageMap();
+      return new Map(Array.from(pkgMap).map(([k, v]) => [v, k]));
+    });
+
+    const getPkgIdJson = (tsconfigPath: string) => {
+      const pkgId = dirsToPkgIds.get(Path.relative(REPO_ROOT, Path.dirname(tsconfigPath)));
       if (pkgId) {
         return JSON.stringify(pkgId);
       }
-    }
+    };
 
     const replaceWithPkgId: Array<[string, string]> = [];
 

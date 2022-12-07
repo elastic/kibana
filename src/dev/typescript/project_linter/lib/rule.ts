@@ -6,52 +6,37 @@
  * Side Public License, v 1.
  */
 
-import { Project } from '../project';
-import type { LintOptions } from '../lint_projects';
+import { RuleContext } from './rule_context';
+import { LintProject } from './lint_project';
 
 export interface NamedViolation extends Violation {
   name: string;
 }
 
-interface Violation {
+export interface Violation {
   msg: string;
   fix?(source: string): string;
 }
 
-type CheckFn = (
+export type CheckFn = (
   this: RuleContext,
-  project: Project,
-  jsonc: string,
-  options: LintOptions
+  project: LintProject,
+  jsonc: string
 ) => void | Violation[] | Violation | string;
-
-interface RuleContext {
-  err(msg: string, fix?: (jsonc: string) => string): void;
-}
 
 export class Rule {
   static create(name: string, options: { check: CheckFn }) {
     return new Rule(name, options.check);
   }
 
-  public readonly failures: Violation[] = [];
+  private constructor(public readonly name: string, private readonly fn: CheckFn) {}
 
-  private constructor(private readonly name: string, private readonly fn: CheckFn) {}
-
-  check(project: Project, jsonc: string, options: LintOptions) {
+  check(project: LintProject, jsonc: string, ruleCache: Map<Rule, unknown>) {
     const failures: NamedViolation[] = [];
 
-    const ctx: RuleContext = {
-      err: (msg: string, fix?: (source: string) => string) => {
-        failures.push({
-          name: this.name,
-          msg,
-          fix,
-        });
-      },
-    };
+    const ctx = new RuleContext(failures, project, this, ruleCache);
+    const extraFailures = this.fn.call(ctx, project, jsonc) ?? [];
 
-    const extraFailures = this.fn.call(ctx, project, jsonc, options) ?? [];
     for (const failure of Array.isArray(extraFailures) ? extraFailures : [extraFailures]) {
       if (typeof failure === 'string') {
         failures.push({

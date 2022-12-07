@@ -16,7 +16,7 @@ import { readPackageMap } from '@kbn/package-map';
 import globby from 'globby';
 
 import { File } from '../file';
-import { getLintedProjects } from './lint_projects';
+import { getLintedProjects } from './project_linter/lint_projects';
 import type { Project } from './project';
 
 class Stats {
@@ -38,7 +38,7 @@ export async function runCheckTsProjectsCli() {
       const stats = new Stats();
       const pkgMap = readPackageMap();
       const pkgDirMap = new Map(Array.from(pkgMap).map(([k, v]) => [v, k]));
-      const { lintingErrorCount, projects } = await getLintedProjects(log, {
+      const { lintingErrorCount, projects } = getLintedProjects(log, {
         fix: flagsReader.boolean('fix'),
         pkgMap,
         pkgDirMap,

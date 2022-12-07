@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { validBaseConfig } from './valid_base_config';
-import { refPkgsIds } from './reference_pkg_ids';
 import { forbiddenCompilerOptions } from './forbidden_compiler_options';
+import { refPkgsIds } from './reference_pkg_ids';
 import { requiredCompilerOptions } from './required_compiler_options';
+import { validBaseConfig } from './valid_base_config';
 
-export const PROJECT_LINT_RULES = [
-  validBaseConfig,
-  refPkgsIds,
+export const PROJECT_LINTER_RULES = [
   forbiddenCompilerOptions,
+  refPkgsIds,
   requiredCompilerOptions,
+  validBaseConfig,
 ];

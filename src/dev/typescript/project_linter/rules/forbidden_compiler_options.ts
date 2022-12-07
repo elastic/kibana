@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Rule } from './rule';
-import { removeCompilerOption } from './compiler_options';
+import { Rule } from '../lib/rule';
+import { removeCompilerOption } from '../lib/compiler_options';
 
 const NAMES = ['declaration', 'emitDeclarationOnly', 'skipLibCheck', 'target'];
 
 export const forbiddenCompilerOptions = Rule.create('forbiddenCompilerOptions', {
-  check(project) {
+  check({ config }) {
     for (const optName of NAMES) {
-      const value = project.config.compilerOptions?.[optName];
+      const value = config.compilerOptions?.[optName];
       if (value === undefined) {
         continue;
       }
