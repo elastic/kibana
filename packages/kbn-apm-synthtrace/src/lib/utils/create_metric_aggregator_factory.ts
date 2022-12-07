@@ -8,7 +8,6 @@
 
 import moment from 'moment';
 import { Duplex, Transform } from 'stream';
-import { loggerProxy } from '../../cli/utils/logger_proxy';
 import { Fields } from '../entity';
 import { parseInterval } from '../interval';
 import { appendHash } from './hash';

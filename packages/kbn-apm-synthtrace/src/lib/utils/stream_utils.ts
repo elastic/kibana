@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { each, eachSeries } from 'async';
-import { Duplex, PassThrough, Transform } from 'stream';
+import { PassThrough, Transform } from 'stream';
 import { loggerProxy } from '../../cli/utils/logger_proxy';
 
 export function series(...streams: Transform[]) {
