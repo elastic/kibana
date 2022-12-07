@@ -45,7 +45,6 @@ describe('test useSavedSearch', () => {
     expect(result.current.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(result.current.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(result.current.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
-    expect(result.current.data$.charts$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
   });
   test('refetch$ triggers a search', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();

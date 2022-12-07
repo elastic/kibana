@@ -239,9 +239,9 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
                   field: value.field.name,
                 },
               })
-            : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceDisabled', {
+            : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceNotAvailable', {
                 defaultMessage:
-                  "This field can't be added to the workspace automatically. You can still use it directly in the configuration panel.",
+                  'To visualize this field, please add it directly to the desired layer. Adding this field to the workspace is not supported based on your current configuration.',
               });
 
           return (
@@ -309,10 +309,11 @@ function FieldItemPopoverContents(
       [indexPattern],
       getEsQueryConfig(services.uiSettings)
     );
-    if (!services.discover || !services.application.capabilities.discover.show) {
+    const discoverLocator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
+    if (!discoverLocator || !services.application.capabilities.discover.show) {
       return;
     }
-    return services.discover.locator!.getRedirectUrl({
+    return discoverLocator.getRedirectUrl({
       dataViewSpec: indexPattern?.spec,
       timeRange: services.data.query.timefilter.timefilter.getTime(),
       filters: newFilters,
@@ -382,7 +383,7 @@ function FieldItemPopoverContents(
             data-test-subj={`lnsFieldListPanel-exploreInDiscover-${dataViewField.name}`}
           >
             {i18n.translate('xpack.lens.indexPattern.fieldExploreInDiscover', {
-              defaultMessage: 'Explore values in Discover',
+              defaultMessage: 'Explore in Discover',
             })}
           </EuiButton>
         </EuiPopoverFooter>

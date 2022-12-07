@@ -24,7 +24,6 @@ export {
   apmOperationsTab,
   apmLabsButton,
   enableInfrastructureHostsView,
-  enableServiceMetrics,
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
   apmAWSLambdaPriceFactor,
@@ -55,6 +54,7 @@ export const casesPath = '/cases';
 export const uptimeOverviewLocatorID = 'UPTIME_OVERVIEW_LOCATOR';
 export const syntheticsMonitorDetailLocatorID = 'SYNTHETICS_MONITOR_DETAIL_LOCATOR';
 export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
+export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
 
 export {
   NETWORK_TIMINGS_FIELDS,

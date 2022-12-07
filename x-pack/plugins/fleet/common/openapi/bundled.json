@@ -59,76 +59,6 @@
         ]
       }
     },
-    "/setup/preconfiguration": {
-      "put": {
-        "summary": "Preconfiguration",
-        "operationId": "get-settings",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "agentPolicies": {
-                      "type": "object",
-                      "items": {}
-                    },
-                    "packages": {
-                      "type": "object",
-                      "properties": {
-                        "name": {
-                          "type": "string"
-                        },
-                        "version": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "body": {
-                    "type": "object",
-                    "properties": {
-                      "agentPolicies": {
-                        "$ref": "#/components/schemas/preconfigured_agent_policies"
-                      },
-                      "packages": {
-                        "type": "object",
-                        "properties": {
-                          "name": {
-                            "type": "string"
-                          },
-                          "version": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "name",
-                          "version"
-                        ]
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/settings": {
       "get": {
         "summary": "Settings",
@@ -147,9 +77,33 @@
         },
         "operationId": "get-settings"
       },
-      "post": {
+      "put": {
         "summary": "Settings - Update",
         "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fleet_server_hosts": {
+                    "type": "array",
+                    "description": "Protocol and path must be the same for each URL",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "has_seen_add_data_notice": {
+                    "type": "boolean"
+                  },
+                  "additional_yaml_config": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -189,7 +143,7 @@
             }
           }
         },
-        "operationId": "generate-service-token",
+        "operationId": "generate-service-token-deprecated",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -425,7 +379,7 @@
             }
           }
         },
-        "operationId": "get-package",
+        "operationId": "get-package-deprecated",
         "security": [
           {
             "basicAuth": []
@@ -488,11 +442,19 @@
             }
           }
         },
-        "operationId": "install-package",
+        "operationId": "install-package-deprecated",
         "description": "",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgkey",
+            "in": "path",
+            "required": true
           }
         ],
         "requestBody": {
@@ -556,10 +518,18 @@
             }
           }
         },
-        "operationId": "delete-package",
+        "operationId": "delete-package-deprecated",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgkey",
+            "in": "path",
+            "required": true
           }
         ],
         "requestBody": {
@@ -1123,7 +1093,7 @@
             }
           }
         },
-        "operationId": "get-agent-status",
+        "operationId": "get-agent-status-deprecated",
         "parameters": [
           {
             "schema": {
@@ -2656,7 +2626,7 @@
             }
           }
         },
-        "operationId": "get-enrollment-api-keys",
+        "operationId": "get-enrollment-api-keys-deprecated",
         "parameters": [],
         "deprecated": true
       },
@@ -2686,7 +2656,7 @@
             }
           }
         },
-        "operationId": "create-enrollment-api-keys",
+        "operationId": "create-enrollment-api-keys-deprecated",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -2729,7 +2699,7 @@
             }
           }
         },
-        "operationId": "get-enrollment-api-key",
+        "operationId": "get-enrollment-api-key-deprecated",
         "deprecated": true
       },
       "delete": {
@@ -2758,7 +2728,7 @@
             }
           }
         },
-        "operationId": "delete-enrollment-api-key",
+        "operationId": "delete-enrollment-api-key-deprecated",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -3088,7 +3058,7 @@
     "/package_policies/delete": {
       "post": {
         "summary": "Package policy - Delete",
-        "operationId": "delete-package-policy",
+        "operationId": "post-delete-package-policy",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3208,7 +3178,7 @@
     "/package_policies/upgrade/dryrun": {
       "post": {
         "summary": "Package policy - Upgrade Dry run",
-        "operationId": "upgrade-package-policy",
+        "operationId": "upgrade-package-policy-dry-run",
         "requestBody": {
           "content": {
             "application/json": {
@@ -4454,141 +4424,6 @@
         "required": [
           "isInitialized",
           "nonFatalErrors"
-        ]
-      },
-      "preconfigured_agent_policies": {
-        "title": "Preconfigured agent policies",
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "is_managed": {
-            "type": "string"
-          },
-          "unenroll_timeout": {
-            "type": "number"
-          },
-          "monitoring_enabled": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "logs",
-                "metrics"
-              ]
-            }
-          },
-          "namespace": {
-            "type": "string"
-          },
-          "id": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
-          },
-          "is_default": {
-            "type": "boolean",
-            "deprecated": true
-          },
-          "is_default_fleet_server": {
-            "type": "boolean",
-            "deprecated": true
-          },
-          "has_fleet_server": {
-            "type": "boolean"
-          },
-          "data_output_id": {
-            "type": "string"
-          },
-          "monitoring_output_id": {
-            "type": "string"
-          },
-          "package_policies": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "oneOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "number"
-                    }
-                  ]
-                },
-                "name": {
-                  "type": "string"
-                },
-                "package": {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "description": {
-                  "type": "string"
-                },
-                "namespace": {
-                  "type": "string"
-                },
-                "inputs": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "type": {
-                        "type": "string"
-                      },
-                      "enabled": {
-                        "type": "boolean"
-                      },
-                      "keep_enabled": {
-                        "type": "boolean"
-                      },
-                      "vars": {
-                        "type": "object",
-                        "properties": {
-                          "name": {
-                            "type": "string"
-                          },
-                          "type": {
-                            "type": "string"
-                          },
-                          "value": {
-                            "type": "string"
-                          },
-                          "frozen": {
-                            "type": "boolean"
-                          }
-                        }
-                      }
-                    },
-                    "required": [
-                      "type"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "required": [
-          "name",
-          "namespace",
-          "package_policies"
         ]
       },
       "settings": {
@@ -6047,7 +5882,8 @@
           "type": {
             "type": "string",
             "enum": [
-              "elasticsearch"
+              "elasticsearch",
+              "logstash"
             ]
           },
           "hosts": {
@@ -6071,14 +5907,14 @@
           "ssl": {
             "type": "object",
             "properties": {
-              "certificate": {
-                "type": "string"
-              },
               "certificate_authorities": {
                 "type": "array",
                 "items": {
                   "type": "string"
                 }
+              },
+              "certificate": {
+                "type": "string"
               },
               "key": {
                 "type": "string"

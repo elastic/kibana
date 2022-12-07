@@ -31,13 +31,13 @@ export const useCreateRuleMutation = (
     {
       ...options,
       mutationKey: CREATE_RULE_MUTATION_KEY,
-      onSuccess: (...args) => {
+      onSettled: (...args) => {
         invalidateFetchPrePackagedRulesStatusQuery();
         invalidateFindRulesQuery();
         invalidateFetchTagsQuery();
 
-        if (options?.onSuccess) {
-          options.onSuccess(...args);
+        if (options?.onSettled) {
+          options.onSettled(...args);
         }
       },
     }
