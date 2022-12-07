@@ -9,7 +9,6 @@
 import { range as lodashRange } from 'lodash';
 import { apm } from '../..';
 import { Scenario } from '../cli/scenario';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { ApmFields } from '../lib/apm/apm_fields';
 
 const scenario: Scenario<ApmFields> = async ({ logger }) => {
