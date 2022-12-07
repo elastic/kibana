@@ -13,7 +13,7 @@ import { SloSelector as Component } from './slo_selector';
 
 export default {
   component: Component,
-  title: 'app/SLOs/Shared/SloSelector',
+  title: 'app/SLO/Shared/SloSelector',
 };
 
 const Template: ComponentStory<typeof Component> = () => (

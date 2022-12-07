@@ -12,7 +12,7 @@ import { BurnRateRuleEditor as Component } from './burn_rate_rule_editor';
 
 export default {
   component: Component,
-  title: 'app/SLOs/BurnRateRule',
+  title: 'app/SLO/BurnRateRule',
   argTypes: {},
 };
 
