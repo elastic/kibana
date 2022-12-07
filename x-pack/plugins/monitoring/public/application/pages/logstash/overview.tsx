@@ -11,7 +11,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
-// @ts-ignore
 import { Overview } from '../../../components/logstash/overview';
 import { LogstashTemplate } from './logstash_template';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
