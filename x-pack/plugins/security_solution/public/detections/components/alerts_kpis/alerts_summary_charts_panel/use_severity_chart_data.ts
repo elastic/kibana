@@ -18,7 +18,7 @@ import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/
 import { useInspectButton } from '../common/hooks';
 import { parseAlertsData } from './helpers';
 
-const getAlertsBySeverityQuery = ({
+export const getAlertsBySeverityQuery = ({
   additionalFilters = [],
   from,
   to,
@@ -59,7 +59,7 @@ const getAlertsBySeverityQuery = ({
   runtime_mappings: runtimeMappings,
 });
 
-interface UseSeverityChartProps {
+export interface UseSeverityChartProps {
   uniqueQueryId: string;
   signalIndexName: string | null;
   skip?: boolean;
@@ -69,20 +69,20 @@ interface UseSeverityChartProps {
   runtimeMappings?: MappingRuntimeFields;
 }
 
-export type UseAlertsByStatus = (props: UseSeverityChartProps) => {
+export type UseAlertsBySeverity = (props: UseSeverityChartProps) => {
   items: ParsedAlertsData;
   isLoading: boolean;
   updatedAt: number;
 };
 
-export const useSeverityChartData: UseAlertsByStatus = ({
+export const useSeverityChartData: UseAlertsBySeverity = ({
   uniqueQueryId,
   entityFilter,
   query,
   filters,
   runtimeMappings,
   signalIndexName,
-  skip,
+  skip = false,
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState(Date.now());

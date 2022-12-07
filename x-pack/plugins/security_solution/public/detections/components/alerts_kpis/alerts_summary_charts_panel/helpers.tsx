@@ -8,9 +8,9 @@ import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { AlertsBySeverityResponse, AlertsBySeverityAgg, ParsedAlertsData } from './types';
 import * as i18n from './translations';
 import { severityLabels } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
-import { RISK_SEVERITY_COLOUR } from '../../../../common/components/severity/common';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
+import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
+
 
 export const parseAlertsData = (
   response: AlertsBySeverityResponse<{}, AlertsBySeverityAgg>
@@ -30,6 +30,5 @@ export const parseAlertsData = (
 };
 
 export const getSeverityColor = (severity: string) => {
-  const label = severityLabels[severity as Severity] ?? i18n.UNKNOWN_SEVERITY;
-  return RISK_SEVERITY_COLOUR[label as RiskSeverity] ?? emptyDonutColor;
+  return SEVERITY_COLOR[severity.toLocaleLowerCase() as Severity] ?? emptyDonutColor;
 };

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { AlertViewSelection } from './helpers';
 import {
+  AlertViewSelection,
   getButtonProperties,
   getContextMenuPanels,
   TABLE_ID,
   TREEMAP_ID,
   TREND_ID,
+  CHARTS_ID,
 } from './helpers';
 import * as i18n from './translations';
 
@@ -42,10 +43,18 @@ describe('helpers', () => {
         name: i18n.TREEMAP,
       });
     });
+
+    test('it returns the expected properties when alertViewSelection is charts', () => {
+      expect(getButtonProperties(CHARTS_ID)).toEqual({
+        'data-test-subj': CHARTS_ID,
+        icon: 'visPie',
+        name: i18n.CHARTS,
+      });
+    });
   });
 
   describe('getContextMenuPanels', () => {
-    const alertViewSelections: AlertViewSelection[] = ['trend', 'table', 'treemap'];
+    const alertViewSelections: AlertViewSelection[] = ['trend', 'table', 'treemap', 'charts'];
     const closePopover = jest.fn();
     const setAlertViewSelection = jest.fn();
 
@@ -55,7 +64,7 @@ describe('helpers', () => {
           alertViewSelection,
           closePopover,
           setAlertViewSelection,
-          isAlertsPageChartsEnabled: false, // remove after charts is implemented
+          isAlertsPageChartsEnabled: true, // remove after charts is implemented
         });
 
         expect(panels[0].id).toEqual(0);
@@ -66,7 +75,7 @@ describe('helpers', () => {
           alertViewSelection,
           closePopover,
           setAlertViewSelection,
-          isAlertsPageChartsEnabled: false, // remove after charts is implemented
+          isAlertsPageChartsEnabled: true, // remove after charts is implemented
         });
 
         const item = panels[0].items?.find((x) => x['data-test-subj'] === alertViewSelection);
@@ -80,7 +89,7 @@ describe('helpers', () => {
           alertViewSelection,
           closePopover,
           setAlertViewSelection,
-          isAlertsPageChartsEnabled: false, // remove after charts is implemented
+          isAlertsPageChartsEnabled: true, // remove after charts is implemented
         });
 
         const item = panels[0].items?.find((x) => x['data-test-subj'] === alertViewSelection);

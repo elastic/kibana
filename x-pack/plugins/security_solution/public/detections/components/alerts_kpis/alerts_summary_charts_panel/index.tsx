@@ -81,7 +81,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
   return (
     <KpiPanel
       $toggleStatus={toggleStatus}
-      data-test-subj="alertsChartsPanel"
+      data-test-subj="alerts-charts-panel"
       hasBorder
       height={panelHeight}
     >
@@ -96,7 +96,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
         toggleQuery={toggleQuery}
       />
       {toggleStatus && (
-        <EuiFlexGroup data-test-subj="chartsPanel">
+        <EuiFlexGroup data-test-subj="alerts-charts-container">
           <PlaceHolder title={'Detections'} />
           <SeverityLevelChart
             data={severityData}

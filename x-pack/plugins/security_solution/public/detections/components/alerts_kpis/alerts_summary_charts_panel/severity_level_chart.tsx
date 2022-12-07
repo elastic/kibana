@@ -86,10 +86,10 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
             titleSize="xs"
             hideSubtitle
           />
-          <EuiFlexGroup data-test-subj="severtyChart" gutterSize="l">
+          <EuiFlexGroup data-test-subj="severty-chart" gutterSize="l">
             <EuiFlexItem>
               <EuiInMemoryTable
-                data-test-subj="severityLevelAlertsTable"
+                data-test-subj="severity-level-alerts-table"
                 columns={columns}
                 items={items}
                 loading={isLoading}
@@ -98,6 +98,7 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <DonutChart
+                data-test-subj="severity-level-donut"
                 data={data}
                 fillColor={fillColor}
                 height={DONUT_HEIGHT}
