@@ -48,9 +48,9 @@ describe('generateAttachmentsMetadata', () => {
     const result = generateAttachmentsMetadata(indicator);
 
     expect(result).toEqual({
-      indicatorName: '',
-      indicatorType: '',
-      indicatorFeedName: '',
+      indicatorName: '-',
+      indicatorType: '-',
+      indicatorFeedName: '-',
     });
   });
 
