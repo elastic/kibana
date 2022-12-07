@@ -9,11 +9,16 @@
 import { Rule } from '../lib/rule';
 import { removeCompilerOption } from '../lib/compiler_options';
 
-const NAMES = ['declaration', 'emitDeclarationOnly', 'skipLibCheck', 'target'];
+const NAMES = ['declaration', 'emitDeclarationOnly', 'skipLibCheck', 'target', 'paths'];
 
 export const forbiddenCompilerOptions = Rule.create('forbiddenCompilerOptions', {
-  check({ config }) {
+  check({ config, repoRel }) {
     for (const optName of NAMES) {
+      if (repoRel === '.buildkite/tsconfig.json' && optName === 'paths') {
+        // allow "paths" in this specific config file
+        continue;
+      }
+
       const value = config.compilerOptions?.[optName];
       if (value === undefined) {
         continue;

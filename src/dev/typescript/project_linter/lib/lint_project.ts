@@ -7,8 +7,10 @@
  */
 
 import Fs from 'fs';
+import Path from 'path';
 
 import { Jsonc } from '@kbn/bazel-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { Project as KbnTsProject } from '../../project';
 import { PROJECTS } from '../../projects';
@@ -21,7 +23,10 @@ export interface TsConfig {
 
 export class LintProject {
   static getAll() {
-    return PROJECTS.map((p) => new LintProject(p.tsConfigPath, p.directory, p));
+    return PROJECTS.map(
+      (p) =>
+        new LintProject(p.tsConfigPath, p.directory, Path.relative(REPO_ROOT, p.tsConfigPath), p)
+    );
   }
 
   static getKbnTsProjects(projects: LintProject[]) {
@@ -47,6 +52,7 @@ export class LintProject {
   constructor(
     public readonly path: string,
     public readonly directory: string,
+    public readonly repoRel: string,
     private readonly kbnTsProject: KbnTsProject
   ) {}
 
