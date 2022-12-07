@@ -54,14 +54,27 @@ export interface ComplianceDashboardData {
 export type CspStatusCode =
   | 'indexed' // latest findings index exists and has results
   | 'indexing' // index timeout was not surpassed since installation, assumes data is being indexed
+  | 'unprivileged' // user lacks privileges for the latest findings index
   | 'index-timeout' // index timeout was surpassed since installation
   | 'not-deployed' // no healthy agents were deployed
   | 'not-installed'; // number of installed csp integrations is 0;
 
+export type IndexStatus =
+  | 'not-empty' // Index contains documents
+  | 'empty' // Index doesn't contain documents (or doesn't exist)
+  | 'unprivileged'; // User doesn't have access to query the index
+
+export interface IndexDetails {
+  index: string;
+  status: IndexStatus;
+}
+
 interface BaseCspSetupStatus {
+  indicesDetails: IndexDetails[];
   latestPackageVersion: string;
   installedPackagePolicies: number;
   healthyAgents: number;
+  isPluginInitialized: boolean;
 }
 
 interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {

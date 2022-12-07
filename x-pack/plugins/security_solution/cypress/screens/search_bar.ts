@@ -32,3 +32,10 @@ export const GLOBAL_SEARCH_BAR_FILTER_ITEM = '#popoverFor_filter0';
 export const GLOBAL_SEARCH_BAR_FILTER_ITEM_AT = (value: number) => `#popoverFor_filter${value}`;
 
 export const GLOBAL_SEARCH_BAR_PINNED_FILTER = '.globalFilterItem-isPinned';
+
+export const GLOBAL_KQL_INPUT =
+  '[data-test-subj="filters-global-container"] [data-test-subj="unifiedQueryInput"] textarea';
+
+export const AUTO_SUGGEST_AGENT_NAME = `[data-test-subj="autocompleteSuggestion-field-agent.name-"]`;
+
+export const AUTO_SUGGEST_HOST_NAME_VALUE = `[data-test-subj='autocompleteSuggestion-value-"siem-kibana"-']`;

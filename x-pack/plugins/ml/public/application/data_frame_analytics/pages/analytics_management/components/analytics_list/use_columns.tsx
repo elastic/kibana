@@ -198,7 +198,7 @@ export const useColumns = (
                   values: { analyticsId: item.config.id },
                 })
           }
-          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowUp' : 'arrowDown'}
+          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowDown' : 'arrowRight'}
         />
       ),
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',
