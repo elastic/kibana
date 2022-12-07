@@ -192,14 +192,13 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     initialValue,
   }) => {
     const handleOnConfirmationCallback = (): void => {
-      ;
-       storage.remove(draftStorageKey);
-       onCancel();
-     };
+      storage.remove(draftStorageKey);
+      onCancel();
+    };
 
     const { showConfirmationModal, onOpenModal, onConfirmModal, onCancelModal } =
       useCancelCreationAction({
-        onConfirmationCallback:  handleOnConfirmationCallback
+        onConfirmationCallback: handleOnConfirmationCallback,
       });
 
     const storage = useMemo(() => new Storage(window.sessionStorage), []);
