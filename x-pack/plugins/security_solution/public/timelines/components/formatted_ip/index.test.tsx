@@ -11,9 +11,9 @@ import userEvent from '@testing-library/user-event';
 import { FormattedIp } from '.';
 import { TestProviders } from '../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../common/types';
-import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import { timelineActions } from '../../store/timeline';
 import { activeTimeline } from '../../containers/active_timeline_context';
+import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
