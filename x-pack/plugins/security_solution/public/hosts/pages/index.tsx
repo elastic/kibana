@@ -44,7 +44,7 @@ export const HostsContainer = React.memo(() => (
       render={({ location: { search = '' } }) => (
         <Redirect
           to={{
-            pathname: `${HOSTS_PATH}/events`,
+            pathname: `${HOSTS_PATH}/${HostsTableType.events}`,
             search: `${search}&onlyExternalAlerts=true`,
           }}
         />

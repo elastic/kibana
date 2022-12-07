@@ -25,7 +25,7 @@ export const UsersContainer = React.memo(() => {
         render={({ location: { search = '' } }) => (
           <Redirect
             to={{
-              pathname: `${USERS_PATH}/events`,
+              pathname: `${USERS_PATH}/${UsersTableType.events}`,
               search: `${search}&onlyExternalAlerts=true`,
             }}
           />
