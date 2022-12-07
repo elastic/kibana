@@ -12,7 +12,6 @@ import { Subscription } from 'rxjs';
 import { MockIModel } from '../__jest__/types';
 import { LangValidation } from '../types';
 import { monaco } from '../monaco_imports';
-import { ID } from './constants';
 
 import { DiagnosticsAdapter } from './diagnostics_adapter';
 
@@ -24,10 +23,12 @@ const getMockWorker = async () => {
   } as any;
 };
 
+const ID = 'painless';
+
 const flushPromises = () =>
   new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 
-describe('Painless DiagnosticAdapter', () => {
+describe('DiagnosticAdapter', () => {
   let diagnosticAdapter: DiagnosticsAdapter;
   let subscription: Subscription;
   let model: MockIModel;
@@ -43,7 +44,7 @@ describe('Painless DiagnosticAdapter', () => {
 
   beforeEach(async () => {
     model = monaco.editor.createModel(ID) as unknown as MockIModel;
-    diagnosticAdapter = new DiagnosticsAdapter(getMockWorker);
+    diagnosticAdapter = new DiagnosticsAdapter(ID, getMockWorker);
 
     // validate() has a promise we need to wait for
     // --> await worker.getSyntaxErrors()

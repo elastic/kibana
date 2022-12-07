@@ -9,17 +9,16 @@
 import { BehaviorSubject } from 'rxjs';
 
 import { monaco } from '../monaco_imports';
-import { SyntaxErrors, LangValidation } from '../types';
-import { ID } from './constants';
-import { WorkerAccessor } from './language';
-import { PainlessError } from './worker';
+import type { SyntaxErrors, LangValidation, EditorError, BaseWorkerDefinition } from '../types';
 
-const toDiagnostics = (error: PainlessError): monaco.editor.IMarkerData => {
+const toDiagnostics = (error: EditorError): monaco.editor.IMarkerData => {
   return {
     ...error,
     severity: monaco.MarkerSeverity.Error,
   };
 };
+
+export type WorkerAccessor = (...uris: monaco.Uri[]) => Promise<BaseWorkerDefinition>;
 
 export class DiagnosticsAdapter {
   private errors: SyntaxErrors = {};
@@ -33,14 +32,14 @@ export class DiagnosticsAdapter {
 
   public validation$ = this.validation.asObservable();
 
-  constructor(private worker: WorkerAccessor) {
+  constructor(private langId: string, private worker: WorkerAccessor) {
     const onModelAdd = (model: monaco.editor.IModel): void => {
       let handle: any;
 
-      if (model.getModeId() === ID) {
+      if (model.getModeId() === this.langId) {
         model.onDidChangeContent(() => {
           // Do not validate if the language ID has changed
-          if (model.getModeId() !== ID) {
+          if (model.getModeId() !== this.langId) {
             return;
           }
 
@@ -54,7 +53,7 @@ export class DiagnosticsAdapter {
               isValidating: false,
               errors: [],
             });
-            return monaco.editor.setModelMarkers(model, ID, []);
+            return monaco.editor.setModelMarkers(model, this.langId, []);
           }
 
           this.validation.next({
@@ -70,8 +69,8 @@ export class DiagnosticsAdapter {
         model.onDidChangeLanguage(({ newLanguage }) => {
           // Reset the model markers if the language ID has changed and is no longer "painless"
           // Otherwise, re-validate
-          if (newLanguage !== ID) {
-            return monaco.editor.setModelMarkers(model, ID, []);
+          if (newLanguage !== this.langId) {
+            return monaco.editor.setModelMarkers(model, this.langId, []);
           } else {
             this.validate(model.uri, ++this.validateIdx);
           }
@@ -107,7 +106,7 @@ export class DiagnosticsAdapter {
         [model!.id]: errorMarkers,
       };
       // Set the error markers and underline them with "Error" severity
-      monaco.editor.setModelMarkers(model!, ID, errorMarkers.map(toDiagnostics));
+      monaco.editor.setModelMarkers(model!, this.langId, errorMarkers.map(toDiagnostics));
     }
 
     const isValid = errorMarkers === undefined || errorMarkers.length === 0;
