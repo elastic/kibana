@@ -22,7 +22,7 @@ function getDisplayName(Component: ComponentType<any>) {
   return Component.displayName || Component.name || 'UnnamedComponent';
 }
 
-interface TemplateProps {
+export interface TemplateProps {
   children?: ReactNode;
   pageSideBar?: ReactNode;
   pageSideBarProps?: EuiPageSidebarProps;
