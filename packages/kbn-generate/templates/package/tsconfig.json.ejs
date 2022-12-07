@@ -1,8 +1,6 @@
 {
   "extends": "<%- relativePathTo("tsconfig.bazel.json") %>",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
     "outDir": "target_types",
     "types": [
     <%_ if (pkg.web) { _%>
@@ -20,5 +18,9 @@
     <%_ if (pkg.web) { _%>
       "**/*.tsx",
     <%_ } _%>
-  ]
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": []
 }
