@@ -236,17 +236,10 @@ export function getMultiBucketImpactTooltipValue(point) {
     point.multiBucketImpact !== undefined
       ? getAnomalyScoreExplanationImpactValue(point.multiBucketImpact)
       : 0;
-  const numHollowSquares = 5 - numFilledSquares;
-
-  let tooltip = '';
-  for (let i = 0; i < numFilledSquares; i++) {
-    tooltip += '\u25A0 '; // Unicode filled square
-  }
-  for (let i = 0; i < numHollowSquares; i++) {
-    tooltip += '\u25A1 '; // Unicode hollow square
-  }
-
-  return tooltip;
+  return new Array(5)
+    .fill('\u25A0 ', 0, numFilledSquares) // Unicode filled square
+    .fill('\u25A1 ', numFilledSquares) // Unicode hollow square
+    .join('');
 }
 
 export function numTicks(axisWidth) {
