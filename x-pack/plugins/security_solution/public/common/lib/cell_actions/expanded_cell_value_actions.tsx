@@ -10,7 +10,7 @@ import { noop } from 'lodash/fp';
 import React, { useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
-import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common/types';
+import type { ColumnHeaderOptions } from '../../../../common/types';
 import { allowTopN } from '../../components/drag_and_drop/helpers';
 import { ShowTopNButton } from '../../components/hover_actions/actions/show_top_n';
 import { SHOW_TOP_VALUES, HIDE_TOP_VALUES } from './translations';

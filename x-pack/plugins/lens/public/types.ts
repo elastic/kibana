@@ -390,6 +390,7 @@ export interface Datasource<T = unknown, P = unknown> {
     state: T,
     layerId: string,
     indexPatterns: IndexPatternMap,
+    dateRange: DateRange,
     searchSessionId?: string
   ) => ExpressionAstExpression | string | null;
 
@@ -471,7 +472,8 @@ export interface Datasource<T = unknown, P = unknown> {
     state: T,
     indexPatterns: IndexPatternMap,
     layerId: string,
-    columnId: string
+    columnId: string,
+    dateRange?: DateRange
   ) => boolean;
   /**
    * Are these datasources equivalent?
@@ -612,6 +614,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
+  dateRange: DateRange;
   indexPatterns: IndexPatternMap;
   hideTooltip?: boolean;
   invalid?: boolean;

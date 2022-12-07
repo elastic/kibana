@@ -7,7 +7,7 @@
 
 import type { Filter } from '@kbn/es-query';
 
-import { TableId, TimelineId } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import {
   alertEvents,
   allEvents,
@@ -21,6 +21,7 @@ import {
   detectionAlertsTables,
 } from './helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { TableId } from '../../../../common/types';
 
 /** the following scopes are NOT detection alert tables */
 const otherScopes = [
