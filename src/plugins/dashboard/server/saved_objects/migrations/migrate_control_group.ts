@@ -15,11 +15,7 @@ import {
 } from '@kbn/controls-plugin/common';
 import { SavedObjectMigrationFn } from '@kbn/core/server';
 
-/**
- * Need to migrate both the "Allow include/exclude" and "Allow exists query" toggles to be undefined
- * because the UX has been removed
- */
-export const migrateOptionsListSettings: SavedObjectMigrationFn<any, any> = (doc) => {
+export const migrateControlGroup: SavedObjectMigrationFn<any, any> = (doc) => {
   const { attributes } = doc;
 
   if (
@@ -34,20 +30,11 @@ export const migrateOptionsListSettings: SavedObjectMigrationFn<any, any> = (doc
     const panels = JSON.parse(attributes.controlGroupInput.panelsJSON) as ControlsPanels;
     const newPanels = Object.keys(panels).reduce<ControlsPanels>((panelAccumulator, panelId) => {
       const oldPanel: ControlPanelState = panels[panelId];
-      if (oldPanel.type === OPTIONS_LIST_CONTROL) {
-        const newExplicitInput = {
-          id: oldPanel.explicitInput.id,
-          ...omit(oldPanel.explicitInput, ['hideExclude', 'hideExists']),
-        };
-        const newPanel: ControlPanelState = { ...panels[panelId], explicitInput: newExplicitInput };
-        return {
-          ...panelAccumulator,
-          [panelId]: newPanel,
-        };
-      }
       return {
         ...panelAccumulator,
-        [panelId]: oldPanel,
+        [panelId]: MigrateControlPanel[oldPanel.type]
+          ? MigrateControlPanel[oldPanel.type].migratePanel(oldPanel)
+          : oldPanel,
       };
     }, {});
     return {
@@ -63,4 +50,22 @@ export const migrateOptionsListSettings: SavedObjectMigrationFn<any, any> = (doc
   } catch {
     return doc;
   }
+};
+
+const MigrateControlPanel: {
+  [type: string]: { migratePanel: (oldPanel: ControlPanelState) => ControlPanelState };
+} = {
+  [OPTIONS_LIST_CONTROL]: {
+    /**
+     * Need to migrate both the "Allow include/exclude" and "Allow exists query" toggles to be undefined
+     * because these were introduced in 8.6.0 but the UX was removed in 8.7.0
+     */
+    migratePanel: (oldPanel) => {
+      const newExplicitInput = {
+        id: oldPanel.explicitInput.id,
+        ...omit(oldPanel.explicitInput, ['hideExclude', 'hideExists']),
+      };
+      return { ...oldPanel, explicitInput: newExplicitInput };
+    },
+  },
 };
