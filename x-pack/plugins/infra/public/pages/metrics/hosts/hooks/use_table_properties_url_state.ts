@@ -56,11 +56,11 @@ export const useTableProperties = () => {
   };
 };
 
-const PaginationRT = rt.union([rt.boolean, rt.type({ pageIndex: rt.number, pageSize: rt.number })]);
-const SortingRT = rt.union([
+const PaginationRT = rt.union([
   rt.boolean,
-  rt.type({ field: rt.string, direction: rt.literal('asc', 'desc') }),
+  rt.partial({ pageIndex: rt.number, pageSize: rt.number }),
 ]);
+const SortingRT = rt.union([rt.boolean, rt.partial({ field: rt.string, direction: rt.string })]);
 
 const TablePropertiesRT = rt.type({
   pagination: PaginationRT,
