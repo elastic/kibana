@@ -22,6 +22,8 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
   const monitorManagement = `${basePath}/app/synthetics/monitors`;
   const addMonitor = `${basePath}/app/synthetics/add-monitor`;
   const overview = `${basePath}/app/synthetics`;
+  const settingsPage = `${basePath}/app/synthetics/settings`;
+
   return {
     ...loginPageProvider({
       page,
@@ -31,15 +33,21 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     }),
     ...utilsPageProvider({ page }),
 
-    async navigateToMonitorManagement() {
+    async navigateToMonitorManagement(doLogin = false) {
       await page.goto(monitorManagement, {
         waitUntil: 'networkidle',
       });
+      if (doLogin) {
+        await this.loginToKibana();
+      }
       await this.waitForMonitorManagementLoadingToFinish();
     },
 
-    async navigateToOverview() {
+    async navigateToOverview(doLogin = false) {
       await page.goto(overview, { waitUntil: 'networkidle' });
+      if (doLogin) {
+        await this.loginToKibana();
+      }
     },
 
     async waitForMonitorManagementLoadingToFinish() {
@@ -53,8 +61,19 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       return await this.findByText('Create monitor');
     },
 
+    async navigateToSettings(doLogin = true) {
+      await page.goto(settingsPage, {
+        waitUntil: 'networkidle',
+      });
+      if (doLogin) {
+        await this.loginToKibana();
+      }
+    },
+
     async navigateToAddMonitor() {
-      await page.goto(addMonitor);
+      await page.goto(addMonitor, {
+        waitUntil: 'networkidle',
+      });
     },
 
     async ensureIsOnMonitorConfigPage() {
