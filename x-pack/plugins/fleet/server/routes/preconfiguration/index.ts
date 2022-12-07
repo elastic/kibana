@@ -8,16 +8,9 @@
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { PRECONFIGURATION_API_ROUTES } from '../../constants';
-import {
-  PutPreconfigurationSchema,
-  PostResetOnePreconfiguredAgentPoliciesSchema,
-} from '../../types';
+import { PostResetOnePreconfiguredAgentPoliciesSchema } from '../../types';
 
-import {
-  updatePreconfigurationHandler,
-  resetPreconfigurationHandler,
-  resetOnePreconfigurationHandler,
-} from './handler';
+import { resetPreconfigurationHandler, resetOnePreconfigurationHandler } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   router.post(
@@ -39,16 +32,5 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     resetOnePreconfigurationHandler
-  );
-
-  router.put(
-    {
-      path: PRECONFIGURATION_API_ROUTES.UPDATE_PATTERN,
-      validate: PutPreconfigurationSchema,
-      fleetAuthz: {
-        fleet: { all: true },
-      },
-    },
-    updatePreconfigurationHandler
   );
 };
