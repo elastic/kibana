@@ -10,8 +10,8 @@ import Fs from 'fs';
 
 import { Jsonc } from '@kbn/bazel-packages';
 
-import { PROJECTS } from '../../projects';
 import { Project as KbnTsProject } from '../../project';
+import { PROJECTS } from '../../projects';
 
 export interface TsConfig {
   extends?: string;
@@ -24,12 +24,24 @@ export class LintProject {
     return PROJECTS.map((p) => new LintProject(p.tsConfigPath, p.directory, p));
   }
 
-  static parseConfig(path: string) {
-    return Jsonc.parse(Fs.readFileSync(path, 'utf8')) as TsConfig;
+  static getKbnTsProjects(projects: LintProject[]) {
+    const cache = new Map<string, KbnTsProject>();
+    return projects.map((p) =>
+      KbnTsProject.load(
+        p.path,
+        {
+          name: p.kbnTsProject.name,
+          disableTypeCheck: p.kbnTsProject.disableTypeCheck,
+        },
+        {
+          cache,
+        }
+      )
+    );
   }
 
-  static getKbnTsProject(project: LintProject) {
-    return project.kbnTsProject;
+  static parseConfig(path: string) {
+    return Jsonc.parse(Fs.readFileSync(path, 'utf8')) as TsConfig;
   }
 
   constructor(

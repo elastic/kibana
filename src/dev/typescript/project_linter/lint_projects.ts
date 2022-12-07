@@ -89,7 +89,7 @@ export function getLintedProjects(log: SomeDevLog, options: LintOptions) {
   }
 
   return {
-    projects: projects.map(LintProject.getKbnTsProject),
+    projects: LintProject.getKbnTsProjects(projects),
     lintingErrorCount: errorCount,
   };
 }
