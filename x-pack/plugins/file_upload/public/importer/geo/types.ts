@@ -9,7 +9,7 @@ import { Feature } from 'geojson';
 import { ReactNode } from 'react';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { IImporter } from '../types';
-import type { ImportFailure } from '../../common/types';
+import type { ImportFailure } from '../../../common/types';
 
 export interface GeoFilePreview {
   features: Feature[];
