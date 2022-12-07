@@ -24,6 +24,7 @@ export type ApmIndicesConfig = Readonly<{
   metric: string;
   apmAgentConfigurationIndex: string;
   apmCustomLinkIndex: string;
+  apmSourceMapIndex: string;
 }>;
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
@@ -53,6 +54,7 @@ export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
     // system indices, not configurable
     apmAgentConfigurationIndex: '.apm-agent-configuration',
     apmCustomLinkIndex: '.apm-custom-link',
+    apmSourceMapIndex: '.apm-source-map',
   };
 }
 

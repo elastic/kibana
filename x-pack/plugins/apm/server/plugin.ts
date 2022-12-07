@@ -56,6 +56,7 @@ import {
 } from '../common/es_fields/apm';
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
+import { createSourceMapIndex } from './routes/source_maps/create_source_map_index';
 
 export class APMPlugin
   implements
@@ -265,13 +266,22 @@ export class APMPlugin
       config: this.currentConfig,
       logger: this.logger,
     });
-    // create custom action index without blocking start lifecycle
+
+    // create custom link index without blocking start lifecycle
     createApmCustomLinkIndex({
       client: core.elasticsearch.client.asInternalUser,
       config: this.currentConfig,
       logger: this.logger,
     });
 
+    // create source map index
+    createSourceMapIndex({
+      client: core.elasticsearch.client.asInternalUser,
+      config: this.currentConfig,
+      logger: this.logger,
+    });
+
+    // TODO: remove in 9.0
     migrateLegacyAPMIndicesToSpaceAware({
       coreStart: core,
       logger: this.logger,

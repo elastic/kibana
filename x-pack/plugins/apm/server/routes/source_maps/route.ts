@@ -20,6 +20,8 @@ import {
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
+import { createSourceMapDoc } from './create_source_map_doc';
+import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 
 export const sourceMapRt = t.intersection([
   t.type({
@@ -89,7 +91,14 @@ const uploadSourceMapRoute = createApmServerRoute({
         .pipe(sourceMapRt),
     }),
   }),
-  handler: async ({ params, plugins, core }): Promise<Artifact | undefined> => {
+  handler: async ({
+    params,
+    plugins,
+    core,
+    context,
+    request,
+    config,
+  }): Promise<Artifact | undefined> => {
     const {
       service_name: serviceName,
       service_version: serviceVersion,
@@ -99,7 +108,7 @@ const uploadSourceMapRoute = createApmServerRoute({
     const cleanedBundleFilepath = getCleanedBundleFilePath(bundleFilepath);
     const fleetPluginStart = await plugins.fleet?.start();
     const coreStart = await core.start();
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
     const savedObjectsClient = await getInternalSavedObjectsClient(core.setup);
     try {
       if (fleetPluginStart) {
@@ -112,12 +121,21 @@ const uploadSourceMapRoute = createApmServerRoute({
             sourceMap,
           },
         });
+
+        const internalApmESClient = await createInternalESClient({
+          context,
+          request,
+          debug: params.query._inspect,
+          config,
+        });
+
+        await createSourceMapDoc(artifact, internalApmESClient);
         await updateSourceMapsOnFleetPolicies({
           core,
           fleetPluginStart,
           savedObjectsClient:
             savedObjectsClient as unknown as SavedObjectsClientContract,
-          elasticsearchClient: esClient,
+          elasticsearchClient: internalEsClient,
         });
 
         return artifact;
