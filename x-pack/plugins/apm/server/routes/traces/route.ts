@@ -19,7 +19,7 @@ import {
 import { getTransaction } from '../transactions/get_transaction';
 import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
-import { getTraceItems } from './get_trace_items';
+import { getTraceItems, TraceItems } from './get_trace_items';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -88,27 +88,36 @@ const tracesByIdRoute = createApmServerRoute({
     path: t.type({
       traceId: t.string,
     }),
-    query: rangeRt,
+    query: t.intersection([
+      rangeRt,
+      t.partial({ entryTransactionId: t.string }),
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
     resources
   ): Promise<{
-    exceedsMax: boolean;
-    traceDocs: Array<
-      | import('./../../../typings/es_schemas/ui/transaction').Transaction
-      | import('./../../../typings/es_schemas/ui/span').Span
-    >;
-    errorDocs: Array<
-      import('./../../../typings/es_schemas/ui/apm_error').APMError
-    >;
-    linkedChildrenOfSpanCountBySpanId: Record<string, number>;
+    traceItems: TraceItems;
+    entryTransaction?: import('./../../../typings/es_schemas/ui/transaction').Transaction;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
     const { traceId } = params.path;
-    const { start, end } = params.query;
-    return getTraceItems(traceId, config, apmEventClient, start, end);
+    const { start, end, entryTransactionId } = params.query;
+    const [traceItems, entryTransaction] = await Promise.all([
+      getTraceItems(traceId, config, apmEventClient, start, end),
+      entryTransactionId
+        ? getTransaction({
+            transactionId: entryTransactionId,
+            traceId,
+            apmEventClient,
+          })
+        : undefined,
+    ]);
+    return {
+      traceItems,
+      entryTransaction,
+    };
   },
 });
 

@@ -9,15 +9,14 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
-import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
-import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import {
+  WaterfallError,
+  WaterfallSpan,
+  WaterfallTransaction,
+} from '../../../../../../../../common/waterfall/typings';
 
 type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
-
-interface IWaterfallGroup {
-  [key: string]: IWaterfallSpanOrTransaction[];
-}
 
 const ROOT_ID = 'root';
 
@@ -32,8 +31,9 @@ export enum WaterfallLegendType {
 }
 
 export interface IWaterfall {
+  entryTransaction?: Transaction;
   entryWaterfallTransaction?: IWaterfallTransaction;
-  rootTransaction?: Transaction;
+  rootWaterfallTransaction?: WaterfallTransaction;
 
   /**
    * Latency in us
@@ -44,17 +44,8 @@ export interface IWaterfall {
   getErrorCount: (parentId: string) => number;
   legends: IWaterfallLegend[];
   errorItems: IWaterfallError[];
-  apiResponse: TraceAPIResponse;
-}
-
-interface IWaterfallSpanItemBase<TDocument, TDoctype>
-  extends IWaterfallItemBase<TDocument, TDoctype> {
-  /**
-   * Latency in us
-   */
-  duration: number;
-  legendValues: Record<WaterfallLegendType, string>;
-  spanLinksCount: SpanLinksCount;
+  exceedsMax: boolean;
+  totalErrorsCount: number;
 }
 
 interface IWaterfallItemBase<TDocument, TDoctype> {
@@ -72,22 +63,30 @@ interface IWaterfallItemBase<TDocument, TDoctype> {
    * skew from timestamp in us
    */
   skew: number;
+  /**
+   * Latency in us
+   */
+  duration: number;
+  legendValues: Record<WaterfallLegendType, string>;
+  spanLinksCount: SpanLinksCount;
 }
 
-export type IWaterfallError = IWaterfallItemBase<APMError, 'error'>;
+export type IWaterfallError = Omit<
+  IWaterfallItemBase<WaterfallError, 'error'>,
+  'duration' | 'legendValues' | 'spanLinksCount'
+>;
 
-export type IWaterfallTransaction = IWaterfallSpanItemBase<
-  Transaction,
+export type IWaterfallTransaction = IWaterfallItemBase<
+  WaterfallTransaction,
   'transaction'
 >;
 
-export type IWaterfallSpan = IWaterfallSpanItemBase<Span, 'span'>;
+export type IWaterfallSpan = IWaterfallItemBase<WaterfallSpan, 'span'>;
 
 export type IWaterfallSpanOrTransaction =
   | IWaterfallTransaction
   | IWaterfallSpan;
 
-// export type IWaterfallItem = IWaterfallSpanOrTransaction | IWaterfallError;
 export type IWaterfallItem = IWaterfallSpanOrTransaction;
 
 export interface IWaterfallLegend {
@@ -96,19 +95,21 @@ export interface IWaterfallLegend {
   color: string;
 }
 
-function getLegendValues(transactionOrSpan: Transaction | Span) {
+function getLegendValues(
+  transactionOrSpan: WaterfallTransaction | WaterfallSpan
+) {
   return {
     [WaterfallLegendType.ServiceName]: transactionOrSpan.service.name,
     [WaterfallLegendType.SpanType]:
       transactionOrSpan.processor.event === ProcessorEvent.span
-        ? (transactionOrSpan as Span).span.subtype ||
-          (transactionOrSpan as Span).span.type
+        ? (transactionOrSpan as WaterfallSpan).span.subtype ||
+          (transactionOrSpan as WaterfallSpan).span.type
         : '',
   };
 }
 
 function getTransactionItem(
-  transaction: Transaction,
+  transaction: WaterfallTransaction,
   linkedChildrenCount: number = 0
 ): IWaterfallTransaction {
   return {
@@ -129,7 +130,7 @@ function getTransactionItem(
 }
 
 function getSpanItem(
-  span: Span,
+  span: WaterfallSpan,
   linkedChildrenCount: number = 0
 ): IWaterfallSpan {
   return {
@@ -150,7 +151,7 @@ function getSpanItem(
 }
 
 function getErrorItem(
-  error: APMError,
+  error: WaterfallError,
   items: IWaterfallItem[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ): IWaterfallError {
@@ -206,7 +207,7 @@ export function getClockSkew(
 }
 
 export function getOrderedWaterfallItems(
-  childrenByParentId: IWaterfallGroup,
+  childrenByParentId: Record<string, IWaterfallSpanOrTransaction[]>,
   entryWaterfallTransaction?: IWaterfallTransaction
 ) {
   if (!entryWaterfallTransaction) {
@@ -244,7 +245,9 @@ export function getOrderedWaterfallItems(
   return getSortedChildren(entryWaterfallTransaction);
 }
 
-function getRootTransaction(childrenByParentId: IWaterfallGroup) {
+function getRootWaterfallTransaction(
+  childrenByParentId: Record<string, IWaterfallSpanOrTransaction[]>
+) {
   const item = first(childrenByParentId.root);
   if (item && item.docType === 'transaction') {
     return item.doc;
@@ -288,21 +291,21 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
   );
 
 const getWaterfallItems = (
-  items: TraceAPIResponse['traceDocs'],
-  linkedChildrenOfSpanCountBySpanId: TraceAPIResponse['linkedChildrenOfSpanCountBySpanId']
+  items: Array<WaterfallTransaction | WaterfallSpan>,
+  linkedChildrenOfSpanCountBySpanId: TraceAPIResponse['traceItems']['linkedChildrenOfSpanCountBySpanId']
 ) =>
   items.map((item) => {
-    const docType: 'span' | 'transaction' = item.processor.event;
+    const docType = item.processor.event;
     switch (docType) {
       case 'span': {
-        const span = item as Span;
+        const span = item as WaterfallSpan;
         return getSpanItem(
           span,
           linkedChildrenOfSpanCountBySpanId[span.span.id]
         );
       }
       case 'transaction':
-        const transaction = item as Transaction;
+        const transaction = item as WaterfallTransaction;
         return getTransactionItem(
           transaction,
           linkedChildrenOfSpanCountBySpanId[transaction.transaction.id]
@@ -367,7 +370,7 @@ function isInEntryTransaction(
 }
 
 function getWaterfallErrors(
-  errorDocs: TraceAPIResponse['errorDocs'],
+  errorDocs: TraceAPIResponse['traceItems']['errorDocs'],
   items: IWaterfallItem[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ) {
@@ -397,7 +400,9 @@ function getWaterfallErrors(
 /*
   { 'parentId': 2 }
   */
-function getErrorCountByParentId(errorDocs: TraceAPIResponse['errorDocs']) {
+function getErrorCountByParentId(
+  errorDocs: TraceAPIResponse['traceItems']['errorDocs']
+) {
   return errorDocs.reduce<Record<string, number>>((acc, doc) => {
     const parentId = doc.parent?.id;
 
@@ -411,27 +416,26 @@ function getErrorCountByParentId(errorDocs: TraceAPIResponse['errorDocs']) {
   }, {});
 }
 
-export function getWaterfall(
-  apiResponse: TraceAPIResponse,
-  entryTransactionId?: Transaction['transaction']['id']
-): IWaterfall {
-  if (isEmpty(apiResponse.traceDocs) || !entryTransactionId) {
+export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
+  const { traceItems, entryTransaction } = apiResponse;
+  if (isEmpty(traceItems.traceDocs) || !entryTransaction) {
     return {
-      apiResponse,
       duration: 0,
       items: [],
       legends: [],
       errorItems: [],
       childrenByParentId: {},
       getErrorCount: () => 0,
+      exceedsMax: false,
+      totalErrorsCount: 0,
     };
   }
 
-  const errorCountByParentId = getErrorCountByParentId(apiResponse.errorDocs);
+  const errorCountByParentId = getErrorCountByParentId(traceItems.errorDocs);
 
   const waterfallItems: IWaterfallSpanOrTransaction[] = getWaterfallItems(
-    apiResponse.traceDocs,
-    apiResponse.linkedChildrenOfSpanCountBySpanId
+    traceItems.traceDocs,
+    traceItems.linkedChildrenOfSpanCountBySpanId
   );
 
   const childrenByParentId = getChildrenGroupedByParentId(
@@ -439,7 +443,7 @@ export function getWaterfall(
   );
 
   const entryWaterfallTransaction = getEntryWaterfallTransaction(
-    entryTransactionId,
+    entryTransaction.transaction.id,
     waterfallItems
   );
 
@@ -448,24 +452,28 @@ export function getWaterfall(
     entryWaterfallTransaction
   );
   const errorItems = getWaterfallErrors(
-    apiResponse.errorDocs,
+    traceItems.errorDocs,
     items,
     entryWaterfallTransaction
   );
 
-  const rootTransaction = getRootTransaction(childrenByParentId);
+  const rootWaterfallTransaction =
+    getRootWaterfallTransaction(childrenByParentId);
+
   const duration = getWaterfallDuration(items);
   const legends = getLegends(items);
 
   return {
-    apiResponse,
     entryWaterfallTransaction,
-    rootTransaction,
+    rootWaterfallTransaction,
+    entryTransaction,
     duration,
     items,
     legends,
     errorItems,
     childrenByParentId: getChildrenGroupedByParentId(items),
     getErrorCount: (parentId: string) => errorCountByParentId[parentId] ?? 0,
+    exceedsMax: traceItems.exceedsMax,
+    totalErrorsCount: traceItems.errorDocs.length,
   };
 }
