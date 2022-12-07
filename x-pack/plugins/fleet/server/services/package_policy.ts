@@ -82,8 +82,11 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
-import type { FleetAuthzRouteConfig } from '../routes/security';
-import { getAuthzFromRequest, hasRequiredFleetAuthzPrivilege } from '../routes/security';
+import {
+  doesNotHaveRequiredFleetAuthz,
+  getAuthzFromRequest,
+  type FleetAuthzRouteConfig,
+} from '../routes/security';
 
 import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
@@ -1255,7 +1258,7 @@ export class PackagePolicyServiceImpl
   public asScoped(request: KibanaRequest): PackagePolicyClient {
     const preflightCheck = async (fleetAuthzConfig: FleetAuthzRouteConfig) => {
       const authz = await getAuthzFromRequest(request);
-      if (!hasRequiredFleetAuthzPrivilege(authz, fleetAuthzConfig)) {
+      if (doesNotHaveRequiredFleetAuthz(authz, fleetAuthzConfig)) {
         throw new FleetUnauthorizedError('Not authorized to this action on integration policies');
       }
     };
@@ -1299,9 +1302,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     }
   ): Promise<PackagePolicy> {
     await this.#runPreflight({
-      fleetAuthz: {
-        integrations: { writeIntegrationPolicies: true },
-      },
+      fleetAuthz: { integrations: { writeIntegrationPolicies: true } },
     });
 
     return super.create(soClient, esClient, packagePolicy, options);

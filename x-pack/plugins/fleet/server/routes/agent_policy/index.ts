@@ -17,7 +17,7 @@ import {
   GetK8sManifestRequestSchema,
   BulkGetAgentPoliciesRequestSchema,
 } from '../../types';
-import type { FleetAuthzRouter } from '../security';
+import { type FleetAuthzRouter } from '../security';
 
 import { K8S_API_ROUTES } from '../../../common/constants';
 

@@ -32,7 +32,7 @@ import {
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
 } from '../../types';
-import type { FleetAuthzRouter } from '../security';
+import { type FleetAuthzRouter } from '../security';
 
 import {
   getCategoriesHandler,
