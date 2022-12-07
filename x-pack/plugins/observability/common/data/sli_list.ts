@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SLOList } from '../../../typings';
+import type { SLOList } from '../../public';
 
 export const emptySloList: SLOList = {
   results: [],
