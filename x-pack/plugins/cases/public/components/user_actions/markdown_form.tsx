@@ -15,6 +15,7 @@ import * as i18n from '../case_view/translations';
 import type { Content } from './schema';
 import { schema } from './schema';
 import { MarkdownRenderer, MarkdownEditorForm } from '../markdown_editor';
+import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 
 export const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
@@ -47,23 +48,23 @@ const UserActionMarkdownComponent = forwardRef<
   });
 
   const fieldName = 'content';
-  const draftCommentStorageKey = `xpack.cases.caseView.${caseId}.${id}.markdownEditor`;
+  const draftStorageKey = getMarkdownEditorStorageKey(caseId, id);
   const { setFieldValue, submit } = form;
 
   const handleCancelAction = useCallback(() => {
-    storage.remove(draftCommentStorageKey);
     onChangeEditable(id);
-  }, [id, onChangeEditable, storage, draftCommentStorageKey]);
+    storage.remove(draftStorageKey);
+  }, [id, onChangeEditable, storage, draftStorageKey]);
 
   const handleSaveAction = useCallback(async () => {
     const { isValid, data } = await submit();
 
     if (isValid && data.content !== content) {
       onSaveContent(data.content);
-      storage.remove(draftCommentStorageKey);
     }
     onChangeEditable(id);
-  }, [content, id, onChangeEditable, onSaveContent, submit, storage, draftCommentStorageKey]);
+    storage.remove(draftStorageKey);
+  }, [content, id, onChangeEditable, onSaveContent, submit, storage, draftStorageKey]);
 
   const setComment = useCallback(
     (newComment) => {
@@ -117,7 +118,7 @@ const UserActionMarkdownComponent = forwardRef<
           'aria-label': 'Cases markdown editor',
           value: content,
           id,
-          draftCommentStorageKey,
+          draftStorageKey,
           bottomRightContent: EditorButtons,
           initialValue: content,
         }}

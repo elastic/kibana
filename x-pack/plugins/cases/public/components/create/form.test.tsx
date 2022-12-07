@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, render, within } from '@testing-library/react';
+import { act, render, within, fireEvent } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { NONE_CONNECTOR_ID } from '../../../common/api';
@@ -53,6 +53,7 @@ const casesFormProps: CreateCaseFormProps = {
 
 describe('CreateCaseForm', () => {
   let globalForm: FormHook;
+  let store: Record<string, any> = {};
 
   const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
     children,
@@ -78,6 +79,15 @@ describe('CreateCaseForm', () => {
     useGetTagsMock.mockReturnValue({ data: ['test'] });
     useGetConnectorsMock.mockReturnValue({ isLoading: false, data: connectorsMock });
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+    Object.defineProperty(window, 'sessionStorage', {
+      value: {
+        clear: jest.fn().mockImplementation(() => (store = {})),
+        getItem: jest.fn().mockImplementation((key: string) => store[key]),
+        setItem: jest.fn().mockImplementation((key: string, value: string) => (store[key] = value)),
+        removeItem: jest.fn().mockImplementation((key: string) => delete store[key]),
+      },
+      writable: true,
+    });
   });
 
   it('renders with steps', async () => {
@@ -211,5 +221,24 @@ describe('CreateCaseForm', () => {
 
     expect(titleInput).toHaveValue('title');
     expect(descriptionInput).toHaveValue('description');
+  });
+
+  it('should clear session storage key on cancel', () => {
+    const result = render(
+      <MockHookWrapperComponent>
+        <CreateCaseForm
+          {...casesFormProps}
+          initialValue={{ title: 'title', description: 'description' }}
+        />
+      </MockHookWrapperComponent>
+    );
+
+    const removeItemSpy = jest.spyOn(window.sessionStorage, 'removeItem');
+    const cancelBtn = result.getByTestId('create-case-cancel');
+
+    fireEvent.click(cancelBtn);
+
+    expect(casesFormProps.onCancel).toHaveBeenCalled();
+    expect(removeItemSpy).toHaveBeenCalled();
   });
 });

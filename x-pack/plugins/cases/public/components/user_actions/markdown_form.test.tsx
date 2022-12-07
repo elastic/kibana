@@ -10,20 +10,20 @@ import { mount } from 'enzyme';
 import { UserActionMarkdown } from './markdown_form';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, TestProviders } from '../../common/mock';
-import { waitFor } from '@testing-library/react';
+import { waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 const onChangeEditable = jest.fn();
 const onSaveContent = jest.fn();
 
 const newValue = 'Hello from Tehas';
 const hyperlink = `[hyperlink](http://elastic.co)`;
-const draftCommentStorageKey = `xpack.cases.caseView.caseId.markdown-id.markdownEditor`;
+const draftStorageKey = `cases.caseView.caseId.markdown-id.markdownEditor`;
 const defaultProps = {
   content: `A link to a timeline ${hyperlink}`,
   id: 'markdown-id',
   caseId: 'caseId',
   isEditable: true,
-  draftCommentStorageKey,
+  draftStorageKey,
   onChangeEditable,
   onSaveContent,
 };
@@ -200,44 +200,48 @@ describe('UserActionMarkdown ', () => {
       expect(result.container.querySelector('textarea')!.value).not.toEqual(oldContent);
     });
   });
+
   describe('draft comment ', () => {
+    let appMockRenderer: AppMockRenderer;
+    let store: Record<string, any> = {};
+
     beforeEach(() => {
+      appMockRenderer = createAppMockRenderer();
       Object.defineProperty(window, 'sessionStorage', {
-        value: { clear: jest.fn(), removeItem: jest.fn(), getItem: jest.fn(), setItem: jest.fn() },
+        value: {
+          clear: jest.fn().mockImplementation(() => (store = {})),
+          getItem: jest.fn().mockImplementation((key: string) => store[key]),
+          setItem: jest
+            .fn()
+            .mockImplementation((key: string, value: string) => (store[key] = value)),
+          removeItem: jest.fn().mockImplementation((key: string) => delete store[key]),
+        },
         writable: true,
       });
     });
 
     it('Save button click clears session storage', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <UserActionMarkdown {...defaultProps} />
-        </TestProviders>
-      );
+      const result = appMockRenderer.render(<UserActionMarkdown {...defaultProps} />);
 
-      wrapper
-        .find(`.euiMarkdownEditorTextArea`)
-        .first()
-        .simulate('change', {
-          target: { value: newValue },
-        });
+      fireEvent.change(result.getByTestId('euiMarkdownEditorTextArea'), {
+        target: { value: newValue },
+      });
 
-      wrapper.find(`button[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
+      const removeItemSpy = jest.spyOn(window.sessionStorage, 'removeItem');
+
+      fireEvent.click(result.getByTestId(`user-action-save-markdown`));
 
       await waitFor(() => {
         expect(onSaveContent).toHaveBeenCalledWith(newValue);
-        expect(window.sessionStorage.removeItem).toHaveBeenCalled();
+        expect(removeItemSpy).toHaveBeenCalledWith(draftStorageKey);
         expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
       });
     });
 
     it('Cancel button click clears session storage', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <UserActionMarkdown {...defaultProps} />
-        </TestProviders>
-      );
-      wrapper.find(`[data-test-subj="user-action-cancel-markdown"]`).first().simulate('click');
+      const result = appMockRenderer.render(<UserActionMarkdown {...defaultProps} />);
+
+      fireEvent.click(result.getByTestId('user-action-cancel-markdown'));
 
       expect(window.sessionStorage.removeItem).toHaveBeenCalled();
     });

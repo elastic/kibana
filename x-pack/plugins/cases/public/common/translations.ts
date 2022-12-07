@@ -311,7 +311,8 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
 export const COMMENT_VERSION_CONFLICT_WARNING = i18n.translate(
   'xpack.cases.configure.commentVersionConflictWarning',
   {
-    defaultMessage: 'This case has been updated. Please refresh before saving additional updates.',
+    defaultMessage:
+      'This comment was updated. Saving your changes will overwrite the updated value.',
   }
 );
 

@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import styled from 'styled-components';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
 import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import useDebounce from 'react-use/lib/useDebounce';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import * as i18n from '../../common/translations';
 import type { MarkdownEditorRef } from './editor';
 import { MarkdownEditor } from './editor';
 import { CommentEditorContext } from './context';
+import { useMarkdownSessionStorage } from './use_markdown_session_storage';
 
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
@@ -27,12 +26,10 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   bottomRightContent?: React.ReactNode;
   caseTitle?: string;
   caseTags?: string[];
-  draftCommentStorageKey?: string;
+  draftStorageKey: string;
   disabledUiPlugins?: string[];
   initialValue?: string;
 };
-
-const STORAGE_DEBOUNCE_TIME = 500;
 
 const BottomContentWrapper = styled(EuiFlexGroup)`
   ${({ theme }) => `
@@ -51,16 +48,18 @@ export const MarkdownEditorForm = React.memo(
         bottomRightContent,
         caseTitle,
         caseTags,
-        draftCommentStorageKey,
+        draftStorageKey,
         disabledUiPlugins,
         initialValue,
       },
       ref
     ) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-      const [showVersionConflictWarning, setShowVersionConflictWarning] = useState<boolean>(false);
-      const storage = useMemo(() => new Storage(window.sessionStorage), []);
-      const isFirstRender = useRef(true);
+      const { hasConflicts } = useMarkdownSessionStorage({
+        field,
+        sessionKey: draftStorageKey,
+        initialValue,
+      });
 
       const commentEditorContextValue = useMemo(
         () => ({
@@ -72,39 +71,6 @@ export const MarkdownEditorForm = React.memo(
         [id, field.value, caseTitle, caseTags]
       );
 
-      useEffect(() => {
-        const storageDraftComment = draftCommentStorageKey && storage.get(draftCommentStorageKey);
-        if (storageDraftComment && storageDraftComment !== '') {
-          field.setValue(storageDraftComment);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, []);
-
-      useEffect(() => {
-        if (initialValue && initialValue !== field.value) {
-          setShowVersionConflictWarning(true);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [initialValue]);
-
-      useDebounce(
-        () => {
-          if (isFirstRender.current) {
-            isFirstRender.current = false;
-            return;
-          }
-          if (draftCommentStorageKey) {
-            if (field.value !== '') {
-              storage.set(draftCommentStorageKey, field.value);
-            } else {
-              storage.remove(draftCommentStorageKey);
-            }
-          }
-        },
-        STORAGE_DEBOUNCE_TIME,
-        [field.value]
-      );
-
       return (
         <CommentEditorContext.Provider value={commentEditorContextValue}>
           <EuiFormRow
@@ -112,9 +78,7 @@ export const MarkdownEditorForm = React.memo(
             describedByIds={idAria ? [idAria] : undefined}
             fullWidth
             error={errorMessage}
-            helpText={
-              showVersionConflictWarning ? i18n.COMMENT_VERSION_CONFLICT_WARNING : field.helpText
-            }
+            helpText={hasConflicts ? i18n.COMMENT_VERSION_CONFLICT_WARNING : field.helpText}
             isInvalid={isInvalid}
             label={field.label}
             labelAppend={field.labelAppend}

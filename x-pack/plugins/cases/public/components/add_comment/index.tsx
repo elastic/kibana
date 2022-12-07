@@ -30,6 +30,7 @@ import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { Case } from '../../containers/types';
 import type { EuiMarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
+import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 
 import * as i18n from './translations';
 import type { AddCommentFormSchema } from './schema';
@@ -73,7 +74,7 @@ export const AddComment = React.memo(
       const [focusOnContext, setFocusOnContext] = useState(false);
       const { permissions, owner } = useCasesContext();
       const { isLoading, createAttachments } = useCreateAttachments();
-      const draftCommentStorageKey = `xpack.cases.caseView.${caseId}.${id}.markdownEditor`;
+      const draftStorageKey = getMarkdownEditorStorageKey(caseId, id);
 
       const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,
@@ -120,7 +121,7 @@ export const AddComment = React.memo(
             data: [{ ...data, type: CommentType.user }],
             updateCase: onCommentPosted,
           });
-          storage.remove(draftCommentStorageKey);
+          storage.remove(draftStorageKey);
           reset();
         }
       }, [
@@ -132,7 +133,7 @@ export const AddComment = React.memo(
         onCommentPosted,
         reset,
         storage,
-        draftCommentStorageKey,
+        draftStorageKey,
       ]);
 
       /**
@@ -178,7 +179,7 @@ export const AddComment = React.memo(
                 componentProps={{
                   ref: editorRef,
                   id,
-                  draftCommentStorageKey,
+                  draftStorageKey,
                   idAria: 'caseComment',
                   isDisabled: isLoading,
                   dataTestSubj: 'add-comment',

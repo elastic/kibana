@@ -16,6 +16,7 @@ import {
 import styled, { css } from 'styled-components';
 
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { Title } from './title';
 import { Description, fieldName as descriptionFieldName } from './description';
@@ -29,6 +30,7 @@ import type { CasesTimelineIntegration } from '../timeline_context';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
+import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import { SubmitCaseButton } from './submit_button';
 import { FormContext } from './form_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
@@ -73,6 +75,8 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
+const draftStorageKey = getMarkdownEditorStorageKey('createCase', 'description');
+
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ connectors, isLoadingConnectors, withSteps }) => {
@@ -110,7 +114,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
               </Container>
             )}
             <Container big>
-              <Description isLoading={isSubmitting} />
+              <Description isLoading={isSubmitting} draftStorageKey={draftStorageKey} />
             </Container>
             <Container />
           </>
@@ -184,45 +188,59 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     timelineIntegration,
     attachments,
     initialValue,
-  }) => (
-    <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-      <FormContext
-        afterCaseCreated={afterCaseCreated}
-        onSuccess={onSuccess}
-        attachments={attachments}
-        initialValue={initialValue}
-      >
-        <CreateCaseFormFields
-          connectors={empty}
-          isLoadingConnectors={false}
-          withSteps={withSteps}
-        />
-        <Container>
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="flexEnd"
-            gutterSize="xs"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="create-case-cancel"
-                iconType="cross"
-                onClick={onCancel}
-                size="s"
-              >
-                {i18n.CANCEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SubmitCaseButton />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Container>
-        <InsertTimeline fieldName={descriptionFieldName} />
-      </FormContext>
-    </CasesTimelineIntegrationProvider>
-  )
+  }) => {
+    const storage = useMemo(() => new Storage(window.sessionStorage), []);
+
+    const handleOnCancel = (): void => {
+      storage.remove(draftStorageKey);
+      onCancel();
+    };
+
+    const handleOnSuccess = (theCase: Case): Promise<void> => {
+      storage.remove(draftStorageKey);
+      return onSuccess(theCase);
+    };
+
+    return (
+      <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
+        <FormContext
+          afterCaseCreated={afterCaseCreated}
+          onSuccess={handleOnSuccess}
+          attachments={attachments}
+          initialValue={initialValue}
+        >
+          <CreateCaseFormFields
+            connectors={empty}
+            isLoadingConnectors={false}
+            withSteps={withSteps}
+          />
+          <Container>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="flexEnd"
+              gutterSize="xs"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="create-case-cancel"
+                  iconType="cross"
+                  onClick={handleOnCancel}
+                  size="s"
+                >
+                  {i18n.CANCEL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SubmitCaseButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </Container>
+          <InsertTimeline fieldName={descriptionFieldName} />
+        </FormContext>
+      </CasesTimelineIntegrationProvider>
+    );
+  }
 );
 
 CreateCaseForm.displayName = 'CreateCaseForm';

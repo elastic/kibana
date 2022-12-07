@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor, act, fireEvent } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 
 import { noCreateCasesPermissions, TestProviders } from '../../common/mock';
@@ -20,6 +20,8 @@ import { AddComment } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
 import type { CaseAttachmentWithoutOwner } from '../../types';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 
 jest.mock('../../containers/use_create_attachments');
 
@@ -52,10 +54,6 @@ describe('AddComment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useCreateAttachmentsMock.mockImplementation(() => defaultResponse);
-    Object.defineProperty(window, 'sessionStorage', {
-      value: { clear: jest.fn(), removeItem: jest.fn(), getItem: jest.fn(), setItem: jest.fn() },
-      writable: true,
-    });
   });
 
   it('should post comment on submit click', async () => {
@@ -212,23 +210,40 @@ describe('AddComment ', () => {
       expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('[title](url)');
     });
   });
+});
+
+describe('draft comment ', () => {
+  let appMockRenderer: AppMockRenderer;
+  let store: Record<string, any> = {};
+
+  beforeEach(() => {
+    appMockRenderer = createAppMockRenderer();
+    jest.clearAllMocks();
+    Object.defineProperty(window, 'sessionStorage', {
+      value: {
+        clear: jest.fn().mockImplementation(() => (store = {})),
+        getItem: jest.fn().mockImplementation((key: string) => store[key]),
+        setItem: jest.fn().mockImplementation((key: string, value: string) => (store[key] = value)),
+        removeItem: jest.fn().mockImplementation((key: string) => delete store[key]),
+      },
+      writable: true,
+    });
+  });
 
   it('should clear session storage on submit', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AddComment {...addCommentProps} />
-      </TestProviders>
-    );
+    const result = appMockRenderer.render(<AddComment {...addCommentProps} />);
+    const draftKey = `cases.caseView.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
 
-    wrapper
-      .find(`[data-test-subj="add-comment"] textarea`)
-      .first()
-      .simulate('change', { target: { value: sampleData.comment } });
+    fireEvent.change(result.getByLabelText('caseComment'), {
+      target: { value: sampleData.comment },
+    });
 
-    expect(wrapper.find(`[data-test-subj="add-comment"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeFalsy();
+    expect(result.getByTestId(`add-comment`)).toBeTruthy();
 
-    wrapper.find(`button[data-test-subj="submit-comment"]`).first().simulate('click');
+    fireEvent.click(result.getByTestId('submit-comment'));
+
+    const removeItemSpy = jest.spyOn(window.sessionStorage, 'removeItem');
+
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
       expect(createAttachments).toBeCalledWith({
@@ -237,8 +252,8 @@ describe('AddComment ', () => {
         data: [sampleData],
         updateCase: onCommentPosted,
       });
-      expect(window.sessionStorage.removeItem).toHaveBeenCalled();
-      expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('');
+      expect(removeItemSpy).toHaveBeenCalledWith(draftKey);
+      expect(result.getByLabelText('caseComment').textContent).toBe('');
     });
   });
 });
