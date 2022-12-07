@@ -7,12 +7,12 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { jsonRt } from '@kbn/io-ts-utils';
+import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Artifact } from '@kbn/fleet-plugin/server';
 import {
   createApmArtifact,
   deleteApmArtifact,
-  listArtifacts,
+  listSourceMapArtifacts,
   updateSourceMapsOnFleetPolicies,
   getCleanedBundleFilePath,
   ArtifactSourceMap,
@@ -40,14 +40,28 @@ export type SourceMap = t.TypeOf<typeof sourceMapRt>;
 const listSourceMapRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/sourcemaps',
   options: { tags: ['access:apm'] },
+  params: t.partial({
+    query: t.partial({
+      page: toNumberRt,
+      perPage: toNumberRt,
+    }),
+  }),
   async handler({
+    params,
     plugins,
-  }): Promise<{ artifacts: ArtifactSourceMap[] } | undefined> {
+  }): Promise<{ artifacts: ArtifactSourceMap[]; total: number } | undefined> {
+    const { page, perPage } = params.query;
+
     try {
       const fleetPluginStart = await plugins.fleet?.start();
       if (fleetPluginStart) {
-        const artifacts = await listArtifacts({ fleetPluginStart });
-        return { artifacts };
+        const { artifacts, total } = await listSourceMapArtifacts({
+          fleetPluginStart,
+          page,
+          perPage,
+        });
+
+        return { artifacts, total };
       }
     } catch (e) {
       throw Boom.internal(

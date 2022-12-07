@@ -360,8 +360,8 @@ export async function fetchArchiveBuffer({
   if (!archivePath) {
     archivePath = `/epr/${pkgName}/${pkgName}-${pkgVersion}.zip`;
   }
-
-  const archiveUrl = `${getRegistryUrl()}${archivePath}`;
+  const registryUrl = getRegistryUrl();
+  const archiveUrl = `${registryUrl}${archivePath}`;
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
 
   if (shouldVerify) {

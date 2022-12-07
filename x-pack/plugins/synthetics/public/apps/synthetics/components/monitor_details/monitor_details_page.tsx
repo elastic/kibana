@@ -11,6 +11,6 @@ import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumb
 
 export const MonitorDetailsPage: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const { monitor } = useSelectedMonitor();
-  useMonitorListBreadcrumbs([{ text: monitor?.name ?? '' }]);
+  useMonitorListBreadcrumbs(monitor ? [{ text: monitor?.name ?? '' }] : []);
   return children;
 };
