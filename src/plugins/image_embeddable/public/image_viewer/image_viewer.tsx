@@ -33,6 +33,7 @@ export interface ImageViewerProps {
   onChange?: () => void;
   onClear?: () => void;
   onError?: () => void;
+  onLoad?: () => void;
   containerCSS?: SerializedStyles;
 }
 
@@ -41,6 +42,7 @@ export function ImageViewer({
   onChange,
   onClear,
   onError,
+  onLoad,
   className,
   containerCSS,
 }: ImageViewerProps) {
@@ -80,7 +82,9 @@ export function ImageViewer({
       {isImageConfigValid && (
         <FileImage
           src={src}
-          meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
+          // uncomment to enable blurhash when it's ready
+          // https://github.com/elastic/kibana/issues/145567
+          // meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
           alt={imageConfig.altText ?? ''}
           className={classNames(className, { 'visually-hidden': hasFailedToLoad })}
           title={onChange ? 'Click to select a different image' : undefined}
@@ -97,6 +101,9 @@ export function ImageViewer({
           }}
           onClick={() => {
             if (onChange) onChange();
+          }}
+          onLoad={() => {
+            if (onLoad) onLoad();
           }}
           onError={() => {
             setFailedToLoad(true);

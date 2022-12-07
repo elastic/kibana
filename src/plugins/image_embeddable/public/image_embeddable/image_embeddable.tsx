@@ -36,24 +36,35 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
     );
   }
 
-  public render() {
-    const ImageEmbeddableViewer = (props: { embeddable: ImageEmbeddable }) => {
-      const input = useObservable(props.embeddable.getInput$(), props.embeddable.getInput());
-
-      return (
-        <ImageViewerContext.Provider
-          value={{
-            getImageDownloadHref: this.deps.getImageDownloadHref,
-            validateUrl: this.deps.validateUrl,
-          }}
-        >
-          <ImageViewer imageConfig={input.imageConfig} />
-        </ImageViewerContext.Provider>
-      );
-    };
-
+  public render(el: HTMLElement) {
+    super.render(el); // calling super.render initializes renderComplete and setTitle
+    el.setAttribute('data-shared-item', '');
+    const ImageEmbeddableViewer = this.ImageEmbeddableViewer;
     return <ImageEmbeddableViewer embeddable={this} />;
   }
 
   public reload() {}
+
+  private ImageEmbeddableViewer = (props: { embeddable: ImageEmbeddable }) => {
+    const input = useObservable(props.embeddable.getInput$(), props.embeddable.getInput());
+
+    return (
+      <ImageViewerContext.Provider
+        value={{
+          getImageDownloadHref: this.deps.getImageDownloadHref,
+          validateUrl: this.deps.validateUrl,
+        }}
+      >
+        <ImageViewer
+          imageConfig={input.imageConfig}
+          onLoad={() => {
+            this.renderComplete.dispatchComplete();
+          }}
+          onError={() => {
+            this.renderComplete.dispatchError();
+          }}
+        />
+      </ImageViewerContext.Provider>
+    );
+  };
 }
