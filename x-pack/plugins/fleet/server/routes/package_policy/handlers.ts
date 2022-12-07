@@ -67,12 +67,12 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
   }
 };
 
-export const bulkGetPackagePoliciesHandler: RequestHandler<
+export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof BulkGetPackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
+  const { client: soClient } = await (await context.fleet).getSoClient();
   const { ids, ignoreMissing } = request.body;
   try {
     const items = await packagePolicyService.getByIDs(soClient, ids, {
@@ -95,10 +95,10 @@ export const bulkGetPackagePoliciesHandler: RequestHandler<
   }
 };
 
-export const getOnePackagePolicyHandler: RequestHandler<
+export const getOnePackagePolicyHandler: FleetRequestHandler<
   TypeOf<typeof GetOnePackagePolicyRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
+  const { client: soClient } = await (await context.fleet).getSoClient();
   const { packagePolicyId } = request.params;
   const notFoundResponse = () =>
     response.notFound({ body: { message: `Package policy ${packagePolicyId} not found` } });
@@ -259,13 +259,13 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   }
 };
 
-export const updatePackagePolicyHandler: RequestHandler<
+export const updatePackagePolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdatePackagePolicyRequestSchema.params>,
   unknown,
   TypeOf<typeof UpdatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  const soClient = coreContext.savedObjects.client;
+  const { client: soClient } = await (await context.fleet).getSoClient();
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);

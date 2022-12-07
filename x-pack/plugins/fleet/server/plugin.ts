@@ -346,6 +346,8 @@ export class FleetPlugin
         const coreContext = await context.core;
         const authz = await getAuthzFromRequest(request);
         const esClient = coreContext.elasticsearch.client;
+
+        // FIXME:PT need to work here - request.route.path is not the route path pattern, but rather the actual request route.
         const routeRequiredAuthz = getRouteRequiredAuthz(request.route.method, request.route.path);
         const routeAuthz = routeRequiredAuthz
           ? calculateRouteAuthz(authz, routeRequiredAuthz)
