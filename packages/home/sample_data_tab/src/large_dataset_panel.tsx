@@ -161,7 +161,7 @@ export const LargeDatasetPanel = ({
   };
 
   const onInstallClick = async () => {
-    /*try {
+    /* try {
       const fieldsToSend = fieldValues
         .filter((value) => value.name !== '')
         .map((el) => {
@@ -182,7 +182,7 @@ export const LargeDatasetPanel = ({
           type: 'country',
           distinctValues: 30,
         },
-        { name: 'State', type: 'state', distinctValues: 120 } ,
+        { name: 'State', type: 'state', distinctValues: 120 },
         { name: 'County', type: 'county', distinctValues: 300 },
         { name: 'City', type: 'city', distinctValues: 2000 },
       ];
