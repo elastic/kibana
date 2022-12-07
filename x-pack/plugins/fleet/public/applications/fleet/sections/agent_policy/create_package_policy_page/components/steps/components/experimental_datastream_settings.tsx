@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -20,17 +20,29 @@ import {
 
 import type {
   ExperimentalDataStreamFeature,
-  RegistryStreamWithDataStream,
+  RegistryDataStream,
 } from '../../../../../../../../../common/types';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../../../../../common/services';
 import type { ExperimentalIndexingFeature } from '../../../../../../../../../common/types/models/epm';
 
 interface Props {
-  registryDataStream: RegistryStreamWithDataStream['data_stream'];
+  registryDataStream: RegistryDataStream;
   experimentalDataFeatures?: ExperimentalDataStreamFeature[];
   setNewExperimentalDataFeatures: (
     experimentalDataFeatures: ExperimentalDataStreamFeature[]
   ) => void;
+}
+
+function getExperimentalFeatureValue(
+  feature: ExperimentalIndexingFeature,
+  experimentalDataFeatures: ExperimentalDataStreamFeature[],
+  registryDataStream: RegistryDataStream
+) {
+  return experimentalDataFeatures?.find(
+    ({ data_stream: dataStream, features }) =>
+      dataStream === getRegistryDataStreamAssetBaseName(registryDataStream) &&
+      typeof features[feature] !== 'undefined'
+  )?.features?.[feature];
 }
 
 export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
@@ -38,20 +50,13 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
   experimentalDataFeatures,
   setNewExperimentalDataFeatures,
 }) => {
-  const getExperimentalFeatureValue = useCallback(
-    (feature: ExperimentalIndexingFeature) => {
-      return experimentalDataFeatures?.find(
-        ({ data_stream: dataStream, features }) =>
-          dataStream === getRegistryDataStreamAssetBaseName(registryDataStream) &&
-          typeof features[feature] !== 'undefined'
-      )?.features?.[feature];
-    },
-    [experimentalDataFeatures, registryDataStream]
-  );
-
   const isSyntheticSourceEditable = registryDataStream.elasticsearch?.source_mode !== 'default';
 
-  const syntheticSourceExperimentalValue = getExperimentalFeatureValue('synthetic_source');
+  const syntheticSourceExperimentalValue = getExperimentalFeatureValue(
+    'synthetic_source',
+    experimentalDataFeatures ?? [],
+    registryDataStream
+  );
   const isSyntheticSourceEnabledByDefault =
     registryDataStream.elasticsearch?.source_mode === 'synthetic';
 
@@ -60,7 +65,9 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
       typeof syntheticSourceExperimentalValue !== 'undefined'
         ? syntheticSourceExperimentalValue
         : isSyntheticSourceEnabledByDefault,
-    tsdb: getExperimentalFeatureValue('tsdb') ?? false,
+    tsdb:
+      getExperimentalFeatureValue('tsdb', experimentalDataFeatures ?? [], registryDataStream) ??
+      false,
   };
 
   const onIndexingSettingChange = (
@@ -105,13 +112,13 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
         <EuiFlexItem>
           <EuiText color="subdued" size="xs">
             <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.stepConfigure.experimentalFeaturesDescription"
+              id="xpack.fleet.packagePolicyEditor.stepConfigure.experimentalFeaturesDescription"
               defaultMessage="Select data streams to configure indexing options. This is an {experimentalFeature} and may have effects on other properties."
               values={{
                 experimentalFeature: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.experimentalFeatureText"
+                      id="xpack.fleet.packagePolicyEditor.experimentalFeatureText"
                       defaultMessage="experimental feature"
                     />
                   </strong>
@@ -128,7 +135,7 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
             data-test-subj="packagePolicyEditor.syntheticSourceExperimentalFeature.switch"
             label={
               <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.experimentalFeatures.syntheticSourceLabel"
+                id="xpack.fleet.packagePolicyEditor.experimentalFeatures.syntheticSourceLabel"
                 defaultMessage="Synthetic source"
               />
             }
@@ -143,7 +150,7 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
           <EuiToolTip
             content={
               <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.experimentalFeatures.TSDBTooltip"
+                id="xpack.fleet.packagePolicyEditor.experimentalFeatures.TSDBTooltip"
                 defaultMessage="Enabling this feature is irreversible"
               />
             }
@@ -154,7 +161,7 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
               data-test-subj="packagePolicyEditor.tsdbExperimentalFeature.switch"
               label={
                 <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.experimentalFeatures.TSDBLabel"
+                  id="xpack.fleet.packagePolicyEditor.experimentalFeatures.TSDBLabel"
                   defaultMessage="Time-series indexing (TSDB)"
                 />
               }
