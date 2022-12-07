@@ -314,6 +314,7 @@ export interface GetFieldsOptions {
   rollupIndex?: string;
   allowNoIndex?: boolean;
   filter?: QueryDslQueryContainer;
+  includeUnmapped?: boolean;
 }
 
 /**
