@@ -38,7 +38,7 @@ export const HelpCommands = ({ apiKey }: { apiKey: string }) => {
       </EuiText>
       <EuiSpacer size="s" />
       <EuiCodeBlock language="javascript" isCopyable fontSize="s" paddingSize="m">
-        npx @elastic/synthetics init --api-key={apiKey} --kbn-url=
+        npx @elastic/synthetics init --api-key={apiKey} --url=
         {window.location.origin + basePath}
       </EuiCodeBlock>
     </div>
