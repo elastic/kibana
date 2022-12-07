@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
-  const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
@@ -104,48 +103,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             return rowData.includes('Sep 21, 2015 @ 14:59:08.840');
           }
         );
-      });
-
-      it('should modify the time range when the histogram is brushed', async function () {
-        // this is the number of renderings of the histogram needed when new data is fetched
-        // this needs to be improved
-        const renderingCountInc = 2;
-        const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await retry.waitFor('chart rendering complete', async () => {
-          const actualCount = await elasticChart.getVisualizationRenderingCount();
-          const expectedCount = prevRenderingCount + renderingCountInc;
-          log.debug(
-            `renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`
-          );
-          return actualCount === expectedCount;
-        });
-        let prevRowData = '';
-        // to make sure the table is already rendered
-        await retry.try(async () => {
-          prevRowData = await PageObjects.discover.getDocTableField(1);
-          log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
-        });
-
-        await PageObjects.discover.brushHistogram();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await retry.waitFor('chart rendering complete after being brushed', async () => {
-          const actualCount = await elasticChart.getVisualizationRenderingCount();
-          const expectedCount = prevRenderingCount + renderingCountInc * 2;
-          log.debug(
-            `renderings after brushing - actual: ${actualCount} expected: ${expectedCount}`
-          );
-          return actualCount === expectedCount;
-        });
-        const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(26);
-
-        await retry.waitFor('doc table containing the documents of the brushed range', async () => {
-          const rowData = await PageObjects.discover.getDocTableField(1);
-          log.debug(`The first timestamp value in doc table after brushing: ${rowData}`);
-          return prevRowData !== rowData;
-        });
       });
 
       it('should show correct initial chart interval of Auto', async function () {
@@ -262,26 +219,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be('~ 15 minutes ago');
         expect(time.end).to.be('now');
-      });
-    });
-
-    describe('empty query', function () {
-      it('should update the histogram timerange when the query is resubmitted', async function () {
-        await kibanaServer.uiSettings.update({
-          'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
-        });
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
-        const initialTimeString = await PageObjects.discover.getChartTimespan();
-        await queryBar.submitQuery();
-
-        await retry.waitFor('chart timespan to have changed', async () => {
-          const refreshedTimeString = await PageObjects.discover.getChartTimespan();
-          log.debug(
-            `Timestamp before: ${initialTimeString}, Timestamp after: ${refreshedTimeString}`
-          );
-          return refreshedTimeString !== initialTimeString;
-        });
       });
     });
 
