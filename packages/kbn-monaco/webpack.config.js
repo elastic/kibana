@@ -47,4 +47,4 @@ const getWorkerConfig = (language) => ({
   },
 });
 
-module.exports = ['default', 'json', 'painless', 'xjson'].map(getWorkerConfig);
+module.exports = ['default', 'json', 'painless', 'xjson', 'esql'].map(getWorkerConfig);
