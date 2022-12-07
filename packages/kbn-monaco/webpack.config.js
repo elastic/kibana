@@ -22,6 +22,7 @@ const getWorkerEntry = (language) => {
 const getWorkerConfig = (language) => ({
   mode: process.env.NODE_ENV || 'development',
   entry: getWorkerEntry(language),
+  devtool: process.env.NODE_ENV === 'production' ? false : '#cheap-source-map',
   output: {
     path: path.resolve(__dirname, 'target_workers'),
     filename: `${language}.editor.worker.js`,
