@@ -107,6 +107,5 @@ export function getBlurhashSrc({
   originalSizeImageCanvas.height = height;
   const originalSizeImageCtx = originalSizeImageCanvas.getContext('2d')!;
   originalSizeImageCtx.drawImage(smallSizeImageCanvas, 0, 0, width, height);
-  // use image/png to support transparency
-  return originalSizeImageCanvas.toDataURL(`image/png`);
+  return originalSizeImageCanvas.toDataURL();
 }
