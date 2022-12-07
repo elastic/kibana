@@ -84,6 +84,36 @@ describe('previewFile', () => {
     });
   });
 
+  test('should read single feature from feature collection', async () => {
+    const file = new File(
+      [
+        JSON.stringify({
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: {
+                population: 200,
+              },
+              geometry: {
+                type: 'Point',
+                coordinates: [-112.0372, 46.608058],
+              },
+            },
+          ],
+        }),
+      ],
+      'testfile.json',
+      { type: 'text/json' }
+    );
+
+    const importer = new GeoJsonImporter(file);
+    const results = await importer.previewFile();
+
+    expect(results.features.length).toBe(1);
+    expect(results.invalidFeatures.length).toBe(0);
+  });
+
   test('should read feature when file contains single feature not wrapped in feature collection', async () => {
     const fileWithSingleFeature = new File(
       [
