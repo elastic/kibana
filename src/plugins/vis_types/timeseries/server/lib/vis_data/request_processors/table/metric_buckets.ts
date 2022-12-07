@@ -7,6 +7,7 @@
  */
 
 import { get } from 'lodash';
+import { BASIC_AGGS_TYPES } from '../../../../../common/enums';
 import { overwrite, bucketTransform } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 
@@ -21,10 +22,12 @@ export const metricBuckets: TableRequestProcessorsFunction =
       column.metrics
         .filter((row) => !/_bucket$/.test(row.type) && !/^series/.test(row.type))
         .forEach((metric) => {
-          const fn = bucketTransform[metric.type];
+          const type = metric.type as unknown as BASIC_AGGS_TYPES;
+          const fn = bucketTransform[type];
           if (fn) {
             try {
               const intervalString = get(doc, aggRoot.replace(/\.aggs$/, '.meta.intervalString'));
+              // @ts-ignore should be typed
               const bucket = fn(metric, column.metrics, intervalString);
 
               overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}`, bucket);
