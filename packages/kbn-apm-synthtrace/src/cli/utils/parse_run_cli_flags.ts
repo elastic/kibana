@@ -37,7 +37,7 @@ function getParsedFile(flags: RunCliFlags) {
   throw new Error(`Could not find scenario file: "${parsedFile}"`);
 }
 
-export function parseRunCliFlags(flags: RunCliFlags & { target: string }) {
+export function parseRunCliFlags(flags: RunCliFlags) {
   const { logLevel } = flags;
   const parsedFile = getParsedFile(flags);
 
@@ -61,7 +61,7 @@ export function parseRunCliFlags(flags: RunCliFlags & { target: string }) {
   }
 
   return {
-    ...pick(flags, 'target', 'workers', 'scenarioOpts'),
+    ...pick(flags, 'target', 'workers', 'scenarioOpts', 'kibana', 'esConcurrency', 'version'),
     logLevel: parsedLogLevel,
     file: parsedFile,
   };

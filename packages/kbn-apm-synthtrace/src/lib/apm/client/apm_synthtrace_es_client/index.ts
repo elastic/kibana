@@ -8,7 +8,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { castArray } from 'lodash';
-import { PassThrough, Readable, Transform } from 'stream';
+import { PassThrough, Readable, Transform, pipeline } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import {
   ESDocumentWithOperation,
@@ -16,7 +16,7 @@ import {
   SynthtraceGenerator,
 } from '../../../../types';
 import { Logger } from '../../../utils/create_logger';
-import { fork, parallel, pipeline } from '../../../utils/stream_utils';
+import { createFilterTransform, fork, parallel } from '../../../utils/stream_utils';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
 import { createSpanMetricsAggregator } from '../../aggregators/create_span_metrics_aggregator';
 import { createTransactionMetricsAggregator } from '../../aggregators/create_transaction_metrics_aggregator';
@@ -55,11 +55,6 @@ export class ApmSynthtraceEsClient {
     this.version = options.version;
   }
 
-  async runningVersion() {
-    const info = await this.client.info();
-    return info.version.number;
-  }
-
   async clean() {
     this.logger.info(`Cleaning APM data streams ${DATA_STREAMS.join(', ')}`);
 
@@ -83,6 +78,8 @@ export class ApmSynthtraceEsClient {
   }
 
   async index(streamOrGenerator: MaybeArray<Readable | SynthtraceGenerator<ApmFields>>) {
+    this.logger.debug(`Bulk indexing ${castArray(streamOrGenerator).length} stream(s)`);
+
     const allStreams = castArray(streamOrGenerator).map((obj) => {
       const base = isGeneratorObject(obj) ? Readable.from(obj) : obj;
 
@@ -96,16 +93,22 @@ export class ApmSynthtraceEsClient {
         getSerializeTransform(),
         getIntakeDefaultsTransform(),
         fork(new PassThrough({ objectMode: true }), ...aggregators),
+        // createFilterTransform((event: ApmFields) => event['processor.event'] === 'metric'),
         createBreakdownMetricsAggregator('30s'),
         getApmServerMetadataTransform(this.version),
         getRoutingTransform(),
-        getDedotTransform()
+        getDedotTransform(),
+        (err) => {
+          if (err) {
+            this.logger.error(err);
+          }
+        }
       );
-    }) as [Transform];
+    }) as Transform[];
 
     let count: number = 0;
 
-    const stream = parallel(...allStreams);
+    const stream = allStreams[0];
 
     await this.client.helpers.bulk({
       concurrency: this.concurrency,
@@ -114,9 +117,12 @@ export class ApmSynthtraceEsClient {
       flushBytes: 500000,
       datasource: stream,
       onDocument: (doc: ESDocumentWithOperation<ApmFields>) => {
-        // console.log('onDocument', doc);
         let action: SynthtraceESAction;
         count++;
+
+        if (count % 10 === 0) {
+          this.logger.debug(`Indexed ${count} documents`);
+        }
 
         if (doc._action) {
           action = doc._action!;

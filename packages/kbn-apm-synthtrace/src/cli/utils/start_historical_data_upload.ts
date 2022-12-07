@@ -20,8 +20,7 @@ export async function startHistoricalDataUpload(
   logger: Logger,
   runOptions: RunOptions,
   from: Date,
-  to: Date,
-  version: string
+  to: Date
 ) {
   const cores = cpus().length;
   // settle on a reasonable max concurrency arbitrarily capping at 10.
@@ -48,10 +47,8 @@ export async function startHistoricalDataUpload(
   const rangeEnd = to;
 
   const diff = moment(from).diff(rangeEnd);
+
   const d = moment.duration(Math.abs(diff), 'ms');
-  logger.info(
-    `Range: ${d.years()} days ${d.days()} days, ${d.hours()} hours ${d.minutes()} minutes ${d.seconds()} seconds`
-  );
 
   // make sure ranges cover at least 100k documents
   const minIntervalSpan = moment.duration(60, 'm');
@@ -103,14 +100,12 @@ export async function startHistoricalDataUpload(
     workerIndex: number;
   }) {
     return new Promise((resolve, reject) => {
-      logger.info(`Setting up Worker: ${workerIndex}`);
+      logger.debug(`Setting up Worker: ${workerIndex}`);
       const worker = new Worker(Path.join(__dirname, './worker.js'), {
         workerData: {
           runOptions,
           bucketFrom,
           bucketTo,
-          workerIndex,
-          version,
         },
       });
       worker.on('message', (message: WorkerMessages) => {
@@ -142,13 +137,14 @@ export async function startHistoricalDataUpload(
         }
         resolve(null);
       });
-      worker.postMessage('setup');
       worker.postMessage('start');
     });
   }
 
   const limiter = pLimit(Math.max(1, Math.floor(intervals.length / 2)));
+
   const workers = range(0, intervals.length).map((index) => () => runService(intervals[index]));
+
   return Promise.all(workers.map((worker) => limiter(() => worker()))).then(async () => {
     await esClient.refresh();
   });

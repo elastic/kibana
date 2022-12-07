@@ -8,6 +8,7 @@
 
 import moment from 'moment';
 import { Duplex, Transform } from 'stream';
+import { loggerProxy } from '../../cli/utils/logger_proxy';
 import { Fields } from '../entity';
 import { parseInterval } from '../interval';
 import { appendHash } from './hash';
@@ -28,7 +29,7 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
     reduce: (metric: TMetric, event: TFields) => void,
     serialize: (metric: TMetric) => TOutput
   ) {
-    const metrics = new Map();
+    const metrics: Map<string, TMetric & { '@timestamp'?: number }> = new Map();
 
     const { intervalAmount, intervalUnit } = parseInterval(flushInterval);
 
@@ -36,12 +37,26 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
     let nextFlush: number | null = null;
 
-    function flush(stream: Duplex) {
-      metrics.forEach((metric) => {
-        stream.push(serialize(metric));
-      });
+    let toFlush: TMetric[] = [];
 
-      metrics.clear();
+    function flush(stream: Duplex, includeCurrentMetrics: boolean = true) {
+      const allItems = [...toFlush];
+
+      toFlush = [];
+
+      if (includeCurrentMetrics) {
+        allItems.push(...metrics.values());
+        metrics.clear();
+      }
+
+      while (allItems.length) {
+        const next = allItems.shift()!;
+        const shouldWriteNext = stream.push(serialize(next));
+        if (!shouldWriteNext) {
+          toFlush = allItems;
+          break;
+        }
+      }
     }
 
     function getNextFlush(timestamp: number) {
@@ -50,6 +65,9 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
     return new Transform({
       objectMode: true,
+      read() {
+        flush(this, false);
+      },
       final(callback) {
         flush(this);
         callback();

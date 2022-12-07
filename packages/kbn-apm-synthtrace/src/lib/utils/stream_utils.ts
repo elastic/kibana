@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 import { each, eachSeries } from 'async';
-import { PassThrough, Transform } from 'stream';
+import { Duplex, PassThrough, Transform } from 'stream';
+import { loggerProxy } from '../../cli/utils/logger_proxy';
 
 export function series(...streams: Transform[]) {
   const pt = new PassThrough({ objectMode: true });
@@ -32,7 +33,10 @@ export function parallel(...streams: NodeJS.ReadableStream[]) {
   each(
     streams,
     (stream, cb) => {
-      stream.on('end', cb);
+      stream.on('end', () => {
+        loggerProxy.debug('Stream ended');
+        cb();
+      });
     },
     () => {
       pt.end();
@@ -41,21 +45,12 @@ export function parallel(...streams: NodeJS.ReadableStream[]) {
   return pt;
 }
 
-export function pipeline(...streams: [NodeJS.ReadableStream, ...Transform[]]): Transform {
-  const [first, ...tail] = streams;
-
-  let stream: NodeJS.ReadableStream = first;
-
-  for (const writable of tail) {
-    stream = stream.pipe(writable);
-  }
-
-  return stream as Transform;
-}
-
 export function fork(...streams: Transform[]): Transform {
   const proxy = new Transform({
     objectMode: true,
+    read() {
+      this.emit('drain');
+    },
     final: (callback) => {
       each(
         streams,
@@ -71,12 +66,30 @@ export function fork(...streams: Transform[]): Transform {
         (stream, cb) => {
           stream.write(chunk, cb);
         },
-        callback
+        (err) => {
+          callback();
+        }
       );
     },
   });
 
-  streams.forEach((stream) => stream.on('data', (chunk) => proxy.push(chunk)));
+  function pauseAllStreams() {
+    streams.forEach((stream) => stream.pause());
+  }
+
+  function resumeAllStreams() {
+    streams.forEach((stream) => stream.resume());
+  }
+
+  streams.forEach((stream) =>
+    stream.on('data', (chunk) => {
+      const shouldWriteNext = proxy.push(chunk);
+      if (!shouldWriteNext) {
+        pauseAllStreams();
+        proxy.once('drain', resumeAllStreams);
+      }
+    })
+  );
 
   each(
     streams,
@@ -90,4 +103,26 @@ export function fork(...streams: Transform[]): Transform {
   );
 
   return proxy;
+}
+
+export function createFilterTransform(filter: (chunk: any) => boolean): Transform {
+  const transform = new Transform({
+    objectMode: true,
+    read() {
+      this.emit('drain');
+    },
+    write(event, encoding, callback) {
+      if (filter(event)) {
+        const shouldWriteNext = this.push(event);
+        if (!shouldWriteNext) {
+          loggerProxy.debug('waiting on drain');
+          this.once('drain', callback);
+          return;
+        }
+      }
+      callback();
+    },
+  });
+
+  return transform;
 }

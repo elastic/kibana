@@ -8,12 +8,13 @@
 
 import { Readable } from 'stream';
 import { Timerange } from '../lib/timerange';
+import { Logger } from '../lib/utils/create_logger';
 import { SynthtraceGenerator } from '../types';
 import { RunOptions } from './utils/parse_run_cli_flags';
 
 type Generate<TFields> = (options: {
   range: Timerange;
 }) => SynthtraceGenerator<TFields> | Array<SynthtraceGenerator<TFields>> | Readable;
-export type Scenario<TFields> = (options: RunOptions) => Promise<{
+export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{
   generate: Generate<TFields>;
 }>;

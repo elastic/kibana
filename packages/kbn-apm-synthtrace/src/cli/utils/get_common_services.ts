@@ -7,30 +7,100 @@
  */
 
 import { Client, ClientOptions } from '@elastic/elasticsearch';
+import { format, parse, Url } from 'url';
+import fetch from 'node-fetch';
+import { ApmSynthtraceKibanaClient } from '../../lib/apm/client/apm_synthtrace_kibana_client';
 import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
 import { createLogger, Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
+
+async function discoverAuth(parsedTarget: Url) {
+  const possibleCredentials = [`admin:changeme`, `elastic:changeme`];
+  for (const auth of possibleCredentials) {
+    const url = format({
+      ...parsedTarget,
+      auth,
+    });
+    let status: number;
+    try {
+      const response = await fetch(url);
+      status = response.status;
+    } catch (err) {
+      status = 0;
+    }
+
+    if (status === 200) {
+      return auth;
+    }
+  }
+
+  throw new Error(`Failed to authenticate user for ${format(parsedTarget)}`);
+}
 
 export function getLogger({ logLevel }: RunOptions) {
   return createLogger(logLevel);
 }
 
-export function getCommonServices({ target, logLevel }: RunOptions, logger?: Logger) {
-  const options: ClientOptions = { node: target };
-  // Useful when debugging trough mitmproxy
-  /*
-  options.Connection = HttpConnection;
-  options.proxy = 'http://localhost:8080';
-  options.tls = {
-    rejectUnauthorized: false,
-  };
+export async function getCommonServices(
+  { target, logLevel, kibana, esConcurrency, version: versionOverride }: RunOptions,
+  logger?: Logger
+) {
+  if (!target) {
+    // assume things are running locally
+    kibana = kibana || 'http://localhost:5601';
+    target = 'http://localhost:9200';
+  }
 
-   */
+  if (!target) {
+    throw new Error('Could not determine an Elasticsearch target');
+  }
+
+  const parsedTarget = parse(target);
+
+  let auth = parsedTarget.auth;
+
+  if (!parsedTarget.auth) {
+    auth = await discoverAuth(parsedTarget);
+  }
+
+  const formatted = format({
+    ...parsedTarget,
+    auth,
+  });
+
+  const kibanaUrl = kibana || target.replace('.es', '.kb');
+
+  const parsedKibanaUrl = parse(kibanaUrl);
+
+  const kibanaUrlWithAuth = format({
+    ...parsedKibanaUrl,
+    auth,
+  });
+
+  const options: ClientOptions = { node: formatted };
+
   const client = new Client(options);
 
   logger = logger ?? createLogger(logLevel);
 
-  const apmEsClient = new ApmSynthtraceEsClient({ client, logger });
+  // We automatically set up managed APM either by migrating on cloud or installing the package locally
+  const kibanaClient = new ApmSynthtraceKibanaClient({
+    logger,
+    target: kibanaUrlWithAuth,
+  });
+
+  await kibanaClient.init();
+
+  const version = versionOverride || (await kibanaClient.fetchLatestApmPackageVersion());
+
+  await kibanaClient.installApmPackage(version);
+
+  const apmEsClient = new ApmSynthtraceEsClient({
+    client,
+    logger,
+    version,
+    concurrency: esConcurrency,
+  });
 
   return {
     logger,

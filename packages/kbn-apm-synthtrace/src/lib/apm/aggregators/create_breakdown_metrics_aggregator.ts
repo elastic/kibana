@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { identity } from 'lodash';
-import { Transform } from 'stream';
-import { fork } from '../../utils/stream_utils';
+import { identity, negate } from 'lodash';
+import { createFilterTransform, fork } from '../../utils/stream_utils';
 import { ApmFields } from '../apm_fields';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
 
@@ -15,15 +14,7 @@ const filter = (event: ApmFields) =>
   event['processor.event'] === 'metric' && event['metricset.name'] === 'span_breakdown';
 
 export function createBreakdownMetricsAggregator(flushInterval: string) {
-  const dropProcessedEventsStream = new Transform({
-    objectMode: true,
-    write(event: ApmFields, encoding, callback) {
-      if (!filter(event)) {
-        this.push(event);
-      }
-      callback();
-    },
-  });
+  const dropProcessedEventsStream = createFilterTransform(negate(filter));
 
   const aggregatorStream = createApmMetricAggregator(
     {

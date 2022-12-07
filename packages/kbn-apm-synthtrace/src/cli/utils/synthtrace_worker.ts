@@ -6,65 +6,55 @@
  * Side Public License, v 1.
  */
 import { parentPort, workerData } from 'worker_threads';
-import { Fields } from '../../..';
 import { timerange } from '../../lib/timerange';
-import { LogLevel } from '../../lib/utils/create_logger';
-import { Scenario } from '../scenario';
 import { getCommonServices } from './get_common_services';
 import { getScenario } from './get_scenario';
+import { loggerProxy } from './logger_proxy';
 import { RunOptions } from './parse_run_cli_flags';
-
-// logging proxy to main thread, ensures we see real time logging
-const loggerProxy = {
-  perf: <T extends any>(name: string, cb: () => T): T => {
-    return cb();
-  },
-  debug: (...args: any[]) => parentPort?.postMessage({ log: LogLevel.debug, args }),
-  info: (...args: any[]) => parentPort?.postMessage({ log: LogLevel.info, args }),
-  error: (...args: any[]) => parentPort?.postMessage({ log: LogLevel.error, args }),
-};
 
 export interface WorkerData {
   bucketFrom: Date;
   bucketTo: Date;
   runOptions: RunOptions;
-  workerIndex: number;
-  version: string;
 }
 
 const { bucketFrom, bucketTo, runOptions } = workerData as WorkerData;
 
-const { logger, apmEsClient } = getCommonServices(runOptions, loggerProxy);
-const file = runOptions.file;
-let scenario: Scenario<Fields>;
-let generators: ReturnType<Awaited<ReturnType<Scenario<Fields>>>['generate']>;
+async function start() {
+  const { logger, apmEsClient } = await getCommonServices(runOptions, loggerProxy);
 
-async function setup() {
-  scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
-  const { generate } = await scenario(runOptions);
+  const file = runOptions.file;
 
-  generators = logger.perf('generate_scenario', () =>
+  const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
+
+  logger.debug('Running scenario');
+
+  const { generate } = await scenario({ ...runOptions, logger });
+
+  logger.debug('Generating scenario');
+
+  const generators = logger.perf('generate_scenario', () =>
     generate({ range: timerange(bucketFrom, bucketTo) })
   );
-}
 
-async function doWork() {
+  logger.debug('Indexing scenario');
+
   await logger.perf('index_scenario', async () => {
     await apmEsClient.index(generators);
   });
 }
 
-parentPort!.on('message', async (message) => {
-  if (message === 'setup') {
-    await setup();
+parentPort!.on('message', (message) => {
+  if (message !== 'start') {
+    return;
   }
-  if (message === 'start') {
-    try {
-      await doWork();
+
+  start()
+    .then(() => {
       process.exit(0);
-    } catch (error) {
-      loggerProxy.info(error);
-      process.exit(2);
-    }
-  }
+    })
+    .catch((err) => {
+      loggerProxy.error(err);
+      process.exit(1);
+    });
 });

@@ -15,10 +15,9 @@ export function getApmServerMetadataTransform(version: string) {
   return new Transform({
     objectMode: true,
     transform(document: ApmFields, encoding, callback) {
-      document['observer.type'] = 'synthftrace';
+      document['observer.type'] = 'synthtrace';
       document['observer.version'] = version;
       document['observer.version_major'] = versionMajor;
-      document['ecs.version'] = '1.4';
       callback(null, document);
     },
   });
