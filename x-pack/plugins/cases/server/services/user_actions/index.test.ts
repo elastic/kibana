@@ -1016,13 +1016,7 @@ describe('CaseUserActionService', () => {
 
     describe('bulkAuditLogCaseDeletion', () => {
       it('logs a delete case audit log message', async () => {
-        await service.bulkAuditLogCaseDeletion({
-          cases: [
-            { id: '1', owner: SECURITY_SOLUTION_OWNER, connectorId: '3' },
-            { id: '2', owner: SECURITY_SOLUTION_OWNER, connectorId: '4' },
-          ],
-          user: commonArgs.user,
-        });
+        await service.bulkAuditLogCaseDeletion(['1', '2']);
 
         expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
 
