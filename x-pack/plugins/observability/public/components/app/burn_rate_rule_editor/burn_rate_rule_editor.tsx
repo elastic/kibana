@@ -32,17 +32,18 @@ export function BurnRateRuleEditor() {
     setBurnRate(value);
   };
 
-  const onSelectedSlo = (slo: SLO) => {
+  const onSelectedSlo = (slo: SLO | undefined) => {
     setSelectedSlo(slo);
   };
 
   useEffect(() => {
-    let sloDurationInMinutes = 1;
     if (selectedSlo) {
-      sloDurationInMinutes = toMinutes(selectedSlo.timeWindow.duration);
+      const sloDurationInMinutes = toMinutes(selectedSlo.timeWindow.duration);
+      const longWindowDurationInMinutes = toMinutes(longWindowDuration);
+      setMaxBurnRate(Math.floor(sloDurationInMinutes / longWindowDurationInMinutes));
+    } else {
+      setMaxBurnRate(1);
     }
-    const longWindowDurationInMinutes = toMinutes(longWindowDuration);
-    setMaxBurnRate(Math.floor(sloDurationInMinutes / longWindowDurationInMinutes));
   }, [longWindowDuration, selectedSlo]);
 
   return (

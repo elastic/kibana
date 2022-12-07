@@ -36,7 +36,7 @@ export function BurnRate({ onChange, maxBurnRate }: Props) {
     <EuiFormRow label={rowLabel} fullWidth isInvalid={!!burnRateError} error={burnRateError}>
       <EuiFieldNumber
         fullWidth
-        step={1}
+        step={0.1}
         min={1}
         max={maxBurnRate}
         value={burnRate}

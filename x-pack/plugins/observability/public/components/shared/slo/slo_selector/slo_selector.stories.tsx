@@ -17,7 +17,7 @@ export default {
 };
 
 const Template: ComponentStory<typeof Component> = () => (
-  <Component onSelected={(slo: SLO) => console.log(slo)} />
+  <Component onSelected={(slo: SLO | undefined) => console.log(slo)} />
 );
 const defaultProps = {};
 
