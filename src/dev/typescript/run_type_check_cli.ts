@@ -54,14 +54,13 @@ function toTypeCheckConfigPath(path: string) {
     : path.replace(/\/tsconfig\.json$/, '/tsconfig.type_check.json');
 }
 
-function createTypeCheckConfigs(projects: Project[]) {
-  const created = new Set<string>();
+async function createTypeCheckConfigs(projects: Project[]) {
   const pkgMap = readPackageMap();
+  const writes: Array<{ source: string; content: string; path: string }> = [];
 
   // write tsconfig.type_check.json files for each project that is not the root
   const queue = new Set(projects.map((p) => p.tsConfigPath));
   for (const path of queue) {
-    const tsconfigStat = Fs.statSync(path);
     const parsed = parseTsconfig(path);
 
     const dir = Path.dirname(path);
@@ -104,11 +103,21 @@ function createTypeCheckConfigs(projects: Project[]) {
       }),
     };
 
-    Fs.writeFileSync(typeCheckConfigPath, JSON.stringify(typeCheckConfig, null, 2));
-    Fs.utimesSync(typeCheckConfigPath, tsconfigStat.atime, tsconfigStat.mtime);
-
-    created.add(typeCheckConfigPath);
+    writes.push({
+      source: path,
+      path: typeCheckConfigPath,
+      content: JSON.stringify(typeCheckConfig, null, 2),
+    });
   }
+
+  const created = new Set<string>();
+
+  await asyncForEachWithLimit(writes, 50, async ({ content, path, source }) => {
+    await Fsp.writeFile(path, content, 'utf8');
+    const tsconfigStat = await Fsp.stat(source);
+    await Fsp.utimes(path, tsconfigStat.atime, tsconfigStat.mtime);
+    created.add(path);
+  });
 
   return created;
 }
@@ -136,7 +145,7 @@ export async function runTypeCheckCli() {
         (p) => !p.disableTypeCheck && (!projectFilter || p.tsConfigPath === projectFilter)
       );
 
-      const created = createTypeCheckConfigs(projects);
+      const created = await createTypeCheckConfigs(projects);
 
       let pluginBuildResult;
       try {
