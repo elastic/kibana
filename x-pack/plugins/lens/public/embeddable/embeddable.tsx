@@ -180,7 +180,7 @@ const getExpressionFromDocument = async (
   };
 };
 
-async function getViewUnderlyingDataArgs({
+function getViewUnderlyingDataArgs({
   activeDatasource,
   activeDatasourceState,
   activeData,
@@ -238,9 +238,12 @@ async function getViewUnderlyingDataArgs({
     esQueryConfig
   );
 
-  const dataView = await dataViewsService.get(meta.id);
+  const dataViewSpec = Object.values(indexPatternsCache).find(
+    (value) => value.id === meta.id
+  )!.spec;
+
   return {
-    dataViewSpec: dataView.toSpec(false),
+    dataViewSpec,
     timeRange,
     filters: newFilters,
     query: aggregateQuery.length > 0 ? aggregateQuery[0] : newQuery,
@@ -909,10 +912,10 @@ export class Embeddable
     const adHocDataviews = await Promise.all(
       Object.values(this.savedVis?.state.adHocDataViews || {})
         .map((persistedSpec) => {
-          return DataViewPersistableStateService.inject(
-            persistedSpec,
-            this.savedVis?.references || []
-          );
+          return DataViewPersistableStateService.inject(persistedSpec, [
+            ...(this.savedVis?.references || []),
+            ...(this.savedVis?.state.internalReferences || []),
+          ]);
         })
         .map((spec) => this.deps.dataViews.create(spec))
     );
@@ -937,7 +940,7 @@ export class Embeddable
       );
     }
 
-    const viewUnderlyingDataArgs = await getViewUnderlyingDataArgs({
+    const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
       activeDatasource: this.activeDataInfo.activeDatasource,
       activeDatasourceState: this.activeDataInfo.activeDatasourceState,
       activeData: this.activeDataInfo.activeData,

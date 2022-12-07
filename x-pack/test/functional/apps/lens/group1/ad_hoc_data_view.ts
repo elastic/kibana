@@ -54,6 +54,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
+  const checkDiscoverNavigationResult = async () => {
+    await testSubjects.click('embeddablePanelToggleMenuIcon');
+    await testSubjects.click('embeddablePanelMore-mainMenu');
+    await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+
+    const [, discoverHandle] = await browser.getAllWindowHandles();
+    await browser.switchToWindow(discoverHandle);
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
+    const actualIndexPattern = await (
+      await testSubjects.find('discover-dataView-switch-link')
+    ).getVisibleText();
+    expect(actualIndexPattern).to.be('*stash*');
+
+    const actualDiscoverQueryHits = await testSubjects.getVisibleText('unifiedHistogramQueryHits');
+    expect(actualDiscoverQueryHits).to.be('14,005');
+    expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);
+  };
+
   describe('lens ad hoc data view tests', () => {
     it('should allow building a chart based on ad hoc data view', async () => {
       await setupAdHocDataView();
@@ -185,6 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(lensHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
+
       await setupAdHocDataView();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -200,24 +220,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'new'
       );
 
-      await testSubjects.click('embeddablePanelToggleMenuIcon');
-      await testSubjects.click('embeddablePanelMore-mainMenu');
-      await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+      await checkDiscoverNavigationResult();
 
-      const [, discoverHandle] = await browser.getAllWindowHandles();
-      await browser.switchToWindow(discoverHandle);
+      await browser.closeCurrentWindow();
+      const [daashboardHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(daashboardHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const actualIndexPattern = await (
-        await testSubjects.find('discover-dataView-switch-link')
-      ).getVisibleText();
-      expect(actualIndexPattern).to.be('*stash*');
-
-      const actualDiscoverQueryHits = await testSubjects.getVisibleText(
-        'unifiedHistogramQueryHits'
-      );
-      expect(actualDiscoverQueryHits).to.be('14,005');
-      expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);
+      // adhoc data view should be persisted after refresh
+      await browser.refresh();
+      await checkDiscoverNavigationResult();
     });
   });
 }
