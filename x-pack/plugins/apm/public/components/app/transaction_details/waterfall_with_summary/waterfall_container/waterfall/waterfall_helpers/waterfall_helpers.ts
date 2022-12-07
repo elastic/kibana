@@ -446,10 +446,6 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     entryTransaction.transaction.id,
     waterfallItems
   );
-  console.log(
-    '### caue  getWaterfall  entryWaterfallTransaction',
-    entryWaterfallTransaction
-  );
 
   const items = getOrderedWaterfallItems(
     childrenByParentId,
