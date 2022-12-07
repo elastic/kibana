@@ -34,6 +34,7 @@ import {
   downloadK8sManifest,
   getK8sManifest,
   bulkGetAgentPoliciesHandler,
+  getUnenrollTimeoutsHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -59,6 +60,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     bulkGetAgentPoliciesHandler
+  );
+
+  // get all unenroll_timeout values for agent policies
+  router.post(
+    {
+      path: AGENT_POLICY_API_ROUTES.UNENROLL_TIMEOUTS_PATTERN,
+      validate: false,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getUnenrollTimeoutsHandler
   );
 
   // Get one

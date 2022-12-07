@@ -444,3 +444,23 @@ export const downloadK8sManifest: FleetRequestHandler<
     return defaultFleetErrorHandler({ error, response });
   }
 };
+
+export const getUnenrollTimeoutsHandler: FleetRequestHandler<undefined, undefined> = async (
+  context,
+  request,
+  response
+) => {
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.epm.internalSoClient;
+  try {
+    const unenrollTimeouts = await agentPolicyService.getUnenrollTimeouts(soClient);
+
+    return response.ok({
+      body: {
+        items: unenrollTimeouts,
+      },
+    });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
