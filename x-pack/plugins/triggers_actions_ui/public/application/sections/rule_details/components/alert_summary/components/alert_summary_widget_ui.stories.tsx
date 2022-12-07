@@ -18,8 +18,6 @@ export const Overview = {
     active: 15,
     recovered: 53,
     timeRange: 'Last 30 days',
-    onActiveClick: action('active clicked'),
-    onRecoveredClick: action('recovered clicked'),
     onClick: action('clicked'),
   },
 };

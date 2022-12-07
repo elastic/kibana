@@ -8,9 +8,9 @@
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { euiLightVars } from '@kbn/ui-theme';
 import {
-  EuiFacetButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertsSummaryWidgetUIProps } from './types';
 
 const onClickWrapper = (
-  event: MouseEvent<HTMLButtonElement | HTMLDivElement>,
+  event: MouseEvent<HTMLAnchorElement | HTMLDivElement>,
   onClick: () => void
 ) => {
   event.preventDefault();
@@ -69,8 +69,12 @@ export const AlertsSummaryWidgetUI = ({
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
                 <EuiFlexItem>
-                  <EuiFacetButton onClick={(event) => onClickWrapper(event, onClick)}>
-                    <EuiText>
+                  <EuiLink
+                    onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
+                      onClickWrapper(event, onClick)
+                    }
+                  >
+                    <EuiText color={euiLightVars.euiTextColor}>
                       <h3 data-test-subj="totalAlertsCount">{active + recovered}</h3>
                     </EuiText>
                     <EuiText size="xs" color="subdued">
@@ -79,11 +83,28 @@ export const AlertsSummaryWidgetUI = ({
                         defaultMessage="All"
                       />
                     </EuiText>
-                  </EuiFacetButton>
+                  </EuiLink>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFacetButton
-                    onClick={(event) =>
+                  <EuiLink
+                    onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
+                      onClickWrapper(event, () => onClick(ALERT_STATUS_ACTIVE))
+                    }
+                  >
+                    <EuiText color={euiLightVars.euiColorDangerText}>
+                      <h3 data-test-subj="activeAlertsCount">{active}</h3>
+                    </EuiText>
+                    <EuiText size="xs" color="subdued">
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel"
+                        defaultMessage="Currently active"
+                      />
+                    </EuiText>
+                  </EuiLink>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiLink
+                    onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
                       onClickWrapper(event, () => onClick(ALERT_STATUS_RECOVERED))
                     }
                   >
@@ -98,22 +119,7 @@ export const AlertsSummaryWidgetUI = ({
                         defaultMessage="Recovered"
                       />
                     </EuiText>
-                  </EuiFacetButton>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFacetButton
-                    onClick={(event) => onClickWrapper(event, () => onClick(ALERT_STATUS_ACTIVE))}
-                  >
-                    <EuiText color={euiLightVars.euiColorDangerText}>
-                      <h3 data-test-subj="activeAlertsCount">{active}</h3>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel"
-                        defaultMessage="Currently active"
-                      />
-                    </EuiText>
-                  </EuiFacetButton>
+                  </EuiLink>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
