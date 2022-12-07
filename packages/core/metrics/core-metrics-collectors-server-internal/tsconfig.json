@@ -15,7 +15,6 @@
     "@kbn/core-metrics-server",
     "@kbn/core-elasticsearch-client-server-internal",
     "@kbn/logging-mocks",
-    "@kbn/core-metrics-server-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
   ],
   "exclude": [
