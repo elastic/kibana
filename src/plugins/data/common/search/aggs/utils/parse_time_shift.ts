@@ -59,7 +59,7 @@ export const isAbsoluteTimeShift = (val?: string) => {
 export const REASON_IDS = {
   missingTimerange: 'missingTimerange',
   notAbsoluteTimeShift: 'notAbsoluteTimeShift',
-  invalidDate: 'INVALID_DATE',
+  invalidDate: 'invalidDate',
   shiftAfterTimeRange: 'shiftAfterTimeRange',
 } as const;
 
@@ -132,7 +132,7 @@ export function validateAbsoluteTimeShift(
   // now be very strict on the format
   const tsMoment = moment(timestamp, LONG_ISO8601_LIKE_FORMAT, true);
   if (!tsMoment.isValid()) {
-    return REASON_IDS.INVALID_DATE;
+    return REASON_IDS.invalidDate;
   }
   if (timeRange) {
     const duration = moment(timeRange.to).diff(moment(timeRange.from));
