@@ -15,7 +15,6 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPageTemplate,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -183,12 +182,7 @@ export const GettingStarted = () => {
   return (
     <KibanaPageTemplate panelled={false} grow>
       <EuiPageTemplate.Section alignment="center">
-        <EuiPanel
-          color="plain"
-          hasShadow
-          css={paddingCss}
-          data-test-subj="onboarding--landing-page"
-        >
+        <div css={paddingCss} data-test-subj="onboarding--landing-page">
           <EuiTitle size="l" className="eui-textCenter">
             <h1>{title}</h1>
           </EuiTitle>
@@ -233,7 +227,7 @@ export const GettingStarted = () => {
               {skipText}
             </EuiLink>
           </div>
-        </EuiPanel>
+        </div>
       </EuiPageTemplate.Section>
     </KibanaPageTemplate>
   );
