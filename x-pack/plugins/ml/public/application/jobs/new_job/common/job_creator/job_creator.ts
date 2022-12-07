@@ -105,6 +105,17 @@ export class JobCreator {
     return this._type;
   }
 
+  public get dataView(): DataView {
+    return this._indexPattern;
+  }
+  public get dataViewId(): string | undefined {
+    return this._indexPattern?.id;
+  }
+
+  public get indexPatternId(): string | undefined {
+    return this._indexPattern.id;
+  }
+
   public get indexPatternTitle(): string {
     return this._indexPatternTitle;
   }

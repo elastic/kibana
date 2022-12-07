@@ -28,13 +28,12 @@ import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { SingleMetricJobCreator } from '../../../../../common';
 import { isDefined } from '../../../../../../../../../common/types/guards';
-interface Props {}
 
 // @todo: remove this with proper query
 const defaultQuery = getDefaultQuery();
 const defaultFilters: Filter[] = [];
 
-export const FieldStatsContent: FC<Props> = () => {
+export const FieldStatsContent: FC = () => {
   const {
     services: { uiSettings, data, fieldFormats, charts },
   } = useMlKibana();
@@ -76,12 +75,7 @@ export const FieldStatsContent: FC<Props> = () => {
     [fieldName, jobCreator.dataView]
   );
 
-  console.log('timeRange', timeRange);
-  console.log('jobCreator.indexPatternId', jobCreator.indexPatternId);
-  console.log('fieldName', fieldName);
-  console.log('fieldForStats', fieldForStats);
-
-  const showFieldStats = timeRange && isDefined(jobCreator.indexPatternId) && fieldForStats;
+  const showFieldStats = timeRange && isDefined(jobCreator.dataViewId) && fieldForStats;
 
   return showFieldStats ? (
     <FieldStats
@@ -138,7 +132,6 @@ export const FieldStatsFlyoutTrigger = () => {
           }
         )}
         data-test-subj={'apmCorrelationsContextPopoverButton'}
-        // style={{ marginLeft: theme.eui.euiSizeXS }}
       />
     </EuiToolTip>
   );
