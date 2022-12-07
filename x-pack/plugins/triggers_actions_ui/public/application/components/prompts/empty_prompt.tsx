@@ -19,7 +19,7 @@ export const EmptyPrompt = ({
 }) => {
   const { docLinks } = useKibana().services;
   const renderActions = () => {
-    if (!showCreateRule) {
+    if (showCreateRule) {
       return [
         <EuiButton
           iconType="plusInCircle"

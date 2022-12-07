@@ -130,6 +130,7 @@ export interface RulesListProps {
   showActionFilter?: boolean;
   ruleDetailsRoute?: string;
   showCreateRuleButton?: boolean;
+  showCreateRuleButtonInPrompt?: boolean;
   setCreateRuleButton?: (component?: React.ReactNode) => void;
   statusFilter?: RuleStatus[];
   onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
@@ -165,6 +166,7 @@ export const RulesList = ({
   showActionFilter = true,
   ruleDetailsRoute,
   showCreateRuleButton = true,
+  showCreateRuleButtonInPrompt = false,
   statusFilter,
   onStatusFilterChange,
   lastResponseFilter,
@@ -1106,7 +1108,7 @@ export const RulesList = ({
     <>
       <RulesListPrompts
         showPrompt={showPrompt}
-        showCreateRule={showCreateRuleButton}
+        showCreateRule={showCreateRuleButtonInPrompt}
         showSpinner={initialLoad}
         authorizedToCreateRules={authorizedToCreateAnyRules}
         onCreateRulesClick={openFlyout}
