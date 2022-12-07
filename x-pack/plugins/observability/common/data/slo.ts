@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SLOList } from '../../public';
+import type { SLO, SLOList } from '../../public';
 
 export const emptySloList: SLOList = {
   results: [],
@@ -48,4 +48,21 @@ export const sloList: SLOList = {
   page: 1,
   perPage: 25,
   total: 2,
+};
+
+export const anSLO: SLO = {
+  id: '2f17deb0-725a-11ed-ab7c-4bb641cfc57e',
+  name: 'SLO latency service log',
+  timeWindow: {
+    duration: { value: 7, unit: 'd' },
+  },
+  objective: {
+    target: 0.98,
+  },
+  summary: {
+    sliValue: 0.990097,
+    errorBudget: {
+      remaining: 0.504831,
+    },
+  },
 };
