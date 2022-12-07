@@ -26,6 +26,10 @@ export type ApmIndicesConfig = Readonly<{
   apmSourceMapIndex: string;
 }>;
 
+export const APM_AGENT_CONFIGURATION_INDEX = '.apm-agent-configuration';
+export const APM_CUSTOM_LINK_INDEX = '.apm-custom-link';
+export const APM_SOURCE_MAP_INDEX = '.apm-source-map';
+
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 
 async function getApmIndicesSavedObject(
@@ -49,10 +53,11 @@ export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
     span: config.indices.span,
     transaction: config.indices.transaction,
     metric: config.indices.metric,
+
     // system indices, not configurable
-    apmAgentConfigurationIndex: '.apm-agent-configuration',
-    apmCustomLinkIndex: '.apm-custom-link',
-    apmSourceMapIndex: '.apm-source-map',
+    apmAgentConfigurationIndex: APM_AGENT_CONFIGURATION_INDEX,
+    apmCustomLinkIndex: APM_CUSTOM_LINK_INDEX,
+    apmSourceMapIndex: APM_SOURCE_MAP_INDEX,
   };
 }
 

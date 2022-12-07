@@ -21,7 +21,6 @@ import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_sa
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
 import { createSourceMapDoc } from './create_source_map_doc';
-import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 
 export const sourceMapRt = t.intersection([
   t.type({
@@ -122,14 +121,7 @@ const uploadSourceMapRoute = createApmServerRoute({
           },
         });
 
-        const internalApmESClient = await createInternalESClient({
-          context,
-          request,
-          debug: params.query._inspect,
-          config,
-        });
-
-        await createSourceMapDoc(artifact, internalApmESClient);
+        await createSourceMapDoc(artifact, internalEsClient);
         await updateSourceMapsOnFleetPolicies({
           core,
           fleetPluginStart,

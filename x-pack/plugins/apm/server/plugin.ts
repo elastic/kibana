@@ -57,6 +57,7 @@ import {
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 import { createSourceMapIndex } from './routes/source_maps/create_source_map_index';
+import { migrateFleetSourceMapArtifacts } from './routes/source_maps/migrate_fleet_source_map_artifacts';
 
 export class APMPlugin
   implements
@@ -255,7 +256,7 @@ export class APMPlugin
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: APMPluginStartDependencies) {
     if (this.currentConfig == null || this.logger == null) {
       throw new Error('APMPlugin needs to be setup before calling start()');
     }
@@ -280,6 +281,14 @@ export class APMPlugin
       config: this.currentConfig,
       logger: this.logger,
     });
+
+    const internalEsClient = core.elasticsearch.client.asInternalUser;
+
+    migrateFleetSourceMapArtifacts(
+      plugins.fleet,
+      internalEsClient,
+      this.logger
+    );
 
     // TODO: remove in 9.0
     migrateLegacyAPMIndicesToSpaceAware({

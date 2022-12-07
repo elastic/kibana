@@ -43,7 +43,7 @@ async function unzipArtifactBody(
   };
 }
 
-function getApmArtifactClient(fleetPluginStart: FleetPluginStart) {
+export function getApmArtifactClient(fleetPluginStart: FleetPluginStart) {
   return fleetPluginStart.createArtifactsClient('apm');
 }
 

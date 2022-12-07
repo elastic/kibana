@@ -5,17 +5,13 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Artifact } from '@kbn/fleet-plugin/server';
-import {
-  APMIndexDocumentParams,
-  APMInternalESClient,
-} from '../../lib/helpers/create_es_client/create_internal_es_client';
+import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
 
-export function createSourceMapDoc(
-  artifact: Artifact,
-  internalESClient: APMInternalESClient
-) {
-  const sourceMapArtifact = {
+function getBodyFromArtifact(artifact: Artifact) {
+  return {
     type: artifact.type,
     identifier: artifact.identifier,
     relative_url: artifact.relative_url,
@@ -29,12 +25,34 @@ export function createSourceMapDoc(
     compression_algorithm: artifact.compressionAlgorithm,
     created: artifact.created,
   };
+}
 
-  const params: APMIndexDocumentParams<unknown> = {
-    index: internalESClient.apmIndices.apmSourceMapIndex,
+export function createSourceMapDoc(
+  artifact: Artifact,
+  internalESClient: ElasticsearchClient
+) {
+  const body = getBodyFromArtifact(artifact);
+  const params: estypes.IndexRequest = {
+    index: APM_SOURCE_MAP_INDEX,
     id: artifact.id, // overwrite existing source map if it exists
-    body: sourceMapArtifact,
+    body,
   };
 
-  return internalESClient.index('upsert_source_map', params);
+  return internalESClient.index(params);
+}
+
+export function bulkCreateSourceMapDocs(
+  artifacts: Artifact[],
+  internalESClient: ElasticsearchClient
+) {
+  const params: estypes.BulkRequest = {
+    body: artifacts.flatMap((artifact) => {
+      return [
+        { index: { _index: APM_SOURCE_MAP_INDEX, _id: artifact.id } },
+        getBodyFromArtifact(artifact),
+      ];
+    }),
+  };
+
+  return internalESClient.bulk(params);
 }
