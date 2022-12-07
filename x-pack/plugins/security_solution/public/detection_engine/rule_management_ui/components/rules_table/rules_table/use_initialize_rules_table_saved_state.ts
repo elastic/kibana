@@ -6,6 +6,7 @@
  */
 
 import { useEffect } from 'react';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { useGetInitialUrlParamValue } from '../../../../../common/utils/global_query_string/helpers';
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
@@ -26,6 +27,14 @@ import {
 } from './rules_table_saved_state';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_SORTING_OPTIONS } from './rules_table_defaults';
 import type { RulesSortingFields } from '../../../../rule_management/logic';
+
+function readStorageState(storage: Storage): RulesTableStorageSavedState | null {
+  try {
+    return storage.get(RULES_TABLE_STATE_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
 
 function validateState(
   urlState: RulesTableUrlSavedState | null,
@@ -55,9 +64,7 @@ export function useInitializeRulesTableSavedState(): void {
 
   useEffect(() => {
     const { decodedParam: urlState } = getUrlParam();
-    const storageState: Partial<RulesTableStorageSavedState> | null = sessionStorage.get(
-      RULES_TABLE_STATE_STORAGE_KEY
-    );
+    const storageState = readStorageState(sessionStorage);
 
     if (!urlState && !storageState) {
       return;
