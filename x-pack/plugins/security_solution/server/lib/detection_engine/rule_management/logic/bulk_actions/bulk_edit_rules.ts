@@ -8,10 +8,7 @@
 import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
 import pMap from 'p-map';
 
-import {
-  MAX_RULES_TO_UPDATE_IN_PARALLEL,
-  NOTIFICATION_THROTTLE_NO_ACTIONS,
-} from '../../../../../../common/constants';
+import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/constants';
 
 import type {
   BulkActionEditPayload,
@@ -87,7 +84,7 @@ export const bulkEditRules = async ({
       result.rules,
       async (rule) => {
         try {
-          if (rule.muteAll && rulesAction.value.throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
+          if (rule.muteAll && rulesAction.value.actions.length !== 0) {
             await rulesClient.unmuteAll({ id: rule.id });
             return (await readRules({ rulesClient, id: rule.id, ruleId: undefined })) ?? rule;
           }
