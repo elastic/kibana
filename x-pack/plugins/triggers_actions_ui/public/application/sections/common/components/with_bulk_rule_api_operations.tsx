@@ -12,6 +12,7 @@ import {
   IExecutionErrorsResult,
   IExecutionKPIResult,
 } from '@kbn/alerting-plugin/common';
+import { KueryNode } from '@kbn/es-query';
 import {
   Rule,
   RuleType,
@@ -21,6 +22,9 @@ import {
   ResolvedRule,
   SnoozeSchedule,
   BulkEditResponse,
+  BulkDeleteResponse,
+  BulkEnableResponse,
+  BulkDisableResponse,
 } from '../../../../types';
 import {
   deleteRules,
@@ -57,6 +61,9 @@ import {
   bulkUnsnoozeRules,
   BulkUnsnoozeRulesProps,
   cloneRule,
+  bulkDeleteRules,
+  bulkEnableRules,
+  bulkDisableRules,
 } from '../../../lib/rule_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -103,6 +110,18 @@ export interface ComponentOpts {
   unsnoozeRule: (rule: Rule, scheduleIds?: string[]) => Promise<void>;
   bulkUnsnoozeRules: (props: BulkUnsnoozeRulesProps) => Promise<BulkEditResponse>;
   cloneRule: (ruleId: string) => Promise<Rule>;
+  bulkDeleteRules: (props: {
+    filter?: KueryNode | null;
+    ids?: string[];
+  }) => Promise<BulkDeleteResponse>;
+  bulkEnableRules: (props: {
+    filter?: KueryNode | null;
+    ids?: string[];
+  }) => Promise<BulkEnableResponse>;
+  bulkDisableRules: (props: {
+    filter?: KueryNode | null;
+    ids?: string[];
+  }) => Promise<BulkDisableResponse>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -225,6 +244,18 @@ export function withBulkRuleOperations<T>(
         }}
         cloneRule={async (ruleId: string) => {
           return await cloneRule({ http, ruleId });
+        }}
+        bulkDeleteRules={async (bulkDeleteProps: { filter?: KueryNode | null; ids?: string[] }) => {
+          return await bulkDeleteRules({ http, ...bulkDeleteProps });
+        }}
+        bulkEnableRules={async (bulkEnableProps: { filter?: KueryNode | null; ids?: string[] }) => {
+          return await bulkEnableRules({ http, ...bulkEnableProps });
+        }}
+        bulkDisableRules={async (bulkDisableProps: {
+          filter?: KueryNode | null;
+          ids?: string[];
+        }) => {
+          return await bulkDisableRules({ http, ...bulkDisableProps });
         }}
       />
     );
