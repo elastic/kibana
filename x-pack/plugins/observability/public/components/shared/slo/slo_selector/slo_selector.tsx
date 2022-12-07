@@ -59,6 +59,7 @@ function SloSelector({ onSelected }: Props) {
       async
       isLoading={loading}
       onChange={onChange}
+      fullWidth
       onSearchChange={onSearchChange}
     />
   );

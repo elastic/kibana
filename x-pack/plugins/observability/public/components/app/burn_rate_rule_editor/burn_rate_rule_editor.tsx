@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
-import { Duration } from '../../../typings';
+import { Duration, SLO } from '../../../typings';
+import { SloSelector } from '../../shared/slo/slo_selector/slo_selector';
 import { BurnRate } from './burn_rate';
 import { LongWindowDuration } from './long_window_duration';
 
@@ -38,7 +39,11 @@ export function BurnRateRuleEditor() {
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
           <EuiFormRow label="Select SLO" fullWidth>
-            <EuiFieldText name="slo" fullWidth />
+            <SloSelector
+              onSelected={(slo: SLO) => {
+                console.log(slo);
+              }}
+            />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
