@@ -9,12 +9,8 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { difference, isEmpty, pickBy } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
-import {
-  encodeQueryString,
-  encodeRisonUrlState,
-  useGetInitialUrlParamValue,
-  useReplaceUrlParams,
-} from './helpers';
+import { encode } from '@kbn/rison';
+import { encodeQueryString, useGetInitialUrlParamValue, useReplaceUrlParams } from './helpers';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { globalUrlParamActions, globalUrlParamSelectors } from '../../store/global_url_param';
 import { useRouteSpy } from '../route/use_route_spy';
@@ -70,7 +66,7 @@ export const useUpdateUrlParam = <State>(urlParamKey: string) => {
 
   const updateUrlParam = useCallback(
     (value: State | null) => {
-      const encodedValue = value !== null ? encodeRisonUrlState(value) : null;
+      const encodedValue = value !== null ? encode(value) : null;
       dispatch(globalUrlParamActions.updateUrlParam({ key: urlParamKey, value: encodedValue }));
     },
     [dispatch, urlParamKey]

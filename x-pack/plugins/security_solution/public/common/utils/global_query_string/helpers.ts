@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { decode, encode } from '@kbn/rison';
+import { decode } from '@kbn/rison';
 import type { ParsedQuery } from 'query-string';
 import { parse, stringify } from 'query-string';
 import { url } from '@kbn/kibana-utils-plugin/public';
@@ -18,20 +18,6 @@ export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.rules ||
   pageName === SecurityPageName.rulesCreate ||
   pageName === SecurityPageName.exceptions;
-
-export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
-  try {
-    return value ? (decode(value) as unknown as T) : null;
-  } catch (error) {
-    if (error instanceof Error && error.message.startsWith('rison decoder error')) {
-      return null;
-    }
-    throw error;
-  }
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const encodeRisonUrlState = (state: any) => encode(state);
 
 export const getQueryStringFromLocation = (search: string) => search.substring(1);
 
@@ -60,7 +46,7 @@ export const useGetInitialUrlParamValue = <State>(urlParamKey: string) => {
       urlParamKey
     );
 
-    const decodedParam = decodeRisonUrlState<State>(param ?? undefined);
+    const decodedParam = decode<State>(param ?? '');
 
     return { param, decodedParam };
   }, [urlParamKey]);
