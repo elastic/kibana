@@ -11,6 +11,9 @@
     {
       "path": "../../observability/e2e/tsconfig.json"
     },
-    "@kbn/synthetics-plugin"
+    "@kbn/synthetics-plugin",
+    "@kbn/test",
+    "@kbn/dev-utils",
+    "@kbn/observability-plugin",
   ]
 }

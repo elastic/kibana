@@ -14,5 +14,8 @@
     "@kbn/visualizations-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/vis-default-editor-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
   ]
 }

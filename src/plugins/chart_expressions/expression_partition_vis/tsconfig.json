@@ -18,6 +18,15 @@
     "@kbn/data-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/charts-plugin",
-    "@kbn/visualizations-plugin"
+    "@kbn/visualizations-plugin",
+    "@kbn/i18n",
+    "@kbn/coloring",
+    "@kbn/embeddable-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/analytics",
+    "@kbn/chart-icons",
   ]
 }

@@ -14,5 +14,8 @@
     "@kbn/core",
     "@kbn/presentation-util-plugin",
     "@kbn/expressions-plugin",
+    "@kbn/expect",
+    "@kbn/i18n",
+    "@kbn/kibana-react-plugin",
   ]
 }

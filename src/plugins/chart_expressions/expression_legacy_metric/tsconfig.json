@@ -18,5 +18,12 @@
     "@kbn/charts-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/visualizations-plugin",
+    "@kbn/i18n",
+    "@kbn/coloring",
+    "@kbn/utility-types",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/analytics",
+    "@kbn/kibana-react-plugin",
+    "@kbn/ui-theme",
   ]
 }

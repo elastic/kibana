@@ -35,6 +35,13 @@
     "@kbn/es-ui-shared-plugin",
     "@kbn/infra-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/rule-registry-plugin"
+    "@kbn/rule-registry-plugin",
+    "@kbn/i18n",
+    "@kbn/std",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/alerting-plugin",
+    "@kbn/rule-data-utils",
   ]
 }

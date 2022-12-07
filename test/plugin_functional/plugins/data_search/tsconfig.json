@@ -11,5 +11,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
+    "@kbn/config-schema",
   ]
 }

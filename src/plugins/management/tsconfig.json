@@ -13,6 +13,11 @@
     "@kbn/core",
     "@kbn/home-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types",
+    "@kbn/share-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-page-kibana-template",
   ]
 }

@@ -14,5 +14,12 @@
     "@kbn/usage-collection-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
+    "@kbn/i18n",
+    "@kbn/test-jest-helpers",
+    "@kbn/analytics",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/i18n-react",
+    "@kbn/expect",
+    "@kbn/monaco",
   ]
 }

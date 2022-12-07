@@ -14,5 +14,14 @@
     "@kbn/dev-tools-plugin",
     "@kbn/home-plugin",
     "@kbn/licensing-plugin",
+    "@kbn/i18n",
+    "@kbn/share-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/utility-types",
+    "@kbn/expect",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/ace",
+    "@kbn/config-schema",
   ]
 }

@@ -13,5 +13,10 @@
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/es-ui-shared-plugin",
+    "@kbn/i18n-react",
+    "@kbn/usage-collection-plugin",
+    "@kbn/i18n",
+    "@kbn/test-jest-helpers",
+    "@kbn/ui-theme",
   ]
 }

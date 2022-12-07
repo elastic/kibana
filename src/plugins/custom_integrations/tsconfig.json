@@ -12,6 +12,12 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/ui-theme",
+    "@kbn/logging-mocks",
+    "@kbn/config-schema",
+    "@kbn/storybook",
   ]
 }

@@ -16,5 +16,16 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/ui-actions-plugin",
+    "@kbn/i18n-react",
+    "@kbn/storybook",
+    "@kbn/utility-types",
+    "@kbn/es-query",
+    "@kbn/core-theme-browser",
+    "@kbn/i18n",
+    "@kbn/test-jest-helpers",
+    "@kbn/std",
+    "@kbn/expressions-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/analytics",
   ]
 }

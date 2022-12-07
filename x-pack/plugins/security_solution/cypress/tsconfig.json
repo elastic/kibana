@@ -17,6 +17,8 @@
     ],
   },
   "kbn_references": [
-    "@kbn/security-solution-plugin"
+    "@kbn/security-solution-plugin",
+    "@kbn/securitysolution-io-ts-alerting-types",
+    "@kbn/securitysolution-io-ts-list-types",
   ]
 }

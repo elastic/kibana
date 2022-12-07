@@ -18,6 +18,7 @@
     "@kbn/navigation-plugin",
     "@kbn/screenshot-mode-plugin",
     "@kbn/developer-examples-plugin",
-    "@kbn/screenshotting-plugin"
+    "@kbn/screenshotting-plugin",
+    "@kbn/config-schema",
   ]
 }

@@ -14,6 +14,10 @@
     "@kbn/home-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/i18n",
+    "@kbn/monaco",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
   ]
 }

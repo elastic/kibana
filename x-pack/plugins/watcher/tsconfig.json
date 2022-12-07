@@ -22,5 +22,15 @@
     "@kbn/license-api-guard-plugin",
     "@kbn/licensing-plugin",
     "@kbn/features-plugin",
+    "@kbn/core-doc-links-browser-mocks",
+    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n",
+    "@kbn/safer-lodash-set",
+    "@kbn/config-schema",
+    "@kbn/datemath",
+    "@kbn/field-formats-plugin",
+    "@kbn/i18n-react",
+    "@kbn/ace",
   ]
 }

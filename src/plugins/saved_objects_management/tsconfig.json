@@ -16,5 +16,13 @@
     "@kbn/management-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/spaces-plugin",
+    "@kbn/i18n",
+    "@kbn/data-views-plugin",
+    "@kbn/utility-types",
+    "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/monaco",
+    "@kbn/config-schema",
   ]
 }

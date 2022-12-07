@@ -12,6 +12,8 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/licensing-plugin",
-    "@kbn/license-api-guard-plugin"
+    "@kbn/license-api-guard-plugin",
+    "@kbn/i18n",
+    "@kbn/core-http-request-handler-context-server",
   ]
 }

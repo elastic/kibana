@@ -6,5 +6,10 @@
   "include": ["server/**/*"],
   "kbn_references": [
     "@kbn/security-plugin",
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/utility-types",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-common",
   ]
 }

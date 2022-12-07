@@ -8,6 +8,7 @@
   },
   "kbn_references": [
     "@kbn/apm-plugin",
-    "@kbn/observability-plugin"
+    "@kbn/observability-plugin",
+    "@kbn/test",
   ]
 }

@@ -7,6 +7,10 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-react-plugin",
-    "@kbn/screenshot-mode-plugin"
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
   ]
 }

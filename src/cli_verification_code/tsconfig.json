@@ -8,5 +8,7 @@
   ],
   "kbn_references": [
     { "path": "../cli/tsconfig.json" },
+    "@kbn/utils",
+    "@kbn/repo-info",
   ]
 }

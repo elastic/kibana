@@ -8,6 +8,7 @@
   ],
   "kbn_references": [
     "@kbn/licensing-plugin",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/i18n",
   ]
 }

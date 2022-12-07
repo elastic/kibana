@@ -7,6 +7,10 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/url-forwarding-plugin",
-    "@kbn/management-plugin"
+    "@kbn/management-plugin",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/ui-theme",
+    "@kbn/kibana-react-plugin",
   ]
 }

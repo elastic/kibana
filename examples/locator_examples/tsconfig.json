@@ -14,5 +14,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/share-plugin",
+    "@kbn/utility-types",
+    "@kbn/kibana-utils-plugin",
   ]
 }

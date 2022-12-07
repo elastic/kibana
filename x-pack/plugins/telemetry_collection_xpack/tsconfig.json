@@ -15,7 +15,8 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/telemetry-collection-manager-plugin",
-    "@kbn/telemetry-plugin"
+    "@kbn/telemetry-plugin",
+    "@kbn/usage-collection-plugin",
   ]
 }
 

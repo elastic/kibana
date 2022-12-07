@@ -21,6 +21,20 @@
     "@kbn/licensing-plugin",
     "@kbn/screenshotting-plugin",
     "@kbn/security-plugin",
-    "@kbn/spaces-plugin"
+    "@kbn/spaces-plugin",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/home-plugin",
+    "@kbn/i18n-react",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/rison",
+    "@kbn/task-manager-plugin",
+    "@kbn/config",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-server",
+    "@kbn/core-test-helpers-test-utils",
+    "@kbn/expressions-plugin",
   ]
 }

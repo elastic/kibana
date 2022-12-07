@@ -11,5 +11,9 @@
   "kbn_references": [
     "@kbn/core",
     { "path": "../setup_node_env/tsconfig.json" },
+    "@kbn/utils",
+    "@kbn/repo-info",
+    "@kbn/safer-lodash-set",
+    "@kbn/config",
   ]
 }

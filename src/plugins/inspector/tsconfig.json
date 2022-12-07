@@ -7,6 +7,10 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-react-plugin",
-    "@kbn/share-plugin"
+    "@kbn/share-plugin",
+    "@kbn/i18n",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/monaco",
   ]
 }

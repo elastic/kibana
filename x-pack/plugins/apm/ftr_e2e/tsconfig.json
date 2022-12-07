@@ -19,5 +19,9 @@
     { "path": "../../../test/tsconfig.json" },
     { "path": "../../../../test/tsconfig.json" },
     "@kbn/apm-plugin",
+    "@kbn/test",
+    "@kbn/apm-synthtrace",
+    "@kbn/dev-utils",
+    "@kbn/axe-config",
   ]
 }

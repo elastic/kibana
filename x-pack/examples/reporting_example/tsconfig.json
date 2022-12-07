@@ -18,6 +18,9 @@
     "@kbn/navigation-plugin",
     "@kbn/screenshot-mode-plugin",
     "@kbn/developer-examples-plugin",
-    "@kbn/reporting-plugin"
+    "@kbn/reporting-plugin",
+    "@kbn/share-plugin",
+    "@kbn/i18n-react",
+    "@kbn/utility-types",
   ]
 }

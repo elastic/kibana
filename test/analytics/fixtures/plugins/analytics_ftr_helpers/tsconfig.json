@@ -12,6 +12,9 @@
   ],
   "exclude": [],
   "kbn_references": [
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/analytics-client",
+    "@kbn/std",
+    "@kbn/config-schema",
   ]
 }

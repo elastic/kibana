@@ -11,6 +11,8 @@
     "./target"
   ],
   "kbn_references": [
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/test",
+    "@kbn/config-schema",
   ]
 }

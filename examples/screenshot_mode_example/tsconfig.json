@@ -18,5 +18,7 @@
     "@kbn/screenshot-mode-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/developer-examples-plugin",
+    "@kbn/analytics",
+    "@kbn/i18n-react",
   ]
 }

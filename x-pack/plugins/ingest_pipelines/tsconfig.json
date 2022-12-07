@@ -21,5 +21,12 @@
     "@kbn/management-plugin",
     "@kbn/share-plugin",
     "@kbn/usage-collection-plugin",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/analytics",
+    "@kbn/monaco",
+    "@kbn/test-jest-helpers",
+    "@kbn/config-schema",
   ]
 }

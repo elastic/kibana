@@ -21,6 +21,13 @@
     "@kbn/usage-collection-plugin",
     "@kbn/home-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/es-ui-shared-plugin"
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/share-plugin",
+    "@kbn/i18n-react",
+    "@kbn/analytics",
+    "@kbn/config-schema",
   ]
 }

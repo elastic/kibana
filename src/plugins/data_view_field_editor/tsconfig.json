@@ -17,6 +17,15 @@
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/field-formats-plugin"
+    "@kbn/field-formats-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n",
+    "@kbn/usage-collection-plugin",
+    "@kbn/monaco",
+    "@kbn/analytics",
+    "@kbn/i18n-react",
+    "@kbn/field-types",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
   ]
 }

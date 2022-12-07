@@ -24,5 +24,10 @@
     "@kbn/es-ui-shared-plugin",
     "@kbn/data-plugin",
     "@kbn/license-api-guard-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/analytics",
+    "@kbn/test-jest-helpers",
+    "@kbn/config-schema",
   ]
 }

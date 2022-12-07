@@ -36,6 +36,12 @@
     "@kbn/infra-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/rule-registry-plugin",
-    "@kbn/session-view-plugin"
+    "@kbn/session-view-plugin",
+    "@kbn/i18n",
+    "@kbn/timelines-plugin",
+    "@kbn/es-query",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
   ]
 }

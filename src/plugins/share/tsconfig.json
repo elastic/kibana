@@ -7,6 +7,10 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
   ]
 }

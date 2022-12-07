@@ -4,5 +4,14 @@
     "outDir": "target/types",
   },
   "include": [".storybook/**/*", "common/**/*", "public/**/*", "../../../typings/**/*"],
-  "kbn_references": ["@kbn/kibana-utils-plugin"]
+  "kbn_references": [
+    "@kbn/kibana-utils-plugin",
+    "@kbn/storybook",
+    "@kbn/ui-theme",
+    "@kbn/core",
+    "@kbn/monaco",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+  ]
 }

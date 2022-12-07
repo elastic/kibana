@@ -22,5 +22,12 @@
     "@kbn/navigation-plugin",
     "@kbn/share-plugin",
     "@kbn/developer-examples-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/i18n-react",
+    "@kbn/utility-types",
+    "@kbn/es-query",
+    "@kbn/i18n",
+    "@kbn/core-mount-utils-browser-internal",
+    "@kbn/config-schema",
   ]
 }

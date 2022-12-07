@@ -13,5 +13,8 @@
     "@kbn/core",
     "@kbn/presentation-util-plugin",
     "@kbn/expressions-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
   ]
 }

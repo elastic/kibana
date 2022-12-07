@@ -22,6 +22,20 @@
     "@kbn/license-management-plugin",
     "@kbn/observability-plugin",
     "@kbn/telemetry-collection-xpack-plugin",
-    "@kbn/triggers-actions-ui-plugin"
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/expect",
+    "@kbn/i18n",
+    "@kbn/data-views-plugin",
+    "@kbn/es-query",
+    "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
+    "@kbn/safer-lodash-set",
+    "@kbn/core-http-browser",
+    "@kbn/unified-search-plugin",
+    "@kbn/config-schema",
+    "@kbn/rule-registry-plugin",
+    "@kbn/telemetry-collection-manager-plugin",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/logging-mocks",
   ]
 }

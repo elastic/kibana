@@ -1,6 +1,9 @@
 {
   "extends": "../../../../../../../tsconfig.base.json",
-  "kbn_references": [{ "path": "../../../../../../../test/tsconfig.json" }],
+  "kbn_references": [
+    { "path": "../../../../../../../test/tsconfig.json" },
+    "@kbn/axe-config",
+  ],
   "include": ["./**/*"],
   "compilerOptions": {
     "outDir": "target/types",

@@ -18,5 +18,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/lens-plugin",
     "@kbn/developer-examples-plugin",
+    "@kbn/data-plugin",
   ]
 }

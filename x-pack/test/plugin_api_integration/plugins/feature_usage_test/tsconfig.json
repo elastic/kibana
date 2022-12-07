@@ -13,5 +13,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/licensing-plugin",
+    "@kbn/config-schema",
   ]
 }

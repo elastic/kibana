@@ -11,5 +11,9 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/licensing-plugin",
+    "@kbn/utility-types",
+    "@kbn/std",
+    "@kbn/config-schema",
+    "@kbn/i18n",
   ]
 }

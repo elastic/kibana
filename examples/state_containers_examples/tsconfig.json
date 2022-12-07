@@ -20,5 +20,6 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/developer-examples-plugin",
+    "@kbn/es-query",
   ]
 }

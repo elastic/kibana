@@ -11,5 +11,14 @@
     "index.ts",
     "../../../typings/**/*"
   ],
-  "kbn_references": ["@kbn/core"]
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/expect",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/utility-types-jest",
+    "@kbn/test-jest-helpers",
+    "@kbn/rison",
+    "@kbn/crypto-browser",
+  ]
 }

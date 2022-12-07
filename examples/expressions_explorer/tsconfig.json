@@ -17,5 +17,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/inspector-plugin",
     "@kbn/developer-examples-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
   ]
 }

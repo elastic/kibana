@@ -10,6 +10,19 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/saved-search-plugin",
-    "@kbn/lens-plugin"
+    "@kbn/lens-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/embeddable-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/datemath",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/shared-ux-utility",
   ]
 }

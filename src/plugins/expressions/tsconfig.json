@@ -9,6 +9,13 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/inspector-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/logging",
+    "@kbn/utility-types",
+    "@kbn/interpreter",
+    "@kbn/i18n",
+    "@kbn/std",
+    "@kbn/core-execution-context-common",
+    "@kbn/tinymath",
   ]
 }

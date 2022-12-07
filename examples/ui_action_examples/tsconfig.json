@@ -14,5 +14,6 @@
   "kbn_references": [
     "@kbn/kibana-react-plugin",
     "@kbn/ui-actions-plugin",
+    "@kbn/core",
   ]
 }

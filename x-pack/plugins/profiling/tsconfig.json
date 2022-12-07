@@ -19,6 +19,22 @@
     "@kbn/navigation-plugin",
     "@kbn/share-plugin",
     "@kbn/observability-plugin",
+    "@kbn/i18n",
+    "@kbn/es-types",
+    "@kbn/core-http-browser",
+    "@kbn/data-views-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/typed-react-router-config",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/io-ts-utils",
+    "@kbn/unified-search-plugin",
+    "@kbn/es-query",
+    "@kbn/config-schema",
+    "@kbn/features-plugin",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-server",
+    "@kbn/apm-utils",
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

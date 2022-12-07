@@ -12,6 +12,10 @@
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/data-plugin"
+    "@kbn/data-plugin",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/monaco",
+    "@kbn/std",
   ]
 }

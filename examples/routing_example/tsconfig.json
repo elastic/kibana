@@ -15,5 +15,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/developer-examples-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/config-schema",
   ]
 }

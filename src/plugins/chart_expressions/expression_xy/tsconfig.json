@@ -21,5 +21,16 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/event-annotation-plugin",
     "@kbn/visualizations-plugin",
+    "@kbn/coloring",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/embeddable-plugin",
+    "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
+    "@kbn/datemath",
+    "@kbn/chart-icons",
+    "@kbn/ui-theme",
+    "@kbn/analytics",
+    "@kbn/kibana-react-plugin",
   ]
 }

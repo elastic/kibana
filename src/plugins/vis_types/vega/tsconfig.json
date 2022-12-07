@@ -26,5 +26,18 @@
     "@kbn/kibana-react-plugin",
     "@kbn/vis-default-editor-plugin",
     "@kbn/es-ui-shared-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/es-query",
+    "@kbn/analytics",
+    "@kbn/core-execution-context-common",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/monaco",
+    "@kbn/utility-types",
+    "@kbn/ui-theme",
+    "@kbn/std",
+    "@kbn/datemath",
+    "@kbn/mapbox-gl",
+    "@kbn/config-schema",
   ]
 }

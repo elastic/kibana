@@ -15,5 +15,13 @@
     "@kbn/visualizations-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/vis-default-editor-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/i18n",
+    "@kbn/data-plugin",
+    "@kbn/coloring",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
   ]
 }

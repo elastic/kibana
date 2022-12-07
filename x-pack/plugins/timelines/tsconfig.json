@@ -21,6 +21,19 @@
     "@kbn/cases-plugin",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
-    "@kbn/alerting-plugin"
+    "@kbn/alerting-plugin",
+    "@kbn/utility-types",
+    "@kbn/es-query",
+    "@kbn/securitysolution-t-grid",
+    "@kbn/rule-data-utils",
+    "@kbn/rule-registry-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/security-plugin",
+    "@kbn/safer-lodash-set",
   ]
 }

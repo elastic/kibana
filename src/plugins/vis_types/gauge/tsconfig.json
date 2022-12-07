@@ -19,6 +19,13 @@
       "@kbn/usage-collection-plugin",
       "@kbn/vis-default-editor-plugin",
       "@kbn/field-formats-plugin",
-      "@kbn/expression-partition-vis-plugin"
+      "@kbn/expression-partition-vis-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/coloring",
+    "@kbn/config-schema",
     ]
   }

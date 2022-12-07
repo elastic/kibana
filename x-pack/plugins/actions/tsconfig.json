@@ -21,6 +21,17 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/features-plugin",
     "@kbn/monitoring-collection-plugin",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/config",
+    "@kbn/core-saved-objects-server",
+    "@kbn/es-query",
+    "@kbn/apm-utils",
+    "@kbn/std",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ]
 }

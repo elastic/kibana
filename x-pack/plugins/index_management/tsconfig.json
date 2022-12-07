@@ -22,6 +22,14 @@
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
     "@kbn/security-plugin",
-    "@kbn/runtime-fields-plugin"
+    "@kbn/runtime-fields-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n",
+    "@kbn/analytics",
+    "@kbn/utility-types",
+    "@kbn/i18n-react",
+    "@kbn/core-doc-links-browser-mocks",
+    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/config-schema",
   ]
 }

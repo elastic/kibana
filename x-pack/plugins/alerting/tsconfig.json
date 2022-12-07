@@ -22,6 +22,19 @@
     "@kbn/monitoring-collection-plugin",
     "@kbn/features-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/data-plugin",
+    "@kbn/i18n",
+    "@kbn/core-saved-objects-server",
+    "@kbn/es-query",
+    "@kbn/logging",
+    "@kbn/std",
+    "@kbn/rule-data-utils",
+    "@kbn/logging-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-saved-objects-common",
+    "@kbn/securitysolution-rules",
   ]
 }

@@ -10,5 +10,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-execution-context-common",
   ]
 }

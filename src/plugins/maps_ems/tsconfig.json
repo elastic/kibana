@@ -6,6 +6,8 @@
   "include": ["common/**/*", "public/**/*", "server/**/*", "./config.ts"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/i18n",
+    "@kbn/config-schema",
   ]
 }

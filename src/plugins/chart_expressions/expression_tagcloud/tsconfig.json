@@ -19,5 +19,11 @@
     "@kbn/charts-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types",
+    "@kbn/coloring",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/analytics",
   ]
 }

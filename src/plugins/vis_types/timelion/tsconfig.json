@@ -20,5 +20,15 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/vis-default-editor-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/analytics",
+    "@kbn/i18n-react",
+    "@kbn/monaco",
+    "@kbn/config-schema",
+    "@kbn/expect",
+    "@kbn/std",
   ]
 }

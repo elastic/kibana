@@ -25,6 +25,12 @@
     "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/data-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/analytics",
+    "@kbn/i18n",
+    "@kbn/core-http-browser",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
 
   ]
 }

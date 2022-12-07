@@ -18,6 +18,14 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/expressions-plugin"
+    "@kbn/expressions-plugin",
+    "@kbn/core-notifications-browser",
+    "@kbn/es-query",
+    "@kbn/field-types",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/core-test-helpers-http-setup-browser",
+    "@kbn/config-schema",
+    "@kbn/utility-types-jest",
   ]
 }

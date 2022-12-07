@@ -13,6 +13,18 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/actions-plugin",
-    "@kbn/triggers-actions-ui-plugin"
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/logging-mocks",
+    "@kbn/logging",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/alerting-plugin",
+    "@kbn/i18n-react",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/securitysolution-io-ts-utils",
   ]
 }

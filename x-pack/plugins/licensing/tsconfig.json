@@ -11,6 +11,12 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/std",
+    "@kbn/i18n",
+    "@kbn/analytics-client",
   ]
 }

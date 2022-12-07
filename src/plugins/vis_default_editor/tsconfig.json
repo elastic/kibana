@@ -15,6 +15,17 @@
     "@kbn/kibana-react-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/unified-search-plugin",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/i18n-react",
+    "@kbn/usage-collection-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/datemath",
+    "@kbn/charts-plugin",
+    "@kbn/coloring",
+    "@kbn/monaco",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/utility-types",
   ]
 }

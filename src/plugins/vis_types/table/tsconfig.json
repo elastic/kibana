@@ -19,6 +19,12 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/vis-default-editor-plugin",
-    "@kbn/field-formats-plugin"
+    "@kbn/field-formats-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/analytics",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/ui-theme",
+    "@kbn/config-schema",
   ]
 }

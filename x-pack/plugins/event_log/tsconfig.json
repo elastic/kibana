@@ -13,6 +13,11 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/spaces-plugin"
+    "@kbn/spaces-plugin",
+    "@kbn/es-query",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/std",
   ]
 }

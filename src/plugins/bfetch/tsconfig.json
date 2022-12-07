@@ -7,5 +7,9 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-utils-plugin",
+    "@kbn/i18n",
+    "@kbn/config-schema",
+    "@kbn/std",
+    "@kbn/core-http-server",
   ]
 }

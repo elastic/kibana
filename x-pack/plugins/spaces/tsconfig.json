@@ -12,6 +12,19 @@
     "@kbn/home-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-avatar-solution",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/config-schema",
+    "@kbn/utility-types",
+    "@kbn/std",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/test",
+    "@kbn/utils",
   ]
 }

@@ -11,5 +11,11 @@
     "common/**/*.json",
     "public/**/*.json"
   ],
-  "kbn_references": ["@kbn/core"]
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/field-types",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/config-schema",
+  ]
 }

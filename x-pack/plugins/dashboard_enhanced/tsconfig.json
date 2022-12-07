@@ -17,5 +17,10 @@
     "@kbn/embeddable-plugin",
     "@kbn/ui-actions-enhanced-plugin",
     "@kbn/embeddable-enhanced-plugin",
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/unified-search-plugin",
+    "@kbn/ui-actions-plugin",
   ]
 }

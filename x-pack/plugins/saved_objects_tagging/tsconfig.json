@@ -17,5 +17,9 @@
     "@kbn/usage-collection-plugin",
     "@kbn/features-plugin",
     "@kbn/security-plugin",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
   ]
 }

@@ -21,5 +21,7 @@
     "@kbn/dashboard-plugin",
     "@kbn/saved-objects-plugin",
     "@kbn/presentation-util-plugin",
+    "@kbn/i18n",
+    "@kbn/utility-types",
   ]
 }

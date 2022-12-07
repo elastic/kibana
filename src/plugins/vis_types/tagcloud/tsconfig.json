@@ -16,5 +16,8 @@
     "@kbn/charts-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/vis-default-editor-plugin",
+    "@kbn/i18n",
+    "@kbn/coloring",
+    "@kbn/config-schema",
   ]
 }

@@ -14,6 +14,8 @@
     {
       "path": "../../observability/e2e/tsconfig.json"
     },
-    "@kbn/ux-plugin"
+    "@kbn/ux-plugin",
+    "@kbn/test",
+    "@kbn/observability-plugin",
   ]
 }
