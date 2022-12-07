@@ -9,7 +9,7 @@ import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import {
   extractErrorMessage,
-  getBenchmarkTypeFilter,
+  createCspRuleSearchFilterByPackagePolicy,
   isNonNullable,
 } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
@@ -65,14 +65,17 @@ const getPage = (data: readonly RuleSavedObject[], { page, perPage }: RulesQuery
 
 const MAX_ITEMS_PER_PAGE = 10000;
 
-export type PageUrlParams = Record<'policyId' | 'packagePolicyId' | 'benchmarkId', string>;
+export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
 
 export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
-    filter: getBenchmarkTypeFilter(params.benchmarkId),
+    filter: createCspRuleSearchFilterByPackagePolicy({
+      packagePolicyId: params.packagePolicyId,
+      policyId: params.policyId,
+    }),
     search: '',
     page: 0,
     perPage: pageSize || 10,

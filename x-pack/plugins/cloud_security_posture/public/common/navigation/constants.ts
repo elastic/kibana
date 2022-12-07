@@ -44,11 +44,10 @@ export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
   },
 };
 
-// CR - Do we wish to keep the packagePolicyId and the policyId in the URL?
 export const benchmarksNavigation: Record<CspBenchmarksPage, CspPageNavigationItem> = {
   rules: {
     name: NAV_ITEMS_NAMES.RULES,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:packagePolicyId/:policyId/:benchmarkId/rules`,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:packagePolicyId/:policyId/rules`,
     id: 'cloud_security_posture-benchmarks-rules',
   },
 };

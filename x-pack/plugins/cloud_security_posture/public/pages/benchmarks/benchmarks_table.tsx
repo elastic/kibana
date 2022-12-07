@@ -44,12 +44,10 @@ const IntegrationButtonLink = ({
   packageName,
   policyId,
   packagePolicyId,
-  benchmarkId,
 }: {
   packageName: string;
   packagePolicyId: string;
   policyId: string;
-  benchmarkId: string;
 }) => {
   const { application } = useKibana().services;
   return (
@@ -58,7 +56,6 @@ const IntegrationButtonLink = ({
         path: generatePath(benchmarksNavigation.rules.path, {
           packagePolicyId,
           policyId,
-          benchmarkId,
         }),
       })}
     >
@@ -78,7 +75,6 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
         packageName={packageName}
         packagePolicyId={benchmark.package_policy.id}
         policyId={benchmark.package_policy.policy_id}
-        benchmarkId={benchmark.benchmark_id}
       />
     ),
     truncateText: true,
