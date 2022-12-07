@@ -34,7 +34,7 @@ export function monitorManagementPageProvider({
     }),
     ...utilsPageProvider({ page }),
 
-    async navigateToMonitorManagement(doLogin = true) {
+    async navigateToMonitorManagement(doLogin = false) {
       await page.goto(monitorManagement, {
         waitUntil: 'networkidle',
       });

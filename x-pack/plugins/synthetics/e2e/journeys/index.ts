@@ -6,7 +6,7 @@
  */
 
 export * from './data_view_permissions';
-export * from './synthetics';
+// export * from './synthetics';
 export * from './alerts';
 export * from './uptime.journey';
 export * from './step_duration.journey';
