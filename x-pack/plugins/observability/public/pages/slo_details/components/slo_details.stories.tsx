@@ -8,17 +8,20 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { SloList as Component } from './slo_list';
+import { SloDetails as Component, Props } from './slo_details';
+import { anSLO } from '../mocks/slo';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/SloList',
+  title: 'app/SLO/DetailsPage/SloDetails',
   argTypes: {},
 };
 
-const Template: ComponentStory<typeof Component> = () => <Component />;
+const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
-const defaultProps = {};
+const defaultProps: Props = {
+  slo: anSLO,
+};
 
-export const SloList = Template.bind({});
-SloList.args = defaultProps;
+export const SloDetails = Template.bind({});
+SloDetails.args = defaultProps;

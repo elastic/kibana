@@ -8,13 +8,19 @@
 
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
-import { sampleEsClientMetrics } from '@kbn/core-metrics-server-mocks';
+import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
 import { createAgentStoreMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getAgentsSocketsStatsMock } from './get_agents_sockets_stats.test.mocks';
 import { ElasticsearchClientsMetricsCollector } from './elasticsearch_client';
 import { getAgentsSocketsStats } from './get_agents_sockets_stats';
 
 jest.mock('@kbn/core-elasticsearch-client-server-internal');
+
+export const sampleEsClientMetrics: ElasticsearchClientsMetrics = {
+  totalActiveSockets: 25,
+  totalIdleSockets: 2,
+  totalQueuedRequests: 0,
+};
 
 describe('ElasticsearchClientsMetricsCollector', () => {
   test('#collect calls getAgentsSocketsStats with the Agents managed by the provided AgentManager', async () => {
