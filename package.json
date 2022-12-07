@@ -981,7 +981,7 @@
     "argsplit": "^1.0.5",
     "autoprefixer": "^10.4.7",
     "axe-core": "^4.0.2",
-    "babel-jest": "^29.2.2",
+    "babel-jest": "^29.3.1",
     "babel-loader": "^8.2.5",
     "babel-plugin-add-module-exports": "^1.0.4",
     "babel-plugin-istanbul": "^6.1.1",
