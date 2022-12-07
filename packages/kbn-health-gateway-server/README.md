@@ -75,3 +75,28 @@ be able to make requests to the `/` endpoint:
 ```bash
 $ curl "https://localhost:3000/"
 ```
+
+## Cloud Testing
+
+per https://github.com/elastic/kibana/issues/147017
+
+### tre-1-gb-8.6 w/ Stack Monitoring
+
+AWS us-east n. virginia
+
+elastic / AElnYXrxGNnZkzavNB8jdIpx
+
+cluster id:
+44859b6634fc4b86b16498bd22793446
+
+deployment id:
+95c359
+
+### tre-8-gb-8.6 w/ Stack Monitoring
+
+AWS europe central 1 Frankfurt
+
+elastic / WHkRXcj5kEqTHBN06pFoGFwC
+
+cluster id:
+76f3e1c2de9d4010940224e1aea0cd67
