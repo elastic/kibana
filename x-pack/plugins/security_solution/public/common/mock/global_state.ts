@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TableId } from '../../../common/types';
 import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
@@ -33,7 +34,6 @@ import {
   TimelineType,
   TimelineStatus,
   TimelineTabs,
-  TableId,
   TimelineId,
 } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';

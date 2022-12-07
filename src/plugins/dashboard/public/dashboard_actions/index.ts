@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  CONTEXT_MENU_TRIGGER,
-  PANEL_BADGE_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { getSavedObjectFinder } from '@kbn/saved-objects-plugin/public';
 
@@ -22,7 +18,7 @@ import { ReplacePanelAction } from './replace_panel_action';
 import { AddToLibraryAction } from './add_to_library_action';
 import { CopyToDashboardAction } from './copy_to_dashboard_action';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
-import { FiltersNotificationBadge } from './filters_notification_badge';
+import { FiltersNotificationAction } from './filters_notification_action';
 import { LibraryNotificationAction } from './library_notification_action';
 
 interface BuildAllDashboardActionsProps {
@@ -48,13 +44,13 @@ export const buildAllDashboardActions = async ({
   uiActions.registerAction(changeViewAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
 
-  const panelLevelFiltersNotification = new FiltersNotificationBadge();
-  uiActions.registerAction(panelLevelFiltersNotification);
-  uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersNotification.id);
-
   const expandPanelAction = new ExpandPanelAction();
   uiActions.registerAction(expandPanelAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
+
+  const panelLevelFiltersNotificationAction = new FiltersNotificationAction();
+  uiActions.registerAction(panelLevelFiltersNotificationAction);
+  uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, panelLevelFiltersNotificationAction.id);
 
   if (share) {
     const ExportCSVPlugin = new ExportCSVAction();

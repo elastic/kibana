@@ -130,7 +130,7 @@ export const dashboardReplacePanelActionStrings = {
     }),
 };
 
-export const dashboardFilterNotificationBadgeStrings = {
+export const dashboardFilterNotificationActionStrings = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.filters', {
       defaultMessage: 'Panel filters',
