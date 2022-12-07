@@ -6,8 +6,8 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { TableIdLiteral } from '../../common/types/timeline';
-import { TableId } from '../../common/types/timeline';
+import type { TableIdLiteral } from '../../common/types';
+import { TableId } from '../../common/types';
 import type { SecuritySubPluginWithStore } from '../app/types';
 import { getDataTablesInStorageByIds } from '../timelines/containers/local_storage';
 import { routes } from './routes';
