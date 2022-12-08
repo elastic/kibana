@@ -267,7 +267,7 @@ export function FilterItem({
                               />
                             </EuiFormRow>
                           </EuiFlexItem>
-                          <EuiFlexItem className={operationCss}>
+                          <EuiFlexItem className={operationCss(euiTheme)}>
                             <EuiFormRow>
                               <OperatorInput
                                 field={field}
