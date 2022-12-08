@@ -10,6 +10,7 @@ import { mockBrowserFields } from './mock';
 import {
   categoryHasFields,
   getFieldCount,
+  getShowDescriptionColumn,
   filterBrowserFieldsByFieldName,
   filterSelectedBrowserFields,
 } from './helpers';
@@ -328,6 +329,58 @@ describe('helpers', () => {
           columnIds,
         })
       ).toEqual(filtered);
+    });
+  });
+
+  describe('getShowDescriptionColumn', () => {
+    test('hide description column if there is not description', () => {
+      expect(
+        getShowDescriptionColumn([
+          {
+            category: 'base',
+            description: '',
+            example: undefined,
+            isRuntime: false,
+            name: '@timestamp',
+            selected: true,
+            type: 'date',
+          },
+          {
+            category: 'base',
+            description: '',
+            example: undefined,
+            isRuntime: false,
+            name: '_id',
+            selected: false,
+            type: 'string',
+          },
+        ])
+      ).toBe(false);
+    });
+
+    test('show description column if there is description', () => {
+      expect(
+        getShowDescriptionColumn([
+          {
+            category: 'base',
+            description: '',
+            example: undefined,
+            isRuntime: false,
+            name: '@timestamp',
+            selected: true,
+            type: 'date',
+          },
+          {
+            category: 'base',
+            description: 'id_description',
+            example: undefined,
+            isRuntime: false,
+            name: '_id',
+            selected: false,
+            type: 'string',
+          },
+        ])
+      ).toBe(true);
     });
   });
 });

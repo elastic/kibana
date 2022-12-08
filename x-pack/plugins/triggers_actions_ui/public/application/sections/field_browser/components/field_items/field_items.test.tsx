@@ -9,7 +9,6 @@ import { omit } from 'lodash/fp';
 import { render } from '@testing-library/react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { mockBrowserFields } from '../../mock';
-
 import { getFieldColumns, getFieldItems } from './field_items';
 
 const timestampFieldId = '@timestamp';
@@ -105,7 +104,11 @@ describe('field_items', () => {
 
   describe('getFieldColumns', () => {
     const onToggleColumn = jest.fn();
-    const getFieldColumnsParams = { onToggleColumn, onHide: () => {} };
+    const getFieldColumnsParams = {
+      onToggleColumn,
+      onHide: () => {},
+      showDescriptionColumn: true,
+    };
 
     beforeEach(() => {
       onToggleColumn.mockClear();
@@ -113,7 +116,9 @@ describe('field_items', () => {
 
     it('should return default field columns', () => {
       expect(
-        getFieldColumns(getFieldColumnsParams).map((column) => omit('render', column))
+        getFieldColumns({ ...getFieldColumnsParams, showDescriptionColumn: false }).map((column) =>
+          omit('render', column)
+        )
       ).toEqual([
         {
           field: 'selected',
@@ -168,28 +173,7 @@ describe('field_items', () => {
       ]);
     });
 
-    it('should render default columns', () => {
-      const timestampField = mockBrowserFields.base.fields![timestampFieldId];
-      const fieldItems = getFieldItems({
-        selectedCategoryIds: ['base'],
-        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
-        columnIds: [],
-      });
-
-      const columns = getFieldColumns(getFieldColumnsParams);
-      const { getByTestId, getAllByText } = render(
-        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
-      );
-
-      expect(getAllByText('Name').at(0)).toBeInTheDocument();
-      expect(getAllByText('Category').at(0)).toBeInTheDocument();
-
-      expect(getByTestId(`field-${timestampFieldId}-checkbox`)).toBeInTheDocument();
-      expect(getByTestId(`field-${timestampFieldId}-name`)).toBeInTheDocument();
-      expect(getByTestId(`field-${timestampFieldId}-category`)).toBeInTheDocument();
-    });
-
-    it('should call call toggle callback on checkbox click', () => {
+    it('should call toggle callback on checkbox click', () => {
       const timestampField = mockBrowserFields.base.fields![timestampFieldId];
       const fieldItems = getFieldItems({
         selectedCategoryIds: ['base'],
@@ -204,6 +188,59 @@ describe('field_items', () => {
 
       getByTestId(`field-${timestampFieldId}-checkbox`).click();
       expect(onToggleColumn).toHaveBeenCalledWith(timestampFieldId);
+    });
+
+    it('should render default columns with description column', () => {
+      const timestampField = mockBrowserFields.base.fields![timestampFieldId];
+      const fieldItems = getFieldItems({
+        selectedCategoryIds: ['base'],
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        columnIds: [],
+      });
+
+      const columns = getFieldColumns({
+        ...getFieldColumnsParams,
+        showDescriptionColumn: true,
+      });
+
+      const { getByTestId, getAllByText } = render(
+        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
+      );
+
+      expect(getAllByText('Name').at(0)).toBeInTheDocument();
+      expect(getAllByText('Description').at(0)).toBeInTheDocument();
+      expect(getAllByText('Category').at(0)).toBeInTheDocument();
+
+      expect(getByTestId(`field-${timestampFieldId}-checkbox`)).toBeInTheDocument();
+      expect(getByTestId(`field-${timestampFieldId}-name`)).toBeInTheDocument();
+      expect(getByTestId(`field-${timestampFieldId}-description`)).toBeInTheDocument();
+      expect(getByTestId(`field-${timestampFieldId}-category`)).toBeInTheDocument();
+    });
+
+    it('should render default columns without description column', () => {
+      const timestampField = mockBrowserFields.base.fields![timestampFieldId];
+      const fieldItems = getFieldItems({
+        selectedCategoryIds: ['base'],
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        columnIds: [],
+      });
+
+      const columns = getFieldColumns({
+        ...getFieldColumnsParams,
+        showDescriptionColumn: false,
+      });
+      const { getByTestId, getAllByText, queryAllByText, queryByTestId } = render(
+        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
+      );
+
+      expect(getAllByText('Name').at(0)).toBeInTheDocument();
+      expect(queryAllByText('Description').at(0)).toBeFalsy();
+      expect(getAllByText('Category').at(0)).toBeInTheDocument();
+
+      expect(getByTestId(`field-${timestampFieldId}-checkbox`)).toBeInTheDocument();
+      expect(getByTestId(`field-${timestampFieldId}-name`)).toBeInTheDocument();
+      expect(queryByTestId(`field-${timestampFieldId}-description`)).not.toBeInTheDocument();
+      expect(getByTestId(`field-${timestampFieldId}-category`)).toBeInTheDocument();
     });
   });
 });

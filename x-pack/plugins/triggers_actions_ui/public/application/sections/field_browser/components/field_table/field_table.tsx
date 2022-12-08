@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiInMemoryTable, Pagination, Direction, useEuiTheme } from '@elastic/eui';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getFieldColumns, getFieldItems, isActionsColumn } from '../field_items';
-import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';
+import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT, getShowDescriptionColumn } from '../../helpers';
 import type { FieldBrowserProps, GetFieldTableColumns } from '../../types';
 import { FieldTableHeader } from './field_table_header';
 import { styles } from './field_table.styles';
@@ -50,11 +50,11 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   filteredBrowserFields,
   filterSelectedEnabled,
   getFieldTableColumns,
+  onFilterSelectedChange,
+  onHide,
+  onToggleColumn,
   searchInput,
   selectedCategoryIds,
-  onFilterSelectedChange,
-  onToggleColumn,
-  onHide,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
@@ -119,8 +119,15 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
    * Process columns
    */
   const columns = useMemo(
-    () => getFieldColumns({ highlight: searchInput, onToggleColumn, getFieldTableColumns, onHide }),
-    [onToggleColumn, searchInput, getFieldTableColumns, onHide]
+    () =>
+      getFieldColumns({
+        getFieldTableColumns,
+        highlight: searchInput,
+        onHide,
+        onToggleColumn,
+        showDescriptionColumn: getShowDescriptionColumn(fieldItems),
+      }),
+    [searchInput, onToggleColumn, getFieldTableColumns, onHide, fieldItems]
   );
   const hasActions = useMemo(() => columns.some((column) => isActionsColumn(column)), [columns]);
 
