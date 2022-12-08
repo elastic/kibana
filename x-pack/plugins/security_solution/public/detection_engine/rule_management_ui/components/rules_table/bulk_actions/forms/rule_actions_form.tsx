@@ -125,6 +125,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
     onConfirm({
       type: editAction,
       value: {
+        throttle: actions.length === 0 ? throttleToSubmit : undefined,
         actions: actions.map(({ actionTypeId, ...action }) => ({
           ...action,
           frequency: { ...frequencyToSubmit, summary: false },

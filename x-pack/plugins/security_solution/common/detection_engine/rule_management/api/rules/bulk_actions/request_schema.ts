@@ -111,9 +111,14 @@ export const BulkActionEditPayloadRuleActions = t.type({
     t.literal(BulkActionEditType.add_rule_actions),
     t.literal(BulkActionEditType.set_rule_actions),
   ]),
-  value: t.type({
-    actions: t.array(NormalizedRuleAction),
-  }),
+  value: t.intersection([
+    t.type({
+      actions: t.array(NormalizedRuleAction),
+    }),
+    t.partial({
+      throttle: ThrottleForBulkActions,
+    }),
+  ]),
 });
 
 type BulkActionEditPayloadSchedule = t.TypeOf<typeof BulkActionEditPayloadSchedule>;
