@@ -33,7 +33,7 @@ class BazelPackage {
     return new BazelPackage(
       Path.relative(repoRoot, dir),
       manifest,
-      readPackageJson(Path.resolve(dir, 'package.json')),
+      readPackageJson(Path.resolve(dir, 'package.json'))
     );
   }
 
@@ -69,7 +69,7 @@ class BazelPackage {
      * Parsed package.json file from the package
      * @type {import('./types').ParsedPackageJson | undefined}
      */
-    pkg,
+    pkg
   ) {
     this.normalizedRepoRelativeDir = normalizedRepoRelativeDir;
     this.manifest = manifest;

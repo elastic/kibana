@@ -122,8 +122,7 @@ function validatePackageManifest(parsed) {
     throw new Error('expected manifest root to be an object');
   }
 
-  const { type, id, owner, devOnly, plugin, sharedBrowserBundle, ...extra } =
-    parsed;
+  const { type, id, owner, devOnly, plugin, sharedBrowserBundle, ...extra } = parsed;
 
   const extraKeys = Object.keys(extra);
   if (extraKeys.length) {
