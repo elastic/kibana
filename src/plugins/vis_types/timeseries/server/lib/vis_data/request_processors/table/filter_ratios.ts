@@ -42,10 +42,10 @@ export const filterRatios: TableRequestProcessorsFunction = ({
           let numeratorPath = `${metric.id}-numerator>_count`;
           let denominatorPath = `${metric.id}-denominator>_count`;
 
-          if (metric.metric_agg && metric.metric_agg !== 'count' && bucketTransform[metricAgg]) {
+          if (metricAgg && metricAgg !== 'count' && bucketTransform[metricAgg]) {
             const aggBody = {
               metric: bucketTransform[metricAgg]({
-                type: metric.metric_agg as Metric['type'],
+                type: metricAgg,
                 field: metric.field,
                 id: metric.id,
               }),
