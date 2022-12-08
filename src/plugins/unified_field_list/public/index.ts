@@ -77,8 +77,17 @@ export {
 } from './hooks/use_grouped_fields';
 
 export {
+  useFieldFilters,
+  getFieldType, // TODO: refactor Lens code to use this function
+  type FieldFiltersParams,
+  type FieldFiltersResult,
+} from './hooks/use_field_filters';
+
+export {
   useQuerySubscriber,
   hasQuerySubscriberData,
   type QuerySubscriberResult,
   type QuerySubscriberParams,
 } from './hooks/use_query_subscriber';
+
+export { wrapOnDot } from './utils/wrap_on_dot';

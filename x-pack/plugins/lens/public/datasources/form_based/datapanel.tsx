@@ -7,7 +7,7 @@
 
 import './datapanel.scss';
 import { uniq } from 'lodash';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiProgress, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,19 +26,17 @@ import {
   useGroupedFields,
   useExistingFieldsReader,
   FieldListFilters,
-  type FieldTypeForFilter,
+  useFieldFilters,
 } from '@kbn/unified-field-list-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
   DatasourceDataPanelProps,
-  DataType,
   FramePublicAPI,
   IndexPattern,
   IndexPatternField,
 } from '../../types';
 import { ChildDragDropProvider, DragContextState } from '../../drag_drop';
 import type { FormBasedPrivateState } from './types';
-import { getFieldType } from './pure_utils';
 import { fieldContainsData } from '../../shared_components';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { FieldItem } from './field_item';
@@ -74,25 +72,6 @@ const supportedFieldTypes = new Set([
   'geo_shape',
   'murmur3',
 ]);
-
-const fieldTypeNames: Record<DataType, string> = {
-  document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'Record' }),
-  string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'Text string' }),
-  number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'Number' }),
-  gauge: i18n.translate('xpack.lens.datatypes.gauge', { defaultMessage: 'Gauge metric' }),
-  counter: i18n.translate('xpack.lens.datatypes.counter', { defaultMessage: 'Counter metric' }),
-  boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'Boolean' }),
-  date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'Date' }),
-  ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP address' }),
-  histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'Histogram' }),
-  geo_point: i18n.translate('xpack.lens.datatypes.geoPoint', {
-    defaultMessage: 'Geographic point',
-  }),
-  geo_shape: i18n.translate('xpack.lens.datatypes.geoShape', {
-    defaultMessage: 'Geographic shape',
-  }),
-  murmur3: i18n.translate('xpack.lens.datatypes.murmur3', { defaultMessage: 'murmur3' }),
-};
 
 function onSupportedFieldFilter(field: IndexPatternField): boolean {
   return supportedFieldTypes.has(field.type);
@@ -189,11 +168,6 @@ export function FormBasedDataPanel({
   );
 }
 
-interface DataPanelState {
-  nameFilter: string;
-  typeFilter: FieldTypeForFilter[];
-}
-
 const htmlId = htmlIdGenerator('datapanel');
 const fieldSearchDescriptionId = htmlId();
 
@@ -235,10 +209,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   layerFields?: string[];
   activeIndexPatterns: IndexPattern[];
 }) {
-  const [localState, setLocalState] = useState<DataPanelState>({
-    nameFilter: '',
-    typeFilter: [],
-  });
   const { indexPatterns } = frame.dataViews;
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
 
@@ -271,14 +241,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         );
   }, [currentIndexPattern, visualizeGeoFieldTrigger]);
 
-  const availableFieldTypes: FieldTypeForFilter[] = uniq([
-    ...(uniq(allFields.map(getFieldType)).filter(
-      (type) => type in fieldTypeNames
-    ) as FieldTypeForFilter[]),
-    // always include current field type filters - there may not be any fields of the type of an existing type filter on data view switch, but we still need to include the existing filter in the list so that the user can remove it
-    ...localState.typeFilter,
-  ]);
-
   const editPermission =
     indexPatternFieldEditor.userPermissions.editIndexPattern() || !currentIndexPattern.isPersisted;
 
@@ -287,23 +249,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       return Boolean(layerFields?.includes(field.name));
     },
     [layerFields]
-  );
-
-  const onFilterField = useCallback(
-    (field: IndexPatternField) => {
-      if (
-        localState.nameFilter.length &&
-        !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
-        !field.displayName.toLowerCase().includes(localState.nameFilter.toLowerCase())
-      ) {
-        return false;
-      }
-      if (localState.typeFilter.length > 0) {
-        return localState.typeFilter.includes(getFieldType(field) as DataType);
-      }
-      return true;
-    },
-    [localState]
   );
 
   const onOverrideFieldGroupDetails = useCallback(
@@ -327,6 +272,9 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [core.uiSettings]
   );
 
+  const fieldListFilters = useFieldFilters({
+    allFields,
+  });
   const fieldListGroupedProps = useGroupedFields<IndexPatternField>({
     dataViewId: currentIndexPatternId,
     allFields,
@@ -335,7 +283,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     },
     fieldsExistenceReader,
     isAffectedByGlobalFilter: Boolean(filters.length),
-    onFilterField,
+    onFilterField: fieldListFilters.onFilterField,
     onSupportedFieldFilter,
     onSelectedFieldFilter,
     onOverrideFieldGroupDetails,
@@ -440,6 +388,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     ]
   );
 
+  const fieldNameHighlight = fieldListFilters.fieldNameHighlight;
   const renderFieldItem: FieldListGroupedProps<IndexPatternField>['renderFieldItem'] = useCallback(
     ({ field, itemIndex, groupIndex, hideDetails }) => (
       <FieldItem
@@ -460,7 +409,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         core={core}
         fieldFormats={fieldFormats}
         indexPattern={currentIndexPattern}
-        highlight={localState.nameFilter.toLowerCase()}
+        highlight={fieldNameHighlight}
         dateRange={dateRange}
         query={query}
         filters={filters}
@@ -474,7 +423,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       dateRange,
       query,
       filters,
-      localState.nameFilter,
+      fieldNameHighlight,
       charts.theme,
       fieldsExistenceReader.hasFieldData,
       dropOntoWorkspace,
@@ -483,16 +432,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       removeField,
       uiActions,
     ]
-  );
-
-  const changeFieldNameFilter = useCallback(
-    (newValue) => setLocalState((s) => ({ ...s, nameFilter: newValue })),
-    [setLocalState]
-  );
-
-  const changeFieldTypeFilter = useCallback(
-    (newValue) => setLocalState((s) => ({ ...s, typeFilter: newValue })),
-    [setLocalState]
   );
 
   return (
@@ -506,12 +445,8 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         {isProcessing && <EuiProgress size="xs" color="accent" position="absolute" />}
         <EuiFlexItem grow={false}>
           <FieldListFilters
-            selectedFieldTypes={localState.typeFilter}
-            availableFieldTypes={availableFieldTypes}
-            onChangeFieldTypes={changeFieldTypeFilter}
-            nameFilter={localState.nameFilter}
+            {...fieldListFilters.fieldListFiltersProps}
             fieldSearchDescriptionId={fieldSearchDescriptionId}
-            onChangeNameFilter={changeFieldNameFilter}
           />
         </EuiFlexItem>
         <EuiFlexItem>

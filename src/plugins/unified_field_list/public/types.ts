@@ -75,5 +75,4 @@ export type FieldTypeForFilter =
   | 'geo_shape'
   | 'counter'
   | 'gauge'
-  | 'summary'
   | 'murmur3';

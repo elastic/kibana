@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHighlight, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
@@ -18,6 +18,8 @@ import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/publi
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   FieldListFilters,
+  useFieldFilters,
+  wrapOnDot,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
@@ -54,7 +56,6 @@ export function TextBasedDataPanel({
   layerFields,
 }: TextBasedDataPanelProps) {
   const prevQuery = usePrevious(query);
-  const [localState, setLocalState] = useState({ nameFilter: '' });
   const [dataHasLoaded, setDataHasLoaded] = useState(false);
   useEffect(() => {
     async function fetchData() {
@@ -83,19 +84,6 @@ export function TextBasedDataPanel({
     [layerFields]
   );
 
-  const onFilterField = useCallback(
-    (field: DatatableColumn) => {
-      if (
-        localState.nameFilter &&
-        !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
-      ) {
-        return false;
-      }
-      return true;
-    },
-    [localState]
-  );
-
   const onOverrideFieldGroupDetails = useCallback((groupName) => {
     if (groupName === FieldsGroupNames.AvailableFields) {
       return {
@@ -107,17 +95,22 @@ export function TextBasedDataPanel({
     }
   }, []);
 
+  const visibleAllFields = dataHasLoaded ? fieldList : null;
+  const fieldListFilters = useFieldFilters({
+    allFields: visibleAllFields,
+  });
   const fieldListGroupedProps = useGroupedFields<DatatableColumn>({
     dataViewId: null,
-    allFields: dataHasLoaded ? fieldList : null,
+    allFields: visibleAllFields,
     services: {
       dataViews,
     },
-    onFilterField,
+    onFilterField: fieldListFilters.onFilterField,
     onSelectedFieldFilter,
     onOverrideFieldGroupDetails,
   });
 
+  const fieldNameHighlight = fieldListFilters.fieldNameHighlight;
   const renderFieldItem: FieldListGroupedProps<DatatableColumn>['renderFieldItem'] = useCallback(
     ({ field, itemIndex, groupIndex, hideDetails }) => {
       return (
@@ -136,17 +129,16 @@ export function TextBasedDataPanel({
             isActive={false}
             onClick={() => {}}
             fieldIcon={<LensFieldIcon type={field?.meta.type as DataType} />}
-            fieldName={field?.name}
+            fieldName={
+              <EuiHighlight search={wrapOnDot(fieldNameHighlight)}>
+                {wrapOnDot(field.name)}
+              </EuiHighlight>
+            }
           />
         </DragDrop>
       );
     },
-    []
-  );
-
-  const changeFieldNameFilter = useCallback(
-    (newValue) => setLocalState((s) => ({ ...s, nameFilter: newValue })),
-    [setLocalState]
+    [fieldNameHighlight]
   );
 
   return (
@@ -164,9 +156,8 @@ export function TextBasedDataPanel({
         >
           <EuiFlexItem grow={false}>
             <FieldListFilters
-              nameFilter={localState.nameFilter}
+              {...fieldListFilters.fieldListFiltersProps}
               fieldSearchDescriptionId={fieldSearchDescriptionId}
-              onChangeNameFilter={changeFieldNameFilter}
             />
           </EuiFlexItem>
           <EuiFlexItem>

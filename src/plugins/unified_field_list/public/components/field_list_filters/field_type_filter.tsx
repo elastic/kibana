@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FieldTypeForFilter } from '../../types';
+import { FIELD_TYPE_NAMES } from './field_type_names';
 
 export interface FieldTypeFilterProps {
   selectedFieldTypes: FieldTypeForFilter[];
@@ -77,7 +78,7 @@ export const FieldTypeFilter: React.FC<FieldTypeFilterProps> = ({
             }}
           >
             <span className="lnsInnerIndexPatternDataPanel__filterTypeInner">
-              {`TODO icon`} {`TODO ${type}`}
+              {`TODO icon`} {FIELD_TYPE_NAMES[type] ?? type}
             </span>
           </EuiContextMenuItem>
         ))}

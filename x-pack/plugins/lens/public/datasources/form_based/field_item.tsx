@@ -24,6 +24,7 @@ import {
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverVisualize,
+  wrapOnDot,
 } from '@kbn/unified-field-list-plugin/public';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { DragDrop } from '../../drag_drop';
@@ -56,13 +57,6 @@ export interface FieldItemProps {
   removeField?: (name: string) => void;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
   uiActions: UiActionsStart;
-}
-
-function wrapOnDot(str?: string) {
-  // u200B is a non-width white-space character, which allows
-  // the browser to efficiently word-wrap right after the dot
-  // without us having to draw a lot of extra DOM elements, etc
-  return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
 export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
