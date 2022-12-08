@@ -475,6 +475,23 @@ declare namespace Mocha {
      * @see https://mochajs.org/api/Mocha.Suite.html#run
      */
     run(): void;
+
+    /**
+     * Attach the given tag(s) to this suite so that the suite can be applied
+     * via `--include-tag` or `--exclude-tag` CLI flags.
+     */
+    tags(tags: string | string[]): void;
+
+    /**
+     * A required version range for ES. When these tests are run against an ES
+     * instance that is not within the given version range, the tests in this
+     * suite will be automatically skipped.
+     *
+     * @param {string} semver A semver version range, like ">=8".
+     *  See https://docs.npmjs.com/cli/v6/using-npm/semver#ranges for
+     *  information about syntax
+     */
+    onlyEsVersion(semver: string): void;
   }
 
   /**
