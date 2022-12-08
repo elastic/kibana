@@ -183,6 +183,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       describe('draft comments', () => {
+        createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
         it('persists new comment when status is updated in dropdown', async () => {
           const commentArea = await find.byCssSelector(
             '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
@@ -271,13 +273,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('actions', () => {
-      beforeEach(async () => {
-        await createAndNavigateToCase(getPageObject, getService);
-      });
-
-      afterEach(async () => {
-        await cases.api.deleteAllCases();
-      });
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
       it('deletes the case successfully', async () => {
         await cases.singleCase.deleteCase();
