@@ -10,31 +10,87 @@ import { render } from '@testing-library/react';
 import { AddToExistingCase } from './add_to_existing_case';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { generateMockFileIndicator, Indicator } from '../../../../../common/types/indicator';
+import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
+import { KibanaContext } from '../../../../hooks';
+
+const indicator: Indicator = generateMockFileIndicator();
+const onClick = () => window.alert('clicked');
+const casesServiceMock = casesPluginMock.createStartContract();
 
 describe('AddToExistingCase', () => {
   it('should render an EuiContextMenuItem', () => {
-    const indicator: Indicator = generateMockFileIndicator();
-    const onClick = () => window.alert('clicked');
+    const mockedServices = {
+      cases: {
+        ...casesServiceMock,
+        helpers: {
+          ...casesServiceMock.helpers,
+          canUseCases: () => ({
+            create: true,
+            update: true,
+          }),
+        },
+      },
+    };
+
     const component = render(
       <TestProvidersComponent>
-        <AddToExistingCase indicator={indicator} onClick={onClick} />
+        <KibanaContext.Provider value={{ services: mockedServices } as any}>
+          <AddToExistingCase indicator={indicator} onClick={onClick} />
+        </KibanaContext.Provider>
       </TestProvidersComponent>
     );
     expect(component).toMatchSnapshot();
   });
 
-  it('should render the EuiContextMenuItem disabled', () => {
-    const indicator: Indicator = generateMockFileIndicator();
+  it('should render the EuiContextMenuItem disabled if indicator is missing name', () => {
+    const mockedServices = {
+      cases: {
+        ...casesServiceMock,
+        helpers: {
+          ...casesServiceMock.helpers,
+          canUseCases: () => ({
+            create: true,
+            update: true,
+          }),
+        },
+      },
+    };
+
     const fields = { ...indicator.fields };
     delete fields['threat.indicator.name'];
     const indicatorMissingName = {
       _id: indicator._id,
       fields,
     };
-    const onClick = () => window.alert('clicked');
     const component = render(
       <TestProvidersComponent>
-        <AddToExistingCase indicator={indicatorMissingName} onClick={onClick} />
+        <KibanaContext.Provider value={{ services: mockedServices } as any}>
+          <AddToExistingCase indicator={indicatorMissingName} onClick={onClick} />
+        </KibanaContext.Provider>
+      </TestProvidersComponent>
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render the EuiContextMenuItem disabled if user has no update permission', () => {
+    const mockedServices = {
+      cases: {
+        ...casesServiceMock,
+        helpers: {
+          ...casesServiceMock.helpers,
+          canUseCases: () => ({
+            create: false,
+            update: false,
+          }),
+        },
+      },
+    };
+
+    const component = render(
+      <TestProvidersComponent>
+        <KibanaContext.Provider value={{ services: mockedServices } as any}>
+          <AddToExistingCase indicator={indicator} onClick={onClick} />
+        </KibanaContext.Provider>
       </TestProvidersComponent>
     );
     expect(component).toMatchSnapshot();

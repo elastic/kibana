@@ -55,6 +55,13 @@ export interface IndicatorsFlyoutProps {
    * We should be showing the filter in and out buttons when the flyout is used in the cases view.
    */
   kqlBarIntegration?: boolean;
+  /**
+   * Name of the indicator, used only when the flyout is rendered in the Cases view.
+   * Because the indicator name is a runtime field, when querying for the indicator from within
+   * the Cases view, this logic is not ran. Therefore, passing the name to the flyout is an
+   * easy (hopefully temporary) solution to display it within the flyout.
+   */
+  indicatorName?: string;
 }
 
 /**
@@ -64,6 +71,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
   indicator,
   closeFlyout,
   kqlBarIntegration = false,
+  indicatorName,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState(TAB_IDS.overview);
 
@@ -157,7 +165,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <IndicatorsFlyoutContext.Provider value={{ kqlBarIntegration }}>
+        <IndicatorsFlyoutContext.Provider value={{ kqlBarIntegration, indicatorName }}>
           {selectedTabContent}
         </IndicatorsFlyoutContext.Provider>
       </EuiFlyoutBody>
