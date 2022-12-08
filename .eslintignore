@@ -39,7 +39,7 @@ snapshots.js
 /packages/kbn-test/src/functional_test_runner/lib/config/__tests__/fixtures/
 /packages/kbn-ui-framework/dist
 /packages/kbn-flot-charts/lib
-/packages/kbn-monaco/src/painless/antlr
+/packages/kbn-monaco/src/**/antlr
 
 # Bazel
 /bazel-*
