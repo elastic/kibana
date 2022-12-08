@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { HttpSetup } from '../../../../private/var/tmp/_bazel_stephmilovic/f2692a3f20a774c59f0da1de1e889609/execroot/kibana/bazel-out/darwin_arm64-fastbuild/bin/packages/core/http/core-http-browser';
-import type { NotificationsStart } from '../../../../private/var/tmp/_bazel_stephmilovic/f2692a3f20a774c59f0da1de1e889609/execroot/kibana/bazel-out/darwin_arm64-fastbuild/bin/packages/core/notifications/core-notifications-browser';
-import { createTransform, deleteTransforms, getTransformState, stopTransforms } from './transforms';
+import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
+import import { createTransform, deleteTransforms, getTransformState, stopTransforms } from './transforms';
 
 const mockRequest = jest.fn();
 const mockHttp = {

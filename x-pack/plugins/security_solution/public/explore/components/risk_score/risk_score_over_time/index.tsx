@@ -19,7 +19,7 @@ import {
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
-import { euiThemeVars } from '../../../../private/var/tmp/_bazel_stephmilovic/f2692a3f20a774c59f0da1de1e889609/execroot/kibana/bazel-out/darwin_arm64-fastbuild/bin/packages/kbn-ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { chartDefaultSettings, useTheme } from '../../../../common/components/charts/common';
 import { useTimeZone } from '../../../../common/lib/kibana';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';

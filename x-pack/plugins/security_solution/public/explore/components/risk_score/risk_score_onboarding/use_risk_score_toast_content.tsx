@@ -8,7 +8,7 @@
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '../../../../private/var/tmp/_bazel_stephmilovic/f2692a3f20a774c59f0da1de1e889609/execroot/kibana/bazel-out/darwin_arm64-fastbuild/bin/packages/kbn-i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoreDocLink } from './risk_score_doc_link';

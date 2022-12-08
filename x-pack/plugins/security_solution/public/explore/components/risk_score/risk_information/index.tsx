@@ -23,7 +23,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React from 'react';
-import { FormattedMessage } from '../../../../private/var/tmp/_bazel_stephmilovic/f2692a3f20a774c59f0da1de1e889609/execroot/kibana/bazel-out/darwin_arm64-fastbuild/bin/packages/kbn-i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getRiskEntityTranslation } from '../translations';
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../../helper_hooks';
