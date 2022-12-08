@@ -9,14 +9,14 @@ import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
-import type { AlertsBySeverityAgg, EntityFilter, ParsedAlertsData } from './types';
-import type { ESBoolQuery } from '../../../../../common/typed_json';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
-import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
+import type { AlertsBySeverityAgg, EntityFilter, ParsedSeverityData } from '../types';
+import type { ESBoolQuery } from '../../../../../../common/typed_json';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
 // import { useQueryInspector } from '../../../../common/components/page/manage_query';
-import { useInspectButton } from '../common/hooks';
-import { parseAlertsData } from './helpers';
+import { useInspectButton } from '../../common/hooks';
+import { parseSeverityAlerts } from '../helpers';
 
 export const getAlertsBySeverityQuery = ({
   additionalFilters = [],
@@ -70,7 +70,7 @@ export interface UseSeverityChartProps {
 }
 
 export type UseAlertsBySeverity = (props: UseSeverityChartProps) => {
-  items: ParsedAlertsData;
+  items: ParsedSeverityData;
   isLoading: boolean;
   updatedAt: number;
 };
@@ -86,7 +86,7 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
-  const [items, setItems] = useState<null | ParsedAlertsData>(null);
+  const [items, setItems] = useState<null | ParsedSeverityData>(null);
 
   const additionalFilters = useMemo(() => {
     try {
@@ -138,7 +138,7 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
     if (data == null) {
       setItems(null);
     } else {
-      setItems(parseAlertsData(data));
+      setItems(parseSeverityAlerts(data));
     }
     setUpdatedAt(Date.now());
   }, [data]);

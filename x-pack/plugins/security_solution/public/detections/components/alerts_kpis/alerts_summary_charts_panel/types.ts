@@ -6,21 +6,16 @@
  */
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 
-export interface SeverityBuckets {
-  key: Severity;
-  value: number;
-  label: string;
-}
-
-export type ParsedAlertsData = SeverityBuckets[] | undefined | null;
 export interface EntityFilter {
   field: string;
   value: string;
 }
 
-interface SeverityBucket {
+export type ParsedSeverityData = SeverityData[] | undefined | null;
+export interface SeverityData {
   key: Severity;
-  doc_count: number;
+  value: number;
+  label: string;
 }
 
 export interface AlertsBySeverityAgg {
@@ -30,8 +25,11 @@ export interface AlertsBySeverityAgg {
     buckets: SeverityBucket[];
   };
 }
-
-export interface AlertsBySeverityResponse<Hit = {}, Aggregations = {} | undefined> {
+interface SeverityBucket {
+  key: Severity;
+  doc_count: number;
+}
+export interface AlertsResponse<Hit = {}, Aggregations = {} | undefined> {
   took: number;
   _shards: {
     total: number;

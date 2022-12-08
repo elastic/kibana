@@ -5,16 +5,15 @@
  * 2.0.
  */
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { AlertsBySeverityResponse, AlertsBySeverityAgg, ParsedAlertsData } from './types';
+import type { AlertsResponse, AlertsBySeverityAgg, ParsedSeverityData } from './types';
 import * as i18n from './translations';
 import { severityLabels } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
 
-
-export const parseAlertsData = (
-  response: AlertsBySeverityResponse<{}, AlertsBySeverityAgg>
-): ParsedAlertsData => {
+export const parseSeverityAlerts = (
+  response: AlertsResponse<{}, AlertsBySeverityAgg>
+): ParsedSeverityData => {
   const severityBuckets = response?.aggregations?.statusBySeverity?.buckets ?? [];
   if (severityBuckets.length === 0) {
     return null;

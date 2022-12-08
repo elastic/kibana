@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { mount } from 'enzyme';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { TestProviders } from '../../../../common/mock';
 import { AlertsSummaryChartsPanel } from '.';
@@ -18,7 +17,6 @@ jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
-
 
 describe('AlertsChartsPanel', () => {
   const defaultProps = {
@@ -36,28 +34,28 @@ describe('AlertsChartsPanel', () => {
     jest.restoreAllMocks();
   });
 
-  test('renders correctly', async() => {
+  test('renders correctly', async () => {
+    await act(async () => {
       const { container } = render(
         <TestProviders>
           <AlertsSummaryChartsPanel {...defaultProps} />
         </TestProviders>
       );
-      await waitFor(() => {
-        expect(container.querySelector('[data-test-subj="alerts-charts-panel"]')).toBeInTheDocument();
-      });
+      expect(container.querySelector('[data-test-subj="alerts-charts-panel"]')).toBeInTheDocument();
+    });
   });
 
-  test('it renders the header with the specified `alignHeader` alignment', async() => {
+  test('it renders the header with the specified `alignHeader` alignment', async () => {
+    await act(async () => {
       const { container } = render(
         <TestProviders>
           <AlertsSummaryChartsPanel {...defaultProps} alignHeader="flexEnd" />
         </TestProviders>
       );
-      await waitFor(() => {
-        expect(
-          container.querySelector('[data-test-subj="headerSectionInnerFlexGroup"]')?.classList[1]
-        ).toContain('flexEnd');
-      });
+      expect(
+        container.querySelector('[data-test-subj="headerSectionInnerFlexGroup"]')?.classList[1]
+      ).toContain('flexEnd');
+    });
   });
 
   describe('Query', () => {
@@ -74,37 +72,34 @@ describe('AlertsChartsPanel', () => {
             <AlertsSummaryChartsPanel {...props} />
           </TestProviders>
         );
-
-        await waitFor(() => {
-          expect(container.querySelector('[data-test-subj="severty-chart"]')).toBeInTheDocument();
-        });
+        expect(container.querySelector('[data-test-subj="severty-chart"]')).toBeInTheDocument();
       });
     });
   });
 
   describe('toggleQuery', () => {
     test('toggles', async () => {
-        const wrapper = mount(
+      await act(async () => {
+        const { container } = render(
           <TestProviders>
             <AlertsSummaryChartsPanel {...defaultProps} />
           </TestProviders>
         );
-      await act(async () => {
-        wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
-        await waitFor(() => {
-          expect(mockSetToggle).toBeCalledWith(false);
-        });
-        wrapper.unmount();
+        const element = container.querySelector('[data-test-subj="query-toggle-header"]');
+        if (element) {
+          fireEvent.click(element);
+        }
+        expect(mockSetToggle).toBeCalledWith(false);
       });
     });
 
     test('toggleStatus=true, render', async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsSummaryChartsPanel {...defaultProps} />
-        </TestProviders>
-      );
-      await waitFor(async () => {
+      await act(async () => {
+        const { container } = render(
+          <TestProviders>
+            <AlertsSummaryChartsPanel {...defaultProps} />
+          </TestProviders>
+        );
         expect(
           container.querySelector('[data-test-subj="alerts-charts-container"]')
         ).toBeInTheDocument();
@@ -112,13 +107,13 @@ describe('AlertsChartsPanel', () => {
     });
 
     test('toggleStatus=false, hide', async () => {
-      mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
-      const { container } = render(
-        <TestProviders>
-          <AlertsSummaryChartsPanel {...defaultProps} />
-        </TestProviders>
-      );
-      await waitFor(async () => {
+      await act(async () => {
+        mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+        const { container } = render(
+          <TestProviders>
+            <AlertsSummaryChartsPanel {...defaultProps} />
+          </TestProviders>
+        );
         expect(
           container.querySelector('[data-test-subj="alerts-charts-container"]')
         ).not.toBeInTheDocument();

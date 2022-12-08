@@ -14,8 +14,8 @@ import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useSeverityChartData } from './use_severity_chart_data';
-import { SeverityLevelChart } from './severity_level_chart';
+import { useSeverityChartData } from './severity_donut/use_severity_chart_data';
+import { SeverityLevelChart } from './severity_donut/severity_level_chart';
 
 const DETECTIONS_ALERTS_CHARTS_ID = 'detections-alerts-charts';
 
@@ -69,7 +69,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
     [setQuerySkip, setToggleStatus]
   );
 
-  const { items: severityData, isLoading } = useSeverityChartData({
+  const { items: severityData, isLoading: isSeverityLoading } = useSeverityChartData({
     filters,
     query,
     signalIndexName,
@@ -100,7 +100,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
           <PlaceHolder title={'Detections'} />
           <SeverityLevelChart
             data={severityData}
-            isLoading={isLoading}
+            isLoading={isSeverityLoading}
             uniqueQueryId={uniqueQueryId}
             addFilter={addFilter}
           />
