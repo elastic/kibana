@@ -18,7 +18,7 @@ import { updateColumnParam } from '../../layer_helpers';
 import { supportedFormats } from '../../../../../../common/expressions/format_column/supported_formats';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 import { IndexPattern, IndexPatternField } from '../../../../../types';
-import { getInvalidFieldMessage, isValidNumber } from '../helpers';
+import { getWrongFieldTypeMessage, getMissingFieldMessage, isValidNumber } from '../helpers';
 
 type RangeType = Omit<Range, 'type'>;
 // Try to cover all possible serialized states for ranges
@@ -82,8 +82,10 @@ export const rangeOperation: OperationDefinition<
   }),
   priority: 4, // Higher than terms, so numbers get histogram
   input: 'field',
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getWrongFieldTypeMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   getWarningMessages: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(
+    getMissingFieldMessage(
       layer.columns[columnId] as FieldBasedIndexPatternColumn,
       indexPattern
     )?.map((msg) => <div>{msg}</div>),

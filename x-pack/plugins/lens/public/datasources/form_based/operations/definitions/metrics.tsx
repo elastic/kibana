@@ -13,11 +13,12 @@ import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
-  getInvalidFieldMessage,
   getSafeName,
   getFilter,
   combineErrorMessages,
   isColumnOfType,
+  getWrongFieldTypeMessage,
+  getMissingFieldMessage,
 } from './helpers';
 import {
   FieldBasedIndexPatternColumn,
@@ -211,11 +212,15 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 
     getErrorMessage: (layer, columnId, indexPattern) =>
       combineErrorMessages([
+        getWrongFieldTypeMessage(
+          layer.columns[columnId] as FieldBasedIndexPatternColumn,
+          indexPattern
+        ),
         getDisallowedPreviousShiftMessage(layer, columnId),
         getColumnReducedTimeRangeError(layer, columnId, indexPattern),
       ]),
     getWarningMessages: (layer, columnId, indexPattern) =>
-      getInvalidFieldMessage(
+      getMissingFieldMessage(
         layer.columns[columnId] as FieldBasedIndexPatternColumn,
         indexPattern
       )?.map((msg) => <div>{msg}</div>),

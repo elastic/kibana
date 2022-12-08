@@ -32,7 +32,7 @@ import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { updateColumnParam } from '../layer_helpers';
 import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
-import { getInvalidFieldMessage, getSafeName } from './helpers';
+import { getMissingFieldMessage, getSafeName, getWrongFieldTypeMessage } from './helpers';
 import { FormBasedLayer } from '../../types';
 import { TooltipWrapper } from '../../../../shared_components';
 
@@ -85,9 +85,15 @@ export const dateHistogramOperation: OperationDefinition<
   priority: 5, // Highest priority level used
   operationParams: [{ name: 'interval', type: 'string', required: false }],
   getErrorMessage: (layer, columnId, indexPattern) =>
-    [getMultipleDateHistogramsErrorMessage(layer, columnId) || ''].filter(Boolean),
+    [
+      getWrongFieldTypeMessage(
+        layer.columns[columnId] as FieldBasedIndexPatternColumn,
+        indexPattern
+      ),
+      getMultipleDateHistogramsErrorMessage(layer, columnId) || '',
+    ].filter(Boolean),
   getWarningMessages: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(
+    getMissingFieldMessage(
       layer.columns[columnId] as FieldBasedIndexPatternColumn,
       indexPattern
     )?.map((msg) => <div>{msg}</div>),

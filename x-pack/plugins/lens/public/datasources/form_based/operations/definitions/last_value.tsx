@@ -24,9 +24,10 @@ import type { IndexPatternField, IndexPattern } from '../../../../types';
 import { DataType } from '../../../../types';
 import {
   getFormatFromPreviousColumn,
-  getInvalidFieldMessage,
   getSafeName,
   getFilter,
+  getMissingFieldMessage,
+  getWrongFieldTypeMessage,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
@@ -63,7 +64,7 @@ const supportedTypes = new Set([
   'date_range',
 ]);
 
-export function getInvalidSortFieldMessage(
+export function getMissingSortFieldMessage(
   sortField: string,
   indexPattern?: IndexPattern
 ): undefined | string {
@@ -77,7 +78,17 @@ export function getInvalidSortFieldMessage(
       values: { invalidField: sortField },
     });
   }
-  if (field.type !== 'date') {
+}
+
+export function getWrongSortFieldTypeMessage(
+  sortField: string,
+  indexPattern?: IndexPattern
+): undefined | string {
+  if (!indexPattern) {
+    return;
+  }
+  const field = indexPattern.getFieldByName(sortField);
+  if (field?.type !== 'date') {
     return i18n.translate('xpack.lens.indexPattern.lastValue.invalidTypeSortField', {
       defaultMessage: 'Field {invalidField} is not a date field and cannot be used for sorting',
       values: { invalidField: sortField },
@@ -194,6 +205,17 @@ export const lastValueOperation: OperationDefinition<
   },
   getErrorMessage(layer, columnId, indexPattern) {
     const errorMessages: string[] = [];
+    const column = layer.columns[columnId] as LastValueIndexPatternColumn;
+
+    const wrongFieldTypeMessage = getWrongFieldTypeMessage(column, indexPattern);
+    const wrongSortFieldTypeMessage = getWrongSortFieldTypeMessage(
+      column.params.sortField,
+      indexPattern
+    );
+
+    if (wrongFieldTypeMessage) errorMessages.push(...wrongFieldTypeMessage);
+    if (wrongSortFieldTypeMessage) errorMessages.push(wrongSortFieldTypeMessage);
+
     errorMessages.push(...(getDisallowedPreviousShiftMessage(layer, columnId) || []));
     errorMessages.push(...(getColumnReducedTimeRangeError(layer, columnId, indexPattern) || []));
     return errorMessages.length ? errorMessages : undefined;
@@ -201,14 +223,14 @@ export const lastValueOperation: OperationDefinition<
   getWarningMessages(layer, columnId, indexPattern) {
     const warningMessages = [];
     const column = layer.columns[columnId] as LastValueIndexPatternColumn;
-    const invalidFieldMessage = getInvalidFieldMessage(column, indexPattern);
-    const invalidSortFieldMessage = getInvalidSortFieldMessage(
+    const missingFieldMessage = getMissingFieldMessage(column, indexPattern);
+    const wrongSortFieldTypeMessage = getMissingSortFieldMessage(
       column.params.sortField,
       indexPattern
     );
 
-    if (invalidFieldMessage) warningMessages.push(...invalidFieldMessage);
-    if (invalidSortFieldMessage) warningMessages.push(invalidSortFieldMessage);
+    if (missingFieldMessage) warningMessages.push(...missingFieldMessage);
+    if (wrongSortFieldTypeMessage) warningMessages.push(wrongSortFieldTypeMessage);
 
     return warningMessages.map((msg) => <div>{msg}</div>);
   },
@@ -310,7 +332,7 @@ export const lastValueOperation: OperationDefinition<
       });
 
     const dateFields = getDateFields(indexPattern);
-    const isSortFieldInvalid = !!getInvalidSortFieldMessage(
+    const isSortFieldInvalid = !!getWrongSortFieldTypeMessage(
       currentColumn.params.sortField,
       indexPattern
     );

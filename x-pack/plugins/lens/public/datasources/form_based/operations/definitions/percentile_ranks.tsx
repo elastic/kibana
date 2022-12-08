@@ -13,12 +13,13 @@ import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
-  getInvalidFieldMessage,
   getSafeName,
   isValidNumber,
   getFilter,
   isColumnOfType,
   combineErrorMessages,
+  getWrongFieldTypeMessage,
+  getMissingFieldMessage,
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
@@ -167,11 +168,15 @@ export const percentileRanksOperation: OperationDefinition<
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
+      getWrongFieldTypeMessage(
+        layer.columns[columnId] as FieldBasedIndexPatternColumn,
+        indexPattern
+      ),
       getDisallowedPreviousShiftMessage(layer, columnId),
       getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   getWarningMessages: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(
+    getMissingFieldMessage(
       layer.columns[columnId] as FieldBasedIndexPatternColumn,
       indexPattern
     )?.map((msg) => <div>{msg}</div>),

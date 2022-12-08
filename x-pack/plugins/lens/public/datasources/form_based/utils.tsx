@@ -42,7 +42,7 @@ import {
   getReferencedColumnIds,
 } from './operations';
 
-import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
+import { getWrongFieldTypeMessage, isColumnOfType } from './operations/definitions/helpers';
 import { FiltersIndexPatternColumn } from './operations/definitions/filters';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
@@ -129,7 +129,7 @@ export function fieldIsInvalid(
   if (!column || !hasField(column)) {
     return false;
   }
-  return !!getInvalidFieldMessage(column, indexPattern)?.length;
+  return !!getWrongFieldTypeMessage(column, indexPattern)?.length;
 }
 
 const accuracyModeDisabledWarning = (

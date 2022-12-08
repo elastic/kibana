@@ -16,11 +16,12 @@ import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import type { IndexPatternField } from '../../../../types';
 import {
-  getInvalidFieldMessage,
   getFilter,
   combineErrorMessages,
   getFormatFromPreviousColumn,
   isColumnOfType,
+  getWrongFieldTypeMessage,
+  getMissingFieldMessage,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
@@ -91,11 +92,15 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   input: 'field',
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
+      getWrongFieldTypeMessage(
+        layer.columns[columnId] as FieldBasedIndexPatternColumn,
+        indexPattern
+      ),
       getDisallowedPreviousShiftMessage(layer, columnId),
       getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   getWarningMessages: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(
+    getMissingFieldMessage(
       layer.columns[columnId] as FieldBasedIndexPatternColumn,
       indexPattern
     )?.map((msg) => <div>{msg}</div>),

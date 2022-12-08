@@ -35,7 +35,7 @@ import {
   IncompleteColumn,
 } from '../column_types';
 import { ValuesInput } from './values_input';
-import { getInvalidFieldMessage, isColumn } from '../helpers';
+import { getMissingFieldMessage, getWrongFieldTypeMessage, isColumn } from '../helpers';
 import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
 import {
   FieldInput as FieldInputBase,
@@ -187,13 +187,17 @@ export const termsOperation: OperationDefinition<
   },
   getErrorMessage: (layer, columnId, indexPattern) => {
     const messages = [
+      getWrongFieldTypeMessage(
+        layer.columns[columnId] as FieldBasedIndexPatternColumn,
+        indexPattern
+      ),
       getDisallowedTermsMessage(layer, columnId, indexPattern) || '',
       getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern) || '',
     ].filter(Boolean);
     return messages.length ? messages : undefined;
   },
   getWarningMessages: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(
+    getMissingFieldMessage(
       layer.columns[columnId] as FieldBasedIndexPatternColumn,
       indexPattern
     )?.map((msg) => <div>{msg}</div>),
