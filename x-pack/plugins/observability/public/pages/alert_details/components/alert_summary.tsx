@@ -28,28 +28,12 @@ import {
   ALERT_STATUS_RECOVERED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import {
-  AlertEvaluationUnitType,
-  getAlertEvaluationUnitTypeByRuleTypeId,
-} from '../../../utils/get_alert_evaluation_unit_type_by_rule_type_id';
-import { asDuration, asMillisecondDuration, asPercent } from '../../../../common/utils/formatters';
+import { formatAlertEvaluationValue } from '../../../utils/format_ alert_evaluation_value';
+import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSummaryProps } from '../types';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
 import { DEFAULT_DATE_FORMAT } from '../constants';
 import { CenterJustifiedSpinner } from '../../rule_details/components/center_justified_spinner';
-
-const formatAlertEvaluationValue = (ruleTypeId: string, evaluationValue?: number) => {
-  if (!evaluationValue || !ruleTypeId) return '-';
-  const unitType = getAlertEvaluationUnitTypeByRuleTypeId(ruleTypeId);
-  switch (unitType as AlertEvaluationUnitType) {
-    case AlertEvaluationUnitType.Duration:
-      return asMillisecondDuration(evaluationValue);
-    case AlertEvaluationUnitType.Percent:
-      return asPercent(evaluationValue, 100);
-    default:
-      break;
-  }
-};
 
 export function AlertSummary({ alert }: AlertSummaryProps) {
   if (!alert) {
