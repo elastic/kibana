@@ -15,6 +15,7 @@ import type {
   CheckAuthorizationResult,
   EnforceAuthorizationParams,
   ISavedObjectsSecurityExtension,
+  PerformAuthorizationParams,
   RedactNamespacesParams,
 } from '@kbn/core-saved-objects-server';
 
@@ -156,6 +157,30 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       throw error;
     }
     auditCallback?.();
+  }
+
+  async performAuthorization<A extends string>(
+    params: PerformAuthorizationParams<A>
+  ): Promise<CheckAuthorizationResult<A>> {
+    const checkResult: CheckAuthorizationResult<A> = await this.checkAuthorization({
+      types: params.types,
+      spaces: params.spaces,
+      actions: params.actions,
+      options: { allowGlobalResource: params.options?.allowGlobalResource === true },
+    });
+
+    if (params.enforceMap !== undefined && checkResult) {
+      params.actions.forEach((action) => {
+        this.enforceAuthorization({
+          typesAndSpaces: params.enforceMap!,
+          action,
+          typeMap: checkResult.typeMap,
+          auditCallback: params.auditCallback,
+        });
+      });
+    }
+
+    return checkResult;
   }
 
   addAuditEvent(params: AddAuditEventParams): void {

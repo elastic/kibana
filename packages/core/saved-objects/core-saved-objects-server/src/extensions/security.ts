@@ -10,6 +10,43 @@ import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type { EcsEventOutcome } from '@kbn/logging';
 
 /**
+ * The PerformAuthorizationParams interface contains settings for checking
+ * & enforcing authorization via the ISavedObjectsSecurityExtension.
+ */
+export interface PerformAuthorizationParams<A extends string> {
+  /**
+   * An set of actions to check.
+   */
+  actions: Set<A>;
+  /**
+   * A set of types to check.
+   */
+  types: Set<string>;
+  /**
+   * A set of spaces to check (types to check comes from the typesAndSpaces map).
+   */
+  spaces: Set<string>;
+  /**
+   * A map of types (key) to spaces (value) that will be affected by the action(s).
+   * If undefined, enforce with be bypassed.
+   */
+  enforceMap?: Map<string, Set<string>>;
+  /**
+   * A callback intended to handle adding audit events in
+   * both error (unauthorized), or success (authorized)
+   * cases
+   */
+  auditCallback?: (error?: Error) => void;
+  /**
+   * Authorization options
+   * allowGlobalResource - whether or not to allow global resources, false if options are undefined
+   */
+  options?: {
+    allowGlobalResource: boolean;
+  };
+}
+
+/**
  * The CheckAuthorizationParams interface contains settings for checking
  * authorization via the ISavedObjectsSecurityExtension.
  */
@@ -192,6 +229,15 @@ export interface ISavedObjectsSecurityExtension {
    * @param params - map of types/spaces, action to check, and authz map (from CheckAuthorizationResult)
    */
   enforceAuthorization: <T extends string>(params: EnforceAuthorizationParams<T>) => void;
+
+  /**
+   * Performs authorization (check & enforce) of actions on specified types in specified spaces.
+   * @param params - actions, types & spaces map, audit callback, options
+   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   */
+  performAuthorization: <T extends string>(
+    params: PerformAuthorizationParams<T>
+  ) => Promise<CheckAuthorizationResult<T>>;
 
   /**
    * Adds an audit event for the specified action with relevant information
