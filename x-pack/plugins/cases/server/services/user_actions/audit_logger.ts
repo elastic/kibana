@@ -14,7 +14,7 @@ const actionsToEcsType: Record<Action, EcsEventType> = {
   add: 'change',
   delete: 'deletion',
   create: 'creation',
-  push_to_service: 'creation',
+  push_to_service: 'change',
   update: 'change',
 };
 
@@ -32,6 +32,7 @@ export class UserActionAuditLogger {
         action: event.descriptiveAction,
         category: ['database'],
         type: [actionsToEcsType[event.action]],
+        outcome: 'success',
       },
       kibana: {
         saved_object: {

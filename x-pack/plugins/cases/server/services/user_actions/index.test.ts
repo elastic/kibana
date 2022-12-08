@@ -741,6 +741,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "creation",
                   ],
@@ -799,6 +800,7 @@ describe('CaseUserActionService', () => {
                     "category": Array [
                       "database",
                     ],
+                    "outcome": "success",
                     "type": Array [
                       "change",
                     ],
@@ -858,6 +860,7 @@ describe('CaseUserActionService', () => {
                     "category": Array [
                       "database",
                     ],
+                    "outcome": "success",
                     "type": Array [
                       "change",
                     ],
@@ -936,8 +939,9 @@ describe('CaseUserActionService', () => {
                     "category": Array [
                       "database",
                     ],
+                    "outcome": "success",
                     "type": Array [
-                      "creation",
+                      "change",
                     ],
                   },
                   "kibana": Object {
@@ -1030,6 +1034,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1050,6 +1055,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1255,6 +1261,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1275,6 +1282,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1295,6 +1303,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1315,6 +1324,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1335,6 +1345,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1355,6 +1366,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1375,6 +1387,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1395,6 +1408,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1477,6 +1491,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1579,6 +1594,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1709,6 +1725,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1729,6 +1746,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1836,6 +1854,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "change",
                   ],
@@ -1856,6 +1875,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1951,6 +1971,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
@@ -1971,6 +1992,7 @@ describe('CaseUserActionService', () => {
                   "category": Array [
                     "database",
                   ],
+                  "outcome": "success",
                   "type": Array [
                     "deletion",
                   ],
