@@ -8,6 +8,7 @@
 import {
   EuiFieldNumber,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiSelect,
   useGeneratedHtmlId,
@@ -74,23 +75,27 @@ export function LongWindowDuration({ initialDuration, onChange }: Props) {
   return (
     <EuiFormRow label={rowLabel} fullWidth isInvalid={!!error} error={error}>
       <EuiFlexGroup direction="row">
-        <EuiFieldNumber
-          isInvalid={!!error}
-          min={1}
-          value={durationValue}
-          onChange={onDurationValueChange}
-          aria-label={valueLabel}
-          data-test-subj="durationValueInput"
-        />
-        <EuiSelect
-          id={selectId}
-          isInvalid={!!error}
-          options={durationUnitOptions}
-          value={durationUnit}
-          onChange={onDurationUnitChange}
-          aria-label={unitLabel}
-          data-test-subj="durationUnitSelect"
-        />
+        <EuiFlexItem grow={false} style={{ width: 100 }}>
+          <EuiFieldNumber
+            isInvalid={!!error}
+            min={1}
+            value={durationValue}
+            onChange={onDurationValueChange}
+            aria-label={valueLabel}
+            data-test-subj="durationValueInput"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSelect
+            id={selectId}
+            isInvalid={!!error}
+            options={durationUnitOptions}
+            value={durationUnit}
+            onChange={onDurationUnitChange}
+            aria-label={unitLabel}
+            data-test-subj="durationUnitSelect"
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
   );
