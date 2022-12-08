@@ -8,8 +8,8 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import type { RowRenderer } from '../../../../../../../common/types/timeline';
-import { RowRendererId } from '../../../../../../../common/types/timeline';
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
+import { RowRendererId } from '@kbn-securitysolution-row-renderers';
 
 import { RowRendererContainer } from '../row_renderer';
 import { SuricataDetails } from './suricata_details';

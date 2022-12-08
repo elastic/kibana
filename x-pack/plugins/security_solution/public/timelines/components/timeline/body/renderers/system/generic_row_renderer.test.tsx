@@ -79,7 +79,7 @@ import {
   createSocketRowRenderer,
 } from './generic_row_renderer';
 import * as i18n from './translations';
-import type { RowRenderer } from '../../../../../../../common/types';
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
 import { TimelineId } from '../../../../../../../common/types';
 
 // EuiIcons coming from .testenv render the icon's aria-label as a span

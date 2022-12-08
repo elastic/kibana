@@ -11,6 +11,7 @@ import uuid from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
+import type { RowRendererId } from '@kbn-securitysolution-row-renderers';
 import type { SessionViewConfig, ExpandedDetailTimeline } from '../../../../common/types';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Sort } from '../../components/timeline/body/sort';
@@ -28,7 +29,6 @@ import type {
   ColumnHeaderOptions,
   TimelineEventsType,
   TimelineTypeLiteral,
-  RowRendererId,
   SerializedFilterQuery,
   TimelinePersistInput,
   ToggleDetailPanel,

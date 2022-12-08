@@ -8,7 +8,9 @@
 import * as runtimeTypes from 'io-ts';
 
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
-import { stringEnum, unionWithNullType } from '../../utility_types';
+import { RowRendererIdRuntimeType } from '@kbn/securitysolution-row-renderers';
+import type { RowRendererId } from '@kbn/securitysolution-row-renderers';
+import { unionWithNullType } from '../../utility_types';
 import type { NoteResult, NoteSavedObject } from './note';
 import { NoteSavedObjectToReturnRuntimeType } from './note';
 import type { PinnedEvent } from './pinned_event';
@@ -209,31 +211,6 @@ const TimelineStatusLiteralWithNullRt = unionWithNullType(TimelineStatusLiteralR
 export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
   typeof TimelineStatusLiteralWithNullRt
 >;
-
-export enum RowRendererId {
-  /** event.kind: signal */
-  alert = 'alert',
-  /** endpoint alerts (created on the endpoint) */
-  alerts = 'alerts',
-  auditd = 'auditd',
-  auditd_file = 'auditd_file',
-  library = 'library',
-  netflow = 'netflow',
-  plain = 'plain',
-  registry = 'registry',
-  suricata = 'suricata',
-  system = 'system',
-  system_dns = 'system_dns',
-  system_endgame_process = 'system_endgame_process',
-  system_file = 'system_file',
-  system_fim = 'system_fim',
-  system_security_event = 'system_security_event',
-  system_socket = 'system_socket',
-  threat_match = 'threat_match',
-  zeek = 'zeek',
-}
-
-export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
 
 /**
  * Timeline template type

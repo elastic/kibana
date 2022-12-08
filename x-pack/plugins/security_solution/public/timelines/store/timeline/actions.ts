@@ -8,6 +8,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 import type { Filter } from '@kbn/es-query';
 
+import type { RowRendererId } from '@kbn-securitysolution-row-renderers';
 import type { SessionViewConfig } from '../../../../common/types';
 import type {
   DataProvider,
@@ -22,7 +23,6 @@ import type {
   TimelineNonEcsData,
 } from '../../../../common/search_strategy/timeline';
 import type {
-  RowRendererId,
   TimelineTabs,
   TimelinePersistInput,
   SerializedFilterQuery,

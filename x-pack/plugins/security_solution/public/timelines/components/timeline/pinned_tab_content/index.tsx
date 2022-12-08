@@ -14,6 +14,7 @@ import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import type { CellValueElementProps } from '../cell_rendering';
@@ -31,7 +32,7 @@ import { useTimelineFullScreen } from '../../../../common/containers/use_full_sc
 import type { TimelineModel } from '../../../store/timeline/model';
 import type { State } from '../../../../common/store';
 import { calculateTotalPages } from '../helpers';
-import type { RowRenderer, ToggleDetailPanel } from '../../../../../common/types/timeline';
+import type { ToggleDetailPanel } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';

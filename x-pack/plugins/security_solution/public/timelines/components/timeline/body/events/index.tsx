@@ -8,6 +8,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import type { inputsModel } from '../../../../../common/store';
 import type {
@@ -17,7 +18,6 @@ import type {
 import type {
   ColumnHeaderOptions,
   CellValueElementProps,
-  RowRenderer,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
 import type { OnRowSelected } from '../../events';

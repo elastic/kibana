@@ -14,7 +14,7 @@ import {
   ARIA_ROWINDEX_ATTRIBUTE,
   getRowRendererClassName,
 } from '@kbn/timelines-plugin/public';
-import type { RowRenderer } from '../../../../../../../common/types';
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
 import type { TimelineItem } from '../../../../../../../common/search_strategy/timeline';
 import { getRowRenderer } from '../../renderers/get_row_renderer';
 import { useStatefulEventFocus } from '../use_stateful_event_focus';

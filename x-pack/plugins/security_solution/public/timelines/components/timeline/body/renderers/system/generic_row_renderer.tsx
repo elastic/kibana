@@ -8,8 +8,8 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import type { RowRenderer } from '../../../../../../../common/types/timeline';
-import { RowRendererId } from '../../../../../../../common/types/timeline';
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
+import { RowRendererId } from '@kbn-securitysolution-row-renderers';
 
 import { DnsRequestEventDetails } from '../dns/dns_request_event_details';
 import { EndgameSecurityEventDetails } from '../endgame/endgame_security_event_details';

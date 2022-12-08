@@ -5,13 +5,9 @@
  * 2.0.
  */
 
+import type { RowRendererId } from '@kbn-securitysolution-row-renderers';
 import type { SortField, Maybe } from '../common';
-import type {
-  DataProviderType,
-  TimelineType,
-  TimelineStatus,
-  RowRendererId,
-} from '../../types/timeline';
+import type { DataProviderType, TimelineType, TimelineStatus } from '../../types/timeline';
 
 export * from './events';
 

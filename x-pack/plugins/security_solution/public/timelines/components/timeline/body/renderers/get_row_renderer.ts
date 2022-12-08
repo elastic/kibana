@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
 import { alertRenderer } from './alert_renderer';
 import { combineRenderers } from './combine_renderers';
-import type { RowRenderer } from '../../../../../../common/types';
 import type { Ecs } from '../../../../../../common/ecs';
 
 /**

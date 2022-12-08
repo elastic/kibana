@@ -10,9 +10,9 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
+import { RowRendererId } from '@kbn-securitysolution-row-renderers';
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
 import { AlertField } from './alert_field';
-import type { RowRenderer } from '../../../../../../../common/types';
-import { RowRendererId } from '../../../../../../../common/types';
 import {
   ID,
   DESTINATION_IP,

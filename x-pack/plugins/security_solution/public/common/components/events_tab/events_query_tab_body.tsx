@@ -10,9 +10,9 @@ import { useDispatch } from 'react-redux';
 
 import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { RowRendererId } from '@kbn/securitysolution-row-renderers';
 import type { TableId } from '../../../../common/types';
 import { dataTableActions } from '../../store/data_table';
-import { RowRendererId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import { MatrixHistogram } from '../matrix_histogram';

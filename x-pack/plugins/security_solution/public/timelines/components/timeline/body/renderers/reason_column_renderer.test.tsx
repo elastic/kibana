@@ -13,8 +13,10 @@ import { REASON_FIELD_NAME } from './constants';
 import { reasonColumnRenderer } from './reason_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 
-import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import { TableId, RowRendererId } from '../../../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
+import { TableId } from '../../../../../../common/types';
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
+import { RowRendererId } from '@kbn-securitysolution-row-renderers';
 
 import { render } from '@testing-library/react';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';

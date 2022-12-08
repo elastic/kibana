@@ -11,12 +11,8 @@ import type { Observable } from 'rxjs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import type {
-  ColumnHeaderOptions,
-  RowRendererId,
-  SortColumnTimeline,
-  TableById,
-} from '../../../../common/types';
+import type { RowRendererId } from '@kbn-securitysolution-row-renderers';
+import type { ColumnHeaderOptions, SortColumnTimeline, TableById } from '../../../../common/types';
 import type { inputsModel } from '../../../common/store/inputs';
 import type { NotesById } from '../../../common/store/app/model';
 

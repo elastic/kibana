@@ -3845,6 +3845,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-row_renderers@link:bazel-bin/packages/kbn-securitysolution-row-renderers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-rules@link:bazel-bin/packages/kbn-securitysolution-rules":
   version "0.0.0"
   uid ""

@@ -25,12 +25,9 @@ import type { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
 import type { DataTableCellAction } from '../../../../common/types';
-import type {
-  CellValueElementProps,
-  ColumnHeaderOptions,
-  RowRenderer,
-} from '../../../../common/types/timeline';
+import type { CellValueElementProps, ColumnHeaderOptions } from '../../../../common/types/timeline';
 
 import type { TimelineItem } from '../../../../common/search_strategy/timeline';
 

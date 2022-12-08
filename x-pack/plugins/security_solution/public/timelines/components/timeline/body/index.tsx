@@ -15,12 +15,13 @@ import {
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
+import { RowRendererId } from '@kbn-securitysolution-row-renderers';
 import { getActionsColumnWidth } from '../../../../common/components/header_actions';
 import type { ControlColumnProps } from '../../../../../common/types';
 import type { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
-import type { RowRenderer, TimelineTabs } from '../../../../../common/types/timeline';
-import { RowRendererId } from '../../../../../common/types/timeline';
+import type { TimelineTabs } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import type { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import type { inputsModel, State } from '../../../../common/store';

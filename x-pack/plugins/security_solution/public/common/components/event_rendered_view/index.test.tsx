@@ -9,7 +9,8 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { EventRenderedViewProps } from '.';
 import { EventRenderedView } from '.';
-import { RowRendererId, TableId } from '../../../../common/types';
+import { TableId } from '../../../../common/types';
+import { RowRendererId } from '@kbn-securitysolution-row-renderers';
 import { mockTimelineData, TestProviders } from '../../mock';
 
 const eventRenderedProps: EventRenderedViewProps = {

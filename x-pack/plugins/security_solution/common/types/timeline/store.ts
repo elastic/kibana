@@ -6,8 +6,8 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { RowRendererId, TimelineTypeLiteral } from '.';
-
+import type { RowRendererId } from '@kbn-securitysolution-row-renderers';
+import type { TimelineTypeLiteral } from '.';
 import type { Direction } from '../../search_strategy';
 import type { ExpandedDetailTimeline } from '../detail_panel';
 import type { ColumnHeaderOptions, ColumnId } from '../header_actions';

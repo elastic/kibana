@@ -24,6 +24,7 @@ import { InPortal } from 'react-reverse-portal';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
@@ -39,11 +40,8 @@ import { TimelineHeader } from '../header';
 import { calculateTotalPages } from '../helpers';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { TimelineRefetch } from '../refetch_timeline';
-import type {
-  KueryFilterQueryKind,
-  RowRenderer,
-  ToggleDetailPanel,
-} from '../../../../../common/types/timeline';
+import type { KueryFilterQueryKind, ToggleDetailPanel } from '../../../../../common/types/timeline';
+
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';

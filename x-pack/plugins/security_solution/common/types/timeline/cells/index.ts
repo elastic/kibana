@@ -7,7 +7,9 @@
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { ColumnHeaderOptions, RowRenderer } from '../..';
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
+import type { ColumnHeaderOptions } from '../..';
+
 import type { Ecs } from '../../../ecs';
 import type { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 

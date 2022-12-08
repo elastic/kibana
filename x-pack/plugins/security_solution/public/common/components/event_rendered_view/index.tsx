@@ -22,10 +22,10 @@ import styled from 'styled-components';
 
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
 import type { Ecs } from '../../../../common/ecs';
 import { APP_UI_ID } from '../../../../common/constants';
 import type { TimelineItem } from '../../../../common/search_strategy';
-import type { RowRenderer } from '../../../../common/types';
 import { RuleName } from '../rule_name';
 import { isEventBuildingBlockType } from './helpers';
 import { UnitCount } from '../toolbar/unit';

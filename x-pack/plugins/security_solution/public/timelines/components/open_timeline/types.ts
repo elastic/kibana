@@ -6,6 +6,7 @@
  */
 
 import type React from 'react';
+import type { RowRendererId } from '@kbn-securitysolution-row-renderers';
 import type { AllTimelinesVariables } from '../../containers/all';
 import type { TimelineModel } from '../../store/timeline/model';
 import type { NoteResult } from '../../../../common/types/timeline/note';
@@ -14,7 +15,6 @@ import type {
   TimelineTypeLiteralWithNull,
   TimelineStatus,
   TemplateTimelineTypeLiteral,
-  RowRendererId,
   TimelineStatusLiteralWithNull,
   SingleTimelineResolveResponse,
 } from '../../../../common/types/timeline';

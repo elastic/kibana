@@ -570,6 +570,8 @@
       "@kbn/securitysolution-list-hooks/*": ["packages/kbn-securitysolution-list-hooks/*"],
       "@kbn/securitysolution-list-utils": ["packages/kbn-securitysolution-list-utils"],
       "@kbn/securitysolution-list-utils/*": ["packages/kbn-securitysolution-list-utils/*"],
+      "@kbn/securitysolution-row_renderers": ["packages/kbn-securitysolution-row-renderers"],
+      "@kbn/securitysolution-row_renderers/*": ["packages/kbn-securitysolution-row-renderers/*"],
       "@kbn/securitysolution-rules": ["packages/kbn-securitysolution-rules"],
       "@kbn/securitysolution-rules/*": ["packages/kbn-securitysolution-rules/*"],
       "@kbn/securitysolution-t-grid": ["packages/kbn-securitysolution-t-grid"],

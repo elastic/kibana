@@ -11,8 +11,9 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 're
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
 import type { SessionViewConfig } from '../../../../../common/types';
-import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
+import type { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
 import {
   useShallowEqualSelector,
