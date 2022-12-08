@@ -7,9 +7,13 @@
  */
 
 import { schema, ValidationError } from '@kbn/config-schema';
-
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
-import type { InternalUiSettingsRouter } from '../internal_types';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type {
+  InternalUiSettingsRequestHandlerContext,
+  InternalUiSettingsRouter,
+} from '../internal_types';
 import { CannotOverrideError } from '../ui_settings_errors';
 
 const validate = {
@@ -22,36 +26,55 @@ const validate = {
 };
 
 export function registerSetRoute(router: InternalUiSettingsRouter) {
+  const setFromRequest = async (
+    uiSettingsClient: IUiSettingsClient,
+    context: InternalUiSettingsRequestHandlerContext,
+    request: KibanaRequest<
+      Readonly<{} & { key: string }>,
+      unknown,
+      Readonly<{ value?: any } & {}>,
+      'post'
+    >,
+    response: KibanaResponseFactory
+  ) => {
+    try {
+      const { key } = request.params;
+      const { value } = request.body;
+
+      await uiSettingsClient.set(key, value);
+
+      return response.ok({
+        body: {
+          settings: await uiSettingsClient.getUserProvided(),
+        },
+      });
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+        return response.customError({
+          body: error,
+          statusCode: error.output.statusCode,
+        });
+      }
+
+      if (error instanceof CannotOverrideError || error instanceof ValidationError) {
+        return response.badRequest({ body: error });
+      }
+
+      throw error;
+    }
+  };
   router.post(
     { path: '/api/kibana/settings/{key}', validate },
     async (context, request, response) => {
-      try {
-        const uiSettingsClient = (await context.core).uiSettings.client;
-
-        const { key } = request.params;
-        const { value } = request.body;
-
-        await uiSettingsClient.set(key, value);
-
-        return response.ok({
-          body: {
-            settings: await uiSettingsClient.getUserProvided(),
-          },
-        });
-      } catch (error) {
-        if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
-          return response.customError({
-            body: error,
-            statusCode: error.output.statusCode,
-          });
-        }
-
-        if (error instanceof CannotOverrideError || error instanceof ValidationError) {
-          return response.badRequest({ body: error });
-        }
-
-        throw error;
-      }
+      const uiSettingsClient = (await context.core).uiSettings.client;
+      return await setFromRequest(uiSettingsClient, context, request, response);
+    }
+  );
+  router.post(
+    { path: '/api/kibana/global_settings/{key}', validate },
+    async (context, request, response) => {
+      const uiSettingsClient = (await context.core).uiSettings.globalClient;
+      return await setFromRequest(uiSettingsClient, context, request, response);
     }
   );
 }

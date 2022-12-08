@@ -9,7 +9,7 @@
 import { defaultsDeep } from 'lodash';
 import { UiSettingsClientCommon, UiSettingsClientParams } from './ui_settings_client_common';
 
-export class UiSettingsClient extends UiSettingsClientCommon {
+export class UiSettingsGlobalClient extends UiSettingsClientCommon {
   constructor(params: UiSettingsClientParams) {
     super(params);
   }
@@ -31,7 +31,7 @@ export class UiSettingsClient extends UiSettingsClientCommon {
     this.setLocally(key, newVal);
 
     try {
-      const { settings } = await this.api.batchSet(key, newVal);
+      const { settings } = await this.api.batchSetGlobal(key, newVal);
       this.cache = defaultsDeep({}, defaults, settings);
       return true;
     } catch (error) {
