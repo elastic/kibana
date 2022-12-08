@@ -59,7 +59,6 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@types/node",
-  "@npm//@types/mocha",
   "@npm//playwright",
   "@npm//uuid",
   "@npm//axios",

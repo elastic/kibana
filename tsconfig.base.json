@@ -380,6 +380,8 @@
       "@kbn/alerts/*": ["packages/kbn-alerts/*"],
       "@kbn/ambient-common-types": ["packages/kbn-ambient-common-types"],
       "@kbn/ambient-common-types/*": ["packages/kbn-ambient-common-types/*"],
+      "@kbn/ambient-ftr-types": ["packages/kbn-ambient-ftr-types"],
+      "@kbn/ambient-ftr-types/*": ["packages/kbn-ambient-ftr-types/*"],
       "@kbn/ambient-storybook-types": ["packages/kbn-ambient-storybook-types"],
       "@kbn/ambient-storybook-types/*": ["packages/kbn-ambient-storybook-types/*"],
       "@kbn/ambient-ui-types": ["packages/kbn-ambient-ui-types"],
