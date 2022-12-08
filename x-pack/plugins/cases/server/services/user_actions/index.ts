@@ -119,6 +119,44 @@ type CreatePayloadFunction<Item, ActionType extends ActionTypeValues> = (
   items: Item[]
 ) => UserActionParameters<ActionType>['payload'];
 
+interface ConnectorInfoAggsResult {
+  references: {
+    connectors: {
+      ids: {
+        buckets: Array<{
+          key: string;
+          connectorFields: {
+            connector: {
+              mostRecent: {
+                hits: {
+                  total: number;
+                  hits: unknown[];
+                };
+              };
+            };
+            createCase: {
+              mostRecent: {
+                hits: {
+                  total: number;
+                  hits: unknown[];
+                };
+              };
+            };
+          };
+          pushInfo: {
+            mostRecent: {
+              hits: {
+                total: number;
+                hits: unknown[];
+              };
+            };
+          };
+        }>;
+      };
+    };
+  };
+}
+
 export class CaseUserActionService {
   private static readonly userActionFieldsAllowed: Set<string> = new Set(Object.keys(ActionTypes));
 
@@ -148,6 +186,138 @@ export class CaseUserActionService {
     });
 
     this.auditLogger = new UserActionAuditLogger(auditLogger);
+  }
+
+  public async getConnectorInformation({ caseId, filter }: { caseId: string; filter?: KueryNode }) {
+    try {
+      this.log.debug('Attempting to find connector information');
+
+      /*
+1. Get all unique IDs of the connectors used in a case with an aggregation. Let's say the query return [1, 2, 3]
+2. Get all user actions in descending order where (connectorID === 1 or connectorID === 2 or connectorID === 3) && ((action === "update" && type === "connector") || (action === "push" type === "push")).
+  The first three results contain the fields of each connector. For simplicity, I left the case where the fields are in the create case UA.
+3. Get all user actions in descending order filtering out the ones that we do not support pushing. For example, updating a connector, changing the status, etc.
+  Set the page to 1. The result is the latest UA.
+4. For each UA connector record from step 2 check if connectorUpdateUA.createdAt < latestUA.createAt. If true then the connector needs to be pushed.
+      */
+
+      const connectorsFilter = buildFilter({
+        filters: [ActionTypes.connector, ActionTypes.create_case, ActionTypes.pushed],
+        field: 'type',
+        operator: 'or',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+      });
+
+      const combinedFilter = combineFilters([connectorsFilter, filter]);
+
+      const response = await this.unsecuredSavedObjectsClient.find<
+        CaseUserActionAttributesWithoutConnectorId,
+        ConnectorInfoAggsResult
+      >({
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        aggs: {
+          references: {
+            nested: {
+              path: `${CASE_USER_ACTION_SAVED_OBJECT}.references`,
+            },
+            aggregations: {
+              connectors: {
+                filter: {
+                  term: {
+                    [`${CASE_USER_ACTION_SAVED_OBJECT}.references.type`]: 'action',
+                  },
+                },
+                aggregations: {
+                  ids: {
+                    terms: {
+                      field: `${CASE_USER_ACTION_SAVED_OBJECT}.references.id`,
+                      size: 1000,
+                    },
+                    aggregations: {
+                      reverse: {
+                        reverse_nested: {},
+                        aggregations: {
+                          connectorFields: {
+                            filters: {
+                              filters: {
+                                connector: {
+                                  term: {
+                                    [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
+                                      ActionTypes.connector,
+                                  },
+                                },
+                                createCase: {
+                                  term: {
+                                    [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
+                                      ActionTypes.create_case,
+                                  },
+                                },
+                              },
+                            },
+                            aggregations: {
+                              mostRecent: {
+                                top_hits: {
+                                  sort: [
+                                    {
+                                      [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
+                                        order: 'desc',
+                                      },
+                                    },
+                                  ],
+                                  size: 1,
+                                },
+                              },
+                            },
+                          },
+                          pushInfo: {
+                            filter: {
+                              term: {
+                                [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
+                                  ActionTypes.pushed,
+                              },
+                            },
+                            aggs: {
+                              mostRecent: {
+                                top_hits: {
+                                  sort: [
+                                    {
+                                      [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
+                                        order: 'desc',
+                                      },
+                                    },
+                                  ],
+                                  size: 1,
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        filter: combinedFilter,
+      });
+
+      console.log('response', JSON.stringify(response, null, 2));
+
+      return (
+        response.aggregations?.references?.connectors?.ids?.buckets?.map(({ key }) => ({
+          id: key,
+        })) ?? []
+      );
+    } catch (error) {
+      this.log.error(`Error finding status changes: ${error}`);
+      throw error;
+    }
   }
 
   private getUserActionItemByDifference(params: GetUserActionItemByDifference): UserActionEvent[] {
