@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
-import type { StatItems } from '../../../../../common/components/stat_items';
+import type { StatItems } from '../../../../components/stat_items';
 import { ID, useNetworkKpiNetworkEvents } from '../../../containers/kpi_network/network_events';
 import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';

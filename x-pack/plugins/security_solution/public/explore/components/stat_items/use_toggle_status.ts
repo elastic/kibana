@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback } from 'react';
-import { useQueryToggle } from '../../containers/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 export const useToggleStatus = ({
   id,

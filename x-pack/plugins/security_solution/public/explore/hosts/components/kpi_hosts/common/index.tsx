@@ -15,8 +15,8 @@ import type {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../../../common/search_strategy';
-import type { StatItemsProps, StatItems } from '../../../../../common/components/stat_items';
-import { StatItemsComponent, useKpiMatrixStatus } from '../../../../../common/components/stat_items';
+import type { StatItemsProps, StatItems } from '../../../../components/stat_items';
+import { StatItemsComponent, useKpiMatrixStatus } from '../../../../components/stat_items';
 import type { UpdateDateRange } from '../../../../../common/components/charts/common';
 import type { UserskKpiStrategyResponse } from '../../../../../../common/search_strategy/security_solution/users';
 

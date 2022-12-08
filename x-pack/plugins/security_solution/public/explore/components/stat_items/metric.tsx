@@ -7,10 +7,13 @@
 import { EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import type { StatItem } from './types';
-import { HoverVisibilityContainer } from '../hover_visibility_container';
-import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { HoverVisibilityContainer } from '../../../common/components/hover_visibility_container';
+import {
+  VisualizationActions,
+  HISTOGRAM_ACTIONS_BUTTON_CLASS,
+} from '../../../common/components/visualization_actions';
 import { FlexItem, StatValue } from './utils';
-import { getEmptyTagValue } from '../empty_value';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
 
 export interface MetricProps {
   fields: StatItem[];

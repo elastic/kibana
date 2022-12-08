@@ -16,7 +16,7 @@ import type {
   NetworkKpiStrategyResponse,
   UserskKpiStrategyResponse,
 } from '../../../../common/search_strategy';
-import type { ChartSeriesData, ChartData } from '../charts/common';
+import type { ChartSeriesData, ChartData } from '../../../common/components/charts/common';
 
 import type { StatItem } from './types';
 

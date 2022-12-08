@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-import type { StatItems } from '../../../../../common/components/stat_items';
+import type { StatItems } from '../../../../components/stat_items';
 import { kpiUniqueFlowIdsLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_flow_ids';
 import { useNetworkKpiUniqueFlows, ID } from '../../../containers/kpi_network/unique_flows';
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';

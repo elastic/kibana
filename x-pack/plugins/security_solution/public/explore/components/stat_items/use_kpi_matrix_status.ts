@@ -9,7 +9,7 @@ import type {
   NetworkKpiStrategyResponse,
   UserskKpiStrategyResponse,
 } from '../../../../common/search_strategy';
-import type { UpdateDateRange } from '../charts/common';
+import type { UpdateDateRange } from '../../../common/components/charts/common';
 import type { StatItems, StatItemsProps } from './types';
 import { addValueToAreaChart, addValueToBarChart, addValueToFields } from './utils';
 

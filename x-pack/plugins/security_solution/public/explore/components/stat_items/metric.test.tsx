@@ -10,8 +10,8 @@ import { Metric } from './metric';
 import type { RenderResult } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../mock';
-import type { LensAttributes } from '../visualization_actions/types';
+import { TestProviders } from '../../../common/mock';
+import type { LensAttributes } from '../../../common/components/visualization_actions/types';
 
 jest.mock('../visualization_actions', () => {
   return {

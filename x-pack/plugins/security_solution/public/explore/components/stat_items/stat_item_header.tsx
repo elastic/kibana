@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { FlexGroup, StyledTitle } from './utils';
-import * as i18n from '../../containers/query_toggle/translations';
+import * as i18n from '../../../common/containers/query_toggle/translations';
 
 const StatItemHeaderComponent = ({
   onToggle,

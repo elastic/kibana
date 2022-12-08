@@ -12,22 +12,22 @@ import { ThemeProvider } from 'styled-components';
 
 import type { StatItemsProps } from '.';
 import { StatItemsComponent } from './stat_items';
-import { BarChart } from '../charts/barchart';
-import { AreaChart } from '../charts/areachart';
+import { BarChart } from '../../../common/components/charts/barchart';
+import { AreaChart } from '../../../common/components/charts/areachart';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { mockUpdateDateRange } from '../../../explore/network/components/kpi_network/mock';
+import { mockUpdateDateRange } from '../../network/components/kpi_network/mock';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
-} from '../../mock';
-import type { State } from '../../store';
-import { createStore } from '../../store';
+} from '../../../common/mock';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
-import * as module from '../../containers/query_toggle';
-import type { LensAttributes } from '../visualization_actions/types';
+import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
+import * as module from '../../../common/containers/query_toggle';
+import type { LensAttributes } from '../../../common/components/visualization_actions/types';
 
 const from = '2019-06-15T06:00:00.000Z';
 const to = '2019-06-18T06:00:00.000Z';

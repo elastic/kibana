@@ -5,8 +5,12 @@
  * 2.0.
  */
 import type { IconType } from '@elastic/eui';
-import type { ChartSeriesConfigs, ChartSeriesData, UpdateDateRange } from '../charts/common';
-import type { LensAttributes } from '../visualization_actions/types';
+import type {
+  ChartSeriesConfigs,
+  ChartSeriesData,
+  UpdateDateRange,
+} from '../../../common/components/charts/common';
+import type { LensAttributes } from '../../../common/components/visualization_actions/types';
 
 export interface MetricStatItem {
   color?: string;

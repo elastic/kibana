@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { FlexItem, MetricItem, StatValue } from './utils';
 import type { MetricStatItem } from './types';
-import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
+import { LensEmbeddable } from '../../../common/components/visualization_actions/lens_embeddable';
 
 export interface MetricEmbeddableProps {
   fields: MetricStatItem[];

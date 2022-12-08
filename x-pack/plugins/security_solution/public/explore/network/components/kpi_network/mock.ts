@@ -6,7 +6,7 @@
  */
 
 import type { NetworkKpiStrategyResponse } from '../../../../../common/search_strategy';
-import type { StatItems } from '../../../../common/components/stat_items';
+import type { StatItems } from '../../../components/stat_items';
 import { kpiUniquePrivateIpsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_area';
 import { kpiUniquePrivateIpsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
 import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_destination_metric';
