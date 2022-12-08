@@ -136,7 +136,7 @@ export function AlertsPage() {
         <EuiFlexItem>
           <ObservabilityAlertSearchbarWithUrlSync
             appName={ALERTS_SEARCH_BAR_ID}
-            setEsQuery={setEsQuery}
+            onEsQueryChange={setEsQuery}
             urlStorageKey={URL_STORAGE_KEY}
           />
         </EuiFlexItem>

@@ -12,7 +12,7 @@ import { SloList as Component } from './slo_list';
 
 export default {
   component: Component,
-  title: 'app/SLOs/SloList',
+  title: 'app/SLO/ListPage/SloList',
   argTypes: {},
 };
 

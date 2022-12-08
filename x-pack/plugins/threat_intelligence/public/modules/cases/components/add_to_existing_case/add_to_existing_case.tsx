@@ -9,7 +9,7 @@ import React, { VFC } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { EMPTY_VALUE } from '../../../../common/constants';
+import { useCaseDisabled } from '../../hooks/use_case_permission';
 import {
   AttachmentMetadata,
   generateAttachmentsMetadata,
@@ -52,19 +52,17 @@ export const AddToExistingCase: VFC<AddToExistingCaseProps> = ({
 
   const id: string = indicator._id as string;
   const attachmentMetadata: AttachmentMetadata = generateAttachmentsMetadata(indicator);
+
   const attachments: CaseAttachmentsWithoutOwner = generateAttachmentsWithoutOwner(
     id,
     attachmentMetadata
   );
-
-  // disable the item if there isn't an indicator name
-  // in the case's attachment, the indicator name is the link to open the flyout
-  const disabled: boolean = attachmentMetadata.indicatorName === EMPTY_VALUE;
-
   const menuItemClicked = () => {
     onClick();
     selectCaseModal.open({ attachments });
   };
+
+  const disabled: boolean = useCaseDisabled(attachmentMetadata.indicatorName);
 
   return (
     <EuiContextMenuItem
