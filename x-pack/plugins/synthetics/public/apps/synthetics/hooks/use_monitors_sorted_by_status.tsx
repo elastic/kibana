@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useMemo, useRef } from 'react';
+import { isEqual } from 'lodash';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { MonitorOverviewItem, OverviewStatusMetaData } from '../../../../common/runtime_types';
 import { selectOverviewState } from '../state/overview';
@@ -34,12 +35,14 @@ export function useMonitorsSortedByStatus() {
   const [monitorsSortedByStatus, setMonitorsSortedByStatus] = useState<
     Record<string, MonitorOverviewItem[]>
   >({ up: [], down: [], disabled: [], pending: [] });
+
+  const currentMonitors = useRef<MonitorOverviewItem[] | null>(monitors);
   console.log('monitor status', status);
   console.log('monitor sorted', monitorsSortedByStatus);
   const downMonitors = useRef<Record<string, string[]> | null>(null);
   const locationNames = useLocationNames();
 
-  const monitorsSortedByStatus = useMemo(() => {
+  useEffect(() => {
     if (!status) {
       return {
         down: [],
