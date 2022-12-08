@@ -72,7 +72,6 @@ import type { IndexRefresh } from '../types';
 import { isAssigneesArray, isStringArray } from './type_guards';
 import type { CaseSavedObject } from '../../common/types';
 import { UserActionAuditLogger } from './audit_logger';
-import { createDeleteEvent } from './builders/delete_case';
 
 export interface UserActionItem {
   attributes: CaseUserActionAttributesWithoutConnectorId;
@@ -265,7 +264,13 @@ export class CaseUserActionService {
     this.log.debug(`Attempting to log bulk case deletion`);
 
     for (const id of caseIds) {
-      this.auditLogger.log(createDeleteEvent({ caseId: id, action: Actions.delete }));
+      this.auditLogger.log({
+        getMessage: () => `User deleted case id: ${id}`,
+        action: Actions.delete,
+        descriptiveAction: 'case_user_action_delete_case',
+        savedObjectId: id,
+        savedObjectType: CASE_SAVED_OBJECT,
+      });
     }
   }
 
