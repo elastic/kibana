@@ -17,6 +17,7 @@ describe('LongWindowDuration', () => {
     render(<LongWindowDuration onChange={() => {}} />);
 
     userEvent.selectOptions(screen.getByTestId('durationUnitSelect'), 'm');
+    userEvent.clear(screen.getByTestId('durationValueInput'));
     userEvent.type(screen.getByTestId('durationValueInput'), '1441', { delay: 0 });
 
     expect(screen.getByText(/cannot exceed/i)).toBeTruthy();
@@ -26,7 +27,8 @@ describe('LongWindowDuration', () => {
     render(<LongWindowDuration onChange={() => {}} />);
 
     userEvent.selectOptions(screen.getByTestId('durationUnitSelect'), 'h');
-    userEvent.type(screen.getByTestId('durationValueInput'), '24', { delay: 0 });
+    userEvent.clear(screen.getByTestId('durationValueInput'));
+    userEvent.type(screen.getByTestId('durationValueInput'), '25', { delay: 0 });
 
     expect(screen.getByText(/cannot exceed/i)).toBeTruthy();
   });
@@ -35,7 +37,8 @@ describe('LongWindowDuration', () => {
     render(<LongWindowDuration onChange={() => {}} />);
 
     userEvent.selectOptions(screen.getByTestId('durationUnitSelect'), ['m']);
-    userEvent.type(screen.getByTestId('durationValueInput'), '25');
+    userEvent.clear(screen.getByTestId('durationValueInput'));
+    userEvent.type(screen.getByTestId('durationValueInput'), '29');
 
     expect(screen.getByText(/cannot exceed/i)).toBeTruthy();
   });
