@@ -20,6 +20,8 @@ import { ServiceMapServiceDetail } from '../../app/service_map';
 import { MobileServiceTemplate } from '../templates/mobile_service_template';
 import { MobileServiceOverview } from '../../app/mobile/service_overview';
 import { MobileTransactionOverview } from '../../app/mobile/transaction_overview';
+// import { MobileTransactionDetails } from '../../app/mobile/service_overview/transactions_details';
+import { TransactionDetails } from '../../app/transaction_details';
 
 export function page({
   title,
@@ -140,28 +142,28 @@ export const mobileServiceDetail = {
           }),
         }),
         children: {
-          // '/mobile-services/{serviceName}/transactions/view': {
-          //   element: <TransactionDetails />,
-          //   params: t.type({
-          //     query: t.intersection([
-          //       t.type({
-          //         transactionName: t.string,
-          //         comparisonEnabled: toBooleanRt,
-          //         showCriticalPath: toBooleanRt,
-          //       }),
-          //       t.partial({
-          //         traceId: t.string,
-          //         transactionId: t.string,
-          //       }),
-          //       offsetRt,
-          //     ]),
-          //   }),
-          //   defaults: {
-          //     query: {
-          //       showCriticalPath: '',
-          //     },
-          //   },
-          // },
+          '/mobile-services/{serviceName}/transactions/view': {
+            element: <TransactionDetails />,
+            params: t.type({
+              query: t.intersection([
+                t.type({
+                  transactionName: t.string,
+                  comparisonEnabled: toBooleanRt,
+                  showCriticalPath: toBooleanRt,
+                }),
+                t.partial({
+                  traceId: t.string,
+                  transactionId: t.string,
+                }),
+                offsetRt,
+              ]),
+            }),
+            defaults: {
+              query: {
+                showCriticalPath: '',
+              },
+            },
+          },
           '/mobile-services/{serviceName}/transactions': {
             element: <MobileTransactionOverview />,
           },

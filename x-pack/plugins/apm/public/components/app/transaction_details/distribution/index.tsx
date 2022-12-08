@@ -17,7 +17,7 @@ import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { DurationDistributionChartWithScrubber } from '../../../shared/charts/duration_distribution_chart_with_scrubber';
 import { HeightRetainer } from '../../../shared/height_retainer';
@@ -43,8 +43,11 @@ export function TransactionDistribution({
   const { traceId, transactionId } = urlParams;
 
   const {
-    query: { rangeFrom, rangeTo, showCriticalPath },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+    query: { rangeFrom, rangeTo, showCriticalPath, environment },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -56,10 +59,6 @@ export function TransactionDistribution({
     end,
   });
   const { waterfallItemId, detailTab } = urlParams;
-
-  const {
-    query: { environment },
-  } = useApmParams('/services/{serviceName}/transactions/view');
 
   const { serviceName } = useApmServiceContext();
 
