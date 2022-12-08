@@ -15,7 +15,6 @@ import { MatrixHistogramType } from '../../../../common/search_strategy/security
 import { TestProviders } from '../../mock';
 import { mockRuntimeMappings } from '../../containers/source/mock';
 import { dnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
-import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { useQueryToggle } from '../../containers/query_toggle';
 
 jest.mock('../../containers/query_toggle');
@@ -41,15 +40,16 @@ jest.mock('./utils', () => ({
   getCustomChartData: jest.fn().mockReturnValue(true),
 }));
 
-jest.mock('../../utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn().mockReturnValue([
-    {
-      detailName: 'mockHost',
-      pageName: 'hosts',
-      tabName: 'events',
-    },
-  ]),
-}));
+const mockLocation = jest.fn().mockReturnValue({ pathname: '/test' });
+
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useLocation: () => mockLocation(),
+  };
+});
 
 describe('Matrix Histogram Component', () => {
   let wrapper: ReactWrapper;
@@ -177,13 +177,7 @@ describe('Matrix Histogram Component', () => {
 
   describe('Inspect button', () => {
     test("it doesn't render Inspect button by default on Host page", () => {
-      (useRouteSpy as jest.Mock).mockReturnValue([
-        {
-          detailName: 'mockHost',
-          pageName: 'hosts',
-          tabName: 'events',
-        },
-      ]);
+      mockLocation.mockReturnValue({ pathname: '/hosts' });
 
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
@@ -196,13 +190,7 @@ describe('Matrix Histogram Component', () => {
     });
 
     test("it doesn't render Inspect button by default on Network page", () => {
-      (useRouteSpy as jest.Mock).mockReturnValue([
-        {
-          detailName: undefined,
-          pageName: 'network',
-          tabName: 'external-alerts',
-        },
-      ]);
+      mockLocation.mockReturnValue({ pathname: '/network' });
 
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
@@ -215,13 +203,7 @@ describe('Matrix Histogram Component', () => {
     });
 
     test('it render Inspect button by default on other pages', () => {
-      (useRouteSpy as jest.Mock).mockReturnValue([
-        {
-          detailName: undefined,
-          pageName: 'overview',
-          tabName: undefined,
-        },
-      ]);
+      mockLocation.mockReturnValue({ pathname: '/overview' });
 
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
@@ -236,13 +218,7 @@ describe('Matrix Histogram Component', () => {
 
   describe('VisualizationActions', () => {
     test('it renders VisualizationActions on Host page if lensAttributes is provided', () => {
-      (useRouteSpy as jest.Mock).mockReturnValue([
-        {
-          detailName: 'mockHost',
-          pageName: 'hosts',
-          tabName: 'events',
-        },
-      ]);
+      mockLocation.mockReturnValue({ pathname: '/hosts' });
 
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
@@ -258,13 +234,7 @@ describe('Matrix Histogram Component', () => {
     });
 
     test('it renders VisualizationActions on Network page if lensAttributes is provided', () => {
-      (useRouteSpy as jest.Mock).mockReturnValue([
-        {
-          detailName: undefined,
-          pageName: 'network',
-          tabName: 'events',
-        },
-      ]);
+      mockLocation.mockReturnValue({ pathname: '/network' });
 
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
@@ -285,13 +255,7 @@ describe('Matrix Histogram Component', () => {
         lensAttributes: dnsTopDomainsLensAttributes,
       };
 
-      (useRouteSpy as jest.Mock).mockReturnValue([
-        {
-          detailName: undefined,
-          pageName: 'overview',
-          tabName: undefined,
-        },
-      ]);
+      mockLocation.mockReturnValue({ pathname: '/overview' });
 
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
