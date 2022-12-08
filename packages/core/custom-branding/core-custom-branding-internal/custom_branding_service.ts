@@ -7,31 +7,38 @@
  */
 
 import type { CustomBranding } from "@kbn/core-custom-branding";
+import { BehaviorSubject } from "rxjs";
 
-/**
- * Combined parts of custom branding
- * Properties are each optional to provide flexibility for the Kibana
- * operator
- */
+interface StartDeps {
+  /** What properties should be set for this Kibana */
+  customBrandingPerOperator: Map<CustomBranding, boolean>;
+  /** The full functionality of custom branding that could be set */
+  customBrandingObject: Partial<CustomBranding> | CustomBranding,
+}
 
 /** @internal */
 export class CustomBrandingService {
-  private customBrandingPerOperator: {};
-
-  async start(customBrandingObject): Promise<CustomBranding> {
+  // set as async in terms of how this will be gathered and brought into core at start of the service
+  async start({customBrandingObject, customBrandingPerOperator}: StartDeps): Promise<CustomBranding> {
+    const customBranding$ = new BehaviorSubject<Partial<CustomBranding>>(new Map());
     return {
-      get: (custombrandingObject) => {
+      get: () => {
         customBrandingObject.map((property) => {
-          
+        return customBrandingPerOperator.set(property),
         })
-        return this.customBrandingPerOperator,
       },
-      set: (customBrandingObject: CustomBranding) => {
-        this.customBrandingPerOperator.add(customBrandingObject.next(customBrandingObject));
+      // observable? 
+      get$: () => {
+        return customBranding$
+      },
+      set: () => {
+        return customBrandingPerOperator,
       },
     };
   }
-  async stop() {
-
-  }
+  // Does setting the properties need to occur at the start of the service? 
+  // IF NOT: 
+  // public applyCustomBranding((customBrandingObject: CustomBranding)) {
+  //     this.customBrandingPerOperator.add(customBrandingObject.next(customBrandingObject));
+  //   },
 }
