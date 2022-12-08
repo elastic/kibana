@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { decode, encode } from '@kbn/rison';
+import { safeDecode, encode } from '@kbn/rison';
 import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineSelectors } from '../../timelines/store/timeline';
@@ -42,12 +42,7 @@ export const useResolveRedirect = () => {
       activeTab,
       graphEventId,
     };
-    let timelineSearch: TimelineUrl = currentTimelineState;
-    try {
-      timelineSearch = decode(timelineRison ?? '') ?? currentTimelineState;
-    } catch (error) {
-      // do nothing as it's already defaulted on line 77
-    }
+    const timelineSearch = safeDecode<TimelineUrl>(timelineRison ?? '') ?? currentTimelineState;
 
     if (
       hasRedirected ||

@@ -10,7 +10,7 @@ import { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useDispatch } from 'react-redux';
-import { decode } from '@kbn/rison';
+import { safeDecode } from '@kbn/rison';
 import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types';
@@ -51,29 +51,11 @@ export const useQueryTimelineByIdOnUrlChange = () => {
       urlKey: URL_PARAM_KEY.timeline,
       search: oldSearch ?? '',
     });
-
     const newUrlStateString = getQueryStringKeyValue({ urlKey: URL_PARAM_KEY.timeline, search });
 
-    if (oldUrlStateString != null && newUrlStateString != null) {
-      let newTimeline: TimelineUrl | null = null;
-      let oldTimeline: TimelineUrl | null = null;
-
-      try {
-        newTimeline = decode(newUrlStateString);
-      } catch (error) {
-        // do nothing as timeline is defaulted to null
-      }
-
-      try {
-        oldTimeline = decode(oldUrlStateString);
-      } catch (error) {
-        // do nothing as timeline is defaulted to null
-      }
-
-      return [oldTimeline, newTimeline];
-    }
-
-    return [null, null];
+    return oldUrlStateString != null && newUrlStateString != null
+      ? [safeDecode<TimelineUrl>(oldUrlStateString), safeDecode<TimelineUrl>(newUrlStateString)]
+      : [null, null];
   }, [oldSearch, search]);
 
   const oldId = previousTimeline?.id;

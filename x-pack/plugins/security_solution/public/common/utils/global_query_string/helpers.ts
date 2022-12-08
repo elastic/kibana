@@ -6,7 +6,7 @@
  */
 
 import type { RisonValue } from '@kbn/rison';
-import { decode, encode } from '@kbn/rison';
+import { safeDecode, encode } from '@kbn/rison';
 import type { ParsedQuery } from 'query-string';
 import { parse, stringify } from 'query-string';
 import { url } from '@kbn/kibana-utils-plugin/public';
@@ -48,7 +48,7 @@ export const useGetInitialUrlParamValue = <State extends RisonValue>(
       getQueryStringFromLocation(window.location.search),
       urlParamKey
     );
-    const paramValue = decode<State>(rawParamValue ?? '');
+    const paramValue = safeDecode<State>(rawParamValue ?? '');
 
     return paramValue;
   }, [urlParamKey]);

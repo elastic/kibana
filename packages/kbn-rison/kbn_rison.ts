@@ -39,12 +39,18 @@ export function encode(obj: any) {
  * parse a rison string into a javascript structure.
  */
 export function decode<T = RisonValue>(rison: string): T | null {
-  // Rison is unable to handle an empty string
-  if (rison.length === 0) {
+  return Rison.decode(rison);
+}
+
+/**
+ * safely parse a rison string into a javascript structure, never throws
+ */
+export function safeDecode<T = RisonValue>(rison: string): T | null {
+  try {
+    return decode(rison);
+  } catch {
     return null;
   }
-
-  return Rison.decode(rison);
 }
 
 /**

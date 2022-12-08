@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
-import { decode, encode } from '@kbn/rison';
+import { safeDecode, encode } from '@kbn/rison';
 import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineSelectors } from '../../timelines/store/timeline';
@@ -53,12 +53,8 @@ export const useResolveConflict = () => {
       activeTab,
       graphEventId,
     };
-    let timelineSearch: TimelineUrl = currentTimelineState;
-    try {
-      timelineSearch = decode(timelineRison ?? '') ?? currentTimelineState;
-    } catch (error) {
-      // do nothing as it's already defaulted on line 77
-    }
+    const timelineSearch = safeDecode<TimelineUrl>(timelineRison ?? '') ?? currentTimelineState;
+
     // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
     // callout with a warning for the user, and provide a way for them to navigate to the other object.
     const currentObjectId = timelineSearch?.id;
