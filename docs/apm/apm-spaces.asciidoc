@@ -56,7 +56,7 @@ aliases for each service environment:
 
 [options="header"]
 |====
-| Index setting    | `production` env         | `staging` evn
+| Index setting    | `production` env         | `staging` env
 | Error            | `production-logs-apm`    | `staging-logs-apm`
 | Span/Transaction | `production-traces-apm`  | `staging-traces-apm`
 | Metrics          | `production-metrics-apm` | `staging-metrics-apm`

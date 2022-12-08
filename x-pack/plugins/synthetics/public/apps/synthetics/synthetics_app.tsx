@@ -92,6 +92,7 @@ const Application = (props: SyntheticsAppProps) => {
                 observability: startPlugins.observability,
                 cases: startPlugins.cases,
                 spaces: startPlugins.spaces,
+                fleet: startPlugins.fleet,
               }}
             >
               <Router history={appMountParameters.history}>
