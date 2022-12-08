@@ -571,7 +571,6 @@ filegroup(
     "//packages/home/sample_data_tab:build_types",
     "//packages/kbn-ace:build_types",
     "//packages/kbn-alerts:build_types",
-    "//packages/kbn-ambient-ftr-types:build_types",
     "//packages/kbn-analytics:build_types",
     "//packages/kbn-apm-config-loader:build_types",
     "//packages/kbn-apm-synthtrace:build_types",
