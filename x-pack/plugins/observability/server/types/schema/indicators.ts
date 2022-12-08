@@ -11,13 +11,18 @@ import { allOrAnyString, dateRangeSchema } from './common';
 const apmTransactionDurationIndicatorTypeSchema = t.literal('sli.apm.transaction_duration');
 const apmTransactionDurationIndicatorSchema = t.type({
   type: apmTransactionDurationIndicatorTypeSchema,
-  params: t.type({
-    environment: allOrAnyString,
-    service: allOrAnyString,
-    transaction_type: allOrAnyString,
-    transaction_name: allOrAnyString,
-    'threshold.us': t.number,
-  }),
+  params: t.intersection([
+    t.type({
+      environment: allOrAnyString,
+      service: allOrAnyString,
+      transaction_type: allOrAnyString,
+      transaction_name: allOrAnyString,
+      'threshold.us': t.number,
+    }),
+    t.partial({
+      index: t.string,
+    }),
+  ]),
 });
 
 const apmTransactionErrorRateIndicatorTypeSchema = t.literal('sli.apm.transaction_error_rate');
