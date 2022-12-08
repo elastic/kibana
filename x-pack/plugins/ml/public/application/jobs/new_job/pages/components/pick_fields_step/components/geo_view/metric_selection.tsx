@@ -12,7 +12,7 @@ import { LayerDescriptor } from '@kbn/maps-plugin/common';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { GeoJobCreator } from '../../../../../common/job_creator';
-import { GeoField } from './geo_field';
+import { GeoField } from '../geo_field';
 import { GeoMapExamples } from './geo_map_examples';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 
@@ -39,7 +39,7 @@ export const GeoDetector: FC<Props> = ({ setIsValid }) => {
     }
     setIsValid(valid);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobCreatorUpdated, jobCreator.geoField]);
+  }, [jobCreatorUpdated]);
 
   // Load example field values when split field changes
   // changes to fieldValues here will trigger the card effect

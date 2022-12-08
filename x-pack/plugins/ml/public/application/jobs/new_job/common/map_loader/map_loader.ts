@@ -15,7 +15,6 @@ import { Field, SplitField } from '../../../../../../common/types/fields';
 const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 
 export class MapLoader extends ChartLoader {
-  private _indexPatternId: string | undefined;
   private _getMapData;
 
   constructor(indexPattern: DataView, query: object, mapsPlugin: MapsStartApi | undefined) {
@@ -24,7 +23,6 @@ export class MapLoader extends ChartLoader {
     this._getMapData = mapsPlugin
       ? memoizeOne(mapsPlugin.createLayerDescriptors.createESSearchSourceLayerDescriptor, eq)
       : null;
-    this._indexPatternId = indexPattern.id;
   }
 
   async getMapLayersForGeoJob(
@@ -34,9 +32,9 @@ export class MapLoader extends ChartLoader {
     filters?: any[]
   ) {
     const layerList: LayerDescriptor[] = [];
-    if (this._indexPatternId !== undefined && geoField) {
+    if (this._dataView.id !== undefined && geoField) {
       const params: any = {
-        indexPatternId: this._indexPatternId,
+        indexPatternId: this._dataView.id,
         geoFieldName: geoField.name,
         geoFieldType: geoField.type as unknown as ES_GEO_FIELD_TYPE,
         filters: filters ?? [],

@@ -41,10 +41,6 @@ export class GeoJobCreator extends JobCreator {
     this._geoAgg = geo;
   }
 
-  public set geoField(field: Field | null) {
-    this._geoField = field;
-  }
-
   public get geoField() {
     return this._geoField;
   }
@@ -63,13 +59,12 @@ export class GeoJobCreator extends JobCreator {
       this._fields.length = 0;
       return;
     }
+
     const agg = this._geoAgg!;
-    if (this._detectors.length === 0) {
-      this.addDetector(agg, field);
-    } else {
-      const dtr = this._createDetector(agg, field);
-      this._editDetector(dtr, agg, field, 0);
-    }
+
+    this.removeAllDetectors();
+    const dtr = this._createDetector(agg, field);
+    this._addDetector(dtr, agg, field);
   }
 
   // set the split field
@@ -95,11 +90,6 @@ export class GeoJobCreator extends JobCreator {
     return this._splitField;
   }
 
-  public addDetector(agg: Aggregation, field: Field) {
-    const dtr: Detector = this._createDetector(agg, field);
-    this._addDetector(dtr, agg, field);
-  }
-
   // create a new detector object, applying the overall split field
   private _createDetector(agg: Aggregation, field: Field) {
     const dtr: Detector = createBasicDetector(agg, field);
@@ -108,10 +98,6 @@ export class GeoJobCreator extends JobCreator {
       dtr.partition_field_name = this._splitField.id;
     }
     return dtr;
-  }
-
-  public removeDetector(index: number) {
-    this._removeDetector(index);
   }
 
   public get aggFieldPairs(): AggFieldPair[] {

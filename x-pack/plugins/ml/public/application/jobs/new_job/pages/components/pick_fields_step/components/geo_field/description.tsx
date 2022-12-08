@@ -20,7 +20,7 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.geoField.description"
-          defaultMessage="Select a geo field. The lat_long function detects anomalies in the geographic location of the input data."
+          defaultMessage="Select a geo field to detect anomalies in the geographic location of the input data."
         />
       }
     >
