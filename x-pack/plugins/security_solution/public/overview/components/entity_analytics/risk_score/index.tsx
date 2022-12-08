@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useDispatch } from 'react-redux';
-import { EnableRiskScore } from '../../../../risk_score/components/enable_risk_score';
+import { EnableRiskScore } from '../../../../explore/components/risk_score/enable_risk_score';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../../explore/users/store/model';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
@@ -18,7 +18,7 @@ import { HostsTableType, HostsType } from '../../../../explore/hosts/store/model
 import { getRiskScoreColumns } from './columns';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { useRiskScore, useRiskScoreKpi } from '../../../../risk_score/containers';
+import { useRiskScore, useRiskScoreKpi } from '../../../../explore/containers/risk_score';
 
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
@@ -33,8 +33,8 @@ import { hostsActions } from '../../../../explore/hosts/store';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { StyledBasicTable } from '../common/styled_basic_table';
 import { RISKY_HOSTS_DOC_LINK, RISKY_USERS_DOC_LINK } from '../../../../../common/constants';
-import { RiskScoreHeaderTitle } from '../../../../risk_score/components/risk_score_onboarding/risk_score_header_title';
-import { RiskScoresNoDataDetected } from '../../../../risk_score/components/risk_score_onboarding/risk_score_no_data_detected';
+import { RiskScoreHeaderTitle } from '../../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
+import { RiskScoresNoDataDetected } from '../../../../explore/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 import { Loader } from '../../../../common/components/loader';
 import { Panel } from '../../../../common/components/panel';

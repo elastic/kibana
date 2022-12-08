@@ -12,7 +12,7 @@ import { EntityAnalyticsRiskScores } from '.';
 import type { UserRiskScore } from '../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import type { SeverityCount } from '../../../../common/components/severity/types';
-import { useRiskScore, useRiskScoreKpi } from '../../../../risk_score/containers';
+import { useRiskScore, useRiskScoreKpi } from '../../../../explore/containers/risk_score';
 import { openAlertsFilter } from '../../detection_response/utils';
 
 const mockSeverityCount: SeverityCount = {

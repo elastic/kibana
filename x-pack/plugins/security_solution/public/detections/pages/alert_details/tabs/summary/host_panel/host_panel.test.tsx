@@ -18,7 +18,7 @@ import { HostPanel } from '.';
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
 import { RiskSeverity } from '../../../../../../../common/search_strategy';
-import { useRiskScore } from '../../../../../../risk_score/containers';
+import { useRiskScore } from '../../../../../../explore/containers/risk_score';
 
 jest.mock('../../../../../../risk_score/containers');
 const mockUseRiskScore = useRiskScore as jest.Mock;
