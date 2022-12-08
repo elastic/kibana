@@ -6,6 +6,7 @@
  */
 
 import { combineReducers } from 'redux';
+import { deleteMonitorReducer, DeleteMonitorState } from './delete_monitor';
 import { agentPoliciesReducer, AgentPoliciesState } from '../private_locations';
 import { monitorReducer, MonitorState } from './monitor';
 import { uiReducer, UiState } from './ui';
@@ -47,6 +48,7 @@ export interface RootState {
   synthetics: SyntheticsReducerState;
   testNowRuns: TestNowRunsState;
   agentPolicies: AgentPoliciesState;
+  deleteMonitor: DeleteMonitorState;
 }
 
 export const rootReducer = combineReducers<RootState>({
@@ -69,4 +71,5 @@ export const rootReducer = combineReducers<RootState>({
   synthetics: syntheticsReducer,
   testNowRuns: testNowRunsReducer,
   agentPolicies: agentPoliciesReducer,
+  deleteMonitor: deleteMonitorReducer,
 });

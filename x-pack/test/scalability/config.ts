@@ -62,8 +62,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...(!!AGGS_SHARD_DELAY ? ['--data.search.aggs.shardDelay.enabled=true'] : []),
         ...(!!DISABLE_PLUGINS ? ['--plugins.initialize=false'] : []),
       ],
-      // delay shutdown to ensure that APM can report the data it collects during test execution
-      delayShutdown: 90_000,
     },
   };
 }
