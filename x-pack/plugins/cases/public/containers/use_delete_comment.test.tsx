@@ -109,6 +109,7 @@ describe('useDeleteComment', () => {
       signal: expect.any(AbortSignal),
     });
 
+    expect(addError).toHaveBeenCalled();
     expect(result.current.isError).toBe(true);
   });
 });
