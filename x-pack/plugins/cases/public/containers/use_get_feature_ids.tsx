@@ -15,6 +15,7 @@ import { casesQueriesKeys } from './constants';
 
 export const useGetFeatureIds = (alertRegistrationContexts: string[]) => {
   const { showErrorToast } = useCasesToast();
+
   return useQuery<ValidFeatureId[], ServerError>(
     casesQueriesKeys.alertFeatureIds(alertRegistrationContexts),
     () => {
@@ -24,9 +25,7 @@ export const useGetFeatureIds = (alertRegistrationContexts: string[]) => {
     },
     {
       onError: (error: ServerError) => {
-        if (error.name !== 'AbortError') {
-          showErrorToast(error, { title: i18n.ERROR_TITLE });
-        }
+        showErrorToast(error, { title: i18n.ERROR_TITLE });
       },
     }
   );

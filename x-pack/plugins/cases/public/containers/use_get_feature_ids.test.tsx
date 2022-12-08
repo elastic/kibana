@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/dom';
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
@@ -28,26 +29,16 @@ describe('useGetFeaturesIds', () => {
     jest.clearAllMocks();
   });
 
-  it('inits with empty data', async () => {
+  it('returns the features ids correctly', async () => {
     const spy = jest.spyOn(api, 'getFeatureIds').mockRejectedValue([]);
+
     const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), {
       wrapper: appMockRender.AppWrapper,
     });
 
     await waitForNextUpdate();
-    expect(spy).toHaveBeenCalledWith(
-      { registrationContext: ['context1'] },
-      expect.any(AbortSignal)
-    );
-  });
 
-  it('fetches data and returns it correctly', async () => {
-    const spy = jest.spyOn(api, 'getFeatureIds');
-    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), {
-      wrapper: appMockRender.AppWrapper,
-    });
-    await waitForNextUpdate();
-    await act(async () => {
+    await waitFor(() => {
       expect(spy).toHaveBeenCalledWith(
         { registrationContext: ['context1'] },
         expect.any(AbortSignal)
@@ -57,16 +48,18 @@ describe('useGetFeaturesIds', () => {
 
   it('shows a toast error when the api return an error', async () => {
     (useToasts as jest.Mock).mockReturnValue({ addError });
+
     const spy = jest
       .spyOn(api, 'getFeatureIds')
       .mockRejectedValue(new Error('Something went wrong'));
+
     const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), {
       wrapper: appMockRender.AppWrapper,
     });
 
     await waitForNextUpdate();
 
-    await act(async () => {
+    await waitFor(() => {
       expect(spy).toHaveBeenCalledWith(
         { registrationContext: ['context1'] },
         expect.any(AbortSignal)
