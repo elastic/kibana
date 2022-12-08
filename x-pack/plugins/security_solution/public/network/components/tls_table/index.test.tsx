@@ -24,7 +24,6 @@ import { createStore } from '../../../common/store';
 import { networkModel } from '../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -44,23 +43,11 @@ describe('Tls Table Component', () => {
     type: networkModel.NetworkType.details,
   };
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('Rendering', () => {
