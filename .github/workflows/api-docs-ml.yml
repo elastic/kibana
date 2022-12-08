@@ -1,6 +1,6 @@
 name: Generate machine learning API docs
 on:
-  pull_request:
+  pull_request_target:
     paths:
      - 'x-pack/plugins/ml/common/openapi/ml_apis_v3.yaml'
     types:
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
           token: ${{secrets.KIBANAMACHINE_TOKEN}}
