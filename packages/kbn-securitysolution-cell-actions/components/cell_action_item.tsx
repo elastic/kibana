@@ -35,18 +35,7 @@ export const ActionItem = ({
 
   return showTooltip ? (
     <EuiToolTip
-      content={
-        // <TooltipWithKeyboardShortcut
-        //   additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
-        //     field,
-        //     value,
-        //   })}
-        // content={FILTER_FOR_VALUE}
-        // shortcut={FILTER_FOR_VALUE_KEYBOARD_SHORTCUT}
-        // showShortcut={ownFocus}
-        // />
-        action.getDisplayNameTooltip ? action.getDisplayNameTooltip(actionContext) : ''
-      }
+      content={action.getDisplayNameTooltip ? action.getDisplayNameTooltip(actionContext) : ''}
     >
       <EuiButtonIcon {...actionProps} iconSize="s" />
     </EuiToolTip>

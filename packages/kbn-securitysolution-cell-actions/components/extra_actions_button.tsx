@@ -16,7 +16,7 @@ interface ExtraActionsButtonProps {
 }
 
 export const SHOW_MORE_ACTIONS = i18n.translate(
-  'xpack.securitySolution.cellActions.showMoreActionsLabel',
+  'securitysolutionCellActions.showMoreActionsLabel',
   {
     defaultMessage: 'More actions',
   }

@@ -8,10 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
-  i18n.translate(
-    'xpack.securitySolution.cellActions.youAreInADialogContainingOptionsScreenReaderOnly',
-    {
-      values: { fieldName },
-      defaultMessage: `You are in a dialog, containing options for field {fieldName}. Press tab to navigate options. Press escape to exit.`,
-    }
-  );
+  i18n.translate('securitysolutionCellActions.youAreInADialogContainingOptionsScreenReaderOnly', {
+    values: { fieldName },
+    defaultMessage: `You are in a dialog, containing options for field {fieldName}. Press tab to navigate options. Press escape to exit.`,
+  });

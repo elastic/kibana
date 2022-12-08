@@ -16,7 +16,7 @@ export const COPY_TO_CLIPBOARD = i18n.translate('xpack.securitySolution.actions.
 });
 
 export const SUCCESS_TOAST_TITLE = (field: string) =>
-  i18n.translate('xpack.timelines.clipboard.copy.successToastTitle', {
+  i18n.translate('xpack.securitySolution.clipboard.copy.successToastTitle', {
     values: { field },
     defaultMessage: 'Copied field {field} to the clipboard',
   });
