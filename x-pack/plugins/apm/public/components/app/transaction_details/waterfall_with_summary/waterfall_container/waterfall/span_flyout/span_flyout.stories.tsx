@@ -4,20 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, dedot } from '@kbn/apm-synthtrace';
+import { apm } from '@kbn/apm-synthtrace';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { SpanFlyout } from '.';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginContextWrapper } from '../../../../../../../context/apm_plugin/mock_apm_plugin_context';
-import { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 
 type Args = ComponentProps<typeof SpanFlyout>;
-type SpanDetailsApiReturnType =
-  APIReturnType<'GET /internal/apm/traces/{traceId}/spans/{spanId}'>;
 
 function generateData() {
   const serviceName = 'synth-apple';
@@ -67,19 +62,6 @@ export default {
   component: SpanFlyout,
   decorators: [
     (StoryComponent: ComponentType) => {
-      const coreMock = {
-        http: {
-          get: async (): Promise<SpanDetailsApiReturnType> => {
-            return {
-              span: dedot(data.spanEvent, {}) as Span,
-              parentTransaction: dedot(
-                data.parentTransaction,
-                {}
-              ) as Transaction,
-            };
-          },
-        },
-      };
       return (
         <MemoryRouter
           initialEntries={[
