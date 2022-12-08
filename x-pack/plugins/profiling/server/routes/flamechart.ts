@@ -53,8 +53,7 @@ export function registerFlameChartSearchRoute({
           await getStackTraces({
             context,
             logger,
-            esClient,
-            profilingElasticsearchClient,
+            client: profilingElasticsearchClient,
             filter,
             sampleSize: targetSampleSize,
           });

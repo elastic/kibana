@@ -55,8 +55,7 @@ export function registerTopNFunctionsSearchRoute({
         const { stackTraceEvents, stackTraces, executables, stackFrames } = await getStackTraces({
           context,
           logger,
-          esClient,
-          profilingElasticsearchClient,
+          client: profilingElasticsearchClient,
           filter,
           sampleSize: targetSampleSize,
         });

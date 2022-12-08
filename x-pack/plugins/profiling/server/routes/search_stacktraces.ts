@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { Logger } from '@kbn/logging';
+import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import {
   Executable,
@@ -107,12 +107,12 @@ export async function searchStackTraces({
   sampleSize,
 }: {
   logger: Logger;
-  client: ElasticsearchClient;
+  client: ProfilingESClient;
   filter: ProjectTimeQuery;
   sampleSize: number;
 }) {
   return withProfilingSpan('search_stack_traces', async () => {
-    const response = await client.transport.request<StackTraceResponse>({
+    const response = await client.transport<StackTraceResponse>('transport_stacktraces', {
       method: 'POST',
       path: encodeURI('/_profiling/stacktraces'),
       body: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, RequestHandlerContext } from '@kbn/core/server';
+import { RequestHandlerContext } from '@kbn/core/server';
 import { Logger } from '@kbn/logging';
 import { profilingElasticsearchPlugin } from '@kbn/observability-plugin/common';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
@@ -16,15 +16,13 @@ import { searchStackTraces } from './search_stacktraces';
 export async function getStackTraces({
   context,
   logger,
-  esClient,
-  profilingElasticsearchClient,
+  client,
   filter,
   sampleSize,
 }: {
   context: RequestHandlerContext;
   logger: Logger;
-  esClient: ElasticsearchClient;
-  profilingElasticsearchClient: ProfilingESClient;
+  client: ProfilingESClient;
   filter: ProjectTimeQuery;
   sampleSize: number;
 }) {
@@ -36,7 +34,7 @@ export async function getStackTraces({
   if (useElasticsearchPlugin) {
     return await searchStackTraces({
       logger,
-      client: esClient,
+      client,
       filter,
       sampleSize,
     });
@@ -44,7 +42,7 @@ export async function getStackTraces({
 
   return await getExecutablesAndStackTraces({
     logger,
-    client: profilingElasticsearchClient,
+    client,
     filter,
     sampleSize,
   });

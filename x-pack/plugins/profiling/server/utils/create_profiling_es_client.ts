@@ -34,6 +34,7 @@ export interface ProfilingESClient {
     operationName: string,
     mgetRequest: MgetRequest
   ): Promise<MgetResponse<TDocument>>;
+  transport<TResponse = unknown>(operationName: string, transportRequest: any): Promise<TResponse>;
 }
 
 export function createProfilingEsClient({
@@ -77,6 +78,27 @@ export function createProfilingEsClient({
             signal: controller.signal,
             meta: true,
           }),
+          request,
+          controller
+        );
+      });
+
+      return unwrapEsResponse(promise);
+    },
+    transport<TResponse = unknown>(
+      operationName: string,
+      transportRequest: any
+    ): Promise<TResponse> {
+      const controller = new AbortController();
+
+      const promise = withProfilingSpan(operationName, () => {
+        return cancelEsRequestOnAbort(
+          esClient.transport.request(transportRequest, {
+            signal: controller.signal,
+            meta: true,
+          }) as unknown as Promise<{
+            body: TResponse;
+          }>,
           request,
           controller
         );
