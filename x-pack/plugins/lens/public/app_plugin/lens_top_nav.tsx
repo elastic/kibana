@@ -233,7 +233,7 @@ export const LensTopNavMenu = ({
     uiSettings,
     application,
     attributeService,
-    discover,
+    share,
     dashboardFeatureFlag,
     dataViewFieldEditor,
     dataViewEditor,
@@ -435,8 +435,10 @@ export const LensTopNavMenu = ({
     currentDoc,
   ]);
 
+  const discoverLocator = share?.url.locators.get('DISCOVER_APP_LOCATOR');
+
   const layerMetaInfo = useMemo(() => {
-    if (!activeDatasourceId || !discover) {
+    if (!activeDatasourceId || !discoverLocator) {
       return;
     }
     return getLayerMetaInfo(
@@ -449,7 +451,7 @@ export const LensTopNavMenu = ({
     );
   }, [
     activeDatasourceId,
-    discover,
+    discoverLocator,
     datasourceMap,
     datasourceStates,
     activeData,
@@ -570,7 +572,7 @@ export const LensTopNavMenu = ({
           const { error, meta } = layerMetaInfo;
           // If Discover is not available, return
           // If there's no data, return
-          if (error || !discover || !meta) {
+          if (error || !discoverLocator || !meta) {
             return;
           }
           const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
@@ -581,7 +583,7 @@ export const LensTopNavMenu = ({
             getEsQueryConfig(uiSettings)
           );
 
-          return discover.locator!.getRedirectUrl({
+          return discoverLocator.getRedirectUrl({
             dataViewSpec: dataViews.indexPatterns[meta.id]?.spec,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters: newFilters,
@@ -622,7 +624,7 @@ export const LensTopNavMenu = ({
     setIsSaveModalVisible,
     goBackToOriginatingApp,
     redirectToOrigin,
-    discover,
+    discoverLocator,
     query,
     filters,
     indexPatterns,
