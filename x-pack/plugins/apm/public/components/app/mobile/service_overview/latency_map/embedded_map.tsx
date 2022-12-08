@@ -31,7 +31,7 @@ import { useTimeRange } from '../../../../../hooks/use_time_range';
 function EmbeddedMapComponent({ filters }: { filters: Filter[] }) {
   const {
     query: { rangeFrom, rangeTo, kuery },
-  } = useApmParams('/services/{serviceName}/overview');
+  } = useApmParams('/mobile-services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const [error, setError] = useState<boolean>();

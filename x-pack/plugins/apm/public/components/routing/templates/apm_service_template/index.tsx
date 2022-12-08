@@ -35,6 +35,8 @@ import { BetaBadge } from '../../../shared/beta_badge';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
+import { fromQuery, replace, toQuery } from '../../../shared/links/url_helpers';
+import { useHistory } from 'react-router';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -77,6 +79,7 @@ function TemplateWithContext({
     query,
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/*');
+  const history = useHistory();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -96,6 +99,14 @@ function TemplateWithContext({
     }),
     [query, router, selectedTab, serviceName, title]
   );
+
+  // if (isMobileAgentName(agentName)) {
+  //   // replace(history, {
+  //   //   pathname: `/mobile-services/${serviceName}/${selectedTab}`,
+  //   //   search: fromQuery(query),
+  //   // });
+  //   return null;
+  // }
 
   return (
     <ApmMainTemplate

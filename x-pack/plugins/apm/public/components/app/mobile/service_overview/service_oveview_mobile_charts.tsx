@@ -22,15 +22,12 @@ import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { LatencyChart } from '../../../shared/charts/latency_chart';
 import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
-import { ServiceOverviewDependenciesTable } from '../service_overview_dependencies_table';
-import { ServiceOverviewThroughputChart } from '../service_overview_throughput_chart';
+import { ServiceOverviewDependenciesTable } from '../../service_overview/service_overview_dependencies_table';
+import { ServiceOverviewThroughputChart } from '../../service_overview/service_overview_throughput_chart';
 import { TransactionsTable } from '../../../shared/transactions_table';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { MostUsedChart } from './most_used_chart';
-import { LatencyMap } from './latency_map';
-import { MobileFilters } from './filters';
 import { useFiltersForMobileCharts } from './use_filters_for_mobile_charts';
 import {
   DEVICE_MODEL_NAME,
@@ -38,6 +35,10 @@ import {
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
 } from '../../../../../common/es_fields/apm';
+import { MostUsedChart } from './most_used_chart';
+import { MobileFilters } from './filters';
+import { LatencyMap } from './latency_map';
+
 interface Props {
   latencyChartHeight: number;
   rowDirection: 'column' | 'row';
@@ -68,7 +69,7 @@ export function ServiceOverviewMobileCharts({
       appVersion,
       transactionType,
     },
-  } = useApmParams('/services/{serviceName}/overview');
+  } = useApmParams('/mobile-services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
