@@ -45,11 +45,12 @@ const StyledEuiContextMenuItem = styled(EuiContextMenuItem)`
 
 const StyledEuiFlexItem = styled('div')`
   max-width: 50%;
-  padding-right: 10px;
+  padding-right: ${(props) => props.theme.eui.euiSizeS};
 `;
 
 const StyledEuiText = styled(EuiText)`
-  padding: 10px 12px;
+  padding: ${(props) => props.theme.eui.euiSizeM};
+  line-height: ${(props) => props.theme.eui.euiFontSizeM};
 `;
 
 /**
