@@ -10,7 +10,6 @@ import React from 'react';
 import { TestProviders } from '../common/mock';
 import { useGetFeatureIds } from './use_get_feature_ids';
 import * as api from './api';
-import { waitFor } from '@testing-library/dom';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -27,29 +26,31 @@ describe('useGetFeaturesIds', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    act(() => {
+    await act(async () => {
       expect(result.current.alertFeatureIds).toEqual([]);
       expect(result.current.isLoading).toEqual(true);
       expect(result.current.isError).toEqual(false);
     });
   });
-  //
+
   it('fetches data and returns it correctly', async () => {
     const spy = jest.spyOn(api, 'getFeatureIds');
     const { result } = renderHook(() => useGetFeatureIds(['context1']), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    await waitFor(() => {
+    await act(async () => {
       expect(spy).toHaveBeenCalledWith(
         { registrationContext: ['context1'] },
         expect.any(AbortSignal)
       );
     });
 
-    expect(result.current.alertFeatureIds).toEqual(['siem', 'observability']);
-    expect(result.current.isLoading).toEqual(false);
-    expect(result.current.isError).toEqual(false);
+    await act(async () => {
+      expect(result.current.alertFeatureIds).toEqual(['siem', 'observability']);
+      expect(result.current.isLoading).toEqual(false);
+      expect(result.current.isError).toEqual(false);
+    });
   });
 
   it('sets isError to true when an error occurs', async () => {
