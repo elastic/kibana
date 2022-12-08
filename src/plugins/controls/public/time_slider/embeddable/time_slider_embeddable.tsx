@@ -49,6 +49,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
   private getTimezone: ControlsSettingsService['getTimezone'];
   private timefilter: ControlsDataService['timefilter'];
+  private prevTimeRange: TimeRange | undefined;
   private readonly waitForControlOutputConsumersToLoad$;
 
   private reduxEmbeddableTools: ReduxEmbeddableTools<
@@ -129,9 +130,9 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       return;
     }
 
-    const nextBounds = this.timeRangeToBounds(input.timeRange);
-    const { actions, dispatch, getState } = this.reduxEmbeddableTools;
-    if (!_.isEqual(nextBounds, getState().componentState.timeRangeBounds)) {
+    if (!_.isEqual(input.timeRange, this.prevTimeRange)) {
+      const { actions, dispatch } = this.reduxEmbeddableTools;
+      const nextBounds = this.timeRangeToBounds(input.timeRange);
       const ticks = getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], this.getTimezone());
       dispatch(
         actions.setTimeRangeBounds({
@@ -145,6 +146,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   }
 
   private syncWithTimeRange() {
+    this.prevTimeRange = this.getInput().timeRange;
     const { actions, dispatch, getState } = this.reduxEmbeddableTools;
     const stepSize = getState().componentState.stepSize;
     const timesliceStartAsPercentageOfTimeRange =
