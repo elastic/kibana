@@ -13,9 +13,7 @@ import { ChartPointerEventContextProvider } from '../../../../context/chart_poin
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-// import { ServiceOverviewCharts } from './service_overview_charts/service_overview_charts';
 import { ServiceOverviewMobileCharts } from './service_oveview_mobile_charts';
-import { isPending } from '../../../../hooks/use_fetcher';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -24,7 +22,7 @@ import { isPending } from '../../../../hooks/use_fetcher';
 export const chartHeight = 288;
 
 export function MobileServiceOverview() {
-  const { agentName, serviceName, serviceAgentStatus } = useApmServiceContext();
+  const { serviceName } = useApmServiceContext();
 
   const {
     query: { environment, rangeFrom, rangeTo },
@@ -44,8 +42,6 @@ export function MobileServiceOverview() {
   const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn
     ? 'column'
     : 'row';
-
-  // const isMobileAgent = isMobileAgentName(agentName);
 
   const serviceOverviewProps = {
     latencyChartHeight,
