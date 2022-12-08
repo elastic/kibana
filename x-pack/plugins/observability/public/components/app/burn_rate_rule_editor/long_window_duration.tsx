@@ -96,19 +96,19 @@ export function LongWindowDuration({ initialDuration, onChange }: Props) {
   );
 }
 
-const rowLabel = i18n.translate('xpack.observability.slo.rules.longTimeWindow.rowLabel', {
-  defaultMessage: 'Long time window',
+const rowLabel = i18n.translate('xpack.observability.slo.rules.longWindow.rowLabel', {
+  defaultMessage: 'Long window',
 });
 
-const valueLabel = i18n.translate('xpack.observability.slo.rules.longTimeWindow.valueLabel', {
-  defaultMessage: 'Enter a duration value for the long time window',
+const valueLabel = i18n.translate('xpack.observability.slo.rules.longWindow.valueLabel', {
+  defaultMessage: 'Enter a duration value for the long window',
 });
 
-const unitLabel = i18n.translate('xpack.observability.slo.rules.longTimeWindow.unitLabel', {
-  defaultMessage: 'Select a duration unit for the long time window',
+const unitLabel = i18n.translate('xpack.observability.slo.rules.longWindow.unitLabel', {
+  defaultMessage: 'Select a duration unit for the long window',
 });
 
-const errorText = i18n.translate('xpack.observability.slo.rules.longTimeWindow.errorText', {
+const errorText = i18n.translate('xpack.observability.slo.rules.longWindow.errorText', {
   defaultMessage:
-    'The long time window must be at least 30 minutes and cannot exceed 24 hours or 1440 minutes.',
+    'The long window must be at least 30 minutes and cannot exceed 24 hours or 1440 minutes.',
 });
