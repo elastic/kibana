@@ -43,6 +43,44 @@ import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/servi
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
+const getAllowedPackageNamesMessage = (allowedPackageNames: string[]): string => {
+  return `Allowed package.name's: ${allowedPackageNames.join(', ')}`;
+};
+
+/**
+ * Validates that Package Policy data only includes `package.name`'s that are in the list of
+ * `allowedPackageNames`. If an error is encountered, then a message is return, otherwise, undefined.
+ *
+ * @param data
+ * @param allowedPackageNames
+ */
+const validatePackagePolicyDataIsScoppedToAllowedPackageNames = (
+  data: Array<PackagePolicy | NewPackagePolicy>,
+  allowedPackageNames: string[]
+): string | undefined => {
+  if (!data.length) {
+    return;
+  }
+
+  if (!allowedPackageNames.length) {
+    return 'Authorization denied due to lack of integration package privileges';
+  }
+
+  // Because List type of APIs have an un-bounded `perPage` query param, we only validate the
+  // data up to the first package.name that we find is not authorized.
+  for (const packagePolicy of data) {
+    if (!packagePolicy.package) {
+      return `Authorization denied. ${getAllowedPackageNamesMessage(allowedPackageNames)}`;
+    }
+
+    if (!allowedPackageNames.includes(packagePolicy.package.name)) {
+      return `Authorization denied to [package.name=${
+        packagePolicy.package.name
+      }]. ${getAllowedPackageNamesMessage(allowedPackageNames)}`;
+    }
+  }
+};
+
 export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetPackagePoliciesRequestSchema.query>
@@ -57,51 +95,17 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
 
     // specific to package-level RBAC
     if (limitedToPackages && limitedToPackages.length) {
-      // { packageName: boolean } record of allowed package names
-      // include policy with no package name
-      const packagePolicyNames = items.reduce<Record<string, boolean>>((acc, item) => {
-        const pkgName = item?.package?.name ?? 'empty-name';
-        if (pkgName) {
-          acc[pkgName] = limitedToPackages.includes(pkgName);
-        }
-        return acc;
-      }, {});
-
-      if (Object.values(packagePolicyNames).every((value) => !value)) {
-        // when there are not any allowed policies
+      const validationResult = validatePackagePolicyDataIsScoppedToAllowedPackageNames(
+        items,
+        limitedToPackages
+      );
+      if (validationResult) {
         return response.forbidden({
           body: {
-            message: `Data for package names ${items
-              .map((item) => item.package?.name)
-              .join(', ')} is not authorized.`,
+            message: validationResult,
           },
         });
       }
-
-      // list allowed package policy items or policies with no package name
-      return response.ok({
-        body: {
-          items: items.filter((item) => {
-            const pkgName = item?.package?.name;
-            // include policies with allowed package names
-            const allowedPackages = Object.entries(packagePolicyNames).reduce<string[]>(
-              (acc, curr) => {
-                if (curr[1]) acc.push(curr[0]);
-                return acc;
-              },
-              []
-            );
-            if (pkgName) {
-              return allowedPackages.includes(pkgName);
-            }
-            // or policies with no package name
-            return item;
-          }),
-          total,
-          page,
-          perPage,
-        },
-      });
     }
 
     // agnostic to package-level RBAC
@@ -123,14 +127,29 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof BulkGetPackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
-  const { client: soClient } = await (await context.fleet).getSoClient();
+  const { client: soClient, limitedToPackages } = await (await context.fleet).getSoClient();
   const { ids, ignoreMissing } = request.body;
+
   try {
     const items = await packagePolicyService.getByIDs(soClient, ids, {
       ignoreMissing,
     });
 
     const body: BulkGetPackagePoliciesResponse = { items: items ?? [] };
+
+    if (limitedToPackages && limitedToPackages.length) {
+      const validationResult = validatePackagePolicyDataIsScoppedToAllowedPackageNames(
+        body.items,
+        limitedToPackages
+      );
+      if (validationResult) {
+        return response.forbidden({
+          body: {
+            message: validationResult,
+          },
+        });
+      }
+    }
 
     return response.ok({
       body,
@@ -159,10 +178,15 @@ export const getOnePackagePolicyHandler: FleetRequestHandler<
 
     if (packagePolicy) {
       if (limitedToPackages && limitedToPackages.length) {
-        const packageName = packagePolicy?.package?.name;
-        if (packageName && !limitedToPackages.includes(packageName)) {
+        const validationResult = validatePackagePolicyDataIsScoppedToAllowedPackageNames(
+          [packagePolicy],
+          limitedToPackages
+        );
+        if (validationResult) {
           return response.forbidden({
-            body: { message: `Data for package name ${packageName} is not authorized.` },
+            body: {
+              message: validationResult,
+            },
           });
         }
       }
