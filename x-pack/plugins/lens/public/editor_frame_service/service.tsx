@@ -14,6 +14,7 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataViewsContract,
+  TimefilterContract,
 } from '@kbn/data-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -55,6 +56,7 @@ export interface EditorFramePlugins {
   dataViews: DataViewsContract;
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
+  timefilter: TimefilterContract;
 }
 
 async function collectAsyncDefinitions<T extends { id: string }>(
