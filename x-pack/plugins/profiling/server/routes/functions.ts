@@ -9,7 +9,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { createTopNFunctions } from '../../common/functions';
-import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';

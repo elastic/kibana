@@ -9,7 +9,7 @@ import { ElasticsearchClient, RequestHandlerContext } from '@kbn/core/server';
 import { Logger } from '@kbn/logging';
 import { profilingElasticsearchPlugin } from '@kbn/observability-plugin/common';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
-import { getExecutablesAndStackTraces } from '../routes/get_executables_and_stacktraces';
+import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
 import { ProjectTimeQuery } from './query';
 import { searchStackTraces } from './search_stacktraces';
 
