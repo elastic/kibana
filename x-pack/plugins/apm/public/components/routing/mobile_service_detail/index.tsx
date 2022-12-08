@@ -20,7 +20,6 @@ import { ServiceMapServiceDetail } from '../../app/service_map';
 import { MobileServiceTemplate } from '../templates/mobile_service_template';
 import { MobileServiceOverview } from '../../app/mobile/service_overview';
 import { MobileTransactionOverview } from '../../app/mobile/transaction_overview';
-// import { MobileTransactionDetails } from '../../app/mobile/service_overview/transactions_details';
 import { TransactionDetails } from '../../app/transaction_details';
 
 export function page({
