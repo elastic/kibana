@@ -191,7 +191,7 @@ export const getPrepackagedRulesStatusRequest = () =>
     path: PREBUILT_RULES_STATUS_URL,
   });
 
-export const getRulesInfoRequest = () =>
+export const getRuleManagementFiltersRequest = () =>
   requestMock.create({
     method: 'get',
     path: RULE_MANAGEMENT_FILTERS_URL,

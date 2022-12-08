@@ -48,11 +48,11 @@ const RulesPageComponent: React.FC = () => {
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
-  const invalidateFetchRulesInfo = useInvalidateFetchRuleManagementFiltersQuery();
+  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateRules = useCallback(() => {
     invalidateFindRulesQuery();
-    invalidateFetchRulesInfo();
-  }, [invalidateFindRulesQuery, invalidateFetchRulesInfo]);
+    invalidateFetchRuleManagementFilters();
+  }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
 
   const [
     {

@@ -20,7 +20,7 @@ export const useCreatePrebuiltRulesMutation = (
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidatePrePackagedRulesStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
-  const invalidateFetchRulesInfo = useInvalidateFetchRuleManagementFiltersQuery();
+  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
 
   return useMutation(() => createPrepackagedRules(), {
     ...options,
@@ -30,7 +30,7 @@ export const useCreatePrebuiltRulesMutation = (
       // the number of rules might change after the installation
       invalidatePrePackagedRulesStatus();
       invalidateFindRulesQuery();
-      invalidateFetchRulesInfo();
+      invalidateFetchRuleManagementFilters();
 
       if (options?.onSettled) {
         options.onSettled(...args);

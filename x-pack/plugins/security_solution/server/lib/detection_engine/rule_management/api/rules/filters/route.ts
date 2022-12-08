@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { RulesInfoResponse } from '../../../../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
+import { RuleManagementFiltersResponse } from '../../../../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../../../common/detection_engine/rule_management/api/urls';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -65,7 +65,7 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
       try {
         const [{ prebuilt: prebuiltRulesCount, custom: customRulesCount }, tags] =
           await Promise.all([fetchRulesCount(rulesClient), readTags({ rulesClient })]);
-        const responseBody: RulesInfoResponse = {
+        const responseBody: RuleManagementFiltersResponse = {
           rules_summary: {
             custom_count: customRulesCount,
             prebuilt_installed_count: prebuiltRulesCount,
@@ -74,7 +74,10 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
             tags,
           },
         };
-        const [validatedBody, validationError] = validate(responseBody, RulesInfoResponse);
+        const [validatedBody, validationError] = validate(
+          responseBody,
+          RuleManagementFiltersResponse
+        );
 
         if (validationError != null) {
           return siemResponse.error({ statusCode: 500, body: validationError });

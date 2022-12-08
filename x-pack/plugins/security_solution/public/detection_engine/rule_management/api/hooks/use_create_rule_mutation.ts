@@ -22,7 +22,7 @@ export const useCreateRuleMutation = (
   options?: UseMutationOptions<RuleResponse, Error, RuleCreateProps>
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
-  const invalidateFetchRulesInfo = useInvalidateFetchRuleManagementFiltersQuery();
+  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
 
   return useMutation<RuleResponse, Error, RuleCreateProps>(
     (rule: RuleCreateProps) => createRule({ rule: transformOutput(rule) }),
@@ -31,7 +31,7 @@ export const useCreateRuleMutation = (
       mutationKey: CREATE_RULE_MUTATION_KEY,
       onSettled: (...args) => {
         invalidateFindRulesQuery();
-        invalidateFetchRulesInfo();
+        invalidateFetchRuleManagementFilters();
 
         if (options?.onSettled) {
           options.onSettled(...args);

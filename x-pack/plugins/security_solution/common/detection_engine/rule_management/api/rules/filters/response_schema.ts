@@ -8,8 +8,8 @@
 import * as t from 'io-ts';
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 
-export type RulesInfoResponse = t.TypeOf<typeof RulesInfoResponse>;
-export const RulesInfoResponse = t.exact(
+export type RuleManagementFiltersResponse = t.TypeOf<typeof RuleManagementFiltersResponse>;
+export const RuleManagementFiltersResponse = t.exact(
   t.type({
     rules_summary: t.type({
       custom_count: PositiveInteger,

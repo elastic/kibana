@@ -11,7 +11,7 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { RulesInfoResponse } from '../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
+import type { RuleManagementFiltersResponse } from '../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/detection_engine/rule_management/api/urls';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
@@ -399,8 +399,8 @@ export const fetchRuleManagementFilters = async ({
   signal,
 }: {
   signal?: AbortSignal;
-}): Promise<RulesInfoResponse> =>
-  KibanaServices.get().http.fetch<RulesInfoResponse>(RULE_MANAGEMENT_FILTERS_URL, {
+}): Promise<RuleManagementFiltersResponse> =>
+  KibanaServices.get().http.fetch<RuleManagementFiltersResponse>(RULE_MANAGEMENT_FILTERS_URL, {
     method: 'GET',
     signal,
   });

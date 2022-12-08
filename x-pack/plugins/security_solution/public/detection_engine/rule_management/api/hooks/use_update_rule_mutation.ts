@@ -23,7 +23,7 @@ export const useUpdateRuleMutation = (
   options?: UseMutationOptions<RuleResponse, Error, RuleUpdateProps>
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
-  const invalidateFetchRulesInfo = useInvalidateFetchRuleManagementFiltersQuery();
+  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
 
   return useMutation<RuleResponse, Error, RuleUpdateProps>(
@@ -34,7 +34,7 @@ export const useUpdateRuleMutation = (
       onSettled: (...args) => {
         invalidateFindRulesQuery();
         invalidateFetchRuleByIdQuery();
-        invalidateFetchRulesInfo();
+        invalidateFetchRuleManagementFilters();
 
         if (options?.onSettled) {
           options.onSettled(...args);

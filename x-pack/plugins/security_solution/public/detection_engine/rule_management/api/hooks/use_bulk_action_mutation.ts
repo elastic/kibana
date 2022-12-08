@@ -27,7 +27,7 @@ export const useBulkActionMutation = (
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
-  const invalidateFetchRulesInfo = useInvalidateFetchRuleManagementFiltersQuery();
+  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateFetchPrebuiltRulesStatusQuery = useInvalidateFetchPrebuiltRulesStatusQuery();
   const updateRulesCache = useUpdateRulesCache();
 
@@ -66,12 +66,12 @@ export const useBulkActionMutation = (
         case BulkActionType.delete:
           invalidateFindRulesQuery();
           invalidateFetchRuleByIdQuery();
-          invalidateFetchRulesInfo();
+          invalidateFetchRuleManagementFilters();
           invalidateFetchPrebuiltRulesStatusQuery();
           break;
         case BulkActionType.duplicate:
           invalidateFindRulesQuery();
-          invalidateFetchRulesInfo();
+          invalidateFetchRuleManagementFilters();
           break;
         case BulkActionType.edit:
           if (updatedRules) {
@@ -82,7 +82,7 @@ export const useBulkActionMutation = (
             invalidateFindRulesQuery();
           }
           invalidateFetchRuleByIdQuery();
-          invalidateFetchRulesInfo();
+          invalidateFetchRuleManagementFilters();
           break;
       }
 

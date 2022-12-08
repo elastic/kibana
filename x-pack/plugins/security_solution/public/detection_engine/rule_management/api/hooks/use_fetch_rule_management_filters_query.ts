@@ -7,7 +7,7 @@
 import { useCallback } from 'react';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { RulesInfoResponse } from '../../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
+import type { RuleManagementFiltersResponse } from '../../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/detection_engine/rule_management/api/urls';
 import { fetchRuleManagementFilters } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
@@ -15,9 +15,9 @@ import { DEFAULT_QUERY_OPTIONS } from './constants';
 export const RULE_MANAGEMENT_FILTERS_QUERY_KEY = ['GET', RULE_MANAGEMENT_FILTERS_URL];
 
 export const useFetchRuleManagementFiltersQuery = (
-  options?: UseQueryOptions<RulesInfoResponse>
+  options?: UseQueryOptions<RuleManagementFiltersResponse>
 ) => {
-  return useQuery<RulesInfoResponse>(
+  return useQuery<RuleManagementFiltersResponse>(
     RULE_MANAGEMENT_FILTERS_QUERY_KEY,
     async ({ signal }) => {
       const response = await fetchRuleManagementFilters({ signal });
