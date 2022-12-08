@@ -185,7 +185,6 @@ function getViewUnderlyingDataArgs({
   activeDatasourceState,
   activeData,
   dataViews,
-  dataViewsService,
   capabilities,
   query,
   filters,
