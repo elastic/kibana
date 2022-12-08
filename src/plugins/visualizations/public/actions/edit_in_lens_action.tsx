@@ -9,6 +9,7 @@
 import React from 'react';
 import { take } from 'rxjs/operators';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
@@ -17,7 +18,7 @@ import { IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { VisualizeEmbeddable } from '../embeddable';
 import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '../triggers';
-import { getUiActions, getApplication, getEmbeddable } from '../services';
+import { getUiActions, getApplication, getEmbeddable, getUsageCollection } from '../services';
 
 export const ACTION_EDIT_IN_LENS = 'ACTION_EDIT_IN_LENS';
 
@@ -53,7 +54,7 @@ const isVisualizeEmbeddable = (embeddable: IEmbeddable): embeddable is Visualize
 export class EditInLensAction implements Action<EditInLensContext> {
   public id = ACTION_EDIT_IN_LENS;
   public readonly type = ACTION_EDIT_IN_LENS;
-  public order = 100;
+  public order = 49;
   public showNotification = true;
   public currentAppId: string | undefined;
 
@@ -94,6 +95,13 @@ export class EditInLensAction implements Action<EditInLensContext> {
         isEmbeddable: true,
       };
       if (navigateToLensConfig) {
+        if (this.currentAppId) {
+          getUsageCollection().reportUiCounter(
+            this.currentAppId,
+            METRIC_TYPE.CLICK,
+            ACTION_EDIT_IN_LENS
+          );
+        }
         getEmbeddable().getStateTransfer().isTransferInProgress = true;
         getUiActions().getTrigger(DASHBOARD_VISUALIZATION_PANEL_TRIGGER).exec(updatedWithMeta);
       }

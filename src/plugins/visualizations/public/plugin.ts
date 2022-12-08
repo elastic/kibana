@@ -42,6 +42,7 @@ import type {
   Setup as InspectorSetup,
   Start as InspectorStart,
 } from '@kbn/inspector-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -95,6 +96,7 @@ import {
   setExecutionContext,
   setFieldFormats,
   setSavedObjectTagging,
+  setUsageCollection,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
@@ -143,6 +145,7 @@ export interface VisualizationsStartDeps {
   screenshotMode: ScreenshotModePluginStart;
   fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  usageCollection: UsageCollectionStart;
 }
 
 /**
@@ -368,6 +371,7 @@ export class VisualizationsPlugin
       spaces,
       savedObjectsTaggingOss,
       fieldFormats,
+      usageCollection,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -387,6 +391,7 @@ export class VisualizationsPlugin
     setExecutionContext(core.executionContext);
     setChrome(core.chrome);
     setFieldFormats(fieldFormats);
+    setUsageCollection(usageCollection);
 
     if (spaces) {
       setSpaces(spaces);
