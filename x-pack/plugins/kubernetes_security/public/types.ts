@@ -35,6 +35,7 @@ export interface GlobalFilter {
 
 export interface ResponseActionButtonProps {
   tooltip: React.ReactNode;
+  canAccessResponseConsole: boolean;
   isDisabled: boolean;
 }
 export interface KubernetesSecurityDeps {

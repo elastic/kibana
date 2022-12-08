@@ -26,7 +26,11 @@ describe('Tree view Breadcrumb component', () => {
   let mockedContext: AppContextTestRender;
   let onSelect: jest.Mock;
   let onResponseActionButtonClick: jest.Mock;
-  const responseActionButtonProps = { tooltip: { content: 'test' }, isDisabled: false };
+  const responseActionButtonProps = {
+    tooltip: { content: 'test' },
+    isDisabled: false,
+    canAccessResponseConsole: true,
+  };
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();

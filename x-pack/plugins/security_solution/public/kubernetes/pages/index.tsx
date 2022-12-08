@@ -27,6 +27,7 @@ import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_que
 import { SessionsView } from '../../common/components/sessions_viewer';
 import { kubernetesSessionsHeaders } from './constants';
 import { useResponderActionData } from '../../detections/components/endpoint_responder/use_responder_action_data';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 
 export const KubernetesContainer = React.memo(() => {
   const { kubernetesSecurity, uiSettings } = useKibana().services;
@@ -46,6 +47,7 @@ export const KubernetesContainer = React.memo(() => {
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const canAccessResponseConsole = useUserPrivileges().endpointPrivileges.canAccessResponseConsole;
 
   const [agentIdForResponder, setAgentIdForResponder] = useState<string>('');
   const [filterQuery, kqlError] = useMemo(
@@ -97,6 +99,7 @@ export const KubernetesContainer = React.memo(() => {
 
   const responseActionButtonProps: ResponseActionButtonProps = {
     isDisabled,
+    canAccessResponseConsole,
     tooltip,
   };
 

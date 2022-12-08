@@ -162,15 +162,17 @@ export const Breadcrumb = ({
             )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={responseActionButtonProps?.tooltip ?? null}>
-            <EuiButtonEmpty
-              data-test-subj={`kubernetesSecurity:kubernetesSecurityResponseAction`}
-              isDisabled={isResponseActionDisabled}
-              onClick={responseActionClick}
-            >
-              {RESPONSE_ACTION_BUTTON}
-            </EuiButtonEmpty>
-          </EuiToolTip>
+          {responseActionButtonProps?.canAccessResponseConsole && (
+            <EuiToolTip content={responseActionButtonProps?.tooltip ?? null}>
+              <EuiButtonEmpty
+                data-test-subj={`kubernetesSecurity:kubernetesSecurityResponseAction`}
+                isDisabled={isResponseActionDisabled}
+                onClick={responseActionClick}
+              >
+                {RESPONSE_ACTION_BUTTON}
+              </EuiButtonEmpty>
+            </EuiToolTip>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
