@@ -187,15 +187,16 @@ export const termsOperation: OperationDefinition<
   },
   getErrorMessage: (layer, columnId, indexPattern) => {
     const messages = [
-      ...(getInvalidFieldMessage(
-        layer.columns[columnId] as FieldBasedIndexPatternColumn,
-        indexPattern
-      ) || []),
       getDisallowedTermsMessage(layer, columnId, indexPattern) || '',
       getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern) || '',
     ].filter(Boolean);
     return messages.length ? messages : undefined;
   },
+  getWarningMessages: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(
+      layer.columns[columnId] as FieldBasedIndexPatternColumn,
+      indexPattern
+    )?.map((msg) => <div>{msg}</div>),
   getNonTransferableFields: (column, newIndexPattern) => {
     return getFieldsByValidationState(newIndexPattern, column).invalidFields;
   },

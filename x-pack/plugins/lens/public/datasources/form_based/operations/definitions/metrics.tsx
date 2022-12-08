@@ -211,13 +211,14 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 
     getErrorMessage: (layer, columnId, indexPattern) =>
       combineErrorMessages([
-        getInvalidFieldMessage(
-          layer.columns[columnId] as FieldBasedIndexPatternColumn,
-          indexPattern
-        ),
         getDisallowedPreviousShiftMessage(layer, columnId),
         getColumnReducedTimeRangeError(layer, columnId, indexPattern),
       ]),
+    getWarningMessages: (layer, columnId, indexPattern) =>
+      getInvalidFieldMessage(
+        layer.columns[columnId] as FieldBasedIndexPatternColumn,
+        indexPattern
+      )?.map((msg) => <div>{msg}</div>),
     filterable: true,
     canReduceTimeRange: true,
     documentation: {

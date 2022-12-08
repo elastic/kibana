@@ -92,10 +92,14 @@ export const cardinalityOperation: OperationDefinition<
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
-      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
       getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
+  getWarningMessages: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(
+      layer.columns[columnId] as FieldBasedIndexPatternColumn,
+      indexPattern
+    )?.map((msg) => <div>{msg}</div>),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 

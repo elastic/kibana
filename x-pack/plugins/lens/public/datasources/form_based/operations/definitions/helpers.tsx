@@ -19,7 +19,17 @@ import { hasField } from '../../pure_utils';
 export function getInvalidFieldMessage(
   column: FieldBasedIndexPatternColumn,
   indexPattern?: IndexPattern
-) {
+): string[] | undefined {
+  return [
+    i18n.translate('xpack.lens.indexPattern.fieldsNotFound', {
+      defaultMessage:
+        '{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found',
+      values: {
+        count: 1,
+        missingFields: 'lolz',
+      },
+    }),
+  ];
   if (!indexPattern) {
     return;
   }

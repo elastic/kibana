@@ -82,8 +82,11 @@ export const rangeOperation: OperationDefinition<
   }),
   priority: 4, // Higher than terms, so numbers get histogram
   input: 'field',
-  getErrorMessage: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+  getWarningMessages: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(
+      layer.columns[columnId] as FieldBasedIndexPatternColumn,
+      indexPattern
+    )?.map((msg) => <div>{msg}</div>),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'number' &&

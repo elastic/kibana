@@ -63,7 +63,10 @@ const supportedTypes = new Set([
   'date_range',
 ]);
 
-export function getInvalidSortFieldMessage(sortField: string, indexPattern?: IndexPattern) {
+export function getInvalidSortFieldMessage(
+  sortField: string,
+  indexPattern?: IndexPattern
+): undefined | string {
   if (!indexPattern) {
     return;
   }
@@ -190,22 +193,24 @@ export const lastValueOperation: OperationDefinition<
     }
   },
   getErrorMessage(layer, columnId, indexPattern) {
+    const errorMessages: string[] = [];
+    errorMessages.push(...(getDisallowedPreviousShiftMessage(layer, columnId) || []));
+    errorMessages.push(...(getColumnReducedTimeRangeError(layer, columnId, indexPattern) || []));
+    return errorMessages.length ? errorMessages : undefined;
+  },
+  getWarningMessages(layer, columnId, indexPattern) {
+    const warningMessages = [];
     const column = layer.columns[columnId] as LastValueIndexPatternColumn;
-    let errorMessages: string[] = [];
-    const invalidSourceFieldMessage = getInvalidFieldMessage(column, indexPattern);
+    const invalidFieldMessage = getInvalidFieldMessage(column, indexPattern);
     const invalidSortFieldMessage = getInvalidSortFieldMessage(
       column.params.sortField,
       indexPattern
     );
-    if (invalidSourceFieldMessage) {
-      errorMessages = [...invalidSourceFieldMessage];
-    }
-    if (invalidSortFieldMessage) {
-      errorMessages = [invalidSortFieldMessage];
-    }
-    errorMessages.push(...(getDisallowedPreviousShiftMessage(layer, columnId) || []));
-    errorMessages.push(...(getColumnReducedTimeRangeError(layer, columnId, indexPattern) || []));
-    return errorMessages.length ? errorMessages : undefined;
+
+    if (invalidFieldMessage) warningMessages.push(...invalidFieldMessage);
+    if (invalidSortFieldMessage) warningMessages.push(invalidSortFieldMessage);
+
+    return warningMessages.map((msg) => <div>{msg}</div>);
   },
   buildColumn({ field, previousColumn, indexPattern }, columnParams) {
     const lastValueParams = columnParams as LastValueIndexPatternColumn['params'];

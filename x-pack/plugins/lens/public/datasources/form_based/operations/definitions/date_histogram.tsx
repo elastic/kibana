@@ -85,13 +85,12 @@ export const dateHistogramOperation: OperationDefinition<
   priority: 5, // Highest priority level used
   operationParams: [{ name: 'interval', type: 'string', required: false }],
   getErrorMessage: (layer, columnId, indexPattern) =>
-    [
-      ...(getInvalidFieldMessage(
-        layer.columns[columnId] as FieldBasedIndexPatternColumn,
-        indexPattern
-      ) || []),
-      getMultipleDateHistogramsErrorMessage(layer, columnId) || '',
-    ].filter(Boolean),
+    [getMultipleDateHistogramsErrorMessage(layer, columnId) || ''].filter(Boolean),
+  getWarningMessages: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(
+      layer.columns[columnId] as FieldBasedIndexPatternColumn,
+      indexPattern
+    )?.map((msg) => <div>{msg}</div>),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       (type === 'date' || type === 'date_range') &&
