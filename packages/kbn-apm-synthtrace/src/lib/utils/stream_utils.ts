@@ -97,7 +97,7 @@ export function fork(...streams: Transform[]): Transform {
       stream.on('end', () => {
         cb();
       }),
-    (err) => {
+    () => {
       proxy.end();
     }
   );

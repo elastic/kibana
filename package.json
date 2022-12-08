@@ -528,7 +528,6 @@
     "getos": "^3.1.0",
     "globby": "^11.1.0",
     "handlebars": "4.7.7",
-    "hdr-histogram-js": "^3.0.0",
     "he": "^1.2.0",
     "history": "^4.9.0",
     "hjson": "3.2.1",

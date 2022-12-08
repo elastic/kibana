@@ -56,8 +56,6 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
         );
       });
 
-      const downstream = apm.service('downstream', 'downstream', 'go').instance('downstream');
-
       const transactionGroupRange = lodashRange(0, NUM_TRANSACTION_GROUPS);
 
       return range

@@ -11,12 +11,8 @@ import { apm } from '../..';
 import { ApmFields } from '../lib/apm/apm_fields';
 import { Instance } from '../lib/apm/instance';
 import { Scenario } from '../cli/scenario';
-import { getLogger } from '../cli/utils/get_common_services';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 
-const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
-  const logger = getLogger(runOptions);
-
+const scenario: Scenario<ApmFields> = async ({ logger }) => {
   const languages = ['go', 'dotnet', 'java', 'python'];
   const services = ['web', 'order-processing', 'api-backend'];
 

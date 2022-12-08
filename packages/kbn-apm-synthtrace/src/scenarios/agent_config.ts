@@ -8,13 +8,9 @@
 
 import { observer } from '../..';
 import { Scenario } from '../cli/scenario';
-import { getLogger } from '../cli/utils/get_common_services';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { AgentConfigFields } from '../lib/agent_config/agent_config_fields';
 
-const scenario: Scenario<AgentConfigFields> = async (runOptions: RunOptions) => {
-  const logger = getLogger(runOptions);
-
+const scenario: Scenario<AgentConfigFields> = async ({ logger }) => {
   return {
     generate: ({ range }) => {
       const agentConfig = observer().agentConfig();

@@ -48,6 +48,7 @@ RUNTIME_DEPS = [
   "@npm//node-fetch",
   "@npm//semver",
   "@npm//elastic-apm-http-client",
+  "@npm//async"
 ]
 
 TYPES_DEPS = [
@@ -62,6 +63,8 @@ TYPES_DEPS = [
   "@npm//@types/node-fetch",
   "@npm//@types/semver",
   "@npm//@types/yargs",
+  "@npm//@types/async",
+  "@npm//utility-types"
 ]
 
 jsts_transpiler(

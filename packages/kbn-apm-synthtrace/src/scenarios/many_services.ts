@@ -7,20 +7,15 @@
  */
 
 import { flatten, random } from 'lodash';
-
 import { apm } from '../..';
 import { Scenario } from '../cli/scenario';
-import { getLogger } from '../cli/utils/get_common_services';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { ApmFields } from '../lib/apm/apm_fields';
 import { Instance } from '../lib/apm/instance';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
-  const logger = getLogger(runOptions);
-
+const scenario: Scenario<ApmFields> = async ({ logger }) => {
   const numServices = 500;
   const languages = ['go', 'dotnet', 'java', 'python'];
   const services = ['web', 'order-processing', 'api-backend', 'proxy'];

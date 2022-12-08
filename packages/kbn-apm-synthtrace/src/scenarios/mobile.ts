@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { apm, timerange } from '../..';
+import { apm } from '../..';
+import { Scenario } from '../cli/scenario';
+import { ApmFields } from '../lib/apm/apm_fields';
 import {
   DeviceInfo,
-  MobileDevice,
-  OSInfo,
   GeoInfo,
+  MobileDevice,
   NetworkConnectionInfo,
+  OSInfo,
 } from '../lib/apm/mobile_device';
-import { ApmFields } from '../lib/apm/apm_fields';
-import { Scenario } from '../cli/scenario';
-import { getLogger } from '../cli/utils/get_common_services';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
@@ -313,15 +311,11 @@ function randomInt(max: number) {
   return Math.floor(Math.random() * max);
 }
 
-const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
-  const logger = getLogger(runOptions);
-
-  const { numDevices = 10 } = runOptions.scenarioOpts || {};
+const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
+  const { numDevices = 10 } = scenarioOpts || {};
 
   return {
-    generate: ({ from, to }) => {
-      const range = timerange(from, to);
-
+    generate: ({ range }) => {
       const androidDevices = [...Array(numDevices).keys()].map((index) => {
         const deviceMetadata = ANDROID_DEVICES[randomInt(ANDROID_DEVICES.length)];
         const geoNetwork = GEO_AND_NETWORK[randomInt(GEO_AND_NETWORK.length)];
@@ -415,9 +409,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         });
       };
 
-      return [...androidDevices, ...iOSDevices]
-        .map((device) => logger.perf('generating_apm_events', () => sessionTransactions(device)))
-        .reduce((p, c) => p.merge(c));
+      return [...androidDevices, ...iOSDevices].map((device) => sessionTransactions(device));
     },
   };
 };

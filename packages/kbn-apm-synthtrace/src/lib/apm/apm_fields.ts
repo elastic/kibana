@@ -85,7 +85,8 @@ export type ApmFields = Fields<{
     'error.id': string;
     'event.ingested': number;
     'event.outcome': string;
-    'faas.coldstart': string;
+    'faas.coldstart': boolean;
+    'faas.execution': string;
     'faas.id': string;
     'faas.name': string;
     'faas.trigger.type': string;
