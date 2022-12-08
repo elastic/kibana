@@ -16,6 +16,11 @@ import { isTrustedApp } from './utils';
 import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 import { OS_LINUX, OS_MAC, OS_WINDOWS } from './components/translations';
 import type { TrustedApp } from '../../../../common/endpoint/types';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+
+jest.mock('../../../common/components/user_privileges');
+const mockUserPrivileges = useUserPrivileges as jest.Mock;
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],
@@ -43,6 +48,12 @@ describe.each([
       );
       return renderResult;
     };
+
+    mockUserPrivileges.mockReturnValue({ endpointPrivileges: getEndpointAuthzInitialStateMock() });
+  });
+
+  afterEach(() => {
+    mockUserPrivileges.mockReset();
   });
 
   it('should display title and who has created and updated it last', async () => {
