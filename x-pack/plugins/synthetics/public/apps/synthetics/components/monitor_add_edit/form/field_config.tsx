@@ -1080,4 +1080,26 @@ export const FIELD: Record<string, FieldMeta> = {
       },
     }),
   },
+  [ConfigKey.SYNTHETICS_ARGS]: {
+    fieldKey: ConfigKey.SYNTHETICS_ARGS,
+    component: EuiFieldText,
+    controlled: true,
+    label: i18n.translate('xpack.synthetics.monitorConfig.syntheticsArgs.label', {
+      defaultMessage: 'Synthetics args',
+    }),
+    helpText: (
+      <span>
+        {i18n.translate('xpack.synthetics.monitorConfig.syntheticsArgs.helpText', {
+          defaultMessage:
+            'Extra arguments to pass to the synthetics agent package. Takes a list of strings. This is useful in rare scenarios, and should not ordinarily need to be set.',
+        })}
+      </span>
+    ),
+    props: ({ setValue }) => ({
+      id: 'syntheticsMontiorConfigSyntheticsArgs',
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(ConfigKey.SYNTHETICS_ARGS, event.target.value);
+      },
+    }),
+  },
 };

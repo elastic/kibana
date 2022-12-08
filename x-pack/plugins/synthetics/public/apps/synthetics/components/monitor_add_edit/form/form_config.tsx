@@ -114,7 +114,11 @@ export const BROWSER_ADVANCED = [
         defaultMessage: 'Provide fine-tuned configuration for the synthetics agent.',
       }
     ),
-    components: [FIELD[ConfigKey.IGNORE_HTTPS_ERRORS], FIELD[ConfigKey.PLAYWRIGHT_OPTIONS]],
+    components: [
+      FIELD[ConfigKey.IGNORE_HTTPS_ERRORS],
+      FIELD[ConfigKey.SYNTHETICS_ARGS],
+      FIELD[ConfigKey.PLAYWRIGHT_OPTIONS],
+    ],
   },
 ];
 
