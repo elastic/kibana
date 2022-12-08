@@ -18,6 +18,8 @@ import { APMPluginStartDependencies } from '../../types';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 import { APM_SERVER, PackagePolicy } from './register_fleet_policy_callbacks';
 
+const doUnzip = promisify(unzip);
+
 export interface ApmArtifactBody {
   serviceName: string;
   serviceVersion: string;
@@ -30,17 +32,9 @@ export type ArtifactSourceMap = Omit<Artifact, 'body'> & {
 
 export type FleetPluginStart = NonNullable<APMPluginStartDependencies['fleet']>;
 
-const doUnzip = promisify(unzip);
-
-async function unzipArtifactBody(
-  artifact: Artifact
-): Promise<ArtifactSourceMap> {
-  const body = await doUnzip(Buffer.from(artifact.body, 'base64'));
-
-  return {
-    ...artifact,
-    body: JSON.parse(body.toString()) as ApmArtifactBody,
-  };
+export async function getUnzippedArtifactBody(artifactBody: string) {
+  const unzippedBody = await doUnzip(Buffer.from(artifactBody, 'base64'));
+  return JSON.parse(unzippedBody.toString()) as ApmArtifactBody;
 }
 
 export function getApmArtifactClient(fleetPluginStart: FleetPluginStart) {
@@ -66,7 +60,10 @@ export async function listSourceMapArtifacts({
   });
 
   const artifacts = await Promise.all(
-    artifactsResponse.items.map(unzipArtifactBody)
+    artifactsResponse.items.map(async (item) => {
+      const body = await getUnzippedArtifactBody(item.body);
+      return { ...item, body };
+    })
   );
 
   return { artifacts, total: artifactsResponse.total };
@@ -179,11 +176,11 @@ export async function updateSourceMapsOnFleetPolicies({
   );
 }
 
-export function getCleanedBundleFilePath(bundleFilePath: string) {
+export function getCleanedBundleFilePath(bundleFilepath: string) {
   try {
-    const cleanedBundleFilepath = new URL(bundleFilePath);
+    const cleanedBundleFilepath = new URL(bundleFilepath);
     return cleanedBundleFilepath.href;
   } catch (e) {
-    return bundleFilePath;
+    return bundleFilepath;
   }
 }

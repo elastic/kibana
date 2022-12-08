@@ -34,45 +34,27 @@ export const createSourceMapIndex = async ({
 const mappings: Mappings = {
   dynamic: 'strict',
   properties: {
-    body: {
-      type: 'binary',
-    },
-    compression_algorithm: {
-      type: 'keyword',
-      index: false,
-    },
     created: {
       type: 'date',
     },
-    decoded_sha256: {
-      type: 'keyword',
+    content: {
+      type: 'binary',
     },
-    decoded_size: {
-      type: 'long',
-      index: false,
-    },
-    encoded_sha256: {
-      type: 'keyword',
-    },
-    encoded_size: {
-      type: 'long',
-      index: false,
-    },
-    encryption_algorithm: {
+    content_sha256: {
       type: 'keyword',
       index: false,
     },
-    identifier: {
+    'file.path': {
       type: 'keyword',
+      index: false,
     },
-    package_name: {
+    'service.name': {
       type: 'keyword',
+      index: false,
     },
-    relative_url: {
+    'service.version': {
       type: 'keyword',
-    },
-    type: {
-      type: 'keyword',
+      index: false,
     },
   },
 };

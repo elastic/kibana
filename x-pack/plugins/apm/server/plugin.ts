@@ -282,13 +282,13 @@ export class APMPlugin
       logger: this.logger,
     });
 
-    const internalEsClient = core.elasticsearch.client.asInternalUser;
+    const internalESClient = core.elasticsearch.client.asInternalUser;
 
-    migrateFleetSourceMapArtifacts(
-      plugins.fleet,
-      internalEsClient,
-      this.logger
-    );
+    migrateFleetSourceMapArtifacts({
+      fleet: plugins.fleet,
+      internalESClient,
+      logger: this.logger,
+    });
 
     // TODO: remove in 9.0
     migrateLegacyAPMIndicesToSpaceAware({

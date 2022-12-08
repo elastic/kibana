@@ -90,19 +90,12 @@ const uploadSourceMapRoute = createApmServerRoute({
         .pipe(sourceMapRt),
     }),
   }),
-  handler: async ({
-    params,
-    plugins,
-    core,
-    context,
-    request,
-    config,
-  }): Promise<Artifact | undefined> => {
+  handler: async ({ params, plugins, core }): Promise<Artifact | undefined> => {
     const {
       service_name: serviceName,
       service_version: serviceVersion,
       bundle_filepath: bundleFilepath,
-      sourcemap: sourceMap,
+      sourcemap: sourceMapContent,
     } = params.body;
     const cleanedBundleFilepath = getCleanedBundleFilePath(bundleFilepath);
     const fleetPluginStart = await plugins.fleet?.start();
@@ -117,11 +110,21 @@ const uploadSourceMapRoute = createApmServerRoute({
             serviceName,
             serviceVersion,
             bundleFilepath: cleanedBundleFilepath,
-            sourceMap,
+            sourceMap: sourceMapContent,
           },
         });
 
-        await createSourceMapDoc(artifact, internalEsClient);
+        // sync source map to APM managed index
+        await createSourceMapDoc({
+          internalESClient: internalEsClient,
+          created: artifact.created,
+          sourceMapContent,
+          bundleFilepath: cleanedBundleFilepath,
+          serviceName,
+          serviceVersion,
+        });
+
+        // sync source map to fleet policy
         await updateSourceMapsOnFleetPolicies({
           core,
           fleetPluginStart,

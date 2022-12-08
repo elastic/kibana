@@ -8,51 +8,150 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Artifact } from '@kbn/fleet-plugin/server';
+import { isElasticsearchVersionConflictError } from '@kbn/fleet-plugin/server/errors/utils';
+import { deflate } from 'zlib';
+import { BinaryLike, createHash } from 'crypto';
+import { promisify } from 'util';
+import { getUnzippedArtifactBody } from '../fleet/source_maps';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
+import { SourceMap } from './route';
 
-function getBodyFromArtifact(artifact: Artifact) {
+const deflateAsync = promisify(deflate);
+
+function asSha256Encoded(content: BinaryLike): string {
+  return createHash('sha256').update(content).digest('hex');
+}
+
+async function getEncodedContent(sourceMapContent: SourceMap) {
+  const contentBuffer = Buffer.from(JSON.stringify(sourceMapContent));
+  const contentZipped = await deflateAsync(contentBuffer);
+  const contentEncoded = contentZipped.toString('base64');
+  const contentHash = asSha256Encoded(contentZipped);
+  return { contentEncoded, contentHash };
+}
+
+async function getSourceMapBody({
+  created,
+  sourceMapContent,
+  bundleFilepath,
+  serviceName,
+  serviceVersion,
+}: {
+  created: string;
+  sourceMapContent: SourceMap;
+  bundleFilepath: string;
+  serviceName: string;
+  serviceVersion: string;
+}) {
+  const { contentEncoded, contentHash } = await getEncodedContent(
+    sourceMapContent
+  );
   return {
-    type: artifact.type,
-    identifier: artifact.identifier,
-    relative_url: artifact.relative_url,
-    body: artifact.body,
-    encryption_algorithm: artifact.encryptionAlgorithm,
-    package_name: artifact.packageName,
-    encoded_size: artifact.encodedSize,
-    encoded_sha256: artifact.encodedSha256,
-    decoded_size: artifact.decodedSize,
-    decoded_sha256: artifact.decodedSha256,
-    compression_algorithm: artifact.compressionAlgorithm,
-    created: artifact.created,
+    created,
+    content: contentEncoded,
+    content_sha256: contentHash,
+    'file.path': bundleFilepath,
+    'service.name': serviceName,
+    'service.version': serviceVersion,
   };
 }
 
-export function createSourceMapDoc(
-  artifact: Artifact,
-  internalESClient: ElasticsearchClient
-) {
-  const body = getBodyFromArtifact(artifact);
-  const params: estypes.IndexRequest = {
+function getSourceMapId({
+  serviceName,
+  serviceVersion,
+  bundleFilepath,
+}: {
+  serviceName: string;
+  serviceVersion: string;
+  bundleFilepath: string;
+}) {
+  return [serviceName, serviceVersion, bundleFilepath].join('-');
+}
+
+export async function createSourceMapDoc({
+  internalESClient,
+  created,
+  sourceMapContent,
+  bundleFilepath,
+  serviceName,
+  serviceVersion,
+}: {
+  internalESClient: ElasticsearchClient;
+  created: string;
+  sourceMapContent: SourceMap;
+  bundleFilepath: string;
+  serviceName: string;
+  serviceVersion: string;
+}) {
+  const body = getSourceMapBody({
+    created,
+    sourceMapContent,
+    bundleFilepath,
+    serviceName,
+    serviceVersion,
+  });
+
+  const params: estypes.CreateRequest = {
     index: APM_SOURCE_MAP_INDEX,
-    id: artifact.id, // overwrite existing source map if it exists
+    id: getSourceMapId({ serviceName, serviceVersion, bundleFilepath }),
     body,
   };
 
-  return internalESClient.index(params);
+  try {
+    return await internalESClient.create(params);
+  } catch (e) {
+    // we ignore 409 errors from the create (document already exists)
+    if (!isElasticsearchVersionConflictError(e)) {
+      throw e;
+    }
+  }
 }
 
-export function bulkCreateSourceMapDocs(
-  artifacts: Artifact[],
+export async function bulkCreateSourceMapDocs({
+  artifacts,
+  internalESClient,
+}: {
+  artifacts: Artifact[];
+  internalESClient: ElasticsearchClient;
+}) {
+  const docs = await Promise.all(
+    artifacts.map(async (artifact) => {
+      const { serviceName, serviceVersion, bundleFilepath, sourceMap } =
+        await getUnzippedArtifactBody(artifact.body);
+
+      return await getSourceMapBody({
+        created: artifact.created,
+        sourceMapContent: sourceMap,
+        bundleFilepath,
+        serviceName,
+        serviceVersion,
+      });
+    })
+  );
+
+  return internalESClient.bulk({
+    body: docs.flatMap((doc) => {
+      const id = getSourceMapId({
+        serviceName: doc['service.name'],
+        serviceVersion: doc['service.version'],
+        bundleFilepath: doc['file.path'],
+      });
+      return [{ create: { _index: APM_SOURCE_MAP_INDEX, _id: id } }, doc];
+    }),
+  });
+}
+
+export async function getLatestSourceMapDoc(
   internalESClient: ElasticsearchClient
 ) {
-  const params: estypes.BulkRequest = {
-    body: artifacts.flatMap((artifact) => {
-      return [
-        { index: { _index: APM_SOURCE_MAP_INDEX, _id: artifact.id } },
-        getBodyFromArtifact(artifact),
-      ];
-    }),
+  const params = {
+    size: 1,
+    _source: ['created'],
+    sort: [{ created: { order: 'desc' } }],
+    body: {
+      query: { match_all: {} },
+    },
   };
-
-  return internalESClient.bulk(params);
+  const res = await internalESClient.search<{ created: string }>(params);
+  return res.hits.hits[0]?._source?.created;
 }
