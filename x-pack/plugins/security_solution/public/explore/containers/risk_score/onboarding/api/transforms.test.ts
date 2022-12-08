@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
-import import { createTransform, deleteTransforms, getTransformState, stopTransforms } from './transforms';
+import { createTransform, deleteTransforms, getTransformState, stopTransforms } from './transforms';
 
 const mockRequest = jest.fn();
 const mockHttp = {
