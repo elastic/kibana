@@ -15,9 +15,15 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import { YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 import { usePartitionActions } from '../hooks/actions';
 import { CellActionExecutionContext } from '.';
+
+const euiContextMenuItemCSS = css`
+  color: ${euiThemeVars.euiColorPrimaryText};
+`;
 
 interface ActionsPopOverProps {
   anchorRef: React.RefObject<HTMLElement>;
@@ -39,7 +45,7 @@ export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
     button={button}
     isOpen={isOpen}
     closePopover={closePopOver}
-    panelPaddingSize="s"
+    panelPaddingSize="xs"
     anchorPosition={'downCenter'}
     hasArrow={true}
     repositionOnScroll
@@ -74,7 +80,7 @@ export const ExtraActionsPopOverWithAnchor = ({
       button={anchorRef.current}
       isOpen={isOpen}
       closePopover={closePopOver}
-      panelPaddingSize="s"
+      panelPaddingSize="xs"
       anchorPosition={'downCenter'}
       hasArrow={false}
       repositionOnScroll
@@ -110,6 +116,7 @@ const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
       size="s"
       items={actions.map((action) => (
         <EuiContextMenuItem
+          css={euiContextMenuItemCSS}
           key={action.id}
           icon={action.getIconType(actionContext)}
           aria-label={action.getDisplayName(actionContext)}

@@ -35,7 +35,6 @@ export interface CellActionExecutionContext extends CellActionConfig, ActionExec
 
 export enum CellActionsMode {
   HOVER_POPOVER = 'hover-popover',
-  HOVER_INLINE = 'hover-inline',
   ALWAYS_VISIBLE = 'always-visible',
 }
 

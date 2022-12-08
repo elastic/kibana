@@ -61,11 +61,7 @@ export const DefaultWithControls = CellActionsTemplate.bind({});
 
 DefaultWithControls.argTypes = {
   mode: {
-    options: [
-      CellActionsMode.HOVER_POPOVER,
-      CellActionsMode.HOVER_INLINE,
-      CellActionsMode.ALWAYS_VISIBLE,
-    ],
+    options: [CellActionsMode.HOVER_POPOVER, CellActionsMode.ALWAYS_VISIBLE],
     defaultValue: CellActionsMode.HOVER_POPOVER,
     control: {
       type: 'radio',
@@ -89,12 +85,6 @@ export const CellActionInline = ({}: {}) => (
 
 export const CellActionHoverPopup = ({}: {}) => (
   <CellActions mode={CellActionsMode.HOVER_POPOVER} triggerId={TRIGGER_ID} config={CONFIG}>
-    Hover me
-  </CellActions>
-);
-
-export const CellActionHoverInline = ({}: {}) => (
-  <CellActions mode={CellActionsMode.HOVER_INLINE} triggerId={TRIGGER_ID} config={CONFIG}>
     Hover me
   </CellActions>
 );
