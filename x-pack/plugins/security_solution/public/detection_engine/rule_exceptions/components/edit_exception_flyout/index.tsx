@@ -123,6 +123,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       bulkCloseIndex,
       entryErrorExists,
       expireTime,
+      expireErrorExists,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -134,6 +135,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     bulkCloseIndex: undefined,
     entryErrorExists: false,
     expireTime: moment(itemToEdit.expire_time),
+    expireErrorExists: false,
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -246,6 +248,16 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     [dispatch]
   );
 
+  const setExpireError = useCallback(
+    (errorExists: boolean): void => {
+      dispatch({
+        type: 'setExpireError',
+        errorExists,
+      });
+    },
+    [dispatch]
+  );
+
   const handleCloseFlyout = useCallback((): void => {
     onCancel(false);
   }, [onCancel]);
@@ -266,6 +278,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         commentToAdd: newComment,
         listType,
         selectedOs: itemToEdit.os_types,
+        expireTime,
         items: exceptionItems,
       });
 
@@ -307,6 +320,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     onConfirm,
     bulkCloseIndex,
     onCancel,
+    expireTime,
   ]);
 
   const editExceptionMessage = useMemo(
@@ -323,8 +337,9 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       isClosingAlerts ||
       exceptionItems.every((item) => item.entries.length === 0) ||
       isLoading ||
-      entryErrorExists,
-    [isLoading, entryErrorExists, exceptionItems, isSubmitting, isClosingAlerts]
+      entryErrorExists ||
+      expireErrorExists,
+    [isLoading, entryErrorExists, exceptionItems, isSubmitting, isClosingAlerts, expireErrorExists]
   );
 
   return (
@@ -386,7 +401,11 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           newCommentOnChange={setComment}
         />
         <EuiHorizontalRule />
-        <ExceptionsExpireTime expireTime={expireTime} setExpireTime={setExpireTime} />
+        <ExceptionsExpireTime
+          expireTime={expireTime}
+          setExpireTime={setExpireTime}
+          setExpireError={setExpireError}
+        />
         {showAlertCloseOptions && (
           <>
             <EuiHorizontalRule />

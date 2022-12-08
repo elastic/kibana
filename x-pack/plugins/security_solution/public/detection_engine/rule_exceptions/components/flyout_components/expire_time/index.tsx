@@ -15,6 +15,7 @@ import * as i18n from './translations';
 interface ExceptionItmeExpireTimeProps {
   expireTime: Moment | undefined;
   setExpireTime: (date: Moment | undefined) => void;
+  setExpireError: (errorExists: boolean) => void;
 }
 
 const SectionHeader = styled(EuiTitle)`
@@ -26,6 +27,7 @@ const SectionHeader = styled(EuiTitle)`
 const ExceptionItemExpireTime: React.FC<ExceptionItmeExpireTimeProps> = ({
   expireTime,
   setExpireTime,
+  setExpireError,
 }): JSX.Element => {
   const [dateTime, setDateTime] = useState<Moment | undefined>(expireTime);
   const [isInvalid, setIsInvalid] = useState(false);
@@ -38,12 +40,14 @@ const ExceptionItemExpireTime: React.FC<ExceptionItmeExpireTimeProps> = ({
       if (date?.isBefore()) {
         setIsInvalid(true);
         setErrors([i18n.EXCEPTION_EXPIRE_TIME_ERROR]);
+        setExpireError(true);
       } else {
         setIsInvalid(false);
         setErrors([]);
+        setExpireError(false);
       }
     },
-    [setDateTime, setExpireTime]
+    [setDateTime, setExpireTime, setExpireError]
   );
 
   return (

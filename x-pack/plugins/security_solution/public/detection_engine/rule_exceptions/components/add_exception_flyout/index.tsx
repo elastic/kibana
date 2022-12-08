@@ -156,6 +156,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       itemConditionValidationErrorExists,
       errorSubmitting,
       expireTime,
+      expireErrorExists,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -325,6 +326,16 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     [dispatch]
   );
 
+  const setExpireError = useCallback(
+    (errorExists: boolean): void => {
+      dispatch({
+        type: 'setExpireError',
+        errorExists,
+      });
+    },
+    [dispatch]
+  );
+
   useEffect((): void => {
     if (listType === ExceptionListTypeEnum.ENDPOINT && alertData != null) {
       setInitialExceptionItems(
@@ -416,6 +427,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       exceptionItemName.trim() === '' ||
       exceptionItems.every((item) => item.entries.length === 0) ||
       itemConditionValidationErrorExists ||
+      expireErrorExists ||
       (addExceptionToRadioSelection === 'add_to_lists' && isEmpty(exceptionListsToAddTo)),
     [
       isSubmitting,
@@ -426,6 +438,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       itemConditionValidationErrorExists,
       addExceptionToRadioSelection,
       exceptionListsToAddTo,
+      expireErrorExists,
     ]
   );
 
@@ -518,7 +531,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             newCommentOnChange={setComment}
           />
           <EuiHorizontalRule />
-          <ExceptionsExpireTime expireTime={expireTime} setExpireTime={setExpireTime} />
+          <ExceptionsExpireTime
+            expireTime={expireTime}
+            setExpireTime={setExpireTime}
+            setExpireError={setExpireError}
+          />
           {showAlertCloseOptions && (
             <>
               <EuiHorizontalRule />

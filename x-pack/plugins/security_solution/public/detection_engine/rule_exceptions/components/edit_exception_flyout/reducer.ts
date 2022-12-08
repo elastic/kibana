@@ -17,6 +17,7 @@ export interface State {
   bulkCloseIndex: string[] | undefined;
   entryErrorExists: boolean;
   expireTime: Moment | undefined;
+  expireErrorExists: boolean;
 }
 
 export type Action =
@@ -51,6 +52,10 @@ export type Action =
   | {
       type: 'setExpireTime';
       expireTime: Moment | undefined;
+    }
+  | {
+      type: 'setExpireError';
+      errorExists: boolean;
     };
 
 export const createExceptionItemsReducer =
@@ -122,6 +127,14 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           expireTime,
+        };
+      }
+      case 'setExpireError': {
+        const { errorExists } = action;
+
+        return {
+          ...state,
+          expireErrorExists: errorExists,
         };
       }
       default:

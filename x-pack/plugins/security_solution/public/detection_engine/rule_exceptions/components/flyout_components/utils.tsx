@@ -173,6 +173,7 @@ export const enrichNewExceptionItems = ({
  * @param sharedLists shared exception lists that were selected to add items to
  * @param selectedOs os selection
  * @param listType exception list type
+ * @param expireTime exception item expire time
  * @param items exception items to be modified
  */
 export const enrichExceptionItemsForUpdate = ({
@@ -180,16 +181,19 @@ export const enrichExceptionItemsForUpdate = ({
   commentToAdd,
   selectedOs,
   listType,
+  expireTime,
   items,
 }: {
   itemName: string;
   commentToAdd: string;
   selectedOs: OsType[];
   listType: ExceptionListTypeEnum;
+  expireTime: Moment | undefined;
   items: ExceptionsBuilderReturnExceptionItem[];
 }): ExceptionsBuilderReturnExceptionItem[] => {
   const enriched: ExceptionsBuilderReturnExceptionItem[] = pipe(
     enrichItemWithComment(commentToAdd),
+    enrichItemWithExpireTime(expireTime),
     enrichItemWithName(itemName),
     enrichEndpointItems(listType, selectedOs)
   )(items);
