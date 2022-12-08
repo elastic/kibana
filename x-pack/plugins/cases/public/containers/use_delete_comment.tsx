@@ -6,10 +6,10 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import { useToasts } from '../common/lib/kibana';
 import { casesMutationsKeys } from './constants';
 import type { ServerError } from '../types';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
+import { useCasesToast } from '../common/use_cases_toast';
 import { deleteComment } from './api';
 import * as i18n from './translations';
 
@@ -19,7 +19,7 @@ interface MutationArgs {
 }
 
 export const useDeleteComment = () => {
-  const toasts = useToasts();
+  const { showErrorToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   return useMutation(
@@ -33,9 +33,7 @@ export const useDeleteComment = () => {
         refreshCaseViewPage();
       },
       onError: (error: ServerError) => {
-        toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
-          title: i18n.ERROR_TITLE,
-        });
+        showErrorToast(error, { title: i18n.ERROR_TITLE });
       },
     }
   );

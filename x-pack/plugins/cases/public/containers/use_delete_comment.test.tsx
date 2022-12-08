@@ -34,14 +34,10 @@ describe('useDeleteComment', () => {
   });
 
   it('init', async () => {
-    const { waitForNextUpdate, result } = renderHook<string, UseDeleteComment>(
-      () => useDeleteComment(),
-      {
-        wrapper,
-      }
-    );
+    const { result } = renderHook<string, UseDeleteComment>(() => useDeleteComment(), {
+      wrapper,
+    });
 
-    expect(waitForNextUpdate).toBeTruthy();
     expect(result.current).toBeTruthy();
   });
 
