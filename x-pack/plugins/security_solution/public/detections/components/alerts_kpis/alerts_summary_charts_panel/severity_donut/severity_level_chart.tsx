@@ -11,7 +11,7 @@ import { isEmpty } from 'lodash/fp';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ShapeTreeNode, ElementClickListener } from '@elastic/charts';
 import * as i18n from '../translations';
-import type { ParsedAlertsData, SeverityBuckets } from '../types';
+import type { ParsedSeverityData, SeverityData } from '../types';
 import type { FillColor } from '../../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../../common/components/charts/donutchart';
 import { ChartLabel } from '../../../../../overview/components/detection_response/alerts_by_status/chart_label';
@@ -23,7 +23,7 @@ import { getSeverityColor } from '../helpers';
 const DONUT_HEIGHT = 150;
 
 interface AlertsChartsPanelProps {
-  data: ParsedAlertsData;
+  data: ParsedSeverityData;
   isLoading: boolean;
   uniqueQueryId: string;
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
@@ -50,7 +50,7 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
       : 0;
   }, [data]);
 
-  const sorting: { sort: { field: keyof SeverityBuckets; direction: SortOrder } } = {
+  const sorting: { sort: { field: keyof SeverityData; direction: SortOrder } } = {
     sort: {
       field: 'value',
       direction: 'desc',
