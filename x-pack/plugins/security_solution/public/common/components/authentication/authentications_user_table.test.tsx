@@ -13,7 +13,7 @@ import { TestProviders } from '../../mock';
 import { useAuthentications } from '../../containers/authentications';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { AuthenticationsUserTable } from './authentications_user_table';
-import { usersModel } from '../../../users/store';
+import { usersModel } from '../../../explore/users/store';
 import { AuthStackByField } from '../../../../common/search_strategy';
 
 jest.mock('../../containers/query_toggle', () => ({

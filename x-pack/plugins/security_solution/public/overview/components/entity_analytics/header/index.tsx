@@ -22,9 +22,9 @@ import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirec
 import { SecurityPageName } from '../../../../app/types';
 import { HostsTableType, HostsType } from '../../../../explore/hosts/store/model';
 import { hostsActions } from '../../../../explore/hosts/store';
-import { usersActions } from '../../../../users/store';
+import { usersActions } from '../../../../explore/users/store';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
-import { UsersTableType } from '../../../../users/store/model';
+import { UsersTableType } from '../../../../explore/users/store/model';
 import { useNotableAnomaliesSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';

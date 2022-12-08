@@ -13,7 +13,7 @@ import { EnableRiskScore } from '../enable_risk_score';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
 import { hostsModel, hostsSelectors } from '../../../explore/hosts/store';
-import { usersSelectors } from '../../../users/store';
+import { usersSelectors } from '../../../explore/users/store';
 import { RiskInformationButtonEmpty } from '../risk_information';
 import * as i18n from './translations';
 
@@ -24,7 +24,7 @@ import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { HostRiskScoreQueryId, UserRiskScoreQueryId, useRiskScore } from '../../containers';
 import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
 import { buildEntityNameFilter, RiskScoreEntity } from '../../../../common/search_strategy';
-import type { UsersComponentsQueryProps } from '../../../users/pages/navigation/types';
+import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';

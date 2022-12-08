@@ -14,7 +14,7 @@ import { useRiskScore } from '../../containers';
 import { RiskDetailsTabBody } from '.';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { HostsType } from '../../../explore/hosts/store/model';
-import { UsersType } from '../../../users/store/model';
+import { UsersType } from '../../../explore/users/store/model';
 
 jest.mock('../../containers');
 jest.mock('../../../common/containers/query_toggle');

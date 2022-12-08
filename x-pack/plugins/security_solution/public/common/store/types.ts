@@ -19,7 +19,7 @@ import type { DragAndDropState } from './drag_and_drop/reducer';
 import type { TimelinePluginState } from '../../timelines/store/timeline';
 import type { NetworkPluginState } from '../../explore/network/store';
 import type { ManagementPluginState } from '../../management';
-import type { UsersPluginState } from '../../users/store';
+import type { UsersPluginState } from '../../explore/users/store';
 import type { GlobalUrlParam } from './global_url_param';
 import type { DataTableState } from './data_table/types';
 
