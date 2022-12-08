@@ -119,5 +119,3 @@ export { ExploratoryViewContextProvider } from './components/shared/exploratory_
 export { fromQuery, toQuery } from './utils/url';
 
 export type { NavigationSection } from './services/navigation_registry';
-
-export { AlertSummary } from './components/shared/alert_summary';

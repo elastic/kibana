@@ -27,10 +27,10 @@ import {
   ALERT_STATUS_RECOVERED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { asDuration } from '../../../common/utils/formatters';
-import { AlertStatusIndicator } from './alert_status_indicator';
-import { DEFAULT_DATE_FORMAT } from '../../pages/alert_details/constants';
-import { AlertSummaryProps } from '../../pages/alert_details/types';
+import { asDuration } from '../../../../common/utils/formatters';
+import { AlertSummaryProps } from '../types';
+import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
+import { DEFAULT_DATE_FORMAT } from '../constants';
 
 export function AlertSummary({ alert }: AlertSummaryProps) {
   const tags = alert?.fields[ALERT_RULE_TAGS];

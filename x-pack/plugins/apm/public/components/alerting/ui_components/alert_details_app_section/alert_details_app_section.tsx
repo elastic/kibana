@@ -6,14 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
 import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
 import moment from 'moment';
-import { AlertSummary } from '@kbn/observability-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
 import { useServiceAgentFetcher } from '../../../../context/apm_service/use_service_agent_fetcher';
@@ -44,6 +44,7 @@ import {
 import { getAggsTypeFromRule } from './helpers';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
+
 export function AlertDetailsAppSection({
   rule,
   alert,
@@ -290,10 +291,9 @@ export function AlertDetailsAppSection({
   ];
 
   /* Error Rate */
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <AlertSummary alert={alert} />
-      <EuiSpacer size="s" />
       <ChartPointerEventContextProvider>
         <EuiFlexItem>
           <EuiPanel hasBorder={true}>
