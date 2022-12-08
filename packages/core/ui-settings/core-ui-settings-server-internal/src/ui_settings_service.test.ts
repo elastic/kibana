@@ -13,6 +13,7 @@ import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import {
   MockUiSettingsClientConstructor,
+  MockUiSettingsGlobalClientConstructor,
   MockUiSettingsDefaultsClientConstructor,
   getCoreSettingsMock,
 } from './ui_settings_service.test.mock';
@@ -53,6 +54,7 @@ describe('uiSettings', () => {
 
   afterEach(() => {
     MockUiSettingsClientConstructor.mockClear();
+    MockUiSettingsGlobalClientConstructor.mockClear();
     getCoreSettingsMock.mockClear();
   });
 
@@ -95,6 +97,20 @@ describe('uiSettings', () => {
           `"uiSettings for the key [foo] has been already registered"`
         );
       });
+
+      it('throws if registers the same key twice to global settings', async () => {
+        const setup = await service.setup(setupDeps);
+        setup.registerGlobal(defaults);
+        expect(() => setup.registerGlobal(defaults)).toThrowErrorMatchingInlineSnapshot(
+          `"Global uiSettings for the key [foo] has been already registered"`
+        );
+      });
+
+      it('does not throw when registering a global and namespaced setting with the same name', async () => {
+        const setup = await service.setup(setupDeps);
+        setup.register(defaults);
+        expect(() => setup.registerGlobal(defaults)).not.toThrow();
+      });
     });
   });
 
@@ -118,6 +134,20 @@ describe('uiSettings', () => {
         );
       });
 
+      it('throws if validation schema is not provided for global settings', async () => {
+        const { registerGlobal } = await service.setup(setupDeps);
+        registerGlobal({
+          // @ts-expect-error schema is required key
+          custom: {
+            value: 42,
+          },
+        });
+
+        await expect(service.start()).rejects.toMatchInlineSnapshot(
+          `[Error: Validation schema is not provided for [custom] Global UI Setting]`
+        );
+      });
+
       it('validates registered definitions', async () => {
         const { register } = await service.setup(setupDeps);
         register({
@@ -129,6 +159,20 @@ describe('uiSettings', () => {
 
         await expect(service.start()).rejects.toMatchInlineSnapshot(
           `[Error: [ui settings defaults [custom]]: expected value of type [string] but got [number]]`
+        );
+      });
+
+      it('validates registered definitions for global settings', async () => {
+        const { registerGlobal } = await service.setup(setupDeps);
+        registerGlobal({
+          custom: {
+            value: 42,
+            schema: schema.string(),
+          },
+        });
+
+        await expect(service.start()).rejects.toMatchInlineSnapshot(
+          `[Error: expected value of type [string] but got [number]]`
         );
       });
 
@@ -199,6 +243,36 @@ describe('uiSettings', () => {
         expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual(defaults);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).not.toBe(defaults);
+      });
+    });
+
+    describe('#asScopedToGlobalClient', () => {
+      it('passes saved object type "config-global" to UiSettingsGlobalClient', async () => {
+        await service.setup(setupDeps);
+        const start = await service.start();
+        start.globalAsScopedToClient(savedObjectsClient);
+
+        expect(MockUiSettingsGlobalClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].type).toBe('config-global');
+      });
+
+      it('passes overrides to UiSettingsGlobalClient', async () => {
+        await service.setup(setupDeps);
+        const start = await service.start();
+        start.globalAsScopedToClient(savedObjectsClient);
+
+        expect(MockUiSettingsGlobalClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].overrides).toEqual({});
+      });
+
+      it('passes a copy of set defaults to UiSettingsGlobalClient', async () => {
+        const setup = await service.setup(setupDeps);
+        setup.register(defaults);
+        const start = await service.start();
+        start.globalAsScopedToClient(savedObjectsClient);
+
+        expect(MockUiSettingsGlobalClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].defaults).toEqual({});
       });
     });
   });
