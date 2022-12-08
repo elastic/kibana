@@ -32,13 +32,8 @@ export function TransactionOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const {
-    transactionType,
-    serviceName,
-    fallbackToTransactions,
-    runtimeName,
-    agentName,
-  } = useApmServiceContext();
+  const { transactionType, serviceName, fallbackToTransactions, runtimeName } =
+    useApmServiceContext();
 
   const history = useHistory();
 

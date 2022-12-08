@@ -8,7 +8,9 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingLogo,
   EuiPageHeaderProps,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +18,7 @@ import { omit } from 'lodash';
 import React from 'react';
 import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import {
+  isMobileAgentName,
   isRumAgentName,
   isServerlessAgent,
 } from '../../../../../common/agent_name';
@@ -34,8 +37,9 @@ import { BetaBadge } from '../../../shared/beta_badge';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
-import { fromQuery, replace, toQuery } from '../../../shared/links/url_helpers';
+import { fromQuery, replace } from '../../../shared/links/url_helpers';
 import { useHistory } from 'react-router';
+import { isPending } from '../../../../hooks/use_fetcher';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -86,7 +90,9 @@ function TemplateWithContext({
 
   const tabs = useTabs({ selectedTab });
 
-  const { agentName } = useApmServiceContext();
+  const { agentName, serviceAgentStatus } = useApmServiceContext();
+
+  const isPendingServiceAgent = !agentName && isPending(serviceAgentStatus);
 
   useBreadcrumb(
     () => ({
@@ -99,13 +105,12 @@ function TemplateWithContext({
     [query, router, selectedTab, serviceName, title]
   );
 
-  // if (isMobileAgentName(agentName)) {
-  //   // replace(history, {
-  //   //   pathname: `/mobile-services/${serviceName}/${selectedTab}`,
-  //   //   search: fromQuery(query),
-  //   // });
-  //   return null;
-  // }
+  if (isMobileAgentName(agentName)) {
+    replace(history, {
+      pathname: `/mobile-services/${serviceName}/${selectedTab}`,
+      search: fromQuery(query),
+    });
+  }
 
   return (
     <ApmMainTemplate
@@ -139,10 +144,21 @@ function TemplateWithContext({
         ),
       }}
     >
-      <SearchBar {...searchBarOptions} />
-      <ServiceAnomalyTimeseriesContextProvider>
-        {children}
-      </ServiceAnomalyTimeseriesContextProvider>
+      {isPendingServiceAgent ? (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="l" />
+            <EuiLoadingLogo logo="logoObservability" size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <>
+          <SearchBar {...searchBarOptions} />
+          <ServiceAnomalyTimeseriesContextProvider>
+            {children}
+          </ServiceAnomalyTimeseriesContextProvider>
+        </>
+      )}
     </ApmMainTemplate>
   );
 }
