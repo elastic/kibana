@@ -31,6 +31,7 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
+import { FILTER_OPEN, TableId } from '../../../../../common/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -39,7 +40,6 @@ import {
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
-import { TableId } from '../../../../../common/types/timeline';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -123,10 +123,7 @@ import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_wit
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  AlertsTableFilterGroup,
-  FILTER_OPEN,
-} from '../../../../detections/components/alerts_table/alerts_filter_group';
+import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';

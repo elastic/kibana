@@ -173,9 +173,9 @@
             "label": "props",
             "description": [],
             "signature": [
-              "P & Pick<",
-              "KibanaPageTemplateProps",
-              ", \"pageSideBar\" | \"pageSideBarProps\"> & { children?: React.ReactNode; } & { solutionNav: ",
+              "P & ",
+              "TemplateProps",
+              " & { solutionNav: ",
               {
                 "pluginId": "@kbn/shared-ux-page-solution-nav",
                 "scope": "common",

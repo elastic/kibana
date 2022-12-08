@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/dom';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
@@ -28,16 +27,32 @@ describe('useGetFeaturesIds', () => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
-  it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'getFeatureIds');
+
+  it('inits with empty data', async () => {
+    const spy = jest.spyOn(api, 'getFeatureIds').mockRejectedValue([]);
     const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), {
       wrapper: appMockRender.AppWrapper,
     });
+
     await waitForNextUpdate();
     expect(spy).toHaveBeenCalledWith(
       { registrationContext: ['context1'] },
       expect.any(AbortSignal)
     );
+  });
+
+  it('fetches data and returns it correctly', async () => {
+    const spy = jest.spyOn(api, 'getFeatureIds');
+    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), {
+      wrapper: appMockRender.AppWrapper,
+    });
+    await waitForNextUpdate();
+    await act(async () => {
+      expect(spy).toHaveBeenCalledWith(
+        { registrationContext: ['context1'] },
+        expect.any(AbortSignal)
+      );
+    });
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -48,8 +63,10 @@ describe('useGetFeaturesIds', () => {
     const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), {
       wrapper: appMockRender.AppWrapper,
     });
+
     await waitForNextUpdate();
-    await waitFor(() => {
+
+    await act(async () => {
       expect(spy).toHaveBeenCalledWith(
         { registrationContext: ['context1'] },
         expect.any(AbortSignal)

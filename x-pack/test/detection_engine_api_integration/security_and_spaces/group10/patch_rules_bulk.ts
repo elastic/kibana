@@ -407,7 +407,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).to.eql([
           {
             error: {
-              message: `default exception list already exists in rule(s): ${ruleWithException.id}`,
+              message: `default exception list for rule: rule-1 already exists in rule(s): ${ruleWithException.id}`,
               status_code: 409,
             },
             rule_id: 'rule-1',

@@ -7,7 +7,6 @@
 import React from 'react';
 import { cloneDeep } from 'lodash/fp';
 
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import {
   TestProviders,
   mockGlobalState,
@@ -59,13 +58,7 @@ export const mockCreateStoreWithQueryFilters = () => {
       filters: filterFromSearchBar,
     },
   };
-  return createStore(
-    myState,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  return createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 };
 
 export const wrapper = ({ children }: { children: React.ReactElement }) => (

@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import type { TransactionOptions } from '@elastic/apm-rum';
 import { useKibana } from '../kibana';
+import type { ApmSearchRequestName } from './types';
 
 const DEFAULT_TRANSACTION_OPTIONS: TransactionOptions = { managed: true };
 
@@ -31,3 +32,6 @@ export const useStartTransaction = () => {
 
   return { startTransaction };
 };
+
+export const getSearchTransactionName = (timelineId: string): ApmSearchRequestName =>
+  `Timeline search ${timelineId}`;
