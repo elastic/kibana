@@ -11,7 +11,11 @@ import type { LogIndexReference } from '@kbn/infra-plugin/common/log_views';
 import type { AnyEventObject } from 'xstate';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
-import type { LogStreamPageTestMachineContextWithLogView } from './infra_logs_page';
+import type {
+  ExpectedIndexStatus,
+  LogStreamPageTestMachineContextWithLogView,
+  LogViewDescriptor,
+} from './infra_logs_page';
 
 export function InfraLogsSettingsPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
@@ -56,7 +60,7 @@ export function InfraLogsSettingsPageProvider({ getPageObjects, getService }: Ft
     // try to open the popover
     const popover = await retry.try(async () => {
       await (await getAddLogColumnButton()).click();
-      return getAddLogColumnPopover();
+      return await getAddLogColumnPopover();
     });
 
     // try to select the timestamp field
@@ -71,7 +75,7 @@ export function InfraLogsSettingsPageProvider({ getPageObjects, getService }: Ft
     // try to open the popover
     const popover = await retry.try(async () => {
       await (await getAddLogColumnButton()).click();
-      return getAddLogColumnPopover();
+      return await getAddLogColumnPopover();
     });
 
     // try to select the given field
@@ -137,7 +141,7 @@ export function InfraLogsSettingsPageProvider({ getPageObjects, getService }: Ft
   const modelStateAssertions = {
     onLogSettingsPage: async () => {
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await getPage();
+      expect(await getPage()).to.be.ok();
     },
     'onLogSettingsPage.withUnchangedSettings': async () => {
       expect(await testSubjects.isEnabled('~applySettingsButton')).to.be(false);
@@ -189,9 +193,7 @@ export function InfraLogsSettingsPageProvider({ getPageObjects, getService }: Ft
 }
 
 export interface LogsSettingsPageTestMachineContextWithChangedLogView {
-  changedLogView: {
-    logIndices: LogIndexReference;
-  };
+  changedLogView: LogViewDescriptor;
 }
 
 export type LogsSettingsPageTestMachineTypestate =
@@ -206,5 +208,9 @@ export type LogsSettingsPageTestMachineTypestate =
     };
 
 export type LogsSettingsPageTestMachineEvent =
-  | { type: 'changeIndexReference'; newIndexReference: LogIndexReference }
+  | {
+      type: 'changeIndexReference';
+      newIndexReference: LogIndexReference;
+      expextedIndexStatus: ExpectedIndexStatus;
+    }
   | { type: 'saveSettings' };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { LogIndexReference } from '@kbn/infra-plugin/common/log_views';
 import type { FlyoutOptionsUrlState } from '@kbn/infra-plugin/public/containers/logs/log_flyout';
 import type { LogPositionUrlState } from '@kbn/infra-plugin/public/containers/logs/log_position';
@@ -27,7 +28,7 @@ export interface TabsParams {
 
 export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['common', 'observability']);
 
   /**
    * URL Navigation
@@ -83,8 +84,11 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
   }
 
   const modelStateAssertions = {
-    async onLogStreamMissingIndicesPage() {
-      await getMissingIndicesPage();
+    onLogStreamPage: async () => {
+      expect(await getPage()).to.be.ok();
+    },
+    onLogStreamMissingIndicesPage: async () => {
+      expect(await getMissingIndicesPage()).to.be.ok();
     },
   };
 
@@ -94,6 +98,9 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
   > = {
     navigateToLogsUi: async () => {
       await navigateTo();
+    },
+    clickLogStreamNavigationLink: async () => {
+      await pageObjects.observability.clickSolutionNavigationEntry('logs', 'stream');
     },
     clickSettingsHeaderLink: async () => {
       await (await getLogSettingsHeaderLink()).click();
@@ -112,10 +119,15 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
   };
 }
 
+export type ExpectedIndexStatus = 'missing' | 'empty' | 'available';
+
+export interface LogViewDescriptor {
+  logIndices: LogIndexReference;
+  expectedIndexStatus: ExpectedIndexStatus;
+}
+
 export interface LogStreamPageTestMachineContextWithLogView {
-  logView: {
-    logIndices: LogIndexReference;
-  };
+  logView: LogViewDescriptor;
 }
 
 export interface LogStreamPageTestMachineTypestate {
@@ -127,6 +139,7 @@ export type LogStreamPageTestMachineContext = LogStreamPageTestMachineTypestate[
 
 export type LogStreamPageTestMachineEvent =
   | { type: 'navigateToLogsUi' }
+  | { type: 'clickLogStreamNavigationLink' }
   | { type: 'clickSettingsHeaderLink' };
 
 type LogsUiTab = 'log-categories' | 'log-rate' | 'settings' | 'stream';

@@ -10,6 +10,7 @@ import { createTestModel } from '@xstate/test';
 import { assign, createMachine } from 'xstate';
 import equal from 'fast-deep-equal';
 // import { DATES } from './constants';
+import { LOGS_INDEX_PATTERN } from '@kbn/infra-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type {
   LogStreamPageTestMachineEvent,
@@ -20,9 +21,18 @@ import {
   LogsSettingsPageTestMachineTypestate,
 } from '../../page_objects/infra_logs_settings_page';
 
-const COMMON_REQUEST_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
+// const COMMON_REQUEST_HEADERS = {
+//   'kbn-xsrf': 'some-xsrf-token',
+// };
+// const logPosition = {
+//   start: DATES.metricsAndLogs.stream.startWithData,
+//   end: DATES.metricsAndLogs.stream.endWithData,
+// };
+// const formattedLocalStart = new Date(logPosition.start).toLocaleDateString('en-US', {
+//   month: 'short',
+//   day: 'numeric',
+//   year: 'numeric',
+// });
 
 type TestMachineEvent = LogStreamPageTestMachineEvent | LogsSettingsPageTestMachineEvent;
 
@@ -35,16 +45,16 @@ type TestMachineContext = TestMachineTypestate['context'];
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const browser = getService('browser');
-  const logsUi = getService('logsUi');
-  const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
+  // const browser = getService('browser');
+  // const logsUi = getService('logsUi');
+  // const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['common', 'header', 'infraLogs', 'infraLogsSettings']);
-  const retry = getService('retry');
-  const supertest = getService('supertest');
+  // const retry = getService('retry');
+  // const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
   const createLogSettingsTestMachine = (initialContext: TestMachineContext) =>
-    /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKYAu2CWAdlLACpzYCyAhgMYAWhYAdLNlQE7YDEBVAbnihVsYEqgAy6WAFU8AbQAMAXUSgADqlh58qAqpAAPRAEYAbAGYmAThtWArAoBMC4woWnHAFgA0IAJ4mAByeTJ62jnZWYaZ2AOwAvvG+aJg4+ESk5NT0jEy6kpjY7GBUALYUeLBaRACSBBB4NHAAClQwXDTIjQDWWLiExAASJRBg7OKE3YoqSCAaWjp6s0YIMZaO5p7mTo5WCoFW5na+AQjGwaHhkdFxicnofenEZKzZDATM+Q9pA7CtMEwAO7aOjSAj0KhESCPX4dOiQmB1UYGABKYAAZmMwOCwNN9PNtHhdPoVsZHBsmOZYtTto5YodjHZzCdEF5YkwaUdYoEuYEFLFTHcQCkYRkXpRaO9PgQCqLiP9mMDsHQAMLwqEQOWwLiwfhgLV42YExYkkzmc5MNx01xmQKmPmmFlnTyOUKeYzGWLmzx2qymCxCkU-MVZSW5L6pfoZBVAkFgiEarVwhFgJFgVEYrE4uTGGbqTSE4nLEwRV3c8xWAVeOz+rxOo52awKOyef32luRYyJJIgAioUbwWZBqPPUM5D74gsm4sIAC0jv8iFn5lddjsgR5zZXFcZnkD3xHmVeYY+LDYnEnCyJS1AKxdTvOllsUV2h3dYTs+8jTyPEvH0tlIoSnKSpqigJFGhaNowEvQsb0MRAjlMDlzlMakwnpdDYgfHlrFsF0bE2YwPy-LVxTecMZQPH8FVg6db0QA4QiZMkjjtNCBSsJ0W2sd1PWMbZAkZCJPx7Ycf3Ik8AOo34YyVUFwXVGBNWDYg6OvU0EBfJgWI2dd-WpUwuMXBA6QUS4bCccwOKsYi9zEmSQ2Pf88io79ZOg2NlTVFMVMPdSiwYs42zw2yFBsYiLGM04zIsqwzI3cwDmpbt4iAA */
+    /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKYAu2CWAdlLACpzYCyAhgMYAWhYAdLNlQE7YDEBVAbnihVsYEqgAy6WAFU8AbQAMAXUSgADqlh58qAqpAAPRAFoAjAHYmAFgAcp0wGYATFYBsATgXnXXhwBoQAE9EUxsHJndI9ysLJxcFGwBWAF9kgLRMHHwiUnJqekYWNk4efkFhUQkpWTlTFSQQDS0dPQajBESmRPMHRI8HSNdzBSGrAOCEJ3dXJjDHd0SbGycwxK9U9PQsXEJiMlZ8hgJmXUlMbHYwKgBbCjxYLSIASQIIPBo4AAUqGC4aZHeAGtttliAAJK4QMDscSEQGKerqTTaPC6fTtVyJcJOBxWBwKOKeGzuXrjEI2KzWKJORLRabdDYgDIg3a5A60I4nAhnFk5b6-f5AnkXK7XAByZSELVhBHhyn0TRRaLaiFcpicTAcyw8Cgc9nc9lMZI6rhsTC8FPMpixYR8VkZzKyrP2lA5hVOWydfJ+YD+AJogOFlxuEoEUtR3LhtURjWRLXRIVcGqcCnsCnc5is3UzRqCiD6ZotVitNocPhSaSZnp2ORdh3d3OroNg-OYAHdtHRpAR6FQiJBecQ-nQ+zAXlCDAAlMAAM2hYB7YARCrjEYTCHVOM15h3+Kc5hJ1v8ecmxaYu965lWV68rgdTedeTdxyYHsyNeIraYHewXZ7I-7CBB1gYdRzAccwCnWd50XaMV2aNcVQ3GkNSvAZvBcPokzGE9ek6TxEjcVxTUI2lTHvd9mzrZ8uR5L1Px9b9OwAYQAmAgPokDYH4MBgOXBpFXjJDHFCc0CStVNTVNEZjVMKwNSsGILD1WwPGIhwKOA6iChfN8MBFG5Wz9IFgIhKgoRhKN5QE1dlVADEsSYHE8SzDMDV6GxjSmGY5gGRZllWdZGQIVAoXgBpHQ-NlXR0sB4KVVp7JMBx8VmaYvH3a1DwpY1jAPLp-J8CkUpiBQK02SjH3ZWKig4bB4qEpKEGMFYNWJHxzEy2k9Ryk9TB8KlIhsLwvANNTNM47TOVfRtzmDW57keKBx3eL4fQaxCmt6GYrRsIZMzcndi1ksIIiieTIlxOSFgmqKpobOiotbDa7MMRBiUpLF1Q84idw8Y1LGiewPBJFTiysdxbqop8ar0zivx-P9e0A4CXsSt6EGiDUvpxRZfu8dwvOGQbPBxfaDUUqGqpi6a4aexjEdYsCOKitH1364izoNdMKdcAYiYUEn9wSMJiR3Knaxh2nZv0+bnpshDXvaJSmEcfc+fxWllmmLzplmPU-KWFZelSVIgA */
     createMachine<TestMachineContext, TestMachineEvent, TestMachineTypestate>(
       {
         predictableActionArguments: true,
@@ -52,10 +62,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         initial: 'start',
         states: {
           start: {
+            entry: 'restoreInitialContext',
             on: {
-              navigateToLogsUi: {
-                target: 'onLogStreamMissingIndicesPage',
-              },
+              navigateToLogsUi: [
+                {
+                  target: 'onLogStreamMissingIndicesPage',
+                  cond: 'areIndicesMissing',
+                },
+                'onLogStreamPage',
+              ],
             },
           },
 
@@ -96,18 +111,38 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             },
 
             initial: 'withUnchangedSettings',
+
+            on: {
+              clickLogStreamNavigationLink: [
+                {
+                  target: 'onLogStreamMissingIndicesPage',
+                  cond: 'areIndicesMissing',
+                },
+                'onLogStreamPage',
+              ],
+            },
+
+            exit: 'discardChangedLogView',
+          },
+
+          onLogStreamPage: {
+            on: {
+              clickSettingsHeaderLink: 'onLogSettingsPage',
+            },
           },
         },
         id: 'logSettingsTestMachine',
       },
       {
         actions: {
+          restoreInitialContext: assign(() => initialContext),
           storeChangedLogView: assign((context, event) =>
             event.type === 'changeIndexReference'
               ? {
                   changedLogView: {
                     ...('changedLogView' in context ? context.changedLogView : {}),
                     logIndices: event.newIndexReference,
+                    expectedIndexStatus: event.expextedIndexStatus,
                   },
                 }
               : {}
@@ -120,11 +155,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 }
               : {}
           ),
+          discardChangedLogView: assign((context, _event) =>
+            'changedLogView' in context
+              ? {
+                  changedLogView: undefined,
+                }
+              : {}
+          ),
         },
         guards: {
           areSettingsDifferent: (context, event) =>
             event.type === 'changeIndexReference' &&
             !equal(context.logView.logIndices, event.newIndexReference),
+          areIndicesMissing: (context) => context.logView.expectedIndexStatus === 'missing',
         },
       }
     );
@@ -134,9 +177,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       logView: {
         logIndices: {
           type: 'index_name',
-          indexName: 'logs-*',
+          indexName: LOGS_INDEX_PATTERN,
         },
+        expectedIndexStatus: 'available',
       },
+      changedLogView: undefined,
     }),
     {
       logger: {
@@ -145,7 +190,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       },
       eventCases: {
         changeIndexReference: [
-          { newIndexReference: { type: 'index_name', indexName: 'does-not-match-*' } },
+          {
+            newIndexReference: { type: 'index_name', indexName: 'does-not-match-*' },
+            expextedIndexStatus: 'missing',
+          },
+          {
+            newIndexReference: { type: 'index_name', indexName: 'filebeat-*' },
+            expextedIndexStatus: 'available',
+          },
         ],
       },
     }
@@ -153,13 +205,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Log Settings', function () {
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
-    logSettingsTestModel.getPaths().forEach((path) => {
+    beforeEach(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.clean({ types: ['infrastructure-monitoring-log-view'] });
+    });
+    afterEach(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.clean({ types: ['infrastructure-monitoring-log-view'] });
+    });
+
+    const testPaths = logSettingsTestModel.getPaths();
+
+    testPaths.forEach((path) => {
       it(path.description, async () => {
         await path.test({
           events: {
