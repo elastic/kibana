@@ -25,7 +25,7 @@ import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import { networkModel } from '../../store';
 
-import { NetworkTopCountriesTable } from './index';
+import { NetworkTopCountriesTable } from '.';
 import { mockData } from './mock';
 
 jest.mock('../../../common/lib/kibana');

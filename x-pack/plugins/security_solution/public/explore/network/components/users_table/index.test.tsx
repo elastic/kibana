@@ -23,7 +23,7 @@ import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import { networkModel } from '../../store';
 
-import { UsersTable } from './index';
+import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 

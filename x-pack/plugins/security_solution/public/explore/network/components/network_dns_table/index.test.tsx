@@ -23,7 +23,7 @@ import { createStore } from '../../../../common/store';
 import { networkModel } from '../../store';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
-import { NetworkDnsTable } from './index';
+import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
 
 jest.mock('../../../common/lib/kibana');

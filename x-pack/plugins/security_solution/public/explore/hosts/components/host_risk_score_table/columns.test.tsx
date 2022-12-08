@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { getHostRiskScoreColumns } from './columns';
 import { TestProviders } from '../../../../common/mock';
-import type { HostRiskScoreColumns } from './index';
+import type { HostRiskScoreColumns } from '.';
 
 describe('getHostRiskScoreColumns', () => {
   test('should render host score rounded', () => {

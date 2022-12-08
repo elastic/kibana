@@ -10,7 +10,7 @@ import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import React from 'react';
-import { NetworkKpiUniqueFlows } from './index';
+import { NetworkKpiUniqueFlows } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useRefetchByRestartingSession } from '../../../../../common/components/page/use_refetch_by_session';
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
