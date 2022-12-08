@@ -74,6 +74,8 @@ async function mountComponent({
         },
     breakdown: noBreakdown ? undefined : { field: undefined },
     appendHistogram,
+    chartVisible: true,
+    setChartVisible: jest.fn(),
     onEditVisualization: onEditVisualization || undefined,
     onResetChartHeight: jest.fn(),
     onChartHiddenChange: jest.fn(),

@@ -213,13 +213,13 @@ export const useDiscoverHistogram = ({
   const [chartHidden, setChartHidden] = useState(state.hideChart);
   const chart = useMemo(
     () =>
-      isPlainRecord || !isTimeBased
+      !isTimeBased
         ? undefined
         : {
             hidden: chartHidden,
             timeInterval: state.interval,
           },
-    [chartHidden, isPlainRecord, isTimeBased, state.interval]
+    [chartHidden, isTimeBased, state.interval]
   );
 
   // Clear the Lens request adapter when the chart is hidden
@@ -266,6 +266,7 @@ export const useDiscoverHistogram = ({
         hits,
         chart,
         breakdown,
+        columns: state.columns,
         onEditVisualization: canVisualize ? onEditVisualization : undefined,
         onTopPanelHeightChange,
         onChartHiddenChange,

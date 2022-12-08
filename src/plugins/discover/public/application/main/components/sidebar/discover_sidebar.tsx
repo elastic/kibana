@@ -16,7 +16,6 @@ import {
   EuiPageSideBar_Deprecated as EuiPageSideBar,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import {
@@ -24,7 +23,6 @@ import {
   FieldListGroupedProps,
   FieldsGroupNames,
   GroupedFieldsParams,
-  triggerVisualizeActionsTextBasedLanguages,
   useExistingFieldsReader,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
@@ -32,7 +30,7 @@ import { useAppStateSelector } from '../../services/discover_app_state_container
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
-import { FIELDS_LIMIT_SETTING, PLUGIN_ID } from '../../../../../common';
+import { FIELDS_LIMIT_SETTING } from '../../../../../common';
 import {
   getSelectedFields,
   shouldShowField,
@@ -42,7 +40,6 @@ import {
 import { doesFieldMatchFilters, FieldFilterState, setFieldFilterProp } from './lib/field_filter';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { getUiActions } from '../../../../kibana_services';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { RecordRawType } from '../../hooks/use_saved_search';
 
@@ -136,7 +133,6 @@ export function DiscoverSidebarComponent({
   const isPlainRecord = useAppStateSelector(
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
-  const query = useAppStateSelector((state) => state.query);
 
   const onChangeFieldSearch = useCallback(
     (filterName: string, value: string | boolean | undefined) => {
@@ -232,17 +228,6 @@ export function DiscoverSidebarComponent({
       dataViewFieldEditor,
     ]
   );
-
-  const visualizeAggregateQuery = useCallback(() => {
-    const aggregateQuery = query && isOfAggregateQueryType(query) ? query : undefined;
-    triggerVisualizeActionsTextBasedLanguages(
-      getUiActions(),
-      columns,
-      PLUGIN_ID,
-      selectedDataView,
-      aggregateQuery
-    );
-  }, [columns, selectedDataView, query]);
 
   const popularFieldsLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
   const onFilterField: GroupedFieldsParams<DataViewField>['onFilterField'] = useCallback(
@@ -392,20 +377,6 @@ export function DiscoverSidebarComponent({
             >
               {i18n.translate('discover.fieldChooser.addField.label', {
                 defaultMessage: 'Add a field',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        )}
-        {isPlainRecord && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="lensApp"
-              data-test-subj="textBased-visualize"
-              onClick={visualizeAggregateQuery}
-              size="s"
-            >
-              {i18n.translate('discover.textBasedLanguages.visualize.label', {
-                defaultMessage: 'Visualize in Lens',
               })}
             </EuiButton>
           </EuiFlexItem>

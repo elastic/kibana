@@ -8,7 +8,7 @@
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 import type { PropsWithChildren, ReactElement, RefObject } from 'react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -54,6 +54,8 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Context object for the chart -- leave undefined to hide the chart
    */
   chart?: UnifiedHistogramChartContext;
+
+  columns?: string[];
   /**
    * Context object for the breakdown -- leave undefined to hide the breakdown
    */
@@ -109,6 +111,7 @@ export const UnifiedHistogramLayout = ({
   request,
   hits,
   chart,
+  columns,
   breakdown,
   resizeRef,
   topPanelHeight,
@@ -122,6 +125,7 @@ export const UnifiedHistogramLayout = ({
   onChartLoad,
   children,
 }: UnifiedHistogramLayoutProps) => {
+  const [chartVisible, setChartVisible] = useState(true);
   const topPanelNode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
     []
@@ -133,7 +137,7 @@ export const UnifiedHistogramLayout = ({
   );
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-  const showFixedPanels = isMobile || !chart || chart.hidden;
+  const showFixedPanels = isMobile || !chart || chart.hidden || !chartVisible;
   const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;
   const minMainPanelHeight = euiTheme.base * 10;
@@ -164,13 +168,16 @@ export const UnifiedHistogramLayout = ({
     <>
       <InPortal node={topPanelNode}>
         <Chart
-          className={chartClassName}
+          className={chartVisible ? chartClassName : undefined}
           services={services}
           dataView={dataView}
           lastReloadRequestTime={lastReloadRequestTime}
           request={request}
           hits={hits}
           chart={chart}
+          setChartVisible={setChartVisible}
+          chartVisible={chartVisible}
+          columns={columns}
           breakdown={breakdown}
           appendHitsCounter={appendHitsCounter}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
