@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
-
 import {
   ControlPanelState,
+  OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
   type ControlsPanels,
 } from '@kbn/controls-plugin/common';
@@ -29,12 +28,13 @@ export const migrateControlGroup: SavedObjectMigrationFn<DashboardAttributes> = 
   try {
     const panels = JSON.parse(attributes.controlGroupInput.panelsJSON) as ControlsPanels;
     const newPanels = Object.keys(panels).reduce<ControlsPanels>((panelAccumulator, panelId) => {
-      const oldPanel: ControlPanelState = panels[panelId];
+      const panel: ControlPanelState = panels[panelId];
+      if (MigrateControlPanel[panel.type]) {
+        MigrateControlPanel[panel.type].migratePanel(panel);
+      }
       return {
         ...panelAccumulator,
-        [panelId]: MigrateControlPanel[oldPanel.type]
-          ? MigrateControlPanel[oldPanel.type].migratePanel(oldPanel)
-          : oldPanel,
+        [panelId]: panel,
       };
     }, {});
 
@@ -54,19 +54,19 @@ export const migrateControlGroup: SavedObjectMigrationFn<DashboardAttributes> = 
 };
 
 const MigrateControlPanel: {
-  [type: string]: { migratePanel: (oldPanel: ControlPanelState) => ControlPanelState };
+  [type: string]: { migratePanel: (panel: ControlPanelState) => void };
 } = {
   [OPTIONS_LIST_CONTROL]: {
     /**
      * Need to migrate both the "Allow include/exclude" and "Allow exists query" toggles to be undefined
-     * because these were introduced in 8.6.0 but the UX was removed in 8.7.0
+     * because these were introduced in 8.6.0 but the UX was removed in 8.7.0.
+     *
+     * This function changes the panel by reference.
      */
-    migratePanel: (oldPanel) => {
-      const newExplicitInput = {
-        id: oldPanel.explicitInput.id,
-        ...omit(oldPanel.explicitInput, ['hideExclude', 'hideExists']),
-      };
-      return { ...oldPanel, explicitInput: newExplicitInput };
+    migratePanel: (panel) => {
+      const explicitInput = panel.explicitInput as OptionsListEmbeddableInput;
+      delete explicitInput.hideExclude;
+      delete explicitInput.hideExists;
     },
   },
 };
