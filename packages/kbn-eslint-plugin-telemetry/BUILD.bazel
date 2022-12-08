@@ -63,9 +63,8 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  # "@npm//@types/estree",
   "@npm//@types/eslint",
-  # "@npm//@typescript-eslint/typescript-estree",
+  "@npm//@typescript-eslint/typescript-estree",
 ]
 
 jsts_transpiler(
