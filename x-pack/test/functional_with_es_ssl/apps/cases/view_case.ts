@@ -274,7 +274,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await createAndNavigateToCase(getPageObject, getService);
       });
-    
+
       afterEach(async () => {
         await cases.api.deleteAllCases();
       });
