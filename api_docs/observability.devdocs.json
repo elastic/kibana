@@ -832,6 +832,78 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.ObservabilityAlertSearchBar",
+        "type": "Function",
+        "tags": [],
+        "label": "ObservabilityAlertSearchBar",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "ObservabilityAlertSearchBarProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityAlertSearchBar.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "ObservabilityAlertSearchBarProps"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.ObservabilityAlertSearchBarProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ObservabilityAlertSearchBarProvider",
+        "description": [],
+        "signature": [
+          "({ children, data: { query: { timefilter: { timefilter: timeFilterService }, }, }, useToasts, triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar }, }: React.PropsWithChildren<",
+          "Dependencies",
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/alert_search_bar/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityAlertSearchBarProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  data: {\n    query: {\n      timefilter: { timefilter: timeFilterService },\n    },\n  },\n  useToasts,\n  triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "Dependencies",
+              ">"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/alert_search_bar/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.Prompt",
         "type": "Function",
         "tags": [],
@@ -3440,6 +3512,54 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsSetup.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ register: (shareMenuProvider: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShareMenuProvider",
+                "text": "ShareMenuProvider"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.AnonymousAccessServiceContract",
+                "text": "AnonymousAccessServiceContract"
+              },
+              ") => void; }"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsSetup.triggersActionsUi",
             "type": "Object",
             "tags": [],
@@ -3589,6 +3709,46 @@
                 "text": "HomePublicPluginStart"
               },
               " | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ toggleShareContextMenu: (options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -11758,6 +11918,21 @@
         "description": [],
         "signature": [
           "\"observability\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.ruleDetailsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "ruleDetailsLocatorID",
+        "description": [],
+        "signature": [
+          "\"RULE_DETAILS_LOCATOR\""
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,
