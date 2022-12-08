@@ -20,7 +20,7 @@ export const getDefaultAlertSummaryTimeRange = () => {
     utcTo: to,
     title: (
       <FormattedMessage
-        id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.last30days"
+        id="xpack.observability.alertsSummaryWidget.last30days"
         defaultMessage="Last 30 days"
       />
     ),
