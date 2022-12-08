@@ -7,11 +7,9 @@
  */
 
 import { vislibPointSeriesTypes as pointSeries } from './point_series';
-import { vislibPieConfig } from './pie';
 import { vislibGaugeConfig } from './gauge';
 
 export const vislibTypesConfig = {
-  pie: vislibPieConfig,
   heatmap: pointSeries.heatmap,
   gauge: vislibGaugeConfig,
   goal: vislibGaugeConfig,
