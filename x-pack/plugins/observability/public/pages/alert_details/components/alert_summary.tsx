@@ -27,7 +27,7 @@ import {
   ALERT_STATUS_RECOVERED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { asDuration } from '../../../../common/utils/formatters';
+import { asDuration, asMillisecondDuration } from '../../../../common/utils/formatters';
 import { AlertSummaryProps } from '../types';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
 import { DEFAULT_DATE_FORMAT } from '../constants';
@@ -48,7 +48,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            {alert?.fields[ALERT_EVALUATION_VALUE] ?? '-'}
+            {asMillisecondDuration(alert?.fields[ALERT_EVALUATION_VALUE]) ?? '-'}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -62,7 +62,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            {alert?.fields[ALERT_EVALUATION_THRESHOLD] ?? '-'}
+            {asMillisecondDuration(alert?.fields[ALERT_EVALUATION_THRESHOLD]) ?? '-'}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
