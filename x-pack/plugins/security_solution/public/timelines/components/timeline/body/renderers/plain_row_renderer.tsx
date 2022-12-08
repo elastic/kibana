@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import type { RowRenderer } from '@kbn-row-renderers';
-import { RowRendererId } from '@kbn-row-renderers';
+import type { RowRenderer } from '@kbn/row-renderers';
+import { RowRendererId } from '@kbn/row-renderers';
 
 const PlainRowRenderer = () => <></>;
 

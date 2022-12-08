@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RowRendererId } from '@kbn-row-renderers';
+import type { RowRendererId } from '@kbn/row-renderers';
 import type { SortField, Maybe } from '../common';
 import type { DataProviderType, TimelineType, TimelineStatus } from '../../types/timeline';
 
