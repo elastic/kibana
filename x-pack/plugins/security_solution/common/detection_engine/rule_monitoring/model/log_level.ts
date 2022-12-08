@@ -11,7 +11,7 @@ import { enumFromString } from '../../../utils/enum_from_string';
 import { assertUnreachable } from '../../../utility_types';
 import { RuleExecutionStatus } from './execution_status';
 
-export enum  LogLevel {
+export enum LogLevel {
   'trace' = 'trace',
   'debug' = 'debug',
   'info' = 'info',
@@ -90,8 +90,6 @@ export const logLevelFromLastRunOutcome = (status: RuleLastRunOutcomes): LogLeve
       return LogLevel.warn;
     case 'failed':
       return LogLevel.error;
-    case 'unknown':
-      return LogLevel.trace;
     default:
       assertUnreachable(status);
       return LogLevel.trace;

@@ -6,7 +6,7 @@
  */
 import { Logger } from '@kbn/core/server';
 import stats from 'stats-lite';
-import { RuleMonitoring, RawRuleMonitoring, RuleMonitoringHistory, RuleLastRun } from '../types';
+import { RuleMonitoring, RawRuleMonitoring, RuleMonitoringHistory } from '../types';
 
 export const INITIAL_METRICS = {
   total_search_duration_ms: null,
@@ -30,18 +30,6 @@ export const getDefaultMonitoring = (timestamp: string): RawRuleMonitoring => {
     },
   };
 };
-
-export const getDefaultLastRun = (): RuleLastRun => ({
-  warning: null,
-  outcome: 'unknown',
-  outcomeMsg: null,
-  alertsCount: {
-    active: null,
-    new: null,
-    recovered: null,
-    ignored: null,
-  },
-});
 
 export const getExecutionDurationPercentiles = (history: RuleMonitoringHistory[]) => {
   const durationSamples = history.reduce<number[]>((duration, historyItem) => {

@@ -5,23 +5,11 @@
  * 2.0.
  */
 
-import {
-  getDefaultLastRun,
-  getDefaultMonitoring,
-  getExecutionDurationPercentiles,
-} from '../lib/monitoring';
-import {
-  RuleMonitoring,
-  RuleMonitoringHistory,
-  PublicRuleMonitoringService,
-  RuleLastRun,
-  RuleLastRunOutcomes,
-  PublicMetricsSetters,
-  PublicLastRunSetters,
-} from '../types';
+import { getDefaultMonitoring, getExecutionDurationPercentiles } from '../lib/monitoring';
+import { RuleMonitoring, RuleMonitoringHistory, PublicRuleMonitoringService } from '../types';
+
 export class RuleMonitoringService {
   private monitoring: RuleMonitoring = getDefaultMonitoring(new Date().toISOString());
-  private lastRun: RuleLastRun = getDefaultLastRun();
 
   public setLastRunMetricsDuration(duration: number) {
     this.monitoring.run.last_run.metrics.duration = duration;
@@ -35,10 +23,6 @@ export class RuleMonitoringService {
 
   public getMonitoring(): RuleMonitoring {
     return this.monitoring;
-  }
-
-  public getLastRun(): RuleLastRun {
-    return this.lastRun;
   }
 
   public addHistory({
@@ -70,7 +54,7 @@ export class RuleMonitoringService {
     };
   }
 
-  public getLastRunMetricsSetters(): PublicMetricsSetters {
+  public getLastRunMetricsSetters(): PublicRuleMonitoringService {
     return {
       setLastRunMetricsTotalSearchDurationMs:
         this.setLastRunMetricsTotalSearchDurationMs.bind(this),
@@ -100,33 +84,6 @@ export class RuleMonitoringService {
 
   private setLastRunMetricsGapDurationS(gapDurationS: number) {
     this.monitoring.run.last_run.metrics.gap_duration_s = gapDurationS;
-  }
-
-  public getLastRunSetters(): PublicLastRunSetters {
-    return {
-      setLastRunOutcome: this.setLastRunOutcome.bind(this),
-      setLastRunOutcomeMsg: this.setLastRunOutcomeMsg.bind(this),
-      setLastRunWarning: this.setLastRunWarning.bind(this),
-    };
-  }
-
-  private setLastRunOutcome(outcome: RuleLastRunOutcomes) {
-    this.lastRun.outcome = outcome;
-  }
-
-  private setLastRunOutcomeMsg(outcomeMsg: string) {
-    this.lastRun.outcomeMsg = outcomeMsg;
-  }
-
-  private setLastRunWarning(warning: RuleLastRun['warning']) {
-    this.lastRun.warning = warning;
-  }
-
-  public getRuleMonitoringSetters(): PublicRuleMonitoringService {
-    return {
-      ...this.getLastRunMetricsSetters(),
-      ...this.getLastRunSetters(),
-    };
   }
 
   private buildExecutionSuccessRatio() {

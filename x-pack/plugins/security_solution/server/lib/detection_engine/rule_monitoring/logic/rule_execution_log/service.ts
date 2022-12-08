@@ -53,7 +53,7 @@ export const createRuleExecutionLogService = (
       params: ClientForExecutorsParams
     ): Promise<IRuleExecutionLogForExecutors> => {
       return withSecuritySpan('IRuleExecutionLogService.createClientForExecutors', async () => {
-        const { savedObjectsClient, context, ruleMonitoringService } = params;
+        const { savedObjectsClient, context, ruleMonitoringService, ruleLastRunService } = params;
 
         const childLogger = logger.get('ruleExecution');
 
@@ -71,7 +71,8 @@ export const createRuleExecutionLogService = (
           eventLogWriter,
           childLogger,
           context,
-          ruleMonitoringService
+          ruleMonitoringService,
+          ruleLastRunService
         );
       });
     },

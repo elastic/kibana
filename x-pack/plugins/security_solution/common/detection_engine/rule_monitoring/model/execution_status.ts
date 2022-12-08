@@ -80,20 +80,18 @@ export const ruleExecutionStatusToNumber = (
   }
 };
 
-export const ruleLastRunOutcomeToNumber = (
+export const ruleLastRunOutcomeToExecutionStatus = (
   outcome: RuleLastRunOutcomes
-): RuleExecutionStatusOrder => {
+): RuleExecutionStatus => {
   switch (outcome) {
     case 'succeeded':
-      return 0;
+      return RuleExecutionStatus.succeeded;
     case 'warning':
-      return 20;
+      return RuleExecutionStatus['partial failure'];
     case 'failed':
-      return 30;
-    case 'unknown':
-      return 40; // TBC
+      return RuleExecutionStatus.failed;
     default:
       assertUnreachable(outcome);
-      return 0;
+      return RuleExecutionStatus.failed;
   }
 };

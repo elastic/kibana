@@ -10,8 +10,8 @@ import type { Duration } from 'moment';
 import type { Logger } from '@kbn/core/server';
 
 import type {
+  PublicRuleLastRunService,
   PublicRuleMonitoringService,
-  RuleLastRunOutcomes,
 } from '@kbn/alerting-plugin/server/types';
 import type {
   RuleExecutionMetrics,
@@ -43,7 +43,8 @@ export const createClientForExecutors = (
   eventLog: IEventLogWriter,
   logger: Logger,
   context: RuleExecutionContext,
-  ruleMonitoringService: PublicRuleMonitoringService
+  ruleMonitoringService: PublicRuleMonitoringService,
+  ruleLastRunService: PublicRuleLastRunService
 ): IRuleExecutionLogForExecutors => {
   const baseCorrelationIds = getCorrelationIds(context);
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
@@ -169,15 +170,17 @@ export const createClientForExecutors = (
       execution_gap_duration_s: executionGapDurationS,
     } = metrics ?? {};
 
-    if (
-      newStatus !== RuleExecutionStatus['going to run'] &&
-      newStatus !== RuleExecutionStatus.running
-    ) {
-      const outcome = mapRuleExecutionStatusToRuleLastRunOutcome(newStatus);
-      ruleMonitoringService.setLastRunOutcome(outcome);
+    if (newStatus === RuleExecutionStatus.failed) {
+      ruleLastRunService.addLastRunError(message);
     }
 
-    ruleMonitoringService.setLastRunOutcomeMsg(message);
+    if (newStatus === RuleExecutionStatus['partial failure']) {
+      ruleLastRunService.addLastRunWarning(message);
+    }
+
+    if (newStatus === RuleExecutionStatus.succeeded) {
+      ruleLastRunService.addLastRunOutcomeMessage(message);
+    }
 
     if (totalSearchDurationMs) {
       ruleMonitoringService.setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs);
@@ -256,21 +259,4 @@ const normalizeDurations = (durations?: string[]): number | undefined => {
 
 const normalizeGap = (duration?: Duration): number | undefined => {
   return duration ? Math.round(duration.asSeconds()) : undefined;
-};
-
-const mapRuleExecutionStatusToRuleLastRunOutcome = (
-  newStatus: RuleExecutionStatus
-): RuleLastRunOutcomes => {
-  switch (newStatus) {
-    case RuleExecutionStatus.succeeded:
-      return 'succeeded';
-    case RuleExecutionStatus.failed:
-      return 'failed';
-    case RuleExecutionStatus['partial failure']:
-      return 'warning';
-    case RuleExecutionStatus['going to run']:
-    case RuleExecutionStatus.running:
-    default:
-      throw new Error(`Unexpected rule execution status: ${newStatus}`);
-  }
 };
