@@ -24,10 +24,21 @@ import {
   doesNotHaveRequiredFleetAuthz,
 } from './security';
 
+function shouldHandlePostAuthRequest(req: KibanaRequest) {
+  if (req?.route?.options?.tags) {
+    return req.route.options.tags.some((tag) => tag.match(/^fleet:authz/));
+  }
+  return false;
+}
+
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
   router: IRouter<TContext>
 ): { router: FleetAuthzRouter<TContext>; onPostAuthHandler: OnPostAuthHandler } {
-  const fleetAuthzOnPostAuthHandler: OnPostAuthHandler = async (_, res, toolkit) => {
+  const fleetAuthzOnPostAuthHandler: OnPostAuthHandler = async (req, res, toolkit) => {
+    if (!shouldHandlePostAuthRequest(req)) {
+      return toolkit.next();
+    }
+
     if (!checkSecurityEnabled()) {
       return res.forbidden();
     }
