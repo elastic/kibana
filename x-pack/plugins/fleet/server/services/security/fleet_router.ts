@@ -34,6 +34,7 @@ function shouldHandlePostAuthRequest(req: KibanaRequest) {
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
   router: IRouter<TContext>
 ): { router: FleetAuthzRouter<TContext>; onPostAuthHandler: OnPostAuthHandler } {
+  // TODO:PT Delete this middleware function as it is no longer used.
   const fleetAuthzOnPostAuthHandler: OnPostAuthHandler = async (req, res, toolkit) => {
     if (!shouldHandlePostAuthRequest(req)) {
       return toolkit.next();
@@ -59,6 +60,14 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     handler: RequestHandler<any, any, any, TContext, R, KibanaResponseFactory>;
     hasRequiredAuthz?: FleetAuthzRouteConfig['fleetAuthz'];
   }): Promise<IKibanaResponse<any>> => {
+    if (!checkSecurityEnabled()) {
+      return response.forbidden({
+        body: {
+          message: 'Kibana security must be enable to use Fleet',
+        },
+      });
+    }
+
     const requestedAuthz = await getAuthzFromRequest(request);
 
     if (doesNotHaveRequiredFleetAuthz(requestedAuthz, hasRequiredAuthz)) {
