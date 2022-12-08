@@ -88,6 +88,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
       notifications: getNotifications(),
       share: getShare(),
       uiSettings: getUiSettings(),
+      settings: getSettings(),
       theme: {
         theme$: EMPTY,
       },
