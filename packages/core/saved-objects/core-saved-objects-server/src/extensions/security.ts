@@ -215,12 +215,12 @@ export interface RedactNamespacesParams<T, A extends string> {
  */
 export interface ISavedObjectsSecurityExtension {
   /**
-   * Checks authorization of actions on specified types in specified spaces.
-   * @param params - types, spaces, and actions to check
+   * Performs authorization (check & enforce) of actions on specified types in specified spaces.
+   * @param params - actions, types & spaces map, audit callback, options
    * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
    */
-  checkAuthorization: <T extends string>(
-    params: CheckAuthorizationParams<T>
+  performAuthorization: <T extends string>(
+    params: PerformAuthorizationParams<T>
   ) => Promise<CheckAuthorizationResult<T>>;
 
   /**
@@ -229,15 +229,6 @@ export interface ISavedObjectsSecurityExtension {
    * @param params - map of types/spaces, action to check, and authz map (from CheckAuthorizationResult)
    */
   enforceAuthorization: <T extends string>(params: EnforceAuthorizationParams<T>) => void;
-
-  /**
-   * Performs authorization (check & enforce) of actions on specified types in specified spaces.
-   * @param params - actions, types & spaces map, audit callback, options
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
-   */
-  performAuthorization: <T extends string>(
-    params: PerformAuthorizationParams<T>
-  ) => Promise<CheckAuthorizationResult<T>>;
 
   /**
    * Adds an audit event for the specified action with relevant information

@@ -284,56 +284,6 @@ export const setupPerformAuthEnforceFailure = (
   );
 };
 
-// export const setupCheckAuthorized = (
-//   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
-// ) => {
-//   mockSecurityExt.checkAuthorization.mockResolvedValue({
-//     status: 'fully_authorized',
-//     typeMap: authMap,
-//   });
-// };
-
-// export const setupCheckPartiallyAuthorized = (
-//   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
-// ) => {
-//   mockSecurityExt.checkAuthorization.mockResolvedValue({
-//     status: 'partially_authorized',
-//     typeMap: authMap,
-//   });
-// };
-
-// export const setupCheckUnauthorized = (
-//   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
-// ) => {
-//   mockSecurityExt.checkAuthorization.mockResolvedValue({
-//     status: 'unauthorized',
-//     typeMap: new Map([]),
-//   });
-// };
-
-// export const setupEnforceSuccess = (
-//   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
-// ) => {
-//   mockSecurityExt.enforceAuthorization.mockImplementation(
-//     (params: EnforceAuthorizationParams<string>) => {
-//       const { auditCallback } = params;
-//       auditCallback?.(undefined);
-//     }
-//   );
-// };
-
-// export const setupEnforceFailure = (
-//   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
-// ) => {
-//   mockSecurityExt.enforceAuthorization.mockImplementation(
-//     (params: EnforceAuthorizationParams<string>) => {
-//       const { auditCallback } = params;
-//       auditCallback?.(enforceError);
-//       throw enforceError;
-//     }
-//   );
-// };
-
 export const setupRedactPassthrough = (
   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
 ) => {
