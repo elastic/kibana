@@ -15,7 +15,7 @@ import { StatItemsComponent } from './stat_items';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { mockUpdateDateRange } from '../../../network/components/kpi_network/mock';
+import { mockUpdateDateRange } from '../../../explore/network/components/kpi_network/mock';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,

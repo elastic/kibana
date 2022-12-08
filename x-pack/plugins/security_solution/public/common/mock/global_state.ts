@@ -29,7 +29,7 @@ import {
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_SIGNALS_INDEX,
 } from '../../../common/constants';
-import { networkModel } from '../../network/store';
+import { networkModel } from '../../explore/network/store';
 import {
   TimelineType,
   TimelineStatus,

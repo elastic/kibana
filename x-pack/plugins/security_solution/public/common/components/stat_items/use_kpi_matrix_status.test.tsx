@@ -9,13 +9,13 @@ import { mount } from 'enzyme';
 import React from 'react';
 import type { StatItemsProps, StatItems } from '.';
 
-import { fieldsMapping as fieldTitleChartMapping } from '../../../network/components/kpi_network/unique_private_ips';
+import { fieldsMapping as fieldTitleChartMapping } from '../../../explore/network/components/kpi_network/unique_private_ips';
 import {
   mockData,
   mockEnableChartsData,
   mockNoChartMappings,
   mockUpdateDateRange,
-} from '../../../network/components/kpi_network/mock';
+} from '../../../explore/network/components/kpi_network/mock';
 
 import type {
   HostsKpiStrategyResponse,

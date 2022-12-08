@@ -6,9 +6,9 @@
  */
 
 import { addValueToFields, addValueToAreaChart, addValueToBarChart } from './utils';
-import { fieldsMapping as fieldTitleChartMapping } from '../../../network/components/kpi_network/unique_private_ips';
+import { fieldsMapping as fieldTitleChartMapping } from '../../../explore/network/components/kpi_network/unique_private_ips';
 
-import { mockData, mockEnableChartsData } from '../../../network/components/kpi_network/mock';
+import { mockData, mockEnableChartsData } from '../../../explore/network/components/kpi_network/mock';
 
 describe('addValueToFields', () => {
   const mockNetworkMappings = fieldTitleChartMapping[0];

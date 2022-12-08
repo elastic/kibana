@@ -29,21 +29,21 @@ import styled from 'styled-components';
 import type { Direction } from '../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import type { HostsTableColumns } from '../../../explore/hosts/components/hosts_table';
-import type { NetworkDnsColumns } from '../../../network/components/network_dns_table/columns';
-import type { NetworkHttpColumns } from '../../../network/components/network_http_table/columns';
+import type { NetworkDnsColumns } from '../../../explore/network/components/network_dns_table/columns';
+import type { NetworkHttpColumns } from '../../../explore/network/components/network_http_table/columns';
 import type {
   NetworkTopNFlowColumns,
   NetworkTopNFlowColumnsNetworkDetails,
-} from '../../../network/components/network_top_n_flow_table/columns';
+} from '../../../explore/network/components/network_top_n_flow_table/columns';
 import type {
   NetworkTopCountriesColumns,
   NetworkTopCountriesColumnsNetworkDetails,
-} from '../../../network/components/network_top_countries_table/columns';
-import type { TlsColumns } from '../../../network/components/tls_table/columns';
+} from '../../../explore/network/components/network_top_countries_table/columns';
+import type { TlsColumns } from '../../../explore/network/components/tls_table/columns';
 import type { UncommonProcessTableColumns } from '../../../explore/hosts/components/uncommon_process_table';
 import type { HostRiskScoreColumns } from '../../../explore/hosts/components/host_risk_score_table';
 
-import type { UsersColumns } from '../../../network/components/users_table/columns';
+import type { UsersColumns } from '../../../explore/network/components/users_table/columns';
 import { HeaderSection } from '../header_section';
 import { Loader } from '../loader';
 import { useStateToaster } from '../toasters';
