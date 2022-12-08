@@ -9,6 +9,7 @@ import type {
   ActionTimelineToShow,
   DeleteTimelines,
   EnableExportTimelineDownloader,
+  OnCreateRuleFromTimeline,
   OnOpenTimeline,
   OpenTimelineResult,
   OnOpenDeleteTimelineModal,
@@ -16,7 +17,6 @@ import type {
 } from '../types';
 import * as i18n from '../translations';
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
-
 /**
  * Returns the action columns (e.g. delete, open duplicate timeline)
  */
@@ -26,12 +26,14 @@ export const getActionsColumns = ({
   enableExportTimelineDownloader,
   onOpenDeleteTimelineModal,
   onOpenTimeline,
+  onCreateRule,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
   enableExportTimelineDownloader?: EnableExportTimelineDownloader;
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
+  onCreateRule?: OnCreateRuleFromTimeline;
 }): [TimelineActionsOverflowColumns] => {
   const createTimelineFromTemplate = {
     name: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
@@ -132,6 +134,22 @@ export const getActionsColumns = ({
     available: () => actionTimelineToShow.includes('delete') && deleteTimelines != null,
   };
 
+  const createRuleFromTimeline = {
+    name: i18n.CREATE_RULE_FROM_TIMELINE,
+    icon: 'indexEdit',
+    onClick: (selectedTimeline: OpenTimelineResult) => {
+      if (onCreateRule != null && selectedTimeline.savedObjectId)
+        onCreateRule(selectedTimeline.savedObjectId);
+    },
+    enabled: (timeline: OpenTimelineResult) =>
+      onCreateRule != null &&
+      timeline.savedObjectId != null &&
+      timeline.status !== TimelineStatus.immutable,
+    description: i18n.CREATE_RULE_FROM_TIMELINE,
+    'data-test-subj': 'create-rule-from-timeline',
+    available: () => actionTimelineToShow.includes('createRule') && onCreateRule != null,
+  };
+
   return [
     {
       width: '80px',
@@ -142,6 +160,7 @@ export const getActionsColumns = ({
         openAsDuplicateTemplateColumn,
         exportTimelineAction,
         deleteTimelineColumn,
+        createRuleFromTimeline,
       ],
     },
   ];
