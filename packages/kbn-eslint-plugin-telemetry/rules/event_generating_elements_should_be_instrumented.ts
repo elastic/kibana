@@ -56,9 +56,7 @@ export const eventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
           );
 
           if (!hasDataTestSubj) {
-            /*
-              Start getting the different parts of the autosuggestion.
-            */
+            // Start getting the different parts of the autosuggestion.
 
             // 1. Path to component
             const cwd = getCwd();
@@ -77,10 +75,11 @@ export const eventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
               Array.isArray(parent.parent.children) ? parent.parent.children : []
             );
 
+            // 5. Putting it together
             const dataTestSubjectSuggestion = `${pathToComponent}|${componentName}|${eventGeneratingElement}`;
             const dataTestPurposeSuggestion = `${potentialIntent}`;
 
-            // Give feedback to user
+            // 6. Report feedback to engineer
             report({
               node: node as any,
               message: `<${name}> should have a \`data-test-subj\` and \`data-test-purpose\` attribute for telemetry purposes. Consider adding them.`,
