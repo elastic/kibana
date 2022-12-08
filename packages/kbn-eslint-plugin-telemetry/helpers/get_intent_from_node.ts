@@ -21,12 +21,12 @@ function strip(input: string): string {
 }
 
 /*
-    Attempts to retrieve a textual representation of elements
-    out of an array of AST nodes.
+    Attempts to get a string representation of the intent
+    out of an array of nodes.
     
     It currently only works through the array of nodes that
-    it has been passed. It does not traverse the AST tree
-    further down.
+    it has been passed. It does not recursively traverse the
+    AST tree.
 
     It currently supports:
         - flat text (JSXText)

@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import path from 'path';
 import type { Rule } from 'eslint';
+import { TSESTree } from '@typescript-eslint/typescript-estree';
+
 import { getIntentFromNodeArray } from '../helpers/get_intent_from_node';
 import { getPathToComponent } from '../helpers/get_path_to_component';
 
-const eventGeneratingElementNames = [
+const EVENT_GENERATING_ELEMENTS = [
   'EuiButton',
   'EuiButtonEmpty',
   'EuiLink',
@@ -23,60 +24,76 @@ const eventGeneratingElementNames = [
   'EuiTextArea',
 ];
 
+interface NodeParentExtension {
+  parent: Node;
+  children: Node;
+}
+type Node = TSESTree.Node & NodeParentExtension;
+
 export const eventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
     fixable: 'code',
   },
   create(context) {
-    const { getCwd, getFilename, report } = context;
+    const { getCwd, getFilename, getScope, report } = context;
 
     return {
-      JSXIdentifier(node: any) {
-        const { name, parent } = node;
+      JSXIdentifier: (node: TSESTree.Node) => {
+        if ('name' in node) {
+          const name = String(node.name);
+          const range = node.range;
+          const parent = node.parent as Node;
 
-        // Return early if JSX element is not an opening element or part of pre-determined list of elements
-        if (parent.type !== 'JSXOpeningElement' || !eventGeneratingElementNames.includes(name)) {
-          return;
-        }
+          // We want to check the attributes of an JSXOpeningElement that is part of an array of
+          // element names that generate events. Return early if that's not the case.
+          if (parent?.type !== 'JSXOpeningElement' || !EVENT_GENERATING_ELEMENTS.includes(name)) {
+            return;
+          }
 
-        const hasDataTestSubj = (node.parent.attributes || []).find(
-          (attr: any) => attr.type === 'JSXAttribute' && attr.name.name === 'data-test-subj'
-        );
-
-        if (!hasDataTestSubj) {
-          const { dir } = path.parse(getFilename());
-          const cwd = getCwd();
-          const relativePathToFile = dir.replace(cwd, '');
-
-          // Get different partials to use for autofix suggestion:
-          const pathToComponent = getPathToComponent(relativePathToFile);
-
-          const componentName = (context.getScope() as any).block?.id?.name?.toLowerCase();
-
-          const eventGeneratingElement = `${name.replace('Eui', '').toLowerCase()}`;
-
-          const potentialIntent = getIntentFromNodeArray(
-            Array.isArray(parent.parent.children) && parent.parent.children.length
-              ? parent.parent.children
-              : []
+          const hasDataTestSubj = (parent.attributes || []).find(
+            (attr) => attr.type === 'JSXAttribute' && attr.name.name === 'data-test-subj'
           );
 
-          const dataTestSubjectSuggestion = `${pathToComponent}|${componentName}|${eventGeneratingElement}|${potentialIntent}`;
+          if (!hasDataTestSubj) {
+            /*
+              Start getting the different parts of the autosuggestion.
+            */
 
-          // Give feedback
-          report({
-            node,
-            message: `<${node.name}> should have a \`data-test-subj\` attribute for telemetry purposes. Consider adding it.`,
-            fix(fixer) {
-              return fixer.insertTextAfterRange(
-                node.range,
-                ` data-test-subj="${dataTestSubjectSuggestion}"`
-              );
-            },
-          });
+            // 1. Path to component
+            const cwd = getCwd();
+            const fileName = getFilename();
+            const pathToComponent = getPathToComponent(fileName, cwd);
+
+            // 2. Component Name
+            const functionDeclaration = getScope().block as TSESTree.FunctionDeclaration;
+            const componentName = functionDeclaration.id?.name.toLowerCase();
+
+            // 3. The element name that generates events which can be instrumented
+            const eventGeneratingElement = name.replace('Eui', '').toLowerCase();
+
+            // 4. The intention of the element (i.e. "Select date", "Submit", "Cancel")
+            const potentialIntent = getIntentFromNodeArray(
+              Array.isArray(parent.parent.children) ? parent.parent.children : []
+            );
+
+            const dataTestSubjectSuggestion = `${pathToComponent}|${componentName}|${eventGeneratingElement}`;
+            const dataTestPurposeSuggestion = `${potentialIntent}`;
+
+            // Give feedback to user
+            report({
+              node: node as any,
+              message: `<${name}> should have a \`data-test-subj\` and \`data-test-purpose\` attribute for telemetry purposes. Consider adding them.`,
+              fix(fixer) {
+                return fixer.insertTextAfterRange(
+                  range,
+                  ` data-test-subj="${dataTestSubjectSuggestion}" data-test-purpose="${dataTestPurposeSuggestion}"`
+                );
+              },
+            });
+          }
         }
       },
-    };
+    } as Rule.RuleListener;
   },
 };
