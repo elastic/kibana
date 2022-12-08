@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
 import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
+import { useHistory } from 'react-router-dom';
 import {
   isMobileAgentName,
   isRumAgentName,
@@ -39,8 +40,7 @@ import { BetaBadge } from '../../../shared/beta_badge';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
-import { fromQuery, replace } from '../../../shared/links/url_helpers';
-import { useHistory } from 'react-router';
+import { replace } from '../../../shared/links/url_helpers';
 import { isPending } from '../../../../hooks/use_fetcher';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
