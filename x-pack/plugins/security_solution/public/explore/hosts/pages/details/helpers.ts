@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Filter } from '../../../../private/var/tmp/_bazel_stephmilovic/f2692a3f20a774c59f0da1de1e889609/execroot/kibana/bazel-out/darwin_arm64-fastbuild/bin/packages/kbn-es-query';
+import type { Filter } from '@kbn/es-query';
 import { escapeQueryValue } from '../../../../common/lib/kuery';
 
 /** Returns the kqlQueryExpression for the `Events` widget on the `Host Details` page */

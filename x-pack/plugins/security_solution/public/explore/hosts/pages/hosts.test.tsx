@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from 'react-router-dom';
 
-import type { Filter } from '../../../../private/var/tmp/_bazel_stephmilovic/f2692a3f20a774c59f0da1de1e889609/execroot/kibana/bazel-out/darwin_arm64-fastbuild/bin/packages/kbn-es-query';
+import type { Filter } from '@kbn/es-query';
 import '../../../common/mock/match_media';
 import {
   TestProviders,

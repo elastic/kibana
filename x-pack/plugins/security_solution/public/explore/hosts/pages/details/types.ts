@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataViewBase, Filter } from '../../../../private/var/tmp/_bazel_stephmilovic/f2692a3f20a774c59f0da1de1e889609/execroot/kibana/bazel-out/darwin_arm64-fastbuild/bin/packages/kbn-es-query';
+import type { DataViewBase, Filter } from '@kbn/es-query';
 import type { HostsTableType } from '../../store/model';
 import type { HostsQueryProps } from '../types';
 import type { NavTab } from '../../../../common/components/navigation/types';
