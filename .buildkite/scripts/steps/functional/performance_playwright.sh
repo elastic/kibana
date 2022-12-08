@@ -12,7 +12,7 @@ is_test_execution_step
 rm -rf "$KIBANA_BUILD_LOCATION"
 .buildkite/scripts/download_build_artifacts.sh
 
-if [ "$BUILDKITE_PIPELINE_SLUG" == "performance-data-set-extraction" ]; then
+if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; then
   # 'performance-data-set-extraction' uses 'n2-2-spot' agent, performance metrics don't matter
   # and we skip warmup phase for each test
   echo "--- Running single user journeys"
