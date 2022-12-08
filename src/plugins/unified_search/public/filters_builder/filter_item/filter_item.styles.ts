@@ -24,8 +24,11 @@ export const fieldAndParamCss = css`
   min-width: 162px;
 `;
 
-export const operationCss = css`
-  max-width: 162px;
+export const operationCss = (euiTheme: EuiThemeComputed) => css`
+  max-width: calc(${euiTheme.size.xl} * 4.5);
+  .euiComboBox__inputWrap {
+    padding-right: calc(${euiTheme.size.l}) !important;
+  }
 `;
 
 export const getGrabIconCss = (euiTheme: EuiThemeComputed) => css`
