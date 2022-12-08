@@ -24,7 +24,7 @@ export const HelpCommands = ({ apiKey }: { apiKey: string }) => {
       <EuiCodeBlock language="javascript" isCopyable fontSize="s" paddingSize="m" whiteSpace="pre">
         {apiKey}
       </EuiCodeBlock>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiText size="s">
         <strong>{USE_AS_ENV}</strong>
       </EuiText>
@@ -32,14 +32,14 @@ export const HelpCommands = ({ apiKey }: { apiKey: string }) => {
       <EuiCodeBlock language="javascript" isCopyable fontSize="s" paddingSize="m">
         export SYNTHETICS_API_KEY={apiKey}
       </EuiCodeBlock>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
+      <EuiSpacer size="m" />
       <EuiText size="s">
-        <strong>{PROJECT_SETUP_COMMAND}</strong>
+        <strong>{PROJECT_PUSH_COMMAND}</strong>
       </EuiText>
       <EuiSpacer size="s" />
       <EuiCodeBlock language="javascript" isCopyable fontSize="s" paddingSize="m">
-        npx @elastic/synthetics init --api-key={apiKey} --url=
-        {window.location.origin + basePath}
+        SYNTHETICS_API_KEY={apiKey} npm run push
       </EuiCodeBlock>
     </div>
   );
@@ -53,10 +53,10 @@ const USE_AS_ENV = i18n.translate('xpack.synthetics.monitorManagement.useEnv.lab
   defaultMessage: 'Use as environment variable',
 });
 
-const PROJECT_SETUP_COMMAND = i18n.translate(
-  'xpack.synthetics.monitorManagement.projectSetup.label',
+const PROJECT_PUSH_COMMAND = i18n.translate(
+  'xpack.synthetics.monitorManagement.projectPush.label',
   {
-    defaultMessage: 'Project setup command',
+    defaultMessage: 'Project push command',
   }
 );
 
