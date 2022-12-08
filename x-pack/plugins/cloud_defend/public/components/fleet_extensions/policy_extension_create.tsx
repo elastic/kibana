@@ -10,7 +10,7 @@ import { ConfigYamlView } from '../config_yaml_view';
 
 export const CloudDefendCreatePolicyExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
-    return <ConfigYamlView policy={newPolicy} onChange={onChange}/>;
+    return <ConfigYamlView policy={newPolicy} onChange={onChange} />;
   }
 );
 

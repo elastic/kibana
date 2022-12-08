@@ -15,7 +15,4 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/plugins/cloud_defend/{common,public,server}/**/*.{ts,tsx}',
   ],
-  transformIgnorePatterns: [
-    '<rootDir>/node_modules/monaco-yaml/**'
-  ]
 };

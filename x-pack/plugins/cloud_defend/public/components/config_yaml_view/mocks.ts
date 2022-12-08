@@ -6,7 +6,7 @@
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { CLOUD_DEFEND_PACKAGE_NAME } from '../../../common';
+import { INTEGRATION_PACKAGE_NAME } from '../../../common/constants';
 
 export const getCloudDefendNewPolicyMock = (): NewPackagePolicy => ({
   name: 'some-cloud_defend-policy',
@@ -16,7 +16,7 @@ export const getCloudDefendNewPolicyMock = (): NewPackagePolicy => ({
   enabled: true,
   inputs: [
     {
-      type: CLOUD_DEFEND_PACKAGE_NAME,
+      type: INTEGRATION_PACKAGE_NAME,
       policy_template: 'kspm',
       enabled: true,
       streams: [
@@ -74,7 +74,7 @@ export const getCloudDefendPolicyMock = (): PackagePolicy => ({
           enabled: true,
         },
       ],
-      type: CLOUD_DEFEND_PACKAGE_NAME,
+      type: INTEGRATION_PACKAGE_NAME,
       enabled: true,
     },
     {
@@ -100,12 +100,12 @@ export const getCloudDefendPolicyMock = (): PackagePolicy => ({
           enabled: false,
         },
       ],
-      type: CLOUD_DEFEND_PACKAGE_NAME,
+      type: INTEGRATION_PACKAGE_NAME,
       enabled: true,
     },
   ],
   vars: {
-    dataYaml: {
+    configuration: {
       type: 'yaml',
       value: 'data_yaml:\n  activated_rules:\n    cis_k8s: []\n    cis_eks:\n      - cis_3_1_4\n ',
     },
