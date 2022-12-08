@@ -80,6 +80,10 @@ export const useGlobalQueryString = (): string => {
   const globalQueryString = useMemo(() => {
     const encodedGlobalUrlParam: Record<string, string> = {};
 
+    if (!globalUrlParam) {
+      return '';
+    }
+
     Object.keys(globalUrlParam).forEach((paramName) => {
       try {
         encodedGlobalUrlParam[paramName] = encode(globalUrlParam[paramName]);
