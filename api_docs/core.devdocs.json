@@ -13186,7 +13186,11 @@
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
+            "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
           },
           {
             "plugin": "alerting",
@@ -13218,11 +13222,7 @@
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
+            "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
             "plugin": "canvas",
@@ -17081,6 +17081,29 @@
                 "path": "src/plugins/discover/server/ui_settings.ts"
               }
             ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.UiSettingsParams.scope",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scope",
+            "description": [
+              "\nScope of the setting. `Global` denotes a setting globally available across namespaces. `Namespace` denotes a setting\nscoped to a namespace. The default value is 'namespace'"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsScope",
+                "text": "UiSettingsScope"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -17724,7 +17747,7 @@
             "section": "def-common.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; searchable?: boolean | undefined; deepLinks?: ",
+          " | undefined; tooltip?: string | undefined; searchable?: boolean | undefined; deepLinks?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -17740,7 +17763,7 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
+          " | undefined; defaultPath?: string | undefined; }"
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
@@ -18247,7 +18270,15 @@
             "section": "def-common.DeprecationSettings",
             "text": "DeprecationSettings"
           },
-          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; }"
+          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; scope?: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsScope",
+            "text": "UiSettingsScope"
+          },
+          " | undefined; }"
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,
@@ -49019,7 +49050,11 @@
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
+            "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
           },
           {
             "plugin": "alerting",
@@ -49051,11 +49086,7 @@
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
+            "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
             "plugin": "canvas",
@@ -59390,6 +59421,29 @@
                 "path": "src/plugins/discover/server/ui_settings.ts"
               }
             ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.UiSettingsParams.scope",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scope",
+            "description": [
+              "\nScope of the setting. `Global` denotes a setting globally available across namespaces. `Namespace` denotes a setting\nscoped to a namespace. The default value is 'namespace'"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsScope",
+                "text": "UiSettingsScope"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -64088,7 +64142,15 @@
             "section": "def-common.DeprecationSettings",
             "text": "DeprecationSettings"
           },
-          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; }"
+          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; scope?: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsScope",
+            "text": "UiSettingsScope"
+          },
+          " | undefined; }"
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,

@@ -18,23 +18,8 @@ import { TableId, RowRendererId } from '../../../../../../common/types';
 
 import { render } from '@testing-library/react';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
-import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '@kbn/timelines-plugin/public/components';
 import { cloneDeep } from 'lodash';
 jest.mock('./plain_column_renderer');
-
-jest.mock('../../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useKibana: () => ({
-      services: {
-        timelines: {
-          getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
-        },
-      },
-    }),
-  };
-});
 
 jest.mock('../../../../../common/components/link_to', () => {
   const original = jest.requireActual('../../../../../common/components/link_to');
