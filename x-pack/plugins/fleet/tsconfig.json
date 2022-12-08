@@ -49,6 +49,8 @@
     "@kbn/share-plugin",
     "@kbn/i18n-react",
     "@kbn/custom-integrations-plugin",
+
+    // packages
     "@kbn/core-application-common",
     "@kbn/core-capabilities-common",
     "@kbn/i18n",
@@ -91,5 +93,6 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/ml-is-populated-object",
     "@kbn/utils",
+    "@kbn/cypress-config",
   ]
 }

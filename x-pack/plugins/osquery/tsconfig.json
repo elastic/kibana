@@ -37,6 +37,8 @@
     "@kbn/es-ui-shared-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
+
+    // packages
     "@kbn/config-schema",
     "@kbn/es-query",
     "@kbn/utility-types",
@@ -64,5 +66,6 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/std",
+    "@kbn/cypress-config",
   ]
 }
