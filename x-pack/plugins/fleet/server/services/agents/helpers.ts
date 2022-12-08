@@ -9,13 +9,14 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SearchHit } from '@kbn/es-types';
 
-import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
+import type { Agent, AgentSOAttributes, AgentStatus, FleetServerAgent } from '../../types';
 import { getAgentStatus } from '../../../common/services/agent_status';
 
+type FleetServerAgentHit = FleetServerAgent & { calculated_status?: AgentStatus[] };
 type FleetServerAgentESResponse =
-  | estypes.GetGetResult<FleetServerAgent>
-  | estypes.SearchResponse<FleetServerAgent>['hits']['hits'][0]
-  | SearchHit<FleetServerAgent>;
+  | estypes.GetGetResult<FleetServerAgentHit>
+  | estypes.SearchResponse<FleetServerAgentHit>['hits']['hits'][0]
+  | SearchHit<FleetServerAgentHit>;
 
 export function searchHitToAgent(hit: FleetServerAgentESResponse & { sort?: SortResults }): Agent {
   // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
@@ -29,7 +30,9 @@ export function searchHitToAgent(hit: FleetServerAgentESResponse & { sort?: Sort
     sort: hit.sort,
   };
 
-  agent.status = getAgentStatus(agent);
+  agent.status = hit._source?.calculated_status?.length
+    ? hit._source.calculated_status[0]
+    : getAgentStatus(agent);
   return agent;
 }
 

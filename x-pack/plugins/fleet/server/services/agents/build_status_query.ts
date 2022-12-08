@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+
 import { AGENT_POLLING_THRESHOLD_MS } from '../../constants';
 
 const DEFAULT_MS_BEFORE_INCACTIVE = 10 * 60 * 1000; // 10 minutes
@@ -68,16 +70,14 @@ function _buildSource(unenrollTimeouts: Array<{ policy_ids: string[]; unenroll_t
 
 export function buildStatusRuntimeQuery(
   unenrollTimeouts: Array<{ policy_ids: string[]; unenroll_timeout: number }>
-) {
+): NonNullable<estypes.SearchRequest['runtime_mappings']> {
   const source = _buildSource(unenrollTimeouts);
   return {
-    runtime_mappings: {
-      status: {
-        type: 'boolean',
-        script: {
-          lang: 'painless',
-          source,
-        },
+    calculated_status: {
+      type: 'keyword',
+      script: {
+        lang: 'painless',
+        source,
       },
     },
   };

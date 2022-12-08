@@ -92,7 +92,7 @@ export async function sendUpgradeAgentsActions(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-    const res = await getAgentsByKuery(esClient, {
+    const res = await getAgentsByKuery(esClient, soClient, {
       kuery: options.kuery,
       showInactive: options.showInactive ?? false,
       page: 1,

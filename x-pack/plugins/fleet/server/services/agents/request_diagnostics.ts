@@ -38,19 +38,19 @@ export async function bulkRequestDiagnostics(
   }
 ): Promise<{ actionId: string }> {
   if ('agentIds' in options) {
-    const givenAgents = await getAgents(esClient, options);
+    const givenAgents = await getAgents(esClient, soClient, options);
     return await requestDiagnosticsBatch(esClient, givenAgents, {});
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-  const res = await getAgentsByKuery(esClient, {
+  const res = await getAgentsByKuery(esClient, soClient, {
     kuery: options.kuery,
     showInactive: false,
     page: 1,
     perPage: batchSize,
   });
   if (res.total <= batchSize) {
-    const givenAgents = await getAgents(esClient, options);
+    const givenAgents = await getAgents(esClient, soClient, options);
     return await requestDiagnosticsBatch(esClient, givenAgents, {});
   } else {
     return await new RequestDiagnosticsActionRunner(
