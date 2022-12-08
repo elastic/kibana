@@ -339,7 +339,7 @@ export interface PublicLastRunGetters {
   getShouldOverrideFrameworkLastRun: () => boolean;
 }
 
-export type PublicRuleLastRunService = PublicLastRunSetters & PublicLastRunGetters;
+export type PublicRuleLastRunService = PublicLastRunSetters;
 
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
 export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}
