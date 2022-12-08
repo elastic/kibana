@@ -11,9 +11,9 @@ import { FieldNameSearch, type FieldNameSearchProps } from './field_name_search'
 import { FieldTypeFilter, type FieldTypeFilterProps } from './field_type_filter';
 
 export interface FieldListFiltersProps {
-  selectedFieldTypes: FieldTypeFilterProps['selectedFieldTypes'];
-  availableFieldTypes: FieldTypeFilterProps['availableFieldTypes'];
-  onChangeFieldTypes: FieldTypeFilterProps['onChange'];
+  selectedFieldTypes?: FieldTypeFilterProps['selectedFieldTypes'];
+  availableFieldTypes?: FieldTypeFilterProps['availableFieldTypes'];
+  onChangeFieldTypes?: FieldTypeFilterProps['onChange'];
   nameFilter: FieldNameSearchProps['nameFilter'];
   fieldSearchDescriptionId?: FieldNameSearchProps['fieldSearchDescriptionId'];
   onChangeNameFilter: FieldNameSearchProps['onChange'];
@@ -30,11 +30,13 @@ export const FieldListFilters: React.FC<FieldListFiltersProps> = ({
   return (
     <FieldNameSearch
       append={
-        <FieldTypeFilter
-          selectedFieldTypes={selectedFieldTypes}
-          availableFieldTypes={availableFieldTypes}
-          onChange={onChangeFieldTypes}
-        />
+        availableFieldTypes?.length && selectedFieldTypes && onChangeFieldTypes ? (
+          <FieldTypeFilter
+            selectedFieldTypes={selectedFieldTypes}
+            availableFieldTypes={availableFieldTypes}
+            onChange={onChangeFieldTypes}
+          />
+        ) : undefined
       }
       nameFilter={nameFilter}
       fieldSearchDescriptionId={fieldSearchDescriptionId}

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormControlLayout, htmlIdGenerator } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
@@ -17,6 +17,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
+  FieldListFilters,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
@@ -55,7 +56,6 @@ export function TextBasedDataPanel({
   const prevQuery = usePrevious(query);
   const [localState, setLocalState] = useState({ nameFilter: '' });
   const [dataHasLoaded, setDataHasLoaded] = useState(false);
-  const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '' }));
   useEffect(() => {
     async function fetchData() {
       if (query && isOfAggregateQueryType(query) && !isEqual(query, prevQuery)) {
@@ -144,6 +144,11 @@ export function TextBasedDataPanel({
     []
   );
 
+  const changeFieldNameFilter = useCallback(
+    (newValue) => setLocalState((s) => ({ ...s, nameFilter: newValue })),
+    [setLocalState]
+  );
+
   return (
     <KibanaContextProvider
       services={{
@@ -158,39 +163,11 @@ export function TextBasedDataPanel({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiFormControlLayout
-              icon="search"
-              fullWidth
-              clear={{
-                title: i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
-                  defaultMessage: 'Clear name and type filters',
-                }),
-                'aria-label': i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
-                  defaultMessage: 'Clear name and type filters',
-                }),
-                onClick: () => {
-                  clearLocalState();
-                },
-              }}
-            >
-              <input
-                className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
-                data-test-subj="lnsTextBasedLanguagesFieldSearch"
-                placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
-                  defaultMessage: 'Search field names',
-                  description: 'Search the list of fields in the data view for the provided text',
-                })}
-                value={localState.nameFilter}
-                onChange={(e) => {
-                  setLocalState({ ...localState, nameFilter: e.target.value });
-                }}
-                aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
-                  defaultMessage: 'Search field names',
-                  description: 'Search the list of fields in the data view for the provided text',
-                })}
-                aria-describedby={fieldSearchDescriptionId}
-              />
-            </EuiFormControlLayout>
+            <FieldListFilters
+              nameFilter={localState.nameFilter}
+              fieldSearchDescriptionId={fieldSearchDescriptionId}
+              onChangeNameFilter={changeFieldNameFilter}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <FieldListGrouped<DatatableColumn>

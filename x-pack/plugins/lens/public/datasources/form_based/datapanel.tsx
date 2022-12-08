@@ -485,6 +485,16 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     ]
   );
 
+  const changeFieldNameFilter = useCallback(
+    (newValue) => setLocalState((s) => ({ ...s, nameFilter: newValue })),
+    [setLocalState]
+  );
+
+  const changeFieldTypeFilter = useCallback(
+    (newValue) => setLocalState((s) => ({ ...s, typeFilter: newValue })),
+    [setLocalState]
+  );
+
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <EuiFlexGroup
@@ -498,17 +508,10 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
           <FieldListFilters
             selectedFieldTypes={localState.typeFilter}
             availableFieldTypes={availableFieldTypes}
-            onChangeFieldTypes={(newValue) =>
-              setLocalState((s) => ({
-                ...s,
-                typeFilter: newValue,
-              }))
-            }
+            onChangeFieldTypes={changeFieldTypeFilter}
             nameFilter={localState.nameFilter}
             fieldSearchDescriptionId={fieldSearchDescriptionId}
-            onChangeNameFilter={(newValue) =>
-              setLocalState((s) => ({ ...s, nameFilter: newValue }))
-            }
+            onChangeNameFilter={changeFieldNameFilter}
           />
         </EuiFlexItem>
         <EuiFlexItem>
