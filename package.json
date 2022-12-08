@@ -1364,7 +1364,7 @@
     "rxjs-marbles": "^7.0.1",
     "sass-loader": "^10.3.1",
     "selenium-webdriver": "^4.6.1",
-    "simple-git": "^3.10.0",
+    "simple-git": "^3.15.1",
     "sinon": "^7.4.2",
     "sort-package-json": "^1.53.1",
     "source-map": "^0.7.3",
