@@ -544,7 +544,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
 
-    await updatePackagePolicyVersion(packagePolicyUpdate, soClient, currentVersion);
+    if (packagePolicyUpdate.package) {
+      await updatePackagePolicyVersion(
+        soClient,
+        packagePolicyUpdate.package.name,
+        packagePolicyUpdate.package.version,
+        currentVersion
+      );
+    }
 
     return newPolicy;
   }
@@ -634,10 +641,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicyUpdates.map((p) => p.id)
     );
 
+    const pkgVersions: Record<string, { name: string; version: string }> = {};
+    packagePolicyUpdates.forEach(({ package: pkg }) => {
+      if (pkg) {
+        pkgVersions[pkg.name + '-' + pkg.version] = {
+          name: pkg.name,
+          version: pkg.version,
+        };
+      }
+    });
+
     await pMap(
-      packagePolicyUpdates,
-      async (packagePolicy) =>
-        await updatePackagePolicyVersion(packagePolicy, soClient, currentVersion),
+      Object.keys(pkgVersions),
+      async (pkgVersion) => {
+        const { name, version } = pkgVersions[pkgVersion];
+        await updatePackagePolicyVersion(soClient, name, version, currentVersion);
+      },
       { concurrency: 50 }
     );
 
@@ -1887,33 +1906,32 @@ async function validateIsNotHostedPolicy(
 }
 
 export async function updatePackagePolicyVersion(
-  packagePolicy: (NewPackagePolicy & { version?: string; id: string }) | UpdatePackagePolicy,
   soClient: SavedObjectsClientContract,
+  packageName: string,
+  packageVersion: string,
   currentVersion?: string
 ) {
-  if (packagePolicy.package) {
-    await removeOldAssets({
-      soClient,
-      pkgName: packagePolicy.package.name,
-      currentVersion: packagePolicy.package.version,
-    });
+  await removeOldAssets({
+    soClient,
+    pkgName: packageName,
+    currentVersion: packageVersion,
+  });
 
-    if (packagePolicy.package.version !== currentVersion) {
-      const upgradeTelemetry: PackageUpdateEvent = {
-        packageName: packagePolicy.package.name,
-        currentVersion: currentVersion || 'unknown',
-        newVersion: packagePolicy.package.version,
-        status: 'success',
-        eventType: 'package-policy-upgrade' as UpdateEventType,
-      };
-      sendTelemetryEvents(
-        appContextService.getLogger(),
-        appContextService.getTelemetryEventsSender(),
-        upgradeTelemetry
-      );
-      appContextService.getLogger().info(`Package policy upgraded successfully`);
-      appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
-    }
+  if (packageVersion !== currentVersion) {
+    const upgradeTelemetry: PackageUpdateEvent = {
+      packageName,
+      currentVersion: currentVersion || 'unknown',
+      newVersion: packageVersion,
+      status: 'success',
+      eventType: 'package-policy-upgrade' as UpdateEventType,
+    };
+    sendTelemetryEvents(
+      appContextService.getLogger(),
+      appContextService.getTelemetryEventsSender(),
+      upgradeTelemetry
+    );
+    appContextService.getLogger().info(`Package policy upgraded successfully`);
+    appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
   }
 }
 
