@@ -9,6 +9,7 @@ PASS_FROM_VAULT="$(retry 5 5 vault read -field=password secret/kibana-issues/dev
 ES_SERVER_URL="https://kibana-ops-e2e-perf.es.us-central1.gcp.cloud.es.io:9243"
 BUILD_ID="${BUILDKITE_BUILD_ID}"
 GCS_BUCKET="gs://kibana-performance/scalability-tests"
+ES_RALLY_GCS_BUCKET="gs://rally-tracks/scalability-traces"
 OUTPUT_REL="target/scalability_tests/${BUILD_ID}"
 OUTPUT_DIR="${KIBANA_DIR}/${OUTPUT_REL}"
 
@@ -31,7 +32,7 @@ echo "--- Creating scalability dataset in ${OUTPUT_REL}"
 mkdir -p "${OUTPUT_DIR}"
 
 echo "--- Archiving scalability trace and uploading as build artifact"
-tar -czf "${OUTPUT_DIR}/scalability_traces.tar.gz" -C target scalability_traces
+tar -czf "${OUTPUT_DIR}/scalability_traces.tar.gz" -C target "scalability_traces/kibana"
 buildkite-agent artifact upload "${OUTPUT_DIR}/scalability_traces.tar.gz"
 
 echo "--- Downloading Kibana artifacts used in tests"
