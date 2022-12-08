@@ -16,4 +16,7 @@
       ],
       "resolveJsonModule": true,
     },
+    "kbn_references": [
+      "@kbn/cypress-config",
+    ]
   }

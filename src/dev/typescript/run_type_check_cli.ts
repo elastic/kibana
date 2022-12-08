@@ -198,14 +198,14 @@ export async function runTypeCheckCli() {
       flags: {
         string: ['project'],
         boolean: ['clean-cache', 'cleanup'],
-        default: {
-          cleanup: true,
-        },
         help: `
           --project [path]        Path to a tsconfig.json file determines the project to check
           --help                  Show this message
           --clean-cache           Delete any existing TypeScript caches before running type check
-          --no-cleanup            Pass to avoid deleting the temporary tsconfig files written to disk
+          --cleanup               Pass to avoid leving temporary tsconfig files on disk. Leaving these
+                                    files in place makes subsequent executions faster because ts can
+                                    identify that none of the imports have changed (it uses creation/update
+                                    times) but cleaning them prevents leaving garbage around the repo.
         `,
       },
     }
