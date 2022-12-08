@@ -216,21 +216,42 @@ describe.each([
       ).not.toBeNull();
     });
 
-    it('should show popup menu with list of associated policies when clicked', async () => {
-      render({ policies });
-      await act(async () => {
-        await fireEvent.click(
-          renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
+    describe('when clicked', () => {
+      it('should show popup menu with list of associated policies, with `View details` button when has Policy privilege', async () => {
+        render({ policies });
+        await act(async () => {
+          await fireEvent.click(
+            renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
+          );
+        });
+
+        expect(
+          renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
+        ).not.toBeNull();
+
+        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual(
+          'Policy oneView details'
         );
       });
 
-      expect(
-        renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
-      ).not.toBeNull();
+      it('should show popup menu with list of associated policies, without `View details` button when does NOT have Policy privilege', async () => {
+        mockUserPrivileges.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({ canReadPolicyManagement: false }),
+        });
 
-      expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual(
-        'Policy oneView details'
-      );
+        render({ policies });
+        await act(async () => {
+          await fireEvent.click(
+            renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
+          );
+        });
+
+        expect(
+          renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
+        ).not.toBeNull();
+
+        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one');
+      });
     });
 
     it('should display policy ID if no policy menu item found in `policies` prop', async () => {
