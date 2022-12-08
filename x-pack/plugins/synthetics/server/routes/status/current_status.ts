@@ -123,6 +123,7 @@ export async function queryMonitorStatus(
             configId,
             heartbeatId,
             location: locationName,
+            summary: status.hits.hits[0]._source.summary,
           });
         } else if (downCount > 0) {
           down += 1;
@@ -130,6 +131,7 @@ export async function queryMonitorStatus(
             configId,
             heartbeatId,
             location: locationName,
+            summary: status.hits.hits[0]._source.summary,
           });
         }
       });

@@ -20,6 +20,7 @@ export const OverviewStatusType = t.type({
   upConfigs: t.array(OverviewStatusMetaDataCodec),
   downConfigs: t.array(OverviewStatusMetaDataCodec),
   enabledIds: t.array(t.string),
+  summary: t.unknown,
 });
 
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusType>;
