@@ -6,8 +6,6 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/dom';
-import { useToasts } from '../common/lib/kibana';
 import type { UseDeleteComment } from './use_delete_comment';
 import { useDeleteComment } from './use_delete_comment';
 import * as api from './api';
@@ -21,11 +19,6 @@ jest.mock('../components/case_view/use_on_refresh_case_view_page');
 const commentId = 'ab124';
 
 describe('useDeleteComment', () => {
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
-
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
-
   it('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseDeleteComment>(() =>
@@ -80,7 +73,6 @@ describe('useDeleteComment', () => {
 
   it('sets isError when fails to delete a case', async () => {
     const spyOnDeleteComment = jest.spyOn(api, 'deleteComment');
-
     spyOnDeleteComment.mockRejectedValue(new Error('Not possible :O'));
 
     await act(async () => {
@@ -94,18 +86,13 @@ describe('useDeleteComment', () => {
         commentId,
       });
       await waitForNextUpdate();
+      expect(spyOnDeleteComment).toBeCalledWith({
+        caseId: basicCaseId,
+        commentId,
+        signal: expect.any(AbortSignal),
+      });
 
-      await waitFor(() => {
-        expect(spyOnDeleteComment).toBeCalledWith({
-          caseId: basicCaseId,
-          commentId,
-          signal: expect.any(AbortSignal),
-        });
-  
-        expect(result.current.isError).toBe(true);
-
-        expect(addError).toHaveBeenCalled();
-      })
+      expect(result.current.isError).toBe(true);
     });
   });
 });
