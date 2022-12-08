@@ -1,9 +1,5 @@
-1,5c1,12
+1c1,6
 < var Exception = Handlebars.Exception;
-< 
-< describe('strict', function() {
-<   describe('strict mode', function() {
-<     it('should error on missing property lookup', function() {
 ---
 > /*
 >  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
@@ -11,7 +7,11 @@
 >  * Elasticsearch B.V. licenses this file to you under the MIT License.
 >  * See `packages/kbn-handlebars/LICENSE` for more information.
 >  */
-> 
+3,5c8,12
+< describe('strict', function() {
+<   describe('strict mode', function() {
+<     it('should error on missing property lookup', function() {
+---
 > import { expectTemplate } from '../__jest__/test_bench';
 > 
 > describe('strict', () => {
