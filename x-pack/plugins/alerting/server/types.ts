@@ -45,6 +45,7 @@ import {
   RuleSnooze,
   IntervalSchedule,
   RuleLastRun,
+  RuleLastRunOutcomes,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -320,6 +321,25 @@ export interface PublicRuleMonitoringService {
   setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
   setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
 }
+
+export type AlertsCount = RuleLastRun['alertsCount'];
+export interface PublicLastRunSetters {
+  setLastRunOutcome: (outcome: RuleLastRunOutcomes) => void;
+  setLastRunOutcomeMsg: (outcomeMsg: string) => void;
+  setLastRunWarning: (warning: RuleLastRun['warning']) => void;
+  setLastRunAlertsCountActive: (active: AlertsCount['active']) => void;
+  setLastRunAlertsCountNew: (newAlerts: AlertsCount['new']) => void;
+  setLastRunAlertsCountRecovered: (recovered: AlertsCount['recovered']) => void;
+  setLastRunAlertsCountIgnored: (error: AlertsCount['ignored']) => void;
+  setShouldOverrideFrameworkLastRun: (shouldOverride: boolean) => void;
+}
+
+export interface PublicLastRunGetters {
+  getLastRun: () => RuleLastRun;
+  getShouldOverrideFrameworkLastRun: () => boolean;
+}
+
+export type PublicRuleLastRunService = PublicLastRunSetters & PublicLastRunGetters;
 
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
 export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}
