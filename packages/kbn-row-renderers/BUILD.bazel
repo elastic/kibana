@@ -49,7 +49,8 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//react",
   "@npm//io-ts",
-  "//packages/kbn-logging"
+  "//packages/kbn-logging",
+  "//packages/kbn-logging-mocks"
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -64,7 +65,10 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react"
+  "@npm//@types/react",
+  "@npm//io-ts",
+  "//packages/kbn-logging:npm_module_types",
+  "//packages/kbn-logging-mocks:npm_module_types"
 ]
 
 jsts_transpiler(
