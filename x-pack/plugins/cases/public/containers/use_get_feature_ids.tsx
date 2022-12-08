@@ -8,15 +8,15 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { ServerError } from '../types';
-import { useToasts } from '../common/lib/kibana';
+import { useCasesToast } from '../common/use_cases_toast';
 import * as i18n from './translations';
 import { getFeatureIds } from './api';
 import { casesQueriesKeys } from './constants';
 
 export const useGetFeatureIds = (alertRegistrationContexts: string[]) => {
-  const toasts = useToasts();
+  const { showErrorToast } = useCasesToast();
   return useQuery<ValidFeatureId[], ServerError>(
-    casesQueriesKeys.featureIds(alertRegistrationContexts),
+    casesQueriesKeys.alertFeatureIds(alertRegistrationContexts),
     () => {
       const abortCtrlRef = new AbortController();
       const query = { registrationContext: alertRegistrationContexts };
@@ -25,12 +25,7 @@ export const useGetFeatureIds = (alertRegistrationContexts: string[]) => {
     {
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            {
-              title: i18n.ERROR_TITLE,
-            }
-          );
+          showErrorToast(error, { title: i18n.ERROR_TITLE });
         }
       },
     }

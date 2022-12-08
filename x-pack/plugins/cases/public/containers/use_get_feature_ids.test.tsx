@@ -6,31 +6,33 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { waitFor } from '@testing-library/dom';
 import { useToasts } from '../common/lib/kibana';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
 import { useGetFeatureIds } from './use_get_feature_ids';
 import * as api from './api';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-const wrapper: React.FC<string> = ({ children }) => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-};
-
 describe('useGetFeaturesIds', () => {
+  const addSuccess = jest.fn();
+  const addError = jest.fn();
+
+  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+
+  let appMockRender: AppMockRenderer;
+
+  beforeEach(() => {
+    appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
+  });
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getFeatureIds');
-    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), { wrapper });
+    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), {
+      wrapper: appMockRender.AppWrapper,
+    });
     await waitForNextUpdate();
     expect(spy).toHaveBeenCalledWith(
       { registrationContext: ['context1'] },
@@ -39,12 +41,13 @@ describe('useGetFeaturesIds', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
     const spy = jest
       .spyOn(api, 'getFeatureIds')
       .mockRejectedValue(new Error('Something went wrong'));
-    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), { wrapper });
+    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), {
+      wrapper: appMockRender.AppWrapper,
+    });
     await waitForNextUpdate();
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith(
