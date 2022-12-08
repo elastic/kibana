@@ -1026,11 +1026,15 @@ export const RulesList = ({
     if (initialLoad) {
       return;
     }
+    if (showPrompt && !authorizedToCreateAnyRules) {
+      setHeaderActions?.([<RulesListDocLink />]);
+      return;
+    }
     if (!showPrompt && authorizedToCreateAnyRules) {
       setHeaderActions?.([<CreateRuleButton openFlyout={openFlyout} />, <RulesListDocLink />]);
-    } else {
-      setHeaderActions?.();
+      return;
     }
+    setHeaderActions?.();
   }, [initialLoad, showPrompt, authorizedToCreateAnyRules]);
 
   useEffect(() => {
