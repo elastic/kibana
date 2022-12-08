@@ -59,7 +59,7 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
     },
     async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
-      const ctx = await context.resolve(['core', 'alerting']);
+      const ctx = await context.resolve(['alerting']);
       const rulesClient = ctx.alerting.getRulesClient();
 
       try {
