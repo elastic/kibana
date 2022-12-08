@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/shared-ux-avatar-user-profile-components",
-  "owner": "@elastic/kibana-global-experience",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/kibana-global-experience"
 }

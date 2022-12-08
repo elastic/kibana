@@ -28,8 +28,6 @@ const resolver = new ImportResolver(
         id: '@pkg/box',
         type: 'shared-common',
         owner: [],
-        typeDeps: [],
-        runtimeDeps: [],
       },
     ],
   ])

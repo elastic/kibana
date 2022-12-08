@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/shared-ux-page-kibana-no-data",
-  "owner": "@elastic/kibana-global-experience",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/kibana-global-experience"
 }

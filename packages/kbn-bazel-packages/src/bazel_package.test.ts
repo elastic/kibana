@@ -21,8 +21,6 @@ const manifest: KibanaPackageManifest = {
   type: 'shared-common',
   id: '@kbn/foo',
   owner: ['@elastic/kibana-operations'],
-  runtimeDeps: [],
-  typeDeps: [],
 };
 
 describe('hasBuildTypesRule()', () => {

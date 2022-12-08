@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/io-ts-utils",
-  "owner": "@elastic/apm-ui",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/apm-ui"
 }

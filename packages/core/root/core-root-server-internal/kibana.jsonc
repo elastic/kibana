@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/core-root-server-internal",
-  "owner": "@elastic/kibana-core",
-  "runtimeDeps": [],
-  "typeDeps": [],
+  "owner": "@elastic/kibana-core"
 }
