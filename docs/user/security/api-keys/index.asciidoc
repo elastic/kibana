@@ -57,7 +57,7 @@ API keys are intended for programmatic access to {kib} and {es}. Do not use API 
 
 To update an API key, open the main menu, click *Stack Management > API Keys*, and then click on the name of the key.
 
-Only the `Restrict privileges` and `metadata` fields can be updated.
+You can only update the `Restrict privileges` and `metadata` fields.
 
 [float]
 [[view-api-keys]]
