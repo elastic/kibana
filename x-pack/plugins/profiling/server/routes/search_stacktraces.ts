@@ -8,7 +8,6 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { Logger } from '@kbn/logging';
 import { withProfilingSpan } from '../utils/with_profiling_span';
-import { DedotObject } from '../../common/elasticsearch';
 import {
   Executable,
   FileID,
@@ -23,24 +22,24 @@ interface ProfilingEvents {
   [key: string]: number;
 }
 
-type ProfilingStackTrace = DedotObject<{
+interface ProfilingStackTrace {
   ['file_ids']: string[];
   ['frame_ids']: string[];
   ['address_or_lines']: number[];
   ['type_ids']: number[];
-}>;
+}
 
 interface ProfilingStackTraces {
   [key: string]: ProfilingStackTrace;
 }
 
-type ProfilingStackFrame = DedotObject<{
+interface ProfilingStackFrame {
   ['file_name']: string | undefined;
   ['function_name']: string;
   ['function_offset']: number | undefined;
   ['line_number']: number | undefined;
   ['source_type']: number | undefined;
-}>;
+}
 
 interface ProfilingStackFrames {
   [key: string]: ProfilingStackFrame;
@@ -50,13 +49,56 @@ interface ProfilingExecutables {
   [key: string]: string;
 }
 
-type StackTraceResponse = DedotObject<{
-  ['stack_trace_events']: ProfilingEvents;
-  ['stack_traces']: ProfilingStackTraces;
-  ['stack_frames']: ProfilingStackFrames;
-  ['executables']: ProfilingExecutables;
+export interface StackTraceResponse {
+  ['stack_trace_events']?: ProfilingEvents;
+  ['stack_traces']?: ProfilingStackTraces;
+  ['stack_frames']?: ProfilingStackFrames;
+  ['executables']?: ProfilingExecutables;
   ['total_frames']: number;
-}>;
+}
+
+export function decodeStackTraceResponse(response: StackTraceResponse) {
+  const stackTraceEvents: Map<StackTraceID, number> = new Map();
+  for (const [key, value] of Object.entries(response.stack_trace_events ?? {})) {
+    stackTraceEvents.set(key, value);
+  }
+
+  const stackTraces: Map<StackTraceID, StackTrace> = new Map();
+  for (const [key, value] of Object.entries(response.stack_traces ?? {})) {
+    stackTraces.set(key, {
+      FrameIDs: value.frame_ids,
+      FileIDs: value.file_ids,
+      AddressOrLines: value.address_or_lines,
+      Types: value.type_ids,
+    } as StackTrace);
+  }
+
+  const stackFrames: Map<StackFrameID, StackFrame> = new Map();
+  for (const [key, value] of Object.entries(response.stack_frames ?? {})) {
+    stackFrames.set(key, {
+      FileName: value.file_name,
+      FunctionName: value.function_name,
+      FunctionOffset: value.function_offset,
+      LineNumber: value.line_number,
+      SourceType: value.source_type,
+    } as StackFrame);
+  }
+
+  const executables: Map<FileID, Executable> = new Map();
+  for (const [key, value] of Object.entries(response.executables ?? {})) {
+    executables.set(key, {
+      FileName: value,
+    } as Executable);
+  }
+
+  return {
+    stackTraceEvents,
+    stackTraces,
+    stackFrames,
+    executables,
+    totalFrames: response.total_frames,
+  };
+}
 
 export async function searchStackTraces({
   logger,
@@ -79,44 +121,6 @@ export async function searchStackTraces({
       },
     });
 
-    const stackTraceEvents: Map<StackTraceID, number> = new Map(
-      Object.entries(response.stack_trace_events)
-    );
-
-    const stackTraces: Map<StackTraceID, StackTrace> = new Map();
-    for (const [key, value] of Object.entries(response.stack_traces)) {
-      stackTraces.set(key, {
-        FrameIDs: value.frame_ids,
-        FileIDs: value.file_ids,
-        AddressOrLines: value.address_or_lines,
-        Types: value.type_ids,
-      } as StackTrace);
-    }
-
-    const stackFrames: Map<StackFrameID, StackFrame> = new Map();
-    for (const [key, value] of Object.entries(response.stack_frames)) {
-      stackFrames.set(key, {
-        FileName: value.file_name,
-        FunctionName: value.function_name,
-        FunctionOffset: value.function_offset,
-        LineNumber: value.line_number,
-        SourceType: value.source_type,
-      } as StackFrame);
-    }
-
-    const executables: Map<FileID, Executable> = new Map();
-    for (const [key, value] of Object.entries(response.executables)) {
-      executables.set(key, {
-        FileName: value,
-      } as Executable);
-    }
-
-    return {
-      stackTraceEvents,
-      stackTraces,
-      stackFrames,
-      executables,
-      totalFrames: response.total_frames,
-    };
+    return decodeStackTraceResponse(response);
   });
 }
