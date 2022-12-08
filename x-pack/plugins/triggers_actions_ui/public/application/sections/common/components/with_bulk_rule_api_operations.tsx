@@ -32,8 +32,6 @@ import {
   enableRules,
   muteRules,
   unmuteRules,
-  disableRule,
-  enableRule,
   muteRule,
   unmuteRule,
   muteAlertInstance,
@@ -70,8 +68,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 export interface ComponentOpts {
   muteRules: (rules: Rule[]) => Promise<void>;
   unmuteRules: (rules: Rule[]) => Promise<void>;
-  enableRules: (rules: Rule[]) => Promise<void>;
-  disableRules: (rules: Rule[]) => Promise<void>;
   deleteRules: (rules: Rule[]) => Promise<{
     successes: string[];
     errors: string[];
@@ -80,8 +76,6 @@ export interface ComponentOpts {
   unmuteRule: (rule: Rule) => Promise<void>;
   muteAlertInstance: (rule: Rule, alertInstanceId: string) => Promise<void>;
   unmuteAlertInstance: (rule: Rule, alertInstanceId: string) => Promise<void>;
-  enableRule: (rule: Rule) => Promise<void>;
-  disableRule: (rule: Rule) => Promise<void>;
   deleteRule: (rule: Rule) => Promise<{
     successes: string[];
     errors: string[];
@@ -173,16 +167,6 @@ export function withBulkRuleOperations<T>(
         unmuteAlertInstance={async (rule: Rule, instanceId: string) => {
           if (isAlertInstanceMuted(rule, instanceId)) {
             return unmuteAlertInstance({ http, id: rule.id, instanceId });
-          }
-        }}
-        enableRule={async (rule: Rule) => {
-          if (isRuleDisabled(rule)) {
-            return await enableRule({ http, id: rule.id });
-          }
-        }}
-        disableRule={async (rule: Rule) => {
-          if (!isRuleDisabled(rule)) {
-            return await disableRule({ http, id: rule.id });
           }
         }}
         deleteRule={async (rule: Rule) => deleteRules({ http, ids: [rule.id] })}
