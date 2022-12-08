@@ -69,6 +69,7 @@ TYPES_DEPS = [
   "//packages/kbn-ftr-screenshot-filename:npm_module_types",
   "//packages/kbn-test:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-ambient-ftr-types:npm_module_types",
 ]
 
 jsts_transpiler(
