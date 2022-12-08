@@ -47,13 +47,64 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetPackagePoliciesRequestSchema.query>
 > = async (context, request, response) => {
-  const { client: soClient } = await (await context.fleet).getSoClient();
+  const { client: soClient, limitedToPackages } = await (await context.fleet).getSoClient();
 
   try {
     const { items, total, page, perPage } = await packagePolicyService.list(
       soClient,
       request.query
     );
+
+    // specific to package-level RBAC
+    if (limitedToPackages && limitedToPackages.length) {
+      // { packageName: boolean } record of allowed package names
+      // include policy with no package name
+      const packagePolicyNames = items.reduce<Record<string, boolean>>((acc, item) => {
+        const pkgName = item?.package?.name ?? 'empty-name';
+        if (pkgName) {
+          acc[pkgName] = limitedToPackages.includes(pkgName);
+        }
+        return acc;
+      }, {});
+
+      if (Object.values(packagePolicyNames).every((value) => !value)) {
+        // when there are not any allowed policies
+        return response.forbidden({
+          body: {
+            message: `Data for package names ${items
+              .map((item) => item.package?.name)
+              .join(', ')} is not authorized.`,
+          },
+        });
+      }
+
+      // list allowed package policy items or policies with no package name
+      return response.ok({
+        body: {
+          items: items.filter((item) => {
+            const pkgName = item?.package?.name;
+            // include policies with allowed package names
+            const allowedPackages = Object.entries(packagePolicyNames).reduce<string[]>(
+              (acc, curr) => {
+                if (curr[1]) acc.push(curr[0]);
+                return acc;
+              },
+              []
+            );
+            if (pkgName) {
+              return allowedPackages.includes(pkgName);
+            }
+            // or policies with no package name
+            return item;
+          }),
+          total,
+          page,
+          perPage,
+        },
+      });
+    }
+
+    // agnostic to package-level RBAC
     return response.ok({
       body: {
         items,
@@ -98,14 +149,24 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
 export const getOnePackagePolicyHandler: FleetRequestHandler<
   TypeOf<typeof GetOnePackagePolicyRequestSchema.params>
 > = async (context, request, response) => {
-  const { client: soClient } = await (await context.fleet).getSoClient();
+  const { client: soClient, limitedToPackages } = await (await context.fleet).getSoClient();
   const { packagePolicyId } = request.params;
   const notFoundResponse = () =>
     response.notFound({ body: { message: `Package policy ${packagePolicyId} not found` } });
 
   try {
     const packagePolicy = await packagePolicyService.get(soClient, packagePolicyId);
+
     if (packagePolicy) {
+      if (limitedToPackages && limitedToPackages.length) {
+        const packageName = packagePolicy?.package?.name;
+        if (packageName && !limitedToPackages.includes(packageName)) {
+          return response.forbidden({
+            body: { message: `Data for package name ${packageName} is not authorized.` },
+          });
+        }
+      }
+
       return response.ok({
         body: {
           item: packagePolicy,
@@ -265,13 +326,22 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  const { client: soClient } = await (await context.fleet).getSoClient();
+  const { client: soClient, limitedToPackages } = await (await context.fleet).getSoClient();
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
   if (!packagePolicy) {
     throw Boom.notFound('Package policy not found');
+  }
+
+  if (limitedToPackages && limitedToPackages.length) {
+    const packageName = packagePolicy?.package?.name;
+    if (packageName && !limitedToPackages.includes(packageName)) {
+      return response.forbidden({
+        body: { message: `Data for package name ${packageName} is not authorized.` },
+      });
+    }
   }
 
   try {

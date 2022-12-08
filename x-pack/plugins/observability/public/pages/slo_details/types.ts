@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export default function loadTests({ loadTestFile }) {
-  describe('Preconfiguration Endpoints', () => {
-    loadTestFile(require.resolve('./preconfiguration'));
-  });
+export interface SloDetailsPathParams {
+  sloId: string;
 }

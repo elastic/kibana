@@ -53,7 +53,7 @@ export type FleetRequestHandlerContext = CustomRequestHandlerContext<{
       client: SavedObjectsClientContract;
       /**
        * If data is to be limited to the list of integration package names. This will be set when
-       * authz to the API was granted only bassed on Package Privileges.
+       * authz to the API was granted only based on Package Privileges.
        */
       limitedToPackages: undefined | string[];
     }>;

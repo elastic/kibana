@@ -131,33 +131,24 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
 /**
  * Retrieves the required fleet route authz
  * in order to grant access to the given api route
- * replaces the actual policy id with the route path pattern placeholder
  * @param routeMethod
  * @param routePath
- * @param policyIds
  */
 export const getRouteRequiredAuthz = (
   routeMethod: RouteMethod,
   routePath: string
-): FleetRouteRequiredAuthz => {
+): FleetRouteRequiredAuthz | undefined => {
   const key = `${routeMethod}:${routePath}`;
 
   if (typeof ROUTE_AUTHZ_REQUIREMENTS[key] !== 'undefined') {
     return ROUTE_AUTHZ_REQUIREMENTS[key];
   }
 
-  const matchingRouteKeys = Object.keys(ROUTE_AUTHZ_REQUIREMENTS).reduce<string[]>(
-    (acc, routeKey) => {
-      const doesMatchRouteKey = pathMatchesPattern(routeKey, key);
-      if (doesMatchRouteKey) {
-        acc.push(routeKey);
-      }
-      return acc;
-    },
-    []
-  );
-
-  return ROUTE_AUTHZ_REQUIREMENTS[matchingRouteKeys[0]];
+  for (const k of Object.keys(ROUTE_AUTHZ_REQUIREMENTS)) {
+    if (pathMatchesPattern(k, key)) {
+      return ROUTE_AUTHZ_REQUIREMENTS[k];
+    }
+  }
 };
 
 const pathMatchesPattern = (pathPattern: string, path: string): boolean => {
