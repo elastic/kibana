@@ -17,7 +17,7 @@ import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo
 import { SLO, APMTransactionDurationIndicator } from '../../../domain/models';
 import { TransformGenerator } from '.';
 
-const APM_SOURCE_INDEX = 'metrics-apm*';
+const DEFAULT_APM_INDEX = 'metrics-apm*';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
@@ -74,7 +74,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     }
 
     return {
-      index: APM_SOURCE_INDEX,
+      index: DEFAULT_APM_INDEX,
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {
