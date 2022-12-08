@@ -1753,7 +1753,6 @@ export default function ({ getService }: FtrProviderContext) {
             {
               enabled: true,
               data_stream: { type: 'synthetics', dataset: 'http' },
-              release: 'experimental',
               vars: {
                 __ui: { value: '{"is_tls_enabled":false}', type: 'yaml' },
                 enabled: { value: false, type: 'bool' },

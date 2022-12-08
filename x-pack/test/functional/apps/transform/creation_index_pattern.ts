@@ -16,10 +16,11 @@ import {
   PivotTransformTestData,
 } from '.';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
+  const PageObjects = getPageObjects(['discover']);
 
   describe('creation_index_pattern', function () {
     before(async () => {
@@ -698,6 +699,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('should navigate to discover');
           await transform.table.clickTransformRowAction(testData.transformId, 'Discover');
+          await PageObjects.discover.waitUntilSearchingHasFinished();
 
           if (testData.discoverAdjustSuperDatePicker) {
             await transform.discover.assertNoResults(testData.destinationIndex);
