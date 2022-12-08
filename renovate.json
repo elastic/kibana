@@ -164,7 +164,6 @@
         "@jest/console",
         "@jest/reporters",
         "@jest/types",
-        "@types/jest",
         "babel-jest",
         "expect",
         "jest",
