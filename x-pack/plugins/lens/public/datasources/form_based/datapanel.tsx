@@ -8,19 +8,7 @@
 import './datapanel.scss';
 import { uniq } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiCallOut,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFilterButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormControlLayout,
-  EuiIcon,
-  EuiPopover,
-  EuiProgress,
-  htmlIdGenerator,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiProgress, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
@@ -37,6 +25,8 @@ import {
   useExistingFieldsFetcher,
   useGroupedFields,
   useExistingFieldsReader,
+  FieldListFilters,
+  type FieldTypeForFilter,
 } from '@kbn/unified-field-list-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
@@ -48,7 +38,6 @@ import type {
 } from '../../types';
 import { ChildDragDropProvider, DragContextState } from '../../drag_drop';
 import type { FormBasedPrivateState } from './types';
-import { LensFieldIcon } from '../../shared_components/field_picker/lens_field_icon';
 import { getFieldType } from './pure_utils';
 import { fieldContainsData } from '../../shared_components';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
@@ -202,11 +191,7 @@ export function FormBasedDataPanel({
 
 interface DataPanelState {
   nameFilter: string;
-  typeFilter: DataType[];
-  isTypeFilterOpen: boolean;
-  isAvailableAccordionOpen: boolean;
-  isEmptyAccordionOpen: boolean;
-  isMetaAccordionOpen: boolean;
+  typeFilter: FieldTypeForFilter[];
 }
 
 const htmlId = htmlIdGenerator('datapanel');
@@ -253,10 +238,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
     typeFilter: [],
-    isTypeFilterOpen: false,
-    isAvailableAccordionOpen: true,
-    isEmptyAccordionOpen: false,
-    isMetaAccordionOpen: false,
   });
   const { indexPatterns } = frame.dataViews;
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
@@ -290,9 +271,10 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         );
   }, [currentIndexPattern, visualizeGeoFieldTrigger]);
 
-  const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
-  const availableFieldTypes = uniq([
-    ...uniq(allFields.map(getFieldType)).filter((type) => type in fieldTypeNames),
+  const availableFieldTypes: FieldTypeForFilter[] = uniq([
+    ...(uniq(allFields.map(getFieldType)).filter(
+      (type) => type in fieldTypeNames
+    ) as FieldTypeForFilter[]),
     // always include current field type filters - there may not be any fields of the type of an existing type filter on data view switch, but we still need to include the existing filter in the list so that the user can remove it
     ...localState.typeFilter,
   ]);
@@ -513,98 +495,21 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       >
         {isProcessing && <EuiProgress size="xs" color="accent" position="absolute" />}
         <EuiFlexItem grow={false}>
-          <EuiFormControlLayout
-            icon="search"
-            fullWidth
-            clear={{
-              title: i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
-                defaultMessage: 'Clear name and type filters',
-              }),
-              'aria-label': i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
-                defaultMessage: 'Clear name and type filters',
-              }),
-              onClick: () => {
-                clearLocalState();
-              },
-            }}
-            append={
-              <EuiPopover
-                id="dataPanelTypeFilter"
-                panelClassName="euiFilterGroup__popoverPanel"
-                panelPaddingSize="none"
-                anchorPosition="rightUp"
-                display="block"
-                isOpen={localState.isTypeFilterOpen}
-                closePopover={() =>
-                  setLocalState(() => ({ ...localState, isTypeFilterOpen: false }))
-                }
-                button={
-                  <EuiFilterButton
-                    aria-label={i18n.translate('xpack.lens.indexPatterns.filterByTypeAriaLabel', {
-                      defaultMessage: 'Filter by type',
-                    })}
-                    color="primary"
-                    isSelected={localState.isTypeFilterOpen}
-                    numFilters={localState.typeFilter.length}
-                    hasActiveFilters={!!localState.typeFilter.length}
-                    numActiveFilters={localState.typeFilter.length}
-                    data-test-subj="lnsIndexPatternFiltersToggle"
-                    className="lnsFilterButton"
-                    onClick={() => {
-                      setLocalState((s) => ({
-                        ...s,
-                        isTypeFilterOpen: !localState.isTypeFilterOpen,
-                      }));
-                    }}
-                  >
-                    <EuiIcon type="filter" />
-                  </EuiFilterButton>
-                }
-              >
-                <EuiContextMenuPanel
-                  data-test-subj="lnsIndexPatternTypeFilterOptions"
-                  items={(availableFieldTypes as DataType[]).map((type) => (
-                    <EuiContextMenuItem
-                      className="lnsInnerIndexPatternDataPanel__filterType"
-                      key={type}
-                      icon={localState.typeFilter.includes(type) ? 'check' : 'empty'}
-                      data-test-subj={`typeFilter-${type}`}
-                      onClick={() => {
-                        setLocalState((s) => ({
-                          ...s,
-                          typeFilter: localState.typeFilter.includes(type)
-                            ? localState.typeFilter.filter((t) => t !== type)
-                            : [...localState.typeFilter, type],
-                        }));
-                      }}
-                    >
-                      <span className="lnsInnerIndexPatternDataPanel__filterTypeInner">
-                        <LensFieldIcon type={type} /> {fieldTypeNames[type]}
-                      </span>
-                    </EuiContextMenuItem>
-                  ))}
-                />
-              </EuiPopover>
+          <FieldListFilters
+            selectedFieldTypes={localState.typeFilter}
+            availableFieldTypes={availableFieldTypes}
+            onChangeFieldTypes={(newValue) =>
+              setLocalState((s) => ({
+                ...s,
+                typeFilter: newValue,
+              }))
             }
-          >
-            <input
-              className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
-              data-test-subj="lnsIndexPatternFieldSearch"
-              placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
-                defaultMessage: 'Search field names',
-                description: 'Search the list of fields in the data view for the provided text',
-              })}
-              value={localState.nameFilter}
-              onChange={(e) => {
-                setLocalState({ ...localState, nameFilter: e.target.value });
-              }}
-              aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
-                defaultMessage: 'Search field names',
-                description: 'Search the list of fields in the data view for the provided text',
-              })}
-              aria-describedby={fieldSearchDescriptionId}
-            />
-          </EuiFormControlLayout>
+            nameFilter={localState.nameFilter}
+            fieldSearchDescriptionId={fieldSearchDescriptionId}
+            onChangeNameFilter={(newValue) =>
+              setLocalState((s) => ({ ...s, nameFilter: newValue }))
+            }
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <FieldListGrouped<IndexPatternField>

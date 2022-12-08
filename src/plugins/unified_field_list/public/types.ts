@@ -62,3 +62,18 @@ export interface FieldsGroup<T extends FieldListItem> extends FieldsGroupDetails
 export type FieldListGroups<T extends FieldListItem> = {
   [key in FieldsGroupNames]?: FieldsGroup<T>;
 };
+
+export type FieldTypeForFilter =
+  | 'string'
+  | 'number'
+  | 'date'
+  | 'boolean'
+  | 'document'
+  | 'ip'
+  | 'histogram'
+  | 'geo_point'
+  | 'geo_shape'
+  | 'counter'
+  | 'gauge'
+  | 'summary'
+  | 'murmur3';

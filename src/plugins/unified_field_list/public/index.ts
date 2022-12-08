@@ -14,6 +14,7 @@ export type {
   TopValuesResult,
 } from '../common/types';
 export { FieldListGrouped, type FieldListGroupedProps } from './components/field_list';
+export { FieldListFilters, type FieldListFiltersProps } from './components/field_list_filters';
 export type {
   FieldTopValuesBucketProps,
   FieldTopValuesBucketParams,
@@ -55,6 +56,7 @@ export type {
   AddFieldFilterHandler,
   FieldListGroups,
   FieldsGroupDetails,
+  FieldTypeForFilter,
 } from './types';
 export { ExistenceFetchStatus, FieldsGroupNames } from './types';
 
