@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { defineConfig } from 'cypress';
+import { defineCypressConfig } from '@kbn/cypress-config';
 
-// eslint-disable-next-line import/no-default-export
-export default defineConfig({
+export default defineCypressConfig({
   defaultCommandTimeout: 120000,
   e2e: {
     baseUrl: 'http://localhost:5601',
-    // eslint-disable-next-line no-unused-vars
-    setupNodeEvents(on, config) {},
     supportFile: './cypress/support/commands.ts',
   },
   env: {
