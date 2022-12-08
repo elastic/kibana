@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { AlertViewSelection } from './helpers';
 import {
-  AlertViewSelection,
   getButtonProperties,
   getContextMenuPanels,
   TABLE_ID,

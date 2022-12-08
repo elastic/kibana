@@ -6,8 +6,13 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+<<<<<<< HEAD:x-pack/plugins/security_solution/public/detections/components/alerts_kpis/alerts_summary_charts_panel/severity_donut/use_severity_chart_data.test.tsx
 import { TestProviders } from '../../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
+=======
+import { TestProviders } from '../../../../common/mock';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
+>>>>>>> 4f0745e5da5b22122d18b2b9dce99737ad2e8f18:x-pack/plugins/security_solution/public/detections/components/alerts_kpis/alerts_summary_charts_panel/use_severity_chart_data.test.tsx
 import { mockAlertsData, alertsBySeverityQuery, parsedAlerts, from, to } from './mock_data';
 import type { UseAlertsBySeverity, UseSeverityChartProps } from './use_severity_chart_data';
 import { useSeverityChartData } from './use_severity_chart_data';
@@ -25,7 +30,11 @@ const defaultUseQueryAlertsReturn = {
   refetch: () => {},
 };
 const mockUseQueryAlerts = jest.fn().mockReturnValue(defaultUseQueryAlertsReturn);
+<<<<<<< HEAD:x-pack/plugins/security_solution/public/detections/components/alerts_kpis/alerts_summary_charts_panel/severity_donut/use_severity_chart_data.test.tsx
 jest.mock('../../../../containers/detection_engine/alerts/use_query', () => {
+=======
+jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
+>>>>>>> 4f0745e5da5b22122d18b2b9dce99737ad2e8f18:x-pack/plugins/security_solution/public/detections/components/alerts_kpis/alerts_summary_charts_panel/use_severity_chart_data.test.tsx
   return {
     useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
   };

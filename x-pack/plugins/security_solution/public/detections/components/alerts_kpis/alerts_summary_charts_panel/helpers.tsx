@@ -11,9 +11,15 @@ import { severityLabels } from '../../../../overview/components/detection_respon
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
 
+<<<<<<< HEAD
 export const parseSeverityAlerts = (
   response: AlertsResponse<{}, AlertsBySeverityAgg>
 ): ParsedSeverityData => {
+=======
+export const parseAlertsData = (
+  response: AlertsBySeverityResponse<{}, AlertsBySeverityAgg>
+): ParsedAlertsData => {
+>>>>>>> 4f0745e5da5b22122d18b2b9dce99737ad2e8f18
   const severityBuckets = response?.aggregations?.statusBySeverity?.buckets ?? [];
   if (severityBuckets.length === 0) {
     return null;
