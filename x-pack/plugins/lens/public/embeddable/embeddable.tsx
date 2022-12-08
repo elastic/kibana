@@ -238,9 +238,7 @@ function getViewUnderlyingDataArgs({
     esQueryConfig
   );
 
-  const dataViewSpec = Object.values(indexPatternsCache).find(
-    (value) => value.id === meta.id
-  )!.spec;
+  const dataViewSpec = indexPatternsCache[meta.id]!.spec;
 
   return {
     dataViewSpec,
