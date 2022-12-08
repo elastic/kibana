@@ -1058,4 +1058,26 @@ export const FIELD: Record<string, FieldMeta> = {
       },
     }),
   },
+  [ConfigKey.IGNORE_HTTPS_ERRORS]: {
+    fieldKey: ConfigKey.IGNORE_HTTPS_ERRORS,
+    component: EuiSwitch,
+    controlled: true,
+    helpText: (
+      <span>
+        {i18n.translate('xpack.synthetics.monitorConfig.ignoreHttpsErrors.helpText', {
+          defaultMessage:
+            'Turns off TLS/SSL validation in the synthetics browser. This is useful for testing sites that use self-signed certificates.',
+        })}
+      </span>
+    ),
+    props: ({ setValue }) => ({
+      id: 'syntheticsMontiorConfigIgnoreHttpsErrors',
+      label: i18n.translate('xpack.synthetics.monitorConfig.ignoreHttpsErrors.label', {
+        defaultMessage: 'Ignore HTTPS errors',
+      }),
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(ConfigKey.IGNORE_HTTPS_ERRORS, !!event.target.checked);
+      },
+    }),
+  },
 };
