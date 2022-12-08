@@ -28,8 +28,6 @@ import {
 } from '../../../../types';
 import {
   deleteRules,
-  disableRules,
-  enableRules,
   muteRules,
   unmuteRules,
   muteRule,
@@ -136,15 +134,6 @@ export function withBulkRuleOperations<T>(
         }
         unmuteRules={async (items: Rule[]) =>
           unmuteRules({ http, ids: items.filter(isRuleMuted).map((item) => item.id) })
-        }
-        enableRules={async (items: Rule[]) =>
-          enableRules({ http, ids: items.filter(isRuleDisabled).map((item) => item.id) })
-        }
-        disableRules={async (items: Rule[]) =>
-          disableRules({
-            http,
-            ids: items.filter((item) => !isRuleDisabled(item)).map((item) => item.id),
-          })
         }
         deleteRules={async (items: Rule[]) =>
           deleteRules({ http, ids: items.map((item) => item.id) })
