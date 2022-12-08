@@ -203,7 +203,7 @@ export class Plugin implements InfraClientPluginClass {
         path: '/explorer',
       },
       {
-        id: 'kubernetes-observability',
+        id: 'kubernetesObservability',
         title: i18n.translate('xpack.infra.homePage.kubernetesObservabilityTabTitle', {
           defaultMessage: 'kubernetes Observability',
         }),

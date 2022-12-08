@@ -1,0 +1,7 @@
+{
+  "prefix": "kubernetesObservability",
+  "paths": {
+    "kubernetesObservability": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}

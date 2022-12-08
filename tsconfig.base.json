@@ -1122,6 +1122,8 @@
       "@kbn/infra-plugin/*": ["x-pack/plugins/infra/*"],
       "@kbn/ingest-pipelines-plugin": ["x-pack/plugins/ingest_pipelines"],
       "@kbn/ingest-pipelines-plugin/*": ["x-pack/plugins/ingest_pipelines/*"],
+      "@kbn/kubernetes-observability-plugin": ["x-pack/plugins/kubernetes_observability"],
+      "@kbn/kubernetes-observability-plugin/*": ["x-pack/plugins/kubernetes_observability/*"],
       "@kbn/kubernetes-security-plugin": ["x-pack/plugins/kubernetes_security"],
       "@kbn/kubernetes-security-plugin/*": ["x-pack/plugins/kubernetes_security/*"],
       "@kbn/lens-plugin": ["x-pack/plugins/lens"],

@@ -1,0 +1,14 @@
+{
+  "id": "kubernetesObservability",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Cloudnative Team",
+    "githubTeam": "obs-cloudnative-monitoring"
+  },
+  "description": "Monitor K8s Clusters",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}
