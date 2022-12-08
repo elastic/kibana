@@ -37,6 +37,7 @@ import {
   aggregationTypeTransform,
   EntityField,
   getEntityFieldList,
+  isMultiBucketAnomaly,
 } from '../../../common/util/anomaly_utils';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { isDefined } from '../../../common/types/guards';
@@ -1101,9 +1102,14 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
             }
           }
 
-          if (record.multi_bucket_impact !== undefined) {
-            chartPoint.multiBucketImpact = record.multi_bucket_impact;
+          if (
+            record.anomaly_score_explanation !== undefined &&
+            record.anomaly_score_explanation.multi_bucket_impact !== undefined
+          ) {
+            chartPoint.multiBucketImpact = record.anomaly_score_explanation.multi_bucket_impact;
           }
+
+          chartPoint.isMultiBucketAnomaly = isMultiBucketAnomaly(record);
         }
       });
 
