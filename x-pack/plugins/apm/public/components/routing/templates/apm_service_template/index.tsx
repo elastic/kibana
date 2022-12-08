@@ -13,6 +13,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
+
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
@@ -83,6 +85,7 @@ function TemplateWithContext({
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/*');
   const history = useHistory();
+  const location = useLocation();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -107,8 +110,7 @@ function TemplateWithContext({
 
   if (isMobileAgentName(agentName)) {
     replace(history, {
-      pathname: `/mobile-services/${serviceName}/${selectedTab}`,
-      search: fromQuery(query),
+      pathname: location.pathname.replace('services', 'mobile-services'),
     });
   }
 
