@@ -113,7 +113,6 @@ exports[`AddData render 1`] = `
           <EuiFlexItem>
             <EuiImage
               alt="Illustration for cloud data migration"
-              className="moveYourData__illustration"
               src="/plugins/kibanaReact/assets/illustration-cloud-migration.png"
             />
           </EuiFlexItem>

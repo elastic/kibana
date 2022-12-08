@@ -25,7 +25,6 @@ import {
 
 import { CoreStart, CoreTheme } from '@kbn/core/public';
 
-import { KibanaThemeProvider, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Observable } from 'rxjs';
 import { getAppStyles } from '../../app.styles';
 import { BreadcrumbService } from '../services/breadcrumbs';
@@ -55,105 +54,97 @@ export const CloudDataMigrationApp = ({
   }, [breadcrumbService]);
 
   return (
-    <KibanaThemeProvider theme$={theme$}>
-      <KibanaContextProvider
-        services={{
-          breadcrumbService,
-        }}
+    <EuiPanel css={styles.panelCss} color="subdued">
+      <EuiFlexGroup
+        direction="column"
+        alignItems="center"
+        gutterSize="xl"
+        justifyContent="spaceBetween"
+        css={styles.layoutCss}
       >
-        <EuiPanel css={styles.panelCss} color="subdued">
-          <EuiFlexGroup
-            direction="column"
-            alignItems="center"
-            gutterSize="xl"
-            justifyContent="spaceBetween"
-            css={styles.layoutCss}
-          >
-            <EuiFlexItem>
-              <EuiImage
-                alt={i18n.translate('xpack.cloudDataMigration.illustration.alt.text', {
-                  defaultMessage: 'Illustration for cloud data migration',
-                })}
-                css={styles.illustrationCss}
-                src={`${basePath}/plugins/kibanaReact/assets/` + 'illustration-cloud-migration.png'}
+        <EuiFlexItem>
+          <EuiImage
+            alt={i18n.translate('xpack.cloudDataMigration.illustration.alt.text', {
+              defaultMessage: 'Illustration for cloud data migration',
+            })}
+            css={styles.illustrationCss}
+            src={`${basePath}/plugins/kibanaReact/assets/` + 'illustration-cloud-migration.png'}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h1>
+              <FormattedMessage
+                id="xpack.cloudDataMigration.migrateToCloudTitle"
+                defaultMessage="Elastic Cloud helps your data work harder."
               />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h1>
+            </h1>
+          </EuiTitle>
+
+          <EuiSpacer size="xl" />
+
+          <EuiListGroup maxWidth={700}>
+            <EuiListGroupItem
+              {...listItemProps}
+              label={
+                <EuiText css={styles.listItemCss} size="s" color="subdued">
                   <FormattedMessage
-                    id="xpack.cloudDataMigration.migrateToCloudTitle"
-                    defaultMessage="Elastic Cloud helps your data work harder."
+                    id="xpack.cloudDataMigration.deployInSeconds.text"
+                    defaultMessage="Deploy Elastic quickly and scale up to petabytes of data with a click."
                   />
-                </h1>
-              </EuiTitle>
+                </EuiText>
+              }
+            />
 
-              <EuiSpacer size="xl" />
-
-              <EuiListGroup maxWidth={700}>
-                <EuiListGroupItem
-                  {...listItemProps}
-                  label={
-                    <EuiText css={styles.listItemCss} size="s" color="subdued">
-                      <FormattedMessage
-                        id="xpack.cloudDataMigration.deployInSeconds.text"
-                        defaultMessage="Deploy Elastic quickly and scale up to petabytes of data with a click."
-                      />
-                    </EuiText>
-                  }
-                />
-
-                <EuiListGroupItem
-                  {...listItemProps}
-                  label={
-                    <EuiText css={styles.listItemCss} size="s" color="subdued">
-                      <FormattedMessage
-                        id="xpack.cloudDataMigration.freeUpEngineering.text"
-                        defaultMessage="Streamline your Elastic workflow and free up your team. Manage multiple deployments from a single view and centralize your monitoring data."
-                      />
-                    </EuiText>
-                  }
-                />
-
-                <EuiListGroupItem
-                  {...listItemProps}
-                  label={
-                    <EuiText css={styles.listItemCss} size="s" color="subdued">
-                      <FormattedMessage
-                        id="xpack.cloudDataMigration.getHelpFromCreators.text"
-                        defaultMessage="Get support from the creators of Elastic to help you ingest all sorts of data and tune your performance."
-                      />
-                    </EuiText>
-                  }
-                />
-
-                <EuiListGroupItem
-                  {...listItemProps}
-                  label={
-                    <EuiText css={styles.listItemCss} size="s" color="subdued">
-                      <FormattedMessage
-                        id="xpack.cloudDataMigration.getInstantAccess.text"
-                        defaultMessage="Access the latest version of Elastic with features you want, like anomaly detection, searchable snapshots, advanced security, and so much more."
-                      />
-                    </EuiText>
-                  }
-                />
-              </EuiListGroup>
-
-              <EuiSpacer size="l" />
-
-              <div>
-                <EuiButton fill={true} target="_blank" href="https://ela.st/cloud-migration">
+            <EuiListGroupItem
+              {...listItemProps}
+              label={
+                <EuiText css={styles.listItemCss} size="s" color="subdued">
                   <FormattedMessage
-                    id="xpack.cloudDataMigration.readInstructionsButtonLabel"
-                    defaultMessage="Help me move"
+                    id="xpack.cloudDataMigration.freeUpEngineering.text"
+                    defaultMessage="Streamline your Elastic workflow and free up your team. Manage multiple deployments from a single view and centralize your monitoring data."
                   />
-                </EuiButton>
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </KibanaContextProvider>
-    </KibanaThemeProvider>
+                </EuiText>
+              }
+            />
+
+            <EuiListGroupItem
+              {...listItemProps}
+              label={
+                <EuiText css={styles.listItemCss} size="s" color="subdued">
+                  <FormattedMessage
+                    id="xpack.cloudDataMigration.getHelpFromCreators.text"
+                    defaultMessage="Get support from the creators of Elastic to help you ingest all sorts of data and tune your performance."
+                  />
+                </EuiText>
+              }
+            />
+
+            <EuiListGroupItem
+              {...listItemProps}
+              label={
+                <EuiText css={styles.listItemCss} size="s" color="subdued">
+                  <FormattedMessage
+                    id="xpack.cloudDataMigration.getInstantAccess.text"
+                    defaultMessage="Access the latest version of Elastic with features you want, like anomaly detection, searchable snapshots, advanced security, and so much more."
+                  />
+                </EuiText>
+              }
+            />
+          </EuiListGroup>
+
+          <EuiSpacer size="l" />
+
+          <div>
+            <EuiButton fill={true} target="_blank" href="https://ela.st/cloud-migration">
+              <FormattedMessage
+                id="xpack.cloudDataMigration.readInstructionsButtonLabel"
+                defaultMessage="Help me move"
+              />
+            </EuiButton>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };
