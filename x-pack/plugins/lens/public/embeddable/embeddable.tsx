@@ -942,7 +942,6 @@ export class Embeddable
       activeDatasourceState: this.activeDataInfo.activeDatasourceState,
       activeData: this.activeDataInfo.activeData,
       dataViews: this.indexPatterns,
-      dataViewsService: this.deps.dataViews,
       capabilities: this.deps.capabilities,
       query: mergedSearchContext.query,
       filters: mergedSearchContext.filters || [],
