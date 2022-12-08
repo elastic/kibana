@@ -53,9 +53,7 @@ run(
     for (const journey of journeys) {
       try {
         await startEs();
-        if (skipWarmup) {
-          log.warning('❗️❗️❗️ Skipping journey warmup run ❗️❗️❗️');
-        } else {
+        if (!skipWarmup) {
           await runWarmup(journey, kibanaInstallDir);
         }
         await runTest(journey, kibanaInstallDir);
@@ -117,7 +115,7 @@ run(
 
     async function runWarmup(journey: Journey, kibanaBuildDir: string | undefined) {
       try {
-        process.stdout.write(`--- Running warmup ${journey.name}\n`);
+        process.stdout.write(`--- Running warmup: ${journey.name}\n`);
         // Set the phase to WARMUP, this will prevent the functional test server from starting Elasticsearch, opt in to telemetry, etc.
         await runFunctionalTest(journey.path, 'WARMUP', kibanaBuildDir);
       } catch (e) {
@@ -128,7 +126,7 @@ run(
 
     async function runTest(journey: Journey, kibanaBuildDir: string | undefined) {
       try {
-        process.stdout.write(`--- Running test ${journey.name}\n`);
+        process.stdout.write(`--- Running ${journey.name}\n`);
         await runFunctionalTest(journey.path, 'TEST', kibanaBuildDir);
       } catch (e) {
         log.warning(`Journey ${journey.name} failed. Retrying once...`);
