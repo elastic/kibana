@@ -59,6 +59,7 @@ export interface ImageEditorFlyoutProps {
 }
 
 export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
+  const isEditing = !!props.initialImageConfig;
   const { euiTheme } = useEuiTheme();
   const [fileId, setFileId] = useState<undefined | string>(() =>
     props.initialImageConfig?.src?.type === 'file' ? props.initialImageConfig.src.fileId : undefined
@@ -118,10 +119,17 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
           <h2>
-            <FormattedMessage
-              id="imageEmbeddable.imageEditor.title"
-              defaultMessage="Configure Image"
-            />
+            {isEditing ? (
+              <FormattedMessage
+                id="imageEmbeddable.imageEditor.editImagetitle"
+                defaultMessage="Edit image"
+              />
+            ) : (
+              <FormattedMessage
+                id="imageEmbeddable.imageEditor.addImagetitle"
+                defaultMessage="Add image"
+              />
+            )}
           </h2>
         </EuiTitle>
         <EuiSpacer size={'s'} />
@@ -134,8 +142,8 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
           </EuiTab>
           <EuiTab onClick={() => setSrcType('url')} isSelected={srcType === 'url'}>
             <FormattedMessage
-              id="imageEmbeddable.imageEditor.byURLTabLabel"
-              defaultMessage="By URL"
+              id="imageEmbeddable.imageEditor.useLinkTabLabel"
+              defaultMessage="Use link"
             />
           </EuiTab>
         </EuiTabs>
@@ -183,7 +191,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                     initialPromptText={i18n.translate(
                       'imageEmbeddable.imageEditor.uploadImagePromptText',
                       {
-                        defaultMessage: 'Upload a new image',
+                        defaultMessage: 'Select or drag and drop an image',
                       }
                     )}
                     fullWidth={true}
@@ -200,7 +208,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                     >
                       <FormattedMessage
                         id="imageEmbeddable.imageEditor.selectImagePromptText"
-                        defaultMessage="Or select from previously uploaded images"
+                        defaultMessage="or use a previously uploaded image"
                       />
                     </EuiLink>
                   </p>
@@ -231,14 +239,6 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                   </p>
                 }
                 titleSize={'s'}
-                body={
-                  <p>
-                    <FormattedMessage
-                      id="imageEmbeddable.imageEditor.byURLNoImageMessage"
-                      defaultMessage="Insert a valid URL to the image in the text field below."
-                    />
-                  </p>
-                }
               />
             ) : (
               <ImageViewer
@@ -259,13 +259,13 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
               label={
                 <FormattedMessage
                   id="imageEmbeddable.imageEditor.imageURLInputLabel"
-                  defaultMessage="Insert a URL to the image"
+                  defaultMessage="Link to image"
                 />
               }
               helpText={
                 <FormattedMessage
                   id="imageEmbeddable.imageEditor.imageURLHelpText"
-                  defaultMessage="Example: https://elastic.co/my-image.png"
+                  defaultMessage="Supported file types: png, jpeg, webp and avif."
                 />
               }
               fullWidth={true}
@@ -300,14 +300,8 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="imageEmbeddable.imageEditor.imageSizingLabel"
-              defaultMessage="Sizing"
-            />
-          }
-          helpText={
-            <FormattedMessage
-              id="imageEmbeddable.imageEditor.imageSizingHelpText"
-              defaultMessage="How the image should be resized relative to its container."
+              id="imageEmbeddable.imageEditor.imageFillModeLabel"
+              defaultMessage="Fill mode"
             />
           }
           fullWidth
@@ -317,25 +311,25 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             options={[
               {
                 value: 'contain',
-                text: i18n.translate('imageEmbeddable.imageEditor.imageSizingContainOptionText', {
+                text: i18n.translate('imageEmbeddable.imageEditor.imageFillModeContainOptionText', {
                   defaultMessage: 'Fit maintaining aspect ratio',
                 }),
               },
               {
                 value: 'cover',
-                text: i18n.translate('imageEmbeddable.imageEditor.imageSizingCoverOptionText', {
+                text: i18n.translate('imageEmbeddable.imageEditor.imageFillModeCoverOptionText', {
                   defaultMessage: 'Fill maintaining aspect ratio',
                 }),
               },
               {
                 value: 'fill',
-                text: i18n.translate('imageEmbeddable.imageEditor.imageSizingFillOptionText', {
+                text: i18n.translate('imageEmbeddable.imageEditor.imageFillModeFillOptionText', {
                   defaultMessage: 'Stretch to fill',
                 }),
               },
               {
                 value: 'none',
-                text: i18n.translate('imageEmbeddable.imageEditor.imageSizingNoneOptionText', {
+                text: i18n.translate('imageEmbeddable.imageEditor.imageFillModeNoneOptionText', {
                   defaultMessage: "Don't resize",
                 }),
               },
@@ -353,12 +347,6 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             <FormattedMessage
               id="imageEmbeddable.imageEditor.imageBackgroundColorLabel"
               defaultMessage="Background color"
-            />
-          }
-          helpText={
-            <FormattedMessage
-              id="imageEmbeddable.imageEditor.imageBackgroundColorHelpText"
-              defaultMessage="The background is visible if the image is transparent or if it doesn't completely fill its container."
             />
           }
           fullWidth
@@ -388,12 +376,6 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
               defaultMessage="Description"
             />
           }
-          helpText={
-            <FormattedMessage
-              id="imageEmbeddable.imageEditor.imageBackgroundDescriptionHelpText"
-              defaultMessage="Screen readers read this description out to their users so they know what the image means."
-            />
-          }
           fullWidth
         >
           <EuiTextArea
@@ -402,6 +384,12 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             compressed={true}
             value={altText}
             maxLength={1000}
+            placeholder={i18n.translate(
+              'imageEmbeddable.imageEditor.imageAltInputPlaceholderText',
+              {
+                defaultMessage: `Alt text that describes the image`,
+              }
+            )}
             onChange={(e) => {
               setAltText(e.target.value);
             }}
@@ -425,10 +413,17 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
               isDisabled={!isDraftImageConfigValid}
               data-test-subj="imageEmbeddableEditorSave"
             >
-              <FormattedMessage
-                id="imageEmbeddable.imageEditor.imageBackgroundSaveButtonText"
-                defaultMessage="Save"
-              />
+              {isEditing ? (
+                <FormattedMessage
+                  id="imageEmbeddable.imageEditor.imageBackgroundEditImageButtonText"
+                  defaultMessage="Edit image"
+                />
+              ) : (
+                <FormattedMessage
+                  id="imageEmbeddable.imageEditor.imageBackgroundAddImageButtonText"
+                  defaultMessage="Add image"
+                />
+              )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -454,7 +449,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
 
 const failedToLoadImageFromURL = (url: string) =>
   i18n.translate('imageEmbeddable.imageEditor.urlFailedToLoadImageErrorMessage', {
-    defaultMessage: 'Failed to load image from URL "{url}".',
+    defaultMessage: 'Unable to load image from URL "{url}".',
     values: {
       url,
     },

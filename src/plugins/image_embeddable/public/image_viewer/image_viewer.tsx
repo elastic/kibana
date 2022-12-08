@@ -189,8 +189,7 @@ function NotFound() {
             <p>
               <FormattedMessage
                 id="imageEmbeddable.imageViewer.notFoundMessage"
-                defaultMessage="Sorry, we can't find the image you are looking for. It might have been
-              removed or renamed, or maybe it never existed."
+                defaultMessage="We can't find the image you're looking for. It might have been removed, renamed, or it didn't exist in the first place."
               />
             </p>
           }
