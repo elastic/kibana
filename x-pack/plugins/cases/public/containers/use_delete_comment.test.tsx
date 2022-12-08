@@ -101,11 +101,11 @@ describe('useDeleteComment', () => {
           commentId,
           signal: expect.any(AbortSignal),
         });
-  
+
         expect(result.current.isError).toBe(true);
 
         expect(addError).toHaveBeenCalled();
-      })
+      });
     });
   });
 });
