@@ -25,10 +25,10 @@ const EVENT_GENERATING_ELEMENTS = [
 ];
 
 interface NodeParentExtension {
-  parent: Node;
-  children: Node;
+  parent: SomeNode;
+  children: SomeNode;
 }
-type Node = TSESTree.Node & NodeParentExtension;
+export type SomeNode = TSESTree.Node & NodeParentExtension;
 
 export const eventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
   meta: {
@@ -43,7 +43,7 @@ export const eventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         if ('name' in node) {
           const name = String(node.name);
           const range = node.range;
-          const parent = node.parent as Node;
+          const parent = node.parent as SomeNode;
 
           // We want to check the attributes of an JSXOpeningElement that is part of an array of
           // element names that generate events. Return early if that's not the case.
@@ -63,7 +63,7 @@ export const eventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
             const fileName = getFilename();
             const pathToComponent = getPathToComponent(fileName, cwd);
 
-            // 2. Component Name
+            // 2. Component name
             const functionDeclaration = getScope().block as TSESTree.FunctionDeclaration;
             const componentName = functionDeclaration.id?.name.toLowerCase();
 
