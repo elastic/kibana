@@ -1,49 +1,44 @@
 name: Generate machine learning API docs
 on:
-  pull_request_target:
+  pull_request:
     paths:
      - 'x-pack/plugins/ml/common/openapi/ml_apis_v3.yaml'
     types:
       - opened
       - synchronize
-      - edited
       - reopened
     brances:
       - main
       - 8.6
 jobs:
-  runs-on: ubuntu-latest
-  steps:
-    - name: checkout_pr_branch
-      uses: actions/checkout@v2
-      with:
-        repository: 'origin/kibana'
-        ref: ${{ github.head_ref }}
-        token: ${{secrets.KIBANAMACHINE_TOKEN}}
-    - name: install_libraries
-      needs: [checkout_pr_branch]
-      run: |
-        npm install -g yarn
-        yarn global add @openapitools/openapi-generator-cli standard-version
-    - name: run_generator
-      needs: [install_libraries]
-      run: |
-        openapi-generator-cli generate -i x-pack/plugins/ml/common/openapi/ml_apis_v3.yaml -g html -o docs/api-generated/machine-learning -t docs/api-generated/template
-    - name: rename_output_file
-      needs: [run_generator]
-      run:
-        mv docs/api-generated/machine-learning/index.html docs/api-generated/machine-learning/ml-apis-passthru.asciidoc
-    - name: commit_changes
-      needs: [rename_output_file]
-      run: |
-        git config user.name "Github Actions Bot"
-        git config user.email "<>"
-        git add docs/api-generated/machine-learning/ml-apis-passthru.asciidoc
-        git clean -f docs/api-generated/machine-learning/.openapi-generator
-        git clean -f
-        git commit -m "Automated APIs" --allow-empty
-    - name: push_changes
-      needs: [commit_changes]
-      if: ${{ success() }}
-      run: |
-        git push origin ${{ github.head_ref }}
+  ml-api-docs-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{secrets.KIBANAMACHINE_TOKEN}}
+      - name: Install libraries
+        run: |
+          npm install -g yarn
+          yarn global add @openapitools/openapi-generator-cli standard-version
+      - name: Run generator
+        run: |
+          openapi-generator-cli generate -i x-pack/plugins/ml/common/openapi/ml_apis_v3.yaml -g html -o docs/api-generated/machine-learning -t docs/api-generated/template
+      - name: Rename output file
+        run:
+          mv docs/api-generated/machine-learning/index.html docs/api-generated/machine-learning/ml-apis-passthru.asciidoc
+      - name: Check for modified files
+        id: git-check
+        run: echo "modified=$(if [ -n "$(git status --porcelain)" ]; then echo "true"; else echo "false"; fi)" >> $GITHUB_OUTPUT
+      - name: Commit and push changes
+        if: steps.git-check.outputs.modified == 'true' 
+        run: |
+          git config user.name "Github Actions Bot"
+          git config user.email "<>"
+          git add docs/api-generated/machine-learning/ml-apis-passthru.asciidoc
+          git clean -f docs/api-generated/machine-learning/.openapi-generator
+          git clean -f
+          git commit -m "Automated API output"
+          git push origin ${{ github.head_ref }}
