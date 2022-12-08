@@ -7,7 +7,8 @@
  */
 import { parentPort, workerData } from 'worker_threads';
 import { timerange } from '../../lib/timerange';
-import { getCommonServices } from './get_common_services';
+import { createLogger } from '../../lib/utils/create_logger';
+import { getEsClient } from './get_es_client';
 import { getScenario } from './get_scenario';
 import { loggerProxy } from './logger_proxy';
 import { RunOptions } from './parse_run_cli_flags';
@@ -17,15 +18,19 @@ export interface WorkerData {
   bucketTo: Date;
   runOptions: RunOptions;
   workerId: string;
+  esUrl: string;
+  version: string;
 }
 
-const { bucketFrom, bucketTo, runOptions } = workerData as WorkerData;
+const { bucketFrom, bucketTo, runOptions, esUrl, version } = workerData as WorkerData;
 
 async function start() {
-  const { logger, apmEsClient } = await getCommonServices({
-    ...runOptions,
-    logger: loggerProxy,
-    installPackage: false,
+  const logger = createLogger(runOptions.logLevel);
+  const apmEsClient = getEsClient({
+    concurrency: runOptions.concurrency,
+    target: esUrl,
+    logger,
+    version,
   });
 
   const file = runOptions.file;

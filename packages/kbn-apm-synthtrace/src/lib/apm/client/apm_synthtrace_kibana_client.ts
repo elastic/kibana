@@ -7,7 +7,6 @@
  */
 
 import fetch from 'node-fetch';
-import { format, parse } from 'url';
 import { Logger } from '../../utils/create_logger';
 
 export class ApmSynthtraceKibanaClient {
@@ -17,45 +16,6 @@ export class ApmSynthtraceKibanaClient {
   constructor(options: { logger: Logger; target: string }) {
     this.logger = options.logger;
     this.target = options.target;
-  }
-
-  async init() {
-    try {
-      this.logger.debug(`Checking Kibana URL ${this.target} for a redirect`);
-
-      const unredirectedResponse = await fetch(this.target, {
-        method: 'HEAD',
-        follow: 1,
-        redirect: 'manual',
-      });
-
-      const discoveredKibanaUrl = unredirectedResponse.headers.get('location') || this.target;
-
-      const parsedTarget = parse(this.target);
-
-      const parsedDiscoveredUrl = parse(discoveredKibanaUrl);
-
-      const discoveredKibanaUrlWithAuth = format({
-        ...parsedDiscoveredUrl,
-        auth: parsedTarget.auth,
-      });
-
-      const redirectedResponse = await fetch(discoveredKibanaUrlWithAuth, {
-        method: 'HEAD',
-      });
-
-      if (redirectedResponse.status !== 200) {
-        throw new Error(
-          `Expected HTTP 200 from ${discoveredKibanaUrlWithAuth}, got ${redirectedResponse.status}`
-        );
-      }
-
-      this.logger.info(`Discovered local kibana running at: ${discoveredKibanaUrlWithAuth}`);
-
-      this.target = discoveredKibanaUrlWithAuth.replace(/\/$/, '');
-    } catch (error) {
-      throw new Error(`Could not connect to Kibana: ` + error.message);
-    }
   }
 
   async fetchLatestApmPackageVersion() {

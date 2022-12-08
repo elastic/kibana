@@ -47,12 +47,12 @@ function options(y: Argv) {
       describe: 'Amount of Node.js worker threads',
       number: true,
     })
-    .option('esConcurrency', {
+    .option('concurrency', {
       describe: 'Concurrency of Elasticsearch client bulk indexing',
       number: true,
       default: 1,
     })
-    .option('version', {
+    .option('versionOverride', {
       describe: 'Package/observer version override',
       string: true,
     })

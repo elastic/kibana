@@ -11,7 +11,7 @@ import { PassThrough, Readable, Writable } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import { timerange } from '../../lib/timerange';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
-import { getCommonServices } from './get_common_services';
+import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
 
@@ -24,7 +24,7 @@ export async function startLiveDataUpload({
 }) {
   const file = runOptions.file;
 
-  const { logger, apmEsClient } = await getCommonServices(runOptions);
+  const { logger, apmEsClient } = await bootstrap(runOptions);
 
   const scenario = await getScenario({ file, logger });
   const { generate } = await scenario({ ...runOptions, logger });

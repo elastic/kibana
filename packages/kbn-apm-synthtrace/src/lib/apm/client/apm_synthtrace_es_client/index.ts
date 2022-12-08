@@ -114,7 +114,7 @@ export class ApmSynthtraceEsClient {
       concurrency: this.concurrency,
       refresh: false,
       refreshOnCompletion: false,
-      flushBytes: 500000,
+      flushBytes: 5000000,
       datasource: stream,
       onDocument: (doc: ESDocumentWithOperation<ApmFields>) => {
         let action: SynthtraceESAction;

@@ -11,7 +11,7 @@ import { cpus } from 'os';
 import Path from 'path';
 import { Worker } from 'worker_threads';
 import { LogLevel } from '../../..';
-import { getCommonServices } from './get_common_services';
+import { bootstrap } from './bootstrap';
 import { RunOptions } from './parse_run_cli_flags';
 import { WorkerData } from './synthtrace_worker';
 
@@ -24,7 +24,7 @@ export async function startHistoricalDataUpload({
   from: Date;
   to: Date;
 }) {
-  const { logger } = await getCommonServices(runOptions);
+  const { logger, esUrl, version } = await bootstrap(runOptions);
 
   const cores = cpus().length;
 
@@ -89,6 +89,8 @@ export async function startHistoricalDataUpload({
         bucketFrom,
         bucketTo,
         workerId: workerIndex.toString(),
+        esUrl,
+        version,
       };
       const worker = new Worker(Path.join(__dirname, './worker.js'), {
         workerData,
