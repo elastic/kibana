@@ -6,6 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { EuiComboBox } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
 import type { Filter, Query } from '@kbn/es-query';
@@ -24,6 +25,12 @@ import { HeaderSection } from '../header_section';
 import { InspectButtonContainer } from '../inspect';
 import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from '../alerts_treemap/query';
 import type { AlertsTreeMapAggregation } from '../alerts_treemap/types';
+import { InputsModelId } from '../../store/inputs/constants';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
+import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
+import { getAlertsTreemapLensAttributes as getLensAttributes } from '../visualization_actions/lens_attributes/common/alerts/alerts_treemap';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 134; // px
 
@@ -35,10 +42,11 @@ export interface Props {
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
-  inspectTitle: string;
-  isPanelExpanded: boolean;
+  extraActions?: Action[];
   filters?: Filter[];
   height?: number;
+  inspectTitle: string;
+  isPanelExpanded: boolean;
   query?: Query;
   riskSubAggregationField: string;
   runtimeMappings?: MappingRuntimeFields;
@@ -60,10 +68,11 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   addFilter,
   alignHeader,
   chartOptionsContextMenu,
-  inspectTitle,
-  isPanelExpanded,
+  extraActions,
   filters,
   height = DEFAULT_HEIGHT,
+  inspectTitle,
+  isPanelExpanded,
   query,
   riskSubAggregationField,
   runtimeMappings,
@@ -84,6 +93,19 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
 
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuid.v4()}`, []);
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const timerange = useMemo(() => ({ from, to }), [from, to]);
+  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+    inputId: InputsModelId.global,
+    queryId: uniqueQueryId,
+  });
+  const extraVisualizationOptions = useMemo(
+    () => ({
+      breakdownField: stackByField1,
+      filters,
+    }),
+    [stackByField1, filters]
+  );
 
   const additionalFilters = useMemo(() => {
     try {
@@ -116,7 +138,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
       stackByField1,
       to,
     }),
-    skip: !isPanelExpanded,
+    skip: !isPanelExpanded || isChartEmbeddablesEnabled,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.TREE_MAP,
   });
@@ -147,10 +169,11 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   useInspectButton({
     deleteQuery,
     loading: isLoadingAlerts,
-    response,
-    setQuery,
-    refetch,
+    refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
     request,
+    response,
+    searchSessionId,
+    setQuery,
     uniqueQueryId,
   });
 
@@ -178,7 +201,9 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
         >
           {isPanelExpanded && (
             <FieldSelection
-              chartOptionsContextMenu={chartOptionsContextMenu}
+              chartOptionsContextMenu={
+                isChartEmbeddablesEnabled ? undefined : chartOptionsContextMenu
+              }
               setStackByField0={setStackByField0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
               setStackByField1={setStackByField1}
@@ -193,21 +218,35 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
           )}
         </HeaderSection>
 
-        {isLoadingAlerts && isPanelExpanded ? (
-          <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
-        ) : (
-          <>
-            {alertsData != null && isPanelExpanded && (
-              <AlertsTreemap
-                addFilter={addFilter}
-                data={alertsData}
-                maxBuckets={DEFAULT_STACK_BY_FIELD0_SIZE}
-                stackByField0={stackByField0}
-                stackByField1={stackByField1}
-              />
-            )}
-          </>
-        )}
+        {isPanelExpanded ? (
+          isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
+            <LensEmbeddable
+              extraActions={extraActions}
+              extraOptions={extraVisualizationOptions}
+              getLensAttributes={getLensAttributes}
+              height={`${DEFAULT_MIN_CHART_HEIGHT}px`}
+              id={uniqueQueryId}
+              inspectTitle={inspectTitle}
+              scopeId={SourcererScopeName.detections}
+              stackByField={stackByField0}
+              timerange={timerange}
+            />
+          ) : isLoadingAlerts ? (
+            <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
+          ) : (
+            <>
+              {alertsData != null && isPanelExpanded && (
+                <AlertsTreemap
+                  addFilter={addFilter}
+                  data={alertsData}
+                  maxBuckets={DEFAULT_STACK_BY_FIELD0_SIZE}
+                  stackByField0={stackByField0}
+                  stackByField1={stackByField1}
+                />
+              )}
+            </>
+          )
+        ) : null}
       </KpiPanel>
     </InspectButtonContainer>
   );

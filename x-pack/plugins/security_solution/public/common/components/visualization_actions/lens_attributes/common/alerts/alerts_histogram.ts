@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { GetLensAttributes, LensAttributes } from '../../types';
+import type { GetLensAttributes, LensAttributes } from '../../../types';
 
-export const getEventsHistogramLensAttributes: GetLensAttributes = (
-  stackByField = 'event.action'
+export const getAlertsHistogramLensAttributes: GetLensAttributes = (
+  stackByField = 'kibana.alert.rule.name',
+  extraOptions
 ) =>
   ({
-    title: 'Host - events',
+    title: 'Alerts',
     description: '',
     visualizationType: 'lnsXY',
     state: {
@@ -20,6 +21,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
         legend: {
           isVisible: true,
           position: 'right',
+          isInside: true,
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',
@@ -46,12 +48,13 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
           yLeft: false,
           yRight: true,
         },
+        valuesInLegend: true,
       },
       query: {
         query: '',
         language: 'kuery',
       },
-      filters: [],
+      filters: extraOptions?.filters ? extraOptions.filters : [],
       datasourceStates: {
         formBased: {
           layers: {
@@ -77,24 +80,25 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
                   sourceField: '___records___',
                 },
                 '34919782-4546-43a5-b668-06ac934d3acd': {
-                  label: `Top values of ${stackByField}`, // could be event.dataset or event.module
+                  label: `Top values of ${stackByField}`,
                   dataType: 'string',
                   operationType: 'terms',
                   scale: 'ordinal',
-                  sourceField: `${stackByField}`, // could be event.dataset or event.module
+                  sourceField: stackByField,
                   isBucketed: true,
                   params: {
-                    size: 10,
+                    size: 1000,
                     orderBy: {
                       type: 'column',
                       columnId: 'e09e0380-0740-4105-becc-0a4ca12e3944',
                     },
-                    orderDirection: 'asc',
+                    orderDirection: 'desc',
                     otherBucket: true,
                     missingBucket: false,
                     parentFormat: {
                       id: 'terms',
                     },
+                    secondaryFields: [],
                   },
                 },
               },
@@ -108,13 +112,10 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
           },
         },
       },
+      internalReferences: [],
+      adHocDataViews: {},
     },
     references: [
-      {
-        type: 'index-pattern',
-        id: '{dataViewId}',
-        name: 'indexpattern-datasource-current-indexpattern',
-      },
       {
         type: 'index-pattern',
         id: '{dataViewId}',

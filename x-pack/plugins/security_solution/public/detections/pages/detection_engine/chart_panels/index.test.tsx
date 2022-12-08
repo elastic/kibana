@@ -9,6 +9,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useAlertsLocalStorage } from './alerts_local_storage';
+import type { Status } from '../../../../../common/detection_engine/schemas/common';
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../common/components/chart_settings_popover/translations';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
@@ -17,8 +18,15 @@ import { TestProviders } from '../../../../common/mock';
 import { ChartPanels } from '.';
 
 jest.mock('./alerts_local_storage');
-
 jest.mock('../../../../common/containers/sourcerer');
+
+jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
+jest.mock('../../../../common/components/page/use_refetch_by_session', () => ({
+  useRefetchByRestartingSession: jest.fn().mockReturnValue({
+    searchSessionId: 'mockSearchSessionId',
+    refetchByRestartingSession: jest.fn(),
+  }),
+}));
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -104,6 +112,7 @@ const defaultProps = {
       },
     },
   ],
+  filterGroup: 'open' as Status,
   isLoadingIndexPattern: false,
   query: {
     query: '',
@@ -111,6 +120,8 @@ const defaultProps = {
   },
   runtimeMappings: {},
   signalIndexName: '.alerts-security.alerts-default',
+  showBuildingBlockAlerts: false,
+  showOnlyThreatIndicatorAlerts: false,
   updateDateRangeCallback: jest.fn(),
 };
 

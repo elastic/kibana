@@ -31,11 +31,13 @@ import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
-import { HISTOGRAM_ACTIONS_BUTTON_CLASS, VisualizationActions } from '../visualization_actions';
+import { VisualizationActions } from '../visualization_actions';
 import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
-import { SecurityPageName } from '../../../../common/constants';
-import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { useQueryToggle } from '../../containers/query_toggle';
+import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
+import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
@@ -68,6 +70,8 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
   flex-direction: column;
   ${({ height }) => (height != null ? `min-height: ${height}px;` : '')}
 `;
+
+const ChartHeight = '150px';
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
@@ -164,6 +168,13 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     [setQuerySkip, setToggleStatus]
   );
 
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+    inputId: InputsModelId.global,
+    queryId: id,
+    skip: !isChartEmbeddablesEnabled,
+  });
+
   const matrixHistogramRequest = {
     endDate,
     errorMessage,
@@ -175,16 +186,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     stackByField: selectedStackByOption.value,
     runtimeMappings,
     isPtrIncluded,
-    skip: querySkip,
+    skip: querySkip || isChartEmbeddablesEnabled,
   };
   const [loading, { data, inspect, totalCount, refetch }] =
     useMatrixHistogramCombined(matrixHistogramRequest);
-  const [{ pageName }] = useRouteSpy();
-
-  const onHostOrNetworkOrUserPage =
-    pageName === SecurityPageName.hosts ||
-    pageName === SecurityPageName.network ||
-    pageName === SecurityPageName.users;
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -209,22 +214,31 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
   useEffect(() => {
     if (!loading && !isInitialLoading) {
-      setQuery({ id, inspect, loading, refetch });
+      setQuery({
+        id,
+        inspect,
+        loading,
+        refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
+        searchSessionId,
+      });
     }
 
     if (isInitialLoading && !!barChartData && data) {
       setIsInitialLoading(false);
     }
   }, [
-    setQuery,
-    id,
-    inspect,
-    loading,
-    refetch,
-    isInitialLoading,
     barChartData,
     data,
+    id,
+    inspect,
+    isChartEmbeddablesEnabled,
+    isInitialLoading,
+    loading,
+    refetch,
+    refetchByRestartingSession,
+    searchSessionId,
     setIsInitialLoading,
+    setQuery,
   ]);
 
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
@@ -236,7 +250,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     <>
       <HoverVisibilityContainer
         show={!isInitialLoading}
-        targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}
+        targetClassNames={[VISUALIZATION_ACTIONS_BUTTON_CLASS]}
       >
         <HistogramPanel
           data-test-subj={`${id}Panel`}
@@ -261,11 +275,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             toggleQuery={toggleQuery}
             subtitle={subtitleWithCounts}
             inspectMultiple
-            showInspectButton={showInspectButton || !onHostOrNetworkOrUserPage}
+            showInspectButton={showInspectButton && !isChartEmbeddablesEnabled}
             isInspectDisabled={filterQuery === undefined}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
-              {onHostOrNetworkOrUserPage && (getLensAttributes || lensAttributes) && timerange && (
+              {(getLensAttributes || lensAttributes) && timerange && (
                 <EuiFlexItem grow={false}>
                   <VisualizationActions
                     className="histogram-viz-actions"
@@ -293,7 +307,17 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             </EuiFlexGroup>
           </HeaderSection>
           {toggleStatus ? (
-            isInitialLoading ? (
+            isChartEmbeddablesEnabled && (getLensAttributes || lensAttributes) && timerange ? (
+              <LensEmbeddable
+                data-test-subj="embeddable-matrix-histogram"
+                getLensAttributes={getLensAttributes}
+                height={ChartHeight}
+                id={id}
+                inspectTitle={title as string}
+                stackByField={selectedStackByOption.value}
+                timerange={timerange}
+              />
+            ) : isInitialLoading ? (
               <MatrixLoader />
             ) : (
               <BarChart

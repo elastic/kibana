@@ -19,6 +19,7 @@ export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' 
   refetch: (() => void) | null;
   uniqueQueryId: string;
   loading: boolean;
+  searchSessionId?: string;
 }
 
 /**
@@ -33,6 +34,7 @@ export const useInspectButton = ({
   uniqueQueryId,
   deleteQuery,
   loading,
+  searchSessionId,
 }: UseInspectButtonParams) => {
   useEffect(() => {
     if (refetch != null && setQuery != null) {
@@ -44,6 +46,7 @@ export const useInspectButton = ({
         },
         loading,
         refetch,
+        searchSessionId,
       });
     }
 
@@ -52,7 +55,7 @@ export const useInspectButton = ({
         deleteQuery({ id: uniqueQueryId });
       }
     };
-  }, [setQuery, loading, response, request, refetch, uniqueQueryId, deleteQuery]);
+  }, [setQuery, loading, response, request, refetch, uniqueQueryId, deleteQuery, searchSessionId]);
 };
 
 export function getAggregatableFields(fields: {

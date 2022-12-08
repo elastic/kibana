@@ -38,6 +38,11 @@ import { useGlobalFullScreen } from '../../../../common/containers/use_full_scre
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
+import { getRulePreviewLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/rule_preview';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -52,6 +57,8 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
 `;
 
 export const ID = 'previewHistogram';
+
+export const CHART_HEIGHT = 150;
 
 interface PreviewHistogramProps {
   previewId: string;
@@ -89,6 +96,20 @@ export const PreviewHistogram = ({
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
+  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+    inputId: InputsModelId.global,
+    queryId: `${ID}-${previewId}`,
+  });
+  const extraVisualizationOptions = useMemo(
+    () => ({
+      ruleId: previewId,
+      spaceId,
+    }),
+    [previewId, spaceId]
+  );
+
   const [isLoading, { data, inspect, totalCount, refetch }] = usePreviewHistogram({
     previewId,
     startDate,
@@ -96,6 +117,7 @@ export const PreviewHistogram = ({
     spaceId,
     indexPattern,
     ruleType,
+    skip: isChartEmbeddablesEnabled,
   });
   const license = useLicense();
   const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
@@ -113,9 +135,25 @@ export const PreviewHistogram = ({
 
   useEffect((): void => {
     if (!isLoading && !isInitializing) {
-      setQuery({ id: `${ID}-${previewId}`, inspect, loading: isLoading, refetch });
+      setQuery({
+        id: `${ID}-${previewId}`,
+        inspect,
+        loading: isLoading,
+        refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
+        searchSessionId,
+      });
     }
-  }, [setQuery, inspect, isLoading, isInitializing, refetch, previewId]);
+  }, [
+    setQuery,
+    inspect,
+    isLoading,
+    isInitializing,
+    refetch,
+    previewId,
+    isChartEmbeddablesEnabled,
+    refetchByRestartingSession,
+    searchSessionId,
+  ]);
 
   const barConfig = useMemo(
     (): ChartSeriesConfigs => getHistogramConfig(endDate, startDate, !isEqlRule),
@@ -161,11 +199,23 @@ export const PreviewHistogram = ({
               id={`${ID}-${previewId}`}
               title={i18n.QUERY_GRAPH_HITS_TITLE}
               titleSize="xs"
+              showInspectButton={!isChartEmbeddablesEnabled}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             {isLoading ? (
               <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
+            ) : isChartEmbeddablesEnabled ? (
+              <LensEmbeddable
+                extraOptions={extraVisualizationOptions}
+                getLensAttributes={getRulePreviewLensAttributes}
+                height={`${CHART_HEIGHT}px`}
+                id={`${ID}-${previewId}`}
+                inspectTitle={i18n.QUERY_GRAPH_HITS_TITLE}
+                scopeId={SourcererScopeName.detections}
+                stackByField={ruleType === 'machine_learning' ? 'host.name' : 'event.category'}
+                timerange={timerange}
+              />
             ) : (
               <BarChart
                 configs={barConfig}

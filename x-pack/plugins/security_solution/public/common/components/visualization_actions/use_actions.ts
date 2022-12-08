@@ -22,6 +22,7 @@ export const useActions = ({
   attributes,
   timeRange,
   inspectActionProps,
+  extraActions,
 }: {
   withActions?: boolean;
 
@@ -30,6 +31,8 @@ export const useActions = ({
   timeRange: { from: string; to: string };
 
   inspectActionProps?: { onInspectActionClicked: () => void; isDisabled: boolean };
+
+  extraActions?: Action[];
 }) => {
   const { lens } = useKibana().services;
   const { navigateToPrefilledEditor } = lens;
@@ -120,7 +123,9 @@ export const useActions = ({
     ]
   );
 
-  return actions;
+  const withExtraActions = actions.concat(extraActions ?? []);
+
+  return withExtraActions;
 };
 
 const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => {
