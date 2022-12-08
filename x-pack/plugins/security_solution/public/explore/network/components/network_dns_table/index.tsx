@@ -16,8 +16,8 @@ import type {
   NetworkDnsEdges,
   NetworkDnsFields,
 } from '../../../../../common/search_strategy';
-import type { Criteria, ItemsPerRow } from '../../../../common/components/paginated_table';
-import { PaginatedTable } from '../../../../common/components/paginated_table';
+import type { Criteria, ItemsPerRow } from '../../../components/paginated_table';
+import { PaginatedTable } from '../../../components/paginated_table';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 import { getNetworkDnsColumns } from './columns';

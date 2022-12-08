@@ -12,7 +12,7 @@ import type { ESTermQuery } from '../../../../../common/typed_json';
 import type { inputsModel } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { createFilter } from '../../../../common/containers/helpers';
-import { generateTablePaginationOptions } from '../../../../common/components/paginated_table/helpers';
+import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
 import type { networkModel } from '../../store';
 import { networkSelectors } from '../../store';
 import type {

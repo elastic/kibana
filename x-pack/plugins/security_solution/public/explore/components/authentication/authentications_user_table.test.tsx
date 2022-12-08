@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import '../../mock/match_media';
+import '../../../common/mock/match_media';
 
-import { TestProviders } from '../../mock';
+import { TestProviders } from '../../../common/mock';
 import { useAuthentications } from '../../containers/authentications';
-import { useQueryToggle } from '../../containers/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { AuthenticationsUserTable } from './authentications_user_table';
-import { usersModel } from '../../../explore/users/store';
+import { usersModel } from '../../users/store';
 import { AuthStackByField } from '../../../../common/search_strategy';
 
 jest.mock('../../containers/query_toggle', () => ({

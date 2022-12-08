@@ -9,8 +9,8 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { Columns, Criteria, ItemsPerRow } from '../../../../common/components/paginated_table';
-import { PaginatedTable } from '../../../../common/components/paginated_table';
+import type { Columns, Criteria, ItemsPerRow } from '../../../components/paginated_table';
+import { PaginatedTable } from '../../../components/paginated_table';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getHostRiskScoreColumns } from './columns';

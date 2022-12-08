@@ -13,8 +13,8 @@ import type {
   Criteria,
   ItemsPerRow,
   SortingBasicTable,
-} from '../../../../common/components/paginated_table';
-import { PaginatedTable } from '../../../../common/components/paginated_table';
+} from '../../../components/paginated_table';
+import { PaginatedTable } from '../../../components/paginated_table';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getHostsColumns } from './columns';

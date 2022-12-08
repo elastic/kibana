@@ -8,8 +8,8 @@
 import React from 'react';
 import type { HostsComponentsQueryProps } from './types';
 import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
-import { AuthenticationsHostTable } from '../../../../common/components/authentication/authentications_host_table';
-import { histogramConfigs } from '../../../../common/components/authentication/helpers';
+import { AuthenticationsHostTable } from '../../../components/authentication/authentications_host_table';
+import { histogramConfigs } from '../../../components/authentication/helpers';
 
 const HISTOGRAM_QUERY_ID = 'authenticationsHistogramQuery';
 

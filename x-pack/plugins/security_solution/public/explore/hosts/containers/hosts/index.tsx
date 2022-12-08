@@ -13,7 +13,7 @@ import { createFilter } from '../../../../common/containers/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { hostsModel } from '../../store';
 import { hostsSelectors } from '../../store';
-import { generateTablePaginationOptions } from '../../../../common/components/paginated_table/helpers';
+import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
 import type {
   HostsEdges,
   PageInfoPaginated,

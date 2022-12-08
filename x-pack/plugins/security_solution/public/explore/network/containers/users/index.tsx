@@ -14,7 +14,7 @@ import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import type { inputsModel } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { createFilter } from '../../../../common/containers/helpers';
-import { generateTablePaginationOptions } from '../../../../common/components/paginated_table/helpers';
+import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
 import { networkSelectors } from '../../store';
 import type {
   FlowTargetSourceDest,

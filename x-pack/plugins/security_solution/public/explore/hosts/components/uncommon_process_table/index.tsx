@@ -12,8 +12,8 @@ import type { HostsUncommonProcessesEdges } from '../../../../../common/search_s
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { defaultToEmptyTag, getEmptyValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
-import type { Columns, ItemsPerRow } from '../../../../common/components/paginated_table';
-import { PaginatedTable } from '../../../../common/components/paginated_table';
+import type { Columns, ItemsPerRow } from '../../../components/paginated_table';
+import { PaginatedTable } from '../../../components/paginated_table';
 
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../../common/components/tables/helpers';

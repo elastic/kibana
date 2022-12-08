@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { inputsModel, State } from '../../../../common/store';
 
-import { generateTablePaginationOptions } from '../../../../common/components/paginated_table/helpers';
+import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
 import { createFilter } from '../../../../common/containers/helpers';
 import type { hostsModel } from '../../store';
 import { hostsSelectors } from '../../store';

@@ -22,7 +22,7 @@ import {
 } from '../../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import type { Columns } from '../../../../common/components/paginated_table';
+import type { Columns } from '../../../components/paginated_table';
 import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 import * as i18n from './translations';

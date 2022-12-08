@@ -16,8 +16,8 @@ import {
   getOrEmptyTagFromValue,
 } from '../../../../common/components/empty_value';
 
-import type { Columns, Criteria, ItemsPerRow } from '../../../../common/components/paginated_table';
-import { PaginatedTable } from '../../../../common/components/paginated_table';
+import type { Columns, Criteria, ItemsPerRow } from '../../../components/paginated_table';
+import { PaginatedTable } from '../../../components/paginated_table';
 
 import { getRowItemDraggables } from '../../../../common/components/tables/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';

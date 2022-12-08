@@ -11,7 +11,7 @@ import { TestProviders } from '../../../../common/mock';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { AuthenticationsQueryTabBody } from './authentications_query_tab_body';
 import { UsersType } from '../../store/model';
-import { useAuthentications } from '../../../../common/containers/authentications';
+import { useAuthentications } from '../../../containers/authentications';
 
 jest.mock('../../../common/containers/authentications');
 jest.mock('../../../common/containers/query_toggle');

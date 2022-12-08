@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { AuthenticationsUserTable } from '../../../../common/components/authentication/authentications_user_table';
-import { histogramConfigs } from '../../../../common/components/authentication/helpers';
-import type { AuthenticationsUserTableProps } from '../../../../common/components/authentication/types';
+import { AuthenticationsUserTable } from '../../../components/authentication/authentications_user_table';
+import { histogramConfigs } from '../../../components/authentication/helpers';
+import type { AuthenticationsUserTableProps } from '../../../components/authentication/types';
 import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
 export const ID = 'usersAuthenticationsQuery';
 

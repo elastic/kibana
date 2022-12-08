@@ -9,7 +9,7 @@ import React from 'react';
 import moment from 'moment';
 
 import type { NetworkTlsNode } from '../../../../../common/search_strategy';
-import type { Columns } from '../../../../common/components/paginated_table';
+import type { Columns } from '../../../components/paginated_table';
 import {
   getRowItemDraggables,
   getRowItemDraggable,

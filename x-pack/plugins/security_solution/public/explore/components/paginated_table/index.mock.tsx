@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getOrEmptyTagFromValue } from '../empty_value';
+import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 
 import type { Columns, ItemsPerRow } from '.';
 
