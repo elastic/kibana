@@ -13,7 +13,7 @@ import Fsp from 'fs/promises';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { asyncForEachWithLimit } from '@kbn/std';
+import { asyncForEachWithLimit, asyncMapWithLimit } from '@kbn/std';
 import { Jsonc } from '@kbn/bazel-packages';
 import { readPackageMap } from '@kbn/package-map';
 
@@ -56,7 +56,7 @@ function toTypeCheckConfigPath(path: string) {
 
 async function createTypeCheckConfigs(projects: Project[]) {
   const pkgMap = readPackageMap();
-  const writes: Array<{ source: string; content: string; path: string }> = [];
+  const writes: Array<{ path: string; content: string; atime: number; mtime: number }> = [];
 
   // write tsconfig.type_check.json files for each project that is not the root
   const queue = new Set(projects.map((p) => p.tsConfigPath));
@@ -64,7 +64,6 @@ async function createTypeCheckConfigs(projects: Project[]) {
     const parsed = parseTsconfig(path);
 
     const dir = Path.dirname(path);
-    const typeCheckConfigPath = Path.resolve(dir, 'tsconfig.type_check.json');
     const refs = parsed.kbn_references ?? [];
     if (!isValidKbnRefs(refs)) {
       throw new Error(`expected valid TS refs in ${path}`);
@@ -103,23 +102,22 @@ async function createTypeCheckConfigs(projects: Project[]) {
       }),
     };
 
+    const tsconfigStat = await Fsp.stat(path);
     writes.push({
-      source: path,
-      path: typeCheckConfigPath,
+      path: Path.resolve(dir, 'tsconfig.type_check.json'),
+      atime: tsconfigStat.atimeMs,
+      mtime: tsconfigStat.mtimeMs,
       content: JSON.stringify(typeCheckConfig, null, 2),
     });
   }
 
-  const created = new Set<string>();
-
-  await asyncForEachWithLimit(writes, 50, async ({ content, path, source }) => {
-    await Fsp.writeFile(path, content, 'utf8');
-    const tsconfigStat = await Fsp.stat(source);
-    await Fsp.utimes(path, tsconfigStat.atime, tsconfigStat.mtime);
-    created.add(path);
-  });
-
-  return created;
+  return new Set<string>(
+    await asyncMapWithLimit(writes, 50, async ({ content, path, atime, mtime }) => {
+      await Fsp.writeFile(path, content, 'utf8');
+      await Fsp.utimes(path, atime, mtime);
+      return path;
+    })
+  );
 }
 
 export async function runTypeCheckCli() {
