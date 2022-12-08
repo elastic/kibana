@@ -271,7 +271,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('actions', () => {
-      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+      beforeEach(async () => {
+        await createAndNavigateToCase(getPageObject, getService);
+      });
+    
+      afterEach(async () => {
+        await cases.api.deleteAllCases();
+      });
 
       it('deletes the case successfully', async () => {
         await cases.singleCase.deleteCase();
