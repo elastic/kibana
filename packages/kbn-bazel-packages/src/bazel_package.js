@@ -8,12 +8,9 @@
 
 const { inspect } = require('util');
 const Path = require('path');
-const Fsp = require('fs/promises');
 
 const { readPackageJson } = require('./parse_package_json');
 const { readPackageManifest } = require('./parse_package_manifest');
-
-const BUILD_TYPES_RULE_NAME = /(^|\s)name\s*=\s*"build_types"/;
 
 /**
  * Representation of a Bazel Package in the Kibana repository
@@ -21,7 +18,6 @@ const BUILD_TYPES_RULE_NAME = /(^|\s)name\s*=\s*"build_types"/;
  * @property {string} normalizedRepoRelativeDir
  * @property {import('./types').KibanaPackageManifest} manifest
  * @property {import('./types').ParsedPackageJson | undefined} pkg
- * @property {string | undefined} buildBazelContent
  */
 class BazelPackage {
   /**
@@ -34,18 +30,10 @@ class BazelPackage {
     const manifest = readPackageManifest(path);
     const dir = Path.dirname(path);
 
-    let buildBazelContent;
-    try {
-      buildBazelContent = await Fsp.readFile(Path.resolve(dir, 'BUILD.bazel'), 'utf8');
-    } catch (error) {
-      throw new Error(`unable to read BUILD.bazel file in [${dir}]: ${error.message}`);
-    }
-
     return new BazelPackage(
       Path.relative(repoRoot, dir),
       manifest,
       readPackageJson(Path.resolve(dir, 'package.json')),
-      buildBazelContent
     );
   }
 
@@ -82,23 +70,10 @@ class BazelPackage {
      * @type {import('./types').ParsedPackageJson | undefined}
      */
     pkg,
-    /**
-     * Content of the BUILD.bazel file
-     * @type {string | undefined}
-     */
-    buildBazelContent = undefined
   ) {
     this.normalizedRepoRelativeDir = normalizedRepoRelativeDir;
     this.manifest = manifest;
     this.pkg = pkg;
-    this.buildBazelContent = buildBazelContent;
-  }
-
-  /**
-   * Returns true if the package includes a `:build_types` bazel rule
-   */
-  hasBuildTypesRule() {
-    return !!(this.buildBazelContent && BUILD_TYPES_RULE_NAME.test(this.buildBazelContent));
   }
 
   /**

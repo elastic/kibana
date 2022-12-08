@@ -1,16 +1,13 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
-load("//src/dev/bazel:index.bzl", "pkg_npm", "ts_project")
+load("@npm//webpack-cli:index.bzl", "webpack_cli")
 
-PKG_DIRNAME = "kbn-ui-shared-deps-npm"
-PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-npm"
-
-SOURCE_FILES = glob(
+SRCS = glob(
   [
-    "**/*.js",
+    "index.js",
+    "src/**/*",
   ],
   exclude = [
+    "**/test_helpers.ts",
     "**/*.config.js",
     "**/*.mock.*",
     "**/*.test.*",
@@ -24,17 +21,6 @@ SOURCE_FILES = glob(
     "**/test_helpers/**",
   ],
 )
-
-SRCS = SOURCE_FILES
-
-filegroup(
-  name = "srcs",
-  srcs = SRCS,
-)
-
-NPM_MODULE_EXTRA_FILES = [
-  "package.json",
-]
 
 # deps needed when importing this module from another location
 RUNTIME_DEPS = [
@@ -73,46 +59,17 @@ RUNTIME_DEPS = [
   "@npm//tslib",
 ]
 
-# deps needed to build the webpack bundles
-WEBPACK_DEPS = [
-  "@npm//webpack",
-  "@npm//clean-webpack-plugin",
-  "@npm//mini-css-extract-plugin",
-  "@npm//moment",
-  "@npm//css-loader",
-]
-
-TYPES_DEPS = [
-  "@npm//@types/node",
-] + RUNTIME_DEPS + WEBPACK_DEPS
-
-ts_config(
-  name = "tsconfig",
-  src = "tsconfig.json",
-  deps = [
-    "//:tsconfig.base.json",
-    "//:tsconfig.bazel.json",
-  ],
-)
-
-ts_project(
-  name = "tsc_types",
-  args = ['--pretty'],
-  srcs = SRCS,
-  deps = TYPES_DEPS,
-  allow_js = True,
-  declaration = True,
-  emit_declaration_only = True,
-  out_dir = "target_types",
-  tsconfig = ":tsconfig",
-)
-
-webpack(
+webpack_cli(
   name = "shared_built_assets",
-  data = RUNTIME_DEPS + WEBPACK_DEPS + [
+  data = RUNTIME_DEPS + SRCS + [
     "//:.browserslistrc",
-    ":srcs",
     ":webpack.config.js",
+
+    "@npm//webpack",
+    "@npm//clean-webpack-plugin",
+    "@npm//mini-css-extract-plugin",
+    "@npm//moment",
+    "@npm//css-loader",
   ],
   output_dir = True,
   args = [
@@ -132,25 +89,11 @@ webpack(
     },
   })
 )
-
+#
 js_library(
-  name = PKG_DIRNAME,
-  srcs = NPM_MODULE_EXTRA_FILES + SRCS,
-  deps = RUNTIME_DEPS + [':shared_built_assets'],
-  package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-js_library(
-  name = "npm_module_types",
-  srcs = NPM_MODULE_EXTRA_FILES,
-  deps = TYPES_DEPS + [":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm(
-  name = "build_types",
-  deps = [":npm_module_types"],
+  name = "kbn-ui-shared-deps-npm",
+  package_name = "@kbn/ui-shared-deps-npm",
+  srcs = SRCS + ["package.json"],
+  deps = RUNTIME_DEPS + [":shared_built_assets"],
   visibility = ["//visibility:public"],
 )
