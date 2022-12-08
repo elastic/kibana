@@ -6,14 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { createCalleeTree } from '../../common/callee';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { createBaseFlameGraph } from '../../common/flamegraph';
+import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { searchStackTraces } from './search_stacktraces';
+import { getStackTraces } from './get_stacktraces';
 import { createCommonFilter } from './query';
 
 export function registerFlameChartSearchRoute({
@@ -39,6 +41,7 @@ export function registerFlameChartSearchRoute({
 
       try {
         const esClient = await getClient(context);
+        const profilingElasticsearchClient = createProfilingEsClient({ request, esClient });
         const filter = createCommonFilter({
           timeFrom,
           timeTo,
@@ -48,9 +51,11 @@ export function registerFlameChartSearchRoute({
 
         const t0 = Date.now();
         const { stackTraceEvents, stackTraces, executables, stackFrames, totalFrames } =
-          await searchStackTraces({
+          await getStackTraces({
+            context,
             logger,
-            client: esClient,
+            esClient,
+            profilingElasticsearchClient,
             filter,
             sampleSize: targetSampleSize,
           });

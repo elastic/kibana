@@ -24,3 +24,4 @@ export const enableAgentExplorerView = 'observability:apmAgentExplorerView';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
 export const apmAWSLambdaRequestCostPerMillion = 'observability:apmAWSLambdaRequestCostPerMillion';
 export const enableCriticalPath = 'observability:apmEnableCriticalPath';
+export const profilingElasticsearchPlugin = 'observability:profilingElasticsearchPlugin';

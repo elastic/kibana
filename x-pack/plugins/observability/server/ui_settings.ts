@@ -27,6 +27,7 @@ import {
   apmAWSLambdaRequestCostPerMillion,
   enableCriticalPath,
   enableInfrastructureHostsView,
+  profilingElasticsearchPlugin,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -344,5 +345,22 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
+  },
+  [profilingElasticsearchPlugin]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingElasticsearchPlugin', {
+      defaultMessage: 'Use Elasticsearch profiler plugin',
+    }),
+    description: i18n.translate('xpack.observability.profilingElasticsearchPluginDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Whether to load stacktraces using Elasticsearch profiler plugin.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: true,
+    requiresPageReload: true,
+    type: 'boolean',
   },
 };
