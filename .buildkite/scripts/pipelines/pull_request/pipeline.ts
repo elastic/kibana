@@ -54,6 +54,10 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
+    if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
+    }
+
     if (
       (await doAnyChangesMatch([
         /^packages\/kbn-securitysolution-.*/,
