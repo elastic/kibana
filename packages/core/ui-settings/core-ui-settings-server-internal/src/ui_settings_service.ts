@@ -32,6 +32,11 @@ export interface SetupDeps {
   http: InternalHttpServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
 }
+type ClientType<T> = T extends 'global'
+  ? UiSettingsGlobalClient
+  : T extends 'namespace'
+  ? UiSettingsClient
+  : never;
 
 /** @internal */
 export class UiSettingsService
@@ -96,11 +101,11 @@ export class UiSettingsService
 
   public async stop() {}
 
-  private getScopedClientFactory(
+  private getScopedClientFactory<T extends UiSettingsScope>(
     scope: UiSettingsScope
-  ): (savedObjectsClient: SavedObjectsClientContract) => UiSettingsClient | UiSettingsGlobalClient {
+  ): (savedObjectsClient: SavedObjectsClientContract) => ClientType<T> {
     const { version, buildNum } = this.coreContext.env.packageInfo;
-    return (savedObjectsClient: SavedObjectsClientContract) => {
+    return (savedObjectsClient: SavedObjectsClientContract): ClientType<T> => {
       const isNamespaceScope = scope === 'namespace';
 
       const options = {
@@ -114,7 +119,7 @@ export class UiSettingsService
         overrides: isNamespaceScope ? this.overrides : {},
         log: this.log,
       };
-      return UiSettingsClientFactory.create(options);
+      return UiSettingsClientFactory.create(options) as ClientType<T>;
     };
   }
 
