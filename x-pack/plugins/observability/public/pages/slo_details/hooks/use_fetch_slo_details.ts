@@ -7,8 +7,9 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useMemo } from 'react';
+import { toDuration } from '../../../utils/slo/duration';
 import { useDataFetcher } from '../../../hooks/use_data_fetcher';
-import { Duration, DurationUnit, SLO } from '../../../typings';
+import { SLO } from '../../../typings';
 
 interface UseFetchSloDetailsResponse {
   loading: boolean;
@@ -72,13 +73,6 @@ function toSLO(result: any): SLO {
       },
     },
   };
-}
-
-function toDuration(duration: string): Duration {
-  const durationValue = duration.substring(0, duration.length - 1);
-  const durationUnit = duration.substring(duration.length - 1);
-
-  return { value: parseInt(durationValue, 10), unit: durationUnit as DurationUnit };
 }
 
 export type { UseFetchSloDetailsResponse };

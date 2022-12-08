@@ -8,8 +8,9 @@
 import { useCallback, useMemo } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 
-import type { Duration, DurationUnit, SLO, SLOList } from '../../typings/slo';
+import type { SLO, SLOList } from '../../typings/slo';
 import { useDataFetcher } from '../use_data_fetcher';
+import { toDuration } from '../../utils/slo/duration';
 
 const EMPTY_LIST = {
   results: [],
@@ -96,13 +97,6 @@ function toSLO(result: any): SLO {
       },
     },
   };
-}
-
-function toDuration(duration: string): Duration {
-  const durationValue = duration.substring(0, duration.length - 1);
-  const durationUnit = duration.substring(duration.length - 1);
-
-  return { value: parseInt(durationValue, 10), unit: durationUnit as DurationUnit };
 }
 
 export { useFetchSloList };
