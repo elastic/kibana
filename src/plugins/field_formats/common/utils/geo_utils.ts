@@ -1,8 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 import * as usng from 'usng.js';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 export const converter = new usng.Converter();
-
 
 export function withinRange(value: string | number, min: number, max: number) {
   const isInvalid = value === '' || value > max || value < min;
@@ -44,19 +51,27 @@ export function utmToDD(northing: string, easting: string, zoneNumber: string) {
 }
 
 export function ddToDMS(lat: number, lon: number) {
-    let southing = lat<0;
-    let westing = lon <0;
-    lat = Math.abs(lat)
-    let lathours = parseInt(lat.toString(),10).toString()
-    let latmins = parseInt((lat%1*60).toString(),10).toString()
-    let latsec = parseInt((lat%1*60%1*60).toString(),10).toString()
-    let lats = lathours.padStart(2,"0")+latmins.padStart(2,"0") +latsec.padStart(2,"0") + (southing?"S":"N")
-    lon = Math.abs(lon)
-    let lonhours = parseInt((lon).toString(),10).toString()
-    let lonmins = parseInt((lon%1*60).toString(),10).toString()
-    let lonsec = parseInt((lon%1*60%1*60).toString(),10).toString()
-    let lons = lonhours.padStart(3,"0")+lonmins.padStart(2,"0") +lonsec.padStart(2,"0") + (westing?"W":"E")
-    return `${lats},${lons}`
+  const southing = lat < 0;
+  const westing = lon < 0;
+  lat = Math.abs(lat);
+  const lathours = parseInt(lat.toString(), 10).toString();
+  const latmins = parseInt(((lat % 1) * 60).toString(), 10).toString();
+  const latsec = parseInt(((((lat % 1) * 60) % 1) * 60).toString(), 10).toString();
+  const lats =
+    lathours.padStart(2, '0') +
+    latmins.padStart(2, '0') +
+    latsec.padStart(2, '0') +
+    (southing ? 'S' : 'N');
+  lon = Math.abs(lon);
+  const lonhours = parseInt(lon.toString(), 10).toString();
+  const lonmins = parseInt(((lon % 1) * 60).toString(), 10).toString();
+  const lonsec = parseInt(((((lon % 1) * 60) % 1) * 60).toString(), 10).toString();
+  const lons =
+    lonhours.padStart(3, '0') +
+    lonmins.padStart(2, '0') +
+    lonsec.padStart(2, '0') +
+    (westing ? 'W' : 'E');
+  return `${lats},${lons}`;
 }
 
 export function ddToMGRS(lat: number, lon: number) {

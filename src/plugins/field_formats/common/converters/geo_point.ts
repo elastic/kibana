@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import { FIELD_FORMAT_IDS, TextContextTypeConvert } from '../types';
-import { asPrettyString, geoUtils} from '../utils';
-const {ddToMGRS,ddToDMS}  = geoUtils;
+import { asPrettyString, geoUtils } from '../utils';
+const { ddToMGRS, ddToDMS } = geoUtils;
 const TRANSFORM_OPTIONS = [
   {
     kind: 'none',
@@ -122,8 +122,8 @@ export class GeoPointFormat extends FieldFormat {
       case 'multi':
         return `LL: ${point.coordinates[1]},${point.coordinates[0]}
 WKT: POINT (${point.coordinates[0]} ${point.coordinates[1]})
-MGRS: ${ddToMGRS(point.coordinates[1],point.coordinates[0])}
-DMS: ${ddToDMS(point.coordinates[1],point.coordinates[0])}`
+MGRS: ${ddToMGRS(point.coordinates[1], point.coordinates[0])}
+DMS: ${ddToDMS(point.coordinates[1], point.coordinates[0])}`;
       default:
         return asPrettyString(val, options);
     }
