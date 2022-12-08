@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, estypes } from '@elastic/elasticsearch';
 import { castArray } from 'lodash';
-import { PassThrough, Readable, Transform, pipeline } from 'stream';
+import { PassThrough, pipeline, Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
+import { ValuesType } from 'utility-types';
 import {
   ESDocumentWithOperation,
   SynthtraceESAction,
   SynthtraceGenerator,
 } from '../../../../types';
 import { Logger } from '../../../utils/create_logger';
-import { createFilterTransform, fork } from '../../../utils/stream_utils';
+import { createFilterTransform, fork, parallel } from '../../../utils/stream_utils';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
 import { createSpanMetricsAggregator } from '../../aggregators/create_span_metrics_aggregator';
 import { createTransactionMetricsAggregator } from '../../aggregators/create_transaction_metrics_aggregator';
@@ -36,6 +37,16 @@ export interface ApmSynthtraceEsClientOptions {
 type MaybeArray<T> = T | T[];
 
 const DATA_STREAMS = ['traces-apm*', 'metrics-apm*', 'logs-apm*'];
+
+export enum ComponentTemplateName {
+  LogsApp = 'logs-apm.app@custom',
+  LogsError = 'logs-apm.error@custom',
+  MetricsApp = 'metrics-apm.app@custom',
+  MetricsInternal = 'metrics-apm.internal@custom',
+  TracesApm = 'traces-apm@custom',
+  TracesApmRum = 'traces-apm.rum@custom',
+  TracesApmSampled = 'traces-apm.sampled@custom',
+}
 
 export class ApmSynthtraceEsClient {
   private readonly client: Client;
@@ -67,6 +78,30 @@ export class ApmSynthtraceEsClient {
     }
   }
 
+  async updateComponentTemplate(
+    name: ComponentTemplateName,
+    modify: (
+      template: ValuesType<
+        estypes.ClusterGetComponentTemplateResponse['component_templates']
+      >['component_template']['template']
+    ) => estypes.ClusterPutComponentTemplateRequest['template']
+  ) {
+    const response = await this.client.cluster.getComponentTemplate({
+      name,
+    });
+
+    const template = response.component_templates[0];
+
+    await this.client.cluster.putComponentTemplate({
+      name,
+      template: {
+        ...modify(template.component_template.template),
+      },
+    });
+
+    this.logger.info(`Updated component template: ${name}`);
+  }
+
   async refresh(dataStreams: string[] = DATA_STREAMS) {
     this.logger.info(`Refreshing ${dataStreams.join(',')}`);
 
@@ -93,7 +128,7 @@ export class ApmSynthtraceEsClient {
         getSerializeTransform(),
         getIntakeDefaultsTransform(),
         fork(new PassThrough({ objectMode: true }), ...aggregators),
-        // createFilterTransform((event: ApmFields) => event['processor.event'] === 'metric'),
+        createFilterTransform((event: ApmFields) => event['processor.event'] === 'metric'),
         createBreakdownMetricsAggregator('30s'),
         getApmServerMetadataTransform(this.version),
         getRoutingTransform(),
@@ -108,19 +143,21 @@ export class ApmSynthtraceEsClient {
 
     let count: number = 0;
 
-    const stream = allStreams[0];
+    const stream = parallel(...allStreams);
 
     await this.client.helpers.bulk({
       concurrency: this.concurrency,
       refresh: false,
       refreshOnCompletion: false,
-      flushBytes: 5000000,
+      flushBytes: 500000,
       datasource: stream,
       onDocument: (doc: ESDocumentWithOperation<ApmFields>) => {
         let action: SynthtraceESAction;
         count++;
 
-        if (count % 1000 === 0) {
+        if (count % 100000 === 0) {
+          this.logger.info(`Indexed ${count} documents`);
+        } else if (count % 1000 === 0) {
           this.logger.debug(`Indexed ${count} documents`);
         }
 

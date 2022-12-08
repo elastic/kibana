@@ -22,7 +22,9 @@ export async function bootstrap(runOptions: RunOptions) {
     logger,
   });
 
-  const version = runOptions.versionOverride || (await kibanaClient.fetchLatestApmPackageVersion());
+  const latestPackageVersion = await kibanaClient.fetchLatestApmPackageVersion();
+
+  const version = runOptions.versionOverride || latestPackageVersion;
 
   const apmEsClient = getEsClient({
     target: esUrl,
@@ -31,7 +33,7 @@ export async function bootstrap(runOptions: RunOptions) {
     version,
   });
 
-  await kibanaClient.installApmPackage(version);
+  await kibanaClient.installApmPackage(latestPackageVersion);
 
   if (runOptions.clean) {
     await apmEsClient.clean();

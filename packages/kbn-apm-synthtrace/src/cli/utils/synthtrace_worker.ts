@@ -7,7 +7,6 @@
  */
 import { parentPort, workerData } from 'worker_threads';
 import { timerange } from '../../lib/timerange';
-import { createLogger } from '../../lib/utils/create_logger';
 import { getEsClient } from './get_es_client';
 import { getScenario } from './get_scenario';
 import { loggerProxy } from './logger_proxy';
@@ -25,7 +24,7 @@ export interface WorkerData {
 const { bucketFrom, bucketTo, runOptions, esUrl, version } = workerData as WorkerData;
 
 async function start() {
-  const logger = createLogger(runOptions.logLevel);
+  const logger = loggerProxy;
   const apmEsClient = getEsClient({
     concurrency: runOptions.concurrency,
     target: esUrl,
@@ -39,7 +38,11 @@ async function start() {
 
   logger.info(`Running scenario from ${bucketFrom.toISOString()} to ${bucketTo.toISOString()}`);
 
-  const { generate } = await scenario({ ...runOptions, logger });
+  const { generate, bootstrap } = await scenario({ ...runOptions, logger });
+
+  if (bootstrap) {
+    await bootstrap({ apmEsClient });
+  }
 
   logger.debug('Generating scenario');
 

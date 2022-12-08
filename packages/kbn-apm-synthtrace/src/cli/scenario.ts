@@ -7,6 +7,7 @@
  */
 
 import { Readable } from 'stream';
+import { ApmSynthtraceEsClient } from '../lib/apm';
 import { Timerange } from '../lib/timerange';
 import { Logger } from '../lib/utils/create_logger';
 import { SynthtraceGenerator } from '../types';
@@ -17,5 +18,6 @@ type Generate<TFields> = (options: {
 }) => SynthtraceGenerator<TFields> | Array<SynthtraceGenerator<TFields>> | Readable;
 
 export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{
+  bootstrap?: (options: { apmEsClient: ApmSynthtraceEsClient }) => Promise<void>;
   generate: Generate<TFields>;
 }>;

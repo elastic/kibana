@@ -6,16 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { range as lodashRange } from 'lodash';
+import { merge, range as lodashRange } from 'lodash';
 import { apm } from '../..';
 import { Scenario } from '../cli/scenario';
 import { ApmFields } from '../lib/apm/apm_fields';
+import { ComponentTemplateName } from '../lib/apm/client/apm_synthtrace_es_client';
 
 const scenario: Scenario<ApmFields> = async ({ logger }) => {
   return {
-    generate: ({ range }) => {
-      logger.info('Loaded scenario');
+    bootstrap: async ({ apmEsClient }) => {
+      await apmEsClient.updateComponentTemplate(
+        ComponentTemplateName.MetricsInternal,
+        (template) => {
+          const next = {
+            settings: {
+              index: {
+                number_of_shards: 8,
+              },
+            },
+          };
 
+          return merge({}, template, next);
+        }
+      );
+    },
+    generate: ({ range }) => {
       const NUM_SERVICES = 50;
       const NUM_SERVICE_NODES = 25;
       const NUM_TRANSACTION_GROUPS = 25;
@@ -48,37 +63,36 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
       return range
         .interval('1m')
         .rate(10)
-        .generator((timestamp) => {
-          logger.info('Generating data for ' + new Date(timestamp).toISOString());
-
-          const events = instances.flatMap((instance) =>
-            transactionGroupRange.flatMap((groupId, groupIndex) =>
-              OUTCOMES.map((outcome, outcomeIndex) => {
-                const index = groupIndex * outcomeIndex;
-                const duration = Math.round((index % MAX_BUCKETS) * BUCKET_SIZE + MIN_DURATION);
-
-                return instance
-                  .transaction(
-                    `transaction-${groupId}`,
-                    TRANSACTION_TYPES[groupIndex % TRANSACTION_TYPES.length]
-                  )
-                  .timestamp(timestamp)
-                  .duration(duration)
-                  .outcome(outcome)
-                  .children(
-                    instance
-                      .span('downstream', 'external', 'http')
-                      .timestamp(timestamp)
-                      .duration(duration)
-                      .outcome(outcome)
+        .generator((timestamp, timestampIndex) => {
+          return logger.perf('generate_events_for_timestamp', () => {
+            const events = instances.flatMap((instance) =>
+              transactionGroupRange.flatMap((groupId, groupIndex) =>
+                OUTCOMES.map((outcome) => {
+                  const duration = Math.round(
+                    (timestampIndex % MAX_BUCKETS) * BUCKET_SIZE + MIN_DURATION
                   );
-              })
-            )
-          );
 
-          logger.info('Done generating');
+                  return instance
+                    .transaction(
+                      `transaction-${groupId}`,
+                      TRANSACTION_TYPES[groupIndex % TRANSACTION_TYPES.length]
+                    )
+                    .timestamp(timestamp)
+                    .duration(duration)
+                    .outcome(outcome)
+                    .children(
+                      instance
+                        .span('downstream', 'external', 'http')
+                        .timestamp(timestamp)
+                        .duration(duration)
+                        .outcome(outcome)
+                    );
+                })
+              )
+            );
 
-          return events;
+            return events;
+          });
         });
     },
   };
