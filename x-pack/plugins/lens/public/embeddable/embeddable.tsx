@@ -197,7 +197,6 @@ function getViewUnderlyingDataArgs({
   activeDatasourceState: unknown;
   activeData: TableInspectorAdapter | undefined;
   dataViews: DataViewBase[] | undefined;
-  dataViewsService: DataViewsContract;
   capabilities: LensEmbeddableDeps['capabilities'];
   query: ExecutionContextSearch['query'];
   filters: Filter[];
