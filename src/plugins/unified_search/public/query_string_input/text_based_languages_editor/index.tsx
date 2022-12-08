@@ -8,7 +8,7 @@
 
 import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
 import classNames from 'classnames';
-import { SQLLang, monaco, ESQL_LANG_ID } from '@kbn/monaco';
+import { SQLLang, monaco, ESQL_LANG_ID, ESQL_THEME_ID } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
 import {
@@ -333,7 +333,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     minimap: { enabled: false },
     wordWrap: isWordWrapped ? 'on' : 'off',
     lineNumbers: showLineNumbers ? 'on' : 'off',
-    theme: isDark ? 'vs-dark' : 'vs',
+    theme: language === 'esql' ? ESQL_THEME_ID : isDark ? 'vs-dark' : 'vs',
     lineDecorationsWidth: 12,
     autoIndent: 'none',
     wrappingIndent: 'none',
