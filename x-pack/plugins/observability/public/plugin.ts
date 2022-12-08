@@ -141,11 +141,20 @@ export class Plugin
         },
       ],
     },
+    {
+      id: 'slos',
+      title: i18n.translate('xpack.observability.slosLinkTitle', {
+        defaultMessage: 'SLOs',
+      }),
+      navLinkStatus: AppNavLinkStatus.visible,
+      order: 8002,
+      path: '/slos',
+    },
     getCasesDeepLinks({
       basePath: casesPath,
       extend: {
         [CasesDeepLinkId.cases]: {
-          order: 8002,
+          order: 8003,
           navLinkStatus: AppNavLinkStatus.hidden,
         },
         [CasesDeepLinkId.casesCreate]: {
@@ -267,6 +276,7 @@ export class Plugin
           // See https://github.com/elastic/kibana/issues/103325.
           const otherLinks: NavigationEntry[] = deepLinks
             .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
+            .filter((link) => (link.id === 'slos' ? config.unsafe.slo.enabled : link))
             .map((link) => ({
               app: observabilityAppId,
               label: link.title,
