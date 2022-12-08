@@ -22,6 +22,8 @@ import { FleetError, isESClientError, AgentNotFoundError } from '../../errors';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
+import { buildStatusRuntimeQuery } from './build_status_query';
+
 const ACTIVE_AGENT_CONDITION = 'active:true';
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
 
@@ -71,13 +73,17 @@ export type GetAgentsOptions =
       perPage?: number;
     };
 
-export async function getAgents(esClient: ElasticsearchClient, options: GetAgentsOptions) {
+export async function getAgents(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  options: GetAgentsOptions
+) {
   let agents: Agent[] = [];
   if ('agentIds' in options) {
     agents = await getAgentsById(esClient, options.agentIds);
   } else if ('kuery' in options) {
     agents = (
-      await getAllAgentsByKuery(esClient, {
+      await getAllAgentsByKuery(esClient, soClient, {
         kuery: options.kuery,
         showInactive: options.showInactive ?? false,
       })
@@ -177,12 +183,14 @@ export function getElasticsearchQuery(
 
 export async function getAgentsByKuery(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
     pitId?: string;
     searchAfter?: SortResults;
+    getAgentStatus?: boolean;
   }
 ): Promise<{
   agents: Agent[];
@@ -200,6 +208,7 @@ export async function getAgentsByKuery(
     showUpgradeable,
     searchAfter,
     pitId,
+    getAgentStatus = true, // TODO: use feature flag
   } = options;
   const filters = [];
 
@@ -212,7 +221,16 @@ export async function getAgentsByKuery(
   }
 
   const kueryNode = _joinFilters(filters);
-  const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+
+  let runtimeFields: estypes.MappingRuntimeFields = {};
+  if (getAgentStatus) {
+    const unenrollTimeouts = await agentPolicyService.getUnenrollTimeouts(soClient);
+    runtimeFields = buildStatusRuntimeQuery(unenrollTimeouts);
+  }
+
+  const body = {
+    ...(kueryNode && { query: toElasticsearchQuery(kueryNode) }),
+  };
   const isDefaultSort = sortField === 'enrolled_at' && sortOrder === 'desc';
   // if using default sorting (enrolled_at), adding a secondary sort on hostname, so that the results are not changing randomly in case many agents were enrolled at the same time
   const secondarySort: estypes.Sort = isDefaultSort
@@ -224,10 +242,9 @@ export async function getAgentsByKuery(
       size,
       track_total_hits: true,
       rest_total_hits_as_int: true,
-      body: {
-        ...body,
-        sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
-      },
+      ...(getAgentStatus && { runtime_mappings: runtimeFields, fields: ['calculated_status'] }),
+      sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
+      body,
       ...(pitId
         ? {
             pit: {
@@ -276,6 +293,7 @@ export async function getAgentsByKuery(
 
 export async function getAllAgentsByKuery(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   options: Omit<ListWithKuery, 'page' | 'perPage'> & {
     showInactive: boolean;
   }
@@ -283,7 +301,11 @@ export async function getAllAgentsByKuery(
   agents: Agent[];
   total: number;
 }> {
-  const res = await getAgentsByKuery(esClient, { ...options, page: 1, perPage: SO_SEARCH_LIMIT });
+  const res = await getAgentsByKuery(esClient, soClient, {
+    ...options,
+    page: 1,
+    perPage: SO_SEARCH_LIMIT,
+  });
 
   return {
     agents: res.agents,

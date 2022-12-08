@@ -10,7 +10,11 @@ jest.mock('./crud');
 jest.mock('./status');
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 
 import { FleetUnauthorizedError } from '../../errors';
 
@@ -36,7 +40,8 @@ describe('AgentService', () => {
   describe('asScoped', () => {
     describe('without required privilege', () => {
       const agentClient = new AgentServiceImpl(
-        elasticsearchServiceMock.createElasticsearchClient()
+        elasticsearchServiceMock.createElasticsearchClient(),
+        savedObjectsClientMock.create()
       ).asScoped(httpServerMock.createKibanaRequest());
 
       beforeEach(() =>
@@ -99,7 +104,8 @@ describe('AgentService', () => {
 
     describe('with required privilege', () => {
       const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-      const agentClient = new AgentServiceImpl(mockEsClient).asScoped(
+      const mockSoClient = savedObjectsClientMock.create();
+      const agentClient = new AgentServiceImpl(mockEsClient, mockSoClient).asScoped(
         httpServerMock.createKibanaRequest()
       );
 
@@ -134,7 +140,8 @@ describe('AgentService', () => {
 
   describe('asInternalUser', () => {
     const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    const agentClient = new AgentServiceImpl(mockEsClient).asInternalUser;
+    const mockSoClient = savedObjectsClientMock.create();
+    const agentClient = new AgentServiceImpl(mockEsClient, mockSoClient).asInternalUser;
 
     expectApisToCallServicesSuccessfully(mockEsClient, agentClient);
   });

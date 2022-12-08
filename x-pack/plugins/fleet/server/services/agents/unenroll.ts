@@ -76,19 +76,19 @@ export async function unenrollAgents(
   }
 ): Promise<{ actionId: string }> {
   if ('agentIds' in options) {
-    const givenAgents = await getAgents(esClient, options);
+    const givenAgents = await getAgents(esClient, soClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, options);
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-  const res = await getAgentsByKuery(esClient, {
+  const res = await getAgentsByKuery(esClient, soClient, {
     kuery: options.kuery,
     showInactive: options.showInactive ?? false,
     page: 1,
     perPage: batchSize,
   });
   if (res.total <= batchSize) {
-    const givenAgents = await getAgents(esClient, options);
+    const givenAgents = await getAgents(esClient, soClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, options);
   } else {
     return await new UnenrollActionRunner(

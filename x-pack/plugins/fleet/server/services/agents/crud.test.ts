@@ -6,6 +6,7 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { Agent } from '../../types';
 
@@ -16,6 +17,7 @@ jest.mock('../../../common/services/is_agent_upgradeable', () => ({
 }));
 
 describe('Agents CRUD test', () => {
+  const soClientMock = savedObjectsClientMock.create();
   let esClientMock: ElasticsearchClient;
   let searchMock: jest.Mock;
 
@@ -122,11 +124,12 @@ describe('Agents CRUD test', () => {
         .mockImplementationOnce(() =>
           Promise.resolve(getEsResponse(['1', '2', '3', '4', '5', 'up', '7'], 7))
         );
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
         showInactive: false,
         page: 1,
         perPage: 5,
+        getAgentStatus: false,
       });
 
       expect(result).toEqual({
@@ -151,11 +154,12 @@ describe('Agents CRUD test', () => {
         .mockImplementationOnce(() =>
           Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5', 'up2', '7'], 7))
         );
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
         showInactive: false,
         page: 1,
         perPage: 5,
+        getAgentStatus: false,
       });
 
       expect(result).toEqual({
@@ -187,11 +191,12 @@ describe('Agents CRUD test', () => {
         .mockImplementationOnce(() =>
           Promise.resolve(getEsResponse(['up1', 'up2', 'up3', 'up4', 'up5', 'up6', '7'], 7))
         );
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
         showInactive: false,
         page: 2,
         perPage: 5,
+        getAgentStatus: false,
       });
 
       expect(result).toEqual({
@@ -214,11 +219,12 @@ describe('Agents CRUD test', () => {
       searchMock.mockImplementationOnce(() =>
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001))
       );
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
         showInactive: false,
         page: 1,
         perPage: 5,
+        getAgentStatus: false,
       });
 
       expect(result).toEqual({
@@ -239,11 +245,12 @@ describe('Agents CRUD test', () => {
 
     it('should return second page', async () => {
       searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['6', '7'], 7)));
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: false,
         showInactive: false,
         page: 2,
         perPage: 5,
+        getAgentStatus: false,
       });
 
       expect(result).toEqual({
@@ -271,8 +278,9 @@ describe('Agents CRUD test', () => {
 
     it('should pass secondary sort for default sort', async () => {
       searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 2)));
-      await getAgentsByKuery(esClientMock, {
+      await getAgentsByKuery(esClientMock, soClientMock, {
         showInactive: false,
+        getAgentStatus: false,
       });
 
       expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
@@ -283,9 +291,10 @@ describe('Agents CRUD test', () => {
 
     it('should not pass secondary sort for non-default sort', async () => {
       searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 2)));
-      await getAgentsByKuery(esClientMock, {
+      await getAgentsByKuery(esClientMock, soClientMock, {
         showInactive: false,
         sortField: 'policy_id',
+        getAgentStatus: false,
       });
       expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
         { policy_id: { order: 'desc' } },
