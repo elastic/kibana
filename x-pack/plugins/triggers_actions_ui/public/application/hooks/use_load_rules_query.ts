@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
@@ -19,10 +20,11 @@ type UseLoadRulesQueryProps = Omit<LoadRulesProps, 'http'> & {
   page: LoadRulesProps['page'];
   sort: LoadRulesProps['sort'];
   enabled: boolean;
+  refresh?: Date;
 };
 
 export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
-  const { filters, hasDefaultRuleTypesFiltersOn, page, sort, onPage, enabled } = props;
+  const { filters, hasDefaultRuleTypesFiltersOn, page, sort, onPage, enabled, refresh } = props;
   const {
     http,
     notifications: { toasts },
@@ -33,6 +35,7 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
     isLoading,
     data: rulesResponse,
     isInitialLoading,
+    dataUpdatedAt,
   } = useQuery({
     queryKey: [
       'loadRules',
@@ -44,6 +47,9 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
       filters.ruleLastRunOutcomes,
       page,
       sort,
+      {
+        refresh: refresh?.toISOString(),
+      },
     ],
     queryFn: () => {
       return loadRulesWithKueryFilter({
@@ -93,8 +99,9 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
       data: rulesResponse?.data ?? [],
       totalItemCount: rulesResponse?.total ?? 0,
     },
+    lastUpdate: moment(dataUpdatedAt).format(),
     noData,
-    initialLoad: isInitialLoading,
+    initialLoad: isInitialLoading || !rulesResponse,
     loadRules: refetch,
   };
 };

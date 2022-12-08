@@ -8,7 +8,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { capitalize, isEmpty, sortBy } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,6 +41,8 @@ import {
   RulesListFilters,
   UpdateFiltersProps,
   RulesPageContainerState,
+  BulkEditActions,
+  UpdateRulesToBulkEditProps,
 } from '../../../../types';
 import { RuleAdd, RuleEdit } from '../../rule_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -170,7 +171,6 @@ export const RulesList = ({
     {}
   );
   const [showErrors, setShowErrors] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState<string>('');
   const cloneRuleId = useRef<null | string>(null);
 
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
@@ -187,45 +187,17 @@ export const RulesList = ({
     ruleTypeId: string;
   } | null>(null);
 
-  const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
-  const [rulesToDeleteFilter, setRulesToDeleteFilter] = useState<KueryNode | null | undefined>();
-  const [isDeletingRules, setIsDeletingRules] = useState<boolean>(false);
   const [isEnablingRules, setIsEnablingRules] = useState<boolean>(false);
   const [isDisablingRules, setIsDisablingRules] = useState<boolean>(false);
 
-  // TODO - tech debt: Right now we're using null and undefined to determine if we should
-  // render the bulk edit modal. Refactor this to only keep track of 1 set of rules and types
-  // to determine which modal to show
-  const [rulesToSnooze, setRulesToSnooze] = useState<RuleTableItem[]>([]);
-  const [rulesToSnoozeFilter, setRulesToSnoozeFilter] = useState<KueryNode | null | undefined>();
-
-  const [rulesToUnsnooze, setRulesToUnsnooze] = useState<RuleTableItem[]>([]);
-  const [rulesToUnsnoozeFilter, setRulesToUnsnoozeFilter] = useState<
-    KueryNode | null | undefined
+  const [rulesToBulkEdit, setRulesToBulkEdit] = useState<RuleTableItem[]>([]);
+  const [rulesToBulkEditFilter, setRulesToBulkEditFilter] = useState<
+    KueryNode | undefined | null
   >();
+  const [bulkEditAction, setBulkEditAction] = useState<BulkEditActions | undefined>();
+  const [isBulkEditing, setIsBulkEditing] = useState<boolean>(false);
 
-  const [rulesToSchedule, setRulesToSchedule] = useState<RuleTableItem[]>([]);
-  const [rulesToScheduleFilter, setRulesToScheduleFilter] = useState<
-    KueryNode | null | undefined
-  >();
-
-  const [rulesToUnschedule, setRulesToUnschedule] = useState<RuleTableItem[]>([]);
-  const [rulesToUnscheduleFilter, setRulesToUnscheduleFilter] = useState<
-    KueryNode | null | undefined
-  >();
-
-  const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
-  const [rulesToUpdateAPIKeyFilter, setRulesToUpdateAPIKeyFilter] = useState<
-    KueryNode | null | undefined
-  >();
-
-  const [isSnoozingRules, setIsSnoozingRules] = useState<boolean>(false);
-  const [isSchedulingRules, setIsSchedulingRules] = useState<boolean>(false);
-  const [isUnsnoozingRules, setIsUnsnoozingRules] = useState<boolean>(false);
-  const [isUnschedulingRules, setIsUnschedulingRules] = useState<boolean>(false);
-  const [isUpdatingRuleAPIKeys, setIsUpdatingRuleAPIKeys] = useState<boolean>(false);
   const [isCloningRule, setIsCloningRule] = useState<boolean>(false);
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Fetch config
@@ -237,7 +209,7 @@ export const RulesList = ({
     hasAnyAuthorizedRuleType,
     authorizedRuleTypes,
     authorizedToCreateAnyRules,
-    isSuccess,
+    isSuccess: isLoadRuleTypesSuccess,
   } = useLoadRuleTypesQuery({ filteredRuleTypes });
 
   // Fetch action types
@@ -257,25 +229,32 @@ export const RulesList = ({
     };
   }, [filters, rulesTypesFilter]);
 
+  const canLoadRules = isLoadRuleTypesSuccess && hasAnyAuthorizedRuleType;
+
   // Fetch rules
-  const { rulesState, loadRules, noData, initialLoad } = useLoadRulesQuery({
+  const { rulesState, loadRules, noData, initialLoad, lastUpdate } = useLoadRulesQuery({
     filters: computedFilter,
     hasDefaultRuleTypesFiltersOn,
     page,
     sort,
     onPage: setPage,
-    enabled: isSuccess,
+    enabled: canLoadRules,
+    refresh,
   });
 
   // Fetch status aggregation
   const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
     useLoadRuleAggregationsQuery({
       filters: computedFilter,
-      enabled: isSuccess,
+      enabled: canLoadRules,
+      refresh,
     });
 
   // Fetch tags
-  const { tags, loadTags } = useLoadTagsQuery();
+  const { tags, loadTags } = useLoadTagsQuery({
+    enabled: isRuleStatusFilterEnabled,
+    refresh,
+  });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setEditFlyoutVisibility(true);
@@ -298,12 +277,10 @@ export const RulesList = ({
     if (isRuleStatusFilterEnabled) {
       await loadTags();
     }
-    setLastUpdate(moment().format());
   }, [
     loadRules,
     loadTags,
     loadRuleAggregations,
-    setLastUpdate,
     isRuleStatusFilterEnabled,
     hasAnyAuthorizedRuleType,
     ruleTypesState,
@@ -320,10 +297,6 @@ export const RulesList = ({
       config,
     });
   }, [ruleTypesState, rulesState.data, canExecuteActions, config]);
-
-  useEffect(() => {
-    // refreshRules();
-  }, [refreshRules, refresh, percentileOptions]);
 
   const {
     isAllSelected,
@@ -543,67 +516,40 @@ export const RulesList = ({
       : false;
   }, [selectedIds, rulesState.data, ruleTypesState.data, isAllSelected]);
 
-  const clearRulesToSnooze = () => {
-    setRulesToSnooze([]);
-    setRulesToSnoozeFilter(undefined);
-  };
+  const updateRulesToBulkEdit = useCallback(
+    ({ action, rules, filter }: UpdateRulesToBulkEditProps) => {
+      setBulkEditAction(action);
+      if (rules) {
+        setRulesToBulkEdit(rules);
+      }
+      if (filter) {
+        setRulesToBulkEditFilter(filter);
+      }
+      if (action === 'delete') {
+        setIsDeleteModalVisibility((rules && rules.length > 0) || Boolean(filter));
+      }
+    },
+    []
+  );
 
-  const clearRulesToDelete = () => {
-    setRulesToDelete([]);
-    setRulesToDeleteFilter(undefined);
-  };
+  const clearRulesToBulkEdit = useCallback(() => {
+    if (bulkEditAction === 'delete') {
+      setIsDeleteModalVisibility(false);
+    }
+    setRulesToBulkEdit([]);
+    setRulesToBulkEditFilter(undefined);
+    setBulkEditAction(undefined);
+  }, []);
 
-  const clearRulesToUnsnooze = () => {
-    setRulesToUnsnooze([]);
-    setRulesToUnsnoozeFilter(undefined);
-  };
-
-  const clearRulesToSchedule = () => {
-    setRulesToSchedule([]);
-    setRulesToScheduleFilter(undefined);
-  };
-
-  const clearRulesToUnschedule = () => {
-    setRulesToUnschedule([]);
-    setRulesToUnscheduleFilter(undefined);
-  };
-
-  const clearRulesToUpdateAPIKey = () => {
-    setRulesToUpdateAPIKey([]);
-    setRulesToUpdateAPIKeyFilter(undefined);
-  };
-
-  const isRulesTableLoading = useMemo(() => {
-    return (
-      isLoading ||
-      rulesState.isLoading ||
-      ruleTypesState.isLoading ||
-      isPerformingAction ||
-      isDeletingRules ||
-      isSnoozingRules ||
-      isEnablingRules ||
-      isDisablingRules ||
-      isUnsnoozingRules ||
-      isSchedulingRules ||
-      isUnschedulingRules ||
-      isUpdatingRuleAPIKeys ||
-      isCloningRule
-    );
-  }, [
-    isLoading,
-    rulesState,
-    ruleTypesState,
-    isPerformingAction,
-    isDeletingRules,
-    isEnablingRules,
-    isDisablingRules,
-    isSnoozingRules,
-    isUnsnoozingRules,
-    isSchedulingRules,
-    isUnschedulingRules,
-    isUpdatingRuleAPIKeys,
-    isCloningRule,
-  ]);
+  const isRulesTableLoading =
+    isLoading ||
+    rulesState.isLoading ||
+    ruleTypesState.isLoading ||
+    isBulkEditing ||
+    isPerformingAction ||
+    isEnablingRules ||
+    isDisablingRules ||
+    isCloningRule;
 
   const onCloneRule = async (ruleId: string) => {
     setIsCloningRule(true);
@@ -670,7 +616,12 @@ export const RulesList = ({
             onRuleEdit(rule);
           }
         }}
-        onRuleDeleteClick={(rule) => setRulesToDelete([rule.id])}
+        onRuleDeleteClick={(rule) =>
+          updateRulesToBulkEdit({
+            action: 'delete',
+            rules: [rule],
+          })
+        }
         onManageLicenseClick={(rule) =>
           setManageLicenseModalOpts({
             licenseType: ruleTypesState.data.get(rule.ruleTypeId)?.minimumLicenseRequired!,
@@ -692,9 +643,19 @@ export const RulesList = ({
             item={rule}
             onLoading={onLoading}
             onRuleChanged={() => refreshRules()}
-            setRulesToDelete={setRulesToDelete}
+            onDeleteRule={() =>
+              updateRulesToBulkEdit({
+                action: 'delete',
+                rules: [rule],
+              })
+            }
             onEditRule={() => onRuleEdit(rule)}
-            onUpdateAPIKey={setRulesToUpdateAPIKey}
+            onUpdateAPIKey={() =>
+              updateRulesToBulkEdit({
+                action: 'updateApiKey',
+                rules: [rule],
+              })
+            }
             onRunRule={() => onRunRule(rule.id)}
             onCloneRule={onCloneRule}
           />
@@ -726,6 +687,9 @@ export const RulesList = ({
                   canExecuteActions,
                   config,
                 })}
+                isBulkEditing={isBulkEditing}
+                bulkEditAction={bulkEditAction}
+                updateRulesToBulkEdit={updateRulesToBulkEdit}
                 isAllSelected={isAllSelected}
                 getFilter={getFilter}
                 onPerformingAction={() => setIsPerformingAction(true)}
@@ -733,26 +697,8 @@ export const RulesList = ({
                   refreshRules();
                   setIsPerformingAction(false);
                 }}
-                isDeletingRules={isDeletingRules}
                 isEnablingRules={isEnablingRules}
                 isDisablingRules={isDisablingRules}
-                isSnoozingRules={isSnoozingRules}
-                isUnsnoozingRules={isUnsnoozingRules}
-                isSchedulingRules={isSchedulingRules}
-                isUnschedulingRules={isUnschedulingRules}
-                isUpdatingRuleAPIKeys={isUpdatingRuleAPIKeys}
-                setRulesToDelete={setRulesToDelete}
-                setRulesToDeleteFilter={setRulesToDeleteFilter}
-                setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
-                setRulesToSnooze={setRulesToSnooze}
-                setRulesToUnsnooze={setRulesToUnsnooze}
-                setRulesToSchedule={setRulesToSchedule}
-                setRulesToUnschedule={setRulesToUnschedule}
-                setRulesToSnoozeFilter={setRulesToSnoozeFilter}
-                setRulesToUnsnoozeFilter={setRulesToUnsnoozeFilter}
-                setRulesToScheduleFilter={setRulesToScheduleFilter}
-                setRulesToUnscheduleFilter={setRulesToUnscheduleFilter}
-                setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
                 onEnable={onEnable}
                 onDisable={onDisable}
               />
@@ -777,6 +723,7 @@ export const RulesList = ({
       )}
     </>
   );
+
   // if initial load, show spinner
   const getRulesList = () => {
     if (noData && !rulesState.isLoading && !ruleTypesState.isLoading) {
@@ -799,13 +746,9 @@ export const RulesList = ({
 
   const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
 
-  useEffect(() => {
-    setIsDeleteModalVisibility(rulesToDelete.length > 0 || Boolean(rulesToDeleteFilter));
-  }, [rulesToDelete, rulesToDeleteFilter]);
-
   const { showToast } = useBulkOperationToast({ onSearchPopulate });
 
-  const onEnable = useCallback(async () => {
+  const onEnable = async () => {
     setIsEnablingRules(true);
 
     const { errors, total } = await bulkEnableRules({
@@ -818,9 +761,9 @@ export const RulesList = ({
     showToast({ action: 'ENABLE', errors, total });
     await refreshRules();
     onClearSelection();
-  }, [http, selectedIds, getFilter, setIsEnablingRules, showToast]);
+  };
 
-  const onDisable = useCallback(async () => {
+  const onDisable = async () => {
     setIsDisablingRules(true);
 
     const { errors, total } = await bulkDisableRules({
@@ -833,30 +776,33 @@ export const RulesList = ({
     showToast({ action: 'DISABLE', errors, total });
     await refreshRules();
     onClearSelection();
-  }, [http, selectedIds, getFilter, setIsDisablingRules, showToast]);
+  };
 
   const onDeleteCancel = () => {
     setIsDeleteModalVisibility(false);
-    clearRulesToDelete();
+    clearRulesToBulkEdit();
   };
-  const onDeleteConfirm = useCallback(async () => {
+  const onDeleteConfirm = async () => {
+    if (bulkEditAction !== 'delete') {
+      return;
+    }
     setIsDeleteModalVisibility(false);
-    setIsDeletingRules(true);
+    setIsBulkEditing(true);
 
     const { errors, total } = await bulkDeleteRules({
-      filter: rulesToDeleteFilter,
-      ids: rulesToDelete,
+      filter: rulesToBulkEditFilter,
+      ids: rulesToBulkEdit.map((rule) => rule.id),
       http,
     });
 
-    setIsDeletingRules(false);
+    setIsBulkEditing(false);
     showToast({ action: 'DELETE', errors, total });
-    await refreshRules();
-    clearRulesToDelete();
+    clearRulesToBulkEdit();
     onClearSelection();
-  }, [http, rulesToDelete, rulesToDeleteFilter, setIsDeletingRules, toasts]);
+    refreshRules();
+  };
 
-  const numberRulesToDelete = rulesToDelete.length || numberOfSelectedItems;
+  const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
 
   return (
     <section data-test-subj="rulesList">
@@ -877,64 +823,62 @@ export const RulesList = ({
         />
       )}
       <BulkSnoozeModal
-        rulesToSnooze={rulesToSnooze}
-        rulesToUnsnooze={rulesToUnsnooze}
-        rulesToSnoozeFilter={rulesToSnoozeFilter}
-        rulesToUnsnoozeFilter={rulesToUnsnoozeFilter}
+        rules={rulesToBulkEdit}
+        filter={rulesToBulkEditFilter}
+        bulkEditAction={bulkEditAction}
         numberOfSelectedRules={numberOfSelectedItems}
-        setIsSnoozingRule={setIsSnoozingRules}
-        setIsUnsnoozingRule={setIsUnsnoozingRules}
+        setIsBulkEditing={setIsBulkEditing}
         onClose={() => {
-          clearRulesToSnooze();
-          clearRulesToUnsnooze();
+          // Don't clear the bulk edit action yet since we need it for loading indicator
+          setRulesToBulkEdit([]);
+          setRulesToBulkEditFilter(undefined);
         }}
         onSave={async () => {
-          clearRulesToSnooze();
-          clearRulesToUnsnooze();
+          clearRulesToBulkEdit();
           onClearSelection();
           await refreshRules();
         }}
         onSearchPopulate={onSearchPopulate}
       />
       <BulkSnoozeScheduleModal
-        rulesToSchedule={rulesToSchedule}
-        rulesToUnschedule={rulesToUnschedule}
-        rulesToScheduleFilter={rulesToScheduleFilter}
-        rulesToUnscheduleFilter={rulesToUnscheduleFilter}
+        rules={rulesToBulkEdit}
+        filter={rulesToBulkEditFilter}
+        bulkEditAction={bulkEditAction}
         numberOfSelectedRules={numberOfSelectedItems}
-        setIsSchedulingRule={setIsSchedulingRules}
-        setIsUnschedulingRule={setIsUnschedulingRules}
+        setIsBulkEditing={setIsBulkEditing}
         onClose={() => {
-          clearRulesToSchedule();
-          clearRulesToUnschedule();
+          // Don't clear the bulk edit action yet since we need it for loading indicator
+          setRulesToBulkEdit([]);
+          setRulesToBulkEditFilter(undefined);
         }}
         onSave={async () => {
-          clearRulesToSchedule();
-          clearRulesToUnschedule();
+          clearRulesToBulkEdit();
           onClearSelection();
           await refreshRules();
         }}
         onSearchPopulate={onSearchPopulate}
       />
-      <UpdateApiKeyModalConfirmation
-        onCancel={() => {
-          clearRulesToUpdateAPIKey();
-        }}
-        idsToUpdate={rulesToUpdateAPIKey}
-        idsToUpdateFilter={rulesToUpdateAPIKeyFilter}
-        numberOfSelectedRules={numberOfSelectedItems}
-        apiUpdateApiKeyCall={bulkUpdateAPIKey}
-        setIsLoadingState={(newIsLoading: boolean) => {
-          setIsUpdatingRuleAPIKeys(newIsLoading);
-          setIsLoading(newIsLoading);
-        }}
-        onUpdated={async () => {
-          clearRulesToUpdateAPIKey();
-          onClearSelection();
-          await refreshRules();
-        }}
-        onSearchPopulate={onSearchPopulate}
-      />
+      {bulkEditAction === 'updateApiKey' && (
+        <UpdateApiKeyModalConfirmation
+          onCancel={() => {
+            clearRulesToBulkEdit();
+          }}
+          rulesToUpdate={rulesToBulkEdit}
+          idsToUpdateFilter={rulesToBulkEditFilter}
+          numberOfSelectedRules={numberOfSelectedItems}
+          apiUpdateApiKeyCall={bulkUpdateAPIKey}
+          setIsLoadingState={(newIsLoading: boolean) => {
+            setIsBulkEditing(newIsLoading);
+            setIsLoading(newIsLoading);
+          }}
+          onUpdated={async () => {
+            clearRulesToBulkEdit();
+            onClearSelection();
+            await refreshRules();
+          }}
+          onSearchPopulate={onSearchPopulate}
+        />
+      )}
       <EuiSpacer size="xs" />
       {getRulesList()}
       {ruleFlyoutVisible && (

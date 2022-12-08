@@ -10,7 +10,14 @@ import { useQuery } from '@tanstack/react-query';
 import { loadRuleTags } from '../lib/rule_api';
 import { useKibana } from '../../common/lib/kibana';
 
-export function useLoadTagsQuery() {
+interface UseLoadTagsQueryProps {
+  enabled: boolean;
+  refresh?: Date;
+}
+
+export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
+  const { enabled, refresh } = props;
+
   const {
     http,
     notifications: { toasts },
@@ -29,9 +36,15 @@ export function useLoadTagsQuery() {
   };
 
   const { refetch, data } = useQuery({
-    queryKey: ['loadRuleTags'],
+    queryKey: [
+      'loadRuleTags',
+      {
+        refresh: refresh?.toDateString(),
+      },
+    ],
     queryFn,
     onError: onErrorFn,
+    enabled,
   });
 
   return {

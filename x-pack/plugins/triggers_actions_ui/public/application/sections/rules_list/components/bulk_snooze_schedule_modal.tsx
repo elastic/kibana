@@ -24,7 +24,7 @@ import {
   ComponentOpts as BulkOperationsComponentOpts,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleSnoozeScheduler } from './rule_snooze/scheduler';
-import { RuleTableItem, SnoozeSchedule } from '../../../../types';
+import { RuleTableItem, SnoozeSchedule, BulkEditActions } from '../../../../types';
 import { useBulkEditResponse } from '../../../hooks/use_bulk_edit_response';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -49,31 +49,27 @@ const deleteConfirmSingle = (ruleName: string) =>
   });
 
 export type BulkSnoozeScheduleModalProps = {
-  rulesToSchedule: RuleTableItem[];
-  rulesToUnschedule: RuleTableItem[];
-  rulesToScheduleFilter?: KueryNode | null | undefined;
-  rulesToUnscheduleFilter?: KueryNode | null | undefined;
+  rules: RuleTableItem[];
+  filter?: KueryNode | null;
+  bulkEditAction?: BulkEditActions;
   numberOfSelectedRules?: number;
   onClose: () => void;
   onSave: () => void;
-  setIsSchedulingRule: (isLoading: boolean) => void;
-  setIsUnschedulingRule: (isLoading: boolean) => void;
+  setIsBulkEditing: (isLoading: boolean) => void;
   onSearchPopulate?: (filter: string) => void;
 } & BulkOperationsComponentOpts;
 
 export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => {
   const {
-    rulesToSchedule,
-    rulesToUnschedule,
-    rulesToScheduleFilter,
-    rulesToUnscheduleFilter,
+    rules,
+    filter,
+    bulkEditAction,
     numberOfSelectedRules = 0,
     onClose,
     onSave,
     bulkSnoozeRules,
     bulkUnsnoozeRules,
-    setIsSchedulingRule,
-    setIsUnschedulingRule,
+    setIsBulkEditing,
     onSearchPopulate,
   } = props;
 
@@ -83,27 +79,13 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
 
   const { showToast } = useBulkEditResponse({ onSearchPopulate });
 
-  const isScheduleModalOpen = useMemo(() => {
-    if (typeof rulesToScheduleFilter !== 'undefined') {
-      return true;
-    }
-    return rulesToSchedule.length > 0;
-  }, [rulesToSchedule, rulesToScheduleFilter]);
-
-  const isUnscheduleModalOpen = useMemo(() => {
-    if (typeof rulesToUnscheduleFilter !== 'undefined') {
-      return true;
-    }
-    return rulesToUnschedule.length > 0;
-  }, [rulesToUnschedule, rulesToUnscheduleFilter]);
-
   const onAddSnoozeSchedule = async (schedule: SnoozeSchedule) => {
     onClose();
-    setIsSchedulingRule(true);
+    setIsBulkEditing(true);
     try {
       const response = await bulkSnoozeRules({
-        ids: rulesToSchedule.map((item) => item.id),
-        filter: rulesToScheduleFilter,
+        ids: rules.map((item) => item.id),
+        filter,
         snoozeSchedule: schedule,
       });
       showToast(response, 'snoozeSchedule');
@@ -112,17 +94,17 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
         title: failureMessage,
       });
     }
-    setIsSchedulingRule(false);
+    setIsBulkEditing(false);
     onSave();
   };
 
   const onRemoveSnoozeSchedule = async () => {
     onClose();
-    setIsUnschedulingRule(true);
+    setIsBulkEditing(true);
     try {
       const response = await bulkUnsnoozeRules({
-        ids: rulesToUnschedule.map((item) => item.id),
-        filter: rulesToUnscheduleFilter,
+        ids: rules.map((item) => item.id),
+        filter,
         scheduleIds: [],
       });
       showToast(response, 'snoozeSchedule');
@@ -131,18 +113,18 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
         title: failureMessage,
       });
     }
-    setIsUnschedulingRule(false);
+    setIsBulkEditing(false);
     onSave();
   };
 
   const confirmationTitle = useMemo(() => {
-    if (!rulesToScheduleFilter && numberOfSelectedRules === 1 && rulesToSchedule[0]) {
-      return deleteConfirmSingle(rulesToSchedule[0].name);
+    if (!filter && numberOfSelectedRules === 1 && rules[0]) {
+      return deleteConfirmSingle(rules[0].name);
     }
     return deleteConfirmPlural(numberOfSelectedRules);
-  }, [rulesToSchedule, rulesToScheduleFilter, numberOfSelectedRules]);
+  }, [rules, filter, numberOfSelectedRules]);
 
-  if (isUnscheduleModalOpen) {
+  if (bulkEditAction === 'unschedule' && (rules.length || filter)) {
     return (
       <EuiConfirmModal
         title={confirmationTitle}
@@ -167,7 +149,7 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
     );
   }
 
-  if (isScheduleModalOpen) {
+  if (bulkEditAction === 'schedule' && (rules.length || filter)) {
     return (
       <EuiModal onClose={onClose}>
         <EuiModalHeader>

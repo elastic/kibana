@@ -25,10 +25,11 @@ const initializeAggregationResult = (values: readonly string[]) => {
 interface UseLoadRuleAggregationsQueryProps {
   filters: RulesListFilters;
   enabled: boolean;
+  refresh?: Date;
 }
 
 export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQueryProps) => {
-  const { filters, enabled } = props;
+  const { filters, enabled, refresh } = props;
 
   const {
     http,
@@ -74,6 +75,9 @@ export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQuery
       filters.ruleLastRunOutcomes,
       filters.ruleStatuses,
       filters.tags,
+      {
+        refresh: refresh?.toISOString(),
+      },
     ],
     queryFn: internalLoadRuleAggregations,
     initialData,

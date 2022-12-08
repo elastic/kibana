@@ -23,6 +23,7 @@ import {
   AlertHistoryDefaultIndexName,
   AsApiContract,
 } from '@kbn/actions-plugin/common';
+import { KueryNode } from '@kbn/es-query';
 import {
   ActionGroup,
   RuleActionParam,
@@ -603,4 +604,18 @@ export type UpdateFiltersProps =
 export interface RulesPageContainerState {
   lastResponse: string[];
   status: RuleStatus[];
+}
+
+export type BulkEditActions =
+  | 'snooze'
+  | 'unsnooze'
+  | 'schedule'
+  | 'unschedule'
+  | 'updateApiKey'
+  | 'delete';
+
+export interface UpdateRulesToBulkEditProps {
+  action: BulkEditActions;
+  rules?: RuleTableItem[];
+  filter?: KueryNode | null;
 }
