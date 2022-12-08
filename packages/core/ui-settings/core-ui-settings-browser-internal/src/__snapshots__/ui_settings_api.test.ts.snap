@@ -123,7 +123,7 @@ Array [
 exports[`#batchSetGlobal Buffers are always clear of previously buffered changes: two requests, second only sends bar, not foo 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/settings/global",
+    "/foo/bar/api/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -134,7 +134,7 @@ Array [
     },
   ],
   Array [
-    "/foo/bar/api/kibana/settings/global",
+    "/foo/bar/api/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -150,7 +150,7 @@ Array [
 exports[`#batchSetGlobal Overwrites previously buffered values with new values for the same key: two requests, foo=d in final 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/settings/global",
+    "/foo/bar/api/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -161,7 +161,7 @@ Array [
     },
   ],
   Array [
-    "/foo/bar/api/kibana/settings/global",
+    "/foo/bar/api/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -177,7 +177,7 @@ Array [
 exports[`#batchSetGlobal buffers changes while first request is in progress, sends buffered changes after first request completes: final, includes both requests 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/settings/global",
+    "/foo/bar/api/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -188,7 +188,7 @@ Array [
     },
   ],
   Array [
-    "/foo/bar/api/kibana/settings/global",
+    "/foo/bar/api/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",
@@ -227,7 +227,7 @@ exports[`#batchSetGlobal rejects on 500 1`] = `"Request failed with status code:
 exports[`#batchSetGlobal sends a single change immediately: single change 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/settings/global",
+    "/foo/bar/api/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",

@@ -71,7 +71,7 @@ export function registerSetRoute(router: InternalUiSettingsRouter) {
     }
   );
   router.post(
-    { path: '/api/kibana/settings/global/{key}', validate },
+    { path: '/api/kibana/global_settings/{key}', validate },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await setFromRequest(uiSettingsClient, context, request, response);

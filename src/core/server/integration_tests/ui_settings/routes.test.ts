@@ -60,7 +60,7 @@ describe('ui settings service', () => {
       describe('set', () => {
         it('validates value', async () => {
           const response = await request
-            .post(root, '/api/kibana/settings/global/custom')
+            .post(root, '/api/kibana/global_settings/custom')
             .send({ value: 100 })
             .expect(400);
 
@@ -72,7 +72,7 @@ describe('ui settings service', () => {
       describe('set many', () => {
         it('validates value', async () => {
           const response = await request
-            .post(root, '/api/kibana/settings/global')
+            .post(root, '/api/kibana/global_settings')
             .send({ changes: { custom: 100, foo: 'bar' } })
             .expect(400);
 
