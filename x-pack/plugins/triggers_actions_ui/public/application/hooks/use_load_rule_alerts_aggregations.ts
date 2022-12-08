@@ -88,7 +88,7 @@ export function useLoadRuleAlertsAggs({ features, ruleId, timeRange }: UseLoadRu
         }
       }
     }
-  }, [http, features, ruleId]);
+  }, [features, http, ruleId, timeRange]);
   useEffect(() => {
     loadRuleAlertsAgg();
   }, [loadRuleAlertsAgg]);
