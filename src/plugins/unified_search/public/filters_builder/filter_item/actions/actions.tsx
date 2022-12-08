@@ -48,6 +48,7 @@ export const FilterItemActions: FC<FilterItemActionsProps & { minimizePaddings?:
             iconType="plusInCircle"
             size="xs"
             iconSize="s"
+            flush="right"
             aria-label={strings.getAddOrFilterGroupButtonIconLabel()}
             data-test-subj="add-or-filter"
             {...(minimizePaddings ? { className: actionButtonCss } : {})}
@@ -64,6 +65,7 @@ export const FilterItemActions: FC<FilterItemActionsProps & { minimizePaddings?:
             iconType="plusInCircle"
             size="xs"
             iconSize="s"
+            flush="right"
             aria-label={strings.getAddAndFilterGroupButtonIconLabel()}
             data-test-subj="add-and-filter"
             {...(minimizePaddings ? { className: actionButtonCss } : {})}
