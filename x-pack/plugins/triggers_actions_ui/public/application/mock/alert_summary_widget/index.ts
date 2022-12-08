@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertSummaryTimeRange } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_load_rule_alerts_aggregations';
+import { AlertSummaryTimeRange } from '../../hooks/use_load_rule_alerts_aggregations';
 import { Rule } from '../../../types';
 
 export const mockRule = (): Rule => {
