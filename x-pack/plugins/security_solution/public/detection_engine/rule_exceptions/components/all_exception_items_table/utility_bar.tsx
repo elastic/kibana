@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiText, EuiButtonGroup } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,7 +23,7 @@ const StyledText = styled.span`
   font-weight: bold;
 `;
 
-const MyUtilities = styled(EuiFlexGroup)`
+const MyUtilities = styled.div`
   height: 50px;
 `;
 
@@ -36,6 +36,8 @@ interface ExceptionsViewerUtilityProps {
   pagination: ExceptionsPagination;
   // Corresponds to last time exception items were fetched
   lastUpdated: string | number;
+  exceptionsToShow: { [id: string]: boolean };
+  onChangeExceptionsToShow: (optionId: string) => void;
 }
 
 /**
@@ -44,9 +46,11 @@ interface ExceptionsViewerUtilityProps {
 const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> = ({
   pagination,
   lastUpdated,
-}): JSX.Element => (
-  <MyUtilities alignItems="center" justifyContent="spaceBetween">
-    <EuiFlexItem grow={false}>
+  exceptionsToShow,
+  onChangeExceptionsToShow,
+}): JSX.Element => {
+  return (
+    <MyUtilities>
       <UtilityBar>
         <UtilityBarSection>
           <UtilityBarGroup>
@@ -67,28 +71,48 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
             </UtilityBarText>
           </UtilityBarGroup>
         </UtilityBarSection>
-      </UtilityBar>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="s" data-test-subj="exceptionsViewerLastUpdated">
-        <FormattedMessage
-          id="xpack.securitySolution.exceptions.viewer.lastUpdated"
-          defaultMessage="Updated {updated}"
-          values={{
-            updated: (
-              <StyledCondition>
-                <FormattedRelativePreferenceDate
-                  value={lastUpdated}
-                  tooltipAnchorClassName="eui-textTruncate"
+        <UtilityBarSection>
+          <UtilityBarGroup>
+            <UtilityBarText dataTestSubj="lastUpdated">
+              <EuiText size="s" data-test-subj="exceptionsViewerLastUpdated">
+                <FormattedMessage
+                  id="xpack.securitySolution.exceptions.viewer.lastUpdated"
+                  defaultMessage="Updated {updated}"
+                  values={{
+                    updated: (
+                      <StyledCondition>
+                        <FormattedRelativePreferenceDate
+                          value={lastUpdated}
+                          tooltipAnchorClassName="eui-textTruncate"
+                        />
+                      </StyledCondition>
+                    ),
+                  }}
                 />
-              </StyledCondition>
-            ),
-          }}
-        />
-      </EuiText>
-    </EuiFlexItem>
-  </MyUtilities>
-);
+              </EuiText>
+            </UtilityBarText>
+            <EuiButtonGroup
+              legend="Displayed exceptions button group"
+              options={[
+                {
+                  id: `active`,
+                  label: 'Active Exceptions',
+                },
+                {
+                  id: `expired`,
+                  label: 'Expired Exceptions',
+                },
+              ]}
+              idToSelectedMap={exceptionsToShow}
+              onChange={onChangeExceptionsToShow}
+              type="multi"
+            />
+          </UtilityBarGroup>
+        </UtilityBarSection>
+      </UtilityBar>
+    </MyUtilities>
+  );
+};
 
 ExceptionsViewerUtilityComponent.displayName = 'ExceptionsViewerUtilityComponent';
 

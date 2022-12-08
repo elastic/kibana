@@ -29,6 +29,7 @@ export interface State {
   viewerState: ViewerState;
   isReadOnly: boolean;
   lastUpdated: string | number;
+  exceptionsToShow: { [id: string]: boolean };
 }
 
 export type Action =
@@ -53,6 +54,10 @@ export type Action =
   | {
       type: 'setLastUpdateTime';
       lastUpdate: string | number;
+    }
+  | {
+      type: 'setExceptionsToShow';
+      optionId: string;
     };
 
 export const allExceptionItemsReducer =
@@ -102,6 +107,15 @@ export const allExceptionItemsReducer =
         return {
           ...state,
           lastUpdated: action.lastUpdate,
+        };
+      }
+      case 'setExceptionsToShow': {
+        return {
+          ...state,
+          exceptionsToShow: {
+            ...state.exceptionsToShow,
+            ...{ [action.optionId]: !state.exceptionsToShow[action.optionId] },
+          },
         };
       }
       default:

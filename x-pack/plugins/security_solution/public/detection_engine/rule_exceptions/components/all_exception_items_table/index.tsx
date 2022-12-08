@@ -24,6 +24,7 @@ import {
   fetchExceptionListsItemsByListIds,
 } from '@kbn/securitysolution-list-api';
 
+import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { ExceptionsViewerSearchBar } from './search_bar';
@@ -66,6 +67,7 @@ const initialState: State = {
   viewerState: 'loading',
   isReadOnly: true,
   lastUpdated: Date.now(),
+  exceptionsToShow: { active: true },
 };
 
 export interface GetExceptionItemProps {
@@ -116,7 +118,16 @@ const ExceptionsViewerComponent = ({
 
   // Reducer state
   const [
-    { exceptions, pagination, currenFlyout, exceptionToEdit, viewerState, isReadOnly, lastUpdated },
+    {
+      exceptions,
+      pagination,
+      currenFlyout,
+      exceptionToEdit,
+      viewerState,
+      isReadOnly,
+      lastUpdated,
+      exceptionsToShow,
+    },
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), {
     ...initialState,
@@ -179,6 +190,16 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
+  const setExceptionsToShow = useCallback(
+    (optionId: string): void => {
+      dispatch({
+        type: 'setExceptionsToShow',
+        optionId,
+      });
+    },
+    [dispatch]
+  );
+
   const [isLoadingReferences, isFetchReferencesError, allReferences, fetchReferences] =
     useFindExceptionListReferences();
 
@@ -197,6 +218,28 @@ const ExceptionsViewerComponent = ({
       setViewerState(null);
     }
   }, [isLoadingReferences, isFetchReferencesError, setViewerState, viewerState]);
+
+  useEffect(() => {
+    if (!exceptionsToShow.active && !exceptionsToShow.expired) {
+      setExceptionsToShow('active');
+    }
+  }, [exceptionsToShow, setExceptionsToShow]);
+
+  const exceptionListFilter = useMemo(() => {
+    if (exceptionsToShow.active && exceptionsToShow.expired) {
+      return undefined;
+    }
+    const namespaceTypes = exceptionListsToQuery.map((list) => list.namespace_type);
+    const savedObjectPrefix = getSavedObjectTypes({
+      namespaceType: namespaceTypes,
+    });
+    if (exceptionsToShow.active) {
+      return `(${savedObjectPrefix}.attributes.expire_time > "${new Date().toISOString()}" OR NOT ${savedObjectPrefix}.attributes.expire_time: *)`;
+    }
+    if (exceptionsToShow.expired) {
+      return `(${savedObjectPrefix}.attributes.expire_time <= "${new Date().toISOString()}")`;
+    }
+  }, [exceptionsToShow, exceptionListsToQuery]);
 
   const handleFetchItems = useCallback(
     async (options?: GetExceptionItemProps) => {
@@ -228,7 +271,7 @@ const ExceptionsViewerComponent = ({
         total,
         data,
       } = await fetchExceptionListsItemsByListIds({
-        filter: undefined,
+        filter: exceptionListFilter,
         http: services.http,
         listIds: exceptionListsToQuery.map((list) => list.list_id),
         namespaceTypes: exceptionListsToQuery.map((list) => list.namespace_type),
@@ -248,7 +291,13 @@ const ExceptionsViewerComponent = ({
         total,
       };
     },
-    [pagination.pageIndex, pagination.pageSize, exceptionListsToQuery, services.http]
+    [
+      pagination.pageIndex,
+      pagination.pageSize,
+      exceptionListsToQuery,
+      services.http,
+      exceptionListFilter,
+    ]
   );
 
   const handleGetExceptionListItems = useCallback(
@@ -304,6 +353,13 @@ const ExceptionsViewerComponent = ({
       }
     },
     [handleFetchItems, setExceptions, setViewerState, toasts]
+  );
+
+  const handleExceptionsToShow = useCallback(
+    (optionId: string): void => {
+      setExceptionsToShow(optionId);
+    },
+    [setExceptionsToShow]
   );
 
   const handleAddException = useCallback((): void => {
@@ -443,7 +499,12 @@ const ExceptionsViewerComponent = ({
             <>
               <EuiSpacer size="l" />
 
-              <ExceptionsViewerUtility pagination={pagination} lastUpdated={lastUpdated} />
+              <ExceptionsViewerUtility
+                pagination={pagination}
+                exceptionsToShow={exceptionsToShow}
+                onChangeExceptionsToShow={handleExceptionsToShow}
+                lastUpdated={lastUpdated}
+              />
             </>
           )}
 

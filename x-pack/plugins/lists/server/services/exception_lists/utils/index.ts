@@ -333,6 +333,7 @@ export const transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSch
   itemId,
   namespaceType,
   osTypes,
+  expireTime,
   // The `UpdateExceptionListItemOptions` type differs from the schema in that some properties are
   // marked as having `undefined` as a valid value, where the schema, however, requires it.
   // So we assign defaults here
@@ -344,6 +345,7 @@ export const transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSch
   return {
     ...rest,
     description,
+    expire_time: expireTime,
     item_id: itemId,
     name,
     namespace_type: namespaceType,
