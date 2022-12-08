@@ -12,8 +12,8 @@ import { EuiHealth, transparentize } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
 
-import { WithHoverActions } from '../../with_hover_actions';
-import { RiskSeverity } from '../../../../../common/search_strategy';
+import { WithHoverActions } from '../../../../../common/components/with_hover_actions';
+import { RiskSeverity } from '../../../../../../common/search_strategy';
 
 export const RISK_SEVERITY_COLOUR: { [k in RiskSeverity]: string } = {
   [RiskSeverity.unknown]: euiLightVars.euiColorMediumShade,

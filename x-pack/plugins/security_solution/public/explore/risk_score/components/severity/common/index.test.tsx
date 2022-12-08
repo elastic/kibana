@@ -8,13 +8,13 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../../mock';
+import { TestProviders } from '../../../../../common/mock';
 
 import type { EuiHealthProps } from '@elastic/eui';
 import { EuiHealth } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { RiskScore } from '.';
 
 jest.mock('@elastic/eui', () => {

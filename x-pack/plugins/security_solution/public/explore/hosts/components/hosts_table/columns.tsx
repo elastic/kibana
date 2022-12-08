@@ -18,12 +18,12 @@ import { FormattedRelativePreferenceDate } from '../../../../common/components/f
 import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 import { DefaultDraggable } from '../../../../common/components/draggables';
-import type { HostsTableColumns } from './index';
+import type { HostsTableColumns } from '.';
 
 import * as i18n from './translations';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
 import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
-import { RiskScore } from '../../../../common/components/severity/common';
+import { RiskScore } from '../../../risk_score/components/severity/common';
 
 export const getHostsColumns = (
   showRiskColumn: boolean,

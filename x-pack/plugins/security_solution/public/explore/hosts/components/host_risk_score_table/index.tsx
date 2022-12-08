@@ -25,11 +25,11 @@ import type { State } from '../../../../common/store';
 import * as i18n from '../hosts_table/translations';
 import * as i18nHosts from './translations';
 
-import { SeverityBadges } from '../../../../common/components/severity/severity_badges';
-import { SeverityBar } from '../../../../common/components/severity/severity_bar';
-import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
+import { SeverityBadges } from '../../../risk_score/components/severity/severity_badges';
+import { SeverityBar } from '../../../risk_score/components/severity/severity_bar';
+import { SeverityFilterGroup } from '../../../risk_score/components/severity/severity_filter_group';
 
-import type { SeverityCount } from '../../../../common/components/severity/types';
+import type { SeverityCount } from '../../../risk_score/components/severity/types';
 
 export const rowItems: ItemsPerRow[] = [
   {

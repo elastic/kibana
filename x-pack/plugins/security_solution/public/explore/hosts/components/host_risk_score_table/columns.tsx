@@ -16,13 +16,13 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
-import type { HostRiskScoreColumns } from './index';
+import type { HostRiskScoreColumns } from '.';
 
 import * as i18n from './translations';
 import { HostsTableType } from '../../store/model';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreFields } from '../../../../../common/search_strategy';
-import { RiskScore } from '../../../../common/components/severity/common';
+import { RiskScore } from '../../../risk_score/components/severity/common';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,

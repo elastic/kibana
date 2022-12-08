@@ -27,7 +27,7 @@ import { usersActions, usersModel, usersSelectors } from '../../store';
 import type { User } from '../../../../../common/search_strategy/security_solution/users/all';
 import type { SortUsersField } from '../../../../../common/search_strategy/security_solution/users/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScore } from '../../../../common/components/severity/common';
+import { RiskScore } from '../../../risk_score/components/severity/common';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { VIEW_USERS_BY_SEVERITY } from '../user_risk_score_table/translations';
 import { SecurityPageName } from '../../../../app/types';

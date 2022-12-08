@@ -9,7 +9,7 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { EntityAnalyticsHeader } from '.';
 import { Direction, RiskScoreFields, RiskSeverity } from '../../../../../common/search_strategy';
-import type { SeverityCount } from '../../../../common/components/severity/types';
+import type { SeverityCount } from '../../../../explore/risk_score/components/severity/types';
 import { TestProviders } from '../../../../common/mock';
 import { hostsActions } from '../../../../explore/hosts/store';
 import { HostsType } from '../../../../explore/hosts/store/model';

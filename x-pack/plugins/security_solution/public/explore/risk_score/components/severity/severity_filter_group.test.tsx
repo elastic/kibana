@@ -7,8 +7,8 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { SeverityFilterGroup } from './severity_filter_group';
-import { RiskSeverity } from '../../../../common/search_strategy';
-import { TestProviders } from '../../mock';
+import { RiskSeverity } from '../../../../../common/search_strategy';
+import { TestProviders } from '../../../../common/mock';
 
 describe('SeverityFilterGroup', () => {
   it('preserves sort order when severityCount is out of order', () => {

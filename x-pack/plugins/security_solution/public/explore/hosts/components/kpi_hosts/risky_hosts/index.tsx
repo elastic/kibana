@@ -35,7 +35,7 @@ import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { HoverVisibilityContainer } from '../../../../../common/components/hover_visibility_container';
 import type { KpiRiskScoreStrategyResponse } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../../common/search_strategy';
-import { RiskScore } from '../../../../../common/components/severity/common';
+import { RiskScore } from '../../../../risk_score/components/severity/common';
 
 const KpiBaseComponentLoader: React.FC = () => (
   <EuiFlexGroup justifyContent="center" alignItems="center" data-test-subj="KpiLoader">

@@ -18,10 +18,10 @@ import * as i18nUsers from '../../pages/translations';
 import * as i18n from './translations';
 import { usersModel, usersSelectors, usersActions } from '../../store';
 import type { UserRiskScoreItem } from '../../../../../common/search_strategy/security_solution/users/common';
-import type { SeverityCount } from '../../../../common/components/severity/types';
-import { SeverityBadges } from '../../../../common/components/severity/severity_badges';
-import { SeverityBar } from '../../../../common/components/severity/severity_bar';
-import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
+import type { SeverityCount } from '../../../risk_score/components/severity/types';
+import { SeverityBadges } from '../../../risk_score/components/severity/severity_badges';
+import { SeverityBar } from '../../../risk_score/components/severity/severity_bar';
+import { SeverityFilterGroup } from '../../../risk_score/components/severity/severity_filter_group';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { State } from '../../../../common/store';
 import type {

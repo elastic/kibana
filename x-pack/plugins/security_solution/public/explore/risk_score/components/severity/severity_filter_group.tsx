@@ -15,8 +15,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import type { RiskSeverity } from '../../../../common/search_strategy';
-import { SEVERITY_UI_SORT_ORDER } from '../../../../common/search_strategy';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { SEVERITY_UI_SORT_ORDER } from '../../../../../common/search_strategy';
 import type { SeverityCount } from './types';
 import { RiskScore } from './common';
 
