@@ -5,40 +5,26 @@
  * 2.0.
  */
 
-import { get, isEmpty } from 'lodash';
-
 import type {
-  Logger,
   SavedObject,
   SavedObjectReference,
-  SavedObjectsBulkResponse,
-  SavedObjectsClientContract,
   SavedObjectsFindResponse,
-  SavedObjectsUpdateResponse,
+  SavedObjectsRawDoc,
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
-import type { AuditLogger } from '@kbn/security-plugin/server';
 import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
 import {
   isConnectorUserAction,
   isPushedUserAction,
-  isUserActionType,
   isCreateCaseUserAction,
   isCommentUserAction,
 } from '../../../common/utils/user_actions';
 import type {
-  ActionTypeValues,
-  CaseAttributes,
   CaseUserActionAttributes,
   CaseUserActionAttributesWithoutConnectorId,
   CaseUserActionResponse,
-  CaseUserProfile,
-  CaseAssignees,
-  CommentRequest,
-  User,
-  UserAction as Action,
 } from '../../../common/api';
 import { Actions, ActionTypes, NONE_CONNECTOR_ID } from '../../../common/api';
 import {
@@ -55,69 +41,26 @@ import {
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
-import { buildFilter, combineFilters, arraysDifference } from '../../client/utils';
-import type {
-  Attributes,
-  BuilderParameters,
-  CommonArguments,
-  CreateUserAction,
-  UserActionEvent,
-  UserActionParameters,
-} from './types';
-import { BuilderFactory } from './builder_factory';
+import { buildFilter, combineFilters } from '../../client/utils';
+import type { ServiceContext } from './types';
 import { defaultSortField, isCommentRequestTypeExternalReferenceSO } from '../../common/utils';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
-import type { IndexRefresh } from '../types';
-import { isAssigneesArray, isStringArray } from './type_guards';
-import type { CaseSavedObject } from '../../common/types';
-import { UserActionAuditLogger } from './audit_logger';
-import { createDeleteEvent } from './builders/delete_case';
+import { UserActionPersister } from './operations/create';
 
 export interface UserActionItem {
   attributes: CaseUserActionAttributesWithoutConnectorId;
   references: SavedObjectReference[];
 }
 
-interface PostCaseUserActionArgs extends IndexRefresh {
-  actions: UserActionEvent[];
+interface MostRecentResults {
+  mostRecent: {
+    hits: {
+      total: number;
+      hits: SavedObjectsRawDoc[];
+    };
+  };
 }
-
-interface CreateUserActionES<T> extends IndexRefresh {
-  attributes: T;
-  references: SavedObjectReference[];
-}
-
-type CommonUserActionArgs = CommonArguments;
-
-interface GetUserActionItemByDifference extends CommonUserActionArgs {
-  field: string;
-  originalValue: unknown;
-  newValue: unknown;
-}
-
-interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {
-  originalValue: T[];
-  newValue: T[];
-}
-
-interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
-  originalCases: CaseSavedObject[];
-  updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
-  user: User;
-}
-
-interface BulkCreateAttachmentUserAction extends Omit<CommonUserActionArgs, 'owner'>, IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: CommentRequest }>;
-}
-
-type CreateUserActionClient<T extends keyof BuilderParameters> = CreateUserAction<T> &
-  CommonUserActionArgs &
-  IndexRefresh;
-
-type CreatePayloadFunction<Item, ActionType extends ActionTypeValues> = (
-  items: Item[]
-) => UserActionParameters<ActionType>['payload'];
 
 interface ConnectorInfoAggsResult {
   references: {
@@ -126,71 +69,88 @@ interface ConnectorInfoAggsResult {
         buckets: Array<{
           key: string;
           connectorFields: {
-            connector: {
-              mostRecent: {
-                hits: {
-                  total: number;
-                  hits: unknown[];
-                };
-              };
-            };
-            createCase: {
-              mostRecent: {
-                hits: {
-                  total: number;
-                  hits: unknown[];
-                };
-              };
-            };
+            connector: MostRecentResults;
+            createCase: MostRecentResults;
           };
-          pushInfo: {
-            mostRecent: {
-              hits: {
-                total: number;
-                hits: unknown[];
-              };
-            };
-          };
+          pushInfo: MostRecentResults;
         }>;
       };
     };
   };
 }
 
+interface CaseConnectorInformation {
+  fields: Map<string, SavedObject<CaseUserActionResponse>>;
+  pushes: Map<string, SavedObject<CaseUserActionResponse>>;
+}
+
 export class CaseUserActionService {
-  private static readonly userActionFieldsAllowed: Set<string> = new Set(Object.keys(ActionTypes));
+  private readonly _creator: UserActionPersister;
 
-  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  private readonly builderFactory: BuilderFactory;
-  private readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  private readonly log: Logger;
-  private readonly auditLogger: UserActionAuditLogger;
-
-  constructor({
-    log,
-    persistableStateAttachmentTypeRegistry,
-    unsecuredSavedObjectsClient,
-    auditLogger,
-  }: {
-    log: Logger;
-    persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-    unsecuredSavedObjectsClient: SavedObjectsClientContract;
-    auditLogger: AuditLogger;
-  }) {
-    this.log = log;
-    this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
-    this.persistableStateAttachmentTypeRegistry = persistableStateAttachmentTypeRegistry;
-
-    this.builderFactory = new BuilderFactory({
-      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
-    });
-
-    this.auditLogger = new UserActionAuditLogger(auditLogger);
+  constructor(private readonly context: ServiceContext) {
+    this._creator = new UserActionPersister(context);
   }
 
-  public async getConnectorInformation({ caseId, filter }: { caseId: string; filter?: KueryNode }) {
+  public get creator() {
+    return this._creator;
+  }
+
+  public async getMostRecentUserAction({
+    caseId,
+    filter,
+  }: {
+    caseId: string;
+    filter?: KueryNode;
+  }): Promise<SavedObject<CaseUserActionResponse> | undefined> {
     try {
-      this.log.debug('Attempting to find connector information');
+      const id = caseId;
+      const type = CASE_SAVED_OBJECT;
+
+      // TODO: finishing filling out this functionality
+      const connectorsFilter = buildFilter({
+        filters: [ActionTypes.assignees, ActionTypes.comment],
+        field: 'type',
+        operator: 'or',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+      });
+
+      const combinedFilter = combineFilters([connectorsFilter, filter]);
+
+      const userActions =
+        await this.context.unsecuredSavedObjectsClient.find<CaseUserActionAttributesWithoutConnectorId>(
+          {
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            hasReference: { type, id },
+            page: 1,
+            perPage: 1,
+            sortField: 'created_at',
+            sortOrder: 'desc',
+          }
+        );
+
+      if (userActions.saved_objects.length <= 0) {
+        return;
+      }
+
+      return transformToExternalModel(
+        userActions,
+        this.context.persistableStateAttachmentTypeRegistry
+      );
+    } catch (error) {
+      this.context.log.error(`Error on GET case user action case id: ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  public async getCaseConnectorInformation({
+    caseId,
+    filter,
+  }: {
+    caseId: string;
+    filter?: KueryNode;
+  }): Promise<CaseConnectorInformation> {
+    try {
+      this.context.log.debug('Attempting to find connector information');
 
       /*
 1. Get all unique IDs of the connectors used in a case with an aggregation. Let's say the query return [1, 2, 3]
@@ -210,7 +170,7 @@ export class CaseUserActionService {
 
       const combinedFilter = combineFilters([connectorsFilter, filter]);
 
-      const response = await this.unsecuredSavedObjectsClient.find<
+      const response = await this.context.unsecuredSavedObjectsClient.find<
         CaseUserActionAttributesWithoutConnectorId,
         ConnectorInfoAggsResult
       >({
@@ -219,80 +179,150 @@ export class CaseUserActionService {
         page: 1,
         perPage: 1,
         sortField: defaultSortField,
-        aggs: {
-          references: {
-            nested: {
-              path: `${CASE_USER_ACTION_SAVED_OBJECT}.references`,
+        aggs: CaseUserActionService.buildConnectorInfoAggs(),
+        filter: combinedFilter,
+      });
+
+      console.log('response', JSON.stringify(response, null, 2));
+
+      return this.createCaseConnectorInformation(response.aggregations);
+    } catch (error) {
+      this.context.log.error(`Error finding status changes: ${error}`);
+      throw error;
+    }
+  }
+
+  private createCaseConnectorInformation(
+    aggsResults?: ConnectorInfoAggsResult
+  ): CaseConnectorInformation {
+    const caseConnectorInfo = {
+      fields: new Map<string, SavedObject<CaseUserActionResponse>>(),
+      pushes: new Map<string, SavedObject<CaseUserActionResponse>>(),
+    };
+
+    if (!aggsResults) {
+      return caseConnectorInfo;
+    }
+
+    for (const connectorInfo of aggsResults.references.connectors.ids.buckets) {
+      let rawUserActionDocument: SavedObjectsRawDoc | undefined;
+
+      if (connectorInfo.connectorFields.connector.mostRecent.hits.hits.length > 0) {
+        rawUserActionDocument = connectorInfo.connectorFields.connector.mostRecent.hits.hits[0];
+      } else if (connectorInfo.connectorFields.createCase.mostRecent.hits.hits.length > 0) {
+        /**
+         * If there is ever a connector update user action that takes precedence over the information stored
+         * in the create case user action because it indicates that the connector's fields were changed
+         */
+        rawUserActionDocument = connectorInfo.connectorFields.createCase.mostRecent.hits.hits[0];
+      }
+
+      if (rawUserActionDocument != null) {
+        const doc =
+          this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
+            rawUserActionDocument
+          );
+
+        caseConnectorInfo.fields.set(
+          connectorInfo.key,
+          transformToExternalModel(doc, this.context.persistableStateAttachmentTypeRegistry)
+        );
+      }
+
+      if (connectorInfo.pushInfo.mostRecent.hits.hits.length > 0) {
+        const rawPushDoc = connectorInfo.pushInfo.mostRecent.hits.hits[0];
+
+        const doc =
+          this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
+            rawPushDoc
+          );
+
+        caseConnectorInfo.pushes.set(
+          connectorInfo.key,
+          transformToExternalModel(doc, this.context.persistableStateAttachmentTypeRegistry)
+        );
+      }
+    }
+
+    return caseConnectorInfo;
+  }
+
+  private static buildConnectorInfoAggs(): Record<
+    string,
+    estypes.AggregationsAggregationContainer
+  > {
+    return {
+      references: {
+        nested: {
+          path: `${CASE_USER_ACTION_SAVED_OBJECT}.references`,
+        },
+        aggregations: {
+          connectors: {
+            filter: {
+              term: {
+                [`${CASE_USER_ACTION_SAVED_OBJECT}.references.type`]: 'action',
+              },
             },
             aggregations: {
-              connectors: {
-                filter: {
-                  term: {
-                    [`${CASE_USER_ACTION_SAVED_OBJECT}.references.type`]: 'action',
-                  },
+              ids: {
+                terms: {
+                  field: `${CASE_USER_ACTION_SAVED_OBJECT}.references.id`,
+                  size: 1000,
                 },
                 aggregations: {
-                  ids: {
-                    terms: {
-                      field: `${CASE_USER_ACTION_SAVED_OBJECT}.references.id`,
-                      size: 1000,
-                    },
+                  reverse: {
+                    reverse_nested: {},
                     aggregations: {
-                      reverse: {
-                        reverse_nested: {},
-                        aggregations: {
-                          connectorFields: {
-                            filters: {
-                              filters: {
-                                connector: {
-                                  term: {
-                                    [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
-                                      ActionTypes.connector,
-                                  },
-                                },
-                                createCase: {
-                                  term: {
-                                    [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
-                                      ActionTypes.create_case,
-                                  },
-                                },
+                      connectorFields: {
+                        filters: {
+                          filters: {
+                            connector: {
+                              term: {
+                                [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
+                                  ActionTypes.connector,
                               },
                             },
-                            aggregations: {
-                              mostRecent: {
-                                top_hits: {
-                                  sort: [
-                                    {
-                                      [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
-                                        order: 'desc',
-                                      },
-                                    },
-                                  ],
-                                  size: 1,
-                                },
+                            createCase: {
+                              term: {
+                                [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
+                                  ActionTypes.create_case,
                               },
                             },
                           },
-                          pushInfo: {
-                            filter: {
-                              term: {
-                                [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
-                                  ActionTypes.pushed,
-                              },
-                            },
-                            aggs: {
-                              mostRecent: {
-                                top_hits: {
-                                  sort: [
-                                    {
-                                      [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
-                                        order: 'desc',
-                                      },
-                                    },
-                                  ],
-                                  size: 1,
+                        },
+                        aggregations: {
+                          mostRecent: {
+                            top_hits: {
+                              sort: [
+                                {
+                                  [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
+                                    order: 'desc',
+                                  },
                                 },
-                              },
+                              ],
+                              size: 1,
+                            },
+                          },
+                        },
+                      },
+                      pushInfo: {
+                        filter: {
+                          term: {
+                            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
+                              ActionTypes.pushed,
+                          },
+                        },
+                        aggregations: {
+                          mostRecent: {
+                            top_hits: {
+                              sort: [
+                                {
+                                  [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
+                                    order: 'desc',
+                                  },
+                                },
+                              ],
+                              size: 1,
                             },
                           },
                         },
@@ -304,280 +334,8 @@ export class CaseUserActionService {
             },
           },
         },
-        filter: combinedFilter,
-      });
-
-      console.log('response', JSON.stringify(response, null, 2));
-
-      return (
-        response.aggregations?.references?.connectors?.ids?.buckets?.map(({ key }) => ({
-          id: key,
-        })) ?? []
-      );
-    } catch (error) {
-      this.log.error(`Error finding status changes: ${error}`);
-      throw error;
-    }
-  }
-
-  private getUserActionItemByDifference(params: GetUserActionItemByDifference): UserActionEvent[] {
-    const { field, originalValue, newValue, caseId, owner, user } = params;
-
-    if (!CaseUserActionService.userActionFieldsAllowed.has(field)) {
-      return [];
-    } else if (
-      field === ActionTypes.assignees &&
-      isAssigneesArray(originalValue) &&
-      isAssigneesArray(newValue)
-    ) {
-      return this.buildAssigneesUserActions({ ...params, originalValue, newValue });
-    } else if (
-      field === ActionTypes.tags &&
-      isStringArray(originalValue) &&
-      isStringArray(newValue)
-    ) {
-      return this.buildTagsUserActions({ ...params, originalValue, newValue });
-    } else if (isUserActionType(field) && newValue != null) {
-      const userActionBuilder = this.builderFactory.getBuilder(ActionTypes[field]);
-      const fieldUserAction = userActionBuilder?.build({
-        caseId,
-        owner,
-        user,
-        payload: { [field]: newValue },
-      });
-
-      return fieldUserAction ? [fieldUserAction] : [];
-    }
-
-    return [];
-  }
-
-  private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseUserProfile>) {
-    const createPayload: CreatePayloadFunction<CaseUserProfile, typeof ActionTypes.assignees> = (
-      items: CaseAssignees
-    ) => ({ assignees: items });
-
-    return this.buildAddDeleteUserActions(params, createPayload, ActionTypes.assignees);
-  }
-
-  private buildTagsUserActions(params: TypedUserActionDiffedItems<string>) {
-    const createPayload: CreatePayloadFunction<string, typeof ActionTypes.tags> = (
-      items: string[]
-    ) => ({
-      tags: items,
-    });
-
-    return this.buildAddDeleteUserActions(params, createPayload, ActionTypes.tags);
-  }
-
-  private buildAddDeleteUserActions<Item, ActionType extends ActionTypeValues>(
-    params: TypedUserActionDiffedItems<Item>,
-    createPayload: CreatePayloadFunction<Item, ActionType>,
-    actionType: ActionType
-  ) {
-    const { originalValue, newValue } = params;
-    const compareValues = arraysDifference(originalValue, newValue);
-
-    const addUserAction = this.buildUserAction({
-      commonArgs: params,
-      actionType,
-      action: Actions.add,
-      createPayload,
-      modifiedItems: compareValues?.addedItems,
-    });
-    const deleteUserAction = this.buildUserAction({
-      commonArgs: params,
-      actionType,
-      action: Actions.delete,
-      createPayload,
-      modifiedItems: compareValues?.deletedItems,
-    });
-
-    return [
-      ...(addUserAction ? [addUserAction] : []),
-      ...(deleteUserAction ? [deleteUserAction] : []),
-    ];
-  }
-
-  private buildUserAction<Item, ActionType extends ActionTypeValues>({
-    commonArgs,
-    actionType,
-    action,
-    createPayload,
-    modifiedItems,
-  }: {
-    commonArgs: CommonUserActionArgs;
-    actionType: ActionType;
-    action: Action;
-    createPayload: CreatePayloadFunction<Item, ActionType>;
-    modifiedItems?: Item[] | null;
-  }) {
-    const userActionBuilder = this.builderFactory.getBuilder(actionType);
-
-    if (!userActionBuilder || !modifiedItems || modifiedItems.length <= 0) {
-      return;
-    }
-
-    const { caseId, owner, user } = commonArgs;
-
-    const userAction = userActionBuilder.build({
-      action,
-      caseId,
-      user,
-      owner,
-      payload: createPayload(modifiedItems),
-    });
-
-    return userAction;
-  }
-
-  public async bulkAuditLogCaseDeletion(caseIds: string[]) {
-    this.log.debug(`Attempting to log bulk case deletion`);
-
-    for (const id of caseIds) {
-      this.auditLogger.log(createDeleteEvent({ caseId: id, action: Actions.delete }));
-    }
-  }
-
-  public async bulkCreateUpdateCase({
-    originalCases,
-    updatedCases,
-    user,
-    refresh,
-  }: BulkCreateBulkUpdateCaseUserActions): Promise<void> {
-    const builtUserActions = updatedCases.reduce<UserActionEvent[]>((acc, updatedCase) => {
-      const originalCase = originalCases.find(({ id }) => id === updatedCase.id);
-
-      if (originalCase == null) {
-        return acc;
-      }
-
-      const caseId = updatedCase.id;
-      const owner = originalCase.attributes.owner;
-
-      const userActions: UserActionEvent[] = [];
-      const updatedFields = Object.keys(updatedCase.attributes);
-
-      updatedFields
-        .filter((field) => CaseUserActionService.userActionFieldsAllowed.has(field))
-        .forEach((field) => {
-          const originalValue = get(originalCase, ['attributes', field]);
-          const newValue = get(updatedCase, ['attributes', field]);
-          userActions.push(
-            ...this.getUserActionItemByDifference({
-              field,
-              originalValue,
-              newValue,
-              user,
-              owner,
-              caseId,
-            })
-          );
-        });
-
-      return [...acc, ...userActions];
-    }, []);
-
-    await this.bulkCreateAndLog({
-      userActions: builtUserActions,
-      refresh,
-    });
-  }
-
-  private async bulkCreateAttachment({
-    caseId,
-    attachments,
-    user,
-    action = Actions.create,
-    refresh,
-  }: BulkCreateAttachmentUserAction): Promise<void> {
-    this.log.debug(`Attempting to create a bulk create case user action`);
-    const userActions = attachments.reduce<UserActionEvent[]>((acc, attachment) => {
-      const userActionBuilder = this.builderFactory.getBuilder(ActionTypes.comment);
-      const commentUserAction = userActionBuilder?.build({
-        action,
-        caseId,
-        user,
-        owner: attachment.owner,
-        attachmentId: attachment.id,
-        payload: { attachment: attachment.attachment },
-      });
-
-      if (commentUserAction == null) {
-        return acc;
-      }
-
-      return [...acc, commentUserAction];
-    }, []);
-
-    await this.bulkCreateAndLog({
-      userActions,
-      refresh,
-    });
-  }
-
-  public async bulkCreateAttachmentDeletion({
-    caseId,
-    attachments,
-    user,
-    refresh,
-  }: BulkCreateAttachmentUserAction): Promise<void> {
-    await this.bulkCreateAttachment({
-      caseId,
-      attachments,
-      user,
-      action: Actions.delete,
-      refresh,
-    });
-  }
-
-  public async bulkCreateAttachmentCreation({
-    caseId,
-    attachments,
-    user,
-    refresh,
-  }: BulkCreateAttachmentUserAction): Promise<void> {
-    await this.bulkCreateAttachment({
-      caseId,
-      attachments,
-      user,
-      action: Actions.create,
-      refresh,
-    });
-  }
-
-  public async createUserAction<T extends keyof BuilderParameters>({
-    action,
-    type,
-    caseId,
-    user,
-    owner,
-    payload,
-    connectorId,
-    attachmentId,
-    refresh,
-  }: CreateUserActionClient<T>) {
-    try {
-      this.log.debug(`Attempting to create a user action of type: ${type}`);
-      const userActionBuilder = this.builderFactory.getBuilder<T>(type);
-
-      const userAction = userActionBuilder?.build({
-        action,
-        caseId,
-        user,
-        owner,
-        connectorId,
-        attachmentId,
-        payload,
-      });
-
-      if (userAction) {
-        await this.createAndLog({ userAction, refresh });
-      }
-    } catch (error) {
-      this.log.error(`Error on creating user action of type: ${type}. Error: ${error}`);
-      throw error;
-    }
+      },
+    };
   }
 
   public async getAll(caseId: string): Promise<SavedObjectsFindResponse<CaseUserActionResponse>> {
@@ -586,30 +344,34 @@ export class CaseUserActionService {
       const type = CASE_SAVED_OBJECT;
 
       const userActions =
-        await this.unsecuredSavedObjectsClient.find<CaseUserActionAttributesWithoutConnectorId>({
-          type: CASE_USER_ACTION_SAVED_OBJECT,
-          hasReference: { type, id },
-          page: 1,
-          perPage: MAX_DOCS_PER_PAGE,
-          sortField: 'created_at',
-          sortOrder: 'asc',
-        });
+        await this.context.unsecuredSavedObjectsClient.find<CaseUserActionAttributesWithoutConnectorId>(
+          {
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            hasReference: { type, id },
+            page: 1,
+            perPage: MAX_DOCS_PER_PAGE,
+            sortField: 'created_at',
+            sortOrder: 'asc',
+          }
+        );
 
       return transformFindResponseToExternalModel(
         userActions,
-        this.persistableStateAttachmentTypeRegistry
+        this.context.persistableStateAttachmentTypeRegistry
       );
     } catch (error) {
-      this.log.error(`Error on GET case user action case id: ${caseId}: ${error}`);
+      this.context.log.error(`Error on GET case user action case id: ${caseId}: ${error}`);
       throw error;
     }
   }
 
   public async getUserActionIdsForCases(caseIds: string[]) {
     try {
-      this.log.debug(`Attempting to retrieve user actions associated with cases: [${caseIds}]`);
+      this.context.log.debug(
+        `Attempting to retrieve user actions associated with cases: [${caseIds}]`
+      );
 
-      const finder = this.unsecuredSavedObjectsClient.createPointInTimeFinder({
+      const finder = this.context.unsecuredSavedObjectsClient.createPointInTimeFinder({
         type: CASE_USER_ACTION_SAVED_OBJECT,
         hasReference: caseIds.map((id) => ({ id, type: CASE_SAVED_OBJECT })),
         sortField: 'created_at',
@@ -630,78 +392,7 @@ export class CaseUserActionService {
 
       return ids;
     } catch (error) {
-      this.log.error(`Error retrieving user action ids for cases: [${caseIds}]: ${error}`);
-      throw error;
-    }
-  }
-
-  private async createAndLog({
-    userAction,
-    refresh,
-  }: {
-    userAction: UserActionEvent;
-  } & IndexRefresh): Promise<void> {
-    const createdUserAction = await this.create({ ...userAction.parameters, refresh });
-    this.auditLogger.log(userAction.eventDetails, createdUserAction.id);
-  }
-
-  private async create<T>({
-    attributes,
-    references,
-    refresh,
-  }: CreateUserActionES<T>): Promise<SavedObject<T>> {
-    try {
-      this.log.debug(`Attempting to POST a new case user action`);
-
-      return await this.unsecuredSavedObjectsClient.create<T>(
-        CASE_USER_ACTION_SAVED_OBJECT,
-        attributes,
-        {
-          references: references ?? [],
-          refresh,
-        }
-      );
-    } catch (error) {
-      this.log.error(`Error on POST a new case user action: ${error}`);
-      throw error;
-    }
-  }
-
-  private async bulkCreateAndLog({
-    userActions,
-    refresh,
-  }: { userActions: UserActionEvent[] } & IndexRefresh) {
-    const createdUserActions = await this.bulkCreate({ actions: userActions, refresh });
-
-    if (!createdUserActions) {
-      return;
-    }
-
-    for (let i = 0; i < userActions.length; i++) {
-      this.auditLogger.log(userActions[i].eventDetails, createdUserActions.saved_objects[i].id);
-    }
-  }
-
-  private async bulkCreate({
-    actions,
-    refresh,
-  }: PostCaseUserActionArgs): Promise<SavedObjectsBulkResponse<Attributes> | undefined> {
-    if (isEmpty(actions)) {
-      return;
-    }
-
-    try {
-      this.log.debug(`Attempting to POST a new case user action`);
-
-      return await this.unsecuredSavedObjectsClient.bulkCreate(
-        actions.map((action) => ({
-          type: CASE_USER_ACTION_SAVED_OBJECT,
-          ...action.parameters,
-        })),
-        { refresh }
-      );
-    } catch (error) {
-      this.log.error(`Error on POST a new case user action: ${error}`);
+      this.context.log.error(`Error retrieving user action ids for cases: [${caseIds}]: ${error}`);
       throw error;
     }
   }
@@ -714,7 +405,7 @@ export class CaseUserActionService {
     filter?: KueryNode;
   }): Promise<Array<SavedObject<CaseUserActionResponse>>> {
     try {
-      this.log.debug('Attempting to find status changes');
+      this.context.log.debug('Attempting to find status changes');
 
       const updateActionFilter = buildFilter({
         filters: Actions.update,
@@ -733,7 +424,7 @@ export class CaseUserActionService {
       const combinedFilters = combineFilters([updateActionFilter, statusChangeFilter, filter]);
 
       const finder =
-        this.unsecuredSavedObjectsClient.createPointInTimeFinder<CaseUserActionAttributesWithoutConnectorId>(
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<CaseUserActionAttributesWithoutConnectorId>(
           {
             type: CASE_USER_ACTION_SAVED_OBJECT,
             hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
@@ -748,14 +439,14 @@ export class CaseUserActionService {
       for await (const findResults of finder.find()) {
         userActions = userActions.concat(
           findResults.saved_objects.map((so) =>
-            transformToExternalModel(so, this.persistableStateAttachmentTypeRegistry)
+            transformToExternalModel(so, this.context.persistableStateAttachmentTypeRegistry)
           )
         );
       }
 
       return userActions;
     } catch (error) {
-      this.log.error(`Error finding status changes: ${error}`);
+      this.context.log.error(`Error finding status changes: ${error}`);
       throw error;
     }
   }
@@ -768,7 +459,7 @@ export class CaseUserActionService {
     filter?: KueryNode;
   }): Promise<Array<{ id: string }>> {
     try {
-      this.log.debug(`Attempting to count connectors for case id ${caseId}`);
+      this.context.log.debug(`Attempting to count connectors for case id ${caseId}`);
       const connectorsFilter = buildFilter({
         filters: [ActionTypes.connector, ActionTypes.create_case],
         field: 'type',
@@ -778,7 +469,7 @@ export class CaseUserActionService {
 
       const combinedFilter = combineFilters([connectorsFilter, filter]);
 
-      const response = await this.unsecuredSavedObjectsClient.find<
+      const response = await this.context.unsecuredSavedObjectsClient.find<
         CaseUserActionAttributesWithoutConnectorId,
         { references: { connectors: { ids: { buckets: Array<{ key: string }> } } } }
       >({
@@ -797,7 +488,7 @@ export class CaseUserActionService {
         })) ?? []
       );
     } catch (error) {
-      this.log.error(`Error while counting connectors for case id ${caseId}: ${error}`);
+      this.context.log.error(`Error while counting connectors for case id ${caseId}: ${error}`);
       throw error;
     }
   }

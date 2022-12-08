@@ -86,7 +86,7 @@ export async function deleteAll(
       concurrency: MAX_CONCURRENT_SEARCHES,
     });
 
-    await userActionService.bulkCreateAttachmentDeletion({
+    await userActionService.creator.bulkCreateAttachmentDeletion({
       caseId: caseID,
       attachments: comments.saved_objects.map((comment) => ({
         id: comment.id,
@@ -150,7 +150,7 @@ export async function deleteComment(
       refresh: false,
     });
 
-    await userActionService.createUserAction({
+    await userActionService.creator.createUserAction({
       type: ActionTypes.comment,
       action: Actions.delete,
       caseId: id,

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
+import type {
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  Logger,
+  ISavedObjectsSerializer,
+} from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { CaseAssignees } from '../../../common/api/cases/assignee';
 import type {
   CasePostRequest,
@@ -125,4 +131,12 @@ export type CommonBuilderArguments = CommonArguments & {
 
 export interface BuilderDeps {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+}
+
+export interface ServiceContext {
+  log: Logger;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  savedObjectsSerializer: ISavedObjectsSerializer;
+  auditLogger: AuditLogger;
 }

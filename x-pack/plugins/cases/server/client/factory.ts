@@ -13,7 +13,7 @@ import type {
   SavedObjectsClientContract,
   IBasePath,
 } from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { ISavedObjectsSerializer, SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   AuditLogger,
   SecurityPluginSetup,
@@ -119,8 +119,11 @@ export class CasesClientFactory {
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
 
+    const savedObjectsSerializer = savedObjectsService.createSerializer();
+
     const services = this.createServices({
       unsecuredSavedObjectsClient,
+      savedObjectsSerializer,
       esClient: scopedClusterClient,
       request,
       auditLogger,
@@ -152,11 +155,13 @@ export class CasesClientFactory {
 
   private createServices({
     unsecuredSavedObjectsClient,
+    savedObjectsSerializer,
     esClient,
     request,
     auditLogger,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    savedObjectsSerializer: ISavedObjectsSerializer;
     esClient: ElasticsearchClient;
     request: KibanaRequest;
     auditLogger: AuditLogger;
@@ -201,6 +206,7 @@ export class CasesClientFactory {
         log: this.logger,
         persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
+        savedObjectsSerializer,
         auditLogger,
       }),
       attachmentService,
