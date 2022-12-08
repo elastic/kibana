@@ -1304,7 +1304,6 @@
       "flot",
       "jest-styled-components",
       "@testing-library/jest-dom",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-common-types",
       "@kbn/ambient-storybook-types"
