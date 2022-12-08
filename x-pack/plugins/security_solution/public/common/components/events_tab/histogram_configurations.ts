@@ -8,7 +8,7 @@ import numeral from '@elastic/numeral';
 
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { getExternalAlertLensAttributes } from '../visualization_actions/lens_attributes/common/external_alert';
-import { getEventsHistogramLensAttributes } from '../visualization_actions/lens_attributes/hosts/events';
+import { getEventsHistogramLensAttributes } from '../visualization_actions/lens_attributes/common/events';
 import type { MatrixHistogramConfigs, MatrixHistogramOption } from '../matrix_histogram/types';
 import * as i18n from './translations';
 

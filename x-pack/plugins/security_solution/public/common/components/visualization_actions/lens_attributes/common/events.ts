@@ -11,7 +11,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
   stackByField = 'event.action'
 ) =>
   ({
-    title: 'Host - events',
+    title: 'Events',
     description: '',
     visualizationType: 'lnsXY',
     state: {
@@ -20,6 +20,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
         legend: {
           isVisible: true,
           position: 'right',
+          isInside: true,
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',
@@ -46,6 +47,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
           yLeft: false,
           yRight: true,
         },
+        valuesInLegend: true,
       },
       query: {
         query: '',
@@ -110,11 +112,6 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
       },
     },
     references: [
-      {
-        type: 'index-pattern',
-        id: '{dataViewId}',
-        name: 'indexpattern-datasource-current-indexpattern',
-      },
       {
         type: 'index-pattern',
         id: '{dataViewId}',

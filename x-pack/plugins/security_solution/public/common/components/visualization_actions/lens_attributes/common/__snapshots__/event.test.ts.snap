@@ -6,11 +6,6 @@ Object {
   "references": Array [
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-current-indexpattern",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "security-solution-my-test",
       "name": "indexpattern-datasource-layer-0039eb0c-9a1a-4687-ae54-0f4e239bec75",
       "type": "index-pattern",
     },
@@ -179,12 +174,14 @@ Object {
         },
       ],
       "legend": Object {
+        "isInside": true,
         "isVisible": true,
         "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",
       "valueLabels": "hide",
+      "valuesInLegend": true,
       "yLeftExtent": Object {
         "mode": "full",
       },
@@ -193,7 +190,7 @@ Object {
       },
     },
   },
-  "title": "Host - events",
+  "title": "Events",
   "visualizationType": "lnsXY",
 }
 `;

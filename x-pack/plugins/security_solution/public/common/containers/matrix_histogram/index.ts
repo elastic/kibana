@@ -249,7 +249,10 @@ export const useMatrixHistogramCombined = (
   const [missingDataLoading, missingDataResponse] = useMatrixHistogram({
     ...matrixHistogramQueryProps,
     includeMissingData: false,
-    skip: skipMissingData || matrixHistogramQueryProps.filterQuery === undefined,
+    skip:
+      skipMissingData ||
+      matrixHistogramQueryProps.filterQuery === undefined ||
+      matrixHistogramQueryProps.skip,
   });
 
   const combinedLoading = useMemo<boolean>(
