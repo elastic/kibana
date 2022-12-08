@@ -9,13 +9,14 @@ import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createFleetContextRendererMock, generateFleetPackageInfo } from '../mocks';
 import { EndpointPackageCustomExtension } from './endpoint_package_custom_extension';
-import { useEndpointPrivileges as _useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 import { exceptionsListAllHttpMocks } from '../../../../../mocks/exceptions_list_http_mocks';
 import { waitFor } from '@testing-library/react';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
 
-jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
-const useEndpointPrivilegesMock = _useEndpointPrivileges as jest.Mock;
+jest.mock('../../../../../../common/components/user_privileges');
+const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 describe('When displaying the EndpointPackageCustomExtension fleet UI extension', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -44,22 +45,21 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
   });
 
   afterEach(() => {
-    useEndpointPrivilegesMock.mockImplementation(getEndpointPrivilegesInitialStateMock);
+    useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
   });
 
-  it('should show artifact cards', async () => {
+  it.each([...artifactCards])('should show artifact card: `%s`', async (artifactCardtestId) => {
     render();
 
     await waitFor(() => {
-      artifactCards.forEach((artifactCard) => {
-        expect(renderResult.getByTestId(artifactCard)).toBeTruthy();
-      });
+      expect(renderResult.getByTestId(artifactCardtestId)).toBeTruthy();
     });
   });
 
   it('should NOT show artifact cards if no endpoint management authz', async () => {
-    useEndpointPrivilegesMock.mockReturnValue({
-      ...getEndpointPrivilegesInitialStateMock({
+    useUserPrivilegesMock.mockReturnValue({
+      ...getUserPrivilegesMockDefaultValue(),
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
         canReadBlocklist: false,
         canReadEventFilters: false,
         canReadHostIsolationExceptions: false,
@@ -67,6 +67,7 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
         canIsolateHost: false,
       }),
     });
+
     render();
 
     await waitFor(() => {
@@ -78,9 +79,9 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
   });
 
   it('should show Host Isolations Exceptions if user has no authz but entries exist', async () => {
-    useEndpointPrivilegesMock.mockReturnValue({
-      ...getEndpointPrivilegesInitialStateMock(),
-      canIsolateHost: false,
+    useUserPrivilegesMock.mockReturnValue({
+      ...getUserPrivilegesMockDefaultValue(),
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({ canIsolateHost: false }),
     });
     // Mock APIs
     exceptionsListAllHttpMocks(http);
@@ -92,9 +93,13 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
   });
 
   it('should NOT show Host Isolation Exceptions if user has no authz and no entries exist', async () => {
-    useEndpointPrivilegesMock.mockReturnValue({
-      ...getEndpointPrivilegesInitialStateMock({ canReadHostIsolationExceptions: false }),
+    useUserPrivilegesMock.mockReturnValue({
+      ...getUserPrivilegesMockDefaultValue(),
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+        canReadHostIsolationExceptions: false,
+      }),
     });
+
     render();
 
     await waitFor(() => {
@@ -103,10 +108,11 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
   });
 
   it('should only show loading spinner if loading', () => {
-    useEndpointPrivilegesMock.mockReturnValue({
-      ...getEndpointPrivilegesInitialStateMock(),
-      loading: true,
+    useUserPrivilegesMock.mockReturnValue({
+      ...getUserPrivilegesMockDefaultValue(),
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({ loading: true }),
     });
+
     render();
 
     expect(renderResult.getByTestId('endpointExtensionLoadingSpinner')).toBeInTheDocument();

@@ -37,7 +37,6 @@ import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../.
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../../../blocklist/constants';
 import { useHttp } from '../../../../../../../common/lib/kibana';
-import { useEndpointPrivileges } from '../../../../../../../common/components/user_privileges/endpoint';
 
 interface PolicyArtifactCardProps {
   policyId: string;
@@ -175,7 +174,7 @@ export const EndpointPolicyArtifactCards = memo<EndpointPolicyArtifactCardsProps
       canReadEventFilters,
       canReadTrustedApplications,
       canReadHostIsolationExceptions,
-    } = useEndpointPrivileges();
+    } = useUserPrivileges().endpointPrivileges;
     const canAccessArtifactContent = useCanAccessSomeArtifacts();
 
     if (loading) {
