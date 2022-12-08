@@ -169,13 +169,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
         expect(await apiKeyNameInput.isEnabled()).to.be(false);
 
-        // Verify expiration switch is disabled
-        const apiKeyExpirationSwitch = await pageObjects.apiKeys.getApiKeyCustomExpirationSwitch();
-        expect(await apiKeyExpirationSwitch.isEnabled()).to.be(false);
-
-        const apiKeyExpirationReadonlyInput =
-          await pageObjects.apiKeys.getApiKeyCustomExpirationInput();
-        expect(await apiKeyExpirationReadonlyInput.isEnabled()).to.be(false);
+        // Status should be displayed
+        const apiKeyStatus = await pageObjects.apiKeys.getFlyoutApiKeyStatus();
+        expect(await apiKeyStatus).to.be('Expires in a day');
 
         // Verify metadata is editable
         const apiKeyMetadataSwitch = await pageObjects.apiKeys.getMetadataSwitch();
@@ -288,13 +284,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
         expect(await apiKeyNameInput.isEnabled()).to.be(false);
 
-        // Verify expiration switch is disabled
-        const apiKeyExpirationSwitch = await pageObjects.apiKeys.getApiKeyCustomExpirationSwitch();
-        expect(await apiKeyExpirationSwitch.isEnabled()).to.be(false);
-
-        // Verify expiration input box is disabled
-        const apiKeyExpirationInput = await pageObjects.apiKeys.getApiKeyCustomExpirationInput();
-        expect(await apiKeyExpirationInput.isEnabled()).to.be(false);
+        // Status should be displayed
+        const apiKeyStatus = await pageObjects.apiKeys.getFlyoutApiKeyStatus();
+        expect(await apiKeyStatus).to.be('Expires in a day');
 
         const apiKeyMetadataSwitch = await pageObjects.apiKeys.getMetadataSwitch();
         const apiKeyRestrictPrivilegesSwitch =
@@ -342,13 +334,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
         expect(await apiKeyNameInput.isEnabled()).to.be(false);
 
-        // Verify expiration switch is disabled
-        const apiKeyExpirationSwitch = await pageObjects.apiKeys.getApiKeyCustomExpirationSwitch();
-        expect(await apiKeyExpirationSwitch.isEnabled()).to.be(false);
-
-        // Verify expiration input box is disabled
-        const apiKeyExpirationInput = await pageObjects.apiKeys.getApiKeyCustomExpirationInput();
-        expect(await apiKeyExpirationInput.isEnabled()).to.be(false);
+        // Status should be displayed
+        const apiKeyStatus = await pageObjects.apiKeys.getFlyoutApiKeyStatus();
+        expect(await apiKeyStatus).to.be('Expired');
 
         const apiKeyMetadataSwitch = await pageObjects.apiKeys.getMetadataSwitch();
         const apiKeyRestrictPrivilegesSwitch =
@@ -393,9 +381,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
         expect(await apiKeyNameInput.isEnabled()).to.be(false);
 
-        // Verify expiration switch is disabled, no expiration will be shown as it was not set on the granted key
-        const apiKeyExpirationSwitch = await pageObjects.apiKeys.getApiKeyCustomExpirationSwitch();
-        expect(await apiKeyExpirationSwitch.isEnabled()).to.be(false);
+        // Status should be displayed
+        const apiKeyStatus = await pageObjects.apiKeys.getFlyoutApiKeyStatus();
+        expect(await apiKeyStatus).to.be('Active');
 
         const apiKeyMetadataSwitch = await pageObjects.apiKeys.getMetadataSwitch();
         const apiKeyRestrictPrivilegesSwitch =

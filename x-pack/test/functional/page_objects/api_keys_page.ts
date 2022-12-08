@@ -144,5 +144,10 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       const usernameField = await testSubjects.find('apiKeyFlyoutUsername');
       return usernameField.getVisibleText();
     },
+
+    async getFlyoutApiKeyStatus() {
+      const apiKeyStatusField = await testSubjects.find('apiKeyStatus');
+      return apiKeyStatusField.getVisibleText();
+    },
   };
 }

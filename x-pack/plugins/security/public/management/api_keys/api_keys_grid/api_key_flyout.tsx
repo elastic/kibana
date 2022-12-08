@@ -14,11 +14,13 @@ import {
   EuiForm,
   EuiFormFieldset,
   EuiFormRow,
+  EuiHealth,
   EuiIcon,
   EuiLoadingContent,
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
@@ -59,7 +61,7 @@ export interface ApiKeyFormValues {
 export interface ApiKeyFlyoutProps {
   defaultValues?: ApiKeyFormValues;
   onSuccess?: (
-    createdApiKeyResponse: CreateApiKeyResponse | undefined,
+    createApiKeyResponse: CreateApiKeyResponse | undefined,
     updateApiKeyResponse: UpdateApiKeyResponse | undefined
   ) => void;
   onCancel: FormFlyoutProps['onCancel'];
@@ -96,14 +98,11 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
     // Collect data from the selected API key to pre-populate the form
     const doesMetadataExist = Object.keys(selectedApiKey.metadata).length > 0;
     const doCustomPrivilegesExist = Object.keys(selectedApiKey.role_descriptors ?? 0).length > 0;
-    const daysUntilExpiration = moment(selectedApiKey.expiration).diff(moment(), 'days', true);
-    const roundedDaysUntilExpiration =
-      Math.round((daysUntilExpiration + Number.EPSILON) * 100) / 100;
 
     defaultValues = {
       name: selectedApiKey.name,
       customExpiration: !!selectedApiKey.expiration,
-      expiration: roundedDaysUntilExpiration.toString(),
+      expiration: !!selectedApiKey.expiration ? selectedApiKey.expiration.toString() : '',
       includeMetadata: doesMetadataExist,
       metadata: doesMetadataExist ? JSON.stringify(selectedApiKey.metadata, null, 2) : '{}',
       customPrivileges: doCustomPrivilegesExist,
@@ -330,55 +329,67 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
           </EuiFormFieldset>
 
           <EuiSpacer />
-          <EuiFormFieldset>
-            <EuiSwitch
-              label={i18n.translate(
-                'xpack.security.accountManagement.apiKeyFlyout.customExpirationLabel',
-                {
-                  defaultMessage: 'Expire after time',
-                }
-              )}
-              checked={!!form.values.customExpiration}
-              onChange={(e) => form.setValue('customExpiration', e.target.checked)}
-              disabled={readonly || !!selectedApiKey}
-              data-test-subj="apiKeyCustomExpirationSwitch"
-            />
-            {form.values.customExpiration && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiFormRow
-                  error={form.errors.expiration}
-                  isInvalid={form.touched.expiration && !!form.errors.expiration && !selectedApiKey}
-                  label={i18n.translate(
-                    'xpack.security.accountManagement.apiKeyFlyout.customExpirationInputLabel',
-                    {
-                      defaultMessage: 'Lifetime (days)',
-                    }
-                  )}
-                >
-                  <EuiFieldNumber
-                    append={i18n.translate(
-                      'xpack.security.accountManagement.apiKeyFlyout.expirationUnit',
-                      {
-                        defaultMessage: 'days',
-                      }
-                    )}
-                    name="expiration"
-                    min={0}
-                    defaultValue={form.values.expiration}
+          {!!selectedApiKey ? (
+            <EuiFormRow
+              label={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.statusLabel', {
+                defaultMessage: 'Status',
+              })}
+            >
+              {determineReadonlyExpiration(form.values?.expiration)}
+            </EuiFormRow>
+          ) : (
+            <EuiFormFieldset>
+              <EuiSwitch
+                label={i18n.translate(
+                  'xpack.security.accountManagement.apiKeyFlyout.customExpirationLabel',
+                  {
+                    defaultMessage: 'Expire after time',
+                  }
+                )}
+                checked={!!form.values.customExpiration}
+                onChange={(e) => form.setValue('customExpiration', e.target.checked)}
+                disabled={readonly || !!selectedApiKey}
+                data-test-subj="apiKeyCustomExpirationSwitch"
+              />
+              {form.values.customExpiration && (
+                <>
+                  <EuiSpacer size="m" />
+
+                  <EuiFormRow
+                    error={form.errors.expiration}
                     isInvalid={
                       form.touched.expiration && !!form.errors.expiration && !selectedApiKey
                     }
-                    fullWidth
-                    data-test-subj="apiKeyCustomExpirationInput"
-                    disabled={readonly || !!selectedApiKey}
-                  />
-                </EuiFormRow>
-                <EuiSpacer size="s" />
-              </>
-            )}
-          </EuiFormFieldset>
-
+                    label={i18n.translate(
+                      'xpack.security.accountManagement.apiKeyFlyout.customExpirationInputLabel',
+                      {
+                        defaultMessage: 'Lifetime (days)',
+                      }
+                    )}
+                  >
+                    <EuiFieldNumber
+                      append={i18n.translate(
+                        'xpack.security.accountManagement.apiKeyFlyout.expirationUnit',
+                        {
+                          defaultMessage: 'days',
+                        }
+                      )}
+                      name="expiration"
+                      min={0}
+                      defaultValue={form.values.expiration}
+                      isInvalid={
+                        form.touched.expiration && !!form.errors.expiration && !selectedApiKey
+                      }
+                      fullWidth
+                      data-test-subj="apiKeyCustomExpirationInput"
+                      disabled={readonly || !!selectedApiKey}
+                    />
+                  </EuiFormRow>
+                  <EuiSpacer size="s" />
+                </>
+              )}
+            </EuiFormFieldset>
+          )}
           <EuiSpacer />
           <EuiFormFieldset>
             <EuiSwitch
@@ -534,4 +545,46 @@ function isEditable(currentUser: AuthenticatedUser | undefined, selectedApiKey: 
   }
 
   return result;
+}
+
+function determineReadonlyExpiration(expiration?: string) {
+  const DATE_FORMAT = 'MMMM Do YYYY HH:mm:ss';
+
+  if (!expiration) {
+    return (
+      <EuiHealth color="primary" data-test-subj="apiKeyStatus">
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.statusActive"
+          defaultMessage="Active"
+        />
+      </EuiHealth>
+    );
+  }
+
+  const expirationInt = parseInt(expiration, 10);
+
+  if (Date.now() > expirationInt) {
+    return (
+      <EuiHealth color="subdued" data-test-subj="apiKeyStatus">
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.statusExpired"
+          defaultMessage="Expired"
+        />
+      </EuiHealth>
+    );
+  }
+
+  return (
+    <EuiHealth color="warning" data-test-subj="apiKeyStatus">
+      <EuiToolTip content={moment(expirationInt).format(DATE_FORMAT)}>
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.statusExpires"
+          defaultMessage="Expires {timeFromNow}"
+          values={{
+            timeFromNow: moment(expirationInt).fromNow(),
+          }}
+        />
+      </EuiToolTip>
+    </EuiHealth>
+  );
 }

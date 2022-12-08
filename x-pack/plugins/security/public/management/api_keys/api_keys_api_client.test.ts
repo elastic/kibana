@@ -101,7 +101,7 @@ describe('APIKeysAPIClient', () => {
     });
   });
 
-  it('updateApiKey() calls correct endpoint', async () => {
+  it('updateApiKey() queries correct endpoint', async () => {
     const httpMock = httpServiceMock.createStartContract();
 
     const mockResponse = Symbol('mockResponse');

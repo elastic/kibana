@@ -113,11 +113,11 @@ export class APIKeysGridPage extends Component<Props, State> {
             href="/flyout"
           >
             <ApiKeyFlyout
-              onSuccess={(createdApiKeyResponse, updateApiKeyResponse) => {
+              onSuccess={(createApiKeyResponse, updateApiKeyResponse) => {
                 this.props.history.push({ pathname: '/' });
                 this.reloadApiKeys();
                 this.setState({
-                  createdApiKey: createdApiKeyResponse,
+                  createdApiKey: createApiKeyResponse,
                   updatedApiKey: updateApiKeyResponse,
                   lastUpdatedApiKeyName: this.state.selectedApiKey?.name,
                   selectedApiKey: undefined,
