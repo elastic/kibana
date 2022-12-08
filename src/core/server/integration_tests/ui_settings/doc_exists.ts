@@ -203,7 +203,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
           },
         });
 
-        const { body } = await supertest('get', '/api/kibana/settings/global').expect(200);
+        const { body } = await supertest('get', '/api/kibana/global_settings').expect(200);
 
         expect(body).toMatchObject({
           settings: {
@@ -228,7 +228,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
 
         const defaultIndex = chance.word();
 
-        const { body } = await supertest('post', '/api/kibana/settings/global/defaultIndex')
+        const { body } = await supertest('post', '/api/kibana/global_settings/defaultIndex')
           .send({
             value: defaultIndex,
           })
@@ -253,7 +253,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
       it('returns a 400 if trying to set overridden value', async () => {
         const { supertest } = await setup();
 
-        const { body } = await supertest('delete', '/api/kibana/settings/global/foo')
+        const { body } = await supertest('delete', '/api/kibana/global_settings/foo')
           .send({
             value: 'baz',
           })
@@ -272,7 +272,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
         const { supertest } = await setup();
 
         const defaultIndex = chance.word();
-        const { body } = await supertest('post', '/api/kibana/settings/global')
+        const { body } = await supertest('post', '/api/kibana/global_settings')
           .send({
             changes: {
               defaultIndex,
@@ -299,7 +299,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
       it('returns a 400 if trying to set overridden value', async () => {
         const { supertest } = await setup();
 
-        const { body } = await supertest('post', '/api/kibana/settings/global')
+        const { body } = await supertest('post', '/api/kibana/global_settings')
           .send({
             changes: {
               foo: 'baz',
@@ -327,7 +327,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
 
         const { body } = await supertest(
           'delete',
-          '/api/kibana/settings/global/defaultIndex'
+          '/api/kibana/global_settings/defaultIndex'
         ).expect(200);
 
         expect(body).toMatchObject({
@@ -345,7 +345,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
       it('returns a 400 if deleting overridden value', async () => {
         const { supertest } = await setup();
 
-        const { body } = await supertest('delete', '/api/kibana/settings/global/foo').expect(400);
+        const { body } = await supertest('delete', '/api/kibana/global_settings/foo').expect(400);
 
         expect(body).toEqual({
           error: 'Bad Request',

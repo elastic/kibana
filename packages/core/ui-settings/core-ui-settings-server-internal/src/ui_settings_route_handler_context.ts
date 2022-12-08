@@ -37,7 +37,7 @@ export class CoreUiSettingsRouteHandlerContext implements UiSettingsRequestHandl
 
   public get globalClient() {
     if (this.#globalClient == null) {
-      this.#globalClient = this.uiSettingsStart.asScopedToGlobalClient(
+      this.#globalClient = this.uiSettingsStart.globalAsScopedToClient(
         this.savedObjectsRouterHandlerContext.client
       );
     }

@@ -312,7 +312,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,
-      asScopedToGlobalClient: deps.uiSettings.asScopedToGlobalClient,
+      globalAsScopedToClient: deps.uiSettings.globalAsScopedToClient,
     },
     coreUsageData: deps.coreUsageData,
   };

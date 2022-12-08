@@ -63,7 +63,7 @@ export function getServices() {
   );
 
   const uiSettings = kbn.coreStart.uiSettings.asScopedToClient(savedObjectsClient);
-  const uiSettingsGlobal = kbn.coreStart.uiSettings.asScopedToGlobalClient(savedObjectsClient);
+  const uiSettingsGlobal = kbn.coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
 
   services = {
     supertest: (method: HttpMethod, path: string) => getSupertest(kbn.root, method, path),

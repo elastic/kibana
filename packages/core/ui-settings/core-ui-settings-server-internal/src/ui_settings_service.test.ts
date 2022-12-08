@@ -105,6 +105,12 @@ describe('uiSettings', () => {
           `"Global uiSettings for the key [foo] has been already registered"`
         );
       });
+
+      it('does not throw when registering a global and namespaced setting with the same name', async () => {
+        const setup = await service.setup(setupDeps);
+        setup.register(defaults);
+        expect(() => setup.registerGlobal(defaults)).not.toThrow();
+      });
     });
   });
 
@@ -244,7 +250,7 @@ describe('uiSettings', () => {
       it('passes saved object type "config-global" to UiSettingsGlobalClient', async () => {
         await service.setup(setupDeps);
         const start = await service.start();
-        start.asScopedToGlobalClient(savedObjectsClient);
+        start.globalAsScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsGlobalClientConstructor).toBeCalledTimes(1);
         expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].type).toBe('config-global');
@@ -253,7 +259,7 @@ describe('uiSettings', () => {
       it('passes overrides to UiSettingsGlobalClient', async () => {
         await service.setup(setupDeps);
         const start = await service.start();
-        start.asScopedToGlobalClient(savedObjectsClient);
+        start.globalAsScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsGlobalClientConstructor).toBeCalledTimes(1);
         expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].overrides).toEqual({});
@@ -263,7 +269,7 @@ describe('uiSettings', () => {
         const setup = await service.setup(setupDeps);
         setup.register(defaults);
         const start = await service.start();
-        start.asScopedToGlobalClient(savedObjectsClient);
+        start.globalAsScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsGlobalClientConstructor).toBeCalledTimes(1);
         expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].defaults).toEqual({});
