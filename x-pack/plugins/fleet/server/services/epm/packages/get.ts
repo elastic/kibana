@@ -23,14 +23,20 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import { FleetError, PackageFailedVerificationError, PackageNotFoundError } from '../../../errors';
+import {
+  FleetError,
+  PackageFailedVerificationError,
+  PackageNotFoundError,
+  RegistryResponseError,
+} from '../../../errors';
 import { appContextService } from '../..';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
-import { getArchivePackage } from '../archive';
+import { generatePackageInfoFromArchiveBuffer, getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
 import { createInstallableFrom } from '.';
+import { getBundledPackageByName } from './bundled_packages';
 
 export type { SearchParams } from '../registry';
 export { getFile } from '../registry';
@@ -305,8 +311,22 @@ export async function getPackageFromSource(options: {
     if (res) {
       logger.debug(`retrieved package ${pkgName}-${pkgVersion} from cache`);
     } else {
-      res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
-      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+      try {
+        res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+        logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+      } catch (err) {
+        if (err instanceof RegistryResponseError && err.status === 404) {
+          // Check bundled packages in case the exact package being requested is available on disk
+          const bundledPackage = await getBundledPackageByName(pkgName);
+
+          if (bundledPackage && bundledPackage.version === pkgVersion) {
+            res = await generatePackageInfoFromArchiveBuffer(
+              bundledPackage.buffer,
+              'application/zip'
+            );
+          }
+        }
+      }
     }
   }
   if (!res) {
