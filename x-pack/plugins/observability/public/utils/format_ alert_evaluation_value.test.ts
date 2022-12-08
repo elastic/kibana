@@ -8,16 +8,16 @@
 import { formatAlertEvaluationValue } from './format_ alert_evaluation_value';
 
 describe('formatAlertEvaluationValue', () => {
-  it('it return - when there is no evaluationValue passed', () => {
+  it('it returns - when there is no evaluationValue passed', () => {
     expect(formatAlertEvaluationValue('apm.transaction_error_rate', undefined)).toBe('-');
   });
-  it('it return the evaluation value when ruleTypeId im unknown aka unformatted', () => {
+  it('it returns the evaluation value when ruleTypeId im unknown aka unformatted', () => {
     expect(formatAlertEvaluationValue('unknown.rule.type', 2000)).toBe(2000);
   });
-  it('it return the evaluation value formatted as percent when the alert rule type is "apm.transaction_error_rate" ', () => {
+  it('it returns the evaluation value formatted as percent when the alert rule type is "apm.transaction_error_rate" ', () => {
     expect(formatAlertEvaluationValue('apm.transaction_error_rate', 20)).toBe('20%');
   });
-  it('it return the evaluation value formatted as duration in ms when the alert rule type is "apm.transaction_duration" ', () => {
+  it('it returns the evaluation value formatted as duration in ms when the alert rule type is "apm.transaction_duration" ', () => {
     expect(formatAlertEvaluationValue('apm.transaction_duration', 140000)).toBe('140 ms');
   });
 });
