@@ -204,7 +204,7 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.THROTTLING_CONFIG],
       FIELD[ConfigKey.ENABLED],
     ],
-    step3: [FIELD[ConfigKey.SOURCE_INLINE]],
+    step3: [FIELD[ConfigKey.SOURCE_INLINE], FIELD[ConfigKey.PARAMS]],
     scriptEdit: [FIELD[ConfigKey.SOURCE_INLINE]],
     advanced: [
       {

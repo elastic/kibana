@@ -814,6 +814,42 @@ export const FIELD: Record<string, FieldMeta> = {
       defaultMessage: 'Monitor script is required',
     }),
   },
+  [ConfigKey.PARAMS]: {
+    fieldKey: ConfigKey.PARAMS,
+    label: i18n.translate('xpack.synthetics.monitorConfig.params.label', {
+      defaultMessage: 'Parameters',
+    }),
+    component: JSONEditor,
+    props: ({ setValue }) => ({
+      id: 'syntheticsMonitorConfigParams',
+      height: '100px',
+      onChange: (json: string) => {
+        setValue(ConfigKey.PARAMS, json);
+      },
+    }),
+    error: i18n.translate('xpack.synthetics.monitorConfig.params.error', {
+      defaultMessage: 'Invalid JSON format',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.synthetics.monitorConfig.params.helpText"
+        defaultMessage="Use JSON to define parameters that can be referenced in your script with {paramsValue}"
+        values={{
+          paramsValue: <EuiCode>params.value</EuiCode>,
+        }}
+      />
+    ),
+    validation: () => ({
+      validate: (value) => {
+        const validateFn = validate[DataStream.BROWSER][ConfigKey.PARAMS];
+        if (validateFn) {
+          return !validateFn({
+            [ConfigKey.PARAMS]: value,
+          });
+        }
+      },
+    }),
+  },
   isTLSEnabled: {
     fieldKey: 'isTLSEnabled',
     component: EuiSwitch,
