@@ -38,7 +38,7 @@ export function encode(obj: any) {
 /**
  * parse a rison string into a javascript structure.
  */
-export function decode<T>(rison: string): T | null {
+export function decode<T = RisonValue>(rison: string): T | null {
   // Rison is unable to handle an empty string
   if (rison.length === 0) {
     return null;
