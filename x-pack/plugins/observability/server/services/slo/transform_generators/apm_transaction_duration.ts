@@ -74,7 +74,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     }
 
     return {
-      index: DEFAULT_APM_INDEX,
+      index: indicator.params.index ?? DEFAULT_APM_INDEX,
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {
