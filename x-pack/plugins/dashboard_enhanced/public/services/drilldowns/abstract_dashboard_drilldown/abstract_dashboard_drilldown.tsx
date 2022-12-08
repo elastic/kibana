@@ -20,6 +20,8 @@ import {
   StartServicesGetter,
   UiComponent,
 } from '@kbn/kibana-utils-plugin/public';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DrilldownConfig } from '../../../../common/drilldowns/dashboard_drilldown/types';
 import { CollectConfigContainer } from './components';
 import { txtGoToDashboard } from './i18n';
@@ -36,8 +38,12 @@ export interface Params {
 export abstract class AbstractDashboardDrilldown<Context extends object = object>
   implements Drilldown<Config, Context>
 {
-  constructor(protected readonly params: Params) {
-    this.ReactCollectConfig = (props) => <CollectConfigContainer {...props} params={this.params} />;
+  constructor(protected readonly params: Params, theme: ThemeServiceStart) {
+    this.ReactCollectConfig = (props) => (
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <CollectConfigContainer {...props} params={this.params} />
+      </KibanaThemeProvider>
+    );
     this.CollectConfig = reactToUiComponent(this.ReactCollectConfig);
   }
 
