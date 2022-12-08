@@ -214,7 +214,7 @@
 <         t: function(defaultString) {
 ---
 >         t(defaultString) {
-186,212d181
+186,242d181
 <         }
 <       })
 <       .toCompileTo('<input aria-label="Name" placeholder="Example User" />');
@@ -242,7 +242,7 @@
 <             'string params for outer helper processed correctly'
 <           );
 <           return a + b;
-214,231d182
+<         },
 < 
 <         blorg: function(a, options) {
 <           equals(
@@ -261,7 +261,7 @@
 <       .withInput({
 <         foo: {},
 <         yeah: {}
-233,248c184
+<       })
 <       .toCompileTo('fooyeah');
 <   });
 < 
@@ -272,11 +272,11 @@
 <         blog: function(options) {
 <           equals(options.hashTypes.fun, 'SubExpression');
 <           return 'val is ' + options.hash.fun;
-<         },
+244,246d182
 <         bork: function() {
 <           return 'BORK';
 <         }
-<       })
+248c184
 <       .toCompileTo('val is BORK');
 ---
 >       .toCompileTo('<input aria-label="Name" placeholder="Example User" />');
