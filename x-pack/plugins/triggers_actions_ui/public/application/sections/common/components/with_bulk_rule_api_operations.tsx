@@ -235,10 +235,6 @@ export function withBulkRuleOperations<T>(
   };
 }
 
-function isRuleDisabled(rule: Rule) {
-  return rule.enabled === false;
-}
-
 function isRuleMuted(rule: Rule) {
   return rule.muteAll === true;
 }
