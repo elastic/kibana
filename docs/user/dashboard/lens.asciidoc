@@ -196,14 +196,14 @@ preview::[]
 
 Annotations allow you to call out specific points in your visualizations that are important, such as significant changes in the data. You can add annotations for any {data-source}, add text and icons, specify the line format and color, and more.
 
+[role="screenshot"]
+image::images/lens_annotations_8.2.0.png[Lens annotations]
+
 Annotations support two placement types:
 
 * *Static date* &mdash; Displays annotations for specific times or time ranges.
 
 * *Custom query* &mdash; Displays annotations based on custom {es} queries. For detailed information about queries, check <<semi-structured-search>>. 
-
-[role="screenshot"]
-image::images/lens_annotations_8.2.0.png[Lens annotations]
 
 Create the annotation layer. 
 
@@ -212,6 +212,8 @@ Create the annotation layer.
 . Select the {data-source} for the annotation.
 
 . From the fields list, drag a field to the *Add an annotation* field.
+
+. To use global filters in the annotation, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the annotations layer], then select *Keep global filters* from the dropdown.
 
 Create static annotations.
 
@@ -240,8 +242,6 @@ Specify the annotation appearance.
 . If you created a custom query annotation, click *Add field* to add a field to the annotation tooltip.
 
 . To close, click *X*.
-
-. To use global filters in the annotation, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the annotations layer] in the *Annotations* layer pane, then select *Keep global filters* from the dropdown.
 
 [float]
 [[add-reference-lines]]
