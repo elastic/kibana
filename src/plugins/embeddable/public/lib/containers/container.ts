@@ -398,7 +398,7 @@ export abstract class Container<
     }
   }
 
-  private async createAndSaveEmbeddable<
+  protected async createAndSaveEmbeddable<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
     TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>
   >(type: string, panelState: PanelState) {
