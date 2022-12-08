@@ -55,25 +55,56 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
       request.query
     );
 
-    const packagePolicies: boolean[] = items.map((item) => {
-      if (limitedToPackages && limitedToPackages.length) {
-        const packageName = item?.package?.name;
-        return !!packageName && limitedToPackages.includes(packageName);
-      }
-      return false;
-    });
+    // specific to package-level RBAC
+    if (limitedToPackages && limitedToPackages.length) {
+      // { packageName: boolean } record of allowed package names
+      // include policy with no package name
+      const packagePolicyNames = items.reduce<Record<string, boolean>>((acc, item) => {
+        const pkgName = item?.package?.name ?? 'empty-name';
+        if (pkgName) {
+          acc[pkgName] = limitedToPackages.includes(pkgName);
+        }
+        return acc;
+      }, {});
 
-    if (!packagePolicies.length || !packagePolicies.every((item) => item)) {
-      return response.forbidden({
+      if (Object.values(packagePolicyNames).every((value) => !value)) {
+        // when there are not any allowed policies
+        return response.forbidden({
+          body: {
+            message: `Data for package names ${items
+              .map((item) => item.package?.name)
+              .join(', ')} is not authorized.`,
+          },
+        });
+      }
+
+      // list allowed package policy items or policies with no package name
+      return response.ok({
         body: {
-          message: `Data for package names ${items
-            .map((item) => item.package?.name)
-            .join(', ')} is not authorized.`,
+          items: items.filter((item) => {
+            const pkgName = item?.package?.name;
+            // include policies with allowed package names
+            const allowedPackages = Object.entries(packagePolicyNames).reduce<string[]>(
+              (acc, curr) => {
+                if (curr[1]) acc.push(curr[0]);
+                return acc;
+              },
+              []
+            );
+            if (pkgName) {
+              return allowedPackages.includes(pkgName);
+            }
+            // or policies with no package name
+            return item;
+          }),
+          total,
+          page,
+          perPage,
         },
       });
     }
 
-    // TODO: maybe filter out the items based on allowed packages?
+    // agnostic to package-level RBAC
     return response.ok({
       body: {
         items,
