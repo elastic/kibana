@@ -22,8 +22,8 @@ export interface Journey {
 run(
   async ({ log, flagsReader, procRunner }) => {
     const skipWarmup = flagsReader.boolean('skip-warmup');
-    const journeyPath = flagsReader.path('journey-path');
     const kibanaInstallDir = flagsReader.path('kibana-install-dir');
+    const journeyPath = flagsReader.path('journey-path');
 
     if (kibanaInstallDir && !fs.existsSync(kibanaInstallDir)) {
       throw createFlagError('--kibana-install-dir must be an existing directory');
@@ -36,7 +36,11 @@ run(
     let journeys: Journey[] = [];
 
     if (journeyPath) {
-      journeys = [{ name: path.parse(journeyPath).name, path: journeyPath }];
+      journeys = fs.statSync(journeyPath).isDirectory()
+        ? fs.readdirSync(journeyPath).map((fileName) => {
+            return { name: fileName, path: path.resolve(journeyPath, fileName) };
+          })
+        : [{ name: path.parse(journeyPath).name, path: journeyPath }];
     } else {
       const journeyBasePath = path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
       journeys = fs.readdirSync(journeyBasePath).map((name) => {
@@ -144,8 +148,8 @@ run(
       boolean: ['skip-warmup'],
       help: `
       --kibana-install-dir=dir      Run Kibana from existing install directory instead of from source
-      --journey-path=path           Define a path for single user journey that should be executed
-                                    All journeys from '${JOURNEY_BASE_PATH}' are executed by default
+      --journey-path=path           Define path to performance journey or directory with multiple journeys
+                                    that should be executed. '${JOURNEY_BASE_PATH}' is run by default
       --skip-warmup                 Journey will be executed without warmup (TEST phase only)
     `,
     },
