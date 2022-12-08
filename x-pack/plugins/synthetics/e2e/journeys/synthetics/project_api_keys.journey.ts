@@ -58,21 +58,12 @@ journey('ProjectAPIKeys', async ({ page }) => {
       page.waitForNavigation({ url: 'http://localhost:5620/app/home' }),
       page.click('button:has-text("Log in")'),
     ]);
-    await page.goto('http://localhost:5620/app/home#/');
-    await page.click('[aria-label="Toggle primary navigation"]');
+    await page.goto('http://localhost:5620/app/synthetics/settings/api-keys', {
+      waitUntil: 'networkidle',
+    });
   });
   step('Click text=Synthetics', async () => {
-    await Promise.all([
-      page.waitForNavigation({ url: 'http://localhost:5620/app/synthetics/monitors' }),
-      page.click('text=Synthetics'),
-    ]);
-    await page.click('text=Settings');
-    expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/alerting');
-    await page.click('text=Project API Keys');
     expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/api-keys');
-    await page.click(
-      'text=Use an API key to push monitors remotely from a CLI or CD pipeline. To generate '
-    );
-    await page.goto('http://localhost:5620/app/synthetics/settings/api-keys');
+    await page.isDisabled('button:has-text("Generate Project API key")');
   });
 });
