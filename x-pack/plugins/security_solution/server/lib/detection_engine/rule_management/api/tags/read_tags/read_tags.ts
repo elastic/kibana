@@ -8,7 +8,7 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 // This is a contrived max limit on the number of tags. In fact it can exceed this number and will be truncated to the hardcoded number.
-const EXPECTED_MAX_TAGS = 500;
+const EXPECTED_MAX_TAGS = 65536;
 
 export const readTags = async ({
   rulesClient,
