@@ -89,6 +89,7 @@ export class Plugin implements InfraClientPluginClass {
     const infraEntries = [
       { label: 'Inventory', app: 'metrics', path: '/inventory' },
       { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
+      { label: 'Kubernetes Observability', app: 'metrics', path: '/kubernetesobservability' },
     ];
     const hostInfraEntry = { label: 'Hosts', app: 'metrics', path: '/hosts' };
     pluginsSetup.observability.navigation.registerSections(
@@ -200,6 +201,13 @@ export class Plugin implements InfraClientPluginClass {
           defaultMessage: 'Metrics Explorer',
         }),
         path: '/explorer',
+      },
+      {
+        id: 'kubernetes-observability',
+        title: i18n.translate('xpack.infra.homePage.kubernetesObservabilityTabTitle', {
+          defaultMessage: 'kubernetes Observability',
+        }),
+        path: '/kubernetesobservability',
       },
       {
         id: 'settings',
