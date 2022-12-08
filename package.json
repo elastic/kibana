@@ -356,7 +356,7 @@
     "@kbn/plugin-discovery": "link:bazel-bin/packages/kbn-plugin-discovery",
     "@kbn/react-field": "link:bazel-bin/packages/kbn-react-field",
     "@kbn/rison": "link:bazel-bin/packages/kbn-rison",
-    "@kbn/row_renderers": "link:bazel-bin/packages/kbn-row-renderers",
+    "@kbn/row-renderers": "link:bazel-bin/packages/kbn-row-renderers",
     "@kbn/rule-data-utils": "link:bazel-bin/packages/kbn-rule-data-utils",
     "@kbn/safer-lodash-set": "link:bazel-bin/packages/kbn-safer-lodash-set",
     "@kbn/securitysolution-autocomplete": "link:bazel-bin/packages/kbn-securitysolution-autocomplete",

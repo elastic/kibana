@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/row_renderers",
+  "id": "@kbn/row-renderers",
   "owner": "@elastic/security-threat-hunting-explore",
   "runtimeDeps": [],
   "typeDeps": [],

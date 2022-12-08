@@ -8,8 +8,8 @@
 import * as runtimeTypes from 'io-ts';
 
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
-import { RowRendererIdRuntimeType } from '@kbn/securitysolution-row-renderers';
-import type { RowRendererId } from '@kbn/securitysolution-row-renderers';
+import { RowRendererIdRuntimeType } from '@kbn/row-renderers';
+import type { RowRendererId } from '@kbn/row-renderers';
 import { unionWithNullType } from '../../utility_types';
 import type { NoteResult, NoteSavedObject } from './note';
 import { NoteSavedObjectToReturnRuntimeType } from './note';

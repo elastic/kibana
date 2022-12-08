@@ -3789,7 +3789,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/row_renderers@link:bazel-bin/packages/kbn-row-renderers":
+"@kbn/row-renderers@link:bazel-bin/packages/kbn-row-renderers":
   version "0.0.0"
   uid ""
 
