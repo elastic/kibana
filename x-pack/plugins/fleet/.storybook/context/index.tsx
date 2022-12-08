@@ -28,7 +28,7 @@ import { setCustomIntegrations } from '../../public/services/custom_integrations
 import { getApplication } from './application';
 import { getChrome } from './chrome';
 import { getHttp } from './http';
-import { getUiSettings } from './ui_settings';
+import { getUiSettings, getSettings } from './ui_settings';
 import { getNotifications } from './notifications';
 import { stubbedStartServices } from './stubs';
 import { getDocLinks } from './doc_links';

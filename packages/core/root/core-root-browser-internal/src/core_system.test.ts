@@ -24,6 +24,7 @@ import {
   NotificationServiceConstructor,
   OverlayServiceConstructor,
   UiSettingsServiceConstructor,
+  SettingsServiceConstructor,
   MockApplicationService,
   MockDocLinksService,
   MockRenderingService,
@@ -131,6 +132,7 @@ describe('constructor', () => {
     expect(NotificationServiceConstructor).toHaveBeenCalledTimes(1);
     expect(HttpServiceConstructor).toHaveBeenCalledTimes(1);
     expect(UiSettingsServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(SettingsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(OverlayServiceConstructor).toHaveBeenCalledTimes(1);
     expect(RenderingServiceConstructor).toHaveBeenCalledTimes(1);
