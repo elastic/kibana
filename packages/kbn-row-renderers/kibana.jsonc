@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/securitysolution-row_renderers",
+  "id": "@kbn/row_renderers",
   "owner": "@elastic/security-solution-explore",
   "runtimeDeps": [],
   "typeDeps": [],

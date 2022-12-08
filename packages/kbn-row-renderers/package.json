@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/securitysolution-row_renderers",
+  "name": "@kbn/row_renderers",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",

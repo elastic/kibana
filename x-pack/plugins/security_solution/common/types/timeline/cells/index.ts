@@ -7,7 +7,7 @@
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { RowRenderer } from '@kbn-securitysolution-row-renderers';
+import type { RowRenderer } from '@kbn-row-renderers';
 import type { ColumnHeaderOptions } from '../..';
 
 import type { Ecs } from '../../../ecs';

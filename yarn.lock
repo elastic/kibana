@@ -3789,6 +3789,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/row_renderers@link:bazel-bin/packages/kbn-row-renderers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils":
   version "0.0.0"
   uid ""
@@ -3842,10 +3846,6 @@
   uid ""
 
 "@kbn/securitysolution-list-utils@link:bazel-bin/packages/kbn-securitysolution-list-utils":
-  version "0.0.0"
-  uid ""
-
-"@kbn/securitysolution-row_renderers@link:bazel-bin/packages/kbn-securitysolution-row-renderers":
   version "0.0.0"
   uid ""
 
