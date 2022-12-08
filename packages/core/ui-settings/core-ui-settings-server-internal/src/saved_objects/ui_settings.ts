@@ -65,7 +65,7 @@ export const uiSettingsGlobalType: SavedObjectsType = {
       };
     },
     getTitle(obj) {
-      return `Global Setting [${obj.id}]`;
+      return `Global Settings [${obj.id}]`;
     },
   },
 };
