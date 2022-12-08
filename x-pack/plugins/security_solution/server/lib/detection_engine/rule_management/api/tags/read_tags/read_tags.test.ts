@@ -6,12 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-import {
-  getRuleMock,
-  getFindResultWithMultiHits,
-} from '../../../../routes/__mocks__/request_responses';
-import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import { readTags, convertTagsToSet, convertToTags, isTags } from './read_tags';
+import { readTags } from './read_tags';
 
 describe('read_tags', () => {
   afterEach(() => {
@@ -29,104 +24,6 @@ describe('read_tags', () => {
 
       const tags = await readTags({ rulesClient });
       expect(tags).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4']);
-    });
-  });
-
-  describe('convertTagsToSet', () => {
-    test('it should convert the intersection of two tag systems without duplicates', () => {
-      const result1 = getRuleMock(getQueryRuleParams());
-      result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.params.ruleId = 'rule-1';
-      result1.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3'];
-
-      const result2 = getRuleMock(getQueryRuleParams());
-      result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result2.params.ruleId = 'rule-2';
-      result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
-
-      const findResult = getFindResultWithMultiHits({ data: [result1, result2] });
-      const set = convertTagsToSet(findResult.data);
-      expect(Array.from(set)).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4']);
-    });
-
-    test('it should with with an empty array', () => {
-      const set = convertTagsToSet([]);
-      expect(Array.from(set)).toEqual([]);
-    });
-  });
-
-  describe('convertToTags', () => {
-    test('it should convert the two tag systems together with duplicates', () => {
-      const result1 = getRuleMock(getQueryRuleParams());
-      result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.params.ruleId = 'rule-1';
-      result1.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3'];
-
-      const result2 = getRuleMock(getQueryRuleParams());
-      result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result2.params.ruleId = 'rule-2';
-      result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
-
-      const findResult = getFindResultWithMultiHits({ data: [result1, result2] });
-      const tags = convertToTags(findResult.data);
-      expect(tags).toEqual([
-        'tag 1',
-        'tag 2',
-        'tag 2',
-        'tag 3',
-        'tag 1',
-        'tag 2',
-        'tag 2',
-        'tag 3',
-        'tag 4',
-      ]);
-    });
-
-    test('it should filter out anything that is not a tag', () => {
-      const result1 = getRuleMock(getQueryRuleParams());
-      result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.params.ruleId = 'rule-1';
-      result1.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3'];
-
-      const result2 = getRuleMock(getQueryRuleParams());
-      result2.id = '99979e67-19a7-455f-b452-8eded6135716';
-      result2.params.ruleId = 'rule-2';
-      // @ts-expect-error
-      delete result2.tags;
-
-      const result3 = getRuleMock(getQueryRuleParams());
-      result3.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result3.params.ruleId = 'rule-2';
-      result3.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
-
-      const findResult = getFindResultWithMultiHits({ data: [result1, result2, result3] });
-      const tags = convertToTags(findResult.data);
-      expect(tags).toEqual([
-        'tag 1',
-        'tag 2',
-        'tag 2',
-        'tag 3',
-        'tag 1',
-        'tag 2',
-        'tag 2',
-        'tag 3',
-        'tag 4',
-      ]);
-    });
-
-    test('it should with with an empty array', () => {
-      const tags = convertToTags([]);
-      expect(tags).toEqual([]);
-    });
-  });
-
-  describe('isTags', () => {
-    test('it should return true if the object has a tags on it', () => {
-      expect(isTags({ tags: [] })).toBe(true);
-    });
-
-    test('it should return false if the object does not have a tags on it', () => {
-      expect(isTags({})).toBe(false);
     });
   });
 });
