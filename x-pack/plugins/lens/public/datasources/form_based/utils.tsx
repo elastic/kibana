@@ -28,7 +28,6 @@ import { estypes } from '@elastic/elasticsearch';
 import type { FramePublicAPI, IndexPattern, StateSetter } from '../../types';
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
-import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
 import {
   operationDefinitionMap,
@@ -40,6 +39,7 @@ import {
   RangeIndexPatternColumn,
   FormulaIndexPatternColumn,
   DateHistogramIndexPatternColumn,
+  getReferencedColumnIds,
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
@@ -56,44 +56,70 @@ export function isColumnInvalid(
   columnId: string,
   indexPattern: IndexPattern
 ) {
-  const column: GenericIndexPatternColumn | undefined = layer.columns[columnId];
+  const column = layer.columns[columnId] as GenericIndexPatternColumn | undefined;
+
   if (!column || !indexPattern) return;
-
-  const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
-  // check also references for errors
-  const referencesHaveErrors =
-    true &&
-    'references' in column &&
-    Boolean(getReferencesErrors(layer, column, indexPattern).filter(Boolean).length);
-
-  const operationErrorMessages =
-    operationDefinition &&
-    operationDefinition.getErrorMessage?.(layer, columnId, indexPattern, operationDefinitionMap);
 
   const filterHasError = column.filter ? !isQueryValid(column.filter, indexPattern) : false;
 
-  return (
-    (operationErrorMessages && operationErrorMessages.length > 0) ||
-    referencesHaveErrors ||
-    filterHasError
-  );
+  if (filterHasError) {
+    return true;
+  }
+
+  return columnHasErrors(layer, columnId, indexPattern);
 }
 
-function getReferencesErrors(
+function columnHasErrors(layer: FormBasedLayer, columnId: string, indexPattern: IndexPattern) {
+  const column = layer.columns[columnId] as GenericIndexPatternColumn | undefined;
+
+  if (!column || !indexPattern) return;
+
+  const columnIdsToCheck = [columnId, ...getReferencedColumnIds(layer, columnId)];
+
+  for (const idToCheck of columnIdsToCheck) {
+    const columnToCheck = layer.columns[idToCheck];
+
+    const operationDefinition =
+      columnToCheck.operationType && operationDefinitionMap[columnToCheck.operationType];
+
+    const operationErrorMessages =
+      operationDefinition && operationDefinition.getErrorMessage?.(layer, idToCheck, indexPattern);
+
+    if (operationErrorMessages?.length) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function columnHasWarnings(
   layer: FormBasedLayer,
-  column: ReferenceBasedIndexPatternColumn,
+  columnId: string,
   indexPattern: IndexPattern
 ) {
-  return column.references?.map((referenceId: string) => {
-    const referencedOperation = layer.columns[referenceId]?.operationType;
-    const referencedDefinition = operationDefinitionMap[referencedOperation];
-    return referencedDefinition?.getErrorMessage?.(
-      layer,
-      referenceId,
-      indexPattern,
-      operationDefinitionMap
-    );
-  });
+  const column = layer.columns[columnId] as GenericIndexPatternColumn | undefined;
+
+  if (!column || !indexPattern) return;
+
+  const columnIdsToCheck = [columnId, ...getReferencedColumnIds(layer, columnId)];
+
+  for (const idToCheck of columnIdsToCheck) {
+    const columnToCheck = layer.columns[idToCheck];
+
+    const operationDefinition =
+      columnToCheck.operationType && operationDefinitionMap[columnToCheck.operationType];
+
+    const operationWarningMessages =
+      operationDefinition &&
+      operationDefinition.getWarningMessages?.(layer, idToCheck, indexPattern);
+
+    if (operationWarningMessages?.length) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export function fieldIsInvalid(

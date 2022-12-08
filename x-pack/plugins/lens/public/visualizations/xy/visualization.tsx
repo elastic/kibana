@@ -870,8 +870,8 @@ export const getXyVisualization = ({
         <DimensionTrigger
           id={columnId}
           hideTooltip={hideTooltip}
-          isInvalid={invalid}
-          invalidMessage={invalidMessage}
+          problemSeverity={invalid ? 'error' : undefined}
+          problemMessage={invalidMessage}
           label={label || defaultAnnotationLabel}
         />
       );

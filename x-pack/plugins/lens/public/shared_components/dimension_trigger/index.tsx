@@ -23,22 +23,22 @@ export const defaultDimensionTriggerTooltip = (
 export const DimensionTrigger = ({
   id,
   label,
-  isInvalid,
   hideTooltip,
-  invalidMessage = defaultDimensionTriggerTooltip,
+  problemSeverity,
+  problemMessage = defaultDimensionTriggerTooltip,
 }: {
   label: string;
   id: string;
-  isInvalid?: boolean;
   hideTooltip?: boolean;
-  invalidMessage?: string | JSX.Element;
+  problemSeverity?: 'warning' | 'error';
+  problemMessage?: string | JSX.Element;
 }) => {
-  if (isInvalid) {
+  if (problemSeverity) {
     return (
-      <EuiToolTip content={!hideTooltip ? invalidMessage : null} anchorClassName="eui-displayBlock">
+      <EuiToolTip content={!hideTooltip ? problemMessage : null} anchorClassName="eui-displayBlock">
         <EuiText
           size="s"
-          color="danger"
+          color={problemSeverity === 'warning' ? 'warning' : 'danger'}
           id={id}
           className="lnsLayerPanel__triggerText"
           data-test-subj="lns-dimensionTrigger"

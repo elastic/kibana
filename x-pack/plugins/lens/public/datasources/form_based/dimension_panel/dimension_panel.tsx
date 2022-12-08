@@ -15,7 +15,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../../types';
 import { GenericIndexPatternColumn } from '../form_based';
-import { isColumnInvalid } from '../utils';
+import { columnHasWarnings, isColumnInvalid } from '../utils';
 import { FormBasedPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
 import { DateRange } from '../../../../common';
@@ -62,6 +62,11 @@ export const FormBasedDimensionTriggerComponent = function FormBasedDimensionTri
     [layer, columnId, currentIndexPattern, invalid]
   );
 
+  const currentColumnHasWarnings = useMemo(
+    () => columnHasWarnings(layer, columnId, currentIndexPattern),
+    [layer, columnId, currentIndexPattern]
+  );
+
   const selectedColumn: GenericIndexPatternColumn | null = layer.columns[props.columnId] ?? null;
 
   if (!selectedColumn) {
@@ -73,9 +78,11 @@ export const FormBasedDimensionTriggerComponent = function FormBasedDimensionTri
     <DimensionTrigger
       id={columnId}
       label={!currentColumnHasErrors ? formattedLabel : selectedColumn.label}
-      isInvalid={Boolean(currentColumnHasErrors)}
+      problemSeverity={
+        currentColumnHasErrors ? 'error' : currentColumnHasWarnings ? 'warning' : undefined
+      }
       hideTooltip={hideTooltip}
-      invalidMessage={invalidMessage}
+      problemMessage={invalidMessage}
     />
   );
 };
