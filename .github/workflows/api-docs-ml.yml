@@ -33,7 +33,9 @@ jobs:
         id: git-check
         run: echo "modified=$(if [ -n "$(git status --porcelain)" ]; then echo "true"; else echo "false"; fi)" >> $GITHUB_OUTPUT
       - name: Commit and push changes
-        if: steps.git-check.outputs.modified == 'true' 
+        if: steps.git-check.outputs.modified == 'true'
+        with:
+          token: ${{secrets.KIBANAMACHINE_TOKEN}}
         run: |
           git config user.name "Github Actions Bot"
           git config user.email "<>"
