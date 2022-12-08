@@ -8,11 +8,8 @@
 import React from 'react';
 import { EuiCallOut, EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSyntheticsSettingsContext } from '../../../contexts';
 
 export const HelpCommands = ({ apiKey }: { apiKey: string }) => {
-  const { basePath } = useSyntheticsSettingsContext();
-
   return (
     <div className="text-left">
       <EuiCallOut title={API_KEY_WARNING_LABEL} iconType="iInCircle" size="s" />
