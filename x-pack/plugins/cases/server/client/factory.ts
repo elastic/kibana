@@ -13,7 +13,8 @@ import type {
   SavedObjectsClientContract,
   IBasePath,
 } from '@kbn/core/server';
-import { ISavedObjectsSerializer, SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   AuditLogger,
   SecurityPluginSetup,
