@@ -70,7 +70,7 @@ const getDefaultFieldTableColumns = ({
   highlight: string;
   showDescriptionColumn: boolean;
 }): FieldTableColumns => {
-  console.log('showDescriptionColumn', showDescriptionColumn)
+  console.log('showDescriptionColumn', showDescriptionColumn);
   const nameColumn = {
     field: 'name',
     name: i18n.NAME,
