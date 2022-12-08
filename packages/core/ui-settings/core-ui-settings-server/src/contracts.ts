@@ -82,5 +82,5 @@ export interface UiSettingsServiceStart {
    * }
    * ```
    */
-  asScopedToGlobalClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+  globalAsScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
 }

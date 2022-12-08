@@ -57,7 +57,7 @@ const createSetupMock = () => {
 const createStartMock = () => {
   const mocked: jest.Mocked<InternalUiSettingsServiceStart> = {
     asScopedToClient: jest.fn(),
-    asScopedToGlobalClient: jest.fn(),
+    globalAsScopedToClient: jest.fn(),
   };
 
   mocked.asScopedToClient.mockReturnValue(createClientMock());

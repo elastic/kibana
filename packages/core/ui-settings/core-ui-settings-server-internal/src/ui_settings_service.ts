@@ -90,7 +90,7 @@ export class UiSettingsService
 
     return {
       asScopedToClient: this.getScopedClientFactory('namespace'),
-      asScopedToGlobalClient: this.getScopedClientFactory('global'),
+      globalAsScopedToClient: this.getScopedClientFactory('global'),
     };
   }
 
