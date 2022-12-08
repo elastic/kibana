@@ -11,7 +11,7 @@ import { RuleAlertsSummary } from './rule_alerts_summary';
 import { mount, ReactWrapper } from 'enzyme';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { mockRule } from '../../../../mock/rule_details/alert_summary';
+import { mockAlertSummaryTimeRange, mockRule } from '../../../../mock/alert_summary_widget';
 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation(() => true),
@@ -49,9 +49,8 @@ const ruleTypes = [
 describe('Rule Alert Summary', () => {
   let wrapper: ReactWrapper;
   const mockedTimeRange = {
+    ...mockAlertSummaryTimeRange,
     title: <h3 data-test-subj="mockedTimeRangeTitle">mockedTimeRangeTitle</h3>,
-    utcFrom: 'mockedUtcFrom',
-    utcTo: 'mockedUtcTo',
   };
 
   async function setup() {
