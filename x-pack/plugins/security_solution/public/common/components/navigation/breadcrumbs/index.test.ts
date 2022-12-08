@@ -9,7 +9,7 @@ import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
 import type { ObjectWithNavTabs } from '.';
 import { getBreadcrumbsForRoute, useSetBreadcrumbs } from '.';
-import { HostsTableType } from '../../../../hosts/store/model';
+import { HostsTableType } from '../../../../explore/hosts/store/model';
 import type { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
 import { NetworkRouteType } from '../../../../network/pages/navigation/types';
 import { TimelineTabs } from '../../../../../common/types/timeline';

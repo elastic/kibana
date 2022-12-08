@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { hostsReducer } from '../../hosts/store';
+import { hostsReducer } from '../../explore/hosts/store';
 import { networkReducer } from '../../network/store';
 import { usersReducer } from '../../users/store';
 import { timelineReducer } from '../../timelines/store/timeline/reducer';

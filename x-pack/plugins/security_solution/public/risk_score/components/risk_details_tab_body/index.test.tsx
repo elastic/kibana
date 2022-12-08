@@ -13,7 +13,7 @@ import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { useRiskScore } from '../../containers';
 import { RiskDetailsTabBody } from '.';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
-import { HostsType } from '../../../hosts/store/model';
+import { HostsType } from '../../../explore/hosts/store/model';
 import { UsersType } from '../../../users/store/model';
 
 jest.mock('../../containers');

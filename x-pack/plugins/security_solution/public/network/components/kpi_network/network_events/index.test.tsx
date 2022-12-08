@@ -13,7 +13,7 @@ import React from 'react';
 import { NetworkKpiNetworkEvents } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
-import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
+import { KpiBaseComponentManage } from '../../../../explore/hosts/components/kpi_hosts/common';
 
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../containers/kpi_network/network_events');

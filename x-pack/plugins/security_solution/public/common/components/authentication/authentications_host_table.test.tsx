@@ -11,7 +11,7 @@ import '../../mock/match_media';
 
 import * as i18n from './translations';
 import { AuthenticationsHostTable } from './authentications_host_table';
-import { hostsModel } from '../../../hosts/store';
+import { hostsModel } from '../../../explore/hosts/store';
 import { TestProviders } from '../../mock';
 import { useAuthentications } from '../../containers/authentications';
 import { useQueryToggle } from '../../containers/query_toggle';

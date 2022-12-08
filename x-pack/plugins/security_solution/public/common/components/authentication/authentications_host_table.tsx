@@ -19,8 +19,8 @@ import {
 } from './helpers';
 import { useAuthentications } from '../../containers/authentications';
 import { useQueryInspector } from '../page/manage_query';
-import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
-import { hostsActions, hostsModel, hostsSelectors } from '../../../hosts/store';
+import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
+import { hostsActions, hostsModel, hostsSelectors } from '../../../explore/hosts/store';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { AuthStackByField } from '../../../../common/search_strategy';

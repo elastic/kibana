@@ -11,8 +11,8 @@ import { EntityAnalyticsHeader } from '.';
 import { Direction, RiskScoreFields, RiskSeverity } from '../../../../../common/search_strategy';
 import type { SeverityCount } from '../../../../common/components/severity/types';
 import { TestProviders } from '../../../../common/mock';
-import { hostsActions } from '../../../../hosts/store';
-import { HostsType } from '../../../../hosts/store/model';
+import { hostsActions } from '../../../../explore/hosts/store';
+import { HostsType } from '../../../../explore/hosts/store/model';
 import { usersActions } from '../../../../users/store';
 import { UsersTableType } from '../../../../users/store/model';
 
