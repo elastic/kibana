@@ -301,10 +301,6 @@ export class ChromeService {
       },
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
-
-      setCustomBranding: (customBranding: CustomBranding) => {
-        customBranding$.next(customBranding);
-      },
     };
   }
 

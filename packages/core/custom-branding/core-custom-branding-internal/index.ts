@@ -7,4 +7,3 @@
  */
 
 export { CustomBrandingService } from './custom_branding_service';
-export type { CustomBranding } from './custom_branding_service';

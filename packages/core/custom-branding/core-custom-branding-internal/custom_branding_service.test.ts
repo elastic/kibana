@@ -12,6 +12,7 @@ import { CustomBrandingService } from './custom_branding_service';
 describe('CustomBrandingService', () => {
   let service: CustomBrandingService;
   let mockAppService: any;
+  let customBrandingObject = { }
 
   beforeEach(() => {
     service = new CustomBrandingService();
