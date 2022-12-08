@@ -12744,7 +12744,7 @@
             "label": "data_stream",
             "description": [],
             "signature": [
-              "{ dataset: string; type: string; elasticsearch?: { privileges?: { indices?: string[] | undefined; } | undefined; index_mode?: string | undefined; } | undefined; }"
+              "{ dataset: string; type: string; elasticsearch?: { privileges?: { indices?: string[] | undefined; } | undefined; index_mode?: string | undefined; source_mode?: string | undefined; } | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
