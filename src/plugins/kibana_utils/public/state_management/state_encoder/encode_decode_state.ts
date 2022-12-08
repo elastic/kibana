@@ -7,6 +7,7 @@
  */
 
 import rison from '@kbn/rison';
+import { encodeState } from '../../../common/state_management/encode_state';
 import { isStateHash } from '../../../common/state_management/state_hash';
 import { retrieveState, persistState } from '../state_hash';
 
@@ -22,21 +23,9 @@ export function decodeState<State>(expandedOrHashedState: string): State {
   }
 }
 
-// should be:
-// export function encodeState<State extends RisonValue> but this leads to the chain of
-// types mismatches up to BaseStateContainer interfaces, as in state containers we don't
-// have any restrictions on state shape
-export function encodeState<State>(state: State, useHash: boolean): string {
-  if (useHash) {
-    return persistState(state);
-  } else {
-    return rison.encodeUnknown(state) ?? '';
-  }
-}
-
 export function hashedStateToExpandedState(expandedOrHashedState: string): string {
   if (isStateHash(expandedOrHashedState)) {
-    return encodeState(retrieveState(expandedOrHashedState), false);
+    return encodeState(retrieveState(expandedOrHashedState), false, persistState);
   }
 
   return expandedOrHashedState;

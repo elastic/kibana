@@ -6,16 +6,20 @@
  * Side Public License, v 1.
  */
 
-import rison, { RisonValue } from '@kbn/rison';
-import { createStateHash } from './state_hash';
+import rison from '@kbn/rison';
 
-/**
- * Common 'encodeState' without HashedItemStore support
- */
-export function encodeState<State>(state: State, useHash: boolean): string {
+// should be:
+// export function encodeState<State extends RisonValue> but this leads to the chain of
+// types mismatches up to BaseStateContainer interfaces, as in state containers we don't
+// have any restrictions on state shape
+export function encodeState<State>(
+  state: State,
+  useHash: boolean,
+  createHash: (rawState: State) => string
+): string {
   if (useHash) {
-    return createStateHash(JSON.stringify(state));
+    return createHash(state);
   } else {
-    return rison.encode(state as unknown as RisonValue);
+    return rison.encodeUnknown(state) ?? '';
   }
 }
