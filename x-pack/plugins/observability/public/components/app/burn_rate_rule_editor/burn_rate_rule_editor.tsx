@@ -17,8 +17,8 @@ import { LongWindowDuration } from './long_window_duration';
 export function BurnRateRuleEditor() {
   const [selectedSlo, setSelectedSlo] = useState<SLO | undefined>(undefined);
   const [longWindowDuration, setLongWindowDuration] = useState<Duration>({ value: 1, unit: 'h' });
-  const [shortWindowDuration, setShortWindowDuration] = useState<Duration>({ value: 5, unit: 'm' });
-  const [burnRate, setBurnRate] = useState<number>(1);
+  const [, setShortWindowDuration] = useState<Duration>({ value: 5, unit: 'm' });
+  const [, setBurnRate] = useState<number>(1);
   const [maxBurnRate, setMaxBurnRate] = useState<number>(1);
 
   const onLongWindowDurationChange = (duration: Duration) => {
