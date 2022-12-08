@@ -7,7 +7,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Tooltip } from '../tooltip';
 import { strings } from './action_strings';
 import { FilterItemActionsProps } from './types';
@@ -29,11 +29,11 @@ export const FilterItemActions: FC<FilterItemActionsProps & { minimizePaddings?:
     <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd" gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>
         <Tooltip content={strings.getDeleteButtonDisabled()} show={disableRemove || disabled}>
-          <EuiButtonEmpty
+          <EuiButtonIcon
             onClick={onRemoveFilter}
             iconType="trash"
             isDisabled={disableRemove || disabled}
-            size="s"
+            size="xs"
             color="danger"
             aria-label={strings.getDeleteFilterGroupButtonIconLabel()}
             {...(minimizePaddings ? { className: actionButtonCss } : {})}
@@ -46,8 +46,9 @@ export const FilterItemActions: FC<FilterItemActionsProps & { minimizePaddings?:
             onClick={onOrButtonClick}
             isDisabled={disableOr || disabled}
             iconType="plusInCircle"
-            size="s"
+            size="xs"
             iconSize="s"
+            flush="right"
             aria-label={strings.getAddOrFilterGroupButtonIconLabel()}
             data-test-subj="add-or-filter"
             {...(minimizePaddings ? { className: actionButtonCss } : {})}
@@ -62,8 +63,9 @@ export const FilterItemActions: FC<FilterItemActionsProps & { minimizePaddings?:
             onClick={onAddButtonClick}
             isDisabled={disableAnd || disabled}
             iconType="plusInCircle"
-            size="s"
+            size="xs"
             iconSize="s"
+            flush="right"
             aria-label={strings.getAddAndFilterGroupButtonIconLabel()}
             data-test-subj="add-and-filter"
             {...(minimizePaddings ? { className: actionButtonCss } : {})}

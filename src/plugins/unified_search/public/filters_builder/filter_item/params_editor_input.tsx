@@ -21,11 +21,11 @@ import type { Operator } from '../../filter_bar/filter_editor';
 export const strings = {
   getSelectFieldPlaceholderLabel: () =>
     i18n.translate('unifiedSearch.filter.filtersBuilder.selectFieldPlaceholder', {
-      defaultMessage: 'Please select a field first ...',
+      defaultMessage: 'Please select a field first...',
     }),
   getSelectOperatorPlaceholderLabel: () =>
     i18n.translate('unifiedSearch.filter.filtersBuilder.selectOperatorPlaceholder', {
-      defaultMessage: 'Please select operator first ...',
+      defaultMessage: 'Please select operator first...',
     }),
 };
 
