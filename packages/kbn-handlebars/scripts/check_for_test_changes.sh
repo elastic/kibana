@@ -6,7 +6,7 @@ TMP=.tmp-handlebars
 
 # Try to detect Windows environment (I've not tested this!)
 if [[ "$OSTYPE" == "msys" ]]; then
-  # Windows environemnt
+  # Windows environment
   DEVNULL=NUL
 else
   # Everything else (including Cygwin on Windows)
@@ -40,7 +40,7 @@ do
   set -e
   if [ $error -gt 1 ]
   then
-    echo "The diff command encounted an unexpected error!"
+    echo "The diff command encountered an unexpected error!"
     exit $error
   fi
 
@@ -50,7 +50,7 @@ do
   set -e
   if [ $error -gt 1 ]
   then
-    echo "The diff command encounted an unexpected error!"
+    echo "The diff command encountered an unexpected error!"
     exit $error
   elif [ $error -gt 0 ]
   then
