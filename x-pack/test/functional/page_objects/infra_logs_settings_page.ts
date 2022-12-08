@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 import { EventExecutor } from '@xstate/test';
-import type { LogIndexReference } from '@kbn/infra-plugin/common/log_views';
+import type {
+  LogIndexReference,
+  LogViewColumnConfiguration,
+} from '@kbn/infra-plugin/common/log_views';
 import type { AnyEventObject } from 'xstate';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
@@ -21,6 +24,7 @@ export function InfraLogsSettingsPageProvider({ getPageObjects, getService }: Ft
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['header']);
 
   /**
@@ -155,7 +159,7 @@ export function InfraLogsSettingsPageProvider({ getPageObjects, getService }: Ft
     LogsSettingsPageTestMachineEvent['type'],
     EventExecutor<unknown, LogsSettingsPageTestMachineEvent | AnyEventObject>
   > = {
-    changeIndexReference: async ({ state, event }) => {
+    changeIndexReference: async ({ event }) => {
       if (event.type !== 'changeIndexReference') {
         throw new Error(`Unexpected event type: ${event.type}`);
       }
@@ -165,6 +169,25 @@ export function InfraLogsSettingsPageProvider({ getPageObjects, getService }: Ft
         await setIndexNames(event.newIndexReference.indexName);
       } else {
         throw new Error('Not implemented');
+      }
+    },
+    changeColumns: async ({ event }) => {
+      if (event.type !== 'changeColumns') {
+        throw new Error(`Unexpected event type: ${event.type}`);
+      }
+
+      await retry.try(async () => {
+        await infraSourceConfigurationForm.getForm();
+      });
+
+      await infraSourceConfigurationForm.removeAllLogColumns();
+
+      for (const column of event.newColumns) {
+        if ('timestampColumn' in column) {
+          await infraSourceConfigurationForm.addTimestampLogColumn();
+        } else if ('fieldColumn' in column) {
+          await infraSourceConfigurationForm.addFieldLogColumn(column.fieldColumn.field);
+        }
       }
     },
     saveSettings: async ({ state, event }) => {
@@ -193,7 +216,7 @@ export function InfraLogsSettingsPageProvider({ getPageObjects, getService }: Ft
 }
 
 export interface LogsSettingsPageTestMachineContextWithChangedLogView {
-  changedLogView: LogViewDescriptor;
+  changedLogView: Partial<LogViewDescriptor>;
 }
 
 export type LogsSettingsPageTestMachineTypestate =
@@ -212,5 +235,9 @@ export type LogsSettingsPageTestMachineEvent =
       type: 'changeIndexReference';
       newIndexReference: LogIndexReference;
       expextedIndexStatus: ExpectedIndexStatus;
+    }
+  | {
+      type: 'changeColumns';
+      newColumns: LogViewColumnConfiguration[];
     }
   | { type: 'saveSettings' };

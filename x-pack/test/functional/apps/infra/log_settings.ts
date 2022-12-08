@@ -11,6 +11,7 @@ import { assign, createMachine } from 'xstate';
 import equal from 'fast-deep-equal';
 // import { DATES } from './constants';
 import { LOGS_INDEX_PATTERN } from '@kbn/infra-plugin/common/constants';
+import { defaultSourceConfiguration } from '@kbn/infra-plugin/common/source_configuration/defaults';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type {
   LogStreamPageTestMachineEvent,
@@ -54,7 +55,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
 
   const createLogSettingsTestMachine = (initialContext: TestMachineContext) =>
-    /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKYAu2CWAdlLACpzYCyAhgMYAWhYAdLNlQE7YDEBVAbnihVsYEqgAy6WAFU8AbQAMAXUSgADqlh58qAqpAAPRAFoAjAHYmAFgAcp0wGYATFYBsATgXnXXhwBoQAE9EUxsHJndI9ysLJxcFGwBWAF9kgLRMHHwiUnJqekYWNk4efkFhUQkpWTlTFSQQDS0dPQajBESmRPMHRI8HSNdzBSGrAOCEJ3dXJjDHd0SbGycwxK9U9PQsXEJiMlZ8hgJmXUlMbHYwKgBbCjxYLSIASQIIPBo4AAUqGC4aZHeAGtttliAAJK4QMDscSEQGKerqTTaPC6fTtVyJcJOBxWBwKOKeGzuXrjEI2KzWKJORLRabdDYgDIg3a5A60I4nAhnFk5b6-f5AnkXK7XAByZSELVhBHhyn0TRRaLaiFcpicTAcyw8Cgc9nc9lMZI6rhsTC8FPMpixYR8VkZzKyrP2lA5hVOWydfJ+YD+AJogOFlxuEoEUtR3LhtURjWRLXRIVcGqcCnsCnc5is3UzRqCiD6ZotVitNocPhSaSZnp2ORdh3d3OroNg-OYAHdtHRpAR6FQiJBecQ-nQ+zAXlCDAAlMAAM2hYB7YARCrjEYTCHVOM15h3+Kc5hJ1v8ecmxaYu965lWV68rgdTedeTdxyYHsyNeIraYHewXZ7I-7CBB1gYdRzAccwCnWd50XaMV2aNcVQ3GkNSvAZvBcPokzGE9ek6TxEjcVxTUI2lTHvd9mzrZ8uR5L1Px9b9OwAYQAmAgPokDYH4MBgOXBpFXjJDHFCc0CStVNTVNEZjVMKwNSsGILD1WwPGIhwKOA6iChfN8MBFG5Wz9IFgIhKgoRhKN5QE1dlVADEsSYHE8SzDMDV6GxjSmGY5gGRZllWdZGQIVAoXgBpHQ-NlXR0sB4KVVp7JMBx8VmaYvH3a1DwpY1jAPLp-J8CkUpiBQK02SjH3ZWKig4bB4qEpKEGMFYNWJHxzEy2k9Ryk9TB8KlIhsLwvANNTNM47TOVfRtzmDW57keKBx3eL4fQaxCmt6GYrRsIZMzcndi1ksIIiieTIlxOSFgmqKpobOiotbDa7MMRBiUpLF1Q84idw8Y1LGiewPBJFTiysdxbqop8ar0zivx-P9e0A4CXsSt6EGiDUvpxRZfu8dwvOGQbPBxfaDUUqGqpi6a4aexjEdYsCOKitH1364izoNdMKdcAYiYUEn9wSMJiR3Knaxh2nZv0+bnpshDXvaJSmEcfc+fxWllmmLzplmPU-KWFZelSVIgA */
+    /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKYAu2CWAdlLACpzYCyAhgMYAWhYAdLNlQE7YDEBVAbnihVsYEqgAy6WAFU8AbQAMAXUSgADqlh58qAqpAAPRAFoAjAHYmAFgAcp0wGYATFYBsATgXnXXhwBoQAE9EUxsHJndI9ysLJxcFGwBWAF9kgLRMHHwiUnJqekYWNk4efkFhUQkpWTlTFSQQDS0dPQajBESmRPMHRI8HSNdzBSGrAOCEJ3dXJjDHd0SbGycwxK9U9PQsXEJiMlZ8hgJmXUlMbHYwKgBbCjxYLSIASQIIPBo4AAUqGC4aZHeAGtttliAAJK4QMDscSEQGKerqTTaPC6fTtVyJcJOBxWBwKOKeGzuXrjEI2KzWKJORLRabdDYgDIg3a5A60I4nAhnFk5b6-f5AnkXK7XAByZSELVhBHhyn0TRRaLaiFcpicTAcyw8Cgc9nc9lMZI6rhsTC8FPMpixYR8VkZzKyrP2lA5hVOWydfJ+YD+AJogOFlxuEoEUtR3LhtURjWRLXRIVcGqcCnsCnc5is3UzRqCiD6ZotVitNocPhSaSZnp2ORdh3d3OroNg-OYAHdtHRpAR6FQiJBecQ-nQ+zAXlCDAAlMAAM2hYB7YARCrjEYTCHVutmbis0WttKxiWNLks5h6eoWc0x9srjprezybuOTA9mXvLZ9TA72C7PZH-YgQdYGHUcwAAYVQZAAFdrgIWBlwaRV4xVDcXDNbp8TcSJDXcY0HHMDVTCGXpTBGGxhiSB0m2dR8CmfV8gNbL9OzA-8YEAr0h1gfgwCAhCkWaNcUMcBJzQJDwSUSexD2NRxKXcJZnFI8xEisBRaVcKi32bOsny5INRVbP0gSAiEqChGEo3lRDV2VUAMSxJgcTxLMMwNXobGPaZZj1AZFmWVZ1lvaja1ozkX0bbTWSY786FY0COPfED+3HMAp1nedF342NBLswxyXU801MiWliQsWTcQiRSsSmRInFCBwHC0oDdLo-SQuIGKWLYgdOOA3t+wg6DYPg6yBKVVp7PJKYqRiJxzDCbxyM8vMEHwwjiKzGkKXmmxUkrAhUCheAGjvHSwsYFdcsm-KEGMRqFFmaYvHm60SVCMZVuMcjzXsYiaXxVwgeavrWvC1gOGwK6JvXYwVg1YkfAIkt3opWSfCpSIbC8LwDQ8TTgqi0L2TaiKDJuO4Hl2cd3i+H1oeQqa1r6JgrRsIZMzcs9i1ksIIiiKwphJGJdwrTYiYfEnwoYvrWwZoSmeJSksXVDygbPDxjUe2wwhcewekSKTbBpEH3zBhseVlz9Yu7Ab2KA+W8vaaINRVnFFnV7xcNW+btaiAkyzPA0rBvcWWou+jIsY63uoSh2bOu9ciKB-mDXTYPXAGY9hkx9xfcU4kz1N86pYtrYRRuOWE5hlCYlMJhHHmzP8VKqZXC8mY5j8pYVl6fbkiAA */
     createMachine<TestMachineContext, TestMachineEvent, TestMachineTypestate>(
       {
         predictableActionArguments: true,
@@ -86,17 +87,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             states: {
               withUnchangedSettings: {
                 on: {
-                  changeIndexReference: [
-                    {
-                      target: 'withChangedSettings',
-                      actions: 'storeChangedLogView',
-                      cond: 'areSettingsDifferent',
-                    },
-                    {
-                      target: 'withUnchangedSettings',
-                      internal: true,
-                    },
-                  ],
+                  changeIndexReference: {
+                    target: 'withChangedSettings',
+                    actions: 'storeChangedIndexReference',
+                    cond: 'canChangeIndexReference',
+                  },
+
+                  changeColumns: {
+                    target: 'withChangedSettings',
+                    cond: 'canChangeColumns',
+                    actions: 'storeChangedColumns',
+                  },
                 },
               },
 
@@ -105,6 +106,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                   saveSettings: {
                     target: 'withUnchangedSettings',
                     actions: 'applyChangedLogView',
+                  },
+
+                  changeIndexReference: {
+                    target: 'withChangedSettings',
+                    internal: true,
+                    cond: 'canChangeIndexReference',
+                    actions: 'storeChangedIndexReference',
+                  },
+
+                  changeColumns: {
+                    target: 'withChangedSettings',
+                    internal: true,
+                    cond: 'canChangeColumns',
+                    actions: 'storeChangedColumns',
                   },
                 },
               },
@@ -136,7 +151,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       {
         actions: {
           restoreInitialContext: assign(() => initialContext),
-          storeChangedLogView: assign((context, event) =>
+          storeChangedIndexReference: assign((context, event) =>
             event.type === 'changeIndexReference'
               ? {
                   changedLogView: {
@@ -147,10 +162,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 }
               : {}
           ),
+          storeChangedColumns: assign((context, event) =>
+            event.type === 'changeColumns'
+              ? {
+                  changedLogView: {
+                    ...('changedLogView' in context ? context.changedLogView : {}),
+                    columns: event.newColumns,
+                  },
+                }
+              : {}
+          ),
           applyChangedLogView: assign((context, event) =>
             event.type === 'saveSettings' && 'changedLogView' in context
               ? {
-                  logView: context.changedLogView,
+                  logView: {
+                    ...context.logView,
+                    ...context.changedLogView,
+                  },
                   changedLogView: undefined,
                 }
               : {}
@@ -164,9 +192,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ),
         },
         guards: {
-          areSettingsDifferent: (context, event) =>
+          canChangeIndexReference: (context, event) =>
             event.type === 'changeIndexReference' &&
-            !equal(context.logView.logIndices, event.newIndexReference),
+            !equal(context.logView.logIndices, event.newIndexReference) &&
+            !(
+              'changedLogView' in context &&
+              equal(context.changedLogView?.logIndices, event.newIndexReference)
+            ),
+          canChangeColumns: (context, event) =>
+            context.logView.expectedIndexStatus !== 'missing' &&
+            event.type === 'changeColumns' &&
+            !equal(context.logView.columns, event.newColumns) &&
+            !(
+              'changedLogView' in context &&
+              equal(context.changedLogView?.columns, event.newColumns)
+            ),
           areIndicesMissing: (context) => context.logView.expectedIndexStatus === 'missing',
         },
       }
@@ -180,6 +220,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           indexName: LOGS_INDEX_PATTERN,
         },
         expectedIndexStatus: 'available',
+        columns: defaultSourceConfiguration.logColumns,
       },
       changedLogView: undefined,
     }),
@@ -197,6 +238,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           {
             newIndexReference: { type: 'index_name', indexName: 'filebeat-*' },
             expextedIndexStatus: 'available',
+          },
+        ],
+        changeColumns: [
+          {
+            newColumns: [
+              { timestampColumn: { id: 'TS' } },
+              { fieldColumn: { id: 'HOSTNAME', field: 'host.name' } },
+            ],
           },
         ],
       },

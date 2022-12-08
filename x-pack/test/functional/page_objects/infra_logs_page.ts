@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import type { LogIndexReference } from '@kbn/infra-plugin/common/log_views';
+import type {
+  LogIndexReference,
+  LogViewColumnConfiguration,
+} from '@kbn/infra-plugin/common/log_views';
 import type { FlyoutOptionsUrlState } from '@kbn/infra-plugin/public/containers/logs/log_flyout';
 import type { LogPositionUrlState } from '@kbn/infra-plugin/public/containers/logs/log_position';
 import { encode } from '@kbn/rison';
@@ -86,6 +89,7 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
   const modelStateAssertions = {
     onLogStreamPage: async () => {
       expect(await getPage()).to.be.ok();
+      // TODO: check columns
     },
     onLogStreamMissingIndicesPage: async () => {
       expect(await getMissingIndicesPage()).to.be.ok();
@@ -124,6 +128,7 @@ export type ExpectedIndexStatus = 'missing' | 'empty' | 'available';
 export interface LogViewDescriptor {
   logIndices: LogIndexReference;
   expectedIndexStatus: ExpectedIndexStatus;
+  columns: LogViewColumnConfiguration[];
 }
 
 export interface LogStreamPageTestMachineContextWithLogView {
