@@ -48,6 +48,11 @@ const ruleTypes = [
 
 describe('Rule Alert Summary', () => {
   let wrapper: ReactWrapper;
+  const mockedTimeRange = {
+    title: <h3 data-test-subj="mockedTimeRangeTitle">mockedTimeRangeTitle</h3>,
+    utcFrom: 'mockedUtcFrom',
+    utcTo: 'mockedUtcTo',
+  };
 
   async function setup() {
     const mockedRule = mockRule();
@@ -60,6 +65,7 @@ describe('Rule Alert Summary', () => {
           rule={mockedRule}
           filteredRuleTypes={['apm', 'uptime', 'metric', 'logs']}
           onClick={jest.fn}
+          timeRange={mockedTimeRange}
         />
       </IntlProvider>
     );
@@ -77,5 +83,8 @@ describe('Rule Alert Summary', () => {
     expect(wrapper.find('[data-test-subj="activeAlertsCount"]').text()).toEqual('1');
     expect(wrapper.find('[data-test-subj="recoveredAlertsCount"]').text()).toBe('7');
     expect(wrapper.find('[data-test-subj="totalAlertsCount"]').text()).toBe('8');
+    expect(wrapper.find('[data-test-subj="mockedTimeRangeTitle"]').text()).toBe(
+      'mockedTimeRangeTitle'
+    );
   });
 });
