@@ -8,7 +8,7 @@
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useMemo } from 'react';
 import { useDataFetcher } from '../../../hooks/use_data_fetcher';
-import { SLO } from '../../../typings';
+import { Duration, DurationUnit, SLO } from '../../../typings';
 
 interface UseFetchSloDetailsResponse {
   loading: boolean;
@@ -56,10 +56,15 @@ const fetchSlo = async (
 };
 
 function toSLO(result: any): SLO {
+  const duration = toDuration(result.time_window.duration);
+
   return {
     id: String(result.id),
     name: String(result.name),
     objective: { target: Number(result.objective.target) },
+    timeWindow: {
+      duration,
+    },
     summary: {
       sliValue: Number(result.summary.sli_value),
       errorBudget: {
@@ -67,6 +72,13 @@ function toSLO(result: any): SLO {
       },
     },
   };
+}
+
+function toDuration(duration: string): Duration {
+  const durationValue = duration.substring(0, duration.length - 1);
+  const durationUnit = duration.substring(duration.length - 1);
+
+  return { value: parseInt(durationValue, 10), unit: durationUnit as DurationUnit };
 }
 
 export type { UseFetchSloDetailsResponse };
