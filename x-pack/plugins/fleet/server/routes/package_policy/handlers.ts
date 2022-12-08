@@ -339,7 +339,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
     const packageName = packagePolicy?.package?.name;
     if (packageName && !limitedToPackages.includes(packageName)) {
       return response.forbidden({
-        body: { message: `Data for package name ${packageName} is not authorized.` },
+        body: { message: `Update for package name ${packageName} is not authorized.` },
       });
     }
   }
