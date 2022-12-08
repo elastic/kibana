@@ -14,7 +14,10 @@ import type {
   ISavedObjectsImporter,
   Logger,
 } from '@kbn/core/server';
-import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from '@kbn/core/server/types';
+import type {
+  SavedObjectsImportSuccess,
+  SavedObjectsImportFailure,
+} from '@kbn/core-saved-objects-common';
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 

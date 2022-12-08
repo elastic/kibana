@@ -6,7 +6,7 @@
  */
 
 import { deprecationsServiceMock } from '@kbn/core/server/mocks';
-import { DomainDeprecationDetails } from '@kbn/core/server/types';
+import { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 
 import { getKibanaUpgradeStatus } from './kibana_status';
 
