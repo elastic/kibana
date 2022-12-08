@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { YamlLang } from '@kbn/kibana-react-plugin/public';
 import { XJsonLang } from './xjson';
 import { PainlessLang } from './painless';
 import { SQLLang } from './sql';
@@ -16,6 +15,8 @@ import { registerLanguage, registerTheme } from './helpers';
 import { createWorkersRegistry } from './workers_registry';
 
 export const DEFAULT_WORKER_ID = 'default';
+
+const Yaml = 'yaml';
 
 const workerRegistry = createWorkersRegistry(DEFAULT_WORKER_ID);
 
@@ -45,7 +46,7 @@ workerRegistry.register(
 );
 
 workerRegistry.register(
-  YamlLang,
+  Yaml,
   async () => await import('!!raw-loader!../../target_workers/yaml.editor.worker.js')
 );
 
