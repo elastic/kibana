@@ -16,7 +16,6 @@ import { omit } from 'lodash';
 import React from 'react';
 import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import {
-  isMobileAgentName,
   isRumAgentName,
   isServerlessAgent,
 } from '../../../../../common/agent_name';
@@ -130,11 +129,6 @@ function TemplateWithContext({
                     end={end}
                   />
                 </EuiFlexItem>
-                {isMobileAgentName(agentName) && (
-                  <EuiFlexItem grow={false}>
-                    <TechnicalPreviewBadge />
-                  </EuiFlexItem>
-                )}
               </EuiFlexGroup>
             </EuiFlexItem>
 
@@ -165,9 +159,7 @@ export function isMetricsTabHidden({
   if (isServerlessAgent(runtimeName)) {
     return !isAwsLambdaEnabled;
   }
-  return (
-    !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName)
-  );
+  return !agentName || isRumAgentName(agentName);
 }
 
 export function isInfraTabHidden({
@@ -178,10 +170,7 @@ export function isInfraTabHidden({
   runtimeName?: string;
 }) {
   return (
-    !agentName ||
-    isRumAgentName(agentName) ||
-    isMobileAgentName(agentName) ||
-    isServerlessAgent(runtimeName)
+    !agentName || isRumAgentName(agentName) || isServerlessAgent(runtimeName)
   );
 }
 
@@ -255,7 +244,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
         defaultMessage: 'Errors',
       }),
-      hidden: isMobileAgentName(agentName),
     },
     {
       key: 'metrics',
@@ -309,8 +297,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       append: isServerlessAgent(runtimeName) && (
         <TechnicalPreviewBadge icon="beaker" />
       ),
-      hidden:
-        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
+      hidden: !agentName || isRumAgentName(agentName),
     },
     {
       key: 'alerts',
