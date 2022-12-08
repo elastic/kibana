@@ -19,5 +19,6 @@
   "kbn_references": [
     "@kbn/test",
     "@kbn/axe-config",
+    "@kbn/cypress-config",
   ]
 }
