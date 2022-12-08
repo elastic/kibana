@@ -20,6 +20,9 @@ export const CellActionsContext = createContext<{ getCompatibleActions: GetActio
 );
 
 interface CellActionsContextProviderProps {
+  /**
+   * Please assign `uiActions.getTriggerCompatibleActions` function.
+   */
   getCompatibleActions: GetActionsType;
 }
 

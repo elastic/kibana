@@ -18,7 +18,6 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
-import { usePartitionActions } from '../hooks/actions';
 import { CellActionExecutionContext } from '.';
 
 const euiContextMenuItemCSS = css`
@@ -60,10 +59,8 @@ export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
 );
 
 interface ExtraActionsPopOverWithAnchorProps
-  extends Pick<ActionsPopOverProps, 'actionContext' | 'closePopOver' | 'isOpen'> {
-  getActions: () => Promise<Action[]>;
+  extends Pick<ActionsPopOverProps, 'actionContext' | 'closePopOver' | 'isOpen' | 'actions'> {
   anchorRef: React.RefObject<HTMLElement>;
-  showMoreActionsFrom: number;
 }
 
 export const ExtraActionsPopOverWithAnchor = ({
@@ -71,10 +68,8 @@ export const ExtraActionsPopOverWithAnchor = ({
   actionContext,
   isOpen,
   closePopOver,
-  getActions,
-  showMoreActionsFrom,
+  actions,
 }: ExtraActionsPopOverWithAnchorProps) => {
-  const { extraActions } = usePartitionActions(getActions, showMoreActionsFrom);
   return anchorRef.current ? (
     <EuiWrappingPopover
       button={anchorRef.current}
@@ -88,7 +83,7 @@ export const ExtraActionsPopOverWithAnchor = ({
       attachToAnchor={false}
     >
       <ExtraActionsPopOverContent
-        actions={extraActions}
+        actions={actions}
         actionContext={actionContext}
         closePopOver={closePopOver}
       />
@@ -98,10 +93,10 @@ export const ExtraActionsPopOverWithAnchor = ({
 
 ExtraActionsPopOverWithAnchor.displayName = 'ExtraActionsPopOverWithAnchor';
 
-interface ExtraActionsPopOverContentProps
-  extends Pick<ActionsPopOverProps, 'actionContext' | 'closePopOver'> {
-  actions: Action[];
-}
+type ExtraActionsPopOverContentProps = Pick<
+  ActionsPopOverProps,
+  'actionContext' | 'closePopOver' | 'actions'
+>;
 
 const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
   actionContext,

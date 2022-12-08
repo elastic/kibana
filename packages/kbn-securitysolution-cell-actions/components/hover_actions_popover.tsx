@@ -100,15 +100,6 @@ export const HoverActionsPopover = React.memo<Props>(
       closePopover();
     }, [closePopover]);
 
-    const onKeyDown = useCallback(
-      (keyboardEvent: React.KeyboardEvent) => {
-        if (showHoverContent && keyboardEvent.key === 'Escape') {
-          onMouseLeave();
-        }
-      },
-      [showHoverContent, onMouseLeave]
-    );
-
     const content = useMemo(
       () => (
         <div ref={contentRef} onMouseEnter={onMouseEnter}>
@@ -134,33 +125,27 @@ export const HoverActionsPopover = React.memo<Props>(
             ownFocus={false}
           >
             {showHoverContent ? (
-              <div onKeyDown={onKeyDown}>
-                <div css={hoverContentWrapperCSS}>
-                  <EuiScreenReaderOnly>
-                    <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field)}</p>
-                  </EuiScreenReaderOnly>
-                  {visibleActions.map((action) => (
-                    <ActionItem
-                      key={action.id}
-                      action={action}
-                      actionContext={actionContext}
-                      showTooltip={showTooltip}
-                    />
-                  ))}
-                  {extraActions.length > 0 ? (
-                    <ExtraActionsButton
-                      onClick={onShowExtraActionsClick}
-                      showTooltip={showTooltip}
-                    />
-                  ) : null}
-                </div>
+              <div css={hoverContentWrapperCSS}>
+                <EuiScreenReaderOnly>
+                  <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field)}</p>
+                </EuiScreenReaderOnly>
+                {visibleActions.map((action) => (
+                  <ActionItem
+                    key={action.id}
+                    action={action}
+                    actionContext={actionContext}
+                    showTooltip={showTooltip}
+                  />
+                ))}
+                {extraActions.length > 0 ? (
+                  <ExtraActionsButton onClick={onShowExtraActionsClick} showTooltip={showTooltip} />
+                ) : null}
               </div>
             ) : null}
           </EuiPopover>
         </div>
         <ExtraActionsPopOverWithAnchor
-          showMoreActionsFrom={showMoreActionsFrom}
-          getActions={getActions}
+          actions={extraActions}
           anchorRef={contentRef}
           actionContext={actionContext}
           closePopOver={closeExtraActions}

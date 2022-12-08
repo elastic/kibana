@@ -18,7 +18,6 @@ export interface CellActionConfig {
   field: string;
   fieldType: string;
   value: string;
-  metadata?: Record<string, unknown>;
 }
 
 export interface CellActionExecutionContext extends CellActionConfig, ActionExecutionContext {
@@ -31,6 +30,11 @@ export interface CellActionExecutionContext extends CellActionConfig, ActionExec
    * Ref to the node where the cell action are rendered.
    */
   nodeRef: React.MutableRefObject<HTMLDivElement | null>;
+
+  /**
+   * Extra configurations for actions.
+   */
+  metadata?: Record<string, unknown>;
 }
 
 export enum CellActionsMode {
@@ -39,14 +43,31 @@ export enum CellActionsMode {
 }
 
 export interface CellActionsProps {
+  /**
+   * Common set of properties used by most actions.
+   */
   config: CellActionConfig;
+  /**
+   * The trigger in which the actions are registered.
+   */
   triggerId: string;
+  /**
+   * UI configuration. Possible options are `HOVER_POPOVER` and `ALWAYS_VISIBLE`.
+   *
+   * `HOVER_POPOVER` shows the actions when the children component is hovered.
+   *
+   * `ALWAYS_VISIBLE` always shows the actions.
+   */
   mode: CellActionsMode;
   showTooltip?: boolean;
+  /**
+   * It shows 'more actions' button when the number of actions is bigger than this parameter.
+   */
   showMoreActionsFrom?: number;
   /**
-   * Extra data that can is sent directly to actions.
-   * Every action can require a different set of properties to render.
+   * Custom set of properties used by some actions.
+   * An action might require a specific set of metadata properties to render.
+   * This data is sent directly to actions.
    */
   metadata?: Record<string, unknown>;
 }
@@ -57,9 +78,6 @@ export const CellActions: React.FC<CellActionsProps> = ({
   children,
   mode,
   showTooltip = true,
-  /**
-   * It shows 'more actions' button when the number of actions is bigger than this parameter.
-   */
   showMoreActionsFrom = 3,
   metadata,
 }) => {
