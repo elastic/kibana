@@ -48,6 +48,7 @@
     "kibanaReact",
     "kibanaUtils",
     "usageCollection",
-    "unifiedSearch"
+    "unifiedSearch",
+    "fieldFormats"
   ]
 }
