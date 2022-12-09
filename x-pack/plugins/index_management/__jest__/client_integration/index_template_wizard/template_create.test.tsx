@@ -120,6 +120,7 @@ describe('<TemplateCreate />', () => {
 
       await act(async () => {
         actions.clickNextButton();
+        jest.advanceTimersByTime(0);
       });
       component.update();
 
@@ -159,6 +160,7 @@ describe('<TemplateCreate />', () => {
       beforeEach(async () => {
         const { actions } = testBed;
         await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
+        jest.advanceTimersByTime(0);
       });
 
       it('should set the correct page title', async () => {
