@@ -40,3 +40,9 @@ export const getMonitorAPI = async ({
 }): Promise<DecryptedSyntheticsMonitorSavedObject> => {
   return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
 };
+
+export const fetchServiceAPIKey = async (): Promise<{
+  apiKey: { encoded: string };
+}> => {
+  return await apiService.get(API_URLS.SYNTHETICS_APIKEY);
+};
