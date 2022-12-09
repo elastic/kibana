@@ -48,13 +48,13 @@ export async function migrateFleetSourceMapArtifacts({
     }
 
     logger.info(
-      `Source map migration: migrating ${artifacts.length} sourcemaps`
+      `Source map migration: Migrating ${artifacts.length} sourcemaps`
     );
 
     await bulkCreateApmSourceMapDocs({ artifacts, internalESClient });
 
     logger.info(
-      `Source map migration: successfully migrated ${artifacts.length} sourcemaps`
+      `Source map migration: Successfully migrated ${artifacts.length} sourcemaps`
     );
   } catch (e) {
     logger.error('Failed to migrate APM fleet source map artifacts');
