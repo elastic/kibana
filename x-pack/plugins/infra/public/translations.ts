@@ -46,6 +46,10 @@ export const metricsExplorerTitle = i18n.translate('xpack.infra.metrics.metricsE
   defaultMessage: 'Metrics Explorer',
 });
 
+export const kubernetesObservabilityTitle = i18n.translate('xpack.infra.metrics.kubernetesObservabilityTitle', {
+    defaultMessage: 'Kubernetes Observability',
+});
+
 export const hostsTitle = i18n.translate('xpack.infra.metrics.hostsTitle', {
   defaultMessage: 'Hosts',
 });

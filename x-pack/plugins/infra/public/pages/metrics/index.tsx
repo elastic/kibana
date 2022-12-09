@@ -25,6 +25,7 @@ import {
 import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { WithSource } from '../../containers/with_source';
 import { SourceProvider } from '../../containers/metrics_source';
+import { KubernetesObservabilityPage } from './kubernetes_observability';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
 import { MetricDetail } from './metric_detail';
@@ -119,7 +120,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                         </WithSource>
                       )}
                     />
-                    <Route path="/kubernetesobservability" component={kubernetesObservability} />
+                    <Route path="/kubernetesobservability" component={KubernetesObservabilityPage} />
                     <Route path="/detail/:type/:node" component={MetricDetail} />
                     <Route path={'/hosts'} component={HostsPage} />
                     <Route path={'/settings'} component={MetricsSettingsPage} />
