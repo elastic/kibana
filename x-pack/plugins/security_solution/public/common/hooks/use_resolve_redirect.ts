@@ -42,7 +42,8 @@ export const useResolveRedirect = () => {
       activeTab,
       graphEventId,
     };
-    const timelineSearch = safeDecode<TimelineUrl>(timelineRison ?? '') ?? currentTimelineState;
+    const timelineSearch =
+      (safeDecode(timelineRison ?? '') as TimelineUrl | null) ?? currentTimelineState;
 
     if (
       hasRedirected ||

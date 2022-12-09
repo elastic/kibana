@@ -54,7 +54,10 @@ export const useQueryTimelineByIdOnUrlChange = () => {
     const newUrlStateString = getQueryStringKeyValue({ urlKey: URL_PARAM_KEY.timeline, search });
 
     return oldUrlStateString != null && newUrlStateString != null
-      ? [safeDecode<TimelineUrl>(oldUrlStateString), safeDecode<TimelineUrl>(newUrlStateString)]
+      ? [
+          safeDecode(oldUrlStateString) as TimelineUrl | null,
+          safeDecode(newUrlStateString) as TimelineUrl | null,
+        ]
       : [null, null];
   }, [oldSearch, search]);
 

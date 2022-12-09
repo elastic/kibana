@@ -38,14 +38,14 @@ export function encode(obj: any) {
 /**
  * parse a rison string into a javascript structure.
  */
-export function decode<T = RisonValue>(rison: string): T | null {
+export function decode(rison: string): RisonValue {
   return Rison.decode(rison);
 }
 
 /**
  * safely parse a rison string into a javascript structure, never throws
  */
-export function safeDecode<T = RisonValue>(rison: string): T | null {
+export function safeDecode(rison: string): RisonValue {
   try {
     return decode(rison);
   } catch {

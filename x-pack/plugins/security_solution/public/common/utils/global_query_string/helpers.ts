@@ -48,7 +48,7 @@ export const useGetInitialUrlParamValue = <State extends RisonValue>(
       getQueryStringFromLocation(window.location.search),
       urlParamKey
     );
-    const paramValue = safeDecode<State>(rawParamValue ?? '');
+    const paramValue = safeDecode(rawParamValue ?? '') as State | null;
 
     return paramValue;
   }, [urlParamKey]);
