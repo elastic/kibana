@@ -8,9 +8,12 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { Logger } from '@kbn/core/server';
+import { FleetArtifactsClient } from '@kbn/fleet-plugin/server/services';
 import { getApmArtifactClient } from '../fleet/source_maps';
 import { bulkCreateApmSourceMapDocs } from './bulk_create_apm_source_map_docs';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
+
+const PER_PAGE = 10;
 
 export async function migrateFleetSourceMapArtifacts({
   fleet,
@@ -27,38 +30,85 @@ export async function migrateFleetSourceMapArtifacts({
 
   try {
     const highestCreatedDate = await getLatestSourceMapDoc(internalESClient);
-    const createdDateFilter = highestCreatedDate
-      ? ` AND created:>${highestCreatedDate.replaceAll(':', '\\:')}'` // lucene syntax
-      : '';
-
     const apmArtifactClient = getApmArtifactClient(fleet);
-    const artifactsResponse = await apmArtifactClient.listArtifacts({
-      kuery: `type: sourcemap${createdDateFilter}`,
-      perPage: 50,
+
+    await paginateArtifacts({
       page: 1,
-      sortOrder: 'asc',
-      sortField: 'created',
+      apmArtifactClient,
+      highestCreatedDate,
+      logger,
+      internalESClient,
     });
-
-    const artifacts = artifactsResponse.items;
-
-    if (artifacts.length === 0) {
-      logger.info('Source map migration: Nothing to migrate');
-      return;
-    }
-
-    logger.info(
-      `Source map migration: Migrating ${artifacts.length} sourcemaps`
-    );
-
-    await bulkCreateApmSourceMapDocs({ artifacts, internalESClient });
-
-    logger.info(
-      `Source map migration: Successfully migrated ${artifacts.length} sourcemaps`
-    );
   } catch (e) {
     logger.error('Failed to migrate APM fleet source map artifacts');
     logger.error(e);
+  }
+}
+
+async function getArtifactsForPage({
+  page,
+  apmArtifactClient,
+  highestCreatedDate,
+}: {
+  page: number;
+  apmArtifactClient: FleetArtifactsClient;
+  highestCreatedDate?: string;
+}) {
+  const createdDateFilter = highestCreatedDate
+    ? ` AND created:>${highestCreatedDate.replaceAll(':', '\\:')}'` // lucene syntax
+    : '';
+
+  return await apmArtifactClient.listArtifacts({
+    kuery: `type: sourcemap${createdDateFilter}`,
+    perPage: PER_PAGE,
+    page,
+    sortOrder: 'asc',
+    sortField: 'created',
+  });
+}
+
+async function paginateArtifacts({
+  page,
+  apmArtifactClient,
+  highestCreatedDate,
+  logger,
+  internalESClient,
+}: {
+  page: number;
+  apmArtifactClient: FleetArtifactsClient;
+  highestCreatedDate?: string;
+  logger: Logger;
+  internalESClient: ElasticsearchClient;
+}) {
+  const { total, items: artifacts } = await getArtifactsForPage({
+    page,
+    apmArtifactClient,
+    highestCreatedDate,
+  });
+
+  if (artifacts.length === 0) {
+    logger.info('Source map migration: Nothing to migrate');
+    return;
+  }
+
+  const migratedCount = (page - 1) * PER_PAGE + artifacts.length;
+  logger.info(`Source map migration: Migrating ${migratedCount} of ${total}`);
+
+  await bulkCreateApmSourceMapDocs({ artifacts, internalESClient });
+
+  const hasMorePages = total > migratedCount;
+  if (hasMorePages) {
+    await paginateArtifacts({
+      page: page + 1,
+      apmArtifactClient,
+      highestCreatedDate,
+      logger,
+      internalESClient,
+    });
+  } else {
+    logger.info(
+      `Source map migration: Successfully migrated ${total} sourcemaps`
+    );
   }
 }
 
