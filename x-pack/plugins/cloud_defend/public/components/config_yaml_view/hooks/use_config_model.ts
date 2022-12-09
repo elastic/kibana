@@ -24,7 +24,7 @@ export const useConfigModel = (configuration: string) => {
   }, [configuration]);
 
   return useMemo(() => {
-    const selectorNames = json.selectors.map((selector: any) => selector.name);
+    const selectorNames = json?.selectors?.map((selector: any) => selector.name) || [];
 
     setDiagnosticsOptions({
       validate: true,
