@@ -7,7 +7,7 @@
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
 import type { Mitre } from '../../objects/rule';
-import { getIndexPatterns, getNewThresholdRule } from '../../objects/rule';
+import { getNewThresholdRule } from '../../objects/rule';
 
 import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
 
@@ -124,7 +124,7 @@ describe('Detection rules, threshold', () => {
     cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
+      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', 'auditbeat-*');
       getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Threshold');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
