@@ -6,11 +6,11 @@
  */
 
 export * from './data_view_permissions';
+export * from './read_only_user';
 export * from './synthetics';
 export * from './alerts';
 export * from './uptime.journey';
 export * from './step_duration.journey';
-export * from './read_only_user';
 export * from './monitor_details.journey';
 export * from './monitor_name.journey';
 export * from './monitor_management.journey';

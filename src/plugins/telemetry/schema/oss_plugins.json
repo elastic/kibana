@@ -8844,12 +8844,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "visualization:visualize:legacyPieChartsLibrary": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "visualization:visualize:legacyHeatmapChartsLibrary": {
           "type": "boolean",
           "_meta": {
@@ -9121,6 +9115,12 @@
           }
         },
         "enterpriseSearch:enableBehavioralAnalyticsSection": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "enterpriseSearch:enableEnginesSection": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."

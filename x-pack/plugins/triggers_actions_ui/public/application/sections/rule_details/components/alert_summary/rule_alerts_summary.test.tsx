@@ -59,6 +59,7 @@ describe('Rule Alert Summary', () => {
         <RuleAlertsSummary
           rule={mockedRule}
           filteredRuleTypes={['apm', 'uptime', 'metric', 'logs']}
+          onClick={jest.fn}
         />
       </IntlProvider>
     );
