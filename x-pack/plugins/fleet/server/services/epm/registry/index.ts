@@ -100,7 +100,7 @@ async function _fetchFindLatestPackage(
 
     // temporary workaround to allow synthetics package beta version until there is a GA available
     // needed because synthetics is installed by default on kibana startup
-    const prereleaseAllowedExceptions = ['synthetics', 'apm'];
+    const prereleaseAllowedExceptions = ['synthetics'];
 
     const prereleaseEnabled = prerelease || prereleaseAllowedExceptions.includes(packageName);
 
