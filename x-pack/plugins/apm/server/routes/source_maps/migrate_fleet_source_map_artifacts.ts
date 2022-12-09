@@ -29,13 +29,17 @@ export async function migrateFleetSourceMapArtifacts({
   }
 
   try {
-    const highestCreatedDate = await getLatestSourceMapDoc(internalESClient);
-    const apmArtifactClient = getApmArtifactClient(fleet);
+    const newestMigratedArtifact = await getLatestSourceMapDoc(
+      internalESClient
+    );
+    const createdDateFilter = newestMigratedArtifact
+      ? ` AND created:>${newestMigratedArtifact.replaceAll(':', '\\:')}'` // kuery only supports lucene syntax
+      : '';
 
     await paginateArtifacts({
       page: 1,
-      apmArtifactClient,
-      highestCreatedDate,
+      apmArtifactClient: getApmArtifactClient(fleet),
+      kuery: `type: sourcemap${createdDateFilter}`,
       logger,
       internalESClient,
     });
@@ -48,18 +52,14 @@ export async function migrateFleetSourceMapArtifacts({
 async function getArtifactsForPage({
   page,
   apmArtifactClient,
-  highestCreatedDate,
+  kuery,
 }: {
   page: number;
   apmArtifactClient: FleetArtifactsClient;
-  highestCreatedDate?: string;
+  kuery: string;
 }) {
-  const createdDateFilter = highestCreatedDate
-    ? ` AND created:>${highestCreatedDate.replaceAll(':', '\\:')}'` // lucene syntax
-    : '';
-
   return await apmArtifactClient.listArtifacts({
-    kuery: `type: sourcemap${createdDateFilter}`,
+    kuery,
     perPage: PER_PAGE,
     page,
     sortOrder: 'asc',
@@ -70,20 +70,20 @@ async function getArtifactsForPage({
 async function paginateArtifacts({
   page,
   apmArtifactClient,
-  highestCreatedDate,
+  kuery,
   logger,
   internalESClient,
 }: {
   page: number;
   apmArtifactClient: FleetArtifactsClient;
-  highestCreatedDate?: string;
+  kuery: string;
   logger: Logger;
   internalESClient: ElasticsearchClient;
 }) {
   const { total, items: artifacts } = await getArtifactsForPage({
     page,
     apmArtifactClient,
-    highestCreatedDate,
+    kuery,
   });
 
   if (artifacts.length === 0) {
@@ -101,7 +101,7 @@ async function paginateArtifacts({
     await paginateArtifacts({
       page: page + 1,
       apmArtifactClient,
-      highestCreatedDate,
+      kuery,
       logger,
       internalESClient,
     });
