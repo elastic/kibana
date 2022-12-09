@@ -20,21 +20,21 @@ import { APM_SERVER, PackagePolicy } from './register_fleet_policy_callbacks';
 
 const doUnzip = promisify(unzip);
 
-export interface ApmArtifactBody {
+interface ApmSourceMapArtifactBody {
   serviceName: string;
   serviceVersion: string;
   bundleFilepath: string;
   sourceMap: SourceMap;
 }
 export type ArtifactSourceMap = Omit<Artifact, 'body'> & {
-  body: ApmArtifactBody;
+  body: ApmSourceMapArtifactBody;
 };
 
 export type FleetPluginStart = NonNullable<APMPluginStartDependencies['fleet']>;
 
 export async function getUnzippedArtifactBody(artifactBody: string) {
   const unzippedBody = await doUnzip(Buffer.from(artifactBody, 'base64'));
-  return JSON.parse(unzippedBody.toString()) as ApmArtifactBody;
+  return JSON.parse(unzippedBody.toString()) as ApmSourceMapArtifactBody;
 }
 
 export function getApmArtifactClient(fleetPluginStart: FleetPluginStart) {
@@ -69,11 +69,11 @@ export async function listSourceMapArtifacts({
   return { artifacts, total: artifactsResponse.total };
 }
 
-export async function createApmArtifact({
+export async function createFleetSourceMapArtifact({
   apmArtifactBody,
   fleetPluginStart,
 }: {
-  apmArtifactBody: ApmArtifactBody;
+  apmArtifactBody: ApmSourceMapArtifactBody;
   fleetPluginStart: FleetPluginStart;
 }) {
   const apmArtifactClient = getApmArtifactClient(fleetPluginStart);

@@ -56,7 +56,7 @@ import {
 } from '../common/es_fields/apm';
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
-import { createSourceMapIndex } from './routes/source_maps/create_source_map_index';
+import { createApmSourceMapIndex } from './routes/source_maps/create_apm_source_map_index';
 import { migrateFleetSourceMapArtifacts } from './routes/source_maps/migrate_fleet_source_map_artifacts';
 
 export class APMPlugin
@@ -261,40 +261,29 @@ export class APMPlugin
       throw new Error('APMPlugin needs to be setup before calling start()');
     }
 
+    const logger = this.logger;
+    const client = core.elasticsearch.client.asInternalUser;
+
     // create agent configuration index without blocking start lifecycle
-    createApmAgentConfigurationIndex({
-      client: core.elasticsearch.client.asInternalUser,
-      config: this.currentConfig,
-      logger: this.logger,
-    });
+    createApmAgentConfigurationIndex({ client, logger });
 
     // create custom link index without blocking start lifecycle
-    createApmCustomLinkIndex({
-      client: core.elasticsearch.client.asInternalUser,
-      config: this.currentConfig,
-      logger: this.logger,
-    });
+    createApmCustomLinkIndex({ client, logger });
 
     // create source map index
-    createSourceMapIndex({
-      client: core.elasticsearch.client.asInternalUser,
-      config: this.currentConfig,
-      logger: this.logger,
-    });
+    createApmSourceMapIndex({ client, logger }).then(() => {
+      const internalESClient = core.elasticsearch.client.asInternalUser;
 
-    const internalESClient = core.elasticsearch.client.asInternalUser;
-
-    migrateFleetSourceMapArtifacts({
-      fleet: plugins.fleet,
-      internalESClient,
-      logger: this.logger,
+      // migrate source map to new index (after it has been created)
+      migrateFleetSourceMapArtifacts({
+        fleet: plugins.fleet,
+        internalESClient,
+        logger,
+      });
     });
 
     // TODO: remove in 9.0
-    migrateLegacyAPMIndicesToSpaceAware({
-      coreStart: core,
-      logger: this.logger,
-    });
+    migrateLegacyAPMIndicesToSpaceAware({ coreStart: core, logger });
   }
 
   public stop() {}

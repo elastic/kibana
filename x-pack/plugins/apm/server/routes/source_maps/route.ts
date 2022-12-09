@@ -10,7 +10,7 @@ import { SavedObjectsClientContract } from '@kbn/core/server';
 import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Artifact } from '@kbn/fleet-plugin/server';
 import {
-  createApmArtifact,
+  createFleetSourceMapArtifact,
   deleteApmArtifact,
   listSourceMapArtifacts,
   updateSourceMapsOnFleetPolicies,
@@ -20,7 +20,7 @@ import {
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
-import { createSourceMapDoc } from './create_source_map_doc';
+import { createApmSourceMapDoc } from './create_apm_source_map_doc';
 
 export const sourceMapRt = t.intersection([
   t.type({
@@ -104,7 +104,8 @@ const uploadSourceMapRoute = createApmServerRoute({
     const savedObjectsClient = await getInternalSavedObjectsClient(core.setup);
     try {
       if (fleetPluginStart) {
-        const artifact = await createApmArtifact({
+        // create source map as fleet artifact
+        const artifact = await createFleetSourceMapArtifact({
           fleetPluginStart,
           apmArtifactBody: {
             serviceName,
@@ -115,7 +116,7 @@ const uploadSourceMapRoute = createApmServerRoute({
         });
 
         // sync source map to APM managed index
-        await createSourceMapDoc({
+        await createApmSourceMapDoc({
           internalESClient: internalEsClient,
           created: artifact.created,
           sourceMapContent,

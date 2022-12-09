@@ -9,10 +9,8 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import { getApmArtifactClient } from '../fleet/source_maps';
-import {
-  bulkCreateSourceMapDocs,
-  getLatestSourceMapDoc,
-} from './create_source_map_doc';
+import { bulkCreateApmSourceMapDocs } from './bulk_create_apm_source_map_docs';
+import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
 
 export async function migrateFleetSourceMapArtifacts({
   fleet,
@@ -27,12 +25,12 @@ export async function migrateFleetSourceMapArtifacts({
     return;
   }
 
-  const highestCreatedDate = await getLatestSourceMapDoc(internalESClient);
-  const createdDateFilter = highestCreatedDate
-    ? ` AND created:>${highestCreatedDate.replaceAll(':', '\\:')}'` // lucene syntax
-    : '';
-
   try {
+    const highestCreatedDate = await getLatestSourceMapDoc(internalESClient);
+    const createdDateFilter = highestCreatedDate
+      ? ` AND created:>${highestCreatedDate.replaceAll(':', '\\:')}'` // lucene syntax
+      : '';
+
     const apmArtifactClient = getApmArtifactClient(fleet);
     const artifactsResponse = await apmArtifactClient.listArtifacts({
       kuery: `type: sourcemap${createdDateFilter}`,
@@ -53,7 +51,7 @@ export async function migrateFleetSourceMapArtifacts({
       `Source map migration: migrating ${artifacts.length} sourcemaps`
     );
 
-    await bulkCreateSourceMapDocs({ artifacts, internalESClient });
+    await bulkCreateApmSourceMapDocs({ artifacts, internalESClient });
 
     logger.info(
       `Source map migration: successfully migrated ${artifacts.length} sourcemaps`
@@ -62,4 +60,18 @@ export async function migrateFleetSourceMapArtifacts({
     logger.error('Failed to migrate APM fleet source map artifacts');
     logger.error(e);
   }
+}
+
+async function getLatestSourceMapDoc(internalESClient: ElasticsearchClient) {
+  const params = {
+    index: APM_SOURCE_MAP_INDEX,
+    size: 1,
+    _source: ['created'],
+    sort: [{ created: { order: 'desc' } }],
+    body: {
+      query: { match_all: {} },
+    },
+  };
+  const res = await internalESClient.search<{ created: string }>(params);
+  return res.hits.hits[0]?._source?.created;
 }

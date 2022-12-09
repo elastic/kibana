@@ -85,15 +85,10 @@ export async function inspectSearchParams(
     }
   ) as APMConfig;
   const mockInternalESClient = { search: spy } as any;
-  const mockIndices = {
-    ...indices,
-    apmAgentConfigurationIndex: '.apm-agent-configuration',
-    apmCustomLinkIndex: '.apm-custom-link',
-    apmSourceMapIndex: '.apm-source-map',
-  };
+
   try {
     response = await fn({
-      mockIndices,
+      mockIndices: indices,
       mockApmEventClient,
       mockConfig,
       mockInternalESClient,

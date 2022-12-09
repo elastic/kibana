@@ -10,26 +10,22 @@ import {
   createOrUpdateIndex,
   Mappings,
 } from '@kbn/observability-plugin/server';
-import { getApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
-import { APMConfig } from '../..';
+import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
 
-export const createSourceMapIndex = async ({
+export async function createApmSourceMapIndex({
   client,
-  config,
   logger,
 }: {
   client: ElasticsearchClient;
-  config: APMConfig;
   logger: Logger;
-}) => {
-  const { apmSourceMapIndex } = getApmIndicesConfig(config);
+}) {
   return createOrUpdateIndex({
-    index: apmSourceMapIndex,
+    index: APM_SOURCE_MAP_INDEX,
     client,
     logger,
     mappings,
   });
-};
+}
 
 const mappings: Mappings = {
   dynamic: 'strict',

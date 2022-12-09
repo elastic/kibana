@@ -21,9 +21,6 @@ export type ApmIndicesConfig = Readonly<{
   span: string;
   transaction: string;
   metric: string;
-  apmAgentConfigurationIndex: string;
-  apmCustomLinkIndex: string;
-  apmSourceMapIndex: string;
 }>;
 
 export const APM_AGENT_CONFIGURATION_INDEX = '.apm-agent-configuration';
@@ -53,11 +50,6 @@ export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
     span: config.indices.span,
     transaction: config.indices.transaction,
     metric: config.indices.metric,
-
-    // system indices, not configurable
-    apmAgentConfigurationIndex: APM_AGENT_CONFIGURATION_INDEX,
-    apmCustomLinkIndex: APM_CUSTOM_LINK_INDEX,
-    apmSourceMapIndex: APM_SOURCE_MAP_INDEX,
   };
 }
 

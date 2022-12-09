@@ -24,9 +24,6 @@ export interface ApmIndicesConfig {
   span: string;
   transaction: string;
   metric: string;
-  apmAgentConfigurationIndex: string;
-  apmCustomLinkIndex: string;
-  apmSourceMapIndex: string;
 }
 
 export type AlertStatus =
