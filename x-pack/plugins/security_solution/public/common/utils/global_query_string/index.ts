@@ -26,7 +26,7 @@ import { getLinkInfo } from '../../links';
  * @param urlParamKey Must not change.
  * @param onInitialize Called once when initializing. It must not change.
  */
-export const useInitializeUrlParam = <State extends RisonValue>(
+export const useInitializeUrlParam = <State extends {}>(
   urlParamKey: string,
   /**
    * @param state Decoded URL param value.
@@ -35,7 +35,7 @@ export const useInitializeUrlParam = <State extends RisonValue>(
 ) => {
   const dispatch = useDispatch();
 
-  const getInitialUrlParamValue = useGetInitialUrlParamValue<State>(urlParamKey);
+  const getInitialUrlParamValue = useGetInitialUrlParamValue(urlParamKey);
 
   useEffect(() => {
     const value = getInitialUrlParamValue();
@@ -48,7 +48,7 @@ export const useInitializeUrlParam = <State extends RisonValue>(
     );
 
     // execute consumer initialization
-    onInitialize(value);
+    onInitialize(value as State);
 
     return () => {
       dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
@@ -62,7 +62,7 @@ export const useInitializeUrlParam = <State extends RisonValue>(
  *
  * Make sure to call `useInitializeUrlParam` before calling this function.
  */
-export const useUpdateUrlParam = <State extends RisonValue>(urlParamKey: string) => {
+export const useUpdateUrlParam = <State extends {}>(urlParamKey: string) => {
   const dispatch = useDispatch();
 
   const updateUrlParam = useCallback(
