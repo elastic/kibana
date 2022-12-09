@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { useCallback, useMemo } from 'react';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -26,7 +26,7 @@ export function useLocalUIFilters({
 }: {
   filterNames: UxLocalUIFilterName[];
 }) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { uxUiFilters } = useLegacyUrlParams();
 
   const setFilterValue = useCallback(

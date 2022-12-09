@@ -14,11 +14,11 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const NotFoundPage = () => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   return (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem grow={false}>

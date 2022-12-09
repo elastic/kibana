@@ -8,13 +8,13 @@
 import React from 'react';
 import { EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { IndexLifecyclePhaseSelectOption } from '../../../../common/storage_explorer_types';
 import * as urlHelpers from '../../shared/links/url_helpers';
 import { useApmParams } from '../../../hooks/use_apm_params';
 
 export function IndexLifecyclePhaseSelect() {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const {
     query: { indexLifecyclePhase },

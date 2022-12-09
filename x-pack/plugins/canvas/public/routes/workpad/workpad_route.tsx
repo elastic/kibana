@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useEffect, useCallback } from 'react';
-import { Route, Switch, Redirect, useParams } from 'react-router-dom';
+import { Route, Routes, Navigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { WorkpadApp } from '../../components/workpad_app';
 import { ExportApp } from '../../components/export_app';
@@ -28,15 +28,14 @@ import { WorkpadPresentationHelper } from './workpad_presentation_helper';
 const { workpadRoutes: strings } = ErrorStrings;
 
 export const WorkpadRoute = () => {
-  return (
+  return ['/workpad/:id/page/:pageNumber', '/workpad/:id'].map((path) => (
     <Route
-      path={['/workpad/:id/page/:pageNumber', '/workpad/:id']}
-      exact={false}
-      children={(route: WorkpadRouteProps) => {
+      path={path}
+      element={(route: WorkpadRouteProps) => {
         return <WorkpadRouteComponent route={route} />;
       }}
     />
-  );
+  ));
 };
 
 const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
@@ -55,10 +54,10 @@ const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
       getRedirectPath={getRedirectPath}
     >
       {(workpad: CanvasWorkpad) => (
-        <Switch>
+        <Routes>
           <Route
             path="/workpad/:id/page/:pageNumber"
-            children={(pageRoute) => (
+            element={
               <WorkpadHistoryManager>
                 <WorkpadRoutingContextComponent>
                   <WorkpadPresentationHelper>
@@ -66,12 +65,13 @@ const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
                   </WorkpadPresentationHelper>
                 </WorkpadRoutingContextComponent>
               </WorkpadHistoryManager>
-            )}
+            }
           />
-          <Route path="/workpad/:id" strict={false} exact={true}>
-            <Redirect to={`/workpad/${route.match.params.id}/page/${workpad.page + 1}`} />
-          </Route>
-        </Switch>
+          <Route
+            path="/workpad/:id"
+            element={<Navigate to={`/workpad/${route.match.params.id}/page/${workpad.page + 1}`} />}
+          />
+        </Routes>
       )}
     </WorkpadLoaderComponent>
   );
@@ -81,7 +81,7 @@ export const ExportWorkpadRoute = () => {
   return (
     <Route
       path={'/export/workpad/pdf/:id/page/:pageNumber'}
-      children={(route: WorkpadRouteProps) => {
+      element={(route: WorkpadRouteProps) => {
         return <ExportWorkpadRouteComponent route={route} />;
       }}
     />
@@ -147,7 +147,7 @@ const WorkpadLoaderComponent: FC<{
   }, [error, notifyService]);
 
   if (error) {
-    return <Redirect to="/" />;
+    return <Navigate to="/" />;
   }
 
   if (!workpad) {

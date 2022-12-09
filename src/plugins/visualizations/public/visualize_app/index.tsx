@@ -33,30 +33,32 @@ export const renderApp = (
     addBadgeToAppChrome(services.chrome);
   }
 
-  const app = (
-    <KibanaThemeProvider theme$={services.theme.theme$}>
-      <Router history={services.history}>
-        <KibanaContextProvider services={services}>
-          <services.presentationUtil.ContextProvider>
-            <services.i18n.Context>
-              <TableListViewKibanaProvider
-                {...{
-                  core: services.core,
-                  toMountPoint,
-                  savedObjectsTagging: services.savedObjectsTagging,
-                  FormattedRelative,
-                }}
-              >
-                <VisualizeApp onAppLeave={onAppLeave} />
-              </TableListViewKibanaProvider>
-            </services.i18n.Context>
-          </services.presentationUtil.ContextProvider>
-        </KibanaContextProvider>
-      </Router>
-    </KibanaThemeProvider>
-  );
+  const App = () => {
+    return (
+      <KibanaThemeProvider theme$={services.theme.theme$}>
+        <Router navigator={services.history} location={services.history.location}>
+          <KibanaContextProvider services={services}>
+            <services.presentationUtil.ContextProvider>
+              <services.i18n.Context>
+                <TableListViewKibanaProvider
+                  {...{
+                    core: services.core,
+                    toMountPoint,
+                    savedObjectsTagging: services.savedObjectsTagging,
+                    FormattedRelative,
+                  }}
+                >
+                  <VisualizeApp onAppLeave={onAppLeave} />
+                </TableListViewKibanaProvider>
+              </services.i18n.Context>
+            </services.presentationUtil.ContextProvider>
+          </KibanaContextProvider>
+        </Router>
+      </KibanaThemeProvider>
+    );
+  };
 
-  ReactDOM.render(app, element);
+  ReactDOM.render(<App />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Route, Router, Switch, useParams } from 'react-router-dom';
+import { Route, Router, Routes, useParams } from 'react-router-dom';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -112,25 +112,27 @@ export const spacesManagementApp = Object.freeze({
           );
         };
 
+        const SpacesRoutes = () => {
+          return (
+            <Router navigator={history} location={history.location}>
+              <Routes>
+                {['', '/'].map((path) => (
+                  <Route path={path} element={<SpacesGridPageWithBreadcrumbs />} />
+                ))}
+
+                <Route path="/create" element={<CreateSpacePageWithBreadcrumbs />} />
+                <Route path="/edit/:spaceId" element={<EditSpacePageWithBreadcrumbs />} />
+              </Routes>
+            </Router>
+          );
+        };
+
         render(
           <KibanaContextProvider services={coreStart}>
             <i18nStart.Context>
               <KibanaThemeProvider theme$={theme$}>
-                <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
-                  <Router history={history}>
-                    <Switch>
-                      <Route path={['', '/']} exact>
-                        <SpacesGridPageWithBreadcrumbs />
-                      </Route>
-                      <Route path="/create">
-                        <CreateSpacePageWithBreadcrumbs />
-                      </Route>
-                      <Route path="/edit/:spaceId">
-                        <EditSpacePageWithBreadcrumbs />
-                      </Route>
-                    </Switch>
-                  </Router>
-                </RedirectAppLinks>
+                <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS} />
+                <SpacesRoutes />
               </KibanaThemeProvider>
             </i18nStart.Context>
           </KibanaContextProvider>,

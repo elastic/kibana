@@ -20,7 +20,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 
 import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../services/package_prerelease';
 
@@ -71,7 +71,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
   }) => {
     const {
       params: { packagePolicyId },
-    } = useRouteMatch<{ packagePolicyId?: string }>();
+    } = useMatch<{ packagePolicyId?: string }>();
     const defaultDataStreamId = useDataStreamId();
     const containerRef = useRef<HTMLDivElement>(null);
 

@@ -8,7 +8,7 @@ import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import qs from 'query-string';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -16,7 +16,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 function RedirectBackends({ to }: { to: string }) {
   const { query } = useApmParams('/backends/*');
   const search = qs.stringify(query);
-  return <Redirect to={{ pathname: to, search }} />;
+  return <Navigate to={{ pathname: to, search }} />;
 }
 
 function RedirectBackendsOverviewToDependenciesOverview() {
@@ -27,7 +27,7 @@ function RedirectBackendsOverviewToDependenciesOverview() {
 
   const search = qs.stringify({ ...query, dependencyName });
 
-  return <Redirect to={{ pathname: `/dependencies/overview`, search }} />;
+  return <Navigate to={{ pathname: `/dependencies/overview`, search }} />;
 }
 
 export const legacyBackends = {

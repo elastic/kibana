@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { i18n } from '@kbn/i18n';
 
 import { AuthorizationContext } from '../../../../lib/authorization';
@@ -19,7 +19,7 @@ import { cloneActionNameText, CloneActionName } from './clone_action_name';
 
 export type CloneAction = ReturnType<typeof useCloneAction>;
 export const useCloneAction = (forceDisable: boolean, transformNodes: number) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const appDeps = useAppDependencies();
   const dataViewsContract = appDeps.data.dataViews;
   const toastNotifications = useToastNotifications();

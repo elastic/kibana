@@ -24,8 +24,9 @@ export function RedirectWithOffset({
 }: {
   children: React.ReactElement;
 }) {
-  const { core } = useApmPluginContext();
   const location = useLocation();
+  const { core } = useApmPluginContext();
+
   const apmRouter = useApmRouter();
   const matchesRoute = isRouteWithComparison({ apmRouter, location });
   const query = qs.parse(location.search);

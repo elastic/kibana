@@ -114,43 +114,53 @@ export const rolesManagementApp = Object.freeze({
           );
         };
 
-        render(
-          <KibanaContextProvider services={startServices}>
-            <i18nStart.Context>
-              <KibanaThemeProvider theme$={theme$}>
-                <Router history={history}>
-                  <ReadonlyBadge
-                    featureId="roles"
-                    tooltip={i18n.translate('xpack.security.management.roles.readonlyTooltip', {
-                      defaultMessage: 'Unable to create or edit roles',
-                    })}
-                  />
-                  <BreadcrumbsProvider
-                    onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
-                  >
-                    <Breadcrumb text={title} href="/">
-                      <Route path={['/', '']} exact={true}>
-                        <RolesGridPage
-                          notifications={notifications}
-                          rolesAPIClient={rolesAPIClient}
-                          history={history}
-                          readOnly={!startServices.application.capabilities.roles.save}
+        const App = () => {
+          return (
+            <KibanaContextProvider services={startServices}>
+              <i18nStart.Context>
+                <KibanaThemeProvider theme$={theme$}>
+                  <Router navigator={history} location={history.location}>
+                    <ReadonlyBadge
+                      featureId="roles"
+                      tooltip={i18n.translate('xpack.security.management.roles.readonlyTooltip', {
+                        defaultMessage: 'Unable to create or edit roles',
+                      })}
+                    />
+                    <BreadcrumbsProvider
+                      onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
+                    >
+                      <Breadcrumb text={title} href="/">
+                        {['/', ''].map((path) => (
+                          <Route
+                            path={path}
+                            element={
+                              <RolesGridPage
+                                notifications={notifications}
+                                rolesAPIClient={rolesAPIClient}
+                                history={history}
+                                readOnly={!startServices.application.capabilities.roles.save}
+                              />
+                            }
+                          />
+                        ))}
+                        <Route
+                          path="/edit/:roleName?"
+                          element={<EditRolePageWithBreadcrumbs action="edit" />}
                         />
-                      </Route>
-                      <Route path="/edit/:roleName?">
-                        <EditRolePageWithBreadcrumbs action="edit" />
-                      </Route>
-                      <Route path="/clone/:roleName">
-                        <EditRolePageWithBreadcrumbs action="clone" />
-                      </Route>
-                    </Breadcrumb>
-                  </BreadcrumbsProvider>
-                </Router>
-              </KibanaThemeProvider>
-            </i18nStart.Context>
-          </KibanaContextProvider>,
-          element
-        );
+                        <Route
+                          path="/clone/:roleName"
+                          element={<EditRolePageWithBreadcrumbs action="clone" />}
+                        />
+                      </Breadcrumb>
+                    </BreadcrumbsProvider>
+                  </Router>
+                </KibanaThemeProvider>
+              </i18nStart.Context>
+            </KibanaContextProvider>
+          );
+        };
+
+        render(<App />, element);
 
         return () => {
           unmountComponentAtNode(element);

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, RouteComponentProps } from 'react-router-dom';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { EuiPage } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
@@ -35,8 +35,7 @@ const AlertingExampleApp = ({
       <EuiPage>
         <Route
           path={`/`}
-          exact={true}
-          render={() => (
+          element={() => (
             <Page title={`Home`} isHome={true}>
               <DocumentationPage triggersActionsUi={triggersActionsUi} />
             </Page>
@@ -44,7 +43,7 @@ const AlertingExampleApp = ({
         />
         <Route
           path={`/rule/:id`}
-          render={(props: RouteComponentProps<{ id: string }>) => {
+          element={(props: RouteComponentProps<{ id: string }>) => {
             return (
               <Page title={`View Rule`} crumb={`View Rule ${props.match.params.id}`}>
                 <ViewAlertPage http={http} id={props.match.params.id} />
@@ -54,7 +53,7 @@ const AlertingExampleApp = ({
         />
         <Route
           path={`/astros/:id`}
-          render={(props: RouteComponentProps<{ id: string }>) => {
+          element={(props: RouteComponentProps<{ id: string }>) => {
             return (
               <Page title={`View People In Space Rule`} crumb={`Astros ${props.match.params.id}`}>
                 <ViewPeopleInSpaceAlertPage http={http} id={props.match.params.id} />

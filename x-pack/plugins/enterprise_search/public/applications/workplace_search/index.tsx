@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Redirect, Switch, useRouteMatch } from 'react-router-dom';
+import { Route, Navigate, Routes, useMatch } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
@@ -53,7 +53,7 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
-  const isSetupGuidePath = !!useRouteMatch(SETUP_GUIDE_PATH);
+  const isSetupGuidePath = !!useMatch(SETUP_GUIDE_PATH);
 
   if (!config.host) {
     return <WorkplaceSearchUnconfigured />;
@@ -80,7 +80,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
    * Personal dashboard urls begin with /p/
    * EX: http://localhost:5601/app/enterprise_search/workplace_search/p/sources
    */
-  const isOrganization = !useRouteMatch(PERSONAL_PATH);
+  const isOrganization = !useMatch(PERSONAL_PATH);
 
   setContext(isOrganization);
 
@@ -96,68 +96,36 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   }, [hasInitialized]);
 
   return (
-    <Switch>
-      <Route path={SETUP_GUIDE_PATH}>
-        <SetupGuide />
-      </Route>
-      <Route path={SOURCE_ADDED_PATH}>
-        <SourceAdded />
-      </Route>
-      <Route exact path="/">
-        <Overview />
-      </Route>
+    <Routes>
+      <Route path={SETUP_GUIDE_PATH} element={<SetupGuide />} />
+      <Route path={SOURCE_ADDED_PATH} element={<SourceAdded />} />
+      <Route path="/" element={<Overview />} />
       <Route path={PERSONAL_PATH}>
-        <Switch>
-          <Redirect exact from={PERSONAL_PATH} to={PRIVATE_SOURCES_PATH} />
-          <Route path={PRIVATE_SOURCES_PATH}>
-            <SourcesRouter />
-          </Route>
-          <Route path={PERSONAL_SETTINGS_PATH}>
-            <AccountSettings />
-          </Route>
-          <Route path={OAUTH_AUTHORIZE_PATH}>
-            <OAuthAuthorize />
-          </Route>
-          <Route path={SEARCH_AUTHORIZE_PATH}>
-            <SearchAuthorize />
-          </Route>
-          <Route>
-            <NotFound isOrganization={false} />
-          </Route>
-        </Switch>
+        <Routes>
+          <Route path={PERSONAL_PATH} element={<Navigate to={PRIVATE_SOURCES_PATH} />} />
+          <Route path={PRIVATE_SOURCES_PATH} element={<SourcesRouter />} />
+          <Route path={PERSONAL_SETTINGS_PATH} element={<AccountSettings />} />
+          <Route path={OAUTH_AUTHORIZE_PATH} element={<OAuthAuthorize />} />
+          <Route path={SEARCH_AUTHORIZE_PATH} element={<SearchAuthorize />} />
+          <Route element={<NotFound isOrganization={false} />} />
+        </Routes>
       </Route>
-      <Route path={SOURCES_PATH}>
-        <SourcesRouter />
-      </Route>
-      <Route path={GROUPS_PATH}>
-        <GroupsRouter />
-      </Route>
-      <Route path={USERS_AND_ROLES_PATH}>
-        <RoleMappings />
-      </Route>
-      <Route path={API_KEYS_PATH}>
-        <ApiKeys />
-      </Route>
-      <Route path={SECURITY_PATH}>
-        <Security />
-      </Route>
-      <Route path={ORG_SETTINGS_PATH}>
-        <SettingsRouter />
-      </Route>
+      <Route path={SOURCES_PATH} element={<SourcesRouter />} />
+      <Route path={GROUPS_PATH} element={<GroupsRouter />} />
+      <Route path={USERS_AND_ROLES_PATH} element={<RoleMappings />} />
+      <Route path={API_KEYS_PATH} element={<ApiKeys />} />
+      <Route path={SECURITY_PATH} element={<Security />} />
+      <Route path={ORG_SETTINGS_PATH} element={<SettingsRouter />} />
       <Route>
         <NotFound />
       </Route>
-    </Switch>
+    </Routes>
   );
 };
 
 export const WorkplaceSearchUnconfigured: React.FC = () => (
-  <Switch>
-    <Route exact path={SETUP_GUIDE_PATH}>
-      <SetupGuide />
-    </Route>
-    <Route>
-      <Redirect to={SETUP_GUIDE_PATH} />
-    </Route>
-  </Switch>
+  <Routes>
+    <Route path={SETUP_GUIDE_PATH} element={<SetupGuide />} />
+    <Route element={<Navigate to={SETUP_GUIDE_PATH} />} />
+  </Routes>
 );

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Navigate, RouteComponentProps } from 'react-router-dom';
 
 import { LinkDescriptor } from '@kbn/observability-plugin/public';
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
@@ -29,7 +29,7 @@ export const RedirectToNodeDetail = ({
     getToFromLocation(location)
   )('');
 
-  return <Redirect to={`/detail/${nodeType}/${nodeId}?${searchString}`} />;
+  return <Navigate to={`/detail/${nodeType}/${nodeId}?${searchString}`} />;
 };
 
 export const getNodeDetailUrl = ({

@@ -8,7 +8,7 @@
 import React, { FC, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { Redirect } from 'react-router-dom';
+import { Navigate, Route } from 'react-router-dom';
 
 import type { NavigateToPath } from '../../contexts/kibana';
 
@@ -29,7 +29,7 @@ export const overviewRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'overview',
-  path: '/overview',
+  path: 'overview',
   title: i18n.translate('xpack.ml.overview.overviewLabel', {
     defaultMessage: 'Overview',
   }),
@@ -69,11 +69,11 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
 
 export const appRootRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   id: '',
-  path: '/',
-  render: () => <Page />,
+  path: '',
+  render: () => <Route element={<Page />} />,
   breadcrumbs: [],
 });
 
 const Page: FC = () => {
-  return <Redirect to="/overview" />;
+  return <Navigate to="/overview" />;
 };

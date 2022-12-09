@@ -7,7 +7,7 @@
 
 import { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 import { indexStatusAction } from '../../../state/actions';
 import { indexStatusSelector, selectDynamicSettings } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
@@ -26,9 +26,9 @@ export const useHasData = () => {
 
   const dispatch = useDispatch();
 
-  const isAddRoute = useRouteMatch(MONITOR_ADD_ROUTE);
-  const isEditRoute = useRouteMatch(MONITOR_EDIT_ROUTE);
-  const isMonitorRoute = useRouteMatch(MONITOR_ROUTE);
+  const isAddRoute = useMatch(MONITOR_ADD_ROUTE);
+  const isEditRoute = useMatch(MONITOR_EDIT_ROUTE);
+  const isMonitorRoute = useMatch(MONITOR_ROUTE);
 
   const skippedRoute = isAddRoute?.isExact || isEditRoute?.isExact || isMonitorRoute?.isExact;
 

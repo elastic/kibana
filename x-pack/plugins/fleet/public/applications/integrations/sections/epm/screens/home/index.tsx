@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
@@ -132,7 +132,7 @@ export const EPMHomePage: React.FC = () => {
     manage: unverifiedPackageCount + upgradeablePackageCount,
   };
   return (
-    <Switch>
+    <Routes>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
         <DefaultLayout section="manage" notificationsBySection={notificationsBySection}>
           <InstalledPackages installedPackages={installedPackages} isLoading={isLoading} />
@@ -143,6 +143,6 @@ export const EPMHomePage: React.FC = () => {
           <AvailablePackages />
         </DefaultLayout>
       </Route>
-    </Switch>
+    </Routes>
   );
 };

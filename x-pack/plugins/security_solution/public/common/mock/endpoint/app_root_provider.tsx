@@ -46,7 +46,7 @@ export const AppRootProvider = memo<{
         <I18nProvider>
           <KibanaContextProvider services={services}>
             <EuiThemeProvider darkMode={isDarkMode}>
-              <Router history={history}>
+              <Router navigator={history} location={history.location}>
                 <RouteCapture>{children}</RouteCapture>
               </Router>
             </EuiThemeProvider>

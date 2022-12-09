@@ -7,9 +7,9 @@
 
 import { History } from 'history';
 import { CoreStart } from '@kbn/core/public';
-import React from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Router, Route, Routes } from 'react-router-dom';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import '../index.scss';
@@ -52,7 +52,7 @@ export const renderApp = (
 
 const MetricsApp: React.FC<{
   core: CoreStart;
-  history: History<unknown>;
+  history: History;
   pluginStart: InfraClientStartExports;
   plugins: InfraClientStartDeps;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
@@ -60,6 +60,12 @@ const MetricsApp: React.FC<{
   theme$: AppMountParameters['theme$'];
 }> = ({ core, history, pluginStart, plugins, setHeaderActionMenu, storage, theme$ }) => {
   const uiCapabilities = core.application.capabilities;
+
+  const [state, setState] = useState({
+    location: history.location,
+  });
+
+  useLayoutEffect(() => history.listen((location) => setState({ location })), [history]);
 
   return (
     <CoreProviders core={core} pluginStart={pluginStart} plugins={plugins} theme$={theme$}>
@@ -70,23 +76,23 @@ const MetricsApp: React.FC<{
         theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
       >
-        <Router history={history}>
-          <Switch>
-            <Route path="/link-to" component={LinkToMetricsPage} />
+        <Router navigator={history} location={state.location} basename="app/metrics">
+          <Routes>
+            <Route path="link-to/*" element={<LinkToMetricsPage />} />
             {uiCapabilities?.infrastructure?.show && (
-              <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
+              <Route path="/" element={<RedirectWithQueryParams to="inventory" />} />
             )}
             {uiCapabilities?.infrastructure?.show && (
-              <RedirectWithQueryParams from="/snapshot" exact={true} to="/inventory" />
+              <Route path="snapshot" element={<RedirectWithQueryParams to="inventory" />} />
             )}
             {uiCapabilities?.infrastructure?.show && (
-              <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
+              <Route path="metrics-explorer" element={<RedirectWithQueryParams to="explorer" />} />
             )}
             {uiCapabilities?.infrastructure?.show && (
-              <Route path="/" component={InfrastructurePage} />
+              <Route path="*" index element={<InfrastructurePage />} />
             )}
-            <Route component={NotFoundPage} />
-          </Switch>
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
         </Router>
       </CommonInfraProviders>
     </CoreProviders>

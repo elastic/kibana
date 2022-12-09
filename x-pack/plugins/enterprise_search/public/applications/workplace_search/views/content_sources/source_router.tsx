@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-import { Route, Switch, useLocation, useParams } from 'react-router-dom';
+import { Route, Routes, useLocation, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
@@ -64,39 +64,46 @@ export const SourceRouter: React.FC = () => {
   const showSynchronization = !isCustomSource && isOrganization;
 
   return (
-    <Switch>
-      <Route exact path={sourcePath(SOURCE_DETAILS_PATH, sourceId, isOrganization)}>
-        <Overview />
-      </Route>
-      <Route exact path={sourcePath(SOURCE_CONTENT_PATH, sourceId, isOrganization)}>
-        <SourceContent />
-      </Route>
+    <Routes>
+      <Route
+        path={sourcePath(SOURCE_DETAILS_PATH, sourceId, isOrganization)}
+        element={<Overview />}
+      />
+      <Route
+        path={sourcePath(SOURCE_CONTENT_PATH, sourceId, isOrganization)}
+        element={<SourceContent />}
+      />
       {showSynchronization && (
-        <Route path={sourcePath(SOURCE_SYNCHRONIZATION_PATH, sourceId, isOrganization)}>
-          <SynchronizationRouter />
-        </Route>
+        <Route
+          path={sourcePath(SOURCE_SYNCHRONIZATION_PATH, sourceId, isOrganization)}
+          element={<SynchronizationRouter />}
+        />
       )}
       {isCustomSource && (
-        <Route exact path={sourcePath(SOURCE_SCHEMAS_PATH, sourceId, isOrganization)}>
-          <Schema />
-        </Route>
+        <Route
+          path={sourcePath(SOURCE_SCHEMAS_PATH, sourceId, isOrganization)}
+          element={<Schema />}
+        />
       )}
       {isCustomSource && (
-        <Route exact path={getSourcesPath(REINDEX_JOB_PATH, isOrganization)}>
-          <SchemaChangeErrors />
-        </Route>
+        <Route
+          path={getSourcesPath(REINDEX_JOB_PATH, isOrganization)}
+          element={<SchemaChangeErrors />}
+        />
       )}
       {isCustomSource && (
-        <Route path={sourcePath(SOURCE_DISPLAY_SETTINGS_PATH, sourceId, isOrganization)}>
-          <DisplaySettingsRouter />
-        </Route>
+        <Route
+          path={sourcePath(SOURCE_DISPLAY_SETTINGS_PATH, sourceId, isOrganization)}
+          element={<DisplaySettingsRouter />}
+        />
       )}
-      <Route exact path={sourcePath(SOURCE_SETTINGS_PATH, sourceId, isOrganization)}>
-        <SourceSettings />
-      </Route>
+      <Route
+        path={sourcePath(SOURCE_SETTINGS_PATH, sourceId, isOrganization)}
+        element={<SourceSettings />}
+      />
       <Route>
         <NotFound isOrganization={isOrganization} pageChrome={[NAV.SOURCES]} />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

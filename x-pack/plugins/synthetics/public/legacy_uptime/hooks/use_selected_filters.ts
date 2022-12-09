@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 import { useGetUrlParams } from './use_url_params';
 import { filterLabels } from '../components/overview/filter_group/translations';
 import { FILTER_FIELDS, MONITOR_ROUTE } from '../../../common/constants';
@@ -42,7 +42,7 @@ export const getFiltersFromMap = (map?: Map<string, string[]>): Filters => {
 
 export const useSelectedFilters = () => {
   const { filters, excludedFilters } = useGetUrlParams();
-  const isMonitorPage = useRouteMatch(MONITOR_ROUTE);
+  const isMonitorPage = useMatch(MONITOR_ROUTE);
 
   return useMemo(() => {
     const selectedFilters = parseFiltersMap(filters);

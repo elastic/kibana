@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect, Route } from 'react-router-dom';
+import { Navigate, Route } from 'react-router-dom';
 import type { RouteProps } from 'react-router-dom';
 
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
@@ -27,7 +27,11 @@ export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
   restrictedPath = '/',
   ...routeProps
 }: ProtectedRouteProps) => {
-  return isAllowed ? <Route {...routeProps} /> : <Redirect to={{ pathname: restrictedPath }} />;
+  return isAllowed ? (
+    <Route {...routeProps} />
+  ) : (
+    <Route element={<Navigate to={{ pathname: restrictedPath }} />} />
+  );
 };
 
 interface IntegrationsAppProps {

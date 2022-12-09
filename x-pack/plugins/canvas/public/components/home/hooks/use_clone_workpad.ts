@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { i18n } from '@kbn/i18n';
 
 import { useNotifyService, useWorkpadService } from '../../../services';
@@ -15,7 +15,7 @@ import { getId } from '../../../lib/get_id';
 export const useCloneWorkpad = () => {
   const workpadService = useWorkpadService();
   const notifyService = useNotifyService();
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   return useCallback(
     async (workpadId: string) => {

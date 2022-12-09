@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Navigate, Routes } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
@@ -38,8 +38,8 @@ const AlertsContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
   const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
   return (
-    <Switch>
-      <Route path={ALERTS_PATH} exact component={AlertsRoute} />
+    <Routes>
+      <Route path={ALERTS_PATH} component={AlertsRoute} />
       {isAlertDetailsPageEnabled && (
         <>
           {/* Redirect to the summary page if only the detail name is provided  */}
@@ -51,7 +51,7 @@ const AlertsContainerComponent: React.FC = () => {
               },
               location: { search = '' },
             }) => (
-              <Redirect
+              <Navigate
                 to={{
                   pathname: getAlertDetailsTabUrl(detailName, AlertDetailRouteType.summary),
                   search,
@@ -63,7 +63,7 @@ const AlertsContainerComponent: React.FC = () => {
         </>
       )}
       <Route component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 };
 

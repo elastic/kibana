@@ -26,7 +26,7 @@ export const EditMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'edit-monitor' });
   useTrackPageview({ app: 'uptime', path: 'edit-monitor', delay: 15000 });
   useMonitorManagementBreadcrumbs({ isEditMonitor: true });
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const { monitorId = '' } = useParams<{ monitorId: string }>();
 
   const { data, status } = useFetcher<
     Promise<DecryptedSyntheticsMonitorSavedObject | undefined>

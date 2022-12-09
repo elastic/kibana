@@ -8,9 +8,10 @@
 import { EuiCheckbox, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
+import { createBrowserHistory } from 'history';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
@@ -34,8 +35,9 @@ const PrependContainer = euiStyled.div`
 `;
 
 export function TimeComparison() {
+  const location = useLocation();
   const trackApmEvent = useUiTracker({ app: 'apm' });
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { isSmall } = useBreakpoints();
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
@@ -45,7 +47,6 @@ export function TimeComparison() {
     '/services/{serviceName}'
   );
 
-  const location = useLocation();
   const apmRouter = useApmRouter();
 
   const { anomalyDetectionJobsStatus, anomalyDetectionJobsData } =

@@ -9,7 +9,7 @@ import { EuiButton, EuiHeaderLink, EuiLink, EuiSpacer, EuiTourStep, EuiText } fr
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { MONITOR_MANAGEMENT_ROUTE } from '../../../../../common/constants';
@@ -18,7 +18,7 @@ import { PUBLIC_BETA_DESCRIPTION } from '../../../pages/monitor_management/servi
 export const ManageMonitorsBtn = () => {
   const [isOpen, setIsOpen] = useLocalStorage('xpack.synthetics.monitorManagement.openTour', true);
 
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   return (
     <EuiTourStep

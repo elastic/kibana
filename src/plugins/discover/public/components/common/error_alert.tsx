@@ -10,10 +10,10 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 export const DiscoverError = ({ error }: { error: Error }) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const goToMain = () => {
     history.push('/');

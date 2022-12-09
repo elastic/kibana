@@ -12,7 +12,10 @@ import { cloudPosturePages } from '../common/navigation/constants';
 import { useSecuritySolutionContext } from './security_solution_context';
 import type { CspPageNavigationItem } from '../common/navigation/types';
 
-type CspRouteProps = Omit<RouteProps, 'render'> & CspPageNavigationItem;
+type CspRouteProps = Omit<RouteProps, 'render'> &
+  CspPageNavigationItem & {
+    component?: React.ComponentType<any>;
+  };
 
 // Security SpyRoute can be automatically rendered for pages with static paths, Security will manage everything using the `links` object.
 // Pages with dynamic paths are not in the Security `links` object, they must render SpyRoute with the parameters values, if needed.
@@ -36,7 +39,7 @@ export const CspRoute: React.FC<CspRouteProps> = ({
   const routeProps: RouteProps = {
     ...cspRouteProps,
     ...(Component && {
-      render: (renderProps) => (
+      render: (renderProps: any) => (
         <TrackApplicationView viewId={id}>
           {STATIC_PATH_PAGE_IDS[id] && SpyRoute && <SpyRoute pageName={id} />}
           <Component {...renderProps} />
@@ -45,5 +48,5 @@ export const CspRoute: React.FC<CspRouteProps> = ({
     }),
   };
 
-  return <Route {...routeProps}>{children}</Route>;
+  return <Route {...routeProps} element={children} />;
 };

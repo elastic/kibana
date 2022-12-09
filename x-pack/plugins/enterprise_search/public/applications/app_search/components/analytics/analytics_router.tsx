@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 
 import {
   ENGINE_ANALYTICS_PATH,
@@ -34,34 +34,26 @@ import {
 
 export const AnalyticsRouter: React.FC = () => {
   return (
-    <Switch>
-      <Route exact path={ENGINE_ANALYTICS_PATH}>
-        <Analytics />
-      </Route>
-      <Route exact path={ENGINE_ANALYTICS_TOP_QUERIES_PATH}>
-        <TopQueries />
-      </Route>
-      <Route exact path={ENGINE_ANALYTICS_TOP_QUERIES_NO_RESULTS_PATH}>
-        <TopQueriesNoResults />
-      </Route>
-      <Route exact path={ENGINE_ANALYTICS_TOP_QUERIES_NO_CLICKS_PATH}>
-        <TopQueriesNoClicks />
-      </Route>
-      <Route exact path={ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH}>
-        <TopQueriesWithClicks />
-      </Route>
-      <Route exact path={ENGINE_ANALYTICS_RECENT_QUERIES_PATH}>
-        <RecentQueries />
-      </Route>
-      <Route exact path={ENGINE_ANALYTICS_QUERY_DETAIL_PATH}>
-        <QueryDetail />
-      </Route>
-      <Route exact path={ENGINE_ANALYTICS_QUERY_DETAILS_PATH}>
-        <Redirect to={generateEnginePath(ENGINE_ANALYTICS_PATH)} />
-      </Route>
-      <Route>
-        <NotFound pageChrome={getEngineBreadcrumbs([ANALYTICS_TITLE])} />
-      </Route>
-    </Switch>
+    <Routes>
+      <Route path={ENGINE_ANALYTICS_PATH} element={<Analytics />} />
+      <Route path={ENGINE_ANALYTICS_TOP_QUERIES_PATH} element={<TopQueries />} />
+      <Route
+        path={ENGINE_ANALYTICS_TOP_QUERIES_NO_RESULTS_PATH}
+        element={<TopQueriesNoResults />}
+      />
+      <Route path={ENGINE_ANALYTICS_TOP_QUERIES_NO_CLICKS_PATH} element={<TopQueriesNoClicks />} />
+      <Route
+        path={ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH}
+        element={<TopQueriesWithClicks />}
+      />
+
+      <Route path={ENGINE_ANALYTICS_RECENT_QUERIES_PATH} element={<RecentQueries />} />
+      <Route path={ENGINE_ANALYTICS_QUERY_DETAIL_PATH} element={<QueryDetail />} />
+      <Route
+        path={ENGINE_ANALYTICS_QUERY_DETAILS_PATH}
+        element={<Navigate to={generateEnginePath(ENGINE_ANALYTICS_PATH)} />}
+      />
+      <Route element={<NotFound pageChrome={getEngineBreadcrumbs([ANALYTICS_TITLE])} />} />
+    </Routes>
   );
 };

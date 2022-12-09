@@ -83,23 +83,26 @@ export const renderApp = (
   });
   const unmountFlashMessagesLogic = mountFlashMessagesLogic();
 
-  ReactDOM.render(
-    <I18nProvider>
-      <KibanaThemeProvider theme$={params.theme$}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
-          <CloudContext>
-            <Provider store={store}>
-              <Router history={params.history}>
-                <App {...initialData} />
-                <Toasts />
-              </Router>
-            </Provider>
-          </CloudContext>
-        </KibanaContextProvider>
-      </KibanaThemeProvider>
-    </I18nProvider>,
-    params.element
-  );
+  const Wrapper = () => {
+    return (
+      <I18nProvider>
+        <KibanaThemeProvider theme$={params.theme$}>
+          <KibanaContextProvider services={{ ...core, ...plugins }}>
+            <CloudContext>
+              <Provider store={store}>
+                <Router navigator={params.history} location={params.history.location}>
+                  <App {...initialData} />
+                  <Toasts />
+                </Router>
+              </Provider>
+            </CloudContext>
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
+      </I18nProvider>
+    );
+  };
+
+  ReactDOM.render(<Wrapper />, params.element);
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);
     unmountKibanaLogic();

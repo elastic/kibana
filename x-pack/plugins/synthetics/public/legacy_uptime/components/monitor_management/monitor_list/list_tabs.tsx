@@ -15,7 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, Fragment, useEffect } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
 import { MonitorManagementListPageState } from './monitor_list';
 import { ConfigKey } from '../../../../../common/runtime_types';
@@ -33,7 +34,7 @@ export const MonitorListTabs = ({
 
   const { refreshApp } = useUptimeRefreshContext();
 
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const { type: viewType = 'all' } = useParams<{ type: 'all' | 'invalid' }>();
 

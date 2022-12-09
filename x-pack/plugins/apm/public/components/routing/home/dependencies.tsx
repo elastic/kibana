@@ -10,7 +10,7 @@ import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import qs from 'query-string';
 import { page } from '.';
 import { offsetRt } from '../../../../common/comparison_rt';
@@ -30,7 +30,7 @@ export const DependenciesInventoryTitle = i18n.translate(
 function RedirectDependenciesToDependenciesOverview() {
   const { query } = useApmParams('/dependencies');
   const search = qs.stringify(query);
-  return <Redirect to={{ pathname: `/dependencies/overview`, search }} />;
+  return <Navigate to={{ pathname: `/dependencies/overview`, search }} />;
 }
 
 export const dependencies = {

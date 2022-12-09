@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Router, Routes, Route, Navigate } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiEmptyPrompt,
@@ -141,13 +141,13 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
   }
 
   return (
-    <Switch>
-      <Route exact path="/overview" component={Overview} />
-      <Route exact path="/es_deprecations" component={EsDeprecations} />
-      <Route exact path="/es_deprecation_logs" component={EsDeprecationLogs} />
-      <Route exact path="/kibana_deprecations" component={KibanaDeprecations} />
-      <Redirect from="/" to="/overview" />
-    </Switch>
+    <Routes>
+      <Route path="/overview" element={Overview} />
+      <Route path="/es_deprecations" element={EsDeprecations} />
+      <Route path="/es_deprecation_logs" element={EsDeprecationLogs} />
+      <Route path="/kibana_deprecations" element={KibanaDeprecations} />
+      <Route path="/" element={<Navigate to="/overview" />} />
+    </Routes>
   );
 };
 
@@ -180,7 +180,7 @@ export const App = ({ history }: { history: ScopedHistory }) => {
   }
 
   return (
-    <Router history={history}>
+    <Router navigator={history} location={history.location}>
       <AppHandlingClusterUpgradeState />
     </Router>
   );

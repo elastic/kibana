@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Router, Route, Switch, useHistory } from 'react-router-dom';
+import { Router, Route, Routes } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { createBrowserHistory } from 'history';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
 import { Loading, Error } from '../../components';
@@ -22,7 +24,8 @@ import { NoAccessPage } from './error_pages/no_access';
 
 export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');
-  const history = useHistory();
+  const history = createBrowserHistory();
+
   const { agents } = useConfig();
   const hasFleetAllPrivileges = useAuthz().fleet.all;
   const fleetStatus = useFleetStatus();
@@ -85,11 +88,9 @@ export const AgentsApp: React.FunctionComponent = () => {
   ) : undefined;
 
   return (
-    <Router history={history}>
-      <Switch>
-        <Route path={FLEET_ROUTING_PATHS.agent_details}>
-          <AgentDetailsPage />
-        </Route>
+    <Router navigator={history} location={history.location}>
+      <Routes>
+        <Route path={FLEET_ROUTING_PATHS.agent_details} element={<AgentDetailsPage />} />
         <Route path={FLEET_ROUTING_PATHS.agents}>
           <DefaultLayout section="agents" rightColumn={rightColumn}>
             {displayInstructions ? (
@@ -99,7 +100,7 @@ export const AgentsApp: React.FunctionComponent = () => {
             )}
           </DefaultLayout>
         </Route>
-      </Switch>
+      </Routes>
     </Router>
   );
 };

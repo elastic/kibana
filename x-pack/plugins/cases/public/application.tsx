@@ -71,7 +71,7 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
               storage,
             }}
           >
-            <Router history={history}>
+            <Router navigator={history} location={history.location}>
               <CasesAppWithContext
                 externalReferenceAttachmentTypeRegistry={
                   deps.externalReferenceAttachmentTypeRegistry

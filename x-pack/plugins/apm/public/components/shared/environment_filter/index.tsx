@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { History } from 'history';
+import { createBrowserHistory, History } from 'history';
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { EnvironmentSelect } from '../environment_select';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
@@ -30,8 +30,7 @@ function updateEnvironmentUrl(
 export function ApmEnvironmentFilter() {
   const { environment, environments, status, rangeFrom, rangeTo, serviceName } =
     useEnvironmentsContext();
-  const history = useHistory();
-  const location = useLocation();
+  const history = createBrowserHistory();
 
   if (!rangeFrom || !rangeTo) {
     return null;

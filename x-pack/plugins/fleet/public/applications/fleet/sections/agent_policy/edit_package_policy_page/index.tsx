@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { pick, omit } from 'lodash';
-import { useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { safeLoad } from 'js-yaml';
@@ -73,9 +73,7 @@ import { useHistoryBlock } from './hooks';
 import { UpgradeStatusCallout } from './components';
 
 export const EditPackagePolicyPage = memo(() => {
-  const {
-    params: { packagePolicyId },
-  } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
+  const { packagePolicyId = '' } = useParams<{ policyId: string; packagePolicyId: string }>();
 
   const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
 

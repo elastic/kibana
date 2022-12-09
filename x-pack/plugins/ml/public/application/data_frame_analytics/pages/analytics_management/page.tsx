@@ -33,6 +33,7 @@ export const getDefaultDFAListState = (): ListingPageUrlState => ({
 });
 
 export const Page: FC = () => {
+  const location = useLocation();
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [globalState] = useUrlState('_g');
 
@@ -45,7 +46,6 @@ export const Page: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
 
-  const location = useLocation();
   const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
   const mapJobId = globalState?.ml?.jobId;
   const mapModelId = globalState?.ml?.modelId;

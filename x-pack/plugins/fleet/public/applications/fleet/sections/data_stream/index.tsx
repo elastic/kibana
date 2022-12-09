@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { createBrowserHistory } from 'history';
 import React from 'react';
-import { Router, Route, Switch, useHistory } from 'react-router-dom';
+import { Router, Route, Routes } from 'react-router-dom';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
 import { DefaultLayout } from '../../layouts';
@@ -14,17 +15,17 @@ import { DefaultLayout } from '../../layouts';
 import { DataStreamListPage } from './list_page';
 
 export const DataStreamApp: React.FunctionComponent = () => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   return (
-    <Router history={history}>
-      <Switch>
+    <Router navigator={history} location={history.location}>
+      <Routes>
         <Route path={FLEET_ROUTING_PATHS.data_streams}>
           <DefaultLayout section="data_streams">
             <DataStreamListPage />
           </DefaultLayout>
         </Route>
-      </Switch>
+      </Routes>
     </Router>
   );
 };

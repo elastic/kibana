@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useCallback } from 'react';
 import { pickBy } from 'lodash';
+import { createBrowserHistory } from 'history';
 import { useUrlParams } from '../../../hooks/use_url_params';
 
 // FIXME:PT Refactor into a more generic hooks for managing url params
@@ -17,7 +18,7 @@ export const useSetUrlParams = (): ((
   replace?: boolean
 ) => void) => {
   const location = useLocation();
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { toUrlParams, urlParams: currentUrlParams } = useUrlParams();
 
   return useCallback(

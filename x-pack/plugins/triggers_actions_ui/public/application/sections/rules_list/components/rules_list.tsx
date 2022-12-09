@@ -28,7 +28,7 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import {
   RuleExecutionStatus,
@@ -161,7 +161,7 @@ export const RulesList = ({
   rulesListKey,
   visibleColumns,
 }: RulesListProps) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const {
     http,
     notifications: { toasts },

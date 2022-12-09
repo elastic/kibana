@@ -12,7 +12,7 @@ import { History } from 'history';
 import { Provider } from 'react-redux';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
+import { Routes, Route, HashRouter, Params } from 'react-router-dom';
 
 import {
   TableListViewKibanaDependencies,
@@ -76,7 +76,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
   let routerHistory: History;
 
-  const getUrlStateStorage = (history: RouteComponentProps['history']) =>
+  const getUrlStateStorage = (history: History) =>
     createKbnUrlStateStorage({
       history,
       useHash: uiSettings.get('state:storeInSessionStorage'),
@@ -108,8 +108,10 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     };
   };
 
-  const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
-    const routeParams = parse(routeProps.history.location.search);
+  const renderDashboard = (
+    routeProps: Location & { history: History; match: { params: Params } }
+  ) => {
+    const routeParams = parse(location.search);
     if (routeParams.embed && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
     }
@@ -126,7 +128,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     );
   };
 
-  const renderListingPage = (routeProps: RouteComponentProps) => {
+  const renderListingPage = (routeProps: Location & { history: History }) => {
     docTitle.change(getDashboardPageTitle());
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
@@ -144,7 +146,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     );
   };
 
-  const renderNoMatch = (routeProps: RouteComponentProps) => {
+  const renderNoMatch = (routeProps: { history: History }) => {
     return <DashboardNoMatch history={routeProps.history} />;
   };
 
@@ -186,24 +188,20 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
               }}
             >
               <HashRouter>
-                <Switch>
-                  <Route
-                    path={[
-                      DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-                      `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
-                    ]}
-                    render={renderDashboard}
-                  />
-                  <Route
-                    exact
-                    path={DashboardConstants.LANDING_PAGE_PATH}
-                    render={renderListingPage}
-                  />
-                  <Route exact path="/">
-                    <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
-                  </Route>
-                  <Route render={renderNoMatch} />
-                </Switch>
+                <Routes>
+                  {[
+                    DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+                    `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
+                  ].map((path) => (
+                    <Route path={path} element={renderDashboard} />
+                  ))}
+
+                  {[DashboardConstants.LANDING_PAGE_PATH, '/'].map((path) => (
+                    <Route path={path} element={renderListingPage} />
+                  ))}
+
+                  <Route element={renderNoMatch} />
+                </Routes>
               </HashRouter>
             </TableListViewKibanaProvider>
           </KibanaThemeProvider>

@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
-import { Redirect, useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
+import { Navigate, Routes, Route, useLocation, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPortal } from '@elastic/eui';
@@ -35,9 +35,7 @@ import {
 } from './components';
 
 export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
-  const {
-    params: { policyId, tabId = '' },
-  } = useRouteMatch<{ policyId: string; tabId?: string }>();
+  const { policyId = '', tabId = '' } = useParams<{ policyId: string; tabId?: string }>();
   const { getHref } = useLink();
   const agentPolicyRequest = useGetOneAgentPolicy(policyId);
   const agentPolicy = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
@@ -100,7 +98,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
 
   const content = useMemo(() => {
     if (redirectToAgentPolicyList) {
-      return <Redirect to="/" />;
+      return <Navigate to="/" />;
     }
 
     if (isLoading) {
@@ -198,19 +196,15 @@ const AgentPolicyDetailsContent: React.FunctionComponent<{ agentPolicy: AgentPol
 }) => {
   useBreadcrumbs('policy_details', { policyName: agentPolicy.name });
   return (
-    <Switch>
+    <Routes>
       <Route
         path={FLEET_ROUTING_PATHS.policy_details_settings}
-        render={() => {
-          return <SettingsView agentPolicy={agentPolicy} />;
-        }}
+        children={<SettingsView agentPolicy={agentPolicy} />}
       />
       <Route
         path={FLEET_ROUTING_PATHS.policy_details}
-        render={() => {
-          return <PackagePoliciesView agentPolicy={agentPolicy} />;
-        }}
+        children={<PackagePoliciesView agentPolicy={agentPolicy} />}
       />
-    </Switch>
+    </Routes>
   );
 };

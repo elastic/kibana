@@ -15,7 +15,7 @@ import {
   EuiPageHeader,
   EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PolicyFromES } from '../../../../common/types';
 import { PolicyTable } from './components/policy_table';
@@ -28,7 +28,7 @@ interface Props {
 }
 
 export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePolicies }) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const createPolicyButton = (
     <EuiButton

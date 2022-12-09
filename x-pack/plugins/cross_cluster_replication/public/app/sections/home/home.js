@@ -6,7 +6,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiSpacer, EuiPageHeader } from '@elastic/eui';
@@ -88,10 +88,10 @@ export class CrossClusterReplicationHome extends PureComponent {
 
         <EuiSpacer size="l" />
 
-        <Switch>
-          <Route exact path={`/follower_indices`} component={FollowerIndicesList} />
-          <Route exact path={`/auto_follow_patterns`} component={AutoFollowPatternList} />
-        </Switch>
+        <Routes>
+          <Route path={`/follower_indices`} element={FollowerIndicesList} />
+          <Route path={`/auto_follow_patterns`} element={AutoFollowPatternList} />
+        </Routes>
       </>
     );
   }

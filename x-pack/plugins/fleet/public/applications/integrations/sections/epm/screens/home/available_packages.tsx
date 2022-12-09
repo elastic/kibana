@@ -7,13 +7,15 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useMemo, useState } from 'react';
-import { useLocation, useHistory, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiFlexItem, EuiCallOut, EuiLink } from '@elastic/eui';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
+
+import { createBrowserHistory } from 'history';
 
 import {
   isInputOnlyPolicyTemplate,
@@ -198,7 +200,7 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
   );
   const [category, setCategory] = useState(selectedCategory);
 
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { getHref, getAbsolutePath } = useLink();
 
   function setUrlCategory(categoryId: string) {

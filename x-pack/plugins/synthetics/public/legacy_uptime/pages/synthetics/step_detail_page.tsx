@@ -6,10 +6,11 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { createBrowserHistory } from 'history';
 import { useInitApp } from '../../hooks/use_init_app';
 import { StepDetailContainer } from '../../components/monitor/synthetics/step_detail/step_detail_container';
 import { journeySelector } from '../../state/selectors';
@@ -31,7 +32,7 @@ export const useStepDetailPage = (): {
   journey?: JourneyState;
   stepIndex: number;
 } => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const dispatch = useDispatch();
 
   const { checkGroupId: checkGroup, stepIndex: stepIndexString } = useParams<{

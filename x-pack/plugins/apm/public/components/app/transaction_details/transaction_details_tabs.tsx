@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { omit } from 'lodash';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { EuiPanel, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
 import { XYBrushEvent } from '@elastic/charts';
@@ -55,7 +55,7 @@ export function TransactionDetailsTabs() {
     : tabs;
 
   const { urlParams } = useLegacyUrlParams();
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const [currentTab, setCurrentTab] = useState(traceSamplesTab.key);
   const { component: TabContent } =

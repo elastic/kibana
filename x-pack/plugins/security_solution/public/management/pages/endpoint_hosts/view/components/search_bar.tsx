@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { encode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import { TimeHistory } from '@kbn/data-plugin/public';
@@ -19,7 +19,7 @@ import * as selectors from '../../store/selectors';
 import { clone } from '../../models/index_pattern';
 
 export const AdminSearchBar = memo(() => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { admin_query: _, ...queryParams } = useEndpointSelector(selectors.uiQueryParams);
   const searchBarIndexPatterns = useEndpointSelector(selectors.patterns);
   const searchBarQuery = useEndpointSelector(selectors.searchBarQuery);

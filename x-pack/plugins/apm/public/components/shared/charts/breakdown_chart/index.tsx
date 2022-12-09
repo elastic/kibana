@@ -23,7 +23,7 @@ import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { Annotation } from '../../../../../common/annotations';
 import {
@@ -68,7 +68,7 @@ export function BreakdownChart({
   yAxisType,
   id,
 }: Props) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const chartTheme = useChartTheme();
   const { core } = useApmPluginContext();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();

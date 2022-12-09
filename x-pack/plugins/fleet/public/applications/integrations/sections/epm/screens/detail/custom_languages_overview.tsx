@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { useParams, Redirect } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { capitalize } from 'lodash';
 
 import { getCustomIntegrationsStart } from '../../../../../../services/custom_integrations';
@@ -25,5 +25,5 @@ export const CustomLanguagesOverview = () => {
 
   const Component = getCustomIntegrationsStart().languageClientsUiComponents[pkgkey];
 
-  return Component ? <Component /> : <Redirect to={getPath('integrations_all')} />;
+  return Component ? <Component /> : <Navigate to={getPath('integrations_all')} />;
 };

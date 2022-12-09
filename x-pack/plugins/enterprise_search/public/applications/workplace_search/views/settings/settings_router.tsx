@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
@@ -31,22 +31,12 @@ export const SettingsRouter: React.FC = () => {
   }, []);
 
   return (
-    <Switch>
-      <Route exact path={ORG_SETTINGS_CUSTOMIZE_PATH}>
-        <Customize />
-      </Route>
-      <Route exact path={ORG_SETTINGS_CONNECTORS_PATH}>
-        <Connectors />
-      </Route>
-      <Route exact path={ORG_SETTINGS_OAUTH_APPLICATION_PATH}>
-        <OauthApplication />
-      </Route>
-      <Route exact path={getEditPath(':serviceType')}>
-        <SourceConfig />
-      </Route>
-      <Route>
-        <Redirect to={ORG_SETTINGS_CUSTOMIZE_PATH} />
-      </Route>
-    </Switch>
+    <Routes>
+      <Route path={ORG_SETTINGS_CUSTOMIZE_PATH} element={<Customize />} />
+      <Route path={ORG_SETTINGS_CONNECTORS_PATH} element={<Connectors />} />
+      <Route path={ORG_SETTINGS_OAUTH_APPLICATION_PATH} element={<OauthApplication />} />
+      <Route path={getEditPath(':serviceType')} element={<SourceConfig />} />
+      <Route element={<Navigate to={ORG_SETTINGS_CUSTOMIZE_PATH} />} />
+    </Routes>
   );
 };

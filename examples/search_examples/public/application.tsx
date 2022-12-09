@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, Redirect } from 'react-router-dom';
+import { Router, Route, Navigate } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
@@ -42,41 +42,50 @@ export const renderApp = (
   { data, navigation, unifiedSearch }: AppPluginStartDependencies,
   { element, history }: AppMountParameters
 ) => {
-  ReactDOM.render(
-    <I18nProvider>
-      <RedirectAppLinks application={application}>
-        <SearchExamplePage exampleLinks={LINKS} basePath={http.basePath}>
-          <Router history={history}>
-            <Route path={LINKS[0].path}>
-              <SearchExamplesApp
-                notifications={notifications}
-                navigation={navigation}
-                data={data}
-                http={http}
-                unifiedSearch={unifiedSearch}
+  const App = () => {
+    return (
+      <I18nProvider>
+        <RedirectAppLinks application={application}>
+          <SearchExamplePage exampleLinks={LINKS} basePath={http.basePath}>
+            <Router navigator={history} location={history.location}>
+              <Route
+                path={LINKS[0].path}
+                element={
+                  <SearchExamplesApp
+                    notifications={notifications}
+                    navigation={navigation}
+                    data={data}
+                    http={http}
+                    unifiedSearch={unifiedSearch}
+                  />
+                }
               />
-            </Route>
-            <Route path={LINKS[1].path}>
-              <SqlSearchExampleApp notifications={notifications} data={data} />
-            </Route>
-            <Route path={LINKS[2].path}>
-              <SearchSessionsExampleApp
-                navigation={navigation}
-                notifications={notifications}
-                data={data}
-                unifiedSearch={unifiedSearch}
-              />
-            </Route>
 
-            <Route path="/" exact={true}>
-              <Redirect to={LINKS[0].path} />
-            </Route>
-          </Router>
-        </SearchExamplePage>
-      </RedirectAppLinks>
-    </I18nProvider>,
-    element
-  );
+              <Route
+                path={LINKS[1].path}
+                element={<SqlSearchExampleApp notifications={notifications} data={data} />}
+              />
+
+              <Route
+                path={LINKS[2].path}
+                element={
+                  <SearchSessionsExampleApp
+                    navigation={navigation}
+                    notifications={notifications}
+                    data={data}
+                    unifiedSearch={unifiedSearch}
+                  />
+                }
+              />
+
+              <Route path="/" element={<Navigate to={LINKS[0].path} />} />
+            </Router>
+          </SearchExamplePage>
+        </RedirectAppLinks>
+      </I18nProvider>
+    );
+  };
+  ReactDOM.render(<App />, element);
 
   return () => {
     data.search.session.clear();

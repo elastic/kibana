@@ -14,7 +14,7 @@ import {
   toQuery,
   useTheme,
 } from '@kbn/observability-plugin/public';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -29,7 +29,7 @@ interface Props {
 
 export function PageViewsChart({ breakdown }: Props) {
   const { dataViewTitle } = useDataView();
-  const history = useHistory();
+  const history = createBrowserHistory();
   const kibana = useKibanaServices();
   const { ExploratoryViewEmbeddable } = kibana.observability;
 

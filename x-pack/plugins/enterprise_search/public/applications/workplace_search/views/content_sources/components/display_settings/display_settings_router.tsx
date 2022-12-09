@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
@@ -22,13 +22,15 @@ import { DisplaySettings } from './display_settings';
 export const DisplaySettingsRouter: React.FC = () => {
   const { isOrganization } = useValues(AppLogic);
   return (
-    <Switch>
-      <Route exact path={getSourcesPath(DISPLAY_SETTINGS_SEARCH_RESULT_PATH, isOrganization)}>
-        <DisplaySettings tabId={0} />
-      </Route>
-      <Route exact path={getSourcesPath(DISPLAY_SETTINGS_RESULT_DETAIL_PATH, isOrganization)}>
-        <DisplaySettings tabId={1} />
-      </Route>
-    </Switch>
+    <Routes>
+      <Route
+        path={getSourcesPath(DISPLAY_SETTINGS_SEARCH_RESULT_PATH, isOrganization)}
+        element={<DisplaySettings tabId={0} />}
+      />
+      <Route
+        path={getSourcesPath(DISPLAY_SETTINGS_RESULT_DETAIL_PATH, isOrganization)}
+        element={<DisplaySettings tabId={1} />}
+      />
+    </Routes>
   );
 };

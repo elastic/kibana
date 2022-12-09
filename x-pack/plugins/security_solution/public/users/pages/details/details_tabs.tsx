@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
+import { Routes } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { RiskDetailsTabBody } from '../../../risk_score/components/risk_details_tab_body';
@@ -46,28 +46,38 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
     };
 
     return (
-      <Switch>
-        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.authentications})`}>
-          <AuthenticationsQueryTabBody {...tabProps} />
-        </Route>
-        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.anomalies})`}>
-          <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesUserTable} />
-        </Route>
-        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.events})`}>
-          <EventsQueryTabBody
-            additionalFilters={userDetailFilter}
-            tableId={TableId.usersPageEvents}
-            {...tabProps}
-          />
-        </Route>
-        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>
-          <RiskDetailsTabBody
-            {...tabProps}
-            riskEntity={RiskScoreEntity.user}
-            entityName={tabProps.userName}
-          />
-        </Route>
-      </Switch>
+      <Routes>
+        <Route
+          path={`${usersDetailsPagePath}/:tabName(${UsersTableType.authentications})`}
+          element={<AuthenticationsQueryTabBody {...tabProps} />}
+        />
+        <Route
+          path={`${usersDetailsPagePath}/:tabName(${UsersTableType.anomalies})`}
+          element={
+            <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesUserTable} />
+          }
+        />
+        <Route
+          path={`${usersDetailsPagePath}/:tabName(${UsersTableType.events})`}
+          element={
+            <EventsQueryTabBody
+              additionalFilters={userDetailFilter}
+              tableId={TableId.usersPageEvents}
+              {...tabProps}
+            />
+          }
+        />
+        <Route
+          path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}
+          element={
+            <RiskDetailsTabBody
+              {...tabProps}
+              riskEntity={RiskScoreEntity.user}
+              entityName={tabProps.userName}
+            />
+          }
+        />
+      </Routes>
     );
   }
 );

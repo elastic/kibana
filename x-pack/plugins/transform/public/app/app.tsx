@@ -7,7 +7,7 @@
 
 import React, { useContext, FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Route, Switch } from 'react-router-dom';
+import { Router, Route, Routes } from 'react-router-dom';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { EuiErrorBoundary } from '@elastic/eui';
@@ -29,6 +29,7 @@ import { TransformManagementSection } from './sections/transform_management';
 
 export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
   const { apiError } = useContext(AuthorizationContext);
+
   if (apiError !== null) {
     return (
       <SectionError
@@ -44,18 +45,18 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
   }
 
   return (
-    <Router history={history}>
-      <Switch>
+    <Router navigator={history} location={history.location}>
+      <Routes>
         <Route
           path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
-          component={CloneTransformSection}
+          children={CloneTransformSection}
         />
         <Route
           path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
-          component={CreateTransformSection}
+          children={CreateTransformSection}
         />
-        <Route path={`/`} component={TransformManagementSection} />
-      </Switch>
+        <Route path="/" element={TransformManagementSection} />
+      </Routes>
     </Router>
   );
 };

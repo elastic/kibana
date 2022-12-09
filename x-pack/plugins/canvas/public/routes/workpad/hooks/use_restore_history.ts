@@ -6,16 +6,18 @@
  */
 
 import { useRef, useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 // @ts-expect-error
+import { createBrowserHistory } from 'history';
 import { restoreHistory } from '../../../state/actions/history';
 import { initializeWorkpad } from '../../../state/actions/workpad';
 import { decode } from '../route_state';
 
 export const useRestoreHistory = () => {
-  const history = useHistory();
   const location = useLocation();
+  const history = createBrowserHistory();
+
   const dispatch = useDispatch();
 
   const { state: historyState } = location;

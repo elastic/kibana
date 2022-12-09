@@ -52,7 +52,6 @@ export function ApmMainTemplate({
 } & KibanaPageTemplateProps &
   Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
   const location = useLocation();
-
   const { services } = useKibana<ApmPluginStartDeps>();
   const { http, docLinks, observability, application } = services;
   const basePath = http?.basePath.get();

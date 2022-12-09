@@ -75,6 +75,7 @@ export function ObservabilityPageTemplate({
   const sections = useObservable(navigationSections$, []);
   const currentAppId = useObservable(currentAppId$, undefined);
   const { pathname: currentPath } = useLocation();
+  // const isMatch = useMatch(currentPath);
 
   const { services } = useKibana<ObservabilityAppServices>();
 
@@ -92,11 +93,14 @@ export function ObservabilityPageTemplate({
             entry.app === currentAppId &&
             (entry.matchPath
               ? entry.matchPath(currentPath)
-              : matchPath(currentPath, {
-                  path: entry.path,
-                  exact: !!entry.matchFullPath,
-                  strict: !entry.ignoreTrailingSlash,
-                }) != null);
+              : matchPath(
+                  {
+                    path: entry.path,
+                    caseSensitive: false,
+                    end: false,
+                  },
+                  currentPath
+                ) != null);
           const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
           const navId = entry.label.toLowerCase().split(' ').join('_');
           return {

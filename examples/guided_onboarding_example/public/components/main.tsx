@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
@@ -38,7 +38,7 @@ export const Main = (props: MainProps) => {
     guidedOnboarding: { guidedOnboardingApi },
     notifications,
   } = props;
-  const history = useHistory();
+  const history = createBrowserHistory();
   const [guidesState, setGuidesState] = useState<GuideState[] | undefined>(undefined);
   const [activeGuide, setActiveGuide] = useState<GuideState | undefined>(undefined);
 

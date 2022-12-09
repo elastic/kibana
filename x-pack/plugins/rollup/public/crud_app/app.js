@@ -7,13 +7,28 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Router, Switch, Route, Redirect, withRouter } from 'react-router-dom';
+import { Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import { UIM_APP_LOAD } from '../../common';
 import { registerRouter, setUserHasLeftApp, METRIC_TYPE } from './services';
 import { trackUiMetric } from '../kibana_services';
 import { JobList, JobCreate } from './sections';
+import { createBrowserHistory } from 'history';
 
+const AppRoutes = () => {
+  const history = createBrowserHistory();
+  return (
+    <Router history={history} location={history.location}>
+      <ShareRouterComponent history={history}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/job_list" />} />
+          <Route path="/job_list" component={JobList} />
+          <Route path="/create" component={JobCreate} />
+        </Routes>
+      </ShareRouterComponent>
+    </Router>
+  );
+};
 class ShareRouterComponent extends Component {
   static propTypes = {
     history: PropTypes.shape({
@@ -38,8 +53,6 @@ class ShareRouterComponent extends Component {
   }
 }
 
-const ShareRouter = withRouter(ShareRouterComponent);
-
 // eslint-disable-next-line react/no-multi-comp
 export class App extends Component {
   componentDidMount() {
@@ -52,16 +65,6 @@ export class App extends Component {
   }
 
   render() {
-    return (
-      <Router history={this.props.history}>
-        <ShareRouter>
-          <Switch>
-            <Redirect exact from="/" to="/job_list" />
-            <Route exact path="/job_list" component={JobList} />
-            <Route exact path="/create" component={JobCreate} />
-          </Switch>
-        </ShareRouter>
-      </Router>
-    );
+    return <AppRoutes />;
   }
 }

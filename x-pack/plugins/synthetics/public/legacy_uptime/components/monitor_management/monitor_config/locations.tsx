@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiCheckboxGroup, EuiFormRow, EuiText, EuiBadge, EuiIconTip } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 import { formatLocation } from '../../../../../common/utils/location_formatter';
 import { monitorManagementListSelector } from '../../../state/selectors';
 import { MonitorServiceLocations, LocationStatus } from '../../../../../common/runtime_types';
@@ -38,7 +38,7 @@ export const ServiceLocations = ({
   );
   const { locations } = useSelector(monitorManagementListSelector);
 
-  const isEditMonitor = useRouteMatch(MONITOR_EDIT_ROUTE);
+  const isEditMonitor = useMatch(MONITOR_EDIT_ROUTE);
 
   const onLocationChange = (optionId: string) => {
     const isSelected = !checkboxIdToSelectedMap[optionId];

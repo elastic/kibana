@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useDispatch } from 'react-redux';
 import { getBaseBreadcrumb } from '../../lib/breadcrumbs';
 import { resetWorkpad } from '../../state/actions/workpad';
@@ -17,7 +17,7 @@ export const HomeApp = () => {
   const { setBreadcrumbs } = usePlatformService();
   const dispatch = useDispatch();
   const onLoad = () => dispatch(resetWorkpad());
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   useEffect(() => {
     setBreadcrumbs([getBaseBreadcrumb(history)]);

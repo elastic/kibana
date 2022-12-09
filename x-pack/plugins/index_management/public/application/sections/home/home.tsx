@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { Route, RouteComponentProps, Routes } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
@@ -116,13 +116,13 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 
       <EuiSpacer size="l" />
 
-      <Switch>
+      <Routes>
         <Route
           exact
           path={[`/${Section.DataStreams}`, `/${Section.DataStreams}/:dataStreamName?`]}
           component={DataStreamList}
         />
-        <Route exact path={`/${Section.Indices}`} component={IndexList} />
+        <Route path={`/${Section.Indices}`} component={IndexList} />
         <Route
           exact
           path={[`/${Section.IndexTemplates}`, `/${Section.IndexTemplates}/:templateName?`]}
@@ -136,7 +136,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           ]}
           component={ComponentTemplateList}
         />
-      </Switch>
+      </Routes>
     </>
   );
 };

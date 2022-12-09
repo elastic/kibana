@@ -9,13 +9,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Observable } from 'rxjs';
 import ReactDOM from 'react-dom';
-import {
-  HashRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-  RouteComponentProps,
-} from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -45,7 +39,6 @@ interface DevToolsWrapperProps {
   updateRoute: (newRoute: string) => void;
   theme$: Observable<CoreTheme>;
   appServices: AppServices;
-  location: RouteComponentProps['location'];
 }
 
 interface MountedDevToolDescriptor {
@@ -60,7 +53,6 @@ function DevToolsWrapper({
   updateRoute,
   theme$,
   appServices,
-  location,
 }: DevToolsWrapperProps) {
   const { docTitleService, breadcrumbService } = appServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
@@ -196,7 +188,7 @@ export function renderApp(
     <I18nProvider>
       <KibanaThemeProvider theme$={theme$}>
         <Router>
-          <Switch>
+          <Routes>
             {devTools
               // Only create routes for devtools that are not disabled
               .filter((devTool) => !devTool.isDisabled())
@@ -204,11 +196,9 @@ export function renderApp(
                 <Route
                   key={devTool.id}
                   path={`/${devTool.id}`}
-                  exact={!devTool.enableRouting}
-                  render={(props) => (
+                  element={(props: any) => (
                     <DevToolsWrapper
                       updateRoute={props.history.push}
-                      location={props.location}
                       activeDevTool={devTool}
                       devTools={devTools}
                       theme$={theme$}
@@ -217,10 +207,8 @@ export function renderApp(
                   )}
                 />
               ))}
-            <Route path="/">
-              <Redirect to={`/${devTools[0].id}`} />
-            </Route>
-          </Switch>
+            <Route path="/" element={<Navigate to={`/${devTools[0].id}`} />} />
+          </Routes>
         </Router>
       </KibanaThemeProvider>
     </I18nProvider>,

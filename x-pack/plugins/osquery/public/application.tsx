@@ -48,7 +48,7 @@ export const renderApp = (
   storage: Storage,
   kibanaVersion: string
 ) => {
-  ReactDOM.render(
+  const App = () => (
     <KibanaThemeProvider theme$={theme$}>
       <KibanaContextProvider
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
@@ -61,7 +61,7 @@ export const renderApp = (
         }}
       >
         <EuiErrorBoundary>
-          <Router history={history}>
+          <Router navigator={history} location={history.location}>
             <I18nProvider>
               <QueryClientProvider client={queryClient}>
                 <OsqueryAppContext />
@@ -71,9 +71,10 @@ export const renderApp = (
           </Router>
         </EuiErrorBoundary>
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
-    element
+    </KibanaThemeProvider>
   );
+
+  ReactDOM.render(<App />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

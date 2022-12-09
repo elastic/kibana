@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { createBrowserHistory } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../common/constants';
 import { useUrlParams } from './use_url_params';
 
@@ -62,7 +63,7 @@ export const paginationFromUrlParams = (urlParams: UrlPaginationParams): Paginat
  */
 export const useUrlPagination = (): UrlPagination => {
   const location = useLocation();
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { urlParams, toUrlParams } = useUrlParams();
 
   const urlPaginationParams = useMemo(() => {

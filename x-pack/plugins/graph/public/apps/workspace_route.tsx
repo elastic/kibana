@@ -8,7 +8,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { Workspace } from '../types';
@@ -58,7 +58,7 @@ export const WorkspaceRoute = ({
    * will not leads to updates, therefore `renderCounter` is used to update react state.
    */
   const [renderCounter, setRenderCounter] = useState(0);
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const indexPatternProvider = useMemo(
     () => createCachedIndexPatternProvider(getIndexPatternProvider.get),

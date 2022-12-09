@@ -7,7 +7,7 @@
 
 import React, { FC, useCallback, MouseEvent } from 'react';
 import { EuiLink, EuiLinkProps, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 interface RoutingProps {
   to: string;
@@ -26,7 +26,7 @@ const isTargetBlank = (event: MouseEvent) => {
 };
 
 export const RoutingLink: FC<RoutingLinkProps> = ({ to, ...rest }) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const onClick = useCallback(
     (event: MouseEvent) => {
@@ -59,7 +59,7 @@ export const RoutingLink: FC<RoutingLinkProps> = ({ to, ...rest }) => {
 type RoutingButtonIconProps = Omit<EuiButtonIconProps, 'href' | 'onClick'> & RoutingProps;
 
 export const RoutingButtonIcon: FC<RoutingButtonIconProps> = ({ to, ...rest }) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const onClick = useCallback(
     (event: MouseEvent) => {

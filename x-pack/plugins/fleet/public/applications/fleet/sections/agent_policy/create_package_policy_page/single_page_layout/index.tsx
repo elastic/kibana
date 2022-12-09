@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -77,7 +77,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
-  const { params } = useRouteMatch<AddToPolicyParams>();
+  const { params } = useMatch<AddToPolicyParams>();
 
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
     name: 'Agent policy 1',

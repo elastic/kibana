@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
@@ -23,21 +23,19 @@ export const EnginesRouter: React.FC = () => {
   const enginesSectionEnabled = uiSettings?.get<boolean>(enableEnginesSection, false);
   if (!enginesSectionEnabled) {
     return (
-      <Switch>
+      <Routes>
         <Route>
           <NotFound />
         </Route>
-      </Switch>
+      </Routes>
     );
   }
   return (
-    <Switch>
-      <Route exact path={ENGINES_PATH}>
-        <EnginesList />
-      </Route>
+    <Routes>
+      <Route path={ENGINES_PATH} element={<EnginesList />} />
       <Route>
         <NotFound />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

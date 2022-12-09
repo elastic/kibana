@@ -9,11 +9,10 @@ import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
-import { RouteComponentProps, RouteProps } from 'react-router-dom';
+import { PathRouteProps, Navigate, Route } from 'react-router-dom';
 import {
   AppMountParameters,
   CoreStart,
@@ -45,20 +44,16 @@ import { createStaticDataView } from '../services/rest/data_view';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { useKibanaServices } from '../hooks/use_kibana_services';
 
-export type BreadcrumbTitle<T = {}> =
-  | string
-  | ((props: RouteComponentProps<T>) => string)
-  | null;
+export type BreadcrumbTitle<T = {}> = string | ((props: T) => string) | null;
 
-export interface RouteDefinition<T = any> extends RouteProps {
+export interface RouteDefinition<T = any> extends PathRouteProps {
   breadcrumb: BreadcrumbTitle<T>;
 }
 
 export const uxRoutes: RouteDefinition[] = [
   {
-    exact: true,
     path: '/',
-    render: () => <Redirect to="/ux" />,
+    children: () => <Route element={<Navigate to="/ux" />} />,
     breadcrumb: DASHBOARD_LABEL,
   },
 ];

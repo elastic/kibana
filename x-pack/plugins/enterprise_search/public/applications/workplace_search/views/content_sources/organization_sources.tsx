@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
@@ -58,7 +58,7 @@ export const OrganizationSources: React.FC = () => {
       }
       isLoading={dataLoading}
       isEmptyState={!contentSources.length}
-      emptyState={<Redirect to={getSourcesPath(ADD_SOURCE_PATH, true)} />}
+      emptyState={<Navigate to={getSourcesPath(ADD_SOURCE_PATH, true)} />}
     >
       <SourcesView>
         <ContentSection>

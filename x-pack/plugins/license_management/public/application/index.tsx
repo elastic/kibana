@@ -14,11 +14,13 @@ import { AppProviders } from './app_providers';
 // @ts-ignore
 import { App } from './app.container';
 
-const AppWithRouter = (props: { [key: string]: any }) => (
-  <Router history={props.history}>
-    <App {...props} />
-  </Router>
-);
+const AppWithRouter = (props: { [key: string]: any }) => {
+  return (
+    <Router navigator={props.history} location={props.history.location}>
+      <App {...props} />
+    </Router>
+  );
+};
 
 export const renderApp = (element: Element, dependencies: AppDependencies) => {
   render(

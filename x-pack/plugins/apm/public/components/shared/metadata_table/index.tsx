@@ -18,8 +18,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { createBrowserHistory } from 'history';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { HeightRetainer } from '../height_retainer';
 import { fromQuery, toQuery } from '../links/url_helpers';
@@ -34,8 +35,9 @@ interface Props {
 }
 
 export function MetadataTable({ sections, isLoading }: Props) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const location = useLocation();
+
   const { urlParams } = useLegacyUrlParams();
   const { searchTerm = '' } = urlParams;
   const { docLinks } = useApmPluginContext().core;

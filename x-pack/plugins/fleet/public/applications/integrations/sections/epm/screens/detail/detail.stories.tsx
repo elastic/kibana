@@ -20,16 +20,12 @@ export default {
 
 export const nginx = () => (
   <MemoryRouter initialEntries={['/detail/nginx-1.1.0/overview']}>
-    <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_overview}>
-      <Component />
-    </Route>
+    <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} element={<Component />} />
   </MemoryRouter>
 );
 
 export const okta = () => (
   <MemoryRouter initialEntries={['/detail/okta-1.2.0/overview']}>
-    <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_overview}>
-      <Component />
-    </Route>
+    <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} element={<Component />} />
   </MemoryRouter>
 );

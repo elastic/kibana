@@ -98,22 +98,24 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
   authc,
   onChange,
   children,
-}) => (
-  <KibanaContextProvider services={services}>
-    <AuthenticationProvider authc={authc}>
-      <I18nProvider>
-        <KibanaThemeProvider theme$={theme$}>
-          <Router history={history}>
-            <ReadonlyBadge
-              featureId="api_keys"
-              tooltip={i18n.translate('xpack.security.management.api_keys.readonlyTooltip', {
-                defaultMessage: 'Unable to create or edit API keys',
-              })}
-            />
-            <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
-          </Router>
-        </KibanaThemeProvider>
-      </I18nProvider>
-    </AuthenticationProvider>
-  </KibanaContextProvider>
-);
+}) => {
+  return (
+    <KibanaContextProvider services={services}>
+      <AuthenticationProvider authc={authc}>
+        <I18nProvider>
+          <KibanaThemeProvider theme$={theme$}>
+            <Router navigator={history} location={history.location}>
+              <ReadonlyBadge
+                featureId="api_keys"
+                tooltip={i18n.translate('xpack.security.management.api_keys.readonlyTooltip', {
+                  defaultMessage: 'Unable to create or edit API keys',
+                })}
+              />
+              <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+            </Router>
+          </KibanaThemeProvider>
+        </I18nProvider>
+      </AuthenticationProvider>
+    </KibanaContextProvider>
+  );
+};

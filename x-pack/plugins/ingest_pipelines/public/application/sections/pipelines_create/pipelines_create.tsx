@@ -6,10 +6,11 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { RouteComponentProps, useHistory } from 'react-router-dom';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
+import { createBrowserHistory } from 'history';
 import { getListPath } from '../../services/navigation';
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
@@ -28,7 +29,7 @@ interface LocationState {
 }
 
 function useFormDefaultValue(sourcePipeline?: Pipeline) {
-  const history = useHistory<LocationState>();
+  const history = createBrowserHistory<LocationState>();
 
   const locationSearchParams = useMemo(() => {
     return new URLSearchParams(history.location.search);
@@ -56,10 +57,8 @@ function useFormDefaultValue(sourcePipeline?: Pipeline) {
   return { formDefaultValue, canEditName: !locationSearchParams.has('name') };
 }
 
-export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Props> = ({
-  sourcePipeline,
-}) => {
-  const history = useHistory<LocationState>();
+export const PipelinesCreate: React.FunctionComponent<Props> = ({ sourcePipeline }) => {
+  const history = createBrowserHistory<LocationState>();
 
   const { services } = useKibana();
 

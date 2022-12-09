@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useMemo, useState, MouseEventHandler, MouseEvent } from 'react';
 import { AggregateQuery, Query, TimeRange, Filter, disableFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 
@@ -71,7 +71,7 @@ export const useNavigationProps = ({
   savedSearchId,
   filters,
 }: UseNavigationProps) => {
-  const isEmbeddableView = !useHistory();
+  const isEmbeddableView = !createBrowserHistory();
   const services = useDiscoverServices();
   const [singleDocHref, setSingleDocHref] = useState('');
   const [contextViewHref, setContextViewHref] = useState('');

@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
@@ -70,7 +70,7 @@ function getCurrentTab(
 }
 
 export function DetailView({ errorGroup, urlParams, kuery }: Props) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { transaction, error, occurrencesCount } = errorGroup;
 
   const { detailTab, offset, comparisonEnabled } = urlParams;

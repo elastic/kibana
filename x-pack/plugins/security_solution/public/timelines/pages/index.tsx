@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Switch, Redirect } from 'react-router-dom';
+import { Routes, Navigate } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { TimelineType } from '../../../common/types/timeline';
@@ -21,17 +21,15 @@ const timelinesPagePath = `${TIMELINES_PATH}/:tabName(${TimelineType.default}|${
 const timelinesDefaultPath = `${TIMELINES_PATH}/${TimelineType.default}`;
 
 export const Timelines = React.memo(() => (
-  <Switch>
-    <Route exact path={timelinesPagePath}>
-      <TimelinesPage />
-    </Route>
+  <Routes>
+    <Route path={timelinesPagePath} element={<TimelinesPage />} />
     <Route
       path={TIMELINES_PATH}
       render={({ location: { search = '' } }) => (
-        <Redirect to={`${timelinesDefaultPath}${appendSearch(search)}`} />
+        <Navigate to={`${timelinesDefaultPath}${appendSearch(search)}`} />
       )}
     />
-  </Switch>
+  </Routes>
 ));
 
 Timelines.displayName = 'Timelines';

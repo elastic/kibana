@@ -9,7 +9,7 @@ import { parse, stringify } from 'query-string';
 import { Location } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { decode, encode, RisonValue } from '@kbn/rison';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { url } from '@kbn/kibana-utils-plugin/public';
 
 export const useUrlState = <State>({
@@ -25,7 +25,7 @@ export const useUrlState = <State>({
   urlStateKey: string;
   writeDefaultState?: boolean;
 }) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   // history.location is mutable so we can't reliably use useMemo
   const queryString = history?.location ? getQueryStringFromLocation(history.location) : '';

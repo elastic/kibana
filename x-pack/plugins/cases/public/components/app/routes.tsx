@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, Suspense, useCallback } from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Navigate, Routes } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -52,49 +52,56 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
 
   return (
     <QueryClientProvider client={casesQueryClient}>
-      <Switch>
-        <Route strict exact path={basePath}>
-          <AllCases />
-        </Route>
+      <Routes>
+        <Route path={basePath} element={<AllCases />} />
 
-        <Route path={getCreateCasePath(basePath)}>
-          {permissions.create ? (
-            <CreateCase
-              onSuccess={onCreateCaseSuccess}
-              onCancel={navigateToAllCases}
-              timelineIntegration={timelineIntegration}
-            />
-          ) : (
-            <NoPrivilegesPage pageName={i18n.CREATE_CASE_PAGE_NAME} />
-          )}
-        </Route>
+        <Route
+          path={getCreateCasePath(basePath)}
+          element={
+            permissions.create ? (
+              <CreateCase
+                onSuccess={onCreateCaseSuccess}
+                onCancel={navigateToAllCases}
+                timelineIntegration={timelineIntegration}
+              />
+            ) : (
+              <NoPrivilegesPage pageName={i18n.CREATE_CASE_PAGE_NAME} />
+            )
+          }
+        />
 
-        <Route path={getCasesConfigurePath(basePath)}>
-          {permissions.update ? (
-            <ConfigureCases />
-          ) : (
-            <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
-          )}
-        </Route>
+        <Route
+          path={getCasesConfigurePath(basePath)}
+          element={
+            permissions.update ? (
+              <ConfigureCases />
+            ) : (
+              <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
+            )
+          }
+        />
 
-        <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            <CaseViewLazy
-              onComponentInitialized={onComponentInitialized}
-              actionsNavigation={actionsNavigation}
-              ruleDetailsNavigation={ruleDetailsNavigation}
-              showAlertDetails={showAlertDetails}
-              useFetchAlertData={useFetchAlertData}
-              refreshRef={refreshRef}
-              timelineIntegration={timelineIntegration}
-            />
-          </Suspense>
-        </Route>
+        {[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)].map((path) => (
+          <Route
+            path={path}
+            element={
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <CaseViewLazy
+                  onComponentInitialized={onComponentInitialized}
+                  actionsNavigation={actionsNavigation}
+                  ruleDetailsNavigation={ruleDetailsNavigation}
+                  showAlertDetails={showAlertDetails}
+                  useFetchAlertData={useFetchAlertData}
+                  refreshRef={refreshRef}
+                  timelineIntegration={timelineIntegration}
+                />
+              </Suspense>
+            }
+          />
+        ))}
 
-        <Route path={basePath}>
-          <Redirect to={basePath} />
-        </Route>
-      </Switch>
+        <Route path={basePath} element={<Navigate to={basePath} />} />
+      </Routes>
     </QueryClientProvider>
   );
 };

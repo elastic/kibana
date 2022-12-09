@@ -6,7 +6,7 @@
  */
 import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   EuiBadge,
@@ -24,6 +24,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
+
+import { createBrowserHistory } from 'history';
 
 import { getPackageReleaseLabel } from '../../../../../../services/package_prerelease';
 
@@ -119,7 +121,7 @@ export function Detail() {
   const missingSecurityConfiguration =
     !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
   const userCanInstallPackages = canInstallPackages && permissionCheck.data?.success;
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
@@ -701,31 +703,43 @@ export function Detail() {
       ) : isLoading || !packageInfo ? (
         <Loading />
       ) : (
-        <Switch>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_overview}>
-            <OverviewPage
-              packageInfo={packageInfo}
-              integrationInfo={integrationInfo}
-              latestGAVersion={latestGAVersion}
-            />
-          </Route>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}>
-            <SettingsPage packageInfo={packageInfo} theme$={services.theme.theme$} />
-          </Route>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
-            <AssetsPage packageInfo={packageInfo} />
-          </Route>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}>
-            <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />
-          </Route>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_custom}>
-            <CustomViewPage packageInfo={packageInfo} />
-          </Route>
-          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_api_reference}>
-            <DocumentationPage packageInfo={packageInfo} integration={integrationInfo?.name} />
-          </Route>
-          <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
-        </Switch>
+        <Routes>
+          <Route
+            path={INTEGRATIONS_ROUTING_PATHS.integration_details_overview}
+            element={
+              <OverviewPage
+                packageInfo={packageInfo}
+                integrationInfo={integrationInfo}
+                latestGAVersion={latestGAVersion}
+              />
+            }
+          />
+          <Route
+            path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}
+            element={<SettingsPage packageInfo={packageInfo} theme$={services.theme.theme$} />}
+          />
+          <Route
+            path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}
+            element={<AssetsPage packageInfo={packageInfo} />}
+          />
+          <Route
+            path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}
+            element={<PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />}
+          />
+          <Route
+            path={INTEGRATIONS_ROUTING_PATHS.integration_details_custom}
+            element={<CustomViewPage packageInfo={packageInfo} />}
+          />
+          <Route
+            path={INTEGRATIONS_ROUTING_PATHS.integration_details_api_reference}
+            element={
+              <DocumentationPage packageInfo={packageInfo} integration={integrationInfo?.name} />
+            }
+          />
+          <Route
+            element={<Navigate to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />}
+          />
+        </Routes>
       )}
     </WithHeaderLayout>
   );

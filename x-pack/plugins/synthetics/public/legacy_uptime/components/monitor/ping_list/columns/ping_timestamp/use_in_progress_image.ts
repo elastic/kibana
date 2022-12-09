@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import {
@@ -28,8 +28,8 @@ export const useInProgressImage = ({
   hasImage: boolean;
   hasIntersected: boolean;
 }) => {
-  const isAddRoute = useRouteMatch(MONITOR_ADD_ROUTE);
-  const isEditRoute = useRouteMatch(MONITOR_EDIT_ROUTE);
+  const isAddRoute = useMatch(MONITOR_ADD_ROUTE);
+  const isEditRoute = useMatch(MONITOR_EDIT_ROUTE);
 
   const [retryLoading, setRetryLoading] = useState(0);
 

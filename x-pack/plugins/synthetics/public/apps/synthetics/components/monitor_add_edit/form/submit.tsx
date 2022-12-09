@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Redirect, useParams, useHistory, useRouteMatch } from 'react-router-dom';
+import { Navigate, useParams, useNavigate, useMatch } from 'react-router-dom';
 import { EuiButton, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
@@ -24,10 +24,10 @@ import { kibanaService } from '../../../../../utils/kibana_service';
 import { MONITORS_ROUTE, MONITOR_EDIT_ROUTE } from '../../../../../../common/constants';
 
 export const ActionBar = () => {
-  const { monitorId } = useParams<{ monitorId: string }>();
-  const history = useHistory();
-  const editRouteMatch = useRouteMatch({ path: MONITOR_EDIT_ROUTE });
-  const isEdit = editRouteMatch?.isExact;
+  const { monitorId = '' } = useParams<{ monitorId: string }>();
+  const navigate = useNavigate();
+  const editRouteMatch = useMatch({ path: MONITOR_EDIT_ROUTE });
+  const isEdit = !editRouteMatch;
   const {
     handleSubmit,
     formState: { errors },
@@ -83,7 +83,7 @@ export const ActionBar = () => {
   };
 
   return status === FETCH_STATUS.SUCCESS ? (
-    <Redirect to={MONITORS_ROUTE} />
+    <Navigate to={MONITORS_ROUTE} />
   ) : (
     <>
       <EuiFlexGroup alignItems="center">
@@ -102,7 +102,7 @@ export const ActionBar = () => {
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink href={history.createHref({ pathname: MONITORS_ROUTE })}>{CANCEL_LABEL}</EuiLink>
+          <EuiLink href={navigate({ pathname: MONITORS_ROUTE })}>{CANCEL_LABEL}</EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -121,7 +121,7 @@ export const ActionBar = () => {
           configId={monitorId}
           name={monitorObject?.attributes?.[ConfigKey.NAME] ?? ''}
           reloadPage={() => {
-            history.push(MONITORS_ROUTE);
+            navigate(MONITORS_ROUTE);
           }}
           isProjectMonitor={
             monitorObject?.attributes?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT

@@ -8,8 +8,4 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { HomeApp } from '../../components/home_app';
 
-export const HomeRoute = () => (
-  <Route path="/">
-    <HomeApp />
-  </Route>
-);
+export const HomeRoute = () => <Route path="/" element={<HomeApp />} />;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useLocation, Redirect } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 import qs from 'query-string';
 import React from 'react';
 import { useDefaultEnvironment } from '../../../hooks/use_default_environment';
@@ -16,7 +16,6 @@ export function RedirectWithDefaultEnvironment({
   children: React.ReactElement;
 }) {
   const location = useLocation();
-
   const query = qs.parse(location.search);
 
   const defaultServiceEnvironment = useDefaultEnvironment();
@@ -28,7 +27,7 @@ export function RedirectWithDefaultEnvironment({
   const normalizedPathname = location.pathname.replace(/\/$/, '');
   if (normalizedPathname === '/services') {
     return (
-      <Redirect
+      <Navigate
         to={qs.stringifyUrl({
           url: location.pathname,
           query: {

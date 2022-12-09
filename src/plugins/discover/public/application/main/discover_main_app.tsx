@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { DiscoverLayout } from './components/layout';
@@ -36,7 +36,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const { savedSearch, dataViewList } = props;
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
-  const usedHistory = useHistory();
+  const usedHistory = createBrowserHistory();
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const navigateTo = useCallback(
     (path: string) => {

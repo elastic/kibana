@@ -7,8 +7,7 @@
 
 import React, { ReactNode, useMemo } from 'react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
-import { useHistory } from 'react-router-dom';
-import { createMemoryHistory, History } from 'history';
+import { createMemoryHistory, History, createBrowserHistory } from 'history';
 import { merge } from 'lodash';
 import { coreMock } from '@kbn/core/public/mocks';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
@@ -121,7 +120,7 @@ export function MockApmPluginContextWrapper({
     createCallApmApi(contextValue.core);
   }
 
-  const contextHistory = useHistory();
+  const contextHistory = createBrowserHistory();
 
   const usedHistory = useMemo(() => {
     return (
@@ -134,7 +133,11 @@ export function MockApmPluginContextWrapper({
   }, [history, contextHistory]);
   return (
     <ApmPluginContext.Provider value={contextValue}>
-      <RouterProvider router={apmRouter as any} history={usedHistory}>
+      <RouterProvider
+        router={apmRouter as any}
+        history={usedHistory}
+        location={usedHistory.location}
+      >
         {children}
       </RouterProvider>
     </ApmPluginContext.Provider>

@@ -7,7 +7,7 @@
 
 import { History } from 'history';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { SpanFlyout } from './span_flyout';
 import { TransactionFlyout } from './transaction_flyout';
 import { IWaterfall } from './waterfall_helpers/waterfall_helpers';
@@ -23,7 +23,7 @@ export function WaterfallFlyout({
   waterfall,
   toggleFlyout,
 }: Props) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const currentItem = waterfall.items.find(
     (item) => item.id === waterfallItemId
   );

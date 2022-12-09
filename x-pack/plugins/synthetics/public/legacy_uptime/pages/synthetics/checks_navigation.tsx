@@ -14,7 +14,7 @@ import {
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import moment from 'moment';
 import { SyntheticsJourneyApiResponse } from '../../../../common/runtime_types/ping';
 import { getShortTimeStamp } from '../../components/overview/monitor_list/columns/monitor_status_column';
@@ -25,7 +25,7 @@ interface Props {
 }
 
 export const ChecksNavigation = ({ timestamp, details }: Props) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const isMobile = useIsWithinMaxBreakpoint('s');
 
   return (

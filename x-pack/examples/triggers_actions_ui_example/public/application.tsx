@@ -44,9 +44,8 @@ const TriggersActionsUiExampleApp = ({
       <EuiPage>
         <Sidebar />
         <Route
-          exact
           path="/"
-          render={() => (
+          element={() => (
             <Page title="Home" isHome>
               <EuiTitle size="l">
                 <h1>Welcome to the Triggers Actions UI plugin example</h1>
@@ -62,7 +61,7 @@ const TriggersActionsUiExampleApp = ({
         />
         <Route
           path="/rules_list"
-          render={() => (
+          element={() => (
             <Page title="Rules List">
               <RulesListSandbox triggersActionsUi={triggersActionsUi} />
             </Page>
@@ -70,7 +69,7 @@ const TriggersActionsUiExampleApp = ({
         />
         <Route
           path="/rules_list_notify_badge"
-          render={() => (
+          element={() => (
             <Page title="Rule List Notify Badge">
               <RulesListNotifyBadgeSandbox triggersActionsUi={triggersActionsUi} />
             </Page>
@@ -78,7 +77,7 @@ const TriggersActionsUiExampleApp = ({
         />
         <Route
           path="/rule_tag_badge"
-          render={() => (
+          element={() => (
             <Page title="Rule Tag Badge">
               <RuleTagBadgeSandbox triggersActionsUi={triggersActionsUi} />
             </Page>
@@ -86,7 +85,7 @@ const TriggersActionsUiExampleApp = ({
         />
         <Route
           path="/rule_tag_filter"
-          render={() => (
+          element={() => (
             <Page title="Rule Tag Filter">
               <RuleTagFilterSandbox triggersActionsUi={triggersActionsUi} />
             </Page>
@@ -94,7 +93,7 @@ const TriggersActionsUiExampleApp = ({
         />
         <Route
           path="/rule_event_log_list"
-          render={() => (
+          element={() => (
             <Page title="Run History List">
               <RuleEventLogListSandbox triggersActionsUi={triggersActionsUi} />
             </Page>
@@ -102,7 +101,7 @@ const TriggersActionsUiExampleApp = ({
         />
         <Route
           path="/rule_status_dropdown"
-          render={() => (
+          element={() => (
             <Page title="Rule Status Dropdown">
               <RuleStatusDropdownSandbox triggersActionsUi={triggersActionsUi} />
             </Page>
@@ -110,7 +109,7 @@ const TriggersActionsUiExampleApp = ({
         />
         <Route
           path="/rule_status_filter"
-          render={() => (
+          element={() => (
             <Page title="Rule Status Filter">
               <RuleStatusFilterSandbox triggersActionsUi={triggersActionsUi} />
             </Page>
@@ -118,7 +117,7 @@ const TriggersActionsUiExampleApp = ({
         />
         <Route
           path="/alerts_table"
-          render={() => (
+          element={() => (
             <Page title="Alerts Table">
               <AlertsTableSandbox triggersActionsUi={triggersActionsUi} />
             </Page>

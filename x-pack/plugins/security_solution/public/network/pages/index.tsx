@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Navigate, Routes } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
@@ -43,27 +43,24 @@ const NetworkContainerComponent = () => {
   );
 
   return (
-    <Switch>
+    <Routes>
       <Route
-        exact
-        strict
         path={NETWORK_PATH}
         render={({ location: { search = '' } }) => (
-          <Redirect to={{ pathname: `${NETWORK_PATH}/${NetworkRouteType.flows}`, search }} />
+          <Navigate to={{ pathname: `${NETWORK_PATH}/${NetworkRouteType.flows}`, search }} />
         )}
       />
-      <Route path={`${NETWORK_PATH}/ml-network`}>
-        <MlNetworkConditionalContainer />
-      </Route>
-      <Route strict path={networkRoutePath}>
-        <Network
-          capabilitiesFetched={capabilities.capabilitiesFetched}
-          hasMlUserPermissions={userHasMlUserPermissions}
-        />
-      </Route>
-      <Route path={NETWORK_DETAILS_TAB_PATH}>
-        <NetworkDetails />
-      </Route>
+      <Route path={`${NETWORK_PATH}/ml-network`} element={<MlNetworkConditionalContainer />} />
+      <Route
+        path={networkRoutePath}
+        element={
+          <Network
+            capabilitiesFetched={capabilities.capabilitiesFetched}
+            hasMlUserPermissions={userHasMlUserPermissions}
+          />
+        }
+      />
+      <Route path={NETWORK_DETAILS_TAB_PATH} element={<NetworkDetails />} />
       <Route
         path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget(${FLOW_TARGET_PARAM})?`}
         render={({
@@ -72,7 +69,7 @@ const NetworkContainerComponent = () => {
           },
           location: { search = '' },
         }) => (
-          <Redirect
+          <Navigate
             to={{
               pathname: getPathWithFlowType(detailName, flowTarget),
               search,
@@ -81,13 +78,13 @@ const NetworkContainerComponent = () => {
         )}
       />
       <Route>
-        <Redirect
+        <Navigate
           to={{
             pathname: NETWORK_PATH,
           }}
         />
       </Route>
-    </Switch>
+    </Routes>
   );
 };
 

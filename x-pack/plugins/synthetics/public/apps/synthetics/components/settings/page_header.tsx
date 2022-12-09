@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { EuiPageHeaderProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { createBrowserHistory } from 'history';
 import { SYNTHETICS_SETTINGS_ROUTE } from '../../../../../common/constants';
 
 export const getSettingsPageHeader = (
-  history: ReturnType<typeof useHistory>,
+  history: ReturnType<typeof createBrowserHistory>,
   syntheticsPath: string
 ): EuiPageHeaderProps => {
   // Not a component, but it doesn't matter. Hooks are just functions
-  const match = useRouteMatch<{ tabId: string }>(SYNTHETICS_SETTINGS_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
+  const match = useParams<{ tabId: string }>(SYNTHETICS_SETTINGS_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
 
   if (!match) {
     return {};

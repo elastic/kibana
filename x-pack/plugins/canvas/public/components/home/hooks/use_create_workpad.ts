@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { i18n } from '@kbn/i18n';
 
 // @ts-expect-error
@@ -18,7 +18,7 @@ import type { CanvasWorkpad } from '../../../../types';
 export const useCreateWorkpad = () => {
   const workpadService = useWorkpadService();
   const notifyService = useNotifyService();
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   return useCallback(
     async (_workpad?: CanvasWorkpad | null) => {

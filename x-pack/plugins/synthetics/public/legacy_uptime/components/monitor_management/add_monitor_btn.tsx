@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiToolTip, EuiSwitch } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLocations } from './hooks/use_locations';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
@@ -18,7 +18,7 @@ import { useEnablement } from './hooks/use_enablement';
 import { useSyntheticsServiceAllowed } from './hooks/use_service_allowed';
 
 export const AddMonitorBtn = () => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const [isEnabling, setIsEnabling] = useState(false);
   const [isDisabling, setIsDisabling] = useState(false);
   const {

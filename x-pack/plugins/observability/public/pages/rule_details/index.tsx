@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useHistory, useParams, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
@@ -37,6 +37,7 @@ import { Query, BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { createBrowserHistory } from 'history';
 import { fromQuery, toQuery } from '../../utils/url';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
@@ -80,8 +81,7 @@ export function RuleDetailsPage() {
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
-  const history = useHistory();
-  const location = useLocation();
+  const history = createBrowserHistory();
 
   const filteredRuleTypes = useMemo(
     () => observabilityRuleTypeRegistry.list(),

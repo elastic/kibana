@@ -6,14 +6,14 @@
  */
 
 import React, { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { omit } from 'lodash';
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { URLSearch } from './url_search';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 
 export function URLFilter() {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const setFilterValue = useCallback(
     (value?: string[], excludedValue?: string[]) => {

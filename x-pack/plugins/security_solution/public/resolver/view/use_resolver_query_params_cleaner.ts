@@ -6,8 +6,9 @@
  */
 
 import { useRef, useEffect } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { createBrowserHistory } from 'history';
 import * as selectors from '../store/selectors';
 import { parameterName } from '../store/parameter_name';
 /**
@@ -24,7 +25,7 @@ export function useResolverQueryParamCleaner() {
   const searchRef = useRef<string>();
   searchRef.current = useLocation().search;
 
-  const history = useHistory();
+  const history = createBrowserHistory();
   const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
 
   const resolverKey = parameterName(resolverComponentInstanceID);

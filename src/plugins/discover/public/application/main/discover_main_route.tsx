@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { DataViewListItem } from '@kbn/data-plugin/public';
 import { DataViewSavedObjectConflictError } from '@kbn/data-views-plugin/public';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
@@ -42,7 +42,7 @@ interface Props {
 }
 
 export function DiscoverMainRoute(props: Props) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const services = useDiscoverServices();
   const { isDev } = props;
   const {

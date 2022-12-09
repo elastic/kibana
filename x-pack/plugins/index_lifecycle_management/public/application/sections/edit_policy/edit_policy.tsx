@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { get } from 'lodash';
 
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import './edit_policy.scss';
 
@@ -119,7 +119,7 @@ export const EditPolicy: React.FunctionComponent = () => {
     [originalPolicyName, existingPolicies, isClonedPolicy]
   );
 
-  const history = useHistory();
+  const history = createBrowserHistory();
   const backToPolicyList = () => {
     history.push('/policies');
   };

@@ -6,13 +6,13 @@
  */
 import moment from 'moment';
 import { useState, useEffect, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMonitoringTimeContainerContext } from './use_monitoring_time';
 
 export function useCharts() {
   const { services } = useKibana<{ data: any }>();
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { handleTimeChange } = useMonitoringTimeContainerContext();
 
   const [zoomInLevel, setZoomInLevel] = useState(0);

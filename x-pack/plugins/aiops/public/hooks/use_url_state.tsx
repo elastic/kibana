@@ -9,8 +9,9 @@ import React, { FC } from 'react';
 import { parse, stringify } from 'query-string';
 import { createContext, useCallback, useContext, useMemo } from 'react';
 import { decode, encode } from '@kbn/rison';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { isEqual } from 'lodash';
+import { createBrowserHistory } from 'history';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;
@@ -93,7 +94,7 @@ export const { Provider } = aiopsUrlStateStore;
 export const UrlStateProvider: FC = ({ children }) => {
   const { Provider: StateProvider } = aiopsUrlStateStore;
 
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { search: urlSearchString } = useLocation();
 
   const setUrlState: SetUrlState = useCallback(

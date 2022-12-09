@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
@@ -34,10 +34,8 @@ export const SearchExperiences: React.FC<InitialAppData> = (props) => {
   };
 
   return (
-    <Switch>
-      <Route exact path={ROOT_PATH}>
-        {showView()}
-      </Route>
-    </Switch>
+    <Routes>
+      <Route path={ROOT_PATH} element={showView()} />
+    </Routes>
   );
 };

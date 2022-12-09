@@ -8,7 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContent_Deprecated as EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
-import { Router, Switch, Route } from 'react-router-dom';
+import { Router, Routes, Route } from 'react-router-dom';
 
 import { useKibana, useExecutionContext } from '../shared_imports';
 
@@ -31,15 +31,15 @@ import {
 import { ROUTES } from './services/navigation';
 
 export const AppWithoutRouter = () => (
-  <Switch>
-    <Route exact path={ROUTES.list} component={PipelinesList} />
-    <Route exact path={ROUTES.clone} component={PipelinesClone} />
-    <Route exact path={ROUTES.create} component={PipelinesCreate} />
-    <Route exact path={ROUTES.edit} component={PipelinesEdit} />
-    <Route exact path={ROUTES.createFromCsv} component={PipelinesCreateFromCsv} />
+  <Routes>
+    <Route path={ROUTES.list} element={PipelinesList} />
+    <Route path={ROUTES.clone} element={PipelinesClone} />
+    <Route path={ROUTES.create} element={PipelinesCreate} />
+    <Route path={ROUTES.edit} element={PipelinesEdit} />
+    <Route path={ROUTES.createFromCsv} element={PipelinesCreateFromCsv} />
     {/* Catch all */}
-    <Route component={PipelinesList} />
-  </Switch>
+    <Route element={PipelinesList} />
+  </Routes>
 );
 
 export const App: FunctionComponent = () => {
@@ -115,7 +115,7 @@ export const App: FunctionComponent = () => {
         }
 
         return (
-          <Router history={history}>
+          <Router navigator={history} location={history.location}>
             <AppWithoutRouter />
           </Router>
         );

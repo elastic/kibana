@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useUrlParams } from './use_url_params';
 
 /**
@@ -15,7 +15,7 @@ import { useUrlParams } from './use_url_params';
  * NOTE: This hook will also increment the `page_index` by 1 since `page` is now one-based
  */
 export const useOldUrlSearchPaginationReplace = (): void => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { urlParams } = useUrlParams();
 
   useEffect(() => {

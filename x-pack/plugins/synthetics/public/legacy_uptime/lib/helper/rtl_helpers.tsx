@@ -13,7 +13,7 @@ import {
   MatcherFunction,
   RenderOptions,
 } from '@testing-library/react';
-import { Router, Route } from 'react-router-dom';
+import { Router, Route, useLocation } from 'react-router-dom';
 import { merge } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
@@ -56,6 +56,7 @@ interface MockKibanaProviderProps<ExtraCore> extends KibanaProviderOptions<Extra
 
 interface MockRouterProps<ExtraCore> extends MockKibanaProviderProps<ExtraCore> {
   history?: History;
+  location?: Location;
   path?: string;
 }
 
@@ -178,8 +179,9 @@ export function MockRouter<ExtraCore>({
   history = createMemoryHistory(),
   kibanaProps,
 }: MockRouterProps<ExtraCore>) {
+  const mockUseLocation = useLocation as jest.MockedFunction<typeof useLocation>;
   return (
-    <Router history={history}>
+    <Router navigator={history} location={mockUseLocation()}>
       <MockKibanaProvider core={core} kibanaProps={kibanaProps}>
         <Route path={path}>{children}</Route>
       </MockKibanaProvider>

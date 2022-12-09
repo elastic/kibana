@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { Route, Switch, Router, Redirect } from 'react-router-dom';
+import { Route, Routes, Router, Navigate } from 'react-router-dom';
 import { ScopedHistory, ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -163,18 +163,22 @@ class AppComponent extends Component<AppProps, AppState> {
       );
     }
 
-    return (
-      <Router history={this.props.history}>
-        <Switch>
-          <Redirect exact from="/" to="/follower_indices" />
-          <Route exact path="/auto_follow_patterns/add" component={AutoFollowPatternAdd} />
-          <Route exact path="/auto_follow_patterns/edit/:id" component={AutoFollowPatternEdit} />
-          <Route exact path="/follower_indices/add" component={FollowerIndexAdd} />
-          <Route exact path="/follower_indices/edit/:id" component={FollowerIndexEdit} />
-          <Route exact path={['/:section']} component={CrossClusterReplicationHome} />
-        </Switch>
-      </Router>
-    );
+    const Rout = () => {
+      return (
+        <Router navigator={this.props.history} location={location}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/follower_indices" />} />
+            <Route path="/auto_follow_patterns/add" element={AutoFollowPatternAdd} />
+            <Route path="/auto_follow_patterns/edit/:id" element={AutoFollowPatternEdit} />
+            <Route path="/follower_indices/add" element={FollowerIndexAdd} />
+            <Route path="/follower_indices/edit/:id" element={FollowerIndexEdit} />
+            <Route path="/:section" element={CrossClusterReplicationHome} />
+          </Routes>
+        </Router>
+      );
+    };
+
+    return <Rout />;
   }
 }
 

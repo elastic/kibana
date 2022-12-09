@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Switch } from 'react-router-dom';
+import { Routes } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import React, { memo } from 'react';
 import { TrustedAppsList } from './view/trusted_apps_list';
@@ -14,10 +14,10 @@ import { NotFoundPage } from '../../../app/404';
 
 export const TrustedAppsContainer = memo(() => {
   return (
-    <Switch>
-      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} exact component={TrustedAppsList} />
+    <Routes>
+      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppsList} />
       <Route path="*" component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 });
 

@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import {
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_INSTANCE_ID,
@@ -99,7 +99,7 @@ export function InstanceDetails({
   kuery,
 }: Props) {
   const theme = useTheme();
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,

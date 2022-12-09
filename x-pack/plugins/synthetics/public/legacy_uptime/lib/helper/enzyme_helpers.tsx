@@ -32,15 +32,21 @@ const helperWithRouter: <R>(
 
   history.location.key = 'TestKeyForTesting';
 
-  const routerWrapper = <Router history={history}>{component}</Router>;
+  const RouterWrapper = () => {
+    return (
+      <Router navigator={history} location={history.location}>
+        {component}
+      </Router>
+    );
+  };
 
   if (wrapReduxStore) {
     return helper(
-      <MountWithReduxProvider state={storeState}>{routerWrapper}</MountWithReduxProvider>
+      <MountWithReduxProvider state={storeState}>{<RouterWrapper />}</MountWithReduxProvider>
     );
   }
 
-  return helper(routerWrapper);
+  return helper(<RouterWrapper />);
 };
 
 export const renderWithRouter = (component: ReactElement, customHistory?: MemoryHistory) => {

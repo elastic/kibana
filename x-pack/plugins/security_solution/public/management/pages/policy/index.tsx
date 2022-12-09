@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { Switch, Redirect } from 'react-router-dom';
+import { Routes, Navigate } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { PolicyDetails, PolicyList } from './view';
 import {
@@ -25,28 +25,26 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 export const PolicyContainer = memo(() => {
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
   return (
-    <Switch>
-      <Route
-        path={[
-          MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
-          MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
-          MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
-          MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
-          MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
-        ]}
-        exact
-        component={PolicyDetails}
-      />
+    <Routes>
+      {[
+        MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+        MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+        MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
+        MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
+        MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+      ].map((path) => (
+        <Route path={path} component={PolicyDetails} />
+      ))}
+
       <Route
         path={MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD}
-        exact
-        render={(props) => <Redirect to={getPolicyDetailPath(props.match.params.policyId)} />}
+        render={(props) => <Navigate to={getPolicyDetailPath(props.match.params.policyId)} />}
       />
       {isPolicyListEnabled && (
-        <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} exact component={PolicyList} />
+        <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyList} />
       )}
       <Route path="*" component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 });
 

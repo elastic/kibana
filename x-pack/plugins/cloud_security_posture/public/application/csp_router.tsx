@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { benchmarksNavigation, cloudPosturePages } from '../common/navigation/constants';
 import type { CspSecuritySolutionContext } from '..';
 import { SecuritySolutionContext } from './security_solution_context';
@@ -26,21 +26,19 @@ export interface CspRouterProps {
 export const CspRouter = ({ securitySolutionContext }: CspRouterProps) => {
   const routerElement = (
     <QueryClientProvider client={queryClient}>
-      <Switch>
-        <CspRoute {...cloudPosturePages.findings} component={pages.Findings} />
-        <CspRoute {...cloudPosturePages.dashboard} component={pages.ComplianceDashboard} />
+      <Routes>
+        <CspRoute {...cloudPosturePages.findings} children={pages.Findings} />
+        <CspRoute {...cloudPosturePages.dashboard} children={pages.ComplianceDashboard} />
 
         <CspRoute {...cloudPosturePages.benchmarks}>
-          <Switch>
-            <CspRoute {...benchmarksNavigation.rules} component={pages.Rules} />
-            <CspRoute {...cloudPosturePages.benchmarks} component={pages.Benchmarks} />
-          </Switch>
+          <Routes>
+            <CspRoute {...benchmarksNavigation.rules} children={pages.Rules} />
+            <CspRoute {...cloudPosturePages.benchmarks} children={pages.Benchmarks} />
+          </Routes>
         </CspRoute>
 
-        <Route>
-          <Redirect to={cloudPosturePages.dashboard.path} />
-        </Route>
-      </Switch>
+        <Route element={<Navigate to={cloudPosturePages.dashboard.path} />} />
+      </Routes>
     </QueryClientProvider>
   );
 

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Redirect, Switch } from 'react-router-dom';
+import { Route, Navigate, Routes } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
@@ -66,21 +66,19 @@ export const AppSearch: React.FC<InitialAppData> = (props) => {
   };
 
   return (
-    <Switch>
-      <Route exact path={SETUP_GUIDE_PATH}>
-        <SetupGuide />
-      </Route>
-      <Route>{showView()}</Route>
-    </Switch>
+    <Routes>
+      <Route path={SETUP_GUIDE_PATH} element={<SetupGuide />} />
+      <Route element={showView()} />
+    </Routes>
   );
 };
 
 export const AppSearchUnconfigured: React.FC = () => (
-  <Switch>
+  <Routes>
     <Route>
-      <Redirect to={SETUP_GUIDE_PATH} />
+      <Navigate to={SETUP_GUIDE_PATH} />
     </Route>
-  </Switch>
+  </Routes>
 );
 
 export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
@@ -100,49 +98,22 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
   }, []);
 
   return (
-    <Switch>
+    <Routes>
       {process.env.NODE_ENV === 'development' && (
-        <Route path={LIBRARY_PATH}>
-          <Library />
-        </Route>
+        <Route path={LIBRARY_PATH} element={<Library />} />
       )}
-      <Route exact path={ROOT_PATH}>
-        <Redirect to={ENGINES_PATH} />
-      </Route>
-      <Route exact path={ENGINES_PATH}>
-        <EnginesOverview />
-      </Route>
-      {canManageEngines && (
-        <Route exact path={ENGINE_CREATION_PATH}>
-          <EngineCreation />
-        </Route>
-      )}
+      <Route path={ROOT_PATH} element={<Navigate to={ENGINES_PATH} />} />
+      <Route path={ENGINES_PATH} element={<EnginesOverview />} />
+
+      {canManageEngines && <Route path={ENGINE_CREATION_PATH} element={<EngineCreation />} />}
       {canManageMetaEngines && (
-        <Route exact path={META_ENGINE_CREATION_PATH}>
-          <MetaEngineCreation />
-        </Route>
+        <Route path={META_ENGINE_CREATION_PATH} element={<MetaEngineCreation />} />
       )}
-      <Route path={ENGINE_PATH}>
-        <EngineRouter />
-      </Route>
-      {canViewSettings && (
-        <Route exact path={SETTINGS_PATH}>
-          <Settings />
-        </Route>
-      )}
-      {canViewAccountCredentials && (
-        <Route exact path={CREDENTIALS_PATH}>
-          <Credentials />
-        </Route>
-      )}
-      {canViewRoleMappings && (
-        <Route path={USERS_AND_ROLES_PATH}>
-          <RoleMappings />
-        </Route>
-      )}
-      <Route>
-        <NotFound />
-      </Route>
-    </Switch>
+      <Route path={ENGINE_PATH} element={<EngineRouter />} />
+      {canViewSettings && <Route path={SETTINGS_PATH} element={<Settings />} />}
+      {canViewAccountCredentials && <Route path={CREDENTIALS_PATH} element={<Credentials />} />}
+      {canViewRoleMappings && <Route path={USERS_AND_ROLES_PATH} element={<RoleMappings />} />}
+      <Route element={<NotFound />} />
+    </Routes>
   );
 };

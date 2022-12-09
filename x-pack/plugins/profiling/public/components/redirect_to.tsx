@@ -5,10 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import { useHistory, Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 export function RedirectTo({ pathname }: { pathname: string }) {
-  const { location } = useHistory();
+  const { location } = createBrowserHistory();
 
-  return <Redirect to={{ pathname, search: location.search }} />;
+  return <Navigate to={{ pathname, search: location.search }} />;
 }

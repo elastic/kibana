@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route, Redirect, RouteChildrenProps } from 'react-router-dom';
+import { Router, Routes, Route, Navigate, Params } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -43,7 +43,10 @@ const readOnlyBadge = {
 const redirectUrl = ({
   match,
   location,
-}: RouteChildrenProps<{ [QUERY]: string }>): LocationDescriptor => {
+}: {
+  location: Location;
+  match: { params: Params };
+}): LocationDescriptor => {
   const search = url.addQueryParam(location.search, QUERY, match?.params[QUERY]);
 
   return {
@@ -58,8 +61,9 @@ export async function mountManagementSection(
   componentRegistry: ComponentRegistry['start'],
   usageCollection?: UsageCollectionSetup
 ) {
+  const [{ chrome, uiSettings, notifications, docLinks, application }] = await getStartServices();
+
   params.setBreadcrumbs(crumb);
-  const [{ uiSettings, notifications, docLinks, application, chrome }] = await getStartServices();
 
   const canSave = application.capabilities.advancedSettings.save as boolean;
   const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'advanced_settings');
@@ -70,31 +74,41 @@ export async function mountManagementSection(
 
   chrome.docTitle.change(title);
 
-  ReactDOM.render(
-    <KibanaThemeProvider theme$={params.theme$}>
-      <I18nProvider>
-        <Router history={params.history}>
-          <Switch>
-            {/* TODO: remove route param (`query`) in 7.13 */}
-            <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
-            <Route path="/">
-              <AdvancedSettings
-                history={params.history}
-                enableSaving={canSave}
-                toasts={notifications.toasts}
-                docLinks={docLinks.links}
-                uiSettings={uiSettings}
-                theme={params.theme$}
-                componentRegistry={componentRegistry}
-                trackUiMetric={trackUiMetric}
+  const App = () => {
+    return (
+      <KibanaThemeProvider theme$={params.theme$}>
+        <I18nProvider>
+          <Router navigator={params.history} location={params.history.location}>
+            <Routes>
+              {/* TODO: remove route param (`query`) in 7.13 */}
+              <Route
+                path={`/:${QUERY}`}
+                element={(props: any) => <Navigate to={redirectUrl(props)} />}
               />
-            </Route>
-          </Switch>
-        </Router>
-      </I18nProvider>
-    </KibanaThemeProvider>,
-    params.element
-  );
+
+              <Route
+                path="/"
+                element={
+                  <AdvancedSettings
+                    history={params.history}
+                    enableSaving={canSave}
+                    toasts={notifications.toasts}
+                    docLinks={docLinks.links}
+                    uiSettings={uiSettings}
+                    theme={params.theme$}
+                    componentRegistry={componentRegistry}
+                    trackUiMetric={trackUiMetric}
+                  />
+                }
+              />
+            </Routes>
+          </Router>
+        </I18nProvider>
+      </KibanaThemeProvider>
+    );
+  };
+
+  ReactDOM.render(<App />, params.element);
   return () => {
     chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(params.element);

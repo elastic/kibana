@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { orderBy } from 'lodash';
 
 import {
@@ -78,7 +78,7 @@ export function FailedTransactionsCorrelations({
     progress.isRunning
   );
 
-  const history = useHistory();
+  const history = createBrowserHistory();
   const [showStats, setShowStats] = useLocalStorage(
     'apmFailedTransactionsShowAdvancedStats',
     false

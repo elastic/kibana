@@ -8,7 +8,7 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-plugin/public';
 import { AlertDropdown } from '../../alerting/log_threshold';
@@ -81,15 +81,15 @@ export const LogsPageContent: React.FunctionComponent = () => {
         </HeaderMenuPortal>
       )}
 
-      <Switch>
-        <Route path={streamTab.pathname} component={StreamPage} />
-        <Route path={anomaliesTab.pathname} component={LogEntryRatePage} />
-        <Route path={logCategoriesTab.pathname} component={LogEntryCategoriesPage} />
-        <Route path={settingsTab.pathname} component={LogsSettingsPage} />
-        <RedirectWithQueryParams from={'/analysis'} to={anomaliesTab.pathname} exact />
-        <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
-        <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
-      </Switch>
+      <Routes>
+        <Route path={streamTab.pathname} element={<StreamPage />} />
+        <Route path={anomaliesTab.pathname} element={<LogEntryRatePage />} />
+        <Route path={logCategoriesTab.pathname} element={<LogEntryCategoriesPage />} />
+        <Route path={settingsTab.pathname} element={<LogsSettingsPage />} />
+        <Route path="analysis" element={<RedirectWithQueryParams to={anomaliesTab.pathname} />} />
+        <Route path="log-rate" element={<RedirectWithQueryParams to={anomaliesTab.pathname} />} />
+        <Route path="/" element={<RedirectWithQueryParams to={streamTab.pathname} />} />
+      </Routes>
     </>
   );
 };

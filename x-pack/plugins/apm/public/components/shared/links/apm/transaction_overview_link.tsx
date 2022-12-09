@@ -23,8 +23,9 @@ export function useTransactionsOverviewHref({
   latencyAggregationType,
   transactionType,
 }: Props) {
-  const { core } = useApmPluginContext();
   const location = useLocation();
+  const { core } = useApmPluginContext();
+
   const { search } = location;
 
   const query = { latencyAggregationType, transactionType };

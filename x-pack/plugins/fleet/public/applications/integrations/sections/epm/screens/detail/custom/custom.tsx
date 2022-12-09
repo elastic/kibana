@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo, useMemo } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useLink, useUIExtension } from '../../../../../hooks';
@@ -32,6 +32,6 @@ export const CustomViewPage: React.FC<Props> = memo(({ packageInfo }) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <Redirect to={getPath('integration_details_overview', { pkgkey })} />
+    <Navigate to={getPath('integration_details_overview', { pkgkey })} />
   );
 });

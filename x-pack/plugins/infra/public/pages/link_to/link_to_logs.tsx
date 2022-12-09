@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
+import { match as RouteMatch, Navigate, Route, Routes } from 'react-router-dom';
 
 import { RedirectToLogs } from './redirect_to_logs';
 import { RedirectToNodeLogs } from './redirect_to_node_logs';
@@ -23,14 +23,14 @@ const ITEM_TYPES = inventoryModels.map((m) => m.id).join('|');
 
 export const LinkToLogsPage: React.FC<LinkToPageProps> = (props) => {
   return (
-    <Switch>
+    <Routes>
       <Route
         path={`${props.match.url}/:sourceId?/:nodeType(${ITEM_TYPES})-logs/:nodeId`}
-        component={RedirectToNodeLogs}
+        children={RedirectToNodeLogs}
       />
-      <Route path={`${props.match.url}/:sourceId?/logs`} component={RedirectToLogs} />
-      <Route path={`${props.match.url}/:sourceId?`} component={RedirectToLogs} />
-      <Redirect to="/" />
-    </Switch>
+      <Route path={`${props.match.url}/:sourceId?/logs`} element={RedirectToLogs} />
+      <Route path={`${props.match.url}/:sourceId?`} element={RedirectToLogs} />
+      <Route element={<Navigate to="/" />} />
+    </Routes>
   );
 };

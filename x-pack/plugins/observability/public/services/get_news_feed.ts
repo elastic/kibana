@@ -14,7 +14,7 @@ export interface NewsItem {
   image_url?: { en: string } | null;
 }
 
-interface NewsFeed {
+export interface NewsFeed {
   items: NewsItem[];
 }
 

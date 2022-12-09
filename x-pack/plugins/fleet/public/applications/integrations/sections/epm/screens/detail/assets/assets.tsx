@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { groupBy } from 'lodash';
@@ -134,7 +134,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
   if (packageInstallStatus.status !== InstallStatus.installed) {
-    return <Redirect to={getPath('integration_details_overview', { pkgkey })} />;
+    return <Navigate to={getPath('integration_details_overview', { pkgkey })} />;
   }
 
   let content: JSX.Element | Array<JSX.Element | null>;

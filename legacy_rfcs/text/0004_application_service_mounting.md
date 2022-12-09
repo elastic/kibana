@@ -235,7 +235,7 @@ const MyApp = ({ basename }) => (
   <BrowserRouter basename={basename}>
 
     {/* mykibana.com/app/my-app/ */}
-    <Route path="/" exact component={HomePage} />
+    <Route path="/" element={HomePage} />
 
     {/* mykibana.com/app/my-app/dashboard/42 */}
     <Route

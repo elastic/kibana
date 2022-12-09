@@ -7,7 +7,7 @@
 
 import React, { createContext, useState, useMemo, useCallback } from 'react';
 import useMount from 'react-use/lib/useMount';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { parse } from 'query-string';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { fromQuery, ObservabilityPublicPluginsStart, toQuery } from '..';
@@ -34,7 +34,7 @@ export const DatePickerContext = createContext({} as DatePickerContextValue);
 
 export function DatePickerContextProvider({ children }: { children: React.ReactElement }) {
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const updateUrl = useCallback(
     (
@@ -46,21 +46,27 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
       },
       isFirstRender: boolean = false
     ) => {
-      const newHistory = {
-        ...location,
-        search: fromQuery({
-          ...toQuery(location.search),
-          ...nextQuery,
-        }),
-      };
+      navigate(
+        {
+          ...location,
+          search: fromQuery({
+            ...toQuery(location.search),
+            ...nextQuery,
+          }),
+        },
+        {
+          replace: isFirstRender,
+        }
+      );
+      // console.log(newHistory);
 
-      if (isFirstRender) {
-        history.replace(newHistory);
-      } else {
-        history.push(newHistory);
-      }
+      // if (isFirstRender) {
+      //   history.replace(newHistory);
+      // } else {
+      //   history.push(newHistory);
+      // }
     },
-    [history, location]
+    [location, navigate]
   );
 
   const [lastUpdated, setLastUpdated] = useState(Date.now());

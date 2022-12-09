@@ -23,10 +23,10 @@ export function RedirectWithDefaultDateRange({
 }: {
   children: ReactElement;
 }) {
+  const location = useLocation();
   const { isDateRangeSet, redirect } = useDateRangeRedirect();
 
   const apmRouter = useApmRouter();
-  const location = useLocation();
 
   const matchesRoute = isRouteWithTimeRange({ apmRouter, location });
 

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Switch, useParams } from 'react-router-dom';
+import { Route, Routes, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
@@ -30,14 +30,10 @@ export const GroupRouter: React.FC = () => {
 
   return (
     <>
-      <Switch>
-        <Route path={GROUP_SOURCE_PRIORITIZATION_PATH}>
-          <GroupSourcePrioritization />
-        </Route>
-        <Route path={GROUP_PATH}>
-          <GroupOverview />
-        </Route>
-      </Switch>
+      <Routes>
+        <Route path={GROUP_SOURCE_PRIORITIZATION_PATH} element={<GroupSourcePrioritization />} />
+        <Route path={GROUP_PATH} element={<GroupOverview />} />
+      </Routes>
       {orgSourcesModalVisible && <OrgSourcesModal />}
     </>
   );

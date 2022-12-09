@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
@@ -49,8 +49,8 @@ export const PersonalDashboardLayout: React.FC<LayoutProps> = ({
       <AccountHeader />
       <EuiPage className="personalDashboardLayout" paddingSize="none">
         <EuiPageSideBar role="navigation" className="personalDashboardLayout__sideBar" sticky>
-          {useRouteMatch(PRIVATE_SOURCES_PATH) && <PrivateSourcesSidebar />}
-          {useRouteMatch(PERSONAL_SETTINGS_PATH) && <AccountSettingsSidebar />}
+          {useMatch(PRIVATE_SOURCES_PATH) && <PrivateSourcesSidebar />}
+          {useMatch(PERSONAL_SETTINGS_PATH) && <AccountSettingsSidebar />}
         </EuiPageSideBar>
         <EuiPageBody component="main" panelled role="main">
           <EuiPageContentBody className="personalDashboardLayout__body" restrictWidth>

@@ -9,7 +9,7 @@ import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { HashRouter, Route, RouteComponentProps, Routes } from 'react-router-dom';
 import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
@@ -363,16 +363,16 @@ export async function mountApp(
         <KibanaContextProvider services={lensServices}>
           <PresentationUtilContext>
             <HashRouter>
-              <Switch>
-                <Route exact path="/edit/:id" component={EditorRoute} />
+              <Routes>
+                <Route path="/edit/:id" component={EditorRoute} />
                 <Route
                   exact
                   path={`/${LENS_EDIT_BY_VALUE}`}
                   render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
                 />
-                <Route exact path="/" component={EditorRoute} />
+                <Route path="/" component={EditorRoute} />
                 <Route path="/" component={NotFound} />
-              </Switch>
+              </Routes>
             </HashRouter>
           </PresentationUtilContext>
         </KibanaContextProvider>

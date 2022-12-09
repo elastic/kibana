@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -22,6 +22,8 @@ import type { Observable } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+
+import { useLocation } from 'react-router-dom';
 
 import type {
   GetAgentPoliciesResponse,
@@ -79,7 +81,8 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   version,
   theme$,
 }) => {
-  const history = useHistory();
+  const location = useLocation();
+  const history = createBrowserHistory();
   const { getPath } = useLink();
 
   const { notifications } = useStartServices();
@@ -146,7 +149,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   const navigateToNewSettingsPage = useCallback(() => {
     // only navigate if still on old settings page (user has not navigated away)
     if (
-      !history.location.pathname.match(
+      !location.pathname.match(
         getPath('integration_details_settings', {
           pkgkey: `${name}-.*`,
         })
@@ -158,7 +161,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       pkgkey: `${name}-${version}`,
     });
     history.push(settingsPath);
-  }, [history, getPath, name, version]);
+  }, [history, getPath, name, version, location]);
 
   const handleClickUpdate = useCallback(async () => {
     await installPackage({ name, version, title, fromUpdate: true });

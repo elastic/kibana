@@ -16,7 +16,7 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
 } from '@elastic/eui';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
@@ -32,7 +32,7 @@ import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
-  const match = useRouteMatch<{ uuid: string | undefined }>();
+  const match = useMatch<{ uuid: string | undefined }>();
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;
   const { zoomInfo, onBrush } = useCharts();

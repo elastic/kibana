@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, useEffect } from 'react';
-import { Route, RouteComponentProps, Switch, Redirect } from 'react-router-dom';
+import { Route, Routes, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 
@@ -28,12 +28,9 @@ export interface MatchParams {
   section: Section;
 }
 
-export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { section },
-  },
-  history,
-}) => {
+export const TriggersActionsUIHome: React.FunctionComponent<MatchParams> = () => {
+  const { section } = useParams<{ section: string }>();
+  const navigate = useNavigate();
   const { chrome, setBreadcrumbs, docLinks } = useKibana().services;
   const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
 
@@ -67,7 +64,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   }
 
   const onSectionChange = (newSection: Section) => {
-    history.push(`/${newSection}`);
+    navigate(`/${newSection}`);
   };
 
   // Set breadcrumb and page title
@@ -117,27 +114,18 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
-          <Switch>
-            <Route
-              exact
-              path={routeToLogs}
-              component={suspendedComponentWithProps(LogsList, 'xl')}
-            />
-            <Route
-              exact
-              path={routeToRules}
-              component={suspendedComponentWithProps(RulesList, 'xl')}
-            />
+          <Routes>
+            <Route path={routeToLogs} element={suspendedComponentWithProps(LogsList, 'xl')} />
+            <Route path={routeToRules} element={suspendedComponentWithProps(RulesList, 'xl')} />
             {isInternalAlertsTableEnabled ? (
               <Route
-                exact
                 path={routeToInternalAlerts}
-                component={suspendedComponentWithProps(AlertsPage, 'xl')}
+                children={suspendedComponentWithProps(AlertsPage, 'xl')}
               />
             ) : (
-              <Redirect to={routeToRules} />
+              <Route path="*" element={<Navigate to={routeToRules} />} />
             )}
-          </Switch>
+          </Routes>
         </HealthCheck>
       </HealthContextProvider>
     </>

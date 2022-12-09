@@ -11,7 +11,6 @@
  */
 
 const Path = require('path');
-
 // extracted const vars
 const distDir = Path.resolve(__dirname, '../shared_built_assets');
 const dllManifestPath = Path.resolve(distDir, 'kbn-ui-shared-deps-npm-manifest.json');

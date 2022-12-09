@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { getSavedObjectsClient, getToasts } from '../../kibana_services';
 import { MapsListView } from './maps_list_view';
@@ -57,7 +57,7 @@ export class LoadListAndRender extends React.Component<{ stateTransfer: Embeddab
     const { mapsLoaded, hasSavedMaps } = this.state;
 
     if (mapsLoaded) {
-      return hasSavedMaps ? <MapsListView /> : <Redirect to="/map" />;
+      return hasSavedMaps ? <MapsListView /> : <Navigate to="/map" />;
     } else {
       return null;
     }

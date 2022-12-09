@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { linkToRepositories } from '../../../../services/navigation';
 
 export const RepositoryError: React.FunctionComponent = () => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   return (
     <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
       <EuiEmptyPrompt

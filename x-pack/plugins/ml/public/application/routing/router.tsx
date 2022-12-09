@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { Router, type RouteProps } from 'react-router-dom';
+import { Router, type PathRouteProps } from 'react-router-dom';
 import { type Location } from 'history';
 
 import type {
@@ -25,7 +25,7 @@ import { UrlStateProvider } from '../util/url_state';
 import { MlPage } from '../components/ml_page';
 
 // custom RouteProps making location non-optional
-interface MlRouteProps extends RouteProps {
+interface MlRouteProps extends PathRouteProps {
   location: Location;
 }
 
@@ -82,12 +82,14 @@ export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children 
  */
 export const MlRouter: FC<{
   pageDeps: PageDependencies;
-}> = ({ pageDeps }) => (
-  <Router history={pageDeps.history}>
-    <UrlStateProvider>
-      <MlNotificationsContextProvider>
-        <MlPage pageDeps={pageDeps} />
-      </MlNotificationsContextProvider>
-    </UrlStateProvider>
-  </Router>
-);
+}> = ({ pageDeps }) => {
+  return (
+    <Router navigator={pageDeps.history} location={location}>
+      <UrlStateProvider>
+        <MlNotificationsContextProvider>
+          <MlPage pageDeps={pageDeps} />
+        </MlNotificationsContextProvider>
+      </UrlStateProvider>
+    </Router>
+  );
+};

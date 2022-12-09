@@ -16,7 +16,7 @@ import {
   ExecutionContextStart,
 } from '@kbn/core/public';
 
-import { Router, Switch, Route, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Router, Routes, Route, Navigate, PathRouteProps } from 'react-router-dom';
 
 import { EuiPageContent_Deprecated as EuiPageContent, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 
@@ -31,10 +31,10 @@ import { registerRouter } from './lib/navigation';
 import { AppContextProvider } from './app_context';
 import { useExecutionContext } from './shared_imports';
 
-const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { children: any }) => {
+const ShareRouter = ({ children }: PathRouteProps & { children: JSX.Element }) => {
   registerRouter({ history });
   return children;
-});
+};
 
 export interface AppDeps {
   docLinks: DocLinksStart;
@@ -92,7 +92,7 @@ export const App = (deps: AppDeps) => {
     );
   }
   return (
-    <Router history={deps.history}>
+    <Router navigator={deps.history} location={deps.history.location}>
       <ShareRouter>
         <AppContextProvider value={deps}>
           <AppWithoutRouter />
@@ -104,12 +104,13 @@ export const App = (deps: AppDeps) => {
 
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
-  <Switch>
-    <Route exact path="/watches" component={WatchListPage} />
-    <Route exact path="/watches/watch/:id/status" component={WatchStatusPage} />
-    <Route exact path="/watches/watch/:id/edit" component={WatchEditPage} />
-    <Route exact path="/watches/new-watch/:type(json|threshold)" component={WatchEditPage} />
-    <Redirect exact from="/" to="/watches" />
-    <Redirect exact from="" to="/watches" />
-  </Switch>
+  <Routes>
+    <Route path="/watches" element={WatchListPage} />
+    <Route path="/watches/watch/:id/status" element={WatchStatusPage} />
+    <Route path="/watches/watch/:id/edit" element={WatchEditPage} />
+    <Route path="/watches/new-watch/:type(json|threshold)" element={WatchEditPage} />
+    {['/', ''].map((path) => (
+      <Route path={path} element={<Navigate to="/watches" />} />
+    ))}
+  </Routes>
 );

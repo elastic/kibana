@@ -92,12 +92,7 @@ export const patterns = (state: Immutable<EndpointState>) => state.patterns;
 export const patternsError = (state: Immutable<EndpointState>) => state.patternsError;
 
 export const isOnEndpointPage = (state: Immutable<EndpointState>) => {
-  return (
-    matchPath(state.location?.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_ENDPOINTS_PATH,
-      exact: true,
-    }) !== null
-  );
+  return matchPath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, state.location?.pathname ?? '') !== null;
 };
 
 /** Sanitized list of URL query params supported by the Details page */

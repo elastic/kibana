@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import type { AppLeaveHandler } from '@kbn/core-application-browser';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useShowTimelineForGivenPath } from '../../utils/timeline/use_show_timeline_for_path';
 import type { TimelineId } from '../../../../common/types';
 import { TimelineStatus, TimelineTabs } from '../../../../common/types';
@@ -32,7 +32,7 @@ export const useTimelineSavePrompt = (
   const dispatch = useDispatch();
   const { overlays, application } = useKibana().services;
   const getIsTimelineVisible = useShowTimelineForGivenPath();
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
   const { status: timelineStatus, updated } = useDeepEqualSelector((state) =>

@@ -7,7 +7,7 @@
 
 import { EuiLoadingSpinner, EuiTabs, EuiTab } from '@elastic/eui';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -25,7 +25,7 @@ const INITIAL_STATE = {
 
 export function InfraTabs() {
   const { serviceName } = useApmServiceContext();
-  const history = useHistory();
+  const history = createBrowserHistory();
   const {
     query: { environment, kuery, rangeFrom, rangeTo, detailTab },
   } = useApmParams('/services/{serviceName}/infrastructure');

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Switch, Route, useRouteMatch } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { LiveQueriesPage } from './list';
 import { NewLiveQueryPage } from './new';
@@ -18,15 +18,15 @@ import { MissingPrivileges } from '../components';
 const LiveQueriesComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   useBreadcrumbs('live_queries');
-  const match = useRouteMatch();
+  const match = useLocation();
 
   if (!permissions.readLiveQueries) {
     return <MissingPrivileges />;
   }
 
   return (
-    <Switch>
-      <Route path={`${match.url}/new`}>
+    <Routes>
+      <Route path={`${match.pathname}/new`}>
         {(permissions.runSavedQueries && (permissions.readSavedQueries || permissions.readPacks)) ||
         permissions.writeLiveQueries ? (
           <NewLiveQueryPage />
@@ -34,13 +34,9 @@ const LiveQueriesComponent = () => {
           <MissingPrivileges />
         )}
       </Route>
-      <Route path={`${match.url}/:actionId`}>
-        <LiveQueryDetailsPage />
-      </Route>
-      <Route path={`${match.url}`}>
-        <LiveQueriesPage />
-      </Route>
-    </Switch>
+      <Route path={`${match.pathname}/:actionId`} element={<LiveQueryDetailsPage />} />
+      <Route path={`${match.pathname}`} element={<LiveQueriesPage />} />
+    </Routes>
   );
 };
 

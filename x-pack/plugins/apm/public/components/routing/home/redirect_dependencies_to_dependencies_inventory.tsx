@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useLocation, Redirect } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 import qs from 'query-string';
 import React from 'react';
 
@@ -15,13 +15,12 @@ export function RedirectDependenciesToDependenciesInventory({
   children: React.ReactElement;
 }) {
   const location = useLocation();
-
   const query = qs.parse(location.search);
 
   const normalizedPathname = location.pathname.replace(/\/$/, '');
   if (normalizedPathname === '/dependencies' && !('dependencyName' in query)) {
     return (
-      <Redirect
+      <Navigate
         to={qs.stringifyUrl({
           url: location.pathname + '/inventory',
           query,

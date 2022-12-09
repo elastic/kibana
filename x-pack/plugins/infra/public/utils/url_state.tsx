@@ -6,9 +6,9 @@
  */
 
 import { parse, stringify } from 'query-string';
-import { History, Location } from 'history';
-import React from 'react';
-import { Route, RouteProps } from 'react-router-dom';
+import { createBrowserHistory, History, Location } from 'history';
+import React, { useLayoutEffect, useState } from 'react';
+import { Route, Routes } from 'react-router-dom';
 import { decode, encode, RisonValue } from '@kbn/rison';
 import { url } from '@kbn/kibana-utils-plugin/public';
 import { throttle } from 'lodash';
@@ -122,13 +122,29 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
 
 export const UrlStateContainer = <UrlState extends any>(
   props: UrlStateContainerProps<UrlState>
-) => (
-  <Route<RouteProps>>
-    {({ history, location }) => (
-      <UrlStateContainerLifecycle<UrlState> history={history} location={location} {...props} />
-    )}
-  </Route>
-);
+) => {
+  const UrlStateComponent = () => {
+    const history = createBrowserHistory();
+    const [state, setState] = useState({
+      location: history.location,
+    });
+
+    useLayoutEffect(() => history.listen((location) => setState({ location })), [history]);
+
+    return (
+      <UrlStateContainerLifecycle<UrlState>
+        history={history}
+        location={state.location}
+        {...props}
+      />
+    );
+  };
+  return (
+    <Routes>
+      <Route element={<UrlStateComponent />} />
+    </Routes>
+  );
+};
 
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | undefined => {
   try {

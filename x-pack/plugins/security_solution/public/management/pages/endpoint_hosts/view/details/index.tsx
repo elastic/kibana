@@ -6,7 +6,7 @@
  */
 import React, { useCallback, memo } from 'react';
 import { EuiFlyout } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useEndpointSelector } from '../hooks';
 import { uiQueryParams } from '../../store/selectors';
 
@@ -14,7 +14,7 @@ import { getEndpointListPath } from '../../../../common/routing';
 import { EndpointDetails } from './endpoint_details';
 
 export const EndpointDetailsFlyout = memo(() => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const queryParams = useEndpointSelector(uiQueryParams);
   const { selected_endpoint: selectedEndpoint, ...queryParamsWithoutSelectedEndpoint } =
     queryParams;

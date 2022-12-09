@@ -8,7 +8,7 @@
 import { XYBrushEvent } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -48,7 +48,7 @@ export function TransactionDistribution({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const history = useHistory();
+  const history = createBrowserHistory();
   const waterfallFetchResult = useWaterfallFetcher({
     traceId,
     transactionId,

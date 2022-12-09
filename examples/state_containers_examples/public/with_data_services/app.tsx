@@ -78,43 +78,39 @@ export const App = ({
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
   return (
     <StateContainersExamplesPage navigateToApp={navigateToApp} exampleLinks={exampleLinks}>
-      <Router history={history}>
-        <>
-          <EuiPageBody>
-            <EuiPageHeader>
-              <EuiTitle size="l">
-                <h1>Integration with search bar</h1>
-              </EuiTitle>
-            </EuiPageHeader>
-            <EuiText>
-              <p>
-                This examples shows how you can use state containers, state syncing utils and
-                helpers from data plugin to sync your app state and search bar state with the URL.
-              </p>
-            </EuiText>
+      <Router navigator={history} location={history.location}>
+        <EuiPageBody>
+          <EuiPageHeader>
+            <EuiTitle size="l">
+              <h1>Integration with search bar</h1>
+            </EuiTitle>
+          </EuiPageHeader>
+          <EuiText>
+            <p>
+              This examples shows how you can use state containers, state syncing utils and helpers
+              from data plugin to sync your app state and search bar state with the URL.
+            </p>
+          </EuiText>
 
-            <navigation.ui.TopNavMenu
-              appName={'Example'}
-              showSearchBar={true}
-              indexPatterns={[dataView]}
-              useDefaultBehaviors={true}
-              showSaveQuery={true}
+          <navigation.ui.TopNavMenu
+            appName={'Example'}
+            showSearchBar={true}
+            indexPatterns={[dataView]}
+            useDefaultBehaviors={true}
+            showSaveQuery={true}
+          />
+          <EuiPageContent>
+            <EuiText>
+              <p>In addition to state from query bar also sync your arbitrary application state:</p>
+            </EuiText>
+            <EuiFieldText
+              placeholder="Additional example applications state: My name is..."
+              value={appState.name}
+              onChange={(e) => appStateContainer.set({ ...appState, name: e.target.value })}
+              aria-label="My name"
             />
-            <EuiPageContent>
-              <EuiText>
-                <p>
-                  In addition to state from query bar also sync your arbitrary application state:
-                </p>
-              </EuiText>
-              <EuiFieldText
-                placeholder="Additional example applications state: My name is..."
-                value={appState.name}
-                onChange={(e) => appStateContainer.set({ ...appState, name: e.target.value })}
-                aria-label="My name"
-              />
-            </EuiPageContent>
-          </EuiPageBody>
-        </>
+          </EuiPageContent>
+        </EuiPageBody>
       </Router>
     </StateContainersExamplesPage>
   );

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import {
   EuiPageContent_Deprecated as EuiPageContent,
@@ -28,7 +28,7 @@ interface PageProps {
 export const Page: React.FC<PageProps> = (props) => {
   const { title, crumb, isHome, children } = props;
 
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const breadcrumbs: Array<{
     text: string;

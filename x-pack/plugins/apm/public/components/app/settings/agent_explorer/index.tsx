@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import {
   SERVICE_LANGUAGE_NAME,
   SERVICE_NAME,
@@ -64,7 +64,7 @@ function useAgentExplorerFetcher({
 }
 
 export function AgentExplorer() {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const {
     query: { serviceName, agentLanguage },

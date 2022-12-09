@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorName } from './use_monitor_name';
@@ -23,7 +23,7 @@ import { AddMonitorLink } from '../../common/links/add_monitor';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 
 export const MonitorSearchableList = ({ closePopover }: { closePopover: () => void }) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const recentlyViewed = useRecentlyViewedMonitors();
 
   const [options, setOptions] = useState<EuiSelectableOption[]>([]);

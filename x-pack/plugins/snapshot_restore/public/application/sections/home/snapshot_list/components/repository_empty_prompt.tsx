@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -17,7 +17,7 @@ import { reactRouterNavigate } from '../../../../../shared_imports';
 import { linkToAddRepository } from '../../../../services/navigation';
 
 export const RepositoryEmptyPrompt: React.FunctionComponent = () => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   return (
     <EuiPageContent
       hasShadow={false}

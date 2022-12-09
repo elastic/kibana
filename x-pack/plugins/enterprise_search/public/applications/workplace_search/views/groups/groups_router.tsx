@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
@@ -26,13 +26,9 @@ export const GroupsRouter: React.FC = () => {
   }, []);
 
   return (
-    <Switch>
-      <Route exact path={GROUPS_PATH}>
-        <Groups />
-      </Route>
-      <Route path={GROUP_PATH}>
-        <GroupRouter />
-      </Route>
-    </Switch>
+    <Routes>
+      <Route path={GROUPS_PATH} element={<Groups />} />
+      <Route path={GROUP_PATH} element={<GroupRouter />} />
+    </Routes>
   );
 };

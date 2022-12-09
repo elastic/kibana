@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Switch } from 'react-router-dom';
+import { Routes } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import React, { memo } from 'react';
 import { MANAGEMENT_ROUTING_BLOCKLIST_PATH } from '../../common/constants';
@@ -20,10 +20,10 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 export const BlocklistContainer = memo(() => {
   return (
     <>
-      <Switch>
-        <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} exact component={Blocklist} />
+      <Routes>
+        <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} component={Blocklist} />
         <Route path="*" component={NotFoundPage} />
-      </Switch>
+      </Routes>
       <SpyRoute pageName={SecurityPageName.blocklist} />
     </>
   );

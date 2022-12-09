@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
@@ -47,7 +47,7 @@ import { EngineLogic, generateEnginePath } from '.';
 import './engine_nav.scss';
 
 export const useEngineNav = () => {
-  const isEngineRoute = !!useRouteMatch(ENGINE_PATH);
+  const isEngineRoute = !!useMatch(ENGINE_PATH);
   const {
     myRole: {
       canViewEngineAnalytics,

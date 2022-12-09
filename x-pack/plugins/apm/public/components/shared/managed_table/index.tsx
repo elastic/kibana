@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import React, { ReactNode, useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
 
@@ -60,7 +60,7 @@ export type SortFunction<T> = (
 ) => T[];
 
 function UnoptimizedManagedTable<T>(props: Props<T>) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const {
     items,
     columns,

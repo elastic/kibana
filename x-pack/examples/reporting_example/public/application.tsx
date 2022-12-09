@@ -7,7 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, Switch } from 'react-router-dom';
+import { Router, Route, Routes } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { CaptureTest } from './containers/capture_test';
@@ -16,23 +16,45 @@ import { ApplicationContextProvider } from './application_context';
 import { SetupDeps, StartDeps, MyForwardableState } from './types';
 import { ROUTES } from './constants';
 
+const App = ({
+  coreStart,
+  forwardedParams,
+  mountParams,
+  deps,
+}: {
+  coreStart: CoreStart;
+  forwardedParams: MyForwardableState;
+  mountParams: AppMountParameters;
+  deps: Omit<StartDeps & SetupDeps, 'developerExamples'>;
+}) => {
+  return (
+    <ApplicationContextProvider forwardedState={forwardedParams}>
+      <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+        <Router navigator={mountParams.history} location={mountParams.history.location}>
+          <Routes>
+            <Route path={ROUTES.captureTest} element={<CaptureTest />} />
+            <Route element={<Main basename={mountParams.appBasePath} {...coreStart} {...deps} />} />
+          </Routes>
+        </Router>
+      </KibanaThemeProvider>
+    </ApplicationContextProvider>
+  );
+};
+
 export const renderApp = (
   coreStart: CoreStart,
   deps: Omit<StartDeps & SetupDeps, 'developerExamples'>,
-  { appBasePath, element, history }: AppMountParameters, // FIXME: appBasePath is deprecated
+  mountParams: AppMountParameters, // FIXME: appBasePath is deprecated
   forwardedParams: MyForwardableState
 ) => {
+  const { element } = mountParams;
   ReactDOM.render(
-    <ApplicationContextProvider forwardedState={forwardedParams}>
-      <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-        <Router history={history}>
-          <Switch>
-            <Route path={ROUTES.captureTest} exact render={() => <CaptureTest />} />
-            <Route render={() => <Main basename={appBasePath} {...coreStart} {...deps} />} />
-          </Switch>
-        </Router>
-      </KibanaThemeProvider>
-    </ApplicationContextProvider>,
+    <App
+      coreStart={coreStart}
+      deps={deps}
+      mountParams={mountParams}
+      forwardedParams={forwardedParams}
+    />,
     element
   );
 

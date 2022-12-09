@@ -21,9 +21,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { createBrowserHistory } from 'history';
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -52,7 +52,7 @@ export type EditUserPageAction =
 
 export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username }) => {
   const { services } = useKibana();
-  const history = useHistory();
+  const history = createBrowserHistory();
   const [{ value: user, error }, getUser] = useAsyncFn(
     () => new UserAPIClient(services.http!).getUser(username),
     [services.http]

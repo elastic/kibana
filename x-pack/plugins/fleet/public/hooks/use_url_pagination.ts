@@ -6,7 +6,9 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+
+import { createBrowserHistory } from 'history';
 
 import { useUrlParams } from './use_url_params';
 import { PAGE_SIZE_OPTIONS, usePagination } from './use_pagination';
@@ -25,8 +27,8 @@ type UrlPaginationParams = Partial<Pagination>;
  * Uses URL params for pagination and also persists those to the URL as they are updated
  */
 export const useUrlPagination = (): UrlPagination => {
+  const history = createBrowserHistory();
   const location = useLocation();
-  const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
   const urlPaginationParams = useMemo(() => {
     return paginationFromUrlParams(urlParams);

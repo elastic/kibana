@@ -7,7 +7,7 @@
 import React, { useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 import {
   EuiPage,
   EuiPageBody,
@@ -31,7 +31,7 @@ import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
-  const match = useRouteMatch<{ uuid: string | undefined }>();
+  const match = useMatch<{ uuid: string | undefined }>();
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();

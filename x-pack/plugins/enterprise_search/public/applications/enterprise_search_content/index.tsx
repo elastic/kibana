@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Route, Redirect, Switch } from 'react-router-dom';
+import { Route, Navigate, Routes } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
@@ -24,10 +24,10 @@ import { SearchIndicesRouter } from './components/search_indices';
 import { Settings } from './components/settings';
 import {
   SETUP_GUIDE_PATH,
-  ROOT_PATH,
   SEARCH_INDICES_PATH,
   SETTINGS_PATH,
   ENGINES_PATH,
+  ROOT_PATH,
 } from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
@@ -54,39 +54,27 @@ export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   };
 
   return (
-    <Switch>
-      <Route exact path={SETUP_GUIDE_PATH}>
-        <SetupGuide />
-      </Route>
-      <Route>{showView()}</Route>
-    </Switch>
+    <Routes>
+      <Route path={SETUP_GUIDE_PATH} element={<SetupGuide />} />
+      <Route element={showView()} />
+    </Routes>
   );
 };
 
 export const EnterpriseSearchContentUnconfigured: React.FC = () => (
-  <Switch>
-    <Route>
-      <Redirect to={SETUP_GUIDE_PATH} />
-    </Route>
-  </Switch>
+  <Routes>
+    <Route element={<Navigate to={SETUP_GUIDE_PATH} />} />
+  </Routes>
 );
 
 export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData>> = () => {
   return (
-    <Switch>
-      <Redirect exact from={ROOT_PATH} to={SEARCH_INDICES_PATH} />
-      <Route path={SEARCH_INDICES_PATH}>
-        <SearchIndicesRouter />
-      </Route>
-      <Route path={SETTINGS_PATH}>
-        <Settings />
-      </Route>
-      <Route path={ENGINES_PATH}>
-        <EnginesRouter />
-      </Route>
-      <Route>
-        <NotFound />
-      </Route>
-    </Switch>
+    <Routes>
+      <Route path={ROOT_PATH} element={<Navigate to={SEARCH_INDICES_PATH} />} />
+      <Route path={SEARCH_INDICES_PATH} element={<SearchIndicesRouter />} />
+      <Route path={SETTINGS_PATH} element={<Settings />} />
+      <Route path={ENGINES_PATH} element={<EnginesRouter />} />
+      <Route element={<NotFound />} />
+    </Routes>
   );
 };

@@ -6,12 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
-import { useLocation, useHistory, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
+
+import { createBrowserHistory } from 'history';
 
 import { pagePathGetters } from '../../../../constants';
 import { useBreadcrumbs, useLink, useStartServices, useFleetStatus } from '../../../../hooks';
@@ -133,7 +135,7 @@ export const InstalledPackages: React.FC<{
   const { http } = useStartServices();
   const addBasePath = http.basePath.prepend;
 
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   function setUrlCategory(categoryId: string) {
     const url = pagePathGetters.integrations_installed({

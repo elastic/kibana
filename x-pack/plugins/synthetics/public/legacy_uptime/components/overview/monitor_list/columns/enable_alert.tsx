@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiLoadingSpinner, EuiToolTip, EuiSwitch } from '@elastic/eui';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectDynamicSettings } from '../../../../state/selectors';
 import {
@@ -33,7 +33,7 @@ export const EnableMonitorAlert = ({ monitorId, selectedMonitor }: Props) => {
 
   const { settings } = useSelector(selectDynamicSettings);
 
-  const isMonitorPage = useRouteMatch(MONITOR_ROUTE);
+  const isMonitorPage = useMatch(MONITOR_ROUTE);
 
   const dispatch = useDispatch();
 

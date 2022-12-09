@@ -6,7 +6,7 @@
  */
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { includes } from 'lodash';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,7 +36,7 @@ export function formatMonitoringError(err: IHttpFetchError<ResponseErrorBody>) {
 
 export const useRequestErrorHandler = () => {
   const { services } = useKibana<MonitoringStartPluginDependencies>();
-  const history = useHistory();
+  const history = createBrowserHistory();
   return useCallback(
     (err: IHttpFetchError<ResponseErrorBody>) => {
       if (err.response?.status === 403) {

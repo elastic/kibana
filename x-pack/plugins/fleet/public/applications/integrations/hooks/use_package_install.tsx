@@ -7,7 +7,7 @@
 
 import createContainer from 'constate';
 import React, { useCallback, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
@@ -46,7 +46,7 @@ function usePackageInstall({
   notifications: NotificationsStart;
   theme$: Observable<CoreTheme>;
 }) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { getPath } = useLink();
   const [packages, setPackage] = useState<PackagesInstall>({});
   const confirmForceInstall = useConfirmForceInstall();

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { ToastsApi } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
 import { RuleType, ActionType, ResolvedRule } from '../../../../types';
@@ -24,20 +24,15 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
-type RuleDetailsRouteProps = RouteComponentProps<{
-  ruleId: string;
-}> &
-  Pick<ActionApis, 'loadActionTypes'> &
+type RuleDetailsRouteProps = Pick<ActionApis, 'loadActionTypes'> &
   Pick<RuleApis, 'loadRuleTypes' | 'resolveRule'>;
 
 export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = ({
-  match: {
-    params: { ruleId },
-  },
   loadRuleTypes,
   loadActionTypes,
   resolveRule,
 }) => {
+  const { ruleId, alertId = '' } = useParams<{ ruleId: string; alertId: string }>();
   const {
     http,
     notifications: { toasts },
@@ -50,9 +45,11 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
   const [ruleType, setRuleType] = useState<RuleType | null>(null);
   const [actionTypes, setActionTypes] = useState<ActionType[] | null>(null);
   const [refreshToken, requestRefresh] = React.useState<number>();
+
+  const id = ruleId ?? alertId;
   useEffect(() => {
     getRuleData(
-      ruleId,
+      id,
       loadRuleTypes,
       resolveRule,
       loadActionTypes,
@@ -61,7 +58,7 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
       setActionTypes,
       toasts
     );
-  }, [ruleId, http, loadActionTypes, loadRuleTypes, resolveRule, toasts, refreshToken]);
+  }, [id, http, loadActionTypes, loadRuleTypes, resolveRule, toasts, refreshToken]);
 
   useEffect(() => {
     if (rule) {

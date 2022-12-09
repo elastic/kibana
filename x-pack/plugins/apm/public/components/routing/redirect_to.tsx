@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { Location } from 'history';
-import { Redirect, useLocation, RouteComponentProps } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 /**
  * Function that returns a react component to redirect to a given pathname removing hash-based URLs
  * @param pathname
  */
 export function redirectTo(pathname: string) {
-  return ({ location }: RouteComponentProps<{}>) => {
-    return <RenderRedirectTo location={location} pathname={pathname} />;
+  return () => {
+    return <RedirectTo pathname={pathname} />;
   };
 }
 
@@ -51,5 +51,5 @@ export function RenderRedirectTo(props: Props) {
     pathname = resolvedUrl.pathname;
   }
 
-  return <Redirect to={{ ...location, hash: '', pathname, search }} />;
+  return <Navigate to={{ ...location, hash: '', pathname, search }} />;
 }

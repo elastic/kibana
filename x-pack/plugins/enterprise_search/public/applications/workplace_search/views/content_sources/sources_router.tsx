@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
@@ -66,49 +66,42 @@ export const SourcesRouter: React.FC = () => {
   }
 
   return (
-    <Switch>
-      <Route exact path={PRIVATE_SOURCES_PATH}>
-        <PrivateSources />
-      </Route>
-      <Route exact path={SOURCES_PATH}>
-        <OrganizationSources />
-      </Route>
-      <Route exact path={getAddPath(GITHUB_VIA_APP_SERVICE_TYPE)}>
-        <GitHubViaApp isGithubEnterpriseServer={false} />
-      </Route>
-      <Route exact path={getAddPath(GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE)}>
-        <GitHubViaApp isGithubEnterpriseServer />
-      </Route>
+    <Routes>
+      <Route path={PRIVATE_SOURCES_PATH} element={<PrivateSources />} />
+      <Route path={SOURCES_PATH} element={<OrganizationSources />} />
       <Route
-        exact
+        path={getAddPath(GITHUB_VIA_APP_SERVICE_TYPE)}
+        element={<GitHubViaApp isGithubEnterpriseServer={false} />}
+      />
+      <Route
+        path={getAddPath(GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE)}
+        element={<GitHubViaApp isGithubEnterpriseServer />}
+      />
+      <Route
         path={`${getSourcesPath(getAddPath('external'), isOrganization)}/intro`}
         data-test-subj="ConnectorBYOIntroRoute"
       >
         <AddSourceBYOIntro />
       </Route>
       <Route
-        exact
         path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/intro`}
         data-test-subj="ConnectorIntroRoute"
       >
         <AddSourceIntro />
       </Route>
       <Route
-        exact
         path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/choice`}
         data-test-subj="ConnectorChoiceRoute"
       >
         <AddSourceChoice />
       </Route>
       <Route
-        exact
         path={`${getSourcesPath(getAddPath('external'), isOrganization)}/connector_registration`}
         data-test-subj="ExternalConnectorConfigRoute"
       >
         <ExternalConnectorConfig />
       </Route>
       <Route
-        exact
         path={`${getSourcesPath(
           getAddPath('external', ':baseServiceType'),
           isOrganization
@@ -118,39 +111,33 @@ export const SourcesRouter: React.FC = () => {
         <ExternalConnectorConfig />
       </Route>
       <Route
-        exact
         path={`${getSourcesPath(getAddPath('custom'), isOrganization)}/`}
         data-test-subj="AddCustomSourceRoute"
       >
         <AddCustomSource />
       </Route>
       <Route
-        exact
         path={`${getSourcesPath(getAddPath('custom', ':baseServiceType'), isOrganization)}/`}
         data-test-subj="AddCustomSourceRoute"
       >
         <AddCustomSource />
       </Route>
       <Route
-        exact
         path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/:initialStep?`}
         data-test-subj="AddSourceRoute"
       >
         <AddSource />
       </Route>
       {canCreatePrivateSources ? (
-        <Route exact path={getSourcesPath(ADD_SOURCE_PATH, false)}>
-          <AddSourceList />
-        </Route>
+        <Route path={getSourcesPath(ADD_SOURCE_PATH, false)} element={<AddSourceList />} />
       ) : (
-        <Redirect exact from={getSourcesPath(ADD_SOURCE_PATH, false)} to={PRIVATE_SOURCES_PATH} />
+        <Route element={<Navigate to={PRIVATE_SOURCES_PATH} />} />
       )}
-      <Route exact path={getSourcesPath(ADD_SOURCE_PATH, true)}>
-        <AddSourceList />
-      </Route>
-      <Route path={getSourcesPath(SOURCE_DETAILS_PATH, isOrganization)}>
-        <SourceRouter />
-      </Route>
-    </Switch>
+      <Route path={getSourcesPath(ADD_SOURCE_PATH, true)} element={<AddSourceList />} />
+      <Route
+        path={getSourcesPath(SOURCE_DETAILS_PATH, isOrganization)}
+        element={<SourceRouter />}
+      />
+    </Routes>
   );
 };

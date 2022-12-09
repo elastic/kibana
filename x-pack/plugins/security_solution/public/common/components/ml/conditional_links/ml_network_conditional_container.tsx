@@ -8,7 +8,7 @@
 import { parse, stringify } from 'query-string';
 import React from 'react';
 
-import { Redirect, Switch, useRouteMatch } from 'react-router-dom';
+import { Navigate, Routes, useParams } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { url as urlUtils } from '@kbn/kibana-utils-plugin/public';
 import { addEntitiesToKql } from './add_entities_to_kql';
@@ -23,12 +23,10 @@ interface QueryStringType {
 }
 
 export const MlNetworkConditionalContainer = React.memo(() => {
-  const { path } = useRouteMatch();
+  const { pathname: path } = useParams();
   return (
-    <Switch>
+    <Routes>
       <Route
-        strict
-        exact
         path={path}
         render={({ location }) => {
           const queryStringDecoded = parse(location.search.substring(1), {
@@ -44,7 +42,7 @@ export const MlNetworkConditionalContainer = React.memo(() => {
             encode: false,
           });
 
-          return <Redirect to={`${NETWORK_PATH}?${reEncoded}`} />;
+          return <Navigate to={`${NETWORK_PATH}?${reEncoded}`} />;
         }}
       />
       <Route
@@ -69,7 +67,7 @@ export const MlNetworkConditionalContainer = React.memo(() => {
               encode: false,
             });
 
-            return <Redirect to={`${NETWORK_PATH}?${reEncoded}`} />;
+            return <Navigate to={`${NETWORK_PATH}?${reEncoded}`} />;
           } else if (multipleEntities(ip)) {
             const ips: string[] = getMultipleEntities(ip);
             queryStringDecoded.query = addEntitiesToKql(
@@ -81,21 +79,20 @@ export const MlNetworkConditionalContainer = React.memo(() => {
               sort: false,
               encode: false,
             });
-            return <Redirect to={`${NETWORK_PATH}?${reEncoded}`} />;
+            return <Navigate to={`${NETWORK_PATH}?${reEncoded}`} />;
           } else {
             const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
               sort: false,
               encode: false,
             });
-            return <Redirect to={`${NETWORK_PATH}/ip/${ip}?${reEncoded}`} />;
+            return <Navigate to={`${NETWORK_PATH}/ip/${ip}?${reEncoded}`} />;
           }
         }}
       />
       <Route
         path={`${NETWORK_PATH}/ml-network/`}
         render={({ location: { search = '' } }) => (
-          <Redirect
-            from={`${NETWORK_PATH}/ml-network/`}
+          <Navigate
             to={{
               pathname: `${NETWORK_PATH}/ml-network`,
               search,
@@ -103,7 +100,7 @@ export const MlNetworkConditionalContainer = React.memo(() => {
           />
         )}
       />
-    </Switch>
+    </Routes>
   );
 });
 

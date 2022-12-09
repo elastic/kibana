@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { Router, Switch, Route, useHistory } from 'react-router-dom';
+import { Router, Routes, Route } from 'react-router-dom';
+
+import { createBrowserHistory } from 'history';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
 import { useBreadcrumbs } from '../../hooks';
@@ -20,26 +22,24 @@ import { UpgradePackagePolicyPage } from './upgrade_package_policy_page';
 
 export const AgentPolicyApp: React.FunctionComponent = () => {
   useBreadcrumbs('policies');
-  const history = useHistory();
+
+  const history = createBrowserHistory();
 
   return (
-    <Router history={history}>
-      <Switch>
-        <Route path={FLEET_ROUTING_PATHS.edit_integration}>
-          <EditPackagePolicyPage />
-        </Route>
-        <Route path={FLEET_ROUTING_PATHS.upgrade_package_policy}>
-          <UpgradePackagePolicyPage />
-        </Route>
-        <Route path={FLEET_ROUTING_PATHS.policy_details}>
-          <AgentPolicyDetailsPage />
-        </Route>
+    <Router navigator={history} location={history.location}>
+      <Routes>
+        <Route path={FLEET_ROUTING_PATHS.edit_integration} element={<EditPackagePolicyPage />} />
+        <Route
+          path={FLEET_ROUTING_PATHS.upgrade_package_policy}
+          element={<UpgradePackagePolicyPage />}
+        />
+        <Route path={FLEET_ROUTING_PATHS.policy_details} element={<AgentPolicyDetailsPage />} />
         <Route path={FLEET_ROUTING_PATHS.policies_list}>
           <DefaultLayout section="agent_policies">
             <AgentPolicyListPage />
           </DefaultLayout>
         </Route>
-      </Switch>
+      </Routes>
     </Router>
   );
 };

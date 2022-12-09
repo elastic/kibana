@@ -6,7 +6,7 @@
  */
 
 import { PathsOf, TypeOf, TypeAsArgs } from '@kbn/typed-react-router-config';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingRouter, profilingRouter, ProfilingRoutes } from '../routing';
 
@@ -22,7 +22,7 @@ export interface StatefulProfilingRouter extends ProfilingRouter {
 }
 
 export function useProfilingRouter(): StatefulProfilingRouter {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const {
     start: { core },

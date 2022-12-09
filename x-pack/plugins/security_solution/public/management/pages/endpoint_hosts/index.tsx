@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Switch } from 'react-router-dom';
+import { Routes } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import React, { memo } from 'react';
 import { EndpointList } from './view';
@@ -17,10 +17,10 @@ import { NotFoundPage } from '../../../app/404';
  */
 export const EndpointsContainer = memo(() => {
   return (
-    <Switch>
-      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} exact component={EndpointList} />
+    <Routes>
+      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointList} />
       <Route path="*" component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 });
 

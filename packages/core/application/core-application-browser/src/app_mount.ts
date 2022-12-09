@@ -72,7 +72,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * export renderApp = ({ element, history }: AppMountParameters) => {
    *   ReactDOM.render(
    *     <Router history={history}>
-   *       <Route path="/" exact component={HomePage} />
+   *       <Route path="/"  component={HomePage} />
    *     </Router>,
    *     element
    *   );
@@ -123,7 +123,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    *   ReactDOM.render(
    *     // pass `appBasePath` to `basename`
    *     <BrowserRouter basename={appBasePath}>
-   *       <Route path="/" exact component={HomePage} />
+   *       <Route path="/"  component={HomePage} />
    *     </BrowserRouter>,
    *     element
    *   );

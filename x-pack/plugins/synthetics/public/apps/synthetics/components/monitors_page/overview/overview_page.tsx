@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { Redirect, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useEnablement, useGetUrlParams } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
@@ -83,7 +83,7 @@ export const OverviewPage: React.FC = () => {
     !monitorsLoading &&
     syntheticsMonitors.length === 0
   ) {
-    return <Redirect to={GETTING_STARTED_ROUTE} />;
+    return <Navigate to={GETTING_STARTED_ROUTE} />;
   }
 
   if (
@@ -93,7 +93,7 @@ export const OverviewPage: React.FC = () => {
     monitorsLoaded &&
     syntheticsMonitors.length === 0
   ) {
-    return <Redirect to={MONITORS_ROUTE} />;
+    return <Navigate to={MONITORS_ROUTE} />;
   }
 
   return (

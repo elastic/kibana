@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { useBreadcrumbs } from '../../hooks';
@@ -18,7 +18,7 @@ import { SimpleMonitorForm } from './simple_monitor_form';
 
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   useEffect(() => {
     dispatch(getServiceLocations());

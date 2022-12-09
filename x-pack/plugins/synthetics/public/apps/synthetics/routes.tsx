@@ -8,7 +8,7 @@
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
 import { EuiIcon, EuiLink, EuiPageHeaderProps, useEuiTheme } from '@elastic/eui';
-import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import { Route, Routes, useMatch } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +16,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { createBrowserHistory } from 'history';
 import { getSettingsRouteConfig } from './components/settings/route_config';
 import { TestRunDetails } from './components/test_run_details/test_run_details';
 import { ErrorDetailsPage } from './components/error_details/error_details_page';
@@ -79,7 +80,7 @@ export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
 
 const getRoutes = (
   euiTheme: EuiThemeComputed,
-  history: ReturnType<typeof useHistory>,
+  history: ReturnType<typeof createBrowserHistory>,
   syntheticsPath: string
 ): RouteProps[] => {
   return [
@@ -319,12 +320,12 @@ const getRoutes = (
 };
 
 const getMonitorSummaryHeader = (
-  history: ReturnType<typeof useHistory>,
+  history: ReturnType<typeof createBrowserHistory>,
   syntheticsPath: string,
   selectedTab: 'overview' | 'history' | 'errors'
 ): EuiPageHeaderProps => {
   // Not a component, but it doesn't matter. Hooks are just functions
-  const match = useRouteMatch<{ monitorId: string }>(MONITOR_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
+  const match = useMatch<{ monitorId: string }>(MONITOR_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
 
   if (!match) {
     return {};
@@ -395,7 +396,7 @@ export const PageRouter: FC = () => {
   const { services } = useKibana();
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();
-  const history = useHistory();
+  const history = createBrowserHistory();
   const routes = getRoutes(
     euiTheme,
     history,
@@ -405,7 +406,7 @@ export const PageRouter: FC = () => {
   apiService.addInspectorRequest = addInspectorRequest;
 
   return (
-    <Switch>
+    <Routes>
       {routes.map(
         ({
           title,
@@ -415,7 +416,7 @@ export const PageRouter: FC = () => {
           pageHeader,
           ...pageTemplateProps
         }: RouteProps) => (
-          <Route path={path} key={dataTestSubj} exact={true}>
+          <Route path={path} key={dataTestSubj}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
               <SyntheticsPageTemplateComponent
@@ -430,6 +431,6 @@ export const PageRouter: FC = () => {
         )
       )}
       <Route component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 };

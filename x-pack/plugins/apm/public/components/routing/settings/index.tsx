@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { agentConfigurationPageStepRt } from '../../../../common/agent_configuration/constants';
 import { environmentRt } from '../../../../common/environment_rt';
 import { Breadcrumb } from '../../app/breadcrumb';
@@ -166,7 +166,7 @@ export const settings = {
         }),
       },
       '/settings': {
-        element: <Redirect to="/settings/general-settings" />,
+        element: <Navigate to="/settings/general-settings" />,
       },
     },
   },

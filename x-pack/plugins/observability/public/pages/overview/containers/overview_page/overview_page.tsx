@@ -5,16 +5,25 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import React, { useMemo, useRef, useCallback, useState } from 'react';
+import React, { useMemo, useRef, useCallback, useState, Suspense } from 'react';
 
+import { Await, useLoaderData } from 'react-router-dom';
+import { NewsFeed } from '../../../../components/app/news_feed';
+import { NewsFeed as NewsFeedType } from '../../../../services/get_news_feed';
 import { calculateBucketSize } from './helpers';
 import { buildEsQuery } from '../../../../utils/build_es_query';
-import { getNewsFeed } from '../../../../services/get_news_feed';
+// import { getNewsFeed } from '../../../../services/get_news_feed';
 
 import {
   DataSections,
@@ -25,13 +34,11 @@ import {
 import { EmptySections } from '../../../../components/app/empty_sections';
 import { ObservabilityHeaderMenu } from '../../../../components/app/header';
 import { Resources } from '../../../../components/app/resources';
-import { NewsFeed } from '../../../../components/app/news_feed';
 import { SectionContainer } from '../../../../components/app/section';
 import { ObservabilityStatusProgress } from '../../../../components/app/observability_status/observability_status_progress';
 
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
-import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { useGuidedSetupProgress } from '../../../../hooks/use_guided_setup_progress';
 import { useHasData } from '../../../../hooks/use_has_data';
@@ -49,7 +56,6 @@ export function OverviewPage() {
     cases: {
       ui: { getCasesContext },
     },
-    http,
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
   } = useKibana<ObservabilityAppServices>().services;
 
@@ -63,7 +69,7 @@ export function OverviewPage() {
     },
   ]);
 
-  const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
+  const newsFeed = (useLoaderData() as any).newsFeed;
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const refetch = useRef<() => void>();
 
@@ -198,7 +204,13 @@ export function OverviewPage() {
           {/* Resources / What's New sections */}
           <EuiFlexGroup>
             <EuiFlexItem grow={4}>
-              {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <Await resolve={newsFeed}>
+                  {({ items }: NewsFeedType) =>
+                    items?.length && <NewsFeed items={items.slice(0, 3)} />
+                  }
+                </Await>
+              </Suspense>
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <Resources />

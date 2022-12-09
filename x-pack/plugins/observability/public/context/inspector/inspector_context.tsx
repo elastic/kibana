@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, ReactNode, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { FetcherResult } from '../../hooks/use_fetcher';
 import { InspectResponse } from '../../../typings/common';
@@ -31,7 +31,7 @@ export type AddInspectorRequest = (
 ) => void;
 
 export function InspectorContextProvider({ children }: { children: ReactNode }) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { inspectorAdapters } = value;
 
   function addInspectorRequest(

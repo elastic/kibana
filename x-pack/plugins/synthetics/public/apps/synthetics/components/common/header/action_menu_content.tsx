@@ -9,9 +9,10 @@ import React from 'react';
 import { EuiHeaderLinks, EuiToolTip, EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { createBrowserHistory } from 'history';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../../common/constants';
@@ -36,13 +37,13 @@ export function ActionMenuContent(): React.ReactElement {
   const { basePath } = useSyntheticsSettingsContext();
   const params = useGetUrlParams();
   const { dateRangeStart, dateRangeEnd } = params;
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const selectedMonitor = {
     monitor: { id: undefined, name: 'test' },
   }; /* useSelector(monitorStatusSelector) TODO: Implement state for monitor status */
 
-  const detailRouteMatch = useRouteMatch(MONITOR_ROUTE);
+  const detailRouteMatch = useMatch(MONITOR_ROUTE);
   const monitorId = selectedMonitor?.monitor?.id;
 
   const syntheticExploratoryViewLink = createExploratoryViewUrl(

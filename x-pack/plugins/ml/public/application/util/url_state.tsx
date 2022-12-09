@@ -17,7 +17,7 @@ import React, {
 } from 'react';
 import { isEqual } from 'lodash';
 import { decode, encode } from '@kbn/rison';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
@@ -89,7 +89,7 @@ export const urlStateStore = createContext<UrlState>({
 const { Provider } = urlStateStore;
 
 export const UrlStateProvider: FC = ({ children }) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { search: searchString } = useLocation();
 
   const setUrlState: SetUrlState = useCallback(

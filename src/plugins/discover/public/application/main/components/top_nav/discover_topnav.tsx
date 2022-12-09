@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewListItem, DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
@@ -63,7 +63,7 @@ export const DiscoverTopNav = ({
   savedDataViewList,
   updateDataViewList,
 }: DiscoverTopNavProps) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,

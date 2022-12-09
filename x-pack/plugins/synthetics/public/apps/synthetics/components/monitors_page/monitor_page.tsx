@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 
@@ -49,7 +49,7 @@ const MonitorPage: React.FC = () => {
   const showEmptyState = isEnabled !== undefined && syntheticsMonitors.length === 0;
 
   if (isEnabled && !monitorsLoading && absoluteTotal === 0 && isDataQueried) {
-    return <Redirect to={GETTING_STARTED_ROUTE} />;
+    return <Navigate to={GETTING_STARTED_ROUTE} />;
   }
 
   return (

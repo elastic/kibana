@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Timeline } from '../../../../../shared/charts/timeline';
 import { fromQuery, toQuery } from '../../../../../shared/links/url_helpers';
@@ -60,7 +60,7 @@ export function Waterfall({
   waterfallItemId,
   showCriticalPath,
 }: Props) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
   const waterfallHeight = itemContainerHeight * waterfall.items.length;

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { EuiCard, EuiStat, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -54,7 +54,7 @@ export const DeprecationIssuesPanel = (props: Props) => {
     errorMessage,
     setIsFixed,
   } = props;
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const hasError = !!errorMessage;
   const hasCriticalIssues = criticalDeprecationsCount > 0;

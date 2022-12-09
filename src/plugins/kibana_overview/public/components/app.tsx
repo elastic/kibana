@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { CoreStart } from '@kbn/core/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { FetchResult } from '@kbn/newsfeed-plugin/public';
@@ -47,11 +47,9 @@ export const KibanaOverviewApp = ({
   return (
     <Router basename={basename}>
       <I18nProvider>
-        <Switch>
-          <Route exact path="/">
-            <Overview {...{ newsFetchResult, solutions, features }} />
-          </Route>
-        </Switch>
+        <Routes>
+          <Route path="/" element={<Overview {...{ newsFetchResult, solutions, features }} />} />
+        </Routes>
       </I18nProvider>
     </Router>
   );

@@ -127,7 +127,10 @@ const Application = (props: UptimeAppProps) => {
                 cases: startPlugins.cases,
               }}
             >
-              <Router history={appMountParameters.history}>
+              <Router
+                navigator={appMountParameters.history}
+                location={appMountParameters.history.location}
+              >
                 <EuiThemeProvider darkMode={darkMode}>
                   <UptimeRefreshContextProvider>
                     <UptimeSettingsContextProvider {...props}>

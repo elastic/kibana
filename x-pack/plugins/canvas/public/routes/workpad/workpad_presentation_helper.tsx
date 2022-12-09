@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { FC, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { getBaseBreadcrumb, getWorkpadBreadcrumb } from '../../lib/breadcrumbs';
 import { getUntitledWorkpadLabel, setDocTitle } from '../../lib/doc_title';
 import { getWorkpad } from '../../state/selectors/workpad';
@@ -27,7 +27,7 @@ export const WorkpadPresentationHelper: FC = ({ children }) => {
   useFullscreenPresentationHelper();
   useAutoplayHelper();
   useRefreshHelper();
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   useEffect(() => {
     platformService.setBreadcrumbs([

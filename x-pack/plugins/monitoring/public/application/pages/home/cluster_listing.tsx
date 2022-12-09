@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Listing } from '../../../components/cluster/listing';
@@ -89,7 +89,7 @@ export const ClusterListing: React.FC<ComponentProps> = () => {
 
   return (
     <PageTemplate tabs={tabs} title={pageTitle} pageTitle={pageTitle} getPageData={getPageData}>
-      {clusters.length === 1 && <Redirect to={{ pathname: '/overview' }} />}
+      {clusters.length === 1 && <Navigate to={{ pathname: 'overview' }} />}
       <Listing
         clusters={clusters}
         angular={{

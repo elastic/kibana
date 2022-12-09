@@ -10,7 +10,8 @@ import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
   getPolicyDetailPath,
@@ -68,7 +69,7 @@ interface PolicyTab {
 }
 
 export const PolicyTabs = React.memo(() => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const http = useHttp();
   const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyFormView);
   const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsView);

@@ -6,7 +6,7 @@
  */
 
 import type React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { FieldIcon } from '@kbn/react-field';
 import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import {
@@ -35,7 +35,7 @@ const useRouterNavigate = (
   to: Parameters<typeof reactRouterNavigate>[1],
   onClickCallback?: Parameters<typeof reactRouterNavigate>[2]
 ) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   return reactRouterNavigate(history, to, onClickCallback);
 };

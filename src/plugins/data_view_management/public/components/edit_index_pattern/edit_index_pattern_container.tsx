@@ -10,20 +10,21 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { EditIndexPattern } from '.';
 import { IndexPatternManagmentContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
-const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...props }) => {
+const EditIndexPatternCont = ({ ...props }) => {
   const { dataViews, setBreadcrumbs, notifications } =
     useKibana<IndexPatternManagmentContext>().services;
   const [error, setError] = useState<Error | undefined>();
   const [indexPattern, setIndexPattern] = useState<DataView>();
+  const { id = '' } = useParams<{ id: string }>();
 
   useEffect(() => {
     dataViews
-      .get(props.match.params.id)
+      .get(id)
       .then((ip: DataView) => {
         setIndexPattern(ip);
         setBreadcrumbs(getEditBreadcrumbs(ip));
@@ -31,7 +32,7 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
       .catch((err) => {
         setError(err);
       });
-  }, [dataViews, props.match.params.id, setBreadcrumbs, setError]);
+  }, [dataViews, id, setBreadcrumbs, setError]);
 
   if (error) {
     const [errorTitle, errorMessage] = [
@@ -55,4 +56,4 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
   return indexPattern != null ? <EditIndexPattern indexPattern={indexPattern} /> : null;
 };
 
-export const EditIndexPatternContainer = withRouter(EditIndexPatternCont);
+export const EditIndexPatternContainer = EditIndexPatternCont;

@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { MAPPING_ERROR_ROUTE } from '../../../common/constants';
 
 interface EsBadRequestError {
@@ -33,7 +33,7 @@ export function shouldRedirect(error?: EsBadRequestError) {
 }
 
 export function useMappingCheck(error?: EsBadRequestError) {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   useEffect(() => {
     if (shouldRedirect(error)) {

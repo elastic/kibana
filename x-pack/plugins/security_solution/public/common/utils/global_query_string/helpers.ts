@@ -9,7 +9,7 @@ import { decode, encode } from '@kbn/rison';
 import type { ParsedQuery } from 'query-string';
 import { parse, stringify } from 'query-string';
 import { url } from '@kbn/kibana-utils-plugin/public';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useCallback } from 'react';
 import { SecurityPageName } from '../../../app/types';
 
@@ -72,7 +72,7 @@ export const encodeQueryString = (urlParams: ParsedQuery<string>): string =>
   stringify(url.encodeQuery(urlParams), { sort: false, encode: false });
 
 export const useReplaceUrlParams = () => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const replaceUrlParams = useCallback(
     (params: Array<{ key: string; value: string | null }>) => {

@@ -89,18 +89,20 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
   securityApiClients,
   onChange,
   children,
-}) => (
-  <KibanaContextProvider services={services}>
-    <AuthenticationProvider authc={authc}>
-      <SecurityApiClientsProvider {...securityApiClients}>
-        <I18nProvider>
-          <KibanaThemeProvider theme$={theme$}>
-            <Router history={history}>
-              <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
-            </Router>
-          </KibanaThemeProvider>
-        </I18nProvider>
-      </SecurityApiClientsProvider>
-    </AuthenticationProvider>
-  </KibanaContextProvider>
-);
+}) => {
+  return (
+    <KibanaContextProvider services={services}>
+      <AuthenticationProvider authc={authc}>
+        <SecurityApiClientsProvider {...securityApiClients}>
+          <I18nProvider>
+            <KibanaThemeProvider theme$={theme$}>
+              <Router navigator={history} location={history.location}>
+                <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+              </Router>
+            </KibanaThemeProvider>
+          </I18nProvider>
+        </SecurityApiClientsProvider>
+      </AuthenticationProvider>
+    </KibanaContextProvider>
+  );
+};

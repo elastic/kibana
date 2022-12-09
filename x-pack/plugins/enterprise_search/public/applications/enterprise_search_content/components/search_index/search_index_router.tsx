@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Switch, useParams } from 'react-router-dom';
+import { Route, Routes, useParams } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
@@ -25,7 +25,7 @@ import { IndexViewLogic } from './index_view_logic';
 import { SearchIndex } from './search_index';
 
 export const SearchIndexRouter: React.FC = () => {
-  const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
+  const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName ?? '');
 
   const indexNameLogic = IndexNameLogic({ indexName });
   const { setIndexName } = useActions(indexNameLogic);
@@ -45,19 +45,11 @@ export const SearchIndexRouter: React.FC = () => {
   }, [indexName]);
 
   return (
-    <Switch>
-      <Route path={SEARCH_INDEX_PATH} exact>
-        <SearchIndex />
-      </Route>
-      <Route path={SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH} exact>
-        <CrawlerDomainDetail />
-      </Route>
-      <Route path={SEARCH_INDEX_SELECT_CONNECTOR_PATH} exact>
-        <SelectConnector />
-      </Route>
-      <Route path={SEARCH_INDEX_TAB_PATH}>
-        <SearchIndex />
-      </Route>
-    </Switch>
+    <Routes>
+      <Route path={SEARCH_INDEX_PATH} element={<SearchIndex />} />
+      <Route path={SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH} element={<CrawlerDomainDetail />} />
+      <Route path={SEARCH_INDEX_SELECT_CONNECTOR_PATH} element={<SelectConnector />} />
+      <Route path={SEARCH_INDEX_TAB_PATH} element={<SearchIndex />} />
+    </Routes>
   );
 };

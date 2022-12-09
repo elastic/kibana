@@ -7,27 +7,25 @@
 
 import React from 'react';
 import { createHashHistory } from 'history';
-import { Redirect, Route, Router, Switch } from 'react-router-dom';
+import { Navigate, Route, Router, Routes } from 'react-router-dom';
 import { ListingRoute } from './apps/listing_route';
 import { GraphServices } from './application';
 import { WorkspaceRoute } from './apps/workspace_route';
 
-export const graphRouter = (deps: GraphServices) => {
+const Wrapper = ({ deps }: { deps: GraphServices }) => {
   const history = createHashHistory();
 
   return (
-    <Router history={history}>
-      <Switch>
-        <Route exact path="/home">
-          <ListingRoute deps={deps} />
-        </Route>
-        <Route path="/workspace/:id?">
-          <WorkspaceRoute deps={deps} />
-        </Route>
-        <Route>
-          <Redirect exact to="/home" />
-        </Route>
-      </Switch>
+    <Router navigator={history} location={history.location}>
+      <Routes>
+        <Route path="/home" element={<ListingRoute deps={deps} />} />
+        <Route path="/workspace/:id?" element={<WorkspaceRoute deps={deps} />} />
+        <Route element={<Navigate to="/home" />} />
+      </Routes>
     </Router>
   );
+};
+
+export const graphRouter = (deps: GraphServices) => {
+  return <Wrapper deps={deps} />;
 };

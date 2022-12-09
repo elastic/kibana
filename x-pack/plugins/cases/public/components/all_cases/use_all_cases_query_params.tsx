@@ -6,12 +6,13 @@
  */
 
 import { useCallback, useRef, useState, useEffect } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { isEqual } from 'lodash';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { parse, stringify } from 'query-string';
 
+import { createBrowserHistory } from 'history';
 import { DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
 import { parseUrlQueryParams } from './utils';
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
@@ -57,9 +58,10 @@ const getQueryParams = (
 };
 
 export function useAllCasesQueryParams(isModalView: boolean = false) {
-  const { appId } = useCasesContext();
   const location = useLocation();
-  const history = useHistory();
+  const { appId } = useCasesContext();
+
+  const history = createBrowserHistory();
   const isFirstRenderRef = useRef(true);
 
   const [queryParams, setQueryParams] = useState<QueryParams>({ ...DEFAULT_QUERY_PARAMS });

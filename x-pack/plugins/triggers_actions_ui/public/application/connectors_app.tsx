@@ -6,7 +6,7 @@
  */
 
 import React, { lazy } from 'react';
-import { Switch, Route, Router } from 'react-router-dom';
+import { Routes, Route, Router } from 'react-router-dom';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -79,7 +79,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
       <EuiThemeProvider darkMode={isDarkMode}>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...deps }}>
-            <Router history={deps.history}>
+            <Router navigator={deps.history} location={location}>
               <AppWithoutRouter />
             </Router>
           </KibanaContextProvider>
@@ -96,9 +96,9 @@ export const AppWithoutRouter = () => {
 
   return (
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
-      <Switch>
-        <Route path={'/'} component={suspendedComponentWithProps(ActionsConnectorsList, 'xl')} />
-      </Switch>
+      <Routes>
+        <Route path="/" element={suspendedComponentWithProps(ActionsConnectorsList, 'xl')} />
+      </Routes>
     </ConnectorProvider>
   );
 };

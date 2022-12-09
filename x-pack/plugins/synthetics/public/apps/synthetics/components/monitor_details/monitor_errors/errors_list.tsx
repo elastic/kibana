@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useMemo, useState } from 'react';
 import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { Ping } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
@@ -41,7 +41,7 @@ export const ErrorsList = () => {
 
   const { basePath } = useSyntheticsSettingsContext();
 
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const format = useKibanaDateFormat();
 

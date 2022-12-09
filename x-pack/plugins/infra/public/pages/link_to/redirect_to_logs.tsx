@@ -7,7 +7,7 @@
 
 import { flowRight } from 'lodash';
 import React from 'react';
-import { match as RouteMatch, Redirect, RouteComponentProps } from 'react-router-dom';
+import { match as RouteMatch, Navigate, RouteComponentProps } from 'react-router-dom';
 
 import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter';
 import { replaceLogPositionInQueryString } from '../../containers/logs/log_position';
@@ -31,5 +31,5 @@ export const RedirectToLogs = ({ location, match }: RedirectToLogsProps) => {
     replaceSourceIdInQueryString(sourceId)
   )('');
 
-  return <Redirect to={`/stream?${searchString}`} />;
+  return <Navigate to={`/stream?${searchString}`} />;
 };

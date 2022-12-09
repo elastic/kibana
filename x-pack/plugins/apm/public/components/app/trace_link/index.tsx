@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getRedirectToTransactionDetailPageUrl } from './get_redirect_to_transaction_detail_page_url';
@@ -50,7 +50,7 @@ export function TraceLink() {
           rangeTo,
         })
       : getRedirectToTracePageUrl({ traceId, rangeFrom, rangeTo });
-    return <Redirect to={to} />;
+    return <Navigate to={to} />;
   }
 
   return (

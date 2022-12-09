@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Switch } from 'react-router-dom';
+import { Routes } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
@@ -43,11 +43,11 @@ const ExceptionsContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (
-    <Switch>
-      <Route path={EXCEPTIONS_PATH} exact component={ExceptionsRoutes} />
+    <Routes>
+      <Route path={EXCEPTIONS_PATH} component={ExceptionsRoutes} />
       <Route path={EXCEPTION_LIST_DETAIL_PATH} component={ExceptionsListDetailRoute} />
       <Route component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 };
 

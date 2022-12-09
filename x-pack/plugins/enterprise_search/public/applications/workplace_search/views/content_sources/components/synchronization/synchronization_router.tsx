@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import {
   SYNC_FREQUENCY_PATH,
@@ -22,22 +22,17 @@ import { Frequency } from './frequency';
 import { Synchronization } from './synchronization';
 
 export const SynchronizationRouter: React.FC = () => (
-  <Switch>
-    <Route exact path={getSourcesPath(SOURCE_SYNCHRONIZATION_PATH, true)}>
-      <Synchronization />
-    </Route>
-    <Route exact path={getSourcesPath(SYNC_FREQUENCY_PATH, true)}>
-      <Frequency tabId={0} />
-    </Route>
-    <Route exact path={getSourcesPath(BLOCKED_TIME_WINDOWS_PATH, true)}>
-      <Frequency tabId={1} />
-    </Route>
-    <Route exact path={getSourcesPath(ASSETS_AND_OBJECTS_PATH, true)}>
-      <AssetsAndObjects />
-    </Route>
-    <Redirect
-      from={getSourcesPath(OLD_OBJECTS_AND_ASSETS_PATH, true)}
-      to={getSourcesPath(ASSETS_AND_OBJECTS_PATH, true)}
+  <Routes>
+    <Route path={getSourcesPath(SOURCE_SYNCHRONIZATION_PATH, true)} element={<Synchronization />} />
+    <Route path={getSourcesPath(SYNC_FREQUENCY_PATH, true)} element={<Frequency tabId={0} />} />
+    <Route
+      path={getSourcesPath(BLOCKED_TIME_WINDOWS_PATH, true)}
+      element={<Frequency tabId={1} />}
     />
-  </Switch>
+    <Route path={getSourcesPath(ASSETS_AND_OBJECTS_PATH, true)} element={<AssetsAndObjects />} />
+    <Route
+      path={getSourcesPath(OLD_OBJECTS_AND_ASSETS_PATH, true)}
+      element={<Navigate to={getSourcesPath(ASSETS_AND_OBJECTS_PATH, true)} />}
+    />
+  </Routes>
 );

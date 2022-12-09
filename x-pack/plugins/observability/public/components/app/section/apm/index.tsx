@@ -19,7 +19,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useContext } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { ThemeContext } from 'styled-components';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { SectionContainer } from '..';
@@ -56,7 +56,7 @@ function formatTpmStat(value?: number) {
 export function APMSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
   const chartTheme = useChartTheme();
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();

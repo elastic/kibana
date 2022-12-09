@@ -7,7 +7,7 @@
 
 import React, { FC, useEffect } from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -296,7 +296,7 @@ export const PageRouter: FC = () => {
   apiService.addInspectorRequest = addInspectorRequest;
 
   return (
-    <Switch>
+    <Routes>
       {routes.map(
         ({
           title,
@@ -307,21 +307,25 @@ export const PageRouter: FC = () => {
           pageHeader,
           ...pageTemplateProps
         }) => (
-          <Route path={path} key={telemetryId} exact={true}>
-            <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
-              <RouteInit title={title} path={path} telemetryId={telemetryId} />
-              <UptimePageTemplateComponent
-                path={path}
-                pageHeader={pageHeader}
-                {...pageTemplateProps}
-              >
-                <RouteComponent />
-              </UptimePageTemplateComponent>
-            </div>
-          </Route>
+          <Route
+            path={path}
+            key={telemetryId}
+            element={
+              <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
+                <RouteInit title={title} path={path} telemetryId={telemetryId} />
+                <UptimePageTemplateComponent
+                  path={path}
+                  pageHeader={pageHeader}
+                  {...pageTemplateProps}
+                >
+                  <RouteComponent />
+                </UptimePageTemplateComponent>
+              </div>
+            }
+          />
         )
       )}
-      <Route component={NotFoundPage} />
-    </Switch>
+      <Route element={NotFoundPage} />
+    </Routes>
   );
 };

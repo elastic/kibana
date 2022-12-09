@@ -27,7 +27,7 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
@@ -68,7 +68,7 @@ export function TimeseriesChart({
   offset,
   timeZone,
 }: TimeseriesChartProps) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { annotations } = useAnnotationsContext();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const theme = useTheme();

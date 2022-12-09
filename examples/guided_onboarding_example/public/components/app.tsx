@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { Router, Switch, Route } from 'react-router-dom';
+import { Router, Routes, Route } from 'react-router-dom';
 
 import {
   EuiPage,
@@ -50,21 +50,21 @@ export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps
             </EuiTitle>
           </EuiPageHeader>
           <EuiPageContent>
-            <Router history={history}>
-              <Switch>
-                <Route exact path="/">
-                  <Main notifications={notifications} guidedOnboarding={guidedOnboarding} />
-                </Route>
-                <Route exact path="/stepOne">
-                  <StepOne guidedOnboarding={guidedOnboarding} />
-                </Route>
-                <Route exact path="/stepTwo">
-                  <StepTwo />
-                </Route>
-                <Route exact path="/stepThree">
-                  <StepThree guidedOnboarding={guidedOnboarding} />
-                </Route>
-              </Switch>
+            <Router navigator={history} location={history.location}>
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <Main notifications={notifications} guidedOnboarding={guidedOnboarding} />
+                  }
+                />
+                <Route path="/stepOne" element={<StepOne guidedOnboarding={guidedOnboarding} />} />
+                <Route path="/stepTwo" element={<StepTwo />} />
+                <Route
+                  path="/stepThree"
+                  element={<StepThree guidedOnboarding={guidedOnboarding} />}
+                />
+              </Routes>
             </Router>
           </EuiPageContent>
         </EuiPageBody>

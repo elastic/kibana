@@ -94,7 +94,10 @@ const Application = (props: SyntheticsAppProps) => {
                 spaces: startPlugins.spaces,
               }}
             >
-              <Router history={appMountParameters.history}>
+              <Router
+                navigator={appMountParameters.history}
+                location={appMountParameters.history.location}
+              >
                 <EuiThemeProvider darkMode={darkMode}>
                   <SyntheticsRefreshContextProvider>
                     <SyntheticsSettingsContextProvider {...props}>

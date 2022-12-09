@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
+import { Routes } from 'react-router-dom';
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { DataViewBase, Filter } from '@kbn/es-query';
@@ -54,7 +54,7 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
     const commonPropsWithFlowTarget = { ...commonProps, flowTarget };
 
     return (
-      <Switch>
+      <Routes>
         <Route
           path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget/:tabName(${NetworkDetailsRouteType.flows})`}
         >
@@ -116,7 +116,7 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
             tableId={TableId.networkPageEvents}
           />
         </Route>
-      </Switch>
+      </Routes>
     );
   }
 );

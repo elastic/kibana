@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { EuiComboBox, EuiFormLabel, EuiSpacer, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { i18n } from '@kbn/i18n';
 import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 import type { FindingsGroupByKind } from '../types';
@@ -46,7 +46,7 @@ const getFindingsGroupPath = (opts: Array<EuiComboBoxOptionOption<FindingsGroupB
 
 export const FindingsGroupBySelector = ({ type }: Props) => {
   const groupByOptions = useMemo(getGroupByOptions, []);
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   if (!INTERNAL_FEATURE_FLAGS.showFindingsGroupBy) return null;
 

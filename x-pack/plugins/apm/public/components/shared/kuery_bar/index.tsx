@@ -9,10 +9,10 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { i18n } from '@kbn/i18n';
 import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { createBrowserHistory } from 'history';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -49,13 +49,13 @@ export function KueryBar(props: {
   const _kuery = 'kuery' in query ? query.kuery : undefined;
   const kuery = props.value || _kuery;
 
-  const history = useHistory();
+  const history = createBrowserHistory();
   const [state, setState] = useState<State>({
     suggestions: [],
     isLoadingSuggestions: false,
   });
   const { urlParams } = useLegacyUrlParams();
-  const location = useLocation();
+
   const { unifiedSearch } = useApmPluginContext().plugins;
 
   let currentRequestCheck;

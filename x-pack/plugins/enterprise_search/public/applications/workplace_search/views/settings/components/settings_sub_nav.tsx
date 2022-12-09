@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 
 import { EuiSideNavItemType } from '@elastic/eui';
 
@@ -19,7 +19,7 @@ import {
 } from '../../../routes';
 
 export const useSettingsSubNav = () => {
-  const isSettingsPage = !!useRouteMatch(ORG_SETTINGS_PATH);
+  const isSettingsPage = !!useMatch(ORG_SETTINGS_PATH);
   if (!isSettingsPage) return undefined;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [

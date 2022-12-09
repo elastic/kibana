@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { SEARCH_INDICES_PATH, SEARCH_INDEX_PATH, NEW_INDEX_PATH } from '../../routes';
 
@@ -17,16 +17,10 @@ import { SearchIndices } from './search_indices';
 
 export const SearchIndicesRouter: React.FC = () => {
   return (
-    <Switch>
-      <Route exact path={NEW_INDEX_PATH}>
-        <NewIndex />
-      </Route>
-      <Route exact path={SEARCH_INDICES_PATH}>
-        <SearchIndices />
-      </Route>
-      <Route path={SEARCH_INDEX_PATH}>
-        <SearchIndexRouter />
-      </Route>
-    </Switch>
+    <Routes>
+      <Route path={NEW_INDEX_PATH} element={<NewIndex />} />
+      <Route path={SEARCH_INDICES_PATH} element={<SearchIndices />} />
+      <Route path={SEARCH_INDEX_PATH} element={<SearchIndexRouter />} />
+    </Routes>
   );
 };

@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import {
   createKbnUrlStateStorage,
@@ -39,7 +39,7 @@ export function useRulesPageStateContainer() {
 }
 
 function useUrlStateSyncEffect(stateContainer: RulesPageStateContainer) {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   useEffect(() => {
     const urlStateStorage = createKbnUrlStateStorage({

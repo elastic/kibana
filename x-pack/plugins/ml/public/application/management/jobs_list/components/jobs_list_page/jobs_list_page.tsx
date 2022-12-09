@@ -127,7 +127,7 @@ export const JobsListPage: FC<{
             }}
           >
             <ContextWrapper feature={PLUGIN_ID}>
-              <Router history={history}>
+              <Router navigator={history} location={history.location}>
                 <EuiPageHeader
                   pageTitle={
                     <FormattedMessage

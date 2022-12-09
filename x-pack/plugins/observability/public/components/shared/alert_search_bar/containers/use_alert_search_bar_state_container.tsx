@@ -9,7 +9,7 @@ import { isRight } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 import * as t from 'io-ts';
 import { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import {
@@ -67,7 +67,7 @@ function useUrlStateSyncEffect(
   stateContainer: AlertSearchBarStateContainer,
   urlStorageKey: string
 ) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const timefilterService = useTimefilterService();
 
   useEffect(() => {

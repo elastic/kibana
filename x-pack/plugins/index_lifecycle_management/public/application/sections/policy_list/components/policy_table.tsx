@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 
 import moment from 'moment';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -76,7 +76,7 @@ interface Props {
 const SHOW_MANAGED_POLICIES_BY_DEFAULT = 'ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT';
 
 export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const {
     services: { getUrlForApp },
   } = useKibana();

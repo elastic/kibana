@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,7 +34,7 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
   const { getPath } = useLink();
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   async function onSubmit() {
     try {

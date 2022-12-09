@@ -15,7 +15,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { MONITOR_HISTORY_ROUTE } from '../../../../../../common/constants';
@@ -33,7 +33,7 @@ export const MonitorStatusHeader = ({
   periodCaption,
   showViewHistoryButton,
 }: MonitorStatusPanelProps) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const params = useGetUrlParams();
   const { monitor } = useSelectedMonitor();
 

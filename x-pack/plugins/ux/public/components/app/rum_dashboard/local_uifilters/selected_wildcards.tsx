@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import {
   FilterValueLabel,
   fromQuery,
@@ -21,7 +21,7 @@ interface Props {
   indexPattern: DataView;
 }
 export function SelectedWildcards({ indexPattern }: Props) {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const {
     urlParams: { searchTerm },

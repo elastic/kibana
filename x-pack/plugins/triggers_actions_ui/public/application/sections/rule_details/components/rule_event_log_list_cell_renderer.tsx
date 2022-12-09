@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { EuiLink } from '@elastic/eui';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { formatRuleAlertCount } from '../../../../common/lib/format_rule_alert_count';
 import { useKibana, useSpacesData } from '../../../../common/lib/kibana';
@@ -48,7 +48,7 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
   const spacesData = useSpacesData();
   const { http } = useKibana().services;
 
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const activeSpace = useMemo(
     () => spacesData?.spacesMap.get(spacesData?.activeSpaceId),

@@ -6,8 +6,9 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { createBrowserHistory } from 'history';
 import { getWorkpad } from '../../../state/selectors/workpad';
 import { WorkpadPageRouteParams, WorkpadRoutingContextType } from '..';
 import {
@@ -18,7 +19,7 @@ import {
 
 export const useRoutingContext: () => WorkpadRoutingContextType = () => {
   const [isAutoplayPaused, setIsAutoplayPaused] = useState<boolean>(false);
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { search } = history.location;
   const params = useParams<WorkpadPageRouteParams>();
   const workpad = useSelector(getWorkpad);

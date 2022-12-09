@@ -30,7 +30,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { parsePath } from 'history';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, useHistory } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
@@ -54,7 +54,7 @@ interface ReportingExampleAppProps {
 const sourceLogos = ['Beats', 'Cloud', 'Logging', 'Kibana'];
 
 export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAppProps) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { forwardedState } = useApplicationContext();
   useEffect(() => {
     // eslint-disable-next-line no-console

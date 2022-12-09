@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -30,12 +30,12 @@ export const App = ({ history }: { history: ScopedHistory }) => {
   });
 
   return (
-    <Router history={history}>
-      <Switch>
-        <Redirect exact from="/" to={ROUTES.list} />
-        <Route exact path={ROUTES.list} component={PolicyList} />
-        <Route path={ROUTES.edit} component={EditPolicy} />
-      </Switch>
+    <Router navigator={history} location={history.location}>
+      <Routes>
+        <Route path="/" element={<Navigate to={ROUTES.list} />} />
+        <Route path={ROUTES.list} element={PolicyList} />
+        <Route path={ROUTES.edit} element={EditPolicy} />
+      </Routes>
     </Router>
   );
 };

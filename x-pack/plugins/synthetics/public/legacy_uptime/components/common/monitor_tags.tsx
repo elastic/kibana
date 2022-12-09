@@ -8,7 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import { EuiBadge, EuiBadgeGroup, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { MonitorSummary } from '../../../../common/runtime_types/monitor';
@@ -46,7 +46,7 @@ const getFilterLabel = (tag: string) => {
 };
 
 export const MonitorTags = ({ ping, summary }: Props) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const {
     services: { docLinks },

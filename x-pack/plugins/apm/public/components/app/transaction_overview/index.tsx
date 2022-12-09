@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -44,7 +44,7 @@ export function TransactionOverview() {
     agentName,
   } = useApmServiceContext();
 
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   // redirect to first transaction type
   if (!transactionTypeFromUrl && transactionType) {

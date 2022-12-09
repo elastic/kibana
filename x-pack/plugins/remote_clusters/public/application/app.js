@@ -7,12 +7,26 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Switch, Route, Redirect, Router } from 'react-router-dom';
+import { Routes, Route, Navigate, Router } from 'react-router-dom';
 
 import { UIM_APP_LOAD } from './constants';
 import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
 import { RemoteClusterList, RemoteClusterAdd, RemoteClusterEdit } from './sections';
 
+const AppRoutes = ({ history }) => {
+  return (
+    <Router navigator={history} location={history.location}>
+      <Routes>
+        {[`/list`, '/', ''].map((path) => (
+          <Route path={path} component={RemoteClusterList} />
+        ))}
+        <Route path="/add" component={RemoteClusterAdd} />
+        <Route path="/edit/:name" component={RemoteClusterEdit} />
+        <Route path={`/:anything`} element={<Navigate to="/list" />} />
+      </Routes>
+    </Router>
+  );
+};
 class AppComponent extends Component {
   static propTypes = {
     history: PropTypes.shape({
@@ -46,16 +60,7 @@ class AppComponent extends Component {
   }
 
   render() {
-    return (
-      <Router history={this.props.history}>
-        <Switch>
-          <Route exact path={[`/list`, '/', '']} component={RemoteClusterList} />
-          <Route path={[`/add`]} component={RemoteClusterAdd} />
-          <Route path={`/edit/:name`} component={RemoteClusterEdit} />
-          <Redirect from={`/:anything`} to="/list" />
-        </Switch>
-      </Router>
-    );
+    <AppRoutes />;
   }
 }
 

@@ -7,9 +7,9 @@
 
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { History } from 'history';
+import { createBrowserHistory, History } from 'history';
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { useEnvironmentsFetcher } from '../../../../hooks/use_environments_fetcher';
 import {
@@ -71,8 +71,9 @@ export function EnvironmentFilter({
   environment,
   serviceName,
 }: EnvironmentFilterProps) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const location = useLocation();
+
   const { environments, loading } = useEnvironmentsFetcher({
     serviceName,
     start,

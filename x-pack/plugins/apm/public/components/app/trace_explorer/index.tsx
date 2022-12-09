@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import {
   TraceSearchQuery,
   TraceSearchType,
@@ -41,7 +41,7 @@ export function TraceExplorer({ children }: { children: React.ReactElement }) {
     },
   } = useApmParams('/traces/explorer');
 
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   useEffect(() => {
     setSearchQuery({

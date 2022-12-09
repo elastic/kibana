@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { sha256 } from 'js-sha256';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import { getTime } from '@kbn/data-plugin/common';
@@ -46,7 +46,7 @@ const DISCOVER_MAIN_ROUTE = '/';
 export function ViewAlertRoute() {
   const { core, data, locator, toastNotifications } = useDiscoverServices();
   const { id } = useParams<{ id: string }>();
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { search } = useLocation();
 
   const query = useMemo(() => new URLSearchParams(search), [search]);

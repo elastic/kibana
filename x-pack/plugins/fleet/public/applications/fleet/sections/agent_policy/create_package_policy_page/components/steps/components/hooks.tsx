@@ -6,10 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 export function useDataStreamId() {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   return useMemo(() => {
     const searchParams = new URLSearchParams(history.location.search);

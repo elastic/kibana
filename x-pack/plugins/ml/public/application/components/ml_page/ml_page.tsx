@@ -8,7 +8,7 @@
 import React, { createContext, FC, useMemo, useState } from 'react';
 import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { createHtmlPortalNode, HtmlPortalNode } from 'react-reverse-portal';
@@ -128,7 +128,7 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
      * avoiding full page reload **/
     <RedirectAppLinks application={application}>
       <EuiPageContentBody restrictWidth={false}>
-        <Switch>
+        <Routes>
           {routeList.map((route) => {
             return (
               <Route
@@ -146,8 +146,8 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
               />
             );
           })}
-          <Redirect to="/overview" />
-        </Switch>
+          <Route element={<Navigate to="/overview" />} />
+        </Routes>
       </EuiPageContentBody>
     </RedirectAppLinks>
   );

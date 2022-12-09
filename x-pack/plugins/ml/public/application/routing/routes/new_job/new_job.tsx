@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 import { MlRoute } from '../../router';
 
@@ -18,5 +18,5 @@ export const newJobRouteFactory = (): MlRoute => ({
 });
 
 const Page: FC = () => {
-  return <Redirect to="/jobs/new_job/step/index_or_search" />;
+  return <Navigate to="/jobs/new_job/step/index_or_search" />;
 };

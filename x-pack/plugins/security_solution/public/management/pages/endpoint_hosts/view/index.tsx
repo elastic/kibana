@@ -21,7 +21,7 @@ import {
   EuiFlexItem,
   EuiCallOut,
 } from '@elastic/eui';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
@@ -31,6 +31,7 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
 } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { createBrowserHistory } from 'history';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
@@ -108,7 +109,7 @@ EndpointListNavLink.displayName = 'EndpointListNavLink';
 // FIXME: this needs refactoring - we are pulling in all selectors from endpoint, which includes many more than what the list uses
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const EndpointList = () => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { services } = useKibana();
   const {
     listData,

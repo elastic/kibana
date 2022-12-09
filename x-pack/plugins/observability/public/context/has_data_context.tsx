@@ -7,7 +7,7 @@
 
 import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch, useOutlet } from 'react-router-dom';
 import { asyncForEach } from '@kbn/std';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getDataHandler } from '../data_handler';
@@ -42,14 +42,15 @@ export const HasDataContext = createContext({} as HasDataContextValue);
 
 const apps: DataContextApps[] = ['apm', 'synthetics', 'infra_logs', 'infra_metrics', 'ux', 'alert'];
 
-export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
+export function HasDataContextProvider() {
+  const outlet = useOutlet();
   const { http } = useKibana<ObservabilityAppServices>().services;
   const [forceUpdate, setForceUpdate] = useState('');
   const { absoluteStart, absoluteEnd } = useDatePickerContext();
 
   const [hasDataMap, setHasDataMap] = useState<HasDataContextValue['hasDataMap']>({});
 
-  const isExploratoryView = useRouteMatch('/exploratory-view');
+  const isExploratoryView = useMatch('/exploratory-view');
 
   useEffect(
     () => {
@@ -171,7 +172,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
           setForceUpdate(uniqueId());
         },
       }}
-      children={children}
+      children={outlet}
     />
   );
 }

@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect } from 'react';
 
 import { EuiSelect } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { I18LABELS } from '../translations';
@@ -16,7 +16,7 @@ import { I18LABELS } from '../translations';
 const DEFAULT_P = 50;
 
 export function UserPercentile() {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const {
     urlParams: { percentile },

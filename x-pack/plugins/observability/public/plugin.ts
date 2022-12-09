@@ -247,7 +247,7 @@ export class Plugin
               defaultMessage: 'Overview',
             }),
             app: observabilityAppId,
-            path: '/overview',
+            path: 'overview',
           };
 
           // Reformat the visible links to be NavigationEntry objects instead of

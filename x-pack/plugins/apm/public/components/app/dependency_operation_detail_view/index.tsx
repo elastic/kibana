@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit, orderBy } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import type { DependencySpan } from '../../../../server/routes/dependencies/get_top_dependency_spans';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -29,7 +29,7 @@ import { maybeRedirectToAvailableSpanSample } from './maybe_redirect_to_availabl
 export function DependencyOperationDetailView() {
   const router = useApmRouter();
 
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const {
     query,

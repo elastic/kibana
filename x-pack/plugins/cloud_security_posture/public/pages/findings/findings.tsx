@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Redirect, Switch, Route, useLocation } from 'react-router-dom';
+import { Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
@@ -25,36 +25,32 @@ export const Findings = () => {
 
   return (
     <CloudPosturePage query={dataViewQuery}>
-      <Switch>
+      <Routes>
         <Route
-          exact
           path={cloudPosturePages.findings.path}
-          component={() => (
-            <Redirect
+          element={
+            <Navigate
               to={{
                 pathname: findingsNavigation.findings_default.path,
                 search: location.search,
               }}
             />
-          )}
+          }
         />
         <Route
           path={findingsNavigation.findings_default.path}
-          render={() => (
+          element={
             <TrackApplicationView viewId={findingsNavigation.findings_default.id}>
               <LatestFindingsContainer dataView={dataViewQuery.data!} />
             </TrackApplicationView>
-          )}
+          }
         />
         <Route
           path={findingsNavigation.findings_by_resource.path}
-          render={() => <FindingsByResourceContainer dataView={dataViewQuery.data!} />}
+          element={<FindingsByResourceContainer dataView={dataViewQuery.data!} />}
         />
-        <Route
-          path={'*'}
-          component={() => <Redirect to={findingsNavigation.findings_default.path} />}
-        />
-      </Switch>
+        <Route path={'*'} element={<Navigate to={findingsNavigation.findings_default.path} />} />
+      </Routes>
     </CloudPosturePage>
   );
 };

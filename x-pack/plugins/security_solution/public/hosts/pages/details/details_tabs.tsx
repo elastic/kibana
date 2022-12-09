@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
+import { Routes } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { RiskScoreEntity } from '../../../../common/search_strategy';
@@ -52,35 +52,47 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     };
 
     return (
-      <Switch>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody {...tabProps} />
-        </Route>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}>
-          <UncommonProcessQueryTabBody {...tabProps} />
-        </Route>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.anomalies})`}>
-          <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
-        </Route>
+      <Routes>
+        <Route
+          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}
+          element={<AuthenticationsQueryTabBody {...tabProps} />}
+        />
+        <Route
+          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}
+          element={<UncommonProcessQueryTabBody {...tabProps} />}
+        />
+        <Route
+          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.anomalies})`}
+          element={
+            <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
+          }
+        />
 
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}>
-          <EventsQueryTabBody
-            additionalFilters={hostDetailsFilter}
-            tableId={TableId.hostsPageEvents}
-            {...tabProps}
-          />
-        </Route>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>
-          <RiskDetailsTabBody
-            {...tabProps}
-            riskEntity={RiskScoreEntity.host}
-            entityName={tabProps.hostName}
-          />
-        </Route>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.sessions})`}>
-          <SessionsTabBody {...tabProps} />
-        </Route>
-      </Switch>
+        <Route
+          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}
+          element={
+            <EventsQueryTabBody
+              additionalFilters={hostDetailsFilter}
+              tableId={TableId.hostsPageEvents}
+              {...tabProps}
+            />
+          }
+        />
+        <Route
+          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}
+          element={
+            <RiskDetailsTabBody
+              {...tabProps}
+              riskEntity={RiskScoreEntity.host}
+              entityName={tabProps.hostName}
+            />
+          }
+        />
+        <Route
+          path={`${hostDetailsPagePath}/:tabName(${HostsTableType.sessions})`}
+          element={<SessionsTabBody {...tabProps} />}
+        />
+      </Routes>
     );
   }
 );

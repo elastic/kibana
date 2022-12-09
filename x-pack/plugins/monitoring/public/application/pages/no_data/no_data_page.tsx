@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext, useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -131,7 +131,7 @@ export const NoDataPage = () => {
   return (
     <PageTemplate title={title} getPageData={getPageData}>
       {shouldRedirect ? (
-        <Redirect to="/home" />
+        <Navigate to="/home" />
       ) : (
         <NoData {...model} enabler={enabler} isCloudEnabled={Legacy.shims.isCloud} />
       )}

@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import styled from 'styled-components';
 import { pick } from 'lodash';
 import {
@@ -53,7 +53,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const {
       agents: { enabled: isFleetEnabled },
     } = useConfig();
-    const history = useHistory();
+    const history = createBrowserHistory();
     const { getPath } = useLink();
     const hasFleetAllPrivileges = useAuthz().fleet.all;
     const refreshAgentPolicy = useAgentPolicyRefresh();

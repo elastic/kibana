@@ -18,7 +18,7 @@ import uuid from 'uuid';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import {
@@ -90,7 +90,7 @@ export function TransactionsTable({
   end,
   saveTableOptionsToUrl = false,
 }: Props) {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const {
     query: {

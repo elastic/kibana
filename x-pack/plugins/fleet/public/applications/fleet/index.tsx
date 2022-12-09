@@ -7,8 +7,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { RouteProps } from 'react-router-dom';
-import { Redirect, Route } from 'react-router-dom';
+import type { PathRouteProps } from 'react-router-dom';
+import { Navigate, Route } from 'react-router-dom';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
@@ -17,7 +17,7 @@ import { licenseService } from './hooks';
 import type { UIExtensionsStorage } from './types';
 import { AppRoutes, FleetAppContext, WithPermissionsAndSetup } from './app';
 
-export interface ProtectedRouteProps extends RouteProps {
+export interface ProtectedRouteProps extends PathRouteProps {
   isAllowed?: boolean;
   restrictedPath?: string;
 }
@@ -27,7 +27,11 @@ export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
   restrictedPath = '/',
   ...routeProps
 }: ProtectedRouteProps) => {
-  return isAllowed ? <Route {...routeProps} /> : <Redirect to={{ pathname: restrictedPath }} />;
+  return isAllowed ? (
+    <Route {...routeProps} />
+  ) : (
+    <Route element={<Navigate to={{ pathname: restrictedPath }} />} />
+  );
 };
 
 interface FleetAppProps {

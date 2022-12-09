@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 import { EuiLink } from '@elastic/eui';
 import { pickBy, identity } from 'lodash';
 import { getLegacyApmHref, APMLinkExtendProps } from './apm_link';
@@ -51,7 +50,7 @@ export function TransactionDetailLink({
     core,
     urlComparisonEnabled: comparisonEnabled,
   });
-  const location = useLocation();
+
   const href = getLegacyApmHref({
     basePath: core.http.basePath,
     path: `/services/${serviceName}/transactions/view`,

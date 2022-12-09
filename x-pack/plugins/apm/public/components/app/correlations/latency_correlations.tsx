@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { orderBy } from 'lodash';
 
 import {
@@ -97,7 +97,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const [selectedSignificantTerm, setSelectedSignificantTerm] =
     useState<LatencyCorrelation | null>(null);
 
-  const history = useHistory();
+  const history = createBrowserHistory();
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
   const onAddFilter = useCallback<OnAddFilter>(

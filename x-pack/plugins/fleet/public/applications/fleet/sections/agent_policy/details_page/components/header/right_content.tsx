@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import {
   EuiFlexGroup,
   EuiI18nNumber,
@@ -53,7 +53,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
   setIsAddAgentHelpPopoverOpen,
 }) => {
   const { getPath } = useLink();
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   if (!agentPolicy) {
     return null;

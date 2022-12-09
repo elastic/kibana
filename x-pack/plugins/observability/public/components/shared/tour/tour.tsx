@@ -40,7 +40,7 @@ const maxWidth: EuiTourStepProps['maxWidth'] = 360;
 const offset: EuiTourStepProps['offset'] = 30;
 const repositionOnScroll: EuiTourStepProps['repositionOnScroll'] = true;
 
-const overviewPath = '/overview';
+const overviewPath = 'overview';
 const dataAssistantStep = 6;
 
 export const observTourStepStorageKey = 'guidedOnboarding.observability.tourStep';

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import {
   AgentConfiguration,
   AgentConfigurationIntake,
@@ -70,7 +70,7 @@ export function AgentConfigurationCreateEdit({
   pageStep: PageStep;
   existingConfigResult?: FetcherResult<AgentConfiguration>;
 }) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const existingConfig = existingConfigResult?.data;
   const isEditMode = Boolean(existingConfigResult);
   const [newConfig, setNewConfig] = useState<AgentConfigurationIntake>(

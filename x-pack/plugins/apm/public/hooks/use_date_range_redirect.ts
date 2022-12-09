@@ -5,14 +5,16 @@
  * 2.0.
  */
 import qs from 'query-string';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { createBrowserHistory } from 'history';
 import { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
 export function useDateRangeRedirect() {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const location = useLocation();
+
   const query = qs.parse(location.search);
 
   const { core, plugins } = useApmPluginContext();

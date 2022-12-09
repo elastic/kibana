@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import { CanvasTemplate } from '../../../../types';
 import { useNotifyService, useWorkpadService } from '../../../services';
@@ -14,7 +14,7 @@ import { useNotifyService, useWorkpadService } from '../../../services';
 export const useCreateFromTemplate = () => {
   const workpadService = useWorkpadService();
   const notifyService = useNotifyService();
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   return useCallback(
     async (template: CanvasTemplate) => {

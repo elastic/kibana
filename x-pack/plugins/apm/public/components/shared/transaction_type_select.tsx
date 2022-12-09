@@ -7,7 +7,7 @@
 
 import { EuiSelect } from '@elastic/eui';
 import React, { FormEvent, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import styled from 'styled-components';
 import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';
 import { useBreakpoints } from '../../hooks/use_breakpoints';
@@ -23,7 +23,7 @@ const EuiSelectWithWidth = styled(EuiSelect)`
 export function TransactionTypeSelect() {
   const { isSmall } = useBreakpoints();
   const { transactionTypes, transactionType } = useApmServiceContext();
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const handleChange = useCallback(
     (event: FormEvent<HTMLSelectElement>) => {

@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 import { EuiForm, EuiFlyoutBody } from '@elastic/eui';
@@ -36,7 +36,7 @@ import type { AppAction } from '../../../../../../common/store/actions';
 export const EndpointIsolationFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const dispatch = useDispatch<Dispatch<AppAction>>();
 
   const { show, ...queryParams } = useEndpointSelector(uiQueryParams);

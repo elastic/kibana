@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Switch, Redirect } from 'react-router-dom';
+import { Routes, Navigate } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { HOSTS_PATH } from '../../../common/constants';
 import { HostDetails } from './details';
@@ -35,13 +35,9 @@ const getHostDetailsTabPath = () =>
   `${HostsTableType.sessions})`;
 
 export const HostsContainer = React.memo(() => (
-  <Switch>
-    <Route path={`${HOSTS_PATH}/ml-hosts`}>
-      <MlHostConditionalContainer />
-    </Route>
-    <Route path={getHostsTabPath()}>
-      <Hosts />
-    </Route>
+  <Routes>
+    <Route path={`${HOSTS_PATH}/ml-hosts`} element={<MlHostConditionalContainer />} />
+    <Route path={getHostsTabPath()} element={<Hosts />} />
     <Route
       path={getHostDetailsTabPath()}
       render={({
@@ -63,7 +59,7 @@ export const HostsContainer = React.memo(() => (
         },
         location: { search = '' },
       }) => (
-        <Redirect
+        <Navigate
           to={{
             pathname: `${HOSTS_PATH}/name/${detailName}/${HostsTableType.authentications}`,
             search,
@@ -79,7 +75,7 @@ export const HostsContainer = React.memo(() => (
         },
         location: { search = '' },
       }) => (
-        <Redirect
+        <Navigate
           to={{
             pathname: `${HOSTS_PATH}/name/${detailName}/${tabName}`,
             search,
@@ -90,10 +86,10 @@ export const HostsContainer = React.memo(() => (
     <Route // Redirect to the first tab when tabName is not present.
       path={HOSTS_PATH}
       render={({ location: { search = '' } }) => (
-        <Redirect to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} />
+        <Navigate to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} />
       )}
     />
-  </Switch>
+  </Routes>
 ));
 
 HostsContainer.displayName = 'HostsContainer';

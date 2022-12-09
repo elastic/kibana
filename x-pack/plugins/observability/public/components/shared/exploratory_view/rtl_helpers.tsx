@@ -168,7 +168,7 @@ export function MockRouter<ExtraCore extends Partial<CoreStart>>({
   kibanaProps,
 }: MockRouterProps<ExtraCore>) {
   return (
-    <Router history={history}>
+    <Router navigator={history} location={history.location}>
       <Route path={'/app/observability/exploratory-view/'}>
         <MockKibanaProvider core={core} kibanaProps={kibanaProps} history={history}>
           {children}

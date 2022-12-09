@@ -10,7 +10,7 @@ import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import qs from 'query-string';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
@@ -69,7 +69,7 @@ function RedirectNodesToMetrics() {
   const { query, path } = useApmParams('/services/{serviceName}/nodes');
   const search = qs.stringify(query);
   return (
-    <Redirect
+    <Navigate
       to={{ pathname: `/services/${path.serviceName}/metrics`, search }}
     />
   );
@@ -81,7 +81,7 @@ function RedirectNodeMetricsToMetricsDetails() {
   );
   const search = qs.stringify(query);
   return (
-    <Redirect
+    <Navigate
       to={{
         pathname: `/services/${path.serviceName}/metrics/${path.serviceNodeName}`,
         search,

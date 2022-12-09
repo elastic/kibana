@@ -6,11 +6,11 @@
  */
 
 import { XYBrushEvent } from '@elastic/charts';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { push } from '../components/shared/links/url_helpers';
 
 export function useSampleChartSelection() {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const selectSampleFromChartSelection = (selection: XYBrushEvent) => {
     if (selection !== undefined) {
       const { x } = selection;

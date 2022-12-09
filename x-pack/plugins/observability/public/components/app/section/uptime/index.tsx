@@ -20,7 +20,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useContext } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { ThemeContext } from 'styled-components';
 import { useTimeZone } from '../../../../hooks/use_time_zone';
 import { SectionContainer } from '..';
@@ -42,7 +42,7 @@ interface Props {
 export function UptimeSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
   const chartTheme = useChartTheme();
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();

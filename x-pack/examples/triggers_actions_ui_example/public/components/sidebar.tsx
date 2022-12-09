@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { EuiPageSidebar, EuiSideNav } from '@elastic/eui';
 
 export const Sidebar = () => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   return (
     <EuiPageSidebar>
       <EuiSideNav

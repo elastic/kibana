@@ -65,7 +65,11 @@ export function ApmAppRoot({
         <KibanaContextProvider services={{ ...core, ...pluginsStart, storage }}>
           <i18nCore.Context>
             <TimeRangeIdContextProvider>
-              <RouterProvider history={history} router={apmRouter as any}>
+              <RouterProvider
+                history={history}
+                router={apmRouter as any}
+                location={history.location}
+              >
                 <RedirectDependenciesToDependenciesInventory>
                   <RedirectWithDefaultEnvironment>
                     <RedirectWithDefaultDateRange>
@@ -80,7 +84,7 @@ export function ApmAppRoot({
                                       <MountApmHeaderActionMenu />
 
                                       <Route
-                                        component={ScrollToTopOnPathChange}
+                                        element={ScrollToTopOnPathChange}
                                       />
                                       <RouteRenderer />
                                     </ApmThemeProvider>

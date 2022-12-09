@@ -9,7 +9,7 @@ import { ALERT_RULE_NAME, ALERT_RULE_PARAMETERS, ALERT_RULE_UUID } from '@kbn/ru
 import { get, has, isEmpty } from 'lodash/fp';
 import React from 'react';
 import type { RouteProps } from 'react-router-dom';
-import { matchPath, Redirect } from 'react-router-dom';
+import { matchPath, Navigate } from 'react-router-dom';
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import {
@@ -226,12 +226,12 @@ export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capab
   const overviewAvailable = isSubPluginAvailable('overview', capabilities);
   const casesAvailable = isSubPluginAvailable(CASES_SUB_PLUGIN_KEY, capabilities);
   if (overviewAvailable) {
-    return <Redirect to={LANDING_PATH} />;
+    return <Navigate to={LANDING_PATH} />;
   }
   if (casesAvailable) {
-    return <Redirect to={CASES_PATH} />;
+    return <Navigate to={CASES_PATH} />;
   }
-  return <Redirect to={LANDING_PATH} />;
+  return <Navigate to={LANDING_PATH} />;
 });
 RedirectRoute.displayName = 'RedirectRoute';
 

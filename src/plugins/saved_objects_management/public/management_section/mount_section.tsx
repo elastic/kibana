@@ -8,7 +8,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route } from 'react-router-dom';
+import { Router, Routes, Route } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -32,6 +32,7 @@ const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle',
 
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
 const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page'));
+
 export const mountManagementSection = async ({ core, mountParams }: MountParams) => {
   const [coreStart, { data, dataViews, savedObjectsTaggingOss, spaces: spacesApi }, pluginStart] =
     await core.getStartServices();
@@ -43,8 +44,6 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
   }
 
-  coreStart.chrome.docTitle.change(title);
-
   const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
     const allowed = capabilities?.management?.kibana?.objects ?? false;
 
@@ -55,12 +54,14 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
     return children! as React.ReactElement;
   };
 
-  ReactDOM.render(
-    wrapWithTheme(
+  coreStart.chrome.docTitle.change(title);
+
+  const App = () => {
+    return (
       <I18nProvider>
-        <Router history={history}>
-          <Switch>
-            <Route path={'/:type/:id'} exact={true}>
+        <Router navigator={history} location={history.location}>
+          <Routes>
+            <Route path="/:type/:id">
               <RedirectToHomeIfUnauthorized>
                 <Suspense fallback={<EuiLoadingSpinner />}>
                   <SavedObjectsEditionPage
@@ -71,7 +72,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
                 </Suspense>
               </RedirectToHomeIfUnauthorized>
             </Route>
-            <Route path={'/'} exact={false}>
+            <Route path="/">
               <RedirectToHomeIfUnauthorized>
                 <Suspense fallback={<EuiLoadingSpinner />}>
                   <SavedObjectsTablePage
@@ -82,19 +83,19 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
                     dataViewsApi={dataViews}
                     actionRegistry={pluginStart.actions}
                     columnRegistry={pluginStart.columns}
-                    allowedTypes={allowedObjectTypes}
+                    allowedTypes={allowedObjectTypes ?? []}
                     setBreadcrumbs={setBreadcrumbs}
                   />
                 </Suspense>
               </RedirectToHomeIfUnauthorized>
             </Route>
-          </Switch>
+          </Routes>
         </Router>
-      </I18nProvider>,
-      theme$
-    ),
-    element
-  );
+      </I18nProvider>
+    );
+  };
+
+  ReactDOM.render(wrapWithTheme(<App />, theme$), element);
 
   return () => {
     coreStart.chrome.docTitle.reset();

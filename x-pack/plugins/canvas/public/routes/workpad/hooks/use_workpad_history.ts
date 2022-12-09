@@ -7,14 +7,14 @@
 
 import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { isEqual } from 'lodash';
 import { createPath } from 'history';
 import { encode, decode } from '../route_state';
 import { State } from '../../../../types';
 
 export const useWorkpadHistory = () => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const historyState = useSelector((state: State) => state.persistent);
   const hasRun = useRef<boolean>(false);
 

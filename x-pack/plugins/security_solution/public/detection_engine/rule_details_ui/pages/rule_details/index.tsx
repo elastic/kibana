@@ -22,7 +22,7 @@ import { Route } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { noop, omit } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Switch, useParams } from 'react-router-dom';
+import { Routes, useParams } from 'react-router-dom';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -816,7 +816,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>
-              <Switch>
+              <Routes>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                   <>
                     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -867,18 +867,21 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     )}
                   </>
                 </Route>
-                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
-                  <ExceptionsViewer
-                    rule={rule}
-                    listTypes={[
-                      ExceptionListTypeEnum.DETECTION,
-                      ExceptionListTypeEnum.RULE_DEFAULT,
-                    ]}
-                    onRuleChange={refreshRule}
-                    isViewReadOnly={!isExistingRule}
-                    data-test-subj="exceptionTab"
-                  />
-                </Route>
+                <Route
+                  path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}
+                  element={
+                    <ExceptionsViewer
+                      rule={rule}
+                      listTypes={[
+                        ExceptionListTypeEnum.DETECTION,
+                        ExceptionListTypeEnum.RULE_DEFAULT,
+                      ]}
+                      onRuleChange={refreshRule}
+                      isViewReadOnly={!isExistingRule}
+                      data-test-subj="exceptionTab"
+                    />
+                  }
+                />
                 <Route
                   path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.endpointExceptions})`}
                 >
@@ -890,13 +893,17 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     data-test-subj="endpointExceptionsTab"
                   />
                 </Route>
-                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}>
-                  <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
-                </Route>
-                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}>
-                  <ExecutionEventsTable ruleId={ruleId} />
-                </Route>
-              </Switch>
+                <Route
+                  path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}
+                  element={
+                    <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
+                  }
+                />
+                <Route
+                  path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}
+                  element={<ExecutionEventsTable ruleId={ruleId} />}
+                />
+              </Routes>
             </StyledMinHeightTabContainer>
           </SecuritySolutionPageWrapper>
         </RuleDetailsContextProvider>

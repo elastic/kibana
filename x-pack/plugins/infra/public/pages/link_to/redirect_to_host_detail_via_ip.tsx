@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Navigate, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
@@ -50,7 +50,7 @@ export const RedirectToHostDetailViaIP = ({
   )('');
 
   if (name) {
-    return <Redirect to={`/detail/host/${name}?${searchString}`} />;
+    return <Navigate to={`/detail/host/${name}?${searchString}`} />;
   }
 
   return (

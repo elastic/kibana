@@ -5,8 +5,9 @@
  * 2.0.
  */
 import qs from 'query-string';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { createBrowserHistory } from 'history';
 import { useKibanaServices } from './use_kibana_services';
 
 export interface TimePickerTimeDefaults {
@@ -15,8 +16,9 @@ export interface TimePickerTimeDefaults {
 }
 
 export function useDateRangeRedirect() {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const location = useLocation();
+
   const query = qs.parse(location.search);
 
   const { data, uiSettings } = useKibanaServices();

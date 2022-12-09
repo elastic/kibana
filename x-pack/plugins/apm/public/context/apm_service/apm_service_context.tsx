@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, ReactNode } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { History } from 'history';
 import { isRumAgentName } from '../../../common/agent_name';
 import {
@@ -43,7 +43,7 @@ export function ApmServiceContextProvider({
 }: {
   children: ReactNode;
 }) {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const {
     path: { serviceName },

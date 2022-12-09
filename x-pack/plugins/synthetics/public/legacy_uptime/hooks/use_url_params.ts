@@ -7,8 +7,9 @@
 
 import { useCallback, useEffect } from 'react';
 import { stringify } from 'query-string';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { createBrowserHistory } from 'history';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 import { selectedFiltersSelector } from '../state/selectors';
 import { setSelectedFilters } from '../state/actions/selected_filters';
@@ -38,7 +39,7 @@ const getMapFromFilters = (value: any): Map<string, any> | undefined => {
 
 export const useUrlParams: UptimeUrlParamsHook = () => {
   const { pathname, search } = useLocation();
-  const history = useHistory();
+  const history = createBrowserHistory();
   const dispatch = useDispatch();
   const selectedFilters = useSelector(selectedFiltersSelector);
   const { filters } = useGetUrlParams();

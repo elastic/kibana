@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 
@@ -29,7 +29,7 @@ export function ProfilingAppPageTemplate({
 
   const { PageTemplate: ObservabilityPageTemplate } = observability.navigation;
 
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   useEffect(() => {
     window.scrollTo(0, 0);

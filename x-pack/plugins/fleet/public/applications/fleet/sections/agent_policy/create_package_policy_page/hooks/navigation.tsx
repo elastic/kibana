@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback, useMemo, useEffect, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import { useStartServices, useLink, useIntraAppState } from '../../../../hooks';
 import type {
@@ -67,7 +67,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const doOnSaveNavigation = useRef<boolean>(true);
   const { getPath } = useLink();
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const {
     application: { navigateToApp },

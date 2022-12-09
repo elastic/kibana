@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
+import { Router, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
@@ -92,14 +92,15 @@ export async function renderApp(
   registerLayerWizards();
   setAppChrome();
 
-  function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
+  const RenderMapApp = () => {
+    const params = useParams<{ savedMapId: string }>();
     const { embeddableId, originatingApp, valueInput, originatingPath } =
       stateTransfer.getIncomingEditorState(APP_ID) || {};
 
     let mapEmbeddableInput;
-    if (routeProps.match.params.savedMapId) {
+    if (params.savedMapId) {
       mapEmbeddableInput = {
-        savedObjectId: routeProps.match.params.savedMapId,
+        savedObjectId: params.savedMapId,
       } as MapByReferenceInput;
     }
     if (valueInput) {
@@ -117,52 +118,57 @@ export async function renderApp(
           originatingApp={originatingApp}
           originatingPath={originatingPath}
           history={history}
-          key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
+          key={params.savedMapId ? params.savedMapId : 'new'}
         />
       </ExitFullScreenButtonKibanaProvider>
     );
-  }
+  };
+
+  const DefaultRoute = () => {
+    const { hash, pathname } = useLocation();
+
+    if (hash) {
+      // Remove leading hash
+      const newPath = hash.substr(1);
+      return <Navigate to={newPath} />;
+    } else if (pathname === '/' || pathname === '') {
+      return <ListPage stateTransfer={stateTransfer} />;
+    } else {
+      return <Navigate to="/" />;
+    }
+  };
+
+  const App = () => {
+    return (
+      <AppUsageTracker>
+        <I18nContext>
+          <KibanaThemeProvider theme$={theme$}>
+            <TableListViewKibanaProvider
+              {...{
+                core: coreStart,
+                toMountPoint,
+                savedObjectsTagging,
+                FormattedRelative,
+              }}
+            >
+              <Router navigator={history} location={history.location}>
+                <Routes>
+                  <Route path={`/map/:savedMapId`} element={RenderMapApp} />
+                  <Route path={`/map`} element={RenderMapApp} />
+                  {/* // Redirect other routes to list, or if hash-containing, their non-hash
+                  equivalents */}
+                  <Route path={``} element={DefaultRoute} />
+                </Routes>
+              </Router>
+            </TableListViewKibanaProvider>
+          </KibanaThemeProvider>
+        </I18nContext>
+      </AppUsageTracker>
+    );
+  };
 
   const I18nContext = getCoreI18n().Context;
-  render(
-    <AppUsageTracker>
-      <I18nContext>
-        <KibanaThemeProvider theme$={theme$}>
-          <TableListViewKibanaProvider
-            {...{
-              core: coreStart,
-              toMountPoint,
-              savedObjectsTagging,
-              FormattedRelative,
-            }}
-          >
-            <Router history={history}>
-              <Switch>
-                <Route path={`/map/:savedMapId`} render={renderMapApp} />
-                <Route exact path={`/map`} render={renderMapApp} />
-                // Redirect other routes to list, or if hash-containing, their non-hash equivalents
-                <Route
-                  path={``}
-                  render={({ location: { pathname, hash } }) => {
-                    if (hash) {
-                      // Remove leading hash
-                      const newPath = hash.substr(1);
-                      return <Redirect to={newPath} />;
-                    } else if (pathname === '/' || pathname === '') {
-                      return <ListPage stateTransfer={stateTransfer} />;
-                    } else {
-                      return <Redirect to="/" />;
-                    }
-                  }}
-                />
-              </Switch>
-            </Router>
-          </TableListViewKibanaProvider>
-        </KibanaThemeProvider>
-      </I18nContext>
-    </AppUsageTracker>,
-    element
-  );
+  render(<App />, element);
 
   return () => {
     unmountComponentAtNode(element);

@@ -6,13 +6,14 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import type { SavedObjectsClientContract, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { createBrowserHistory } from 'history';
 import { GraphStore } from '../state_management';
 import { GraphWorkspaceSavedObject, Workspace } from '../types';
 import { getEmptyWorkspace, getSavedWorkspace } from './saved_workspace_utils';
@@ -51,7 +52,7 @@ export const useWorkspaceLoader = ({
   data,
 }: UseWorkspaceLoaderProps) => {
   const [state, setState] = useState<WorkspaceLoadedState>();
-  const { replace: historyReplace } = useHistory();
+  const { replace: historyReplace } = createBrowserHistory();
   const { search } = useLocation();
   const { id } = useParams<WorkspaceUrlParams>();
 

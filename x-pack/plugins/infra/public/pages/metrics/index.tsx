@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useContext } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -47,7 +47,9 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
   defaultMessage: 'Add data',
 });
 
-export const InfrastructurePage = ({ match }: RouteComponentProps) => {
+export const InfrastructurePage = () => {
+  const location = useLocation();
+
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
@@ -85,7 +87,9 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                         <EuiHeaderLink color={'text'} {...settingsLinkProps}>
                           {settingsTabTitle}
                         </EuiHeaderLink>
-                        <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                        <Routes>
+                          <Route path="inventory" element={<AnomalyDetectionFlyout />} />
+                        </Routes>
                         <MetricsAlertDropdown />
                         <EuiHeaderLink
                           href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
@@ -97,11 +101,11 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                       </EuiHeaderLinks>
                     </HeaderMenuPortal>
                   )}
-                  <Switch>
-                    <Route path={'/inventory'} component={SnapshotPage} />
+                  <Routes>
+                    <Route path="inventory" element={<SnapshotPage />} />
                     <Route
-                      path={'/explorer'}
-                      render={(props) => (
+                      path="explorer"
+                      element={
                         <WithSource>
                           {({ configuration, createDerivedIndexPattern }) => (
                             <MetricsExplorerOptionsContainer>
@@ -117,12 +121,12 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                             </MetricsExplorerOptionsContainer>
                           )}
                         </WithSource>
-                      )}
+                      }
                     />
-                    <Route path="/detail/:type/:node" component={MetricDetail} />
-                    <Route path={'/hosts'} component={HostsPage} />
-                    <Route path={'/settings'} component={MetricsSettingsPage} />
-                  </Switch>
+                    <Route path="detail/:type/:node" element={<MetricDetail />} />
+                    <Route path="hosts" element={<HostsPage />} />
+                    <Route path="settings" element={<MetricsSettingsPage />} />
+                  </Routes>
                 </InfraMLCapabilitiesProvider>
               </WaffleFiltersProvider>
             </WaffleTimeProvider>

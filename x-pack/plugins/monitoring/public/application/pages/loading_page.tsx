@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { PageTemplate } from './page_template';
 import { PageLoading } from '../../components';
@@ -38,12 +38,12 @@ export const LoadingPage = ({ staticLoadingState }: { staticLoadingState?: boole
 
 const renderRedirections = (clusters: any) => {
   if (!clusters || !clusters.length) {
-    return <Redirect to="/no-data" />;
+    return <Navigate to="/no-data" />;
   }
   if (clusters.length === 1) {
     // Bypass the cluster listing if there is just 1 cluster
-    return <Redirect to="/overview" />;
+    return <Navigate to="overview" />;
   }
 
-  return <Redirect to="/home" />;
+  return <Navigate to="/home" />;
 };

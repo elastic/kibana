@@ -6,7 +6,7 @@
  */
 import { EuiModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import React, { useCallback, useEffect, useState } from 'react';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -45,7 +45,7 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
 
   const isEdit = !!savedServiceGroup;
 
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const navigateToServiceGroups = useCallback(() => {
     history.push({

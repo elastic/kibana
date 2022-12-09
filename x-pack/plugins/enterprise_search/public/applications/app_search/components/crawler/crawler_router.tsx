@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
@@ -25,13 +25,9 @@ export const CrawlerRouter: React.FC = () => {
   }, []);
 
   return (
-    <Switch>
-      <Route exact path={ENGINE_CRAWLER_PATH}>
-        <CrawlerOverview />
-      </Route>
-      <Route exact path={ENGINE_CRAWLER_DOMAIN_PATH}>
-        <CrawlerSingleDomain />
-      </Route>
-    </Switch>
+    <Routes>
+      <Route path={ENGINE_CRAWLER_PATH} element={<CrawlerOverview />} />
+      <Route path={ENGINE_CRAWLER_DOMAIN_PATH} element={<CrawlerSingleDomain />} />
+    </Routes>
   );
 };

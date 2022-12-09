@@ -10,11 +10,13 @@ import {
   Direction,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiLoadingSpinner,
   EuiTableSortingType,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, Suspense } from 'react';
+import { Await, useLoaderData } from 'react-router-dom';
 import {
   MetricsFetchDataResponse,
   MetricsFetchDataSeries,
@@ -22,8 +24,7 @@ import {
   StringOrNull,
 } from '../../../..';
 import { SectionContainer } from '..';
-import { getDataHandler } from '../../../../data_handler';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { HostLink } from './host_link';
@@ -50,32 +51,13 @@ const bytesPerSecondFormatter = (value: NumberOrNull) =>
   value === null ? '' : numeral(value).format('0b') + '/s';
 
 export function MetricsSection({ bucketSize }: Props) {
-  const { forceUpdate, hasDataMap } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
-    useDatePickerContext();
+  const { hasDataMap } = useHasData();
+  const { absoluteStart, absoluteEnd } = useDatePickerContext();
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
   const [sortField, setSortField] = useState<keyof MetricsFetchDataSeries>('uptime');
   const [sortedData, setSortedData] = useState<MetricsFetchDataResponse | null>(null);
 
-  const { data, status } = useFetcher(() => {
-    if (bucketSize && absoluteStart && absoluteEnd) {
-      return getDataHandler('infra_metrics')?.fetchData({
-        absoluteTime: { start: absoluteStart, end: absoluteEnd },
-        relativeTime: { start: relativeStart, end: relativeEnd },
-        ...bucketSize,
-      });
-    }
-    // `forceUpdate` and `lastUpdated` should trigger a reload
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    bucketSize,
-    relativeStart,
-    relativeEnd,
-    absoluteStart,
-    absoluteEnd,
-    forceUpdate,
-    lastUpdated,
-  ]);
+  const data = (useLoaderData() as any).metrics as Promise<MetricsFetchDataResponse>;
 
   const handleTableChange = useCallback(
     ({ sort }: Criteria<MetricsFetchDataSeries>) => {
@@ -85,7 +67,8 @@ export function MetricsSection({ bucketSize }: Props) {
         setSortDirection(direction);
         if (data) {
           (async () => {
-            const response = await data.sort(field, direction);
+            const metrics = await data;
+            const response = await metrics.sort(field, direction);
             setSortedData(response || null);
           })();
         }
@@ -201,29 +184,31 @@ export function MetricsSection({ bucketSize }: Props) {
     sort: { field: sortField, direction: sortDirection },
   };
 
-  const viewData = sortedData || data;
-
-  const { appLink } = data || {};
-
   return (
-    <SectionContainer
-      title={i18n.translate('xpack.observability.overview.metrics.title', {
-        defaultMessage: 'Hosts',
-      })}
-      appLink={{
-        href: appLink,
-        label: i18n.translate('xpack.observability.overview.metrics.appLink', {
-          defaultMessage: 'Show inventory',
-        }),
-      }}
-      hasError={status === FETCH_STATUS.FAILURE}
-    >
-      <EuiBasicTable
-        onChange={handleTableChange}
-        sorting={sorting}
-        items={viewData?.series ?? []}
-        columns={columns}
-      />
-    </SectionContainer>
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <Await resolve={data}>
+        {(metrics: MetricsFetchDataResponse) => (
+          <SectionContainer
+            title={i18n.translate('xpack.observability.overview.metrics.title', {
+              defaultMessage: 'Hosts',
+            })}
+            appLink={{
+              href: metrics.appLink,
+              label: i18n.translate('xpack.observability.overview.metrics.appLink', {
+                defaultMessage: 'Show inventory',
+              }),
+            }}
+            hasError={status === FETCH_STATUS.FAILURE}
+          >
+            <EuiBasicTable
+              onChange={handleTableChange}
+              sorting={sorting}
+              items={(sortedData ?? metrics).series ?? []}
+              columns={columns}
+            />
+          </SectionContainer>
+        )}
+      </Await>
+    </Suspense>
   );
 }

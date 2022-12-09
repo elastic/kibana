@@ -9,8 +9,7 @@ import type { History } from 'history';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { RouteComponentProps } from 'react-router-dom';
-import { Redirect, Route, Router, Switch } from 'react-router-dom';
+import { Navigate, Route, Router, Routes, useParams } from 'react-router-dom';
 import type { Observable } from 'rxjs';
 
 import type { CoreStart, CoreTheme, StartServicesAccessor } from '@kbn/core/public';
@@ -65,6 +64,16 @@ export const usersManagementApp = Object.freeze({
           import('../roles'),
         ]);
 
+        const Edit = () => {
+          const { username = '' } = useParams<{ username: string }>();
+          const decodedUserName = tryDecodeURIComponent(username);
+          return (
+            <Breadcrumb text={decodedUserName} href={`/edit/${encodeURIComponent(username)}`}>
+              <EditUserPage username={decodedUserName} />
+            </Breadcrumb>
+          );
+        };
+
         render(
           <Providers
             services={coreStart}
@@ -85,17 +94,22 @@ export const usersManagementApp = Object.freeze({
               })}
               href="/"
             >
-              <Switch>
-                <Route path={['/', '']} exact>
-                  <UsersGridPage
-                    notifications={coreStart.notifications}
-                    userAPIClient={new UserAPIClient(coreStart.http)}
-                    rolesAPIClient={new RolesAPIClient(coreStart.http)}
-                    history={history}
-                    navigateToApp={coreStart.application.navigateToApp}
-                    readOnly={!coreStart.application.capabilities.users.save}
+              <Routes>
+                {['/', ''].map((path) => (
+                  <Route
+                    path={path}
+                    element={
+                      <UsersGridPage
+                        notifications={coreStart.notifications}
+                        userAPIClient={new UserAPIClient(coreStart.http)}
+                        rolesAPIClient={new RolesAPIClient(coreStart.http)}
+                        history={history}
+                        navigateToApp={coreStart.application.navigateToApp}
+                        readOnly={!coreStart.application.capabilities.users.save}
+                      />
+                    }
                   />
-                </Route>
+                ))}
                 <Route path="/create">
                   <Breadcrumb
                     text={i18n.translate('xpack.security.users.editUserPage.createBreadcrumb', {
@@ -106,23 +120,9 @@ export const usersManagementApp = Object.freeze({
                     <CreateUserPage />
                   </Breadcrumb>
                 </Route>
-                <Route
-                  path="/edit/:username"
-                  render={(props: RouteComponentProps<EditUserParams>) => {
-                    // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
-                    // See https://github.com/elastic/kibana/issues/82440
-                    const username = tryDecodeURIComponent(props.match.params.username);
-                    return (
-                      <Breadcrumb text={username} href={`/edit/${encodeURIComponent(username)}`}>
-                        <EditUserPage username={username} />
-                      </Breadcrumb>
-                    );
-                  }}
-                />
-                <Route path="/edit">
-                  <Redirect to="/create" />
-                </Route>
-              </Switch>
+                <Route path="/edit/:username" element={Edit} />
+                <Route path="/edit" element={<Navigate to="/create" />} />
+              </Routes>
             </Breadcrumb>
           </Providers>,
           element
@@ -151,16 +151,18 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
   authc,
   onChange,
   children,
-}) => (
-  <KibanaContextProvider services={services}>
-    <AuthenticationProvider authc={authc}>
-      <I18nProvider>
-        <KibanaThemeProvider theme$={theme$}>
-          <Router history={history}>
-            <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
-          </Router>
-        </KibanaThemeProvider>
-      </I18nProvider>
-    </AuthenticationProvider>
-  </KibanaContextProvider>
-);
+}) => {
+  return (
+    <KibanaContextProvider services={services}>
+      <AuthenticationProvider authc={authc}>
+        <I18nProvider>
+          <KibanaThemeProvider theme$={theme$}>
+            <Router navigator={history} location={history.location}>
+              <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+            </Router>
+          </KibanaThemeProvider>
+        </I18nProvider>
+      </AuthenticationProvider>
+    </KibanaContextProvider>
+  );
+};

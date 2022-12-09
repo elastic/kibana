@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useReducer } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import {
   EuiPageHeader,
   EuiText,
@@ -85,7 +85,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   requestRefresh,
   refreshToken,
 }) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const {
     application: { capabilities },
     ruleTypeRegistry,

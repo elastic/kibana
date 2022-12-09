@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
@@ -52,13 +52,9 @@ export const EnterpriseSearchOverview: React.FC<InitialAppData> = ({
   };
 
   return (
-    <Switch>
-      <Route exact path={SETUP_GUIDE_PATH}>
-        <SetupGuide />
-      </Route>
-      <Route exact path={ROOT_PATH}>
-        {showView()}
-      </Route>
-    </Switch>
+    <Routes>
+      <Route path={SETUP_GUIDE_PATH} element={<SetupGuide />} />
+      <Route path={ROOT_PATH} element={showView()} />
+    </Routes>
   );
 };

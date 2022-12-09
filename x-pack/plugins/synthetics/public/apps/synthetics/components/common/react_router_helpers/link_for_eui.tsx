@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import {
   EuiLink,
   EuiButton,
@@ -30,7 +30,7 @@ interface IEuiReactRouterProps {
 }
 
 export const ReactRouterHelperForEui: React.FC<IEuiReactRouterProps> = ({ to, children }) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const onClick = (event: React.MouseEvent) => {
     if (letBrowserHandleEvent(event)) return;

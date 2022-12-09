@@ -6,7 +6,7 @@
  */
 import { stringify, parse } from 'query-string';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, useLocation, useHistory } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import type { CriteriaWithPagination, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -19,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
+
+import { createBrowserHistory } from 'history';
 
 import { InstallStatus } from '../../../../../types';
 import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
@@ -82,7 +84,7 @@ const AgentPolicyNotFound = () => (
 
 export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps) => {
   const { search } = useLocation();
-  const history = useHistory();
+  const history = createBrowserHistory();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const agentPolicyIdFromParams = useMemo(
     () => queryParams.get('addAgentToPolicyId'),
@@ -330,7 +332,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   // this happens if they arrive with a direct url or they uninstall while on this tab
   if (packageInstallStatus.status !== InstallStatus.installed) {
     return (
-      <Redirect to={getPath('integration_details_overview', { pkgkey: `${name}-${version}` })} />
+      <Navigate to={getPath('integration_details_overview', { pkgkey: `${name}-${version}` })} />
     );
   }
   const selectedPolicies = packageAndAgentPolicies.find(

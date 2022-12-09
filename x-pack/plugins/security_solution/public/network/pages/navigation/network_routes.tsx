@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
+import { Routes } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -71,10 +71,11 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
     };
 
     return (
-      <Switch>
-        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.dns})`}>
-          <DnsQueryTabBody {...tabProps} />
-        </Route>
+      <Routes>
+        <Route
+          path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.dns})`}
+          element={<DnsQueryTabBody {...tabProps} />}
+        />
         <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.flows})`}>
           <>
             <ConditionalFlexGroup direction="column">
@@ -101,26 +102,34 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
             </ConditionalFlexGroup>
           </>
         </Route>
-        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.http})`}>
-          <HttpQueryTabBody {...tabProps} />
-        </Route>
-        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.tls})`}>
-          <TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
-        </Route>
-        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.anomalies})`}>
-          <AnomaliesQueryTabBody
-            {...anomaliesProps}
-            AnomaliesTableComponent={AnomaliesNetworkTable}
-          />
-        </Route>
-        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.events})`}>
-          <EventsQueryTabBody
-            additionalFilters={sourceOrDestinationIpExistsFilter}
-            tableId={TableId.networkPageEvents}
-            {...tabProps}
-          />
-        </Route>
-      </Switch>
+        <Route
+          path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.http})`}
+          element={<HttpQueryTabBody {...tabProps} />}
+        />
+        <Route
+          path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.tls})`}
+          element={<TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />}
+        />
+        <Route
+          path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.anomalies})`}
+          element={
+            <AnomaliesQueryTabBody
+              {...anomaliesProps}
+              AnomaliesTableComponent={AnomaliesNetworkTable}
+            />
+          }
+        />
+        <Route
+          path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.events})`}
+          element={
+            <EventsQueryTabBody
+              additionalFilters={sourceOrDestinationIpExistsFilter}
+              tableId={TableId.networkPageEvents}
+              {...tabProps}
+            />
+          }
+        />
+      </Routes>
     );
   }
 );

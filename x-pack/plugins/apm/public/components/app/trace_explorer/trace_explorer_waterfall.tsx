@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTraceExplorerSamples } from '../../../hooks/use_trace_explorer_samples';
@@ -14,7 +14,7 @@ import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetche
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
 
 export function TraceExplorerWaterfall() {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const traceSamplesFetchResult = useTraceExplorerSamples();
 

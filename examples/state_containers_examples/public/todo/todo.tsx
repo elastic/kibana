@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { Link, Route, Router, Switch, useLocation } from 'react-router-dom';
+import { Link, Route, Router, Routes } from 'react-router-dom';
 import { History } from 'history';
 import {
   EuiButton,
@@ -58,7 +58,7 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter, stateContainer }) => {
       }),
     [todos, filter]
   );
-  const location = useLocation();
+
   return (
     <>
       <div>
@@ -183,7 +183,7 @@ export const TodoAppPage: React.FC<{
   }, [stateContainer, props.history, useHashedUrl]);
 
   return (
-    <Router history={props.history}>
+    <Router navigator={props.history} location={props.history.location}>
       <EuiPageBody>
         <EuiPageHeader>
           <EuiPageHeaderSection>
@@ -203,17 +203,20 @@ export const TodoAppPage: React.FC<{
         </EuiPageHeader>
         <EuiPageContent>
           <EuiPageContentBody>
-            <Switch>
-              <Route path={'/completed'}>
-                <TodoApp filter={'completed'} stateContainer={stateContainer} />
-              </Route>
-              <Route path={'/not-completed'}>
-                <TodoApp filter={'not-completed'} stateContainer={stateContainer} />
-              </Route>
-              <Route path={'/'}>
-                <TodoApp filter={null} stateContainer={stateContainer} />
-              </Route>
-            </Switch>
+            <Routes>
+              <Route
+                path={'/completed'}
+                element={<TodoApp filter={'completed'} stateContainer={stateContainer} />}
+              />
+              <Route
+                path={'/not-completed'}
+                element={<TodoApp filter={'not-completed'} stateContainer={stateContainer} />}
+              />
+              <Route
+                path={'/'}
+                element={<TodoApp filter={null} stateContainer={stateContainer} />}
+              />
+            </Routes>
             <EuiSpacer size={'xxl'} />
             <EuiText size={'s'}>
               <p>Most of kibana apps persist state in the URL in two ways:</p>

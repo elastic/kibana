@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '../../../../../common/constants/monitor_defaults';
 import {
@@ -123,7 +123,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   const [isZipUrlTLSEnabled, setIsZipUrlTLSEnabled] = useState<boolean>(defaultIsZipUrlTLSEnabled);
   const [namespace, setNamespace] = useState<string>(defaultNamespace);
 
-  const isAddMonitorRoute = useRouteMatch(MONITOR_ADD_ROUTE);
+  const isAddMonitorRoute = useMatch(MONITOR_ADD_ROUTE);
 
   useEffect(() => {
     if (isAddMonitorRoute?.isExact) {

@@ -6,7 +6,7 @@
  */
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import {
   ActionMenuDivider,
   Section,
@@ -50,7 +50,7 @@ export function InstanceActionsMenu({
     serviceNodeName,
   });
   const metricOverviewHref = useMetricOverviewHref(serviceName);
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   if (isPending(status)) {
     return (

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect, useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { DataRetentionTab } from './data_retention';
 import { useSettingsBreadcrumbs } from './use_settings_breadcrumbs';
 
@@ -16,7 +16,7 @@ export const SettingsPage = () => {
   const { tabId } = useParams<{ tabId: string }>();
 
   if (!tabId) {
-    return <Redirect to="/settings/alerting" />;
+    return <Navigate to="/settings/alerting" />;
   }
 
   return <div>{tabId === 'alerting' ? <div>TODO: Alerting</div> : <DataRetentionTab />}</div>;

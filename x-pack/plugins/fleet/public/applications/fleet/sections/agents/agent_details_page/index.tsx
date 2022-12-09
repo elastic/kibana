@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useParams } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,9 +37,7 @@ import {
 } from './components';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
-  const {
-    params: { agentId, tabId = '' },
-  } = useRouteMatch<{ agentId: string; tabId?: string }>();
+  const { agentId = '', tabId = '' } = useParams<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
   const {
     isLoading,
@@ -230,25 +228,19 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         : '-',
   });
   return (
-    <Switch>
+    <Routes>
       <Route
         path={FLEET_ROUTING_PATHS.agent_details_logs}
-        render={() => {
-          return <AgentLogs agent={agent} agentPolicy={agentPolicy} />;
-        }}
+        children={<AgentLogs agent={agent} agentPolicy={agentPolicy} />}
       />
       <Route
         path={FLEET_ROUTING_PATHS.agent_details_diagnostics}
-        render={() => {
-          return <AgentDiagnosticsTab agent={agent} />;
-        }}
+        children={<AgentDiagnosticsTab agent={agent} />}
       />
       <Route
         path={FLEET_ROUTING_PATHS.agent_details}
-        render={() => {
-          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
-        }}
+        children={<AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />}
       />
-    </Switch>
+    </Routes>
   );
 };

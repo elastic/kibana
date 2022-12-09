@@ -6,13 +6,13 @@
  */
 
 import { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../../../hooks';
 
 export function useHistoryBlock(isEdited: boolean) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { overlays, application } = useStartServices();
 
   useEffect(() => {

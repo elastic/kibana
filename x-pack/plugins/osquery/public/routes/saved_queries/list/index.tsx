@@ -19,7 +19,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import deepEqual from 'fast-deep-equal';
 
 import type { SavedObject } from '@kbn/core/public';
@@ -46,7 +46,7 @@ interface PlayButtonProps {
 }
 
 const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, savedQuery }) => {
-  const { push } = useHistory();
+  const { push } = createBrowserHistory();
 
   // TODO: Add href
   const handlePlayClick = useCallback(

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useRouteMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 
 import { useLink } from '../../../../hooks';
 
 export function usePackagePolicyEditorPageUrl(dataStreamId?: string) {
   const {
     params: { packagePolicyId, policyId },
-  } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
+  } = useMatch<{ policyId: string; packagePolicyId: string }>();
   const { getHref } = useLink();
 
   const baseUrl =

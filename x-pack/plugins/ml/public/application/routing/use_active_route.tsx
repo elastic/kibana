@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useLocation, useRouteMatch } from 'react-router-dom';
+import { useLocation, useMatch } from 'react-router-dom';
 import { keyBy } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -29,18 +29,18 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
   /**
    * Temp fix for routes with params.
    */
-  const editCalendarMatch = useRouteMatch('/settings/calendars_list/edit_calendar/:calendarId');
-  const editFilterMatch = useRouteMatch('/settings/filter_lists/edit_filter_list/:filterId');
+  const editCalendarMatch = useMatch('/settings/calendars_list/edit_calendar/:calendarId');
+  const editFilterMatch = useMatch('/settings/filter_lists/edit_filter_list/:filterId');
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const routesMap = useMemo(() => keyBy(routesList, 'path'), []);
 
   const activeRoute = useMemo(() => {
     if (editCalendarMatch) {
-      return routesMap[editCalendarMatch.path];
+      return routesMap[editCalendarMatch.pathname];
     }
     if (editFilterMatch) {
-      return routesMap[editFilterMatch.path];
+      return routesMap[editFilterMatch.pathname];
     }
     // Remove trailing slash from the pathname
     const pathnameKey = pathname.replace(/\/$/, '');
@@ -95,8 +95,8 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
   useExecutionContext(executionContext, {
     name: PLUGIN_ID,
     type: 'application',
-    page: activeRoute?.path ?? '/overview',
+    page: activeRoute?.path ?? 'overview',
   });
 
-  return activeRoute ?? routesMap['/overview'];
+  return activeRoute ?? routesMap.overview;
 };

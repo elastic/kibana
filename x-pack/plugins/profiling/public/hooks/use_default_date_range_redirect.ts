@@ -5,13 +5,14 @@
  * 2.0.
  */
 import qs from 'query-string';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
 export function useDateRangeRedirect() {
-  const history = useHistory();
   const location = useLocation();
+  const history = createBrowserHistory();
+
   const query = qs.parse(location.search);
 
   const {

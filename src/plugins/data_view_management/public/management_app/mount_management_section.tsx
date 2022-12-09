@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -80,32 +80,34 @@ export async function mountManagementSection(
     savedObjectsManagement,
   };
 
-  ReactDOM.render(
-    <KibanaContextProvider services={deps}>
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <Router history={params.history}>
-            <Switch>
-              <Route path={['/create']}>
-                <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
-              </Route>
-              <Route path={['/dataView/:id/field/:fieldName', '/dataView/:id/create-field/']}>
-                <CreateEditFieldContainer />
-              </Route>
-              <Route path={['/dataView/:id']}>
-                <EditIndexPatternContainer />
-              </Route>
-              <Redirect path={'/patterns*'} to={'dataView*'} />
-              <Route path={['/']}>
-                <IndexPatternTableWithRouter canSave={canSave} />
-              </Route>
-            </Switch>
-          </Router>
-        </I18nProvider>
-      </KibanaThemeProvider>
-    </KibanaContextProvider>,
-    params.element
-  );
+  const App = () => {
+    return (
+      <KibanaContextProvider services={deps}>
+        <KibanaThemeProvider theme$={theme.theme$}>
+          <I18nProvider>
+            <Router navigator={params.history} location={params.history.location}>
+              <Routes>
+                <Route
+                  path="/create"
+                  element={
+                    <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
+                  }
+                />
+                {['/dataView/:id/field/:fieldName', '/dataView/:id/create-field/'].map((path) => (
+                  <Route path={path} element={<CreateEditFieldContainer />} />
+                ))}
+                <Route path="/dataView/:id" element={<EditIndexPatternContainer />} />
+                <Route path="/patterns*" element={<Navigate to={'dataView*'} />} />
+                <Route path="/" element={<IndexPatternTableWithRouter canSave={canSave} />} />
+              </Routes>
+            </Router>
+          </I18nProvider>
+        </KibanaThemeProvider>
+      </KibanaContextProvider>
+    );
+  };
+
+  ReactDOM.render(<App />, params.element);
 
   return () => {
     chrome.docTitle.reset();

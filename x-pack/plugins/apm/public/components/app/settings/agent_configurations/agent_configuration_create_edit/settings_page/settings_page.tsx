@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 import React, { useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
@@ -57,7 +57,7 @@ export function SettingsPage({
   isEditMode: boolean;
   onClickEdit: () => void;
 }) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   // get a telemetry UI event tracker
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { toasts } = useApmPluginContext().core.notifications;

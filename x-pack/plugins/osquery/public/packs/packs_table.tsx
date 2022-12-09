@@ -21,7 +21,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
@@ -83,7 +83,7 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
 
 const PacksTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
-  const { push } = useHistory();
+  const { push } = createBrowserHistory();
   const { data, isLoading } = usePacks({});
 
   const renderAgentPolicy = useCallback(

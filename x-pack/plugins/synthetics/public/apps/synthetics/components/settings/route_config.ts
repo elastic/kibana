@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { RouteProps } from '../../routes';
 import { SETTINGS_ROUTE, SYNTHETICS_SETTINGS_ROUTE } from '../../../../../common/constants';
 import { SettingsPage } from './settings_page';
 import { getSettingsPageHeader } from './page_header';
 
 export const getSettingsRouteConfig = (
-  history: ReturnType<typeof useHistory>,
+  history: ReturnType<typeof createBrowserHistory>,
   syntheticsPath: string,
   baseTitle: string
 ) => {

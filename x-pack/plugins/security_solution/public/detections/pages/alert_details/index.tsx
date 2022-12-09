@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { Switch, useParams } from 'react-router-dom';
+import { Routes, useParams } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { EuiSpacer } from '@elastic/eui';
@@ -30,7 +30,7 @@ import { AlertDetailsHeader } from './components/header';
 import { DetailsSummaryTab } from './tabs/summary';
 
 export const AlertDetailsPage = memo(() => {
-  const { detailName: eventId } = useParams<{ detailName: string }>();
+  const { detailName: eventId = '' } = useParams<{ detailName: string }>();
   const dispatch = useDispatch();
   const sourcererDataView = useSourcererDataView(SourcererScopeName.detections);
   const indexName = useMemo(
@@ -75,17 +75,20 @@ export const AlertDetailsPage = memo(() => {
           <AlertDetailsHeader loading={loading} ruleName={ruleName} timestamp={timestamp} />
           <SecuritySolutionTabNavigation navTabs={getAlertDetailsNavTabs(eventId)} />
           <EuiSpacer size="l" />
-          <Switch>
-            <Route exact path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.summary)}>
-              <DetailsSummaryTab
-                eventId={eventId}
-                dataAsNestedObject={dataAsNestedObject}
-                searchHit={searchHit}
-                detailsData={detailsData}
-                sourcererDataView={sourcererDataView}
-              />
-            </Route>
-          </Switch>
+          <Routes>
+            <Route
+              path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.summary)}
+              element={
+                <DetailsSummaryTab
+                  eventId={eventId}
+                  dataAsNestedObject={dataAsNestedObject}
+                  searchHit={searchHit}
+                  detailsData={detailsData}
+                  sourcererDataView={sourcererDataView}
+                />
+              }
+            />
+          </Routes>
         </>
       )}
       <SpyRoute pageName={SecurityPageName.alerts} state={{ ruleName }} />

@@ -6,7 +6,7 @@
  */
 import qs from 'query-string';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useApmParams } from '../../../hooks/use_apm_params';
 
 export function RedirectToDefaultServiceRouteView() {
@@ -18,6 +18,6 @@ export function RedirectToDefaultServiceRouteView() {
   const search = qs.stringify(query);
 
   return (
-    <Redirect to={{ pathname: `/services/${serviceName}/overview`, search }} />
+    <Navigate to={{ pathname: `/services/${serviceName}/overview`, search }} />
   );
 }

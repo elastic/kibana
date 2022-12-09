@@ -83,8 +83,9 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
 }
 
 function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
-  const { core } = useApmPluginContext();
   const location = useLocation();
+  const { core } = useApmPluginContext();
+
   const { urlParams } = useLegacyUrlParams();
 
   const sections = getSections({

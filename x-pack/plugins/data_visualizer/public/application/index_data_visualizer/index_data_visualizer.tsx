@@ -6,7 +6,7 @@
  */
 import '../_index.scss';
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from '@kbn/rison';
@@ -14,6 +14,7 @@ import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { createBrowserHistory } from 'history';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   IndexDataVisualizerViewProps,
@@ -80,7 +81,7 @@ export const DataVisualizerUrlStateContextProvider: FC<
     notifications: { toasts },
   } = services;
 
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { search: urlSearchString } = useLocation();
 
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>(undefined);

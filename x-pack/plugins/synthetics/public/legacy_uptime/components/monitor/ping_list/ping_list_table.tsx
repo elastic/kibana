@@ -9,7 +9,7 @@ import React, { MouseEvent, useCallback, useEffect, useState } from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useDispatch } from 'react-redux';
 import * as I18LABELS from './translations';
 import { FailedStepsApiResponse, Ping } from '../../../../../common/runtime_types';
@@ -38,7 +38,7 @@ interface Props {
 }
 
 export function PingListTable({ loading, error, pings, pagination, onChange, failedSteps }: Props) {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const [expandedRows, setExpandedRows] = useState<Record<string, JSX.Element>>({});
 

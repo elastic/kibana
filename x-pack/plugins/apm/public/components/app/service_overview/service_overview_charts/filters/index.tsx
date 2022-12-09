@@ -11,7 +11,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { Environment } from '../../../../../../common/environment_rt';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
@@ -44,7 +44,7 @@ export function MobileFilters({
   start,
   filters,
 }: Props) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { isSmall, isLarge } = useBreakpoints();
   const { serviceName } = useApmServiceContext();
   const { data = { mobileFilters: [] } } = useFetcher(

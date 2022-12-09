@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
@@ -54,7 +54,7 @@ function getColorPerItem(series?: LogsFetchDataResponse['series']) {
 }
 
 export function LogsSection({ bucketSize }: Props) {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const chartTheme = useChartTheme();
   const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =

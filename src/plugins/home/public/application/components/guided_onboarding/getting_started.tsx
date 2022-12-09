@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -53,7 +53,7 @@ export const GettingStarted = () => {
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   useEffect(() => {
     chrome.setBreadcrumbs([

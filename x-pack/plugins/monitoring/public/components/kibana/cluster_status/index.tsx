@@ -35,6 +35,7 @@ interface IndicatorProps {
 }
 
 export function ClusterStatus({ stats, alerts }: ClusterStatusProps) {
+  const location = useLocation();
   const {
     concurrent_connections: connections,
     count: instances,
@@ -47,7 +48,6 @@ export function ClusterStatus({ stats, alerts }: ClusterStatusProps) {
   } = stats;
 
   const { staleStatusThresholdSeconds } = React.useContext(ExternalConfigContext);
-  const location = useLocation();
 
   const metrics = [
     {

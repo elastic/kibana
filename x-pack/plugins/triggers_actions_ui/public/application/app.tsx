@@ -6,7 +6,7 @@
  */
 
 import React, { lazy } from 'react';
-import { Switch, Route, Redirect, Router } from 'react-router-dom';
+import { Routes, Route, Navigate, Router } from 'react-router-dom';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -85,7 +85,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
       <EuiThemeProvider darkMode={isDarkMode}>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...deps }}>
-            <Router history={deps.history}>
+            <Router navigator={deps.history} location={location}>
               <AppWithoutRouter sectionsRegex={sectionsRegex} />
             </Router>
           </KibanaContextProvider>
@@ -103,32 +103,29 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
 
   return (
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
-      <Switch>
+      <Routes>
         <Route
           path={`/:section(${sectionsRegex})`}
-          component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
+          children={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
         />
         <Route
           path={ruleDetailsRoute}
-          component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
+          children={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
         />
         <Route
-          exact
           path={legacyRouteToRuleDetails}
-          render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
+          children={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
         />
         <Route
-          exact
           path={routeToConnectors}
-          render={() => {
+          children={() => {
             navigateToApp(`management/insightsAndAlerting/${CONNECTORS_PLUGIN_ID}`);
             return null;
           }}
         />
 
-        <Redirect from={'/'} to="rules" />
-        <Redirect from={'/alerts'} to="rules" />
-      </Switch>
+        <Route path="*" element={<Navigate to="rules" />} />
+      </Routes>
     </ConnectorProvider>
   );
 };

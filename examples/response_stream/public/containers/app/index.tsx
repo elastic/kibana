@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Navigate, Routes } from 'react-router-dom';
 import { EuiPage } from '@elastic/eui';
 import { useDeps } from '../../hooks/use_deps';
 import { Sidebar } from './sidebar';
@@ -19,7 +19,7 @@ export const App: React.FC = () => {
   const routeElements: React.ReactElement[] = [];
   for (const { items } of routes) {
     for (const { id, component } of items) {
-      routeElements.push(<Route key={id} path={`/${id}`} render={(props) => component} />);
+      routeElements.push(<Route key={id} path={`/${id}`} element={component} />);
     }
   }
 
@@ -27,10 +27,10 @@ export const App: React.FC = () => {
     <Router basename={appBasePath}>
       <EuiPage>
         <Sidebar />
-        <Switch>
+        <Routes>
           {routeElements}
-          <Redirect to="/simple-string-stream" />
-        </Switch>
+          <Route element={<Navigate to="/simple-string-stream" />} />
+        </Routes>
       </EuiPage>
     </Router>
   );

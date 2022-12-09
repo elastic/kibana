@@ -7,8 +7,9 @@
 
 import * as t from 'io-ts';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { defer, Navigate, RouteProps } from 'react-router-dom';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { casesPath } from '../../common';
 import { CasesPage } from '../pages/cases';
 import { AlertsPage } from '../pages/alerts/containers/alerts_page';
@@ -21,8 +22,13 @@ import { AlertingPages } from '../config';
 import { AlertDetails } from '../pages/alert_details';
 import { DatePickerContextProvider } from '../context/date_picker_context';
 import { SlosPage } from '../pages/slos';
+import { getNewsFeed } from '../services/get_news_feed';
+import { getDataHandler } from '../data_handler';
+import { getAbsoluteTime } from '../utils/date';
+import { calculateBucketSize } from '../pages/overview/containers/overview_page/helpers';
 
-export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
+export type RoutesType = ReturnType<typeof getRoutes>;
+export type RouteParams<T extends keyof RoutesType> = DecodeParams<RoutesType[T]['paramType']>;
 
 type DecodeParams<TParams extends Params | undefined> = {
   [key in keyof TParams]: TParams[key] extends t.Any ? t.TypeOf<TParams[key]> : never;
@@ -35,67 +41,85 @@ export interface Params {
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
-function SimpleRedirect({ to }: { to: string }) {
-  const history = useHistory();
-  history.replace(to);
-  return null;
-}
+// function SimpleRedirect({ to }: { to: string }) {
+//   return <Navigate to={to} />;
+// }
 
-export const routes = {
-  '/': {
-    handler: () => {
-      return <SimpleRedirect to="/overview" />;
-    },
-    params: {},
-    exact: true,
+export const getRoutes = (http: HttpSetup): Record<string, RouteProps & { paramType: Params }> => ({
+  '*': {
+    element: <Navigate to="/overview" />,
+    paramType: {},
   },
-  '/landing': {
-    handler: () => {
-      return <SimpleRedirect to="/overview" />;
-    },
-    params: {},
-    exact: true,
+  landing: {
+    element: <Navigate to="/overview" />,
+    paramType: {},
   },
-  '/overview': {
-    handler: ({ query }: any) => {
-      return (
-        <DatePickerContextProvider>
-          <OverviewPage />
-        </DatePickerContextProvider>
-      );
+  overview: {
+    element: (
+      <DatePickerContextProvider>
+        <OverviewPage />
+      </DatePickerContextProvider>
+    ),
+    loader: async ({ request }) => {
+      const url = new URL(request.url);
+
+      const { rangeFrom, rangeTo } = new Proxy(new URLSearchParams(url.search), {
+        get: (searchParams, prop) => searchParams.get(prop as string),
+      }) as {
+        rangeFrom?: string;
+        rangeTo?: string;
+        refreshPaused?: boolean;
+        refreshInterval?: number;
+      };
+
+      const relativeStart = rangeFrom as string;
+      const relativeEnd = rangeTo as string;
+
+      const absoluteStart = getAbsoluteTime(relativeStart as string);
+      const absoluteEnd = getAbsoluteTime(relativeEnd as string);
+
+      const bucketSize = calculateBucketSize({
+        start: absoluteStart,
+        end: absoluteEnd,
+      });
+
+      const gInfra = () => {
+        if (bucketSize && absoluteStart && absoluteEnd) {
+          return getDataHandler('infra_metrics')?.fetchData({
+            absoluteTime: {
+              start: absoluteStart as number,
+              end: absoluteEnd as number,
+            },
+            relativeTime: { start: relativeStart, end: relativeEnd },
+            ...bucketSize,
+          });
+        }
+      };
+
+      return defer({ newsFeed: getNewsFeed({ http }), metrics: gInfra() });
     },
-    params: {},
-    exact: true,
+    paramType: {},
   },
-  [casesPath]: {
-    handler: () => {
-      return (
-        <TrackApplicationView viewId={AlertingPages.cases}>
-          <CasesPage />
-        </TrackApplicationView>
-      );
-    },
-    params: {},
-    exact: false,
+  [`${casesPath}/*`]: {
+    element: (
+      <TrackApplicationView viewId={AlertingPages.cases}>
+        <CasesPage />
+      </TrackApplicationView>
+    ),
+    paramType: {},
   },
-  '/alerts': {
-    handler: () => {
-      return (
-        <TrackApplicationView viewId={AlertingPages.alerts}>
-          <AlertsPage />
-        </TrackApplicationView>
-      );
-    },
-    params: {
-      // Technically gets a '_a' param by using Kibana URL state sync helpers
-    },
-    exact: true,
+  alerts: {
+    element: (
+      <TrackApplicationView viewId={AlertingPages.alerts}>
+        <AlertsPage />
+      </TrackApplicationView>
+    ),
+    paramType: {},
   },
-  '/exploratory-view/': {
-    handler: () => {
-      return <ObservabilityExploratoryView />;
-    },
-    params: {
+  'exploratory-view/': {
+    element: <ObservabilityExploratoryView />,
+
+    paramType: {
       query: t.partial({
         rangeFrom: t.string,
         rangeTo: t.string,
@@ -103,38 +127,36 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
-    exact: true,
+    // exact: true,
   },
-  '/alerts/rules': {
-    handler: () => {
-      return (
-        <TrackApplicationView viewId={AlertingPages.rules}>
-          <RulesPage />
-        </TrackApplicationView>
-      );
-    },
-    params: {},
-    exact: true,
+  'alerts/rules': {
+    element: (
+      <TrackApplicationView viewId={AlertingPages.rules}>
+        <RulesPage />
+      </TrackApplicationView>
+    ),
+    paramType: {},
+    // params: {},
+    // exact: true,
   },
-  '/alerts/rules/:ruleId': {
-    handler: () => {
-      return <RuleDetailsPage />;
-    },
-    params: {},
-    exact: true,
+  'alerts/rules/:ruleId': {
+    element: <RuleDetailsPage />,
+    paramType: {},
+
+    // params: {},
+    // exact: true,
   },
-  '/alerts/:alertId': {
-    handler: () => {
-      return <AlertDetails />;
-    },
-    params: {},
-    exact: true,
+  'alerts/:alertId': {
+    element: <AlertDetails />,
+    paramType: {},
+    // params: {},
+    // exact: true,
   },
-  '/slos': {
-    handler: () => {
-      return <SlosPage />;
-    },
-    params: {},
-    exact: true,
+  slos: {
+    element: <SlosPage />,
+    paramType: {},
+    // },
+    // params: {},
+    // exact: true,
   },
-};
+});

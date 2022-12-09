@@ -10,7 +10,7 @@ import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
+import { Router, Navigate, Route, Routes, useMatch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -145,8 +145,8 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [initializationError, setInitializationError] = useState<Error | null>(null);
 
-  const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
-  const isDebugPath = !!useRouteMatch(FLEET_ROUTING_PATHS.debug);
+  const isAddIntegrationsPath = !!useMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
+  const isDebugPath = !!useMatch(FLEET_ROUTING_PATHS.debug);
 
   useEffect(() => {
     (async () => {
@@ -259,7 +259,7 @@ export const FleetAppContext: React.FC<{
                     <EuiThemeProvider darkMode={isDarkMode}>
                       <UIExtensionsContext.Provider value={extensions}>
                         <FleetStatusProvider>
-                          <Router history={history}>
+                          <Router navigator={history} location={history.location}>
                             <PackageInstallProvider
                               notifications={startServices.notifications}
                               theme$={theme$}
@@ -306,6 +306,25 @@ const FleetTopNav = memo(
   }
 );
 
+const Redirect = () => {
+  // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
+  const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
+  if (!shouldRedirectHash) {
+    return <Navigate to={FLEET_ROUTING_PATHS.agents} />;
+  }
+  const pathname = location.hash.replace(/^#(\/fleet)?/, '');
+
+  return (
+    <Navigate
+      to={{
+        ...location,
+        pathname,
+        hash: undefined,
+      }}
+    />
+  );
+};
+
 export const AppRoutes = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
     const flyoutContext = useFlyoutContext();
@@ -315,50 +334,25 @@ export const AppRoutes = memo(
       <>
         <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
 
-        <Switch>
-          <Route path={FLEET_ROUTING_PATHS.agents}>
-            <AgentsApp />
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.policies}>
-            <AgentPolicyApp />
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
-            <EnrollmentTokenListPage />
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.data_streams}>
-            <DataStreamApp />
-          </Route>
+        <Routes>
+          <Route path={FLEET_ROUTING_PATHS.agents} element={<AgentsApp />} />
+          <Route path={FLEET_ROUTING_PATHS.policies} element={<AgentPolicyApp />} />
+          <Route
+            path={FLEET_ROUTING_PATHS.enrollment_tokens}
+            element={<EnrollmentTokenListPage />}
+          />
+          <Route path={FLEET_ROUTING_PATHS.data_streams} element={<DataStreamApp />} />
 
-          <Route path={FLEET_ROUTING_PATHS.settings}>
-            <SettingsApp />
-          </Route>
+          <Route path={FLEET_ROUTING_PATHS.settings} element={<SettingsApp />} />
 
           {/* TODO: Move this route to the Integrations app */}
-          <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-            <CreatePackagePolicyPage />
-          </Route>
-
           <Route
-            render={({ location }) => {
-              // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
-              const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
-              if (!shouldRedirectHash) {
-                return <Redirect to={FLEET_ROUTING_PATHS.agents} />;
-              }
-              const pathname = location.hash.replace(/^#(\/fleet)?/, '');
-
-              return (
-                <Redirect
-                  to={{
-                    ...location,
-                    pathname,
-                    hash: undefined,
-                  }}
-                />
-              );
-            }}
+            path={FLEET_ROUTING_PATHS.add_integration_to_policy}
+            element={<CreatePackagePolicyPage />}
           />
-        </Switch>
+
+          <Route element={Redirect} />
+        </Routes>
 
         {flyoutContext.isEnrollmentFlyoutOpen && (
           <EuiPortal>

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { EuiLink, EuiIcon } from '@elastic/eui';
 import { InPortal } from 'react-reverse-portal';
 import { MonitorDetailsLinkPortalNode } from './portals';
@@ -26,7 +26,7 @@ export const MonitorDetailsLinkPortal = ({
 };
 
 export const MonitorDetailsLink = ({ name, configId }: { name: string; configId: string }) => {
-  const history = useHistory();
+  const history = createBrowserHistory();
   const href = history.createHref({
     pathname: `monitor/${configId}`,
   });

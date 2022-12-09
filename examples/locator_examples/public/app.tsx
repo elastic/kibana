@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import { EuiPageBody } from '@elastic/eui';
 import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
-import { Route, Switch, Redirect, Router, useLocation } from 'react-router-dom';
+import { Route, Routes, Navigate, Router, useLocation } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import { EuiText } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
@@ -32,22 +32,26 @@ const HelloPage = ({ firstName, lastName }: HelloPageProps) => (
   <EuiText>{`Hello ${firstName} ${lastName}`}</EuiText>
 );
 
-export const Routes: React.FC<{}> = () => {
+export const LocatorRoutes: React.FC<{}> = () => {
   const query = useQuery();
 
   return (
     <EuiPageBody>
       <EuiPageContent>
         <EuiPageContentBody>
-          <Switch>
-            <Route path="/hello">
-              <HelloPage
-                firstName={query.get('firstName') || ''}
-                lastName={query.get('lastName') || ''}
-              />
-            </Route>
-            <Redirect from="/" to="/hello" />
-          </Switch>
+          <Routes>
+            <Route
+              path="/hello"
+              element={
+                <HelloPage
+                  firstName={query.get('firstName') || ''}
+                  lastName={query.get('lastName') || ''}
+                />
+              }
+            />
+
+            <Route element={<Navigate to="/hello" />} />
+          </Routes>
         </EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>
@@ -65,8 +69,8 @@ export const LinksExample: React.FC<{
     [props.appBasePath]
   );
   return (
-    <Router history={history}>
-      <Routes />
+    <Router navigator={history} location={history.location}>
+      <LocatorRoutes />
     </Router>
   );
 };

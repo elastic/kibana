@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useSelector } from 'react-redux';
 import {
   ENDPOINT_BLOCKLISTS_LIST_ID,
@@ -46,7 +46,7 @@ export function usePolicyDetailsSelector<TSelected>(
 
 export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
-  const history = useHistory();
+  const history = createBrowserHistory();
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
 
   const getPath = useCallback(

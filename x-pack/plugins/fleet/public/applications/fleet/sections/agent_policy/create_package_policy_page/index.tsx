@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { useMemo } from 'react';
-import { useLocation, useRouteMatch } from 'react-router-dom';
+import { useLocation, useMatch } from 'react-router-dom';
 
 import type { AddToPolicyParams, EditPackagePolicyFrom } from './types';
 
@@ -15,7 +15,7 @@ import { CreatePackagePolicyMultiPage } from './multi_page_layout';
 
 export const CreatePackagePolicyPage: React.FC<{}> = () => {
   const { search } = useLocation();
-  const { params } = useRouteMatch<AddToPolicyParams>();
+  const { params } = useMatch<AddToPolicyParams>();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const useMultiPageLayout = useMemo(() => queryParams.has('useMultiPageLayout'), [queryParams]);
   const queryParamsPolicyId = useMemo(

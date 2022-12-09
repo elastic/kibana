@@ -9,7 +9,8 @@ import * as t from 'io-ts';
 import { useLocation, useParams } from 'react-router-dom';
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { Params, RouteParams, routes } from '../routes';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { getRoutes, Params, RouteParams, RoutesType } from '../routes';
 
 function getQueryParams(location: ReturnType<typeof useLocation>) {
   const urlSearchParms = new URLSearchParams(location.search);
@@ -25,11 +26,14 @@ function getQueryParams(location: ReturnType<typeof useLocation>) {
  * It removes any aditional item which is not declared in the type.
  * @param params
  */
-export function useRouteParams<T extends keyof typeof routes>(pathName: T): RouteParams<T> {
+export function useRouteParams<T extends keyof RoutesType>(
+  pathName: T,
+  http: HttpSetup
+): RouteParams<T> {
   const location = useLocation();
   const pathParams = useParams();
   const queryParams = getQueryParams(location);
-  const { query, path } = routes[pathName].params as Params;
+  const { query, path } = getRoutes(http)[pathName].paramType as Params;
 
   const rts = {
     queryRt: query ? t.exact(query) : t.strict({}),

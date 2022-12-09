@@ -9,7 +9,6 @@ import { EuiLink } from '@elastic/eui';
 import { Location } from 'history';
 import { IBasePath } from '@kbn/core/public';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 import rison from '@kbn/rison';
 import url from 'url';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../../common/data_view_constants';
@@ -61,7 +60,6 @@ export const getDiscoverHref = ({
 
 export function DiscoverLink({ query = {}, ...rest }: Props) {
   const { core } = useApmPluginContext();
-  const location = useLocation();
 
   const href = getDiscoverHref({
     basePath: core.http.basePath,

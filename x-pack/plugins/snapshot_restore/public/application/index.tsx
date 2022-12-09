@@ -18,11 +18,13 @@ interface AppWithRouterProps {
   history: ScopedHistory;
 }
 
-const AppWithRouter = ({ history }: AppWithRouterProps) => (
-  <Router history={history}>
-    <App />
-  </Router>
-);
+const AppWithRouter = ({ history }: AppWithRouterProps) => {
+  return (
+    <Router navigator={history} location={history.location}>
+      <App />
+    </Router>
+  );
+};
 
 export const renderApp = (elem: Element, dependencies: AppDependencies) => {
   render(

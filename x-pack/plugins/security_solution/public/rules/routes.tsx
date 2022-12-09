@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Navigate, Routes } from 'react-router-dom';
 
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
@@ -52,7 +52,7 @@ const RulesContainerComponent: React.FC = () => {
   return (
     <PluginTemplateWrapper>
       <TrackApplicationView viewId={SecurityPageName.rules}>
-        <Switch>
+        <Routes>
           <Route // Redirect to first tab if none specified
             path="/rules/id/:detailName"
             exact
@@ -62,7 +62,7 @@ const RulesContainerComponent: React.FC = () => {
               },
               location,
             }) => (
-              <Redirect
+              <Navigate
                 to={{
                   ...location,
                   pathname: `/rules/id/${detailName}/${RuleDetailTabs.alerts}`,
@@ -82,7 +82,7 @@ const RulesContainerComponent: React.FC = () => {
           ))}
           <Route component={NotFoundPage} />
           <SpyRoute pageName={SecurityPageName.rules} />
-        </Switch>
+        </Routes>
       </TrackApplicationView>
     </PluginTemplateWrapper>
   );

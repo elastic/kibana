@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { flowRight } from 'lodash';
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Navigate, RouteComponentProps } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
 import { LinkDescriptor } from '@kbn/observability-plugin/public';
 import { findInventoryFields } from '../../../common/inventory_models';
@@ -68,7 +68,7 @@ export const RedirectToNodeLogs = ({
     replaceSourceIdInQueryString(sourceId)
   )('');
 
-  return <Redirect to={`/stream?${searchString}`} />;
+  return <Navigate to={`/stream?${searchString}`} />;
 };
 
 export const getNodeLogsUrl = ({

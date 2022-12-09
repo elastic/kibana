@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -24,7 +24,7 @@ export const SnapshotEmptyPrompt: React.FunctionComponent<{ policiesCount: numbe
   policiesCount,
 }) => {
   const { docLinks } = useCore();
-  const history = useHistory();
+  const history = createBrowserHistory();
   return (
     <EuiPageContent
       hasShadow={false}

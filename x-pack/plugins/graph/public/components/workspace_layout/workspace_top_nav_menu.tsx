@@ -9,10 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Provider, useStore } from 'react-redux';
 import { AppMountParameters, Capabilities, CoreStart } from '@kbn/core/public';
-import { useHistory, useLocation } from 'react-router-dom';
 import { Start as InspectorPublicPluginStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { createBrowserHistory } from 'history';
 import { datasourceSelector, hasFieldsSelector } from '../../state_management';
 import { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { AsObservable, Settings, SettingsWorkspaceProps } from '../settings';
@@ -40,8 +40,8 @@ interface WorkspaceTopNavMenuProps {
 
 export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   const store = useStore();
-  const location = useLocation();
-  const history = useHistory();
+
+  const history = createBrowserHistory();
   const allSavingDisabled = props.graphSavePolicy === 'none';
   const isInspectDisabled = !props.workspace?.lastRequest || !props.workspace.lastRequest;
 

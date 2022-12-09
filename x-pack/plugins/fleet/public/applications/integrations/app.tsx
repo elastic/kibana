@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Router, Redirect, Route, Switch } from 'react-router-dom';
+import { Router, Navigate, Route, Routes } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 
 import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
@@ -83,7 +83,7 @@ export const IntegrationsAppContext: React.FC<{
                         <FleetStatusProvider>
                           <startServices.customIntegrations.ContextProvider>
                             <CloudContext>
-                              <Router history={history}>
+                              <Router navigator={history} location={history.location}>
                                 <AgentPolicyContextProvider>
                                   <PackageInstallProvider
                                     notifications={startServices.notifications}
@@ -113,37 +113,34 @@ export const IntegrationsAppContext: React.FC<{
   }
 );
 
+const Redirect = () => {
+  const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
+  if (!shouldRedirectHash) {
+    return <Navigate to={pagePathGetters.integrations_all({})[1]} />;
+  }
+  const pathname = location.hash.replace(/^#/, '');
+
+  return (
+    <Navigate
+      to={{
+        ...location,
+        pathname,
+        hash: undefined,
+      }}
+    />
+  );
+};
+
 export const AppRoutes = memo(() => {
   const flyoutContext = useFlyoutContext();
   const fleetStatus = useFleetStatus();
 
   return (
     <>
-      <Switch>
-        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
-          <EPMApp />
-        </Route>
-        <Route
-          render={({ location }) => {
-            // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
-            const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
-            if (!shouldRedirectHash) {
-              return <Redirect to={pagePathGetters.integrations_all({})[1]} />;
-            }
-            const pathname = location.hash.replace(/^#/, '');
-
-            return (
-              <Redirect
-                to={{
-                  ...location,
-                  pathname,
-                  hash: undefined,
-                }}
-              />
-            );
-          }}
-        />
-      </Switch>
+      <Routes>
+        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations} element={<EPMApp />} />
+        <Route element={Redirect} />
+      </Routes>
 
       {flyoutContext.isEnrollmentFlyoutOpen && (
         <EuiPortal>

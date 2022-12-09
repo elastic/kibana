@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { Switch } from 'react-router-dom';
+import { Routes } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
 import type { UsersTabsProps } from './types';
@@ -35,27 +35,36 @@ export const UsersTabs = memo<UsersTabsProps>(
     };
 
     return (
-      <Switch>
-        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.allUsers})`}>
-          <AllUsersQueryTabBody {...tabProps} />
-        </Route>
-        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.authentications})`}>
-          <AuthenticationsQueryTabBody {...tabProps} />
-        </Route>
-        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.anomalies})`}>
-          <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesUserTable} />
-        </Route>
-        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.risk})`}>
-          <UserRiskScoreQueryTabBody {...tabProps} />
-        </Route>
-        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.events})`}>
-          <EventsQueryTabBody
-            additionalFilters={userNameExistsFilter}
-            tableId={TableId.usersPageEvents}
-            {...tabProps}
-          />
-        </Route>
-      </Switch>
+      <Routes>
+        <Route
+          path={`${USERS_PATH}/:tabName(${UsersTableType.allUsers})`}
+          element={<AllUsersQueryTabBody {...tabProps} />}
+        />
+        <Route
+          path={`${USERS_PATH}/:tabName(${UsersTableType.authentications})`}
+          element={<AuthenticationsQueryTabBody {...tabProps} />}
+        />
+        <Route
+          path={`${USERS_PATH}/:tabName(${UsersTableType.anomalies})`}
+          element={
+            <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesUserTable} />
+          }
+        />
+        <Route
+          path={`${USERS_PATH}/:tabName(${UsersTableType.risk})`}
+          element={<UserRiskScoreQueryTabBody {...tabProps} />}
+        />
+        <Route
+          path={`${USERS_PATH}/:tabName(${UsersTableType.events})`}
+          element={
+            <EventsQueryTabBody
+              additionalFilters={userNameExistsFilter}
+              tableId={TableId.usersPageEvents}
+              {...tabProps}
+            />
+          }
+        />
+      </Routes>
     );
   }
 );

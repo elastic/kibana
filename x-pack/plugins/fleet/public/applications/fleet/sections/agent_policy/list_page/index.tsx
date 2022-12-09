@@ -20,7 +20,7 @@ import {
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import type { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
@@ -60,7 +60,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     field: 'updated_at',
     direction: 'desc',
   });
-  const history = useHistory();
+  const history = createBrowserHistory();
   const isCreateAgentPolicyFlyoutOpen = 'create' in urlParams;
   const setIsCreateAgentPolicyFlyoutOpen = useCallback(
     (isOpen: boolean) => {

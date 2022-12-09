@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext, useState, useEffect, useRef } from 'react';
-import { useParams, Redirect } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -131,7 +131,7 @@ export const ActionBar = ({
   }, [data, status, isSaving, isValid, monitorId, hasErrors, locations, loading]);
 
   return isSuccessful ? (
-    <Redirect to={MONITOR_MANAGEMENT_ROUTE + '/all'} />
+    <Navigate to={MONITOR_MANAGEMENT_ROUTE + '/all'} />
   ) : (
     <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>

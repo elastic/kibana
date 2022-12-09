@@ -6,12 +6,12 @@
  */
 
 import React, { FC } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 import { SECTION_SLUG } from '../constants';
 
-export const RedirectToTransformManagement: FC = () => <Redirect to={`/${SECTION_SLUG.HOME}`} />;
+export const RedirectToTransformManagement: FC = () => <Navigate to={`/${SECTION_SLUG.HOME}`} />;
 
 export const RedirectToCreateTransform: FC<{ savedObjectId: string }> = ({ savedObjectId }) => (
-  <Redirect push to={`/${SECTION_SLUG.CREATE_TRANSFORM}/${savedObjectId}`} />
+  <Navigate push to={`/${SECTION_SLUG.CREATE_TRANSFORM}/${savedObjectId}`} />
 );

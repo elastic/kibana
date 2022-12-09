@@ -15,7 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
 import { useTitle } from '../hooks/use_title';
@@ -61,7 +61,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   const { currentTimerange } = useMonitoringTimeContainerContext();
   const [loaded, setLoaded] = useState(false);
   const [isRequestPending, setIsRequestPending] = useState(false);
-  const history = useHistory();
+  const history = createBrowserHistory();
   const [hasError, setHasError] = useState(false);
   const handleRequestError = useRequestErrorHandler();
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);

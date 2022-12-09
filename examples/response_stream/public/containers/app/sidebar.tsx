@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { routes } from '../../routes';
 
 export const Sidebar: React.FC = () => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   return (
     <EuiPageSideBar>

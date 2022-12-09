@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -72,25 +72,21 @@ export const App: React.FunctionComponent = () => {
           </PageLoading>
         ) : hasPrivileges ? (
           <div data-test-subj="snapshotRestoreApp" className={APP_WRAPPER_CLASS}>
-            <Switch>
-              <Route exact path="/add_repository" component={RepositoryAdd} />
-              <Route exact path="/edit_repository/:name*" component={RepositoryEdit} />
+            <Routes>
+              <Route path="/add_repository" element={RepositoryAdd} />
+              <Route path="/edit_repository/:name*" element={RepositoryEdit} />
               <Route
-                exact
                 path={`/:section(${sectionsRegex})/:repositoryName?/:snapshotId*`}
-                component={SnapshotRestoreHome}
+                children={SnapshotRestoreHome}
               />
-              <Redirect exact from="/restore/:repositoryName" to="/snapshots" />
-              <Route
-                exact
-                path="/restore/:repositoryName/:snapshotId*"
-                component={RestoreSnapshot}
-              />
-              {slmUi.enabled && <Route exact path="/add_policy" component={PolicyAdd} />}
-              {slmUi.enabled && <Route exact path="/edit_policy/:name*" component={PolicyEdit} />}
-              <Redirect from="/" to={`/${DEFAULT_SECTION}`} />
-              <Redirect from="" to={`/${DEFAULT_SECTION}`} />
-            </Switch>
+              <Route path="/restore/:repositoryName" element={<Navigate to="/snapshots" />} />
+              <Route path="/restore/:repositoryName/:snapshotId*" element={RestoreSnapshot} />
+              {slmUi.enabled && <Route path="/add_policy" element={PolicyAdd} />}
+              {slmUi.enabled && <Route path="/edit_policy/:name*" element={PolicyEdit} />}
+              {['/', ''].map((path) => (
+                <Route path={path} element={<Navigate to={`/${DEFAULT_SECTION}`} />} />
+              ))}
+            </Routes>
           </div>
         ) : (
           <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">

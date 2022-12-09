@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useContext } from 'react';
-import { Route, Redirect, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useClusters } from './hooks/use_clusters';
 import { GlobalStateContext } from './contexts/global_state_context';
 import { getClusterFromClusters } from '../lib/get_cluster_from_clusters';
@@ -16,7 +16,6 @@ export interface ComponentProps {
   clusters: [];
 }
 interface RouteInitProps {
-  path: string;
   component: React.ComponentType<ComponentProps>;
   codePaths: string[];
   fetchAllClusters: boolean;
@@ -24,15 +23,14 @@ interface RouteInitProps {
 }
 
 export const RouteInit: React.FC<RouteInitProps> = ({
-  path,
   component,
   codePaths,
   fetchAllClusters,
   unsetGlobalState = false,
 }) => {
+  const location = useLocation();
   const globalState = useContext(GlobalStateContext);
   const clusterUuid = fetchAllClusters ? null : globalState.cluster_uuid;
-  const location = useLocation();
 
   const { clusters, loaded } = useClusters(clusterUuid, undefined, codePaths);
 
@@ -42,7 +40,7 @@ export const RouteInit: React.FC<RouteInitProps> = ({
 
   // TODO: check for setupMode too when the setup mode is migrated
   if (loaded && !cluster && !inSetupMode) {
-    return <Redirect to="/no-data" />;
+    return <Navigate to="no-data" />;
   }
 
   if (loaded && cluster) {
@@ -52,24 +50,18 @@ export const RouteInit: React.FC<RouteInitProps> = ({
       location.pathname !== 'home' &&
       isExpired(cluster.license)
     ) {
-      return <Redirect to="/license" />;
+      return <Navigate to="license" />;
     }
 
     // check if we need to redirect because of attempt at unsupported multi-cluster monitoring
     const clusterSupported = cluster.isSupported || clusters.length === 1;
     if (location.pathname !== '/home' && !clusterSupported) {
-      return <Redirect to="/home" />;
+      return <Navigate to="home" />;
     }
   }
 
   const Component = component;
-  return loaded ? (
-    <Route path={path}>
-      <Component clusters={clusters} />
-    </Route>
-  ) : (
-    <LoadingPage staticLoadingState />
-  );
+  return loaded ? <Component clusters={clusters} /> : <LoadingPage staticLoadingState />;
 };
 
 const isExpired = (license: any): boolean => {

@@ -89,7 +89,7 @@ export const observabilityConfig: GuideConfig = {
       ),
       location: {
         appID: 'observability',
-        path: '/overview',
+        path: 'overview',
       },
     },
   ],

@@ -89,50 +89,60 @@ export const roleMappingsManagementApp = Object.freeze({
           );
         };
 
-        render(
-          <KibanaContextProvider services={core}>
-            <core.i18n.Context>
-              <KibanaThemeProvider theme$={theme$}>
-                <Router history={history}>
-                  <ReadonlyBadge
-                    data-test-subj="readOnlyBadge"
-                    featureId="role_mappings"
-                    tooltip={i18n.translate(
-                      'xpack.security.management.roleMappings.readonlyTooltip',
-                      {
-                        defaultMessage: 'Unable to create or edit role mappings',
-                      }
-                    )}
-                  />
-                  <BreadcrumbsProvider
-                    onChange={createBreadcrumbsChangeHandler(core.chrome, setBreadcrumbs)}
-                  >
-                    <Breadcrumb text={title} href="/">
-                      <Route path={['/', '']} exact={true}>
-                        <RoleMappingsGridPage
-                          notifications={core.notifications}
-                          rolesAPIClient={new RolesAPIClient(core.http)}
-                          roleMappingsAPI={roleMappingsAPIClient}
-                          docLinks={core.docLinks}
-                          history={history}
-                          navigateToApp={core.application.navigateToApp}
-                          readOnly={!core.application.capabilities.role_mappings.save}
+        const AppRoutes = () => {
+          return (
+            <KibanaContextProvider services={core}>
+              <core.i18n.Context>
+                <KibanaThemeProvider theme$={theme$}>
+                  <Router navigator={history} location={history.location}>
+                    <ReadonlyBadge
+                      data-test-subj="readOnlyBadge"
+                      featureId="role_mappings"
+                      tooltip={i18n.translate(
+                        'xpack.security.management.roleMappings.readonlyTooltip',
+                        {
+                          defaultMessage: 'Unable to create or edit role mappings',
+                        }
+                      )}
+                    />
+                    <BreadcrumbsProvider
+                      onChange={createBreadcrumbsChangeHandler(core.chrome, setBreadcrumbs)}
+                    >
+                      <Breadcrumb text={title} href="/">
+                        {['/', ''].map((path) => (
+                          <Route
+                            path={path}
+                            element={
+                              <RoleMappingsGridPage
+                                notifications={core.notifications}
+                                rolesAPIClient={new RolesAPIClient(core.http)}
+                                roleMappingsAPI={roleMappingsAPIClient}
+                                docLinks={core.docLinks}
+                                history={history}
+                                navigateToApp={core.application.navigateToApp}
+                                readOnly={!core.application.capabilities.role_mappings.save}
+                              />
+                            }
+                          />
+                        ))}
+                        <Route
+                          path="/edit/:name?"
+                          element={<EditRoleMappingsPageWithBreadcrumbs action="edit" />}
                         />
-                      </Route>
-                      <Route path="/edit/:name?">
-                        <EditRoleMappingsPageWithBreadcrumbs action="edit" />
-                      </Route>
-                      <Route path="/clone/:name">
-                        <EditRoleMappingsPageWithBreadcrumbs action="clone" />
-                      </Route>
-                    </Breadcrumb>
-                  </BreadcrumbsProvider>
-                </Router>
-              </KibanaThemeProvider>
-            </core.i18n.Context>
-          </KibanaContextProvider>,
-          element
-        );
+                        <Route
+                          path="/clone/:name"
+                          element={<EditRoleMappingsPageWithBreadcrumbs action="clone" />}
+                        />
+                      </Breadcrumb>
+                    </BreadcrumbsProvider>
+                  </Router>
+                </KibanaThemeProvider>
+              </core.i18n.Context>
+            </KibanaContextProvider>
+          );
+        };
+
+        render(<AppRoutes />, element);
 
         return () => {
           unmountComponentAtNode(element);

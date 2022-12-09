@@ -7,7 +7,9 @@
 
 import React, { useCallback } from 'react';
 import { EuiPortal } from '@elastic/eui';
-import { Router, Route, Switch, useHistory, Redirect } from 'react-router-dom';
+import { Router, Route, Routes, Navigate } from 'react-router-dom';
+
+import { createBrowserHistory } from 'history';
 
 import {
   useBreadcrumbs,
@@ -43,7 +45,7 @@ function useSettingsAppData() {
 
 export const SettingsApp = withConfirmModalProvider(() => {
   useBreadcrumbs('settings');
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const flyoutContext = useFlyoutContext();
 
@@ -94,15 +96,15 @@ export const SettingsApp = withConfirmModalProvider(() => {
 
   return (
     <DefaultLayout section="settings">
-      <Router history={history}>
-        <Switch>
+      <Router navigator={history} location={history.location}>
+        <Routes>
           <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
             {(route: { match: { params: { itemId: string } } }) => {
               const fleetServerHost = fleetServerHosts.data?.items.find(
                 (o) => route.match.params.itemId === o.id
               );
               if (!fleetServerHost) {
-                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+                return <Navigate to={FLEET_ROUTING_PATHS.settings} />;
               }
 
               return (
@@ -137,7 +139,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
                 (item) => route.match.params.itemId === item.id
               );
               if (!fleetProxy) {
-                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+                return <Navigate to={FLEET_ROUTING_PATHS.settings} />;
               }
               return (
                 <EuiPortal>
@@ -150,7 +152,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
             {(route: { match: { params: { outputId: string } } }) => {
               const output = outputs.data?.items.find((o) => route.match.params.outputId === o.id);
               if (!output) {
-                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+                return <Navigate to={FLEET_ROUTING_PATHS.settings} />;
               }
 
               return (
@@ -175,7 +177,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
                 (o) => route.match.params.downloadSourceId === o.id
               );
               if (!downloadSource) {
-                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+                return <Navigate to={FLEET_ROUTING_PATHS.settings} />;
               }
 
               return (
@@ -188,7 +190,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
               );
             }}
           </Route>
-        </Switch>
+        </Routes>
       </Router>
       <SettingsPage
         deleteFleetProxy={deleteFleetProxy}

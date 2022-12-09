@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { UIM_APP_LOAD } from '../../common/constants';
@@ -26,6 +26,7 @@ import {
 
 export const App = ({ history }: { history: ScopedHistory }) => {
   const { core, services } = useAppContext();
+
   useEffect(
     () => services.uiMetricService.trackMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD),
     [services.uiMetricService]
@@ -37,7 +38,7 @@ export const App = ({ history }: { history: ScopedHistory }) => {
   });
 
   return (
-    <Router history={history}>
+    <Router navigator={history} location={history.location}>
       <AppWithoutRouter />
     </Router>
   );
@@ -45,18 +46,17 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
-  <Switch>
-    <Route exact path="/create_template" component={TemplateCreate} />
-    <Route exact path="/clone_template/:name*" component={TemplateClone} />
-    <Route exact path="/edit_template/:name*" component={TemplateEdit} />
-    <Route exact path="/create_component_template" component={ComponentTemplateCreate} />
+  <Routes>
+    <Route path="/create_template" element={TemplateCreate} />
+    <Route path="/clone_template/:name*" element={TemplateClone} />
+    <Route path="/edit_template/:name*" element={TemplateEdit} />
+    <Route path="/create_component_template" element={ComponentTemplateCreate} />
     <Route
-      exact
       path="/create_component_template/:sourceComponentTemplateName"
-      component={ComponentTemplateClone}
+      children={ComponentTemplateClone}
     />
-    <Route exact path="/edit_component_template/:name*" component={ComponentTemplateEdit} />
-    <Route path={`/:section(${homeSections.join('|')})`} component={IndexManagementHome} />
-    <Redirect from={`/`} to={`/indices`} />
-  </Switch>
+    <Route path="/edit_component_template/:name*" element={ComponentTemplateEdit} />
+    <Route path={`/:section(${homeSections.join('|')})`} element={IndexManagementHome} />
+    <Route path="/" element={<Navigate to={`/indices`} />} />
+  </Routes>
 );

@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { createBrowserHistory } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import type { ConsoleResponseActionCommands } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   RESPONSE_ACTION_API_COMMANDS_NAMES,
@@ -97,8 +98,9 @@ export const actionsLogFiltersFromUrlParams = (
 
 export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
   // track actions and status filters
+
   const location = useLocation();
-  const history = useHistory();
+  const history = createBrowserHistory();
   const { urlParams, toUrlParams } = useUrlParams();
 
   const getUrlActionsLogFilters = useMemo(

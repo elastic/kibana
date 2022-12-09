@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { Query } from '@kbn/es-query';
 import { findingsNavigation } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
@@ -33,7 +33,7 @@ const getFindingsQuery = (queryValue: Query['query']): Pick<FindingsBaseURLQuery
 };
 
 export const useNavigateFindings = () => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   return (query: Query['query'] = {}) => {
     history.push({
@@ -49,7 +49,7 @@ export const useNavigateFindings = () => {
 };
 
 export const useNavigateFindingsByResource = () => {
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   return (query: Query['query'] = {}) => {
     history.push({

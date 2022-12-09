@@ -7,7 +7,8 @@
 
 import { useCallback } from 'react';
 import { parse, stringify } from 'query-string';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { SyntheticsUrlParams, getSupportedUrlParams } from '../utils/url_params';
 
 function getParsedParams(search: string) {
@@ -32,7 +33,7 @@ export const useGetUrlParams: GetUrlParams = () => {
 
 export const useUrlParams: SyntheticsUrlParamsHook = () => {
   const { pathname, search } = useLocation();
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   const updateUrlParams: UpdateUrlParams = useCallback(
     (updatedParams, replaceState = false) => {

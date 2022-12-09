@@ -8,7 +8,7 @@
 // TODO: We need to write tests for this once we have a logic file in place and a functioning API.
 
 import React from 'react';
-import { useRouteMatch, useParams } from 'react-router-dom';
+import { useMatch, useParams } from 'react-router-dom';
 
 import { EuiSideNavItemType, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +22,7 @@ import './index_nav.scss';
 import { SearchIndexTabId } from './search_index';
 
 export const useSearchIndicesNav = () => {
-  const isIndexRoute = !!useRouteMatch(SEARCH_INDEX_PATH);
+  const isIndexRoute = !!useMatch(SEARCH_INDEX_PATH);
   const { indexName } = useParams<{ indexName: string }>();
 
   if (!indexName || !isIndexRoute) return undefined;

@@ -21,7 +21,6 @@ export const useNavigateToPath = () => {
   } = useMlKibana();
 
   const location = useLocation();
-
   return useCallback(
     async (path: string | undefined, preserveSearch: boolean = false) => {
       if (path === undefined) return;

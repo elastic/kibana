@@ -7,7 +7,7 @@
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -41,7 +41,7 @@ export function TransactionDetails() {
   const { transactionType, fallbackToTransactions, runtimeName, agentName } =
     useApmServiceContext();
 
-  const history = useHistory();
+  const history = createBrowserHistory();
 
   // redirect to first transaction type
   if (!transactionTypeFromUrl && transactionType) {

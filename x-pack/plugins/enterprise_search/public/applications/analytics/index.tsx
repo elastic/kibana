@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
@@ -36,23 +36,24 @@ export const Analytics: React.FC<InitialAppData> = (props) => {
   }
 
   return (
-    <Switch>
-      <Route exact path={ROOT_PATH}>
-        {incompatibleVersions ? (
-          <VersionMismatchPage
-            enterpriseSearchVersion={enterpriseSearchVersion}
-            kibanaVersion={kibanaVersion}
-          />
-        ) : (
-          <AnalyticsOverview />
-        )}
-      </Route>
-      <Route path={COLLECTION_CREATION_PATH}>
-        <AddAnalyticsCollection />
-      </Route>
-      <Route exact path={COLLECTION_VIEW_PATH}>
-        <AnalyticsCollectionView />
-      </Route>
-    </Switch>
+    <Routes>
+      <Route
+        path={ROOT_PATH}
+        element={
+          incompatibleVersions ? (
+            <VersionMismatchPage
+              enterpriseSearchVersion={enterpriseSearchVersion}
+              kibanaVersion={kibanaVersion}
+            />
+          ) : (
+            <AnalyticsOverview />
+          )
+        }
+      />
+
+      <Route path={COLLECTION_CREATION_PATH} element={<AddAnalyticsCollection />} />
+
+      <Route path={COLLECTION_VIEW_PATH} element={<AnalyticsCollectionView />} />
+    </Routes>
   );
 };
