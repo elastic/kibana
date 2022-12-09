@@ -6,12 +6,12 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { TableId } from '../../../common/types';
-import type { SecuritySubPluginWithStore } from '../../app/types';
+import { TableId } from '../../common/types';
+import type { SecuritySubPluginWithStore } from '../app/types';
 import { routes } from './routes';
-import type { NetworkState } from './store';
-import { initialNetworkState, networkReducer } from './store';
-import { getDataTablesInStorageByIds } from '../../timelines/containers/local_storage';
+import type { NetworkState } from './network/store';
+import { initialNetworkState, networkReducer } from './network/store';
+import { getDataTablesInStorageByIds } from '../timelines/containers/local_storage';
 
 export class Network {
   public setup() {}

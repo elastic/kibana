@@ -49,7 +49,7 @@ import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
 import type { Hosts } from './explore/hosts';
 import type { Users } from './explore/users';
-import type { Network } from './explore/network';
+import type { Network } from './explore';
 import type { Kubernetes } from './kubernetes';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
