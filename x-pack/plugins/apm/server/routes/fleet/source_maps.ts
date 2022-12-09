@@ -138,12 +138,12 @@ export async function updateSourceMapsOnFleetPolicies({
   core,
   fleetPluginStart,
   savedObjectsClient,
-  elasticsearchClient,
+  internalESClient,
 }: {
   core: { setup: CoreSetup; start: () => Promise<CoreStart> };
   fleetPluginStart: FleetPluginStart;
   savedObjectsClient: SavedObjectsClientContract;
-  elasticsearchClient: ElasticsearchClient;
+  internalESClient: ElasticsearchClient;
 }) {
   const { artifacts } = await listSourceMapArtifacts({ fleetPluginStart });
   const apmFleetPolicies = await getApmPackagePolicies({
@@ -168,7 +168,7 @@ export async function updateSourceMapsOnFleetPolicies({
 
       await fleetPluginStart.packagePolicyService.update(
         savedObjectsClient,
-        elasticsearchClient,
+        internalESClient,
         id,
         updatedPackagePolicy
       );

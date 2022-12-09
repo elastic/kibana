@@ -100,7 +100,7 @@ const uploadSourceMapRoute = createApmServerRoute({
     const cleanedBundleFilepath = getCleanedBundleFilePath(bundleFilepath);
     const fleetPluginStart = await plugins.fleet?.start();
     const coreStart = await core.start();
-    const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+    const internalESClient = coreStart.elasticsearch.client.asInternalUser;
     const savedObjectsClient = await getInternalSavedObjectsClient(core.setup);
     try {
       if (fleetPluginStart) {
@@ -117,7 +117,7 @@ const uploadSourceMapRoute = createApmServerRoute({
 
         // sync source map to APM managed index
         await createApmSourceMapDoc({
-          internalESClient: internalEsClient,
+          internalESClient,
           created: artifact.created,
           sourceMapContent,
           bundleFilepath: cleanedBundleFilepath,
@@ -131,7 +131,7 @@ const uploadSourceMapRoute = createApmServerRoute({
           fleetPluginStart,
           savedObjectsClient:
             savedObjectsClient as unknown as SavedObjectsClientContract,
-          elasticsearchClient: internalEsClient,
+          internalESClient,
         });
 
         return artifact;
@@ -157,7 +157,7 @@ const deleteSourceMapRoute = createApmServerRoute({
     const fleetPluginStart = await plugins.fleet?.start();
     const { id } = params.path;
     const coreStart = await core.start();
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const internalESClient = coreStart.elasticsearch.client.asInternalUser;
     const savedObjectsClient = await getInternalSavedObjectsClient(core.setup);
     try {
       if (fleetPluginStart) {
@@ -167,7 +167,7 @@ const deleteSourceMapRoute = createApmServerRoute({
           fleetPluginStart,
           savedObjectsClient:
             savedObjectsClient as unknown as SavedObjectsClientContract,
-          elasticsearchClient: esClient,
+          internalESClient,
         });
       }
     } catch (e) {
