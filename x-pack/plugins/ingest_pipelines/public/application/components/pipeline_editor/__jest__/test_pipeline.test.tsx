@@ -220,7 +220,9 @@ describe('Test pipeline', () => {
 
         // Add required fields, and click run
         form.setInputValue('indexField.input', index);
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
         form.setInputValue('idField.input', documentId);
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
         await actions.clickAddDocumentButton();
 
         // Verify request
