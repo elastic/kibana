@@ -12,8 +12,9 @@ import { FleetArtifactsClient } from '@kbn/fleet-plugin/server/services';
 import { getApmArtifactClient } from '../fleet/source_maps';
 import { bulkCreateApmSourceMapDocs } from './bulk_create_apm_source_map_docs';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
+import { ApmSourceMapDoc } from './create_apm_source_map_doc';
 
-const PER_PAGE = 10;
+const PER_PAGE = 2;
 
 export async function migrateFleetSourceMapArtifacts({
   fleet,
@@ -33,7 +34,7 @@ export async function migrateFleetSourceMapArtifacts({
       internalESClient
     );
     const createdDateFilter = newestMigratedArtifact
-      ? ` AND created:>${newestMigratedArtifact.replaceAll(':', '\\:')}'` // kuery only supports lucene syntax
+      ? ` AND created:>${newestMigratedArtifact.replaceAll(':', '\\:')}` // kuery only supports lucene syntax
       : '';
 
     await paginateArtifacts({
@@ -115,6 +116,7 @@ async function paginateArtifacts({
 async function getLatestSourceMapDoc(internalESClient: ElasticsearchClient) {
   const params = {
     index: APM_SOURCE_MAP_INDEX,
+    track_total_hits: false,
     size: 1,
     _source: ['created'],
     sort: [{ created: { order: 'desc' } }],
@@ -122,6 +124,6 @@ async function getLatestSourceMapDoc(internalESClient: ElasticsearchClient) {
       query: { match_all: {} },
     },
   };
-  const res = await internalESClient.search<{ created: string }>(params);
+  const res = await internalESClient.search<ApmSourceMapDoc>(params);
   return res.hits.hits[0]?._source?.created;
 }
