@@ -291,7 +291,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // filter
-        await filterBar.addFilter('category', 'is', `Men's Shoes`);
+        await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('154');
         });

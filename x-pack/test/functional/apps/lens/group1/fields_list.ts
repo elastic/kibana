@@ -177,7 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             10
           );
           // define a filter
-          await filterBar.addFilter('geo.src', 'is', 'CN');
+          await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'CN' });
           await retry.waitFor('Wait for the filter to take effect', async () => {
             await testSubjects.click(fieldId);
             // check for top values chart has changed compared to the previous test
@@ -194,7 +194,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // One Fields cap's limitation is to not know when an index has no fields based on filters
         it('should detect fields have no data in popup if filter excludes them', async () => {
           await filterBar.removeAllFilters();
-          await filterBar.addFilter('bytes', 'is', '-1');
+          await filterBar.addFilter({ field: 'bytes', operation: 'is', value: '-1' });
           // check via popup fields have no data
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('string');
           await log.debug(`Opening field stats for ${fieldId}`);

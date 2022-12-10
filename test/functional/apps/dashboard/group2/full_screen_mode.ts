@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows filter bar in fullscreen mode', async () => {
-      await filterBar.addFilter('bytes', 'is', '12345678');
+      await filterBar.addFilter({ field: 'bytes', operation: 'is', value: '12345678' });
       await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.dashboard.clickFullScreenMode();
       await retry.try(async () => {

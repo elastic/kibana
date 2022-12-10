@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
 
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await filterBar.addFilter(columnName, 'is', value);
+        await filterBar.addFilter({ field: columnName, operation: 'is', value });
       }
     });
 

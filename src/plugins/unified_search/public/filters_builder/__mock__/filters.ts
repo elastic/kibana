@@ -7,6 +7,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+import { BooleanRelation } from '@kbn/es-query';
 
 export const getFiltersMock = () =>
   [
@@ -34,6 +35,7 @@ export const getFiltersMock = () =>
     {
       meta: {
         type: 'combined',
+        relation: BooleanRelation.OR,
         params: [
           {
             meta: {
@@ -56,50 +58,56 @@ export const getFiltersMock = () =>
               store: 'appState',
             },
           },
-          [
-            {
-              meta: {
-                index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-                alias: null,
-                negate: false,
-                disabled: false,
-                type: 'phrase',
-                key: 'category.keyword',
-                params: {
-                  query: "Men's Accessories 3",
+          {
+            meta: {
+              type: 'combined',
+              relation: BooleanRelation.AND,
+              params: [
+                {
+                  meta: {
+                    index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+                    alias: null,
+                    negate: false,
+                    disabled: false,
+                    type: 'phrase',
+                    key: 'category.keyword',
+                    params: {
+                      query: "Men's Accessories 3",
+                    },
+                  },
+                  query: {
+                    match_phrase: {
+                      'category.keyword': "Men's Accessories 3",
+                    },
+                  },
+                  $state: {
+                    store: 'appState',
+                  },
                 },
-              },
-              query: {
-                match_phrase: {
-                  'category.keyword': "Men's Accessories 3",
+                {
+                  meta: {
+                    index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+                    alias: null,
+                    negate: false,
+                    disabled: false,
+                    type: 'phrase',
+                    key: 'category.keyword',
+                    params: {
+                      query: "Men's Accessories 4",
+                    },
+                  },
+                  query: {
+                    match_phrase: {
+                      'category.keyword': "Men's Accessories 4",
+                    },
+                  },
+                  $state: {
+                    store: 'appState',
+                  },
                 },
-              },
-              $state: {
-                store: 'appState',
-              },
+              ],
             },
-            {
-              meta: {
-                index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-                alias: null,
-                negate: false,
-                disabled: false,
-                type: 'phrase',
-                key: 'category.keyword',
-                params: {
-                  query: "Men's Accessories 4",
-                },
-              },
-              query: {
-                match_phrase: {
-                  'category.keyword': "Men's Accessories 4",
-                },
-              },
-              $state: {
-                store: 'appState',
-              },
-            },
-          ],
+          },
           {
             meta: {
               index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',

@@ -201,7 +201,7 @@ export default ({ getService, getPageObjects }) => {
       );
       const hitCountNumber = await PageObjects.discover.getHitCount();
       const originalHitCount = parseInt(hitCountNumber.replace(/\,/g, ''));
-      await filterBar.addFilter('extension.keyword', 'is', 'jpg');
+      await filterBar.addFilter({ field: 'extension.keyword', operation: 'is', value: 'jpg' });
       expect(await filterBar.hasFilter('extension.keyword', 'jpg')).to.be(true);
       await retry.try(async () => {
         const hitCountNumber = await PageObjects.discover.getHitCount();

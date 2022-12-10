@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should preserve app filters in lens', async () => {
-      await filterBar.addFilter('extension', 'is', 'css');
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'css' });
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');

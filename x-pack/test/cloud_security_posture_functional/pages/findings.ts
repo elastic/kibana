@@ -55,7 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('SearchBar', () => {
       it('add filter', async () => {
-        await filterBar.addFilter('rule.name', 'is', ruleName1);
+        await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
         expect(await table.hasColumnValue('Rule', ruleName1)).to.be(true);

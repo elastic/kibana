@@ -24,16 +24,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.openAddFilterPanel();
       await a11y.testAppSnapshot();
       await PageObjects.discover.closeAddFilterPanel();
-      await filterBar.addFilter('OriginCityName', 'is', 'Rome');
-    });
-
-    it('a11y test on filter panel with custom label', async () => {
-      await filterBar.clickEditFilter('OriginCityName', 'Rome');
-      await testSubjects.click('createCustomLabel');
-      await a11y.testAppSnapshot();
+      await filterBar.addFilter({ field: 'OriginCityName', operation: 'is', value: 'Rome' });
     });
 
     it('a11y test on Edit filter as Query DSL panel', async () => {
+      await filterBar.clickEditFilter('OriginCityName', 'Rome');
       await testSubjects.click('editQueryDSL');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);
@@ -41,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // the following tests are for the new saved query panel which also has filter panel options
     it('a11y test on saved query panel- on more than one filters', async () => {
-      await filterBar.addFilter('DestCountry', 'is', 'AU');
+      await filterBar.addFilter({ field: 'DestCountry', operation: 'is', value: 'AU' });
       await testSubjects.click('queryBarMenuPopover');
       await a11y.testAppSnapshot();
     });

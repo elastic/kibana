@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.loadSavedDashboard(dashboardPeriodOf2DaysData);
 
         // add a filter
-        await filterBar.addFilter('category', 'is', `Men's Shoes`);
+        await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
 
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
@@ -179,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.common.sleep(1000);
-        await filterBar.addFilter('name.keyword', 'is', 'Fethany');
+        await filterBar.addFilter({ field: 'name.keyword', operation: 'is', value: 'Fethany' });
         await PageObjects.common.sleep(1000);
       });
 
