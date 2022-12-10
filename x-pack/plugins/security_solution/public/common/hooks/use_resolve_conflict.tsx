@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
-import { safeDecode, encode, RisonValue } from '@kbn/rison';
+import { safeDecode, encode } from '@kbn/rison';
 import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineSelectors } from '../../timelines/store/timeline';
