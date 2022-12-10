@@ -56,23 +56,26 @@ export const useItemsAction = <T,>({
       onFlyoutClosed();
 
       const casesToUpdate = selectedCasesToEdit.reduce((acc, theCase) => {
+        const caseFieldValue = fieldSelector(theCase);
+
         const itemsWithoutUnselectedItems = difference(
-          fieldSelector(theCase),
+          caseFieldValue,
           itemsSelection.unSelectedItems
         );
-        const uniqueTags = new Set([
+
+        const uniqueItems = new Set([
           ...itemsWithoutUnselectedItems,
           ...itemsSelection.selectedItems,
         ]);
 
-        if (areItemsEqual(new Set([...theCase.tags]), uniqueTags)) {
+        if (areItemsEqual(new Set([...caseFieldValue]), uniqueItems)) {
           return acc;
         }
 
         return [
           ...acc,
           {
-            [fieldKey]: itemsTransformer(Array.from(uniqueTags.values())),
+            [fieldKey]: itemsTransformer(Array.from(uniqueItems.values())),
             id: theCase.id,
             version: theCase.version,
           },

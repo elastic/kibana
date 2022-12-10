@@ -8,14 +8,14 @@
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { useTagsAction } from './use_tags_action';
+import { useAssigneesAction } from './use_assignees_action';
 
 import * as api from '../../../containers/api';
 import { basicCase } from '../../../containers/mock';
 
 jest.mock('../../../containers/api');
 
-describe('useTagsAction', () => {
+describe('useAssigneesAction', () => {
   let appMockRender: AppMockRenderer;
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();
@@ -28,7 +28,7 @@ describe('useTagsAction', () => {
   it('renders an action', async () => {
     const { result } = renderHook(
       () =>
-        useTagsAction({
+        useAssigneesAction({
           onAction,
           onActionSuccess,
           isDisabled: false,
@@ -40,24 +40,24 @@ describe('useTagsAction', () => {
 
     expect(result.current.getAction([basicCase])).toMatchInlineSnapshot(`
       Object {
-        "data-test-subj": "cases-bulk-action-tags",
+        "data-test-subj": "cases-bulk-action-assignees",
         "disabled": false,
         "icon": <EuiIcon
           size="m"
-          type="tag"
+          type="userAvatar"
         />,
-        "key": "cases-bulk-action-tags",
-        "name": "Edit tags",
+        "key": "cases-bulk-action-assignees",
+        "name": "Edit assignees",
         "onClick": [Function],
       }
     `);
   });
 
-  it('update the tags correctly', async () => {
+  it('update the assignees correctly', async () => {
     const updateSpy = jest.spyOn(api, 'updateCases');
 
     const { result, waitFor } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
+      () => useAssigneesAction({ onAction, onActionSuccess, isDisabled: false }),
       {
         wrapper: appMockRender.AppWrapper,
       }
@@ -73,14 +73,20 @@ describe('useTagsAction', () => {
     expect(result.current.isFlyoutOpen).toBe(true);
 
     act(() => {
-      result.current.onSaveTags({ selectedItems: ['one'], unSelectedItems: ['pepsi'] });
+      result.current.onSaveAssignees({ selectedItems: ['1'], unSelectedItems: [] });
     });
 
     await waitFor(() => {
       expect(result.current.isFlyoutOpen).toBe(false);
       expect(onActionSuccess).toHaveBeenCalled();
       expect(updateSpy).toHaveBeenCalledWith(
-        [{ tags: ['coke', 'one'], id: basicCase.id, version: basicCase.version }],
+        [
+          {
+            assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }, { uid: '1' }],
+            id: basicCase.id,
+            version: basicCase.version,
+          },
+        ],
         expect.anything()
       );
     });
@@ -88,7 +94,7 @@ describe('useTagsAction', () => {
 
   it('shows the success toaster correctly when updating one case', async () => {
     const { result, waitFor } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
+      () => useAssigneesAction({ onAction, onActionSuccess, isDisabled: false }),
       {
         wrapper: appMockRender.AppWrapper,
       }
@@ -101,7 +107,7 @@ describe('useTagsAction', () => {
     });
 
     act(() => {
-      result.current.onSaveTags({ selectedItems: ['one', 'one'], unSelectedItems: ['pepsi'] });
+      result.current.onSaveAssignees({ selectedItems: ['1', '1'], unSelectedItems: ['2'] });
     });
 
     await waitFor(() => {
@@ -113,7 +119,7 @@ describe('useTagsAction', () => {
 
   it('shows the success toaster correctly when updating multiple cases', async () => {
     const { result, waitFor } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
+      () => useAssigneesAction({ onAction, onActionSuccess, isDisabled: false }),
       {
         wrapper: appMockRender.AppWrapper,
       }
@@ -126,7 +132,7 @@ describe('useTagsAction', () => {
     });
 
     act(() => {
-      result.current.onSaveTags({ selectedItems: ['one', 'one'], unSelectedItems: ['pepsi'] });
+      result.current.onSaveAssignees({ selectedItems: ['1', '1'], unSelectedItems: ['2'] });
     });
 
     await waitFor(() => {

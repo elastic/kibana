@@ -323,7 +323,7 @@ export const useItemsState = ({
     (item) => item.itemState === ItemState.CHECKED || item.itemState === ItemState.PARTIAL
   ).length;
 
-  return { state, options, totalSelectedItems, dispatch, onChange, onSelectAll, onSelectNone };
+  return { state, options, totalSelectedItems, onChange, onSelectAll, onSelectNone };
 };
 
 export type UseItemsState = ReturnType<typeof useItemsState>;
