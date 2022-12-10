@@ -156,6 +156,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
         const { registerAlertsTableConfiguration } =
           await this.lazyRegisterAlertsTableConfiguration();
+        console.warn({ alertsTableConfigurationRegistry });
         registerAlertsTableConfiguration(alertsTableConfigurationRegistry, this.storage);
 
         const [coreStart, startPlugins] = await core.getStartServices();

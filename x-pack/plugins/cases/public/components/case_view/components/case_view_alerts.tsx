@@ -48,6 +48,8 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     showExpandToDetails: alertFeatureIds.includes('siem'),
   };
 
+  console.warn({ alertStateProps, caseData });
+
   if (alertIdsQuery.ids.values.length === 0) {
     return <CaseViewAlertsEmpty />;
   }

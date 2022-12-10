@@ -19,6 +19,8 @@ import type {
 import { get } from 'lodash';
 import { APP_ID, CASES_FEATURE_ID } from '../../../../common/constants';
 import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
+import type { ColumnHeaderOptions } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types';
 import { TableId } from '../../../../common/types';
 import { getColumns } from '../../../detections/configurations/security_solution_detections';
 import { useRenderCellValue } from '../../../detections/configurations/security_solution_detections/render_cell_value';
@@ -84,8 +86,8 @@ const registerAlertsTableConfiguration = (
                 ...fields,
               };
             }) as ColumnHeaderOptions[],
+            scopeId: TimelineId.casePage,
             pageSize,
-            timelineId: TimelineId.casePage,
             closeCellPopover: dataGridRef?.closeCellPopover,
           });
         }) as EuiDataGridColumnCellAction[],

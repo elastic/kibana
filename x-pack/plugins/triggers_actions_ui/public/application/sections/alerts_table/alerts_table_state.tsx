@@ -13,6 +13,7 @@ import {
   EuiDataGridSorting,
   EuiEmptyPrompt,
   EuiFlyoutSize,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -49,7 +50,7 @@ interface CaseUi {
   };
 }
 
-export interface AlertsTableStateProps {
+export type AlertsTableStateProps = {
   alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
   configurationId: string;
   id: string;
@@ -58,7 +59,7 @@ export interface AlertsTableStateProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
-}
+} & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
   columns: EuiDataGridColumn[];
@@ -105,6 +106,7 @@ const AlertsTableState = ({
   query,
   pageSize,
   showExpandToDetails,
+  leadingControlColumns,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
 
@@ -258,7 +260,7 @@ const AlertsTableState = ({
       pageSize: pagination.pageSize,
       pageSizeOptions: [10, 20, 50, 100],
       id,
-      leadingControlColumns: [],
+      leadingControlColumns: leadingControlColumns ?? [],
       showExpandToDetails,
       trailingControlColumns: [],
       useFetchAlertsData,
@@ -286,6 +288,7 @@ const AlertsTableState = ({
       onResetColumns,
       onColumnsChange,
       onChangeVisibleColumns,
+      leadingControlColumns,
     ]
   );
 

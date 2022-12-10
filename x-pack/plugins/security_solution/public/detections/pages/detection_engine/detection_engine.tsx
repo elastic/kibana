@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiWindowEvent,
   EuiHorizontalRule,
+  EuiText,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
@@ -77,6 +78,7 @@ import {
 import { EmptyPage } from '../../../common/components/empty_page';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
+import { DetectionEngineAlertTable } from './trigger_alert_table';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -376,6 +378,15 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 
               <EuiSpacer size="l" />
             </Display>
+            <EuiText size="m"> {`Trigger Actions UI`}</EuiText>
+            <EuiHorizontalRule />
+            <DetectionEngineAlertTable
+              configId="securitySolution"
+              flyoutSize="m"
+              filters={alertsTableDefaultFilters}
+            />
+            <EuiHorizontalRule />
+
             <AlertsTable
               tableId={TableId.alertsOnAlertsPage}
               loading={loading}
