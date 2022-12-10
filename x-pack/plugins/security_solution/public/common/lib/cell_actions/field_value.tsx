@@ -6,9 +6,13 @@
  */
 
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { head, getOr, get, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
+import styled from 'styled-components';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Ecs } from '../../../../common/ecs';
@@ -18,6 +22,15 @@ import { parseValue } from '../../../timelines/components/timeline/body/renderer
 import { EmptyComponent, getLinkColumnDefinition } from './helpers';
 import { getField, getFieldKey } from '../../../helpers';
 import { getPageRowIndex } from '../../components/data_table/pagination';
+
+const EventRenderedFlexItem = styled(EuiFlexItem)`
+  div:first-child {
+    padding-left: 0px;
+    div {
+      margin: 0px;
+    }
+  }
+`;
 
 const useFormattedFieldProps = ({
   rowIndex,
@@ -122,6 +135,11 @@ export const FieldValueCell = ({
         linkValue,
       } = useFormattedFieldProps({ rowIndex, pageSize, ecsData, columnId, header, data });
 
+      const rowRenderer =
+        getRowRenderer != null
+          ? getRowRenderer({ data: ecsData[0], rowRenderers: defaultRowRenderers })
+          : defaultRowRenderers.find((x) => x.isInstance(ecsData[0])) ?? null;
+
       const showEmpty = useMemo(() => {
         const hasLink = link !== undefined && values && !isEmpty(value);
         if (pageRowIndex >= data.length) {
@@ -130,6 +148,23 @@ export const FieldValueCell = ({
           return hasLink !== true;
         }
       }, [link, pageRowIndex, value, values]);
+
+      if (fieldName === 'kibana.alert.reason') {
+        return (
+          <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
+            <EventRenderedFlexItem className="eui-xScroll">
+              <div className="eui-displayInlineBlock">
+                {rowRenderer &&
+                  rowRenderer.renderRow({
+                    data: ecsData[0],
+                    isDraggable: false,
+                    scopeId,
+                  })}
+              </div>
+            </EventRenderedFlexItem>
+          </EuiFlexGroup>
+        );
+      }
 
       return showEmpty === false ? (
         <FormattedFieldValue

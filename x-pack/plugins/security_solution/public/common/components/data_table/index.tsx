@@ -397,6 +397,14 @@ export const DataTableComponent = React.memo<DataTableProps>(
       theme,
     ]);
 
+    // matches the snippet example
+    const rowHeightsOptions = useMemo(
+      () => ({
+        defaultHeight: 'auto' as const,
+      }),
+      []
+    );
+
     return (
       <>
         <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
@@ -415,6 +423,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
             onColumnResize={onColumnResize}
             pagination={pagination}
             ref={dataGridRef}
+            rowHeightsOptions={rowHeightsOptions}
           />
         </EuiDataGridContainer>
       </>
