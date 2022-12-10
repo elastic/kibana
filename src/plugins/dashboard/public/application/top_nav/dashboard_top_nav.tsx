@@ -29,6 +29,7 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import type { OverlayRef } from '@kbn/core/public';
 import type { SavedQuery } from '@kbn/data-plugin/common';
 import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { getContextProvider as getPresentationUtilContextProvider } from '@kbn/presentation-util-plugin/public';
 import type { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '@kbn/embeddable-plugin/public';
 
@@ -120,6 +121,8 @@ export function DashboardTopNav({
     embeddable: { getEmbeddableFactory, getEmbeddableFactories, getStateTransfer },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
+
+  const PresentationUtilContextProvider = getPresentationUtilContextProvider();
 
   const dispatchDashboardStateChange = useDashboardDispatch();
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
@@ -579,7 +582,9 @@ export function DashboardTopNav({
     <>
       <TopNavMenu {...getNavBarProps()} />
       {!printMode && isLabsEnabled && isLabsShown ? (
-        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
+        <PresentationUtilContextProvider>
+          <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
+        </PresentationUtilContextProvider>
       ) : null}
       {dashboardState.viewMode !== ViewMode.VIEW && !printMode ? (
         <>
