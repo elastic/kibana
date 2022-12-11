@@ -36,10 +36,11 @@ export function clustersRoute(server: MonitoringCore) {
       // the monitoring data. `try/catch` makes it a little more explicit.
       try {
         await verifyMonitoringAuth(req);
-
         const clusters = await getClustersFromRequest(req, {
           codePaths: req.payload.codePaths,
         });
+        console.log(clusters.length);
+
         return postClustersResponsePayloadRT.encode(clusters);
       } catch (err) {
         throw handleError(err, req);

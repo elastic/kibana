@@ -79,6 +79,9 @@ export async function getInstanceRuleDataForClusters(
         // This means they are only using internal monitoring and rule monitoring data is not available
         return null;
       }
+      console.log('gfhfhgfhgfhgfhgfhgfhgfhgfhgfhfhgfhgfhgf')
+      console.log(response.aggregations?.failures)
+      console.log(response.aggregations)
       return {
         failures: response.aggregations?.failures?.value,
         executions: response.aggregations?.executions?.value,
