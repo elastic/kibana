@@ -8,4 +8,3 @@
 
 export const NEW_HEATMAP_CHARTS_LIBRARY = 'visualization:visualize:legacyHeatmapChartsLibrary';
 export const NEW_GAUGE_CHARTS_LIBRARY = 'visualization:visualize:legacyGaugeChartsLibrary';
-export const NEW_PIE_CHARTS_LIBRARY = 'visualization:visualize:legacyPieChartsLibrary';
