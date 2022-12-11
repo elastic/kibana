@@ -63,7 +63,7 @@ export const useFieldStatsTrigger = () => {
         </EuiFlexGroup>
       );
     },
-    []
+    [setIsFlyoutVisible, setFieldName]
   );
   return { renderOption, setIsFlyoutVisible, setFieldName };
 };

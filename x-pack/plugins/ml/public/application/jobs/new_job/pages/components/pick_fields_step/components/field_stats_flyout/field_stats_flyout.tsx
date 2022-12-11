@@ -118,7 +118,7 @@ export const FieldStatsFlyoutTrigger = () => {
   return (
     <EuiToolTip
       content={i18n.translate(
-        'xpack.apm.correlations.fieldContextPopover.descriptionTooltipContent',
+        'xpack.ml.newJob.wizard.fieldContextPopover.descriptionTooltipContent',
         {
           defaultMessage: 'Show top 10 field values',
         }
@@ -130,7 +130,7 @@ export const FieldStatsFlyoutTrigger = () => {
           setIsFlyoutVisible(!isFlyoutVisible);
         }}
         aria-label={i18n.translate(
-          'xpack.apm.correlations.fieldContextPopover.topFieldValuesAriaLabel',
+          'xpack.ml.newJob.wizard.fieldContextPopover.topFieldValuesAriaLabel',
           {
             defaultMessage: 'Show top 10 field values',
           }
