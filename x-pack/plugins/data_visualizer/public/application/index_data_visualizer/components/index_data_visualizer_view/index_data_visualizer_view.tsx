@@ -223,12 +223,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     [currentSavedSearch, dataVisualizerListState, setDataVisualizerListState]
   );
 
-  const samplerShardSize =
-    dataVisualizerListState.samplerShardSize ?? restorableDefaults.samplerShardSize;
-  const setSamplerShardSize = (value: number) => {
-    setDataVisualizerListState({ ...dataVisualizerListState, samplerShardSize: value });
-  };
-
   const visibleFieldTypes =
     dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;
   const setVisibleFieldTypes = (values: string[]) => {
@@ -391,8 +385,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       uiSettings,
     ]
   );
-
-  const wizardPanelWidth = '240px';
 
   const fieldsCountStats: TotalFieldsStats | undefined = useMemo(() => {
     let _visibleFieldsCount = 0;
@@ -612,20 +604,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     />
                   </EuiPanel>
                 </EuiFlexItem>
-                <EuiFlexItem
-                  grow={false}
-                  css={
-                    !compact &&
-                    css`
-                      width: ${wizardPanelWidth};
-                    `
-                  }
-                >
+                {compact ? <EuiSpacer size="m" /> : null}
+                <EuiFlexItem grow={false}>
                   <ActionsPanel
                     dataView={currentDataView}
                     searchQueryLanguage={searchQueryLanguage}
                     searchString={searchString}
                     getAdditionalLinks={getAdditionalLinks}
+                    compact={compact}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
