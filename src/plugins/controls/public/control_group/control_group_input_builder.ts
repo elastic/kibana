@@ -25,8 +25,6 @@ import {
 import { ControlGroupInput } from './types';
 import { getCompatibleControlType, getNextPanelOrder } from './embeddable/control_group_helpers';
 
-import { OptionsListEmbeddableInput } from '../options_list';
-
 export interface AddDataControlProps {
   controlId?: string;
   dataViewId: string;
