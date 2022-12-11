@@ -21,18 +21,29 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
   const deletePackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  const superTestVerboseErrors = (req: Request) => {
+  // FIXME:PT Delete this. Temporary to help debug failing test
+  const withSuperTestResponseBodyLogger = (req: Request) => {
+    const calledFromStack = new Error('').stack;
+
     req.on('error', (err) => {
-      if (!err.response || !err.response.body || !err.response.text) {
+      if (!err.response || (!err.response.body && !err.response.text)) {
+        log.error(`No response body received.\n\n${calledFromStack}`);
         return;
       }
 
-      err.message += `\n${JSON.stringify(err.response.body ?? err.response.text, null, 2)}`;
+      if (err.response.error) {
+        log.error(`${JSON.stringify(err.response.error, null, 2)}\n\n${calledFromStack}`);
+      } else {
+        log.error(
+          `${JSON.stringify(err.response.body ?? err.response.text, null, 2)}\n\n${calledFromStack}`
+        );
+      }
     });
   };
 
@@ -44,7 +55,7 @@ export default function (providerContext: FtrProviderContext) {
       beforeEach(async () => {
         await supertest
           .post(`/api/fleet/epm/packages/multiple_versions/0.1.0`)
-          .use(superTestVerboseErrors)
+          .use(withSuperTestResponseBodyLogger)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
@@ -61,7 +72,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return 403 if user without integrations all requests upgrade', async function () {
         await supertestWithoutAuth
           .post(`/api/fleet/epm/packages/_bulk`)
-          .use(superTestVerboseErrors)
+          .use(withSuperTestResponseBodyLogger)
           .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
           .set('kbn-xsrf', 'xxxx')
           .expect(403);
@@ -76,7 +87,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return 200 and an array for upgrading a package', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
-          .use(superTestVerboseErrors)
+          .use(withSuperTestResponseBodyLogger)
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions'] })
           .expect(200);
@@ -88,7 +99,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return an error for packages that do not exist', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
-          .use(superTestVerboseErrors)
+          .use(withSuperTestResponseBodyLogger)
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions', 'blahblah'] })
           .expect(200);
@@ -104,7 +115,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should upgrade multiple packages', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
-          .use(superTestVerboseErrors)
+          .use(withSuperTestResponseBodyLogger)
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions', 'overrides'] })
           .expect(200);
@@ -127,7 +138,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return 200 and an array for upgrading a package', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
-          .use(superTestVerboseErrors)
+          .use(withSuperTestResponseBodyLogger)
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions'] })
           .expect(200);
