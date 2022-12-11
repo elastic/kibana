@@ -17,7 +17,7 @@ export const useMessage = <
   TMessage extends Extract<TMessageUnion, { type: TType }>,
   TPayload extends TMessage extends UnifiedDataMessage<any> ? TMessage['payload'] : never
 >(
-  message$: Observable<TMessageUnion> | undefined,
+  message$: Observable<TMessageUnion | undefined> | undefined,
   type: TType,
   callback: (payload: TPayload) => void
 ) => {
@@ -40,7 +40,7 @@ export const useMessageData = <
   TMessage extends Extract<TMessageUnion, { type: TType }>,
   TPayload extends TMessage extends UnifiedDataMessage<any> ? TMessage['payload'] : never
 >(
-  message$: Observable<TMessageUnion> | undefined,
+  message$: Observable<TMessageUnion | undefined> | undefined,
   type: TType
 ): TPayload | undefined => {
   const [data, setData] = useState<TPayload>();

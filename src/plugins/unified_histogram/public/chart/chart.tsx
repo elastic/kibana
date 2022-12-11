@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import { Subject } from 'rxjs';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './use_chart_panels';
@@ -33,14 +33,15 @@ import type {
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramInput$,
+  UnifiedHistogramInputMessage,
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { useTotalHits } from './use_total_hits';
 import { useRequestParams } from './use_request_params';
 import { useChartStyles } from './use_chart_styles';
 import { useChartActions } from './use_chart_actions';
-import { useRefetchId } from './use_refetch_id';
 import { getLensAttributes } from './get_lens_attributes';
+import { useRefetch } from './use_refetch';
 
 export interface ChartProps {
   className?: string;
@@ -82,7 +83,7 @@ export function Chart({
   appendHitsCounter,
   appendHistogram,
   disableAutoFetching,
-  input$,
+  input$: originalInput$,
   onEditVisualization: originalOnEditVisualization,
   onResetChartHeight,
   onChartHiddenChange,
@@ -118,15 +119,21 @@ export function Chart({
     dataView.isTimeBased()
   );
 
-  const { filters, query, relativeTimeRange } = useRequestParams({
+  const input$ = useMemo(
+    () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
+    [originalInput$]
+  );
+
+  const { filters, query, timeRange, relativeTimeRange } = useRequestParams({
     services,
     query: originalQuery,
     filters: originalFilters,
     timeRange: originalTimeRange,
     request,
+    input$,
   });
 
-  const refetchId = useRefetchId({
+  const refetch$ = useRefetch({
     dataView,
     request,
     hits,
@@ -140,10 +147,6 @@ export function Chart({
     input$,
   });
 
-  // We need to update the absolute time range whenever the refetchId changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const timeRange = useMemo(() => getAbsoluteTimeRange(relativeTimeRange), [refetchId]);
-
   useTotalHits({
     services,
     dataView,
@@ -155,7 +158,7 @@ export function Chart({
     filters,
     query,
     timeRange,
-    refetchId,
+    refetch$,
     onTotalHitsChange,
   });
 
@@ -302,7 +305,7 @@ export function Chart({
               hits={hits}
               chart={chart}
               timeRange={timeRange}
-              refetchId={refetchId}
+              refetch$={refetch$}
               lensAttributes={lensAttributes}
               onTotalHitsChange={onTotalHitsChange}
               onChartLoad={onChartLoad}

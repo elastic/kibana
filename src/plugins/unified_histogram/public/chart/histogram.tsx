@@ -8,16 +8,16 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import useDebounce from 'react-use/lib/useDebounce';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
+import type { Observable } from 'rxjs';
 import {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
@@ -26,10 +26,11 @@ import {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
+  UnifiedHistogramInputMessage,
 } from '../types';
 import { buildBucketInterval } from './build_bucket_interval';
 import { useTimeRange } from './use_time_range';
-import { REQUEST_DEBOUNCE_MS } from './consts';
+import { useStableCallback } from './use_stable_callback';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;
@@ -38,25 +39,11 @@ export interface HistogramProps {
   hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
   timeRange: TimeRange;
-  refetchId: number;
+  refetch$: Observable<UnifiedHistogramInputMessage>;
   lensAttributes: TypedLensByValueInput['attributes'];
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
 }
-
-/**
- * Takes a callback and syncs it to a ref as it changes, then returns a function
- * that calls the current ref so it can be exluded from effect dependencies
- */
-const useRefCallback = <T extends (...args: any[]) => any>(fn: T | undefined) => {
-  const ref = useRef(fn);
-
-  useEffect(() => {
-    ref.current = fn;
-  }, [fn]);
-
-  return (...args: Parameters<T>) => ref.current?.(...args);
-};
 
 export function Histogram({
   services: { data, lens, uiSettings },
@@ -65,7 +52,7 @@ export function Histogram({
   hits,
   chart: { timeInterval },
   timeRange,
-  refetchId,
+  refetch$,
   lensAttributes: attributes,
   onTotalHitsChange,
   onChartLoad,
@@ -78,15 +65,7 @@ export function Histogram({
     timeInterval,
   });
 
-  // Keep track of previous hits in a ref to avoid recreating the
-  // onLoad callback when the hits change, which triggers a Lens reload
-  const previousHits = useRef(hits?.total);
-
-  useEffect(() => {
-    previousHits.current = hits?.total;
-  }, [hits?.total]);
-
-  const onLoad = useCallback(
+  const onLoad = useStableCallback(
     (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
       const lensRequest = adapters?.requests?.getRequests()[0];
       const requestFailed = lensRequest?.status === RequestStatus.ERROR;
@@ -100,7 +79,7 @@ export function Histogram({
       // This is incorrect, so we check for request failures and shard failures here, and emit an error instead.
       if (requestFailed || response?._shards.failed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
-        onChartLoad?.({ complete: false, adapters: adapters ?? {} });
+        onChartLoad?.({ adapters: adapters ?? {} });
         return;
       }
 
@@ -108,7 +87,7 @@ export function Histogram({
 
       onTotalHitsChange?.(
         isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
-        totalHits ?? previousHits.current
+        totalHits ?? hits?.total
       );
 
       if (response) {
@@ -124,42 +103,27 @@ export function Histogram({
       }
 
       onChartLoad?.({ adapters: adapters ?? {} });
-    },
-    [data, dataView, onChartLoad, onTotalHitsChange, timeInterval, timeRange]
+    }
   );
 
-  const [debouncedProps, setDebouncedProps] = useState(
-    getLensProps({
-      timeRange,
-      attributes,
-      request,
-      onLoad,
-    })
+  const lensProps = useMemo(
+    () =>
+      getLensProps({
+        timeRange,
+        attributes,
+        request,
+        onLoad,
+      }),
+    [attributes, onLoad, request, timeRange]
   );
 
-  const previousRefetchId = useRef<number>();
+  const [debouncedProps, setDebouncedProps] = useState(lensProps);
+  const updateDebouncedProps = useStableCallback(() => setDebouncedProps(lensProps));
 
-  useDebounce(
-    () => {
-      debugger;
-      if (refetchId === previousRefetchId.current) {
-        return;
-      }
-
-      previousRefetchId.current = refetchId;
-
-      setDebouncedProps(
-        getLensProps({
-          timeRange,
-          attributes,
-          request,
-          onLoad,
-        })
-      );
-    },
-    REQUEST_DEBOUNCE_MS,
-    [attributes, onLoad, refetchId, request, timeRange]
-  );
+  useEffect(() => {
+    const subscription = refetch$.subscribe(updateDebouncedProps);
+    return () => subscription.unsubscribe();
+  }, [refetch$, updateDebouncedProps]);
 
   const { euiTheme } = useEuiTheme();
   const chartCss = css`

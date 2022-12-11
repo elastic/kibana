@@ -14,8 +14,8 @@ export const messageIsType = <
   TMessage extends Extract<TMessageUnion, { type: TType }>,
   TPayload extends TMessage extends UnifiedDataMessage<any> ? TMessage['payload'] : never
 >(
-  message: TMessageUnion,
+  message: TMessageUnion | undefined,
   type: TType
 ): message is TMessage & { payload: TPayload } => {
-  return message.type === type;
+  return message?.type === type;
 };

@@ -11,31 +11,18 @@ import { DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { MutableRefObject, useEffect, useRef } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
-import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { catchError, filter, lastValueFrom, map, Observable, of } from 'rxjs';
 import {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
+  UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
 } from '../types';
-import { REQUEST_DEBOUNCE_MS } from './consts';
-
-/**
- * Takes a callback and syncs it to a ref as it changes, then returns a function
- * that calls the current ref so it can be exluded from effect dependencies
- */
-const useRefCallback = <T extends (...args: any[]) => any>(fn: T | undefined) => {
-  const ref = useRef(fn);
-
-  useEffect(() => {
-    ref.current = fn;
-  }, [fn]);
-
-  return (...args: Parameters<T>) => ref.current?.(...args);
-};
+import { useStableCallback } from './use_stable_callback';
 
 export const useTotalHits = ({
   services,
@@ -48,7 +35,7 @@ export const useTotalHits = ({
   filters,
   query,
   timeRange,
-  refetchId,
+  refetch$,
   onTotalHitsChange,
 }: {
   services: UnifiedHistogramServices;
@@ -61,48 +48,31 @@ export const useTotalHits = ({
   filters: Filter[];
   query: Query | AggregateQuery;
   timeRange: TimeRange;
-  refetchId: number;
+  refetch$: Observable<UnifiedHistogramInputMessage>;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
 }) => {
   const abortController = useRef<AbortController>();
-  const previousRefetchId = useRef<number>();
-
-  useDebounce(
-    () => {
-      debugger;
-      if (refetchId === previousRefetchId.current) {
-        return;
-      }
-
-      previousRefetchId.current = refetchId;
-
-      fetchTotalHits({
-        services,
-        abortController,
-        dataView,
-        request,
-        hits,
-        chartVisible,
-        filters,
-        query,
-        timeRange,
-        onTotalHitsChange,
-      });
-    },
-    REQUEST_DEBOUNCE_MS,
-    [
-      chartVisible,
-      dataView,
-      filters,
-      hits,
-      onTotalHitsChange,
-      query,
-      refetchId,
-      request,
+  const fetch = useStableCallback(() => {
+    fetchTotalHits({
       services,
+      abortController,
+      dataView,
+      request,
+      hits,
+      chartVisible,
+      filters,
+      query,
       timeRange,
-    ]
-  );
+      onTotalHitsChange,
+    });
+  });
+
+  useEffectOnce(fetch);
+
+  useEffect(() => {
+    const subscription = refetch$.subscribe(fetch);
+    return () => subscription.unsubscribe();
+  }, [fetch, refetch$]);
 };
 
 const fetchTotalHits = async ({

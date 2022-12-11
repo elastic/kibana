@@ -287,15 +287,18 @@ export const useDiscoverHistogram = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchSessionId]);
 
-  const input$ = useMemo(() => new Subject<UnifiedHistogramInputMessage>(), []);
   const [isRendered, setIsRendered] = useState(false);
+
+  useEffect(() => {
+    setIsRendered(Boolean(searchSessionId));
+  }, [searchSessionId]);
+
+  const input$ = useMemo(() => new Subject<UnifiedHistogramInputMessage>(), []);
 
   useEffect(() => {
     const subscription = savedSearchFetch$.subscribe(() => {
       if (isRendered) {
         input$.next({ type: 'refetch' });
-      } else {
-        setIsRendered(true);
       }
     });
 
