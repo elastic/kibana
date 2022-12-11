@@ -8,7 +8,7 @@
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { getVisualizeInformation } from '@kbn/unified-field-list-plugin/public';
+import { getVisualizeInformation, useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   UnifiedHistogramFetchStatus,
@@ -129,21 +129,6 @@ export const useDiscoverHistogram = ({
   );
 
   /**
-   * Request
-   */
-
-  // The searchSessionId will be updated whenever a new search
-  // is started and will trigger a unified histogram refetch
-  const searchSessionId = useObservable(searchSessionManager.searchSessionId$);
-  const request = useMemo(
-    () => ({
-      searchSessionId,
-      adapter: inspectorAdapters.requests,
-    }),
-    [inspectorAdapters.requests, searchSessionId]
-  );
-
-  /**
    * Total hits
    */
 
@@ -220,32 +205,23 @@ export const useDiscoverHistogram = ({
     [inspectorAdapters]
   );
 
-  const [chartHidden, setChartHidden] = useState(hideChart);
   const chart = useMemo(
     () =>
       isPlainRecord || !isTimeBased
         ? undefined
         : {
-            hidden: chartHidden,
+            hidden: hideChart,
             timeInterval: interval,
           },
-    [chartHidden, interval, isPlainRecord, isTimeBased]
+    [hideChart, interval, isPlainRecord, isTimeBased]
   );
 
   // Clear the Lens request adapter when the chart is hidden
   useEffect(() => {
-    if (chartHidden || !chart) {
+    if (hideChart || !chart) {
       inspectorAdapters.lensRequests = undefined;
     }
-  }, [chart, chartHidden, inspectorAdapters]);
-
-  // state.chartHidden is updated before searchSessionId, which can trigger duplicate
-  // requests, so instead of using state.chartHidden directly, we update chartHidden
-  // when searchSessionId changes
-  useEffect(() => {
-    setChartHidden(hideChart);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchSessionId]);
+  }, [chart, hideChart, inspectorAdapters]);
 
   /**
    * Breakdown
@@ -272,32 +248,40 @@ export const useDiscoverHistogram = ({
    * Search params
    */
 
-  const [searchParams, setSearchParams] = useState({
-    query: data.query.queryString.getQuery(),
-    filters: data.query.filterManager.getFilters(),
-    timeRange: data.query.timefilter.timefilter.getTime(),
-  });
+  const { query, filters, fromDate: from, toDate: to } = useQuerySubscriber({ data });
+  const timeRange = useMemo(
+    () => (from && to ? { from, to } : data.query.timefilter.timefilter.getTimeDefaults()),
+    [data.query.timefilter.timefilter, from, to]
+  );
 
-  useEffect(() => {
-    setSearchParams({
-      query: data.query.queryString.getQuery(),
-      filters: data.query.filterManager.getFilters(),
-      timeRange: data.query.timefilter.timefilter.getTime(),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchSessionId]);
+  /**
+   * Request
+   */
 
-  const [isRendered, setIsRendered] = useState(false);
+  // The searchSessionId will be updated whenever a new search is started
+  const searchSessionId = useObservable(searchSessionManager.searchSessionId$);
+  const request = useMemo(
+    () => ({
+      searchSessionId,
+      adapter: inspectorAdapters.requests,
+    }),
+    [inspectorAdapters.requests, searchSessionId]
+  );
 
-  useEffect(() => {
-    setIsRendered(Boolean(searchSessionId));
-  }, [searchSessionId]);
+  /**
+   * Data fetching
+   */
 
   const input$ = useMemo(() => new Subject<UnifiedHistogramInputMessage>(), []);
 
+  // Initialized when the first search has been requested or
+  // when in SQL mode since search sessions are not supported
+  const isInitialized = Boolean(searchSessionId) || isPlainRecord;
+
+  // Trigger a unified histogram refetch when savedSearchFetch$ is triggered
   useEffect(() => {
     const subscription = savedSearchFetch$.subscribe(() => {
-      if (isRendered) {
+      if (isInitialized) {
         input$.next({ type: 'refetch' });
       }
     });
@@ -305,16 +289,14 @@ export const useDiscoverHistogram = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [input$, isRendered, savedSearchFetch$]);
-
-  // Initialized when the first search has been requested or
-  // when in SQL mode since search sessions are not supported
-  const isInitialized = Boolean(searchSessionId) || isPlainRecord;
+  }, [input$, isInitialized, savedSearchFetch$]);
 
   // Don't render the unified histogram layout until initialized
   return isInitialized
     ? {
-        ...searchParams,
+        query,
+        filters,
+        timeRange,
         topPanelHeight,
         request,
         hits,
