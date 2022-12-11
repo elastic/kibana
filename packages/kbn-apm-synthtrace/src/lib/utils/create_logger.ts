@@ -15,7 +15,7 @@ export enum LogLevel {
   error = 3,
 }
 
-export function getTimeString() {
+function getTimeString() {
   return `[${new Date().toLocaleTimeString()}]`;
 }
 

@@ -14,7 +14,7 @@ import { WorkerData } from './synthtrace_worker';
 const { workerId } = isMainThread ? { workerId: -1 } : (workerData as WorkerData);
 
 function getLogMethod(log: LogLevel) {
-  return (...args: any) =>
+  return (...args: any) => {
     parentPort?.postMessage({
       log,
       args: [`[${workerId}]`].concat(
@@ -25,6 +25,7 @@ function getLogMethod(log: LogLevel) {
         )
       ),
     });
+  };
 }
 
 // logging proxy to main thread, ensures we see real time logging

@@ -17,7 +17,7 @@ import {
   SynthtraceGenerator,
 } from '../../../../types';
 import { Logger } from '../../../utils/create_logger';
-import { createFilterTransform, fork, parallel } from '../../../utils/stream_utils';
+import { fork, parallel } from '../../../utils/stream_utils';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
 import { createSpanMetricsAggregator } from '../../aggregators/create_span_metrics_aggregator';
 import { createTransactionMetricsAggregator } from '../../aggregators/create_transaction_metrics_aggregator';
@@ -57,6 +57,29 @@ export class ApmSynthtraceEsClient {
   private readonly refreshAfterIndex: boolean;
 
   private readonly version: string;
+
+  private pipelineCallback: (base: Readable) => NodeJS.WritableStream = (base) => {
+    const aggregators = [
+      createTransactionMetricsAggregator('1m'),
+      createSpanMetricsAggregator('1m'),
+    ];
+
+    return pipeline(
+      base,
+      getSerializeTransform(),
+      getIntakeDefaultsTransform(),
+      fork(new PassThrough({ objectMode: true }), ...aggregators),
+      createBreakdownMetricsAggregator('30s'),
+      getApmServerMetadataTransform(this.version),
+      getRoutingTransform(),
+      getDedotTransform(),
+      (err) => {
+        if (err) {
+          this.logger.error(err);
+        }
+      }
+    );
+  };
 
   constructor(options: { client: Client; logger: Logger } & ApmSynthtraceEsClientOptions) {
     this.client = options.client;
@@ -112,33 +135,21 @@ export class ApmSynthtraceEsClient {
     });
   }
 
+  pipeline(cb: (base: Readable) => NodeJS.WritableStream) {
+    this.pipelineCallback = cb;
+  }
+
+  getVersion() {
+    return this.version;
+  }
+
   async index(streamOrGenerator: MaybeArray<Readable | SynthtraceGenerator<ApmFields>>) {
     this.logger.debug(`Bulk indexing ${castArray(streamOrGenerator).length} stream(s)`);
 
     const allStreams = castArray(streamOrGenerator).map((obj) => {
       const base = isGeneratorObject(obj) ? Readable.from(obj) : obj;
 
-      const aggregators = [
-        createTransactionMetricsAggregator('1m'),
-        createSpanMetricsAggregator('1m'),
-      ];
-
-      return pipeline(
-        base,
-        getSerializeTransform(),
-        getIntakeDefaultsTransform(),
-        fork(new PassThrough({ objectMode: true }), ...aggregators),
-        createFilterTransform((event: ApmFields) => event['processor.event'] === 'metric'),
-        createBreakdownMetricsAggregator('30s'),
-        getApmServerMetadataTransform(this.version),
-        getRoutingTransform(),
-        getDedotTransform(),
-        (err) => {
-          if (err) {
-            this.logger.error(err);
-          }
-        }
-      );
+      return this.pipelineCallback(base);
     }) as Transform[];
 
     let count: number = 0;
@@ -149,7 +160,7 @@ export class ApmSynthtraceEsClient {
       concurrency: this.concurrency,
       refresh: false,
       refreshOnCompletion: false,
-      flushBytes: 500000,
+      flushBytes: 250000,
       datasource: stream,
       onDocument: (doc: ESDocumentWithOperation<ApmFields>) => {
         let action: SynthtraceESAction;
@@ -168,7 +179,10 @@ export class ApmSynthtraceEsClient {
           action = { create: { _index: doc._index } };
           delete doc._index;
         } else {
-          throw new Error(`_action or _index not set in document`);
+          this.logger.debug(doc);
+          throw new Error(
+            `Could not determine operation: _index and _action not defined in document`
+          );
         }
 
         return action;

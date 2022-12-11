@@ -11,14 +11,35 @@ import { Serializable } from '../../../serializable';
 import { ApmFields } from '../../apm_fields';
 
 export function getSerializeTransform() {
+  const buffer: ApmFields[] = [];
+
+  let cb: (() => void) | undefined;
+
+  function push(stream: Transform, events: ApmFields[], callback?: () => void) {
+    let event: ApmFields | undefined;
+    while ((event = events.shift())) {
+      if (!stream.push(event)) {
+        buffer.push(...events);
+        cb = callback;
+        return;
+      }
+    }
+    callback?.();
+  }
+
   return new Transform({
     objectMode: true,
-    transform(chunk: Serializable<ApmFields>, encoding, callback) {
-      const events = chunk.serialize();
-      for (const event of events) {
-        this.push(event);
+    read() {
+      if (cb) {
+        const nextCallback = cb;
+        cb = undefined;
+        const nextEvents = [...buffer];
+        buffer.length = 0;
+        push(this, nextEvents, nextCallback);
       }
-      callback();
+    },
+    write(chunk: Serializable<ApmFields>, encoding, callback) {
+      push(this, chunk.serialize(), callback);
     },
   });
 }

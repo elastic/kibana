@@ -46,6 +46,11 @@ export interface GeoLocation {
   type: string;
 }
 
+type ExperimentalFields = Partial<{
+  'metricset.interval': string;
+  'transaction.duration.summary': string;
+}>;
+
 export type ApmFields = Fields<{
   'metricset.id': string;
 }> &
@@ -85,6 +90,12 @@ export type ApmFields = Fields<{
     'error.id': string;
     'event.ingested': number;
     'event.outcome': string;
+    'event.outcome_numeric':
+      | number
+      | {
+          sum: number;
+          value_count: number;
+        };
     'faas.coldstart': boolean;
     'faas.execution': string;
     'faas.id': string;
@@ -157,7 +168,8 @@ export type ApmFields = Fields<{
     }>;
     'url.original': string;
   }> &
-  ApmApplicationMetricFields;
+  ApmApplicationMetricFields &
+  ExperimentalFields;
 
 export type SpanParams = {
   spanName: string;

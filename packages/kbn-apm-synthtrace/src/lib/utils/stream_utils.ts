@@ -6,23 +6,7 @@
  * Side Public License, v 1.
  */
 import { each, eachSeries } from 'async';
-import { PassThrough, Transform } from 'stream';
-import { loggerProxy } from '../../cli/utils/logger_proxy';
-
-export function series(...streams: Transform[]) {
-  const pt = new PassThrough({ objectMode: true });
-  eachSeries(
-    streams,
-    (stream, cb) => {
-      stream.pipe(pt, { end: false });
-      stream.on('end', cb);
-    },
-    () => {
-      pt.end();
-    }
-  );
-  return pt;
-}
+import { Duplex, PassThrough, Transform } from 'stream';
 
 export function parallel(...streams: NodeJS.ReadableStream[]) {
   const pt = new PassThrough({ objectMode: true });
@@ -34,7 +18,6 @@ export function parallel(...streams: NodeJS.ReadableStream[]) {
     streams,
     (stream, cb) => {
       stream.on('end', () => {
-        loggerProxy.debug('Stream ended');
         cb();
       });
     },
@@ -45,28 +28,22 @@ export function parallel(...streams: NodeJS.ReadableStream[]) {
   return pt;
 }
 
-export function fork(...streams: Transform[]): Transform {
+export function fork(...streams: Transform[]): Duplex {
   const proxy = new Transform({
     objectMode: true,
     read() {
-      this.emit('drain');
+      resumeAllStreams();
     },
-    final: (callback) => {
-      each(
+    write(chunk, encoding, callback) {
+      eachSeries(
         streams,
         (stream, cb) => {
-          stream.end(cb);
+          const shouldWriteNext = stream.write(chunk, cb);
+          if (!shouldWriteNext) {
+            stream.on('drain', cb);
+          }
         },
-        callback
-      );
-    },
-    write: (chunk, encoding, callback) => {
-      each(
-        streams,
-        (stream, cb) => {
-          stream.write(chunk, cb);
-        },
-        (err) => {
+        () => {
           callback();
         }
       );
@@ -86,21 +63,11 @@ export function fork(...streams: Transform[]): Transform {
       const shouldWriteNext = proxy.push(chunk);
       if (!shouldWriteNext) {
         pauseAllStreams();
-        proxy.once('drain', resumeAllStreams);
       }
     })
   );
 
-  each(
-    streams,
-    (stream, cb) =>
-      stream.on('end', () => {
-        cb();
-      }),
-    () => {
-      proxy.end();
-    }
-  );
+  pauseAllStreams();
 
   return proxy;
 }
@@ -108,18 +75,12 @@ export function fork(...streams: Transform[]): Transform {
 export function createFilterTransform(filter: (chunk: any) => boolean): Transform {
   const transform = new Transform({
     objectMode: true,
-    read() {
-      this.emit('drain');
-    },
-    write(event, encoding, callback) {
+    transform(event, encoding, callback) {
       if (filter(event)) {
-        const shouldWriteNext = this.push(event);
-        if (!shouldWriteNext) {
-          this.once('drain', callback);
-          return;
-        }
+        callback(null, event);
+      } else {
+        callback(null);
       }
-      callback();
     },
   });
 

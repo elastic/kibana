@@ -28,6 +28,8 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
     reduce: (metric: TMetric, event: TFields) => void,
     serialize: (metric: TMetric) => TOutput
   ) {
+    let cb: (() => void) | undefined;
+
     const metrics: Map<string, TMetric & { '@timestamp'?: number }> = new Map();
 
     const { intervalAmount, intervalUnit } = parseInterval(flushInterval);
@@ -38,7 +40,7 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
     let toFlush: TMetric[] = [];
 
-    function flush(stream: Duplex, includeCurrentMetrics: boolean = true) {
+    function flush(stream: Duplex, includeCurrentMetrics: boolean, minSize: number = 0) {
       const allItems = [...toFlush];
 
       toFlush = [];
@@ -48,13 +50,22 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
         metrics.clear();
       }
 
+      let flushed = 0;
+
       while (allItems.length) {
         const next = allItems.shift()!;
         const shouldWriteNext = stream.push(serialize(next));
-        if (!shouldWriteNext) {
+        flushed++;
+        if (!shouldWriteNext && minSize <= flushed) {
           toFlush = allItems;
-          break;
+          return;
         }
+      }
+
+      if (cb) {
+        const next = cb;
+        cb = undefined;
+        next();
       }
     }
 
@@ -64,31 +75,26 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
     return new Transform({
       objectMode: true,
-      read() {
-        flush(this, false);
+      read(size) {
+        flush(this, false, size);
       },
       final(callback) {
-        flush(this);
+        flush(this, true);
         callback();
       },
       write(event: TFields, encoding, callback) {
+        if (cb) {
+          throw new Error('Writing to a paused stream');
+        }
         if (!filter(event)) {
           callback();
           return;
         }
+
         const timestamp = event['@timestamp']!;
 
         if (typeof timestamp === 'string') {
           throw new Error('Timestamp cannot be a string');
-        }
-
-        if (nextFlush === null) {
-          nextFlush = getNextFlush(timestamp);
-        }
-
-        if (timestamp > nextFlush) {
-          flush(this);
-          nextFlush = getNextFlush(timestamp);
         }
 
         const truncatedTimestamp = Math.floor(timestamp / flushEveryMs) * flushEveryMs;
@@ -104,7 +110,17 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
         reduce(set, event);
 
-        callback();
+        if (nextFlush === null) {
+          nextFlush = getNextFlush(timestamp);
+        }
+
+        if (timestamp > nextFlush) {
+          nextFlush = getNextFlush(timestamp);
+          cb = callback;
+          flush(this, true);
+        } else {
+          callback();
+        }
       },
     });
   };

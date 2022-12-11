@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { getTimeString, Logger, LogLevel } from './create_logger';
+import { Logger, LogLevel } from './create_logger';
 
 function isPromise(val: any): val is Promise<any> {
   return val && typeof val === 'object' && 'then' in val && typeof val.then === 'function';
 }
 
 function logTo(logger: Logger, name: string, start: bigint) {
-  logger.debug(getTimeString(), `${name}: ${Number(process.hrtime.bigint() - start) / 1000000}ms`);
+  logger.debug(`${name}: ${Number(process.hrtime.bigint() - start) / 1000000}ms`);
 }
 
 export const logPerf = <T extends any>(

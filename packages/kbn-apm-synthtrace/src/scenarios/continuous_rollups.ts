@@ -7,10 +7,19 @@
  */
 
 import { merge, range as lodashRange } from 'lodash';
+import { PassThrough, pipeline, Transform } from 'stream';
 import { apm } from '../..';
 import { Scenario } from '../cli/scenario';
+import { createServiceMetricsAggregator } from '../lib/apm/aggregators/create_service_metrics_aggregator';
+import { createTransactionMetricsAggregator } from '../lib/apm/aggregators/create_transaction_metrics_aggregator';
 import { ApmFields } from '../lib/apm/apm_fields';
 import { ComponentTemplateName } from '../lib/apm/client/apm_synthtrace_es_client';
+import { getApmServerMetadataTransform } from '../lib/apm/client/apm_synthtrace_es_client/get_apm_server_metadata_transform';
+import { getDedotTransform } from '../lib/apm/client/apm_synthtrace_es_client/get_dedot_transform';
+import { getIntakeDefaultsTransform } from '../lib/apm/client/apm_synthtrace_es_client/get_intake_defaults_transform';
+import { getSerializeTransform } from '../lib/apm/client/apm_synthtrace_es_client/get_serialize_transform';
+import { fork } from '../lib/utils/stream_utils';
+import { ESDocumentWithOperation } from '../types';
 
 const scenario: Scenario<ApmFields> = async ({ logger }) => {
   return {
@@ -24,16 +33,87 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
                 number_of_shards: 8,
               },
             },
+            mappings: {
+              properties: {
+                transaction: {
+                  properties: {
+                    summary: {
+                      type: 'aggregate_metric_double',
+                      metrics: ['min', 'max', 'sum', 'value_count'],
+                      default_metric: 'max',
+                    },
+                  },
+                },
+                metricset: {
+                  properties: {
+                    interval: {
+                      type: 'constant_keyword' as const,
+                    },
+                  },
+                },
+              },
+            },
           };
 
           return merge({}, template, next);
         }
       );
+
+      function withInterval(cb: (flushInterval: string) => Transform, flushInterval: string) {
+        const aggregator = cb(flushInterval);
+
+        aggregator.pipe(
+          new PassThrough({
+            objectMode: true,
+            write(metric: ApmFields, encoding, callback) {
+              metric['metricset.interval'] = flushInterval;
+              callback();
+            },
+          })
+        );
+
+        return aggregator;
+      }
+
+      const aggregators = [
+        withInterval(createServiceMetricsAggregator, '1m'),
+        withInterval(createServiceMetricsAggregator, '10m'),
+        withInterval(createServiceMetricsAggregator, '60m'),
+        withInterval(createTransactionMetricsAggregator, '1m'),
+        withInterval(createTransactionMetricsAggregator, '10m'),
+        withInterval(createTransactionMetricsAggregator, '60m'),
+      ];
+
+      apmEsClient.pipeline((base) => {
+        return pipeline(
+          base,
+          getSerializeTransform(),
+          getIntakeDefaultsTransform(),
+          fork(...aggregators),
+          new Transform({
+            objectMode: true,
+            transform(event: ESDocumentWithOperation<ApmFields>, encoding, callback) {
+              const index = `metrics-apm.internal-${
+                event['metricset.name'] === 'transaction' ? 'transaction' : 'service'
+              }.${event['metricset.interval']}`;
+              event._index = index;
+              callback(null, event);
+            },
+          }),
+          getApmServerMetadataTransform(apmEsClient.getVersion()),
+          getDedotTransform(),
+          (err) => {
+            if (err) {
+              logger.error(err);
+            }
+          }
+        );
+      });
     },
     generate: ({ range }) => {
       const NUM_SERVICES = 50;
       const NUM_SERVICE_NODES = 25;
-      const NUM_TRANSACTION_GROUPS = 25;
+      const NUM_TRANSACTION_GROUPS = 10;
       const TRANSACTION_TYPES = ['request', 'custom'];
       const ENVIRONMENTS = ['production', 'development'];
 
@@ -60,37 +140,33 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
 
       return range
         .interval('1m')
-        .rate(10)
+        .rate(1)
         .generator((timestamp, timestampIndex) => {
-          return logger.perf('generate_events_for_timestamp', () => {
-            const events = instances.flatMap((instance) =>
-              transactionGroupRange.flatMap((groupId, groupIndex) =>
-                OUTCOMES.map((outcome) => {
-                  const duration = Math.round(
-                    (timestampIndex % MAX_BUCKETS) * BUCKET_SIZE + MIN_DURATION
-                  );
-
-                  return instance
-                    .transaction(
-                      `transaction-${groupId}`,
-                      TRANSACTION_TYPES[groupIndex % TRANSACTION_TYPES.length]
-                    )
-                    .timestamp(timestamp)
-                    .duration(duration)
-                    .outcome(outcome)
-                    .children(
-                      instance
-                        .span('downstream', 'external', 'http')
-                        .timestamp(timestamp)
-                        .duration(duration)
-                        .outcome(outcome)
+          return logger.perf(
+            'generate_events_for_timestamp ' + new Date(timestamp).toISOString(),
+            () => {
+              const events = instances.flatMap((instance) =>
+                transactionGroupRange.flatMap((groupId, groupIndex) =>
+                  OUTCOMES.map((outcome) => {
+                    const duration = Math.round(
+                      (timestampIndex % MAX_BUCKETS) * BUCKET_SIZE + MIN_DURATION
                     );
-                })
-              )
-            );
 
-            return events;
-          });
+                    return instance
+                      .transaction(
+                        `transaction-${groupId}`,
+                        TRANSACTION_TYPES[groupIndex % TRANSACTION_TYPES.length]
+                      )
+                      .timestamp(timestamp)
+                      .duration(duration)
+                      .outcome(outcome);
+                  })
+                )
+              );
+
+              return events;
+            }
+          );
         });
     },
   };
