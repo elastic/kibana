@@ -16,8 +16,6 @@ import React, {
 } from 'react';
 import { FieldStats, FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import moment from 'moment';
-import { getDefaultQuery } from '@kbn/data-plugin/public';
-import { Filter } from '@kbn/es-query';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -32,14 +30,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { getDefaultDatafeedQuery } from '../../../../../utils/new_job_utils';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { SingleMetricJobCreator } from '../../../../../common';
 import { isDefined } from '../../../../../../../../../common/types/guards';
 
-// @todo: remove this with proper query
-const defaultQuery = getDefaultQuery();
-const defaultFilters: Filter[] = [];
+const defaultDatafeedQuery = getDefaultDatafeedQuery();
 
 export const FieldStatsContent: FC = () => {
   const {
@@ -88,8 +85,7 @@ export const FieldStatsContent: FC = () => {
   return showFieldStats ? (
     <FieldStats
       services={fieldStatsServices}
-      query={defaultQuery}
-      filters={defaultFilters}
+      dslQuery={jobCreator.query ?? defaultDatafeedQuery}
       fromDate={timeRange.from}
       toDate={timeRange.to}
       dataViewOrDataViewId={jobCreator.dataView}

@@ -112,10 +112,6 @@ export class JobCreator {
     return this._indexPattern?.id;
   }
 
-  public get indexPatternId(): string | undefined {
-    return this._indexPattern.id;
-  }
-
   public get indexPatternTitle(): string {
     return this._indexPatternTitle;
   }

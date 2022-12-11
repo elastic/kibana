@@ -133,7 +133,6 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     () => `${field?.name}-${dataTestSubject}`,
     [field?.name, dataTestSubject]
   );
-
   const setState: typeof changeState = useCallback(
     (nextState) => {
       if (prevFetchedRef.current !== fieldId) {
@@ -217,9 +216,9 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       prevFetchedRef.current = fieldId;
       abortControllerRef.current?.abort();
     };
-    // Need to reset abortController when the field changes
+    // Need to refetch data when the field or query changes
     // not just when popover is closed/component is unmounted
-  }, [fieldId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fieldId, dslQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
