@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { FieldStats, FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import moment from 'moment';
 import { getDefaultQuery } from '@kbn/data-plugin/public';
@@ -95,7 +103,7 @@ interface MLJobWizardFieldStatsFlyoutProps {
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (v: boolean) => void;
   toggleFlyoutVisible: () => void;
-  setFieldName: (v: string) => void;
+  setFieldName: (v: string | undefined) => void;
   fieldName?: string;
   setFieldValue: (v: string) => void;
   fieldValue?: string | number;
@@ -144,14 +152,11 @@ export const FieldStatsFlyout = () => {
     prefix: 'pushedFlyoutTitle',
   });
 
+  const closeFlyout = useCallback(() => setIsFlyoutVisible(false), []); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (isFlyoutVisible) {
     return (
-      <EuiFlyout
-        type="push"
-        size="xs"
-        onClose={() => setIsFlyoutVisible(false)}
-        aria-labelledby={pushedFlyoutTitleId}
-      >
+      <EuiFlyout type="push" size="xs" onClose={closeFlyout} aria-labelledby={pushedFlyoutTitleId}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h3 id={pushedFlyoutTitleId}>Field stats</h3>
@@ -167,7 +172,7 @@ export const FieldStatsFlyout = () => {
           <FieldStatsContent />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiButton onClick={() => setIsFlyoutVisible(false)}>Close</EuiButton>
+          <EuiButton onClick={closeFlyout}>Close</EuiButton>
         </EuiFlyoutFooter>
       </EuiFlyout>
     );

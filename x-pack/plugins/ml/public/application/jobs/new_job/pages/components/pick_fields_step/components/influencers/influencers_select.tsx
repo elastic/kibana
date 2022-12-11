@@ -5,19 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode, useContext } from 'react';
-import {
-  EuiButtonIcon,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHighlight,
-} from '@elastic/eui';
+import React, { FC, useContext } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { isDefined } from '../../../../../../../../../common/types/guards';
-import { MLJobWizardFieldStatsFlyoutContext } from '../field_stats_flyout/field_stats_flyout';
+import { useFieldStatsTrigger } from '../../../../../utils/use_field_stats_trigger';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Field } from '../../../../../../../../../common/types/fields';
 import {
@@ -33,7 +24,7 @@ interface Props {
 
 export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedInfluencers }) => {
   const { jobCreator } = useContext(JobCreatorContext);
-  const { setIsFlyoutVisible, setFieldName } = useContext(MLJobWizardFieldStatsFlyoutContext);
+  const { renderOption } = useFieldStatsTrigger();
 
   const options: EuiComboBoxOptionOption[] = [
     ...createFieldOptions(fields, jobCreator.additionalFields),
@@ -45,39 +36,6 @@ export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedIn
   function onChange(selectedOptions: EuiComboBoxOptionOption[]) {
     changeHandler(selectedOptions.map((o) => o.label));
   }
-  const renderOption = (option: EuiComboBoxOptionOption, searchValue: string): ReactNode => {
-    const fieldName = option.label;
-    return option.isGroupLabelOption ? (
-      option.label
-    ) : (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={true}>
-          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="inspect"
-            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-              if (ev.type === 'click') {
-                ev.currentTarget.focus();
-              }
-              ev.preventDefault();
-              ev.stopPropagation();
-
-              if (isDefined(fieldName)) {
-                setFieldName(fieldName);
-                setIsFlyoutVisible(true);
-              }
-            }}
-            aria-label={i18n.translate('xpack.ml.fieldContextPopover.topFieldValuesAriaLabel', {
-              defaultMessage: 'Show top 10 field values',
-            })}
-            data-test-subj={'mlAggSelectFieldStatsPopoverButton'}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
 
   return (
     <EuiComboBox

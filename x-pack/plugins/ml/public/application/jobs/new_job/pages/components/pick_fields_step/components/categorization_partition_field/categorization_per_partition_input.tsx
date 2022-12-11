@@ -8,6 +8,7 @@
 import React, { FC, useCallback, useContext, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
+import { useFieldStatsTrigger } from '../../../../../utils/use_field_stats_trigger';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Field } from '../../../../../../../../../common/types/fields';
 import { createFieldOptions } from '../../../../../common/job_creator/util/general';
@@ -43,6 +44,7 @@ export const CategorizationPerPartitionFieldSelect: FC<Props> = ({
       changeHandler((selectedOptions[0] && selectedOptions[0].label) ?? null),
     [changeHandler]
   );
+  const { renderOption } = useFieldStatsTrigger();
 
   return (
     <EuiComboBox
@@ -52,6 +54,7 @@ export const CategorizationPerPartitionFieldSelect: FC<Props> = ({
       onChange={onChange}
       isClearable={true}
       data-test-subj="mlJobWizardCategorizationPerPartitionFieldNameSelect"
+      renderOption={renderOption}
     />
   );
 };

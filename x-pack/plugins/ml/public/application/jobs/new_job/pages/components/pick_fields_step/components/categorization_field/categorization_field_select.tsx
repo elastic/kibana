@@ -8,6 +8,7 @@
 import React, { FC, useCallback, useContext, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
+import { useFieldStatsTrigger } from '../../../../../utils/use_field_stats_trigger';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Field } from '../../../../../../../../../common/types/fields';
 import { createFieldOptions } from '../../../../../common/job_creator/util/general';
@@ -25,6 +26,7 @@ export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, se
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [fields, jobCreatorUpdated]
   );
+  const { renderOption } = useFieldStatsTrigger();
 
   const selection: EuiComboBoxOptionOption[] = useMemo(() => {
     const selectedOptions: EuiComboBoxOptionOption[] = [];
@@ -48,6 +50,7 @@ export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, se
       onChange={onChange}
       isClearable={true}
       data-test-subj="mlCategorizationFieldNameSelect"
+      renderOption={renderOption}
     />
   );
 };

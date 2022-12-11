@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode, useContext } from 'react';
-import {
-  EuiButtonIcon,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHighlight,
-} from '@elastic/eui';
+import React, { FC } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { MLJobWizardFieldStatsFlyoutContext } from '../field_stats_flyout/field_stats_flyout';
+import { useFieldStatsTrigger } from '../../../../../utils/use_field_stats_trigger';
 import { Field, SplitField } from '../../../../../../../../../common/types/fields';
 
 interface DropDownLabel {
@@ -41,8 +33,7 @@ export const SplitFieldSelect: FC<Props> = ({
   testSubject,
   placeholder,
 }) => {
-  const { setIsFlyoutVisible, setFieldName } = useContext(MLJobWizardFieldStatsFlyoutContext);
-
+  const { renderOption } = useFieldStatsTrigger();
   const options: EuiComboBoxOptionOption[] = fields.map(
     (f) =>
       ({
@@ -64,40 +55,6 @@ export const SplitFieldSelect: FC<Props> = ({
       changeHandler(null);
     }
   }
-
-  const renderOption = (option: EuiComboBoxOptionOption, searchValue: string): ReactNode => {
-    const field = (option as DropDownLabel).field;
-    return option.isGroupLabelOption || !field ? (
-      option.label
-    ) : (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={true}>
-          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="inspect"
-            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-              if (ev.type === 'click') {
-                ev.currentTarget.focus();
-              }
-              ev.preventDefault();
-              ev.stopPropagation();
-
-              if (typeof field.id === 'string') {
-                setFieldName(field.id);
-                setIsFlyoutVisible(true);
-              }
-            }}
-            aria-label={i18n.translate('xpack.ml.fieldContextPopover.topFieldValuesAriaLabel', {
-              defaultMessage: 'Show top 10 field values',
-            })}
-            data-test-subj={'mlAggSelectFieldStatsPopoverButton'}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
 
   return (
     <EuiComboBox

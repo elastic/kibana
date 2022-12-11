@@ -16,6 +16,7 @@ import {
   EuiHorizontalRule,
   EuiTextArea,
 } from '@elastic/eui';
+import { useFieldStatsTrigger } from '../../../../../utils/use_field_stats_trigger';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import {
@@ -222,6 +223,8 @@ export const AdvancedDetectorModal: FC<Props> = ({
     }
   }, [excludeFrequentEnabled]);
 
+  const { renderOption } = useFieldStatsTrigger();
+
   function onCreateClick() {
     detectorChangeHandler(detector, payload.index);
   }
@@ -245,6 +248,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={createSelectedOptions(aggOption)}
                 onChange={onOptionChange(setAggOption)}
                 isClearable={true}
+                renderOption={renderOption}
               />
             </AggDescription>
           </EuiFlexItem>
@@ -257,6 +261,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setFieldOption)}
                 isClearable={true}
                 isDisabled={fieldOptionEnabled === false}
+                renderOption={renderOption}
               />
             </FieldDescription>
           </EuiFlexItem>
@@ -272,6 +277,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setByFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
+                renderOption={renderOption}
               />
             </ByFieldDescription>
           </EuiFlexItem>
@@ -284,6 +290,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setOverFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
+                renderOption={renderOption}
               />
             </OverFieldDescription>
           </EuiFlexItem>
@@ -296,6 +303,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setPartitionFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
+                renderOption={renderOption}
               />
             </PartitionFieldDescription>
           </EuiFlexItem>
@@ -308,6 +316,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setExcludeFrequentOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false || excludeFrequentEnabled === false}
+                renderOption={renderOption}
               />
             </ExcludeFrequentDescription>
           </EuiFlexItem>

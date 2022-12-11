@@ -7,6 +7,7 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 
+import { MLJobWizardFieldStatsFlyoutContext } from './components/field_stats_flyout/field_stats_flyout';
 import { JobCreatorContext } from '../job_creator_context';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
@@ -30,10 +31,16 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
   const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
   const [selectionValid, setSelectionValid] = useState(false);
+  const { setIsFlyoutVisible, setFieldName } = useContext(MLJobWizardFieldStatsFlyoutContext);
 
   useEffect(() => {
     setNextActive(selectionValid && jobValidator.isPickFieldsStepValid);
-  }, [jobValidator, jobValidatorUpdated, selectionValid]);
+
+    return () => {
+      setIsFlyoutVisible(false);
+      setFieldName(undefined);
+    };
+  }, [jobValidator, jobValidatorUpdated, selectionValid, setIsFlyoutVisible, setFieldName]);
 
   return (
     <Fragment>

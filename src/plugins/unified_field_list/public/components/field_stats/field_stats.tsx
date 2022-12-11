@@ -127,15 +127,20 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   });
   const [dataView, changeDataView] = useState<DataView | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const isCanceledRef = useRef<boolean>(false);
+  // Keep track of the last loaded field
+  const prevFetchedRef = useRef<string | undefined>();
+  const fieldId = useMemo(
+    () => `${field?.name}-${dataTestSubject}`,
+    [field?.name, dataTestSubject]
+  );
 
   const setState: typeof changeState = useCallback(
     (nextState) => {
-      if (!isCanceledRef.current) {
+      if (prevFetchedRef.current !== fieldId) {
         changeState(nextState);
       }
     },
-    [changeState, isCanceledRef]
+    [changeState, prevFetchedRef, fieldId]
   );
 
   useEffect(
@@ -149,18 +154,17 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   const setDataView: typeof changeDataView = useCallback(
     (nextDataView) => {
-      if (!isCanceledRef.current) {
+      if (prevFetchedRef.current !== fieldId) {
         changeDataView(nextDataView);
       }
     },
-    [changeDataView, isCanceledRef]
+    [changeDataView, prevFetchedRef, fieldId]
   );
 
   async function fetchData() {
-    if (isCanceledRef.current) {
+    if (prevFetchedRef.current === fieldId) {
       return;
     }
-
     try {
       const loadedDataView =
         typeof dataViewOrDataViewId === 'string'
@@ -210,10 +214,12 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     fetchData();
 
     return () => {
-      isCanceledRef.current = true;
+      prevFetchedRef.current = fieldId;
       abortControllerRef.current?.abort();
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    // Need to reset abortController when the field changes
+    // not just when popover is closed/component is unmounted
+  }, [fieldId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();

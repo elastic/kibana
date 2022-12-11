@@ -93,11 +93,13 @@ export function createFieldOptions(fields: Field[], additionalFields: Field[]) {
       .filter((f) => f.id !== EVENT_RATE_FIELD_ID)
       .map((f) => ({
         label: f.name,
+        field: f,
       })),
     ...additionalFields
       .filter((f) => fields.some((f2) => f2.id === f.id) === false)
       .map((f) => ({
         label: f.id,
+        field: f,
       })),
   ].sort((a, b) => a.label.localeCompare(b.label));
 }
