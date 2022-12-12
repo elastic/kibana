@@ -47,7 +47,6 @@ export const useAddToSharedListTable = ({
   onListSelectionChange,
 }: ExceptionsAddToListsComponentProps) => {
   const [listsToDisplay, setListsToDisplay] = useState<ExceptionListRuleReferencesSchema[]>([]);
-  const [exceptionListReferences, setExceptionListReferences] = useState<RuleReferences>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const listsToFetch = useMemo(() => {
@@ -68,28 +67,29 @@ export const useAddToSharedListTable = ({
   const getReferences = useCallback(async () => {
     try {
       setIsLoading(true);
-      const result = await getExceptionItemsReferences(
+      return getExceptionItemsReferences(
         (!listsToFetch.length
-          ? [{ namespace_type: 'single' }, { namespace_type: 'agnostic' }] // TODO remove 'agnostic' when using `single` only
+          ? [{ namespace_type: 'single' }]
           : listsToFetch) as ExceptionListSchema[]
       );
-      setExceptionListReferences(result as RuleReferences);
     } catch (err) {
       setError(i18n.REFERENCES_FETCH_ERROR);
     }
   }, [listsToFetch]);
 
   const fillListsToDisplay = useCallback(async () => {
-    await getReferences();
-    if (exceptionListReferences) {
-      const lists: ExceptionListRuleReferencesSchema[] = [];
-      for (const [_, value] of Object.entries(exceptionListReferences))
-        if (value.type === ExceptionListTypeEnum.DETECTION) lists.push(value);
-
-      setListsToDisplay(lists);
-      setIsLoading(false);
+    const result = (await getReferences()) as RuleReferences;
+    if (!result) {
+      return setIsLoading(false);
     }
-  }, [exceptionListReferences, getReferences]);
+    const lists: ExceptionListRuleReferencesSchema[] = [];
+
+    for (const value of Object.values(result))
+      if (value.type === ExceptionListTypeEnum.DETECTION) lists.push(value);
+
+    setListsToDisplay(lists);
+    setIsLoading(false);
+  }, [getReferences]);
 
   useEffect(() => {
     fillListsToDisplay();
