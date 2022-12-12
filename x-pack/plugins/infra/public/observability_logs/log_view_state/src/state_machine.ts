@@ -22,7 +22,7 @@ import {
 } from './types';
 
 export const createPureLogViewStateMachine = (initialContext: LogViewContextWithId) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UBqBLMB3AxMgPIDiA+hgJICiA6mZQCJkDCAEgIIByJ1jA2gAYAuolAAHVLCwAXLKgB2YkAA9EAFgAcARgB0ANgBM+nQFZ96gOwBmAJyXBpgDQgAnogC01q7q2DB3qa2moaCOgC+4S5omDgEAKoACowcACrUQqJIIJLScorKagjaAfq6ofrWmkH6ttrq6tYu7ghehuq6lqbemlX65g6mkdHo2Hi6AK4KWNNyAIYANlgAXpD4mcq5svJK2UXetrra+vpd1traQdZVzYglZZbGQYKWttahmo7DIDFjuLoLVBzCAzKCEIgcRiUHhkADK8RYLGofD4G2yW3yu1ARRsHXOhmCT2COk0twQIV0pn8gi0dkqVMM2m+vziAKBIIUYOIkOh5AAYhxKMhUSJNlJtgU9ogqZpOqFnqZzIZroYyYZlbpbLZ-LZ+oz2sd1MzRqyAE5wVALABuoPwACVqLCiMh4qlKEQuHCEUiUQJRejxZjCnd1ZZdL0LoI6mdrmSKVT-LTddYqdpNMbYuNzbBLTbOfbHc7Xe7PQKhSKshJAztgwhiZSLhdHpp1IZLNpLGqNVqdXrtAbLBm-roAMYACzAI4A1qDYTI5jIJrB8OxqCwANK8uGpNLxWFexHIxgVsV5GtS4qWTRhywnUJa4xt0ydtyIV6+Anakw6axGayDqIfhNcZx0nGdOTnBclxXNg103GFYR3VI9zIMthT9SscmrSVsTuUxtGscMBjTc57GvLtCJ7KM+wHIczQta01gdblmGIcgqDoNEqzPHDVBDUwOhCa4dWVUJbzJLwDGuTRanMdRglqKojUAllxkBYFQT5OYsAWJjqFSO0AE0uKwnisT4hA7A6W9HkVX8-HsNV1AeY4ThsQRDB0XVDDorMGImTEtJ0vSDOM-1uIlcyim1PRKmMIxLn-Ex1CclyTlOawPK8-RfP+UDp1nedF1gILdIgAtQpMjFz1w4p1A7XRvG0N5bEMKk3kaVLOlcjKsuaoxcsmcQIAXW0khSN0EO9I8TwDMza3sMNtVsbotH6d5bBS19Wk0Q59A8oIGhMMICSZFTgP+CZhtG-NxrSLc0NmiKgwvfsfEseTanVeTjH-CT1UOGkW2MB8AgZQarpGuROVKvSWLINiKBoWgquwqLEFOWUU2CBptWufbSW2jx+1MXRHEy-D1V-D77EiQCFFQCA4GUVTcFPSLawI2Vahky56mqK9+gkxoOmCRMBL1cwUwh6ZZiwRYVkgdmXtqtMyh5-Q+a0Z8ZOcbaSlJ9UTkaZqenMWxBvUjkoGVmqLKsQwybatqVt2kIXxaEw5X6a86heN4XkG7Nc1BW3eOiz5fG17U2q0X64z0R51pkk4aXwwb8vAqBIOKsP0eKfDAdMCpajWxxVW2q8DDkgi3kuYIhnOzN-mDxiIDz2tGQuavE3LixGiaSvual+w+ccR4Lab4crc07Syo7i8rHVi5lWfDsCTaslf0d9eVvbXVqX6IP-MCuelbmjmL1H8pBEqdtzG6fCt6MI4J5sex+nq68M4nAqIKKpcsN24XxVhZS4oRfCmF6PFBoE8t5BCOFld4zlLgCRpBDa60MbYgLttFE4BhQj1Q+gJKwip-qtnDIyFs6hqL1QaOmKerJIY3SgEAheqttZHHwpjf8VQgb-QJJQtM9UkoNFbABSIQA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UBqBLMB3AxMgPIDiA+hgJICiA6mZQCJkDCAEgIIByJ1jA2gAYAuolAAHVLCwAXLKgB2YkAA9EAFkEBmAHQAmAGwB2dQYAcAVkGmAjGYMAaEAE9EAWi3qjO9WcGCLIzMbLWMLAE4AX0inNEwcAgBVAAVGDgAVaiFRJBBJaTlFZTUEG20DfUEDLUtwg3CbdXUtJ1cEDz11HSMLTzMagwtjAOjY9Gw8HQBXBSxZuQBDABssAC9IfGzlfNl5JVySz3CdGwMwrRsbCK0a1sQyiqNDCMEjcK09QT8LUZA4idwOiWqAWEDmUEIRA4jEoPDIAGVEiwWNQ+HwtrkdoV9qASkZPDoLnpwmZniTgmY7ghSTorP5fFo6lorHobL9-gkgSCwQoIcRobDyAAxDiUZDokTbKS7IoHRBWMzdT4vCxDPQ3PRUvTqnThcL+OoWVmdU7qdnjTkAJzgqCWADdwfgAErUeFEZCJdKUIhcMgisUSnISaXY4qIcm0y6XJ5mdR6Iw2IxanV6g2DY3qRPm+KTa2wW0O3nO13uz3e32I5GoxiBqUFPZh0ra7z9S6CBo9G4tFyIGl06z9JlWOzZgE6ADGAAswOOANbg+EyBYyKawfDsagsADSgoR6QyiXhftF4oEksxIYbctKFhCOksxjsF3CQSTPYQ2t0qfb6ZsJqMo6clOM7zryi7Lqu65sJuO5wvC+7pIeCJIiiaJnkGeSXrKuL3K+3RnJ8eqGPGgRUm8PjEvq5jBKE6oATEfwWrmNr2hsLr8swxDkFQdAYsG9bYao9x6BYXSkjcBrqp8RiOO+Hg6NUAzhEM6gkvUNRmgxHKTMCoLgkKCxYEsbHUOkToAJp8ZhAk4kJCCMl0MlPKqoS+O2b5tJ0jynGc+KCHowR1HogHMfmSxTNiBlGSZZmWee-EyrZJT6jYCkfARVxaDJsZaqY3Q+cYWj+YFBghYCwFzguS4rrAUXGRAxaxVZWJXjhpSZt4ng2O84Qie2njdp5eUJmchXFd1BjBVpTGAlM4gQMujopGkXpwv6p7NVhSXCV43SqfU2qqYYWVUm42rHAOcb1L12gsmV0zzYtRbLRku6VqhNboXWiWNi+3j6spfSDB84TqKdZjHAY-kRE05hfMSbLTTms2PXIvJ1SZHFkFxFA0LQm02Y2xiKsyJJNPqNxQ5Scl-hYOgBEVt6fsYqn0QxCioBAcDKNpuDfaG14hIq9T2FcjSWEEgync0XQkv4k1ZQYjQRD8SNjjMcy7MsayQPzrV2XYFQi0rt6+IE9gWFSZR09qZzNN1fRDFEaucrpPJQHrgklF4ej0yJInKRDpIeYg5hKoMZhvGUbxFfRYzIzoeYFuCnvbQgcs+Gb+oib4x1UsE4e9PYZzWLe90VaBUDgTVqeNmLF1GlU9S+FDRpkcLKkhO8Vwkqr8djknrEQLX16spcCl0poRoGE0NztxP1QvmLARPM7-eu9y+mGfVI9tV4RuXOqgSJsSIlUrRJyr8fdT+FUfeMQng8RXsGPDxehPXkvlTVAmQy9Le59JqX2JPiF8gxMyR3LtOSqYFqqrlfrvA2jcfAWH6IYGePtwjnwiCcYqHxbCqk0Jpdekw5oLTRh7d+P1P5nAUp8Dq6hRJeFVKdTovtSR2CaD+TMTQzD3TIU9KACCqECzauLOmYtiZZRqAOVhxJ7ysljCEGSTQ4xs0iEAA */
   createMachine<LogViewContext, LogViewEvent, LogViewTypestate>(
     {
       context: initialContext,
@@ -143,6 +143,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         LOG_VIEW_ID_CHANGED: {
           target: '.loading',
           actions: 'storeLogViewId',
+          cond: 'isLogViewIdDifferent',
         },
         UPDATE: {
           target: '.updating',
@@ -189,6 +190,10 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
               } as LogViewContextWithError)
             : {}
         ),
+      },
+      guards: {
+        isLogViewIdDifferent: (context, event) =>
+          'logViewId' in event ? event.logViewId !== context.logViewId : false,
       },
     }
   );

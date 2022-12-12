@@ -7,7 +7,7 @@
 
 import { useInterpret, useSelector } from '@xstate/react';
 import createContainer from 'constate';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { waitFor } from 'xstate/lib/waitFor';
 import { LogViewAttributes } from '../../common/log_views';
 import {
@@ -41,6 +41,13 @@ export const useLogView = ({
       devTools: useDevTools,
     }
   );
+
+  useEffect(() => {
+    logViewStateService.send({
+      type: 'LOG_VIEW_ID_CHANGED',
+      logViewId,
+    });
+  }, [logViewId, logViewStateService]);
 
   const logView = useSelector(logViewStateService, (state) =>
     state.matches('resolving') || state.matches('checkingStatus') || state.matches('resolved')
