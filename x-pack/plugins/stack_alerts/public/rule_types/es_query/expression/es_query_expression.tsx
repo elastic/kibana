@@ -206,7 +206,7 @@ export const EsQueryExpression: React.FC<
           // reset expression fields if indices are deleted
           if (indices.length === 0) {
             setRuleProperty('params', {
-              ...ruleParams,
+              timeField: ruleParams.timeField,
               index: indices,
               esQuery: DEFAULT_VALUES.QUERY,
               size: DEFAULT_VALUES.SIZE,
@@ -214,12 +214,11 @@ export const EsQueryExpression: React.FC<
               timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
               timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
               threshold: DEFAULT_VALUES.THRESHOLD,
-              timeField: '',
               aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-              aggField: '',
               groupBy: DEFAULT_VALUES.GROUP_BY,
               termSize: DEFAULT_VALUES.TERM_SIZE,
-              termField: '',
+              searchType: SearchType.esQuery,
+              excludeHitsFromPreviousRun: DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
             });
           } else {
             await refreshEsFields(indices);
