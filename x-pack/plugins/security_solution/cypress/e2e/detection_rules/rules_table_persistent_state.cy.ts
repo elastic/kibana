@@ -13,7 +13,7 @@ import {
   expectNumberOfRules,
   expectToContainRule,
   filterBySearchTerm,
-  goBackFromRuleDetails,
+  goToRulesTable,
   goToRuleDetails,
 } from '../../tasks/alerts_detection_rules';
 import { RULE_SEARCH_FIELD } from '../../screens/alerts_detection_rules';
@@ -63,7 +63,7 @@ describe('Persistent rules table state', () => {
     expectToContainRule('rule 1');
 
     goToRuleDetails();
-    goBackFromRuleDetails();
+    goToRulesTable();
 
     cy.get(RULE_SEARCH_FIELD).should('have.value', 'rule 1');
     expectNumberOfRules(1);

@@ -144,4 +144,4 @@ export const REFRESH_SETTINGS_SELECTION_NOTE = '[data-test-subj="refreshSettings
 
 export const REFRESH_RULES_STATUS = '[data-test-subj="refreshRulesStatus"]';
 
-export const RULE_DETAILS_BACK_TO_ALL_RULES = '[data-test-subj="ruleDetailsBackToAllRules"]';
+export const RULE_DETAILS_BACK_TO_ALL_RULES = '[data-test-subj="breadcrumb"][title="Rules"]';

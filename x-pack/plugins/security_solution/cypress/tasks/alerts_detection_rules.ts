@@ -184,7 +184,7 @@ export const goToRuleDetails = () => {
   cy.get(RULE_NAME).first().click({ force: true });
 };
 
-export const goBackFromRuleDetails = () => {
+export const goToRulesTable = () => {
   cy.get(RULE_DETAILS_BACK_TO_ALL_RULES).click({ force: true });
 };
 
