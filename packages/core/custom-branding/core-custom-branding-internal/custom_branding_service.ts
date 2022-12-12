@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject } from 'rxjs';
 import useObservable, { Observable } from 'react-use/lib/useObservable';
 import type { CustomBranding } from '@kbn/core-custom-branding';
 
@@ -18,23 +18,34 @@ interface Props extends CustomBranding {
 }
 
 /** @internal */
-export function CustomBrandingService({logo, favicon, pageTitle , customizedLogo}: Props){
+export function CustomBrandingService({ logo, favicon, pageTitle, customizedLogo }: Props) {
   const customBrandingPerOperator$ = new Map<string, string | Observable<string> | undefined>();
-  const logo$ = getObservable$(logo); 
-  const favicon$ = getObservable$(favicon); 
+  const logo$ = getObservable$(logo);
+  const favicon$ = getObservable$(favicon);
   const pageTitle$ = getObservable$(pageTitle);
   const customizedLogo$ = getObservable$(customizedLogo);
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   async () => {
     return {
       // get what is passed to the service
       get: (property: string | Observable<string> | undefined) => getObservable$(property),
 
       // set the parameters which may have come in as observables or not
-      set: () => customBrandingPerOperator$.set('logo', logo$).set('favicon', favicon$).set('pageTitle', pageTitle$).set('customizedLogo', customizedLogo$),
+      set: () =>
+        customBrandingPerOperator$
+          .set('logo', logo$)
+          .set('favicon', favicon$)
+          .set('pageTitle', pageTitle$)
+          .set('customizedLogo', customizedLogo$),
     };
-  }
+  };
 }
 
-
 // Helper function
-export const getObservable$ = (logo: string | Observable<string> | undefined) => useObservable(logo ? logo as unknown as Observable<string> : new BehaviorSubject<string | undefined>(undefined));
+export const getObservable$ = (logo: string | Observable<string> | undefined) =>
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useObservable(
+    logo
+      ? (logo as unknown as Observable<string>)
+      : new BehaviorSubject<string | undefined>(undefined)
+  );
