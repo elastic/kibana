@@ -23,17 +23,19 @@ export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
   flyoutOverrides: {
     flyoutContainer: css`
       top: 55px !important;
-      bottom: 25px !important;
+      bottom: unset !important;
       right: calc(${euiTheme.size.s} + 128px); // Accounting for margin on button
       border-radius: 6px;
-      height: auto;
+      height: unset !important;
       animation: euiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1);
       box-shadow: none;
+      max-height: 76vh;
       @media (max-width: ${euiTheme.breakpoint.s}px) {
         right: 25px !important;
       }
     `,
     flyoutBody: css`
+      overflow: scroll;
       .euiFlyoutBody__overflowContent {
         width: 480px;
         padding-top: 10px;
