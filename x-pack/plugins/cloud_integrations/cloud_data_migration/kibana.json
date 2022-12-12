@@ -7,8 +7,9 @@
     "githubTeam": "platform-onboarding"
   },
   "description": "Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud",
-  "server": false,
+  "server": true,
   "ui": true,
   "configPath": ["xpack", "cloud_integrations", "data_migration"],
-  "requiredPlugins": ["cloud", "management", "kibanaReact"]
+  "requiredPlugins": ["cloud", "management", "kibanaReact", "features"],
+  "requiredBundles": [ "kibanaReact" ]
 }
