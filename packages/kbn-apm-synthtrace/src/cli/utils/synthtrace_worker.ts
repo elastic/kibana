@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 import { parentPort, workerData } from 'worker_threads';
+import pidusage from 'pidusage';
+import { memoryUsage } from 'process';
 import { timerange } from '../../lib/timerange';
 import { getEsClient } from './get_es_client';
 import { getScenario } from './get_scenario';
@@ -51,6 +53,16 @@ async function start() {
   );
 
   logger.debug('Indexing scenario');
+
+  function mb(value: number): string {
+    return Math.round(value / 1024 ** 2).toString() + 'mb';
+  }
+
+  setInterval(async () => {
+    const stats = await pidusage(process.pid);
+    const mem = memoryUsage();
+    logger.info(`cpu: ${stats.cpu}, memory: ${mb(mem.heapUsed)}/${mb(mem.heapTotal)}`);
+  }, 5000);
 
   await logger.perf('index_scenario', async () => {
     await apmEsClient.index(generators);

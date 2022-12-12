@@ -14,7 +14,8 @@ export function getDedotTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ApmFields, encoding, callback) {
-      const target = dedot(document, {});
+      // no need to dedot metric events
+      const target = document['processor.event'] === 'metric' ? document : dedot(document, {});
       delete target.meta;
       target['@timestamp'] = new Date(target['@timestamp']!).toISOString();
       callback(null, target);
