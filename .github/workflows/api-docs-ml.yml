@@ -7,7 +7,7 @@ on:
       - opened
       - synchronize
       - reopened
-    brances:
+    branches:
       - main
       - 8.6
 jobs:
