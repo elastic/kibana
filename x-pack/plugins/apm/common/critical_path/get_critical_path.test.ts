@@ -20,7 +20,7 @@ describe('getCriticalPath', () => {
         ),
         errorDocs: [],
         exceedsMax: false,
-        linkedChildrenOfSpanCountBySpanId: {},
+        spanLinksCountById: {},
       },
       entryTransaction,
     });

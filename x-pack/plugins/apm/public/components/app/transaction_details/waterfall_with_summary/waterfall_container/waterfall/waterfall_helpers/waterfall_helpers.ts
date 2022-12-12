@@ -292,23 +292,20 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
 
 const getWaterfallItems = (
   items: Array<WaterfallTransaction | WaterfallSpan>,
-  linkedChildrenOfSpanCountBySpanId: TraceAPIResponse['traceItems']['linkedChildrenOfSpanCountBySpanId']
+  spanLinksCountById: TraceAPIResponse['traceItems']['spanLinksCountById']
 ) =>
   items.map((item) => {
     const docType = item.processor.event;
     switch (docType) {
       case 'span': {
         const span = item as WaterfallSpan;
-        return getSpanItem(
-          span,
-          linkedChildrenOfSpanCountBySpanId[span.span.id]
-        );
+        return getSpanItem(span, spanLinksCountById[span.span.id]);
       }
       case 'transaction':
         const transaction = item as WaterfallTransaction;
         return getTransactionItem(
           transaction,
-          linkedChildrenOfSpanCountBySpanId[transaction.transaction.id]
+          spanLinksCountById[transaction.transaction.id]
         );
     }
   });
@@ -435,7 +432,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
 
   const waterfallItems: IWaterfallSpanOrTransaction[] = getWaterfallItems(
     traceItems.traceDocs,
-    traceItems.linkedChildrenOfSpanCountBySpanId
+    traceItems.spanLinksCountById
   );
 
   const childrenByParentId = getChildrenGroupedByParentId(

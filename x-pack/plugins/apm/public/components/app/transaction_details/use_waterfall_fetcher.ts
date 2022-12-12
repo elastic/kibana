@@ -15,7 +15,7 @@ const INITIAL_DATA: APIReturnType<'GET /internal/apm/traces/{traceId}'> = {
     errorDocs: [],
     traceDocs: [],
     exceedsMax: false,
-    linkedChildrenOfSpanCountBySpanId: {},
+    spanLinksCountById: {},
   },
   entryTransaction: undefined,
 };
@@ -38,7 +38,7 @@ export function useWaterfallFetcher({
     error,
   } = useFetcher(
     (callApmApi) => {
-      if (traceId && start && end) {
+      if (traceId && start && end && transactionId) {
         return callApmApi('GET /internal/apm/traces/{traceId}', {
           params: {
             path: { traceId },

@@ -49,7 +49,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           exceedsMax: false,
           traceDocs: [],
           errorDocs: [],
-          linkedChildrenOfSpanCountBySpanId: {},
+          spanLinksCountById: {},
         },
       });
     });

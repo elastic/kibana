@@ -89,10 +89,7 @@ const tracesByIdRoute = createApmServerRoute({
     path: t.type({
       traceId: t.string,
     }),
-    query: t.intersection([
-      rangeRt,
-      t.partial({ entryTransactionId: t.string }),
-    ]),
+    query: t.intersection([rangeRt, t.type({ entryTransactionId: t.string })]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -107,13 +104,11 @@ const tracesByIdRoute = createApmServerRoute({
     const { start, end, entryTransactionId } = params.query;
     const [traceItems, entryTransaction] = await Promise.all([
       getTraceItems(traceId, config, apmEventClient, start, end),
-      entryTransactionId
-        ? getTransaction({
-            transactionId: entryTransactionId,
-            traceId,
-            apmEventClient,
-          })
-        : undefined,
+      getTransaction({
+        transactionId: entryTransactionId,
+        traceId,
+        apmEventClient,
+      }),
     ]);
     return {
       traceItems,

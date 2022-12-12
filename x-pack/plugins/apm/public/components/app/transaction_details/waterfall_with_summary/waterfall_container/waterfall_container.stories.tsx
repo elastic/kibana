@@ -96,7 +96,7 @@ export const Example: Story<any> = () => {
     exceedsMax: false,
     traceDocs,
     errorDocs: errorDocs.map((error) => dedot(error, {}) as WaterfallError),
-    linkedChildrenOfSpanCountBySpanId: {},
+    spanLinksCountById: {},
   };
 
   const entryTransaction = dedot(traceDocs[0]!, {}) as Transaction;

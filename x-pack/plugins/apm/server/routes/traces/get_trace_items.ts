@@ -51,13 +51,13 @@ import {
   WaterfallTransaction,
 } from '../../../common/waterfall/typings';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getLinkedChildrenCountBySpanId } from '../span_links/get_linked_children';
+import { getSpanLinksCountById } from '../span_links/get_linked_children';
 
 export interface TraceItems {
   exceedsMax: boolean;
   traceDocs: Array<WaterfallTransaction | WaterfallSpan>;
   errorDocs: WaterfallError[];
-  linkedChildrenOfSpanCountBySpanId: Record<string, number>;
+  spanLinksCountById: Record<string, number>;
 }
 
 export async function getTraceItems(
@@ -154,12 +154,11 @@ export async function getTraceItems(
     },
   });
 
-  const [errorResponse, traceResponse, linkedChildrenOfSpanCountBySpanId] =
-    await Promise.all([
-      errorResponsePromise,
-      traceResponsePromise,
-      getLinkedChildrenCountBySpanId({ traceId, apmEventClient, start, end }),
-    ]);
+  const [errorResponse, traceResponse, spanLinksCountById] = await Promise.all([
+    errorResponsePromise,
+    traceResponsePromise,
+    getSpanLinksCountById({ traceId, apmEventClient, start, end }),
+  ]);
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
   const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);
@@ -169,6 +168,6 @@ export async function getTraceItems(
     exceedsMax,
     traceDocs,
     errorDocs,
-    linkedChildrenOfSpanCountBySpanId,
+    spanLinksCountById,
   };
 }

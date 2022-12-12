@@ -69,12 +69,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('contains two children link on Span A', () => {
-          expect(
-            Object.values(traces.traceItems.linkedChildrenOfSpanCountBySpanId).length
-          ).to.equal(1);
-          expect(
-            traces.traceItems.linkedChildrenOfSpanCountBySpanId[ids.producerInternalOnly.spanAId]
-          ).to.equal(2);
+          expect(Object.values(traces.traceItems.spanLinksCountById).length).to.equal(1);
+          expect(traces.traceItems.spanLinksCountById[ids.producerInternalOnly.spanAId]).to.equal(
+            2
+          );
         });
       });
 
@@ -89,16 +87,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('contains two children link on Span B', () => {
+          expect(Object.values(traces.traceItems.spanLinksCountById).length).to.equal(2);
+          expect(traces.traceItems.spanLinksCountById[ids.producerExternalOnly.spanBId]).to.equal(
+            1
+          );
           expect(
-            Object.values(traces.traceItems.linkedChildrenOfSpanCountBySpanId).length
-          ).to.equal(2);
-          expect(
-            traces.traceItems.linkedChildrenOfSpanCountBySpanId[ids.producerExternalOnly.spanBId]
-          ).to.equal(1);
-          expect(
-            traces.traceItems.linkedChildrenOfSpanCountBySpanId[
-              ids.producerExternalOnly.transactionBId
-            ]
+            traces.traceItems.spanLinksCountById[ids.producerExternalOnly.transactionBId]
           ).to.equal(1);
         });
       });
@@ -114,15 +108,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('contains one children link on transaction C and two on span C', () => {
+          expect(Object.values(traces.traceItems.spanLinksCountById).length).to.equal(2);
           expect(
-            Object.values(traces.traceItems.linkedChildrenOfSpanCountBySpanId).length
-          ).to.equal(2);
-          expect(
-            traces.traceItems.linkedChildrenOfSpanCountBySpanId[ids.producerConsumer.transactionCId]
+            traces.traceItems.spanLinksCountById[ids.producerConsumer.transactionCId]
           ).to.equal(1);
-          expect(
-            traces.traceItems.linkedChildrenOfSpanCountBySpanId[ids.producerConsumer.spanCId]
-          ).to.equal(1);
+          expect(traces.traceItems.spanLinksCountById[ids.producerConsumer.spanCId]).to.equal(1);
         });
       });
 
@@ -137,15 +127,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('contains no children', () => {
+          expect(Object.values(traces.traceItems.spanLinksCountById).length).to.equal(0);
           expect(
-            Object.values(traces.traceItems.linkedChildrenOfSpanCountBySpanId).length
-          ).to.equal(0);
-          expect(
-            traces.traceItems.linkedChildrenOfSpanCountBySpanId[ids.producerMultiple.transactionDId]
+            traces.traceItems.spanLinksCountById[ids.producerMultiple.transactionDId]
           ).to.equal(undefined);
-          expect(
-            traces.traceItems.linkedChildrenOfSpanCountBySpanId[ids.producerMultiple.spanEId]
-          ).to.equal(undefined);
+          expect(traces.traceItems.spanLinksCountById[ids.producerMultiple.spanEId]).to.equal(
+            undefined
+          );
         });
       });
     });
