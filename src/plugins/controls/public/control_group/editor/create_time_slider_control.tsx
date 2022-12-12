@@ -9,17 +9,15 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import type { ControlInput } from '../../types';
-import { TIME_SLIDER_CONTROL } from '../../time_slider/types';
 
 interface Props {
-  addNewEmbeddable: (type: string, input: Omit<ControlInput, 'id'>) => void;
+  onCreate: () => void;
   closePopover?: () => void;
   hasTimeSliderControl: boolean;
 }
 
 export const CreateTimeSliderControlButton = ({
-  addNewEmbeddable,
+  onCreate,
   closePopover,
   hasTimeSliderControl,
 }: Props) => {
@@ -27,11 +25,7 @@ export const CreateTimeSliderControlButton = ({
     <EuiContextMenuItem
       icon="plusInCircle"
       onClick={() => {
-        addNewEmbeddable(TIME_SLIDER_CONTROL, {
-          title: i18n.translate('controls.controlGroup.timeSlider.title', {
-            defaultMessage: 'Time slider',
-          }),
-        });
+        onCreate();
         if (closePopover) {
           closePopover();
         }
