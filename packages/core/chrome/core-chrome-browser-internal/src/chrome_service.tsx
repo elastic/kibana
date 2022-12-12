@@ -28,7 +28,6 @@ import type {
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
 import { CustomBrandingService } from '@kbn/core-custom-branding-internal';
-import type { CustomBranding } from '@kbn/core-custom-branding';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
