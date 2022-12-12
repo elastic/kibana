@@ -1,15 +1,5 @@
-1,11c1,21
+1c1,6
 < global.handlebarsEnv = null;
-< 
-< beforeEach(function() {
-<   global.handlebarsEnv = Handlebars.create();
-< });
-< 
-< describe('basic context', function() {
-<   it('most basic', function() {
-<     expectTemplate('{{foo}}')
-<       .withInput({ foo: 'foo' })
-<       .toCompileTo('foo');
 ---
 > /*
 >  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
@@ -17,22 +7,24 @@
 >  * Elasticsearch B.V. licenses this file to you under the MIT License.
 >  * See `packages/kbn-handlebars/LICENSE` for more information.
 >  */
-> 
+3,5c8,9
+< beforeEach(function() {
+<   global.handlebarsEnv = Handlebars.create();
+< });
+---
 > import Handlebars from '../..';
 > import { expectTemplate } from '../__jest__/test_bench';
-> 
+7,11c11,13
+< describe('basic context', function() {
+<   it('most basic', function() {
+<     expectTemplate('{{foo}}')
+<       .withInput({ foo: 'foo' })
+<       .toCompileTo('foo');
+---
 > describe('basic context', () => {
 >   it('most basic', () => {
 >     expectTemplate('{{foo}}').withInput({ foo: 'foo' }).toCompileTo('foo');
->   });
-> 
->   it('escaping', () => {
->     expectTemplate('\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('{{foo}}');
->     expectTemplate('content \\{{foo}}').withInput({ foo: 'food' }).toCompileTo('content {{foo}}');
->     expectTemplate('\\\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('\\food');
->     expectTemplate('content \\\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('content \\food');
->     expectTemplate('\\\\ {{foo}}').withInput({ foo: 'food' }).toCompileTo('\\\\ food');
-14,36c24
+14,33c16,21
 <   it('escaping', function() {
 <     expectTemplate('\\{{foo}}')
 <       .withInput({ foo: 'food' })
@@ -53,8 +45,14 @@
 <     expectTemplate('\\\\ {{foo}}')
 <       .withInput({ foo: 'food' })
 <       .toCompileTo('\\\\ food');
-<   });
-< 
+---
+>   it('escaping', () => {
+>     expectTemplate('\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('{{foo}}');
+>     expectTemplate('content \\{{foo}}').withInput({ foo: 'food' }).toCompileTo('content {{foo}}');
+>     expectTemplate('\\\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('\\food');
+>     expectTemplate('content \\\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('content \\food');
+>     expectTemplate('\\\\ {{foo}}').withInput({ foo: 'food' }).toCompileTo('\\\\ food');
+36c24
 <   it('compiling with a basic context', function() {
 ---
 >   it('compiling with a basic context', () => {
@@ -199,7 +197,7 @@
 >   it('newlines', () => {
 190d150
 < 
-194,223c154,160
+194,216c154,159
 <   it('escaping text', function() {
 <     expectTemplate("Awesome's")
 <       .withMessage(
@@ -223,13 +221,6 @@
 <     expectTemplate(" ' ' ")
 <       .withMessage('double quotes never produce invalid javascript')
 <       .toCompileTo(" ' ' ");
-<   });
-< 
-<   it('escaping expressions', function() {
-<     expectTemplate('{{{awesome}}}')
-<       .withInput({ awesome: "&'\\<>" })
-<       .withMessage("expressions with 3 handlebars aren't escaped")
-<       .toCompileTo("&'\\<>");
 ---
 >   it('escaping text', () => {
 >     expectTemplate("Awesome's").toCompileTo("Awesome's");
@@ -237,16 +228,21 @@
 >     expectTemplate('Awesome\\\\ foo').toCompileTo('Awesome\\\\ foo');
 >     expectTemplate('Awesome {{foo}}').withInput({ foo: '\\' }).toCompileTo('Awesome \\');
 >     expectTemplate(" ' ' ").toCompileTo(" ' ' ");
->   });
-225,228c162,165
+219,223c162,163
+<   it('escaping expressions', function() {
+<     expectTemplate('{{{awesome}}}')
+<       .withInput({ awesome: "&'\\<>" })
+<       .withMessage("expressions with 3 handlebars aren't escaped")
+<       .toCompileTo("&'\\<>");
+---
+>   it('escaping expressions', () => {
+>     expectTemplate('{{{awesome}}}').withInput({ awesome: "&'\\<>" }).toCompileTo("&'\\<>");
+225,228c165
 <     expectTemplate('{{&awesome}}')
 <       .withInput({ awesome: "&'\\<>" })
 <       .withMessage("expressions with {{& handlebars aren't escaped")
 <       .toCompileTo("&'\\<>");
 ---
->   it('escaping expressions', () => {
->     expectTemplate('{{{awesome}}}').withInput({ awesome: "&'\\<>" }).toCompileTo("&'\\<>");
-> 
 >     expectTemplate('{{&awesome}}').withInput({ awesome: "&'\\<>" }).toCompileTo("&'\\<>");
 232d168
 <       .withMessage('by default expressions should be escaped')
