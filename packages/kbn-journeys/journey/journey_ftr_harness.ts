@@ -117,15 +117,18 @@ export class JourneyFtrHarness {
   }
 
   private async onSetup() {
-    await Promise.all([
-      this.setupBrowserAndPage(),
-      asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
-        await this.esArchiver.load(esArchive);
-      }),
-      asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
-        await this.kibanaServer.importExport.load(kbnArchive);
-      }),
-    ]);
+    await this.setupBrowserAndPage();
+
+    if (process.env.TEST_PERFORMANCE_PHASE === 'WARMUP') {
+      await Promise.all([
+        asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
+          await this.esArchiver.load(esArchive);
+        }),
+        asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
+          await this.kibanaServer.importExport.load(kbnArchive);
+        }),
+      ]);
+    }
 
     // It is important that we start the APM transaction after we open the browser and all the test data is loaded
     // so that the scalability data extractor can focus on just the APM data produced by Kibana running under test.
@@ -189,14 +192,16 @@ export class JourneyFtrHarness {
     // unloading the test data so that the scalability data extractor can focus on just the APM data produced
     // by Kibana running under test.
     await this.teardownApm();
-    await Promise.all([
-      asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
+
+    if (process.env.TEST_PERFORMANCE_PHASE === 'TEST') {
+      // unload data
+      await asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         await this.esArchiver.unload(esArchive);
-      }),
-      asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
-        await this.kibanaServer.importExport.unload(kbnArchive);
-      }),
-    ]);
+      });
+      // empty the kibana index
+      await this.esArchiver.emptyKibanaIndex();
+      // TODO: delete the kibana index \ clean mappings?
+    }
   }
 
   private async onStepSuccess(step: AnyStep) {
