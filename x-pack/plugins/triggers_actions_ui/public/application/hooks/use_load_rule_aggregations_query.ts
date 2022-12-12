@@ -65,7 +65,7 @@ export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQuery
     );
   };
 
-  const { data, refetch, isLoading } = useQuery({
+  const { data, refetch, isLoading, fetchStatus } = useQuery({
     queryKey: [
       'loadRuleAggregationsWithKueryFilter',
       filters.searchText,
@@ -89,6 +89,6 @@ export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQuery
     loadRuleAggregations: refetch,
     rulesStatusesTotal: data?.ruleExecutionStatus ?? {},
     rulesLastRunOutcomesTotal: data?.ruleLastRunOutcome ?? {},
-    isLoading,
+    isLoading: isLoading && fetchStatus === 'fetching',
   };
 };

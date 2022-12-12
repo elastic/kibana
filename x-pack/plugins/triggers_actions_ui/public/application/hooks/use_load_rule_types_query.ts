@@ -37,7 +37,7 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
     );
   };
 
-  const { isLoading, isSuccess } = useQuery({
+  const { isLoading, isSuccess, fetchStatus } = useQuery({
     queryKey: ['loadRuleTypes'],
     queryFn,
     onError: onErrorFn,
@@ -73,7 +73,7 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
   return {
     ruleTypesState: {
       isInitialized: true,
-      isLoading,
+      isLoading: isLoading || fetchStatus === 'fetching',
       data: filteredIndex,
     },
     hasAnyAuthorizedRuleType,

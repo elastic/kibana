@@ -243,7 +243,6 @@ export const RulesList = ({
     }
     return [filters.types, false];
   }, [filters.types, authorizedRuleTypes]);
-
   const computedFilter = useMemo(() => {
     return {
       ...filters,
@@ -274,7 +273,7 @@ export const RulesList = ({
 
   // Fetch tags
   const { tags, loadTags } = useLoadTagsQuery({
-    enabled: isRuleStatusFilterEnabled,
+    enabled: isRuleStatusFilterEnabled && canLoadRules,
     refresh,
   });
 
