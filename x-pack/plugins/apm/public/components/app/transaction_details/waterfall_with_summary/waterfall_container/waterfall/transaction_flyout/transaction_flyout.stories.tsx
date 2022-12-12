@@ -4,14 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm } from '@kbn/apm-synthtrace';
+import { apm, dedot } from '@kbn/apm-synthtrace';
 import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { TransactionFlyout } from '.';
-import { MockApmPluginContextWrapper } from '../../../../../../../context/apm_plugin/mock_apm_plugin_context';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import { ApmPluginContextValue } from '../../../../../../../context/apm_plugin/apm_plugin_context';
+import { MockApmPluginStorybook } from '../../../../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 
 type Args = ComponentProps<typeof TransactionFlyout>;
+type TransactionDetailsApiReturnType =
+  APIReturnType<'GET /internal/apm/traces/{traceId}/transactions/{transactionId}'>;
 
 function generateData() {
   const serviceName = 'synth-apple';
@@ -54,16 +58,20 @@ export default {
   component: TransactionFlyout,
   decorators: [
     (StoryComponent: ComponentType) => {
+      const coreMock = {
+        http: {
+          get: async (): Promise<TransactionDetailsApiReturnType> => {
+            return dedot(data.transactionEvent, {}) as Transaction;
+          },
+        },
+      };
       return (
-        <MemoryRouter
-          initialEntries={[
-            '/services/testServiceName/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=Api::CustomersController%23index&transactionType=request&latencyAggregationType=avg&flyoutDetailTab=&waterfallItemId=0863ecffc80f0aed&traceId=1d63e25e7345627176e172ae690f9462&transactionId=969fe48e33f4e13c',
-          ]}
+        <MockApmPluginStorybook
+          apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
+          routePath="/services/testServiceName/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=Api::CustomersController%23index&transactionType=request&latencyAggregationType=avg&flyoutDetailTab=&waterfallItemId=0863ecffc80f0aed&traceId=1d63e25e7345627176e172ae690f9462&transactionId=969fe48e33f4e13c"
         >
-          <MockApmPluginContextWrapper>
-            <StoryComponent />
-          </MockApmPluginContextWrapper>
-        </MemoryRouter>
+          <StoryComponent />
+        </MockApmPluginStorybook>
       );
     },
   ],

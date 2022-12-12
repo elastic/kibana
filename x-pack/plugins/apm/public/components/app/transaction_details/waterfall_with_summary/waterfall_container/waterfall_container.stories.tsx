@@ -9,7 +9,6 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Meta, Story } from '@storybook/react';
 import { noop } from 'lodash';
 import React, { ComponentProps } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { WaterfallContainer } from '.';
 import {
   WaterfallError,
@@ -17,34 +16,19 @@ import {
   WaterfallTransaction,
 } from '../../../../../../common/waterfall/typings';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
-import { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { getWaterfall } from './waterfall/waterfall_helpers/waterfall_helpers';
+import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 type Args = ComponentProps<typeof WaterfallContainer>;
-
-const apmPluginContextMock = {
-  core: {
-    http: {
-      basePath: { prepend: () => {} },
-    },
-  },
-} as unknown as ApmPluginContextValue;
 
 const stories: Meta<Args> = {
   title: 'app/TransactionDetails/waterfall',
   component: WaterfallContainer,
   decorators: [
     (StoryComponent) => (
-      <MemoryRouter
-        initialEntries={[
-          '/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName',
-        ]}
-      >
-        <MockApmPluginContextWrapper value={apmPluginContextMock}>
-          <StoryComponent />
-        </MockApmPluginContextWrapper>
-      </MemoryRouter>
+      <MockApmPluginStorybook routePath="/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName">
+        <StoryComponent />
+      </MockApmPluginStorybook>
     ),
   ],
 };

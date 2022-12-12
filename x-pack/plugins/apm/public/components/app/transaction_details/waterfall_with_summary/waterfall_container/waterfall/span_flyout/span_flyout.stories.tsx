@@ -4,15 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm } from '@kbn/apm-synthtrace';
+import { apm, dedot } from '@kbn/apm-synthtrace';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { SpanFlyout } from '.';
-import { MockApmPluginContextWrapper } from '../../../../../../../context/apm_plugin/mock_apm_plugin_context';
+import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import { ApmPluginContextValue } from '../../../../../../../context/apm_plugin/apm_plugin_context';
+import { MockApmPluginStorybook } from '../../../../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 
 type Args = ComponentProps<typeof SpanFlyout>;
+type SpanDetailsApiReturnType =
+  APIReturnType<'GET /internal/apm/traces/{traceId}/spans/{spanId}'>;
 
 function generateData() {
   const serviceName = 'synth-apple';
@@ -62,16 +67,27 @@ export default {
   component: SpanFlyout,
   decorators: [
     (StoryComponent: ComponentType) => {
+      const coreMock = {
+        http: {
+          get: async (): Promise<SpanDetailsApiReturnType> => {
+            return {
+              span: dedot(data.spanEvent, {}) as Span,
+              parentTransaction: dedot(
+                data.parentTransaction,
+                {}
+              ) as Transaction,
+            };
+          },
+        },
+      };
+
       return (
-        <MemoryRouter
-          initialEntries={[
-            '/services/testServiceName/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=Api::CustomersController%23index&transactionType=request&latencyAggregationType=avg&flyoutDetailTab=&waterfallItemId=0863ecffc80f0aed&traceId=1d63e25e7345627176e172ae690f9462&transactionId=969fe48e33f4e13c',
-          ]}
+        <MockApmPluginStorybook
+          routePath="/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=Api::CustomersController%23index&transactionType=request&latencyAggregationType=avg&flyoutDetailTab=&waterfallItemId=0863ecffc80f0aed&traceId=1d63e25e7345627176e172ae690f9462&transactionId=969fe48e33f4e13c"
+          apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
         >
-          <MockApmPluginContextWrapper>
-            <StoryComponent />
-          </MockApmPluginContextWrapper>
-        </MemoryRouter>
+          <StoryComponent />
+        </MockApmPluginStorybook>
       );
     },
   ],
