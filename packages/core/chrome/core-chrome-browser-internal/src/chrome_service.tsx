@@ -301,7 +301,7 @@ export class ChromeService {
       },
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
-      
+
       setLogo: (logo: string) => {
         if (customBranding$.get('logo') !== undefined) {
           customBranding$.get('logo')!.next(logo);
@@ -310,7 +310,7 @@ export class ChromeService {
 
       setCustomizedLogo: (customizedLogo: string) => {
         if (customBranding$.get('customizedLogo') !== undefined) {
-          customBranding$.get('customizedLogo')!.next(customizedLogo)
+          customBranding$.get('customizedLogo')!.next(customizedLogo);
         }
       },
 
