@@ -66,8 +66,6 @@ import {
 import { MigrationLogger } from './migration_logger';
 import { TransformSavedObjectDocumentError } from '.';
 
-const DEFAULT_MINIMUM_CONVERT_VERSION = '8.0.0';
-
 export type MigrateFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 export type MigrateAndConvertFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];
 
@@ -95,7 +93,7 @@ interface TransformOptions {
 interface DocumentMigratorOptions {
   kibanaVersion: string;
   typeRegistry: ISavedObjectTypeRegistry;
-  minimumConvertVersion?: string;
+  convertVersion?: string;
   log: Logger;
 }
 
@@ -142,7 +140,7 @@ export interface VersionedTransformer {
  * A concrete implementation of the VersionedTransformer interface.
  */
 export class DocumentMigrator implements VersionedTransformer {
-  private documentMigratorOptions: Omit<DocumentMigratorOptions, 'minimumConvertVersion'>;
+  private documentMigratorOptions: Omit<DocumentMigratorOptions, 'convertVersion'>;
   private migrations?: ActiveMigrations;
   private transformDoc?: ApplyTransformsFn;
 
@@ -152,17 +150,12 @@ export class DocumentMigrator implements VersionedTransformer {
    * @param {DocumentMigratorOptions} opts
    * @prop {string} kibanaVersion - The current version of Kibana
    * @prop {SavedObjectTypeRegistry} typeRegistry - The type registry to get type migrations from
-   * @prop {string} minimumConvertVersion - The minimum version of Kibana in which documents can be converted to multi-namespace types
+   * @prop {string} convertVersion - The version of Kibana in which documents can be converted to multi-namespace types
    * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
-  constructor({
-    typeRegistry,
-    kibanaVersion,
-    minimumConvertVersion = DEFAULT_MINIMUM_CONVERT_VERSION,
-    log,
-  }: DocumentMigratorOptions) {
-    validateMigrationDefinition(typeRegistry, kibanaVersion, minimumConvertVersion);
+  constructor({ typeRegistry, kibanaVersion, convertVersion, log }: DocumentMigratorOptions) {
+    validateMigrationDefinition(typeRegistry, kibanaVersion, convertVersion);
 
     this.documentMigratorOptions = { typeRegistry, kibanaVersion, log };
   }
@@ -300,7 +293,7 @@ function validateMigrationsMapObject(
 function validateMigrationDefinition(
   registry: ISavedObjectTypeRegistry,
   kibanaVersion: string,
-  minimumConvertVersion: string
+  convertVersion?: string
 ) {
   function assertObjectOrFunction(entity: any, prefix: string) {
     if (!entity || (typeof entity !== 'function' && typeof entity !== 'object')) {
@@ -321,9 +314,9 @@ function validateMigrationDefinition(
       throw new Error(
         `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Expected value to be a semver, but got '${convertToMultiNamespaceTypeVersion}'.`
       );
-    } else if (Semver.lt(convertToMultiNamespaceTypeVersion, minimumConvertVersion)) {
+    } else if (convertVersion && Semver.neq(convertToMultiNamespaceTypeVersion, convertVersion)) {
       throw new Error(
-        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Value '${convertToMultiNamespaceTypeVersion}' cannot be less than '${minimumConvertVersion}'.`
+        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Value '${convertToMultiNamespaceTypeVersion}' cannot be any other than '${convertVersion}'.`
       );
     } else if (Semver.gt(convertToMultiNamespaceTypeVersion, kibanaVersion)) {
       throw new Error(
@@ -345,6 +338,7 @@ function validateMigrationDefinition(
       );
     }
     if (convertToMultiNamespaceTypeVersion) {
+      // CHECKPOINT 1
       assertValidConvertToMultiNamespaceType(
         namespaceType,
         convertToMultiNamespaceTypeVersion,
