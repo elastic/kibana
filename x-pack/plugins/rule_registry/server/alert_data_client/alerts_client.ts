@@ -623,7 +623,7 @@ export class AlertsClient {
           )?.buckets ?? [],
       };
     } catch (error) {
-      this.logger.error(`get threw an error: ${error}`);
+      this.logger.error(`getAlertSummary threw an error: ${error}`);
       throw error;
     }
   }
