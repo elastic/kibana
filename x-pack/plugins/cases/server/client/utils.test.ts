@@ -38,6 +38,10 @@ describe('utils', () => {
       expect(sortToSnake('closed_at')).toBe('closed_at');
     });
 
+    it('transforms title correctly', () => {
+      expect(sortToSnake('title')).toBe('title.keyword');
+    });
+
     it('transforms default correctly', () => {
       expect(sortToSnake('not-exist')).toBe('created_at');
     });
