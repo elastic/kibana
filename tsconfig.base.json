@@ -962,6 +962,8 @@
       "@kbn/newsfeed-fixtures-plugin/*": ["test/common/fixtures/plugins/newsfeed/*"],
       "@kbn/open-telemetry-instrumented-plugin": ["test/common/fixtures/plugins/otel_metrics"],
       "@kbn/open-telemetry-instrumented-plugin/*": ["test/common/fixtures/plugins/otel_metrics/*"],
+      "@kbn/kbn-health-gateway-status-plugin": ["test/health_gateway/plugins/status"],
+      "@kbn/kbn-health-gateway-status-plugin/*": ["test/health_gateway/plugins/status/*"],
       "@kbn/kbn-tp-run-pipeline-plugin": ["test/interpreter_functional/plugins/kbn_tp_run_pipeline"],
       "@kbn/kbn-tp-run-pipeline-plugin/*": ["test/interpreter_functional/plugins/kbn_tp_run_pipeline/*"],
       "@kbn/app-link-test-plugin": ["test/plugin_functional/plugins/app_link_test"],

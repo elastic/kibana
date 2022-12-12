@@ -12,9 +12,8 @@ import { expectToReject } from '../../common/utils/expect_to_reject';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const supertest = getService('supertest');
 
-  async function callApi({
+  async function createServiceGroupApi({
     serviceGroupId,
     groupName,
     kuery,
@@ -44,38 +43,47 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response;
   }
 
-  type SavedObjectsFindResults = Array<{
-    id: string;
-    type: string;
-  }>;
+  async function getServiceGroupsApi() {
+    return apmApiClient.writeUser({
+      endpoint: 'GET /internal/apm/service-groups',
+    });
+  }
 
-  async function deleteServiceGroups() {
-    const response = await supertest
-      .get('/api/saved_objects/_find?type=apm-service-group')
-      .set('kbn-xsrf', 'true');
-    const savedObjects: SavedObjectsFindResults = response.body.saved_objects;
-    const bulkDeleteBody = savedObjects.map(({ id, type }) => ({ id, type }));
-    return supertest
-      .post(`/api/saved_objects/_bulk_delete?force=true`)
-      .set('kbn-xsrf', 'foo')
-      .send(bulkDeleteBody);
+  async function deleteAllServiceGroups() {
+    return await getServiceGroupsApi().then((response) => {
+      const promises = response.body.serviceGroups.map((item) => {
+        if (item.id) {
+          return apmApiClient.writeUser({
+            endpoint: 'DELETE /internal/apm/service-group',
+            params: { query: { serviceGroupId: item.id } },
+          });
+        }
+      });
+      return Promise.all(promises);
+    });
   }
 
   registry.when('Service group create', { config: 'basic', archives: [] }, () => {
-    afterEach(deleteServiceGroups);
+    afterEach(deleteAllServiceGroups);
 
     it('creates a new service group', async () => {
-      const response = await callApi({
+      const serviceGroup = {
         groupName: 'synthbeans',
         kuery: 'service.name: synth*',
-      });
-      expect(response.status).to.be(200);
-      expect(Object.keys(response.body).length).to.be(0);
+      };
+      const createResponse = await createServiceGroupApi(serviceGroup);
+      expect(createResponse.status).to.be(200);
+      expect(createResponse.body).to.have.property('id');
+      expect(createResponse.body).to.have.property('groupName', serviceGroup.groupName);
+      expect(createResponse.body).to.have.property('kuery', serviceGroup.kuery);
+      expect(createResponse.body).to.have.property('updatedAt');
+      const serviceGroupsResponse = await getServiceGroupsApi();
+      expect(serviceGroupsResponse.body.serviceGroups.length).to.be(1);
     });
 
     it('handles invalid fields with error response', async () => {
       const err = await expectToReject<ApmApiError>(() =>
-        callApi({
+        createServiceGroupApi({
           groupName: 'synthbeans',
           kuery: 'service.name: synth* or transaction.type: request',
         })
