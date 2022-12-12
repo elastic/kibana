@@ -65,6 +65,9 @@ export function createTransactionMetricsAggregator(flushInterval: string) {
       init: (event) => {
         const set = pick(event, KEY_FIELDS);
 
+        const isSuccess = event['event.outcome'] === 'succes';
+        const isFailure = event['event.outcome'] === 'failure';
+
         return {
           ...set,
           'metricset.name': 'transaction',
@@ -72,6 +75,10 @@ export function createTransactionMetricsAggregator(flushInterval: string) {
           'processor.name': 'metric',
           'transaction.root': !event['parent.id'],
           'transaction.duration.histogram': createLosslessHistogram(),
+          'event.outcome_numeric': {
+            sum: isSuccess ? 1 : 0,
+            value_count: isSuccess || isFailure ? 1 : 0,
+          },
         };
       },
     },

@@ -35,6 +35,15 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
             },
             mappings: {
               properties: {
+                event: {
+                  properties: {
+                    outcome_numeric: {
+                      type: 'aggregate_metric_double',
+                      metrics: ['sum', 'value_count'],
+                      default_metric: 'sum',
+                    },
+                  },
+                },
                 transaction: {
                   properties: {
                     summary: {
