@@ -11,13 +11,16 @@ import { getRoutePaths } from '../../common';
 import { createCalleeTree } from '../../common/callee';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { createBaseFlameGraph } from '../../common/flamegraph';
-import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
 import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
 import { createCommonFilter } from './query';
 
-export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterParameters) {
+export function registerFlameChartSearchRoute({
+  router,
+  logger,
+  services: { createProfilingEsClient },
+}: RouteRegisterParameters) {
   const paths = getRoutePaths();
   router.get(
     {

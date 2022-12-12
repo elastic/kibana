@@ -125,7 +125,6 @@ describe('when on the package policy create page', () => {
           name: 'nginx',
           title: 'Nginx',
           version: '1.3.0',
-          release: 'ga',
           description: 'Collect logs and metrics from Nginx HTTP servers with Elastic Agent.',
           policy_templates: [
             {
@@ -147,7 +146,6 @@ describe('when on the package policy create page', () => {
               type: 'logs',
               dataset: 'nginx.access',
               title: 'Nginx access logs',
-              release: 'experimental',
               ingest_pipeline: 'default',
               streams: [
                 {
@@ -239,7 +237,6 @@ describe('when on the package policy create page', () => {
                 dataset: 'nginx.access',
                 type: 'logs',
               },
-              release: 'experimental',
               enabled: true,
               vars: {
                 paths: {
@@ -537,7 +534,6 @@ describe('when on the package policy create page', () => {
                 streams: [
                   {
                     ...newPackagePolicy.inputs[0].streams[0],
-                    release: 'experimental',
                     vars: {
                       paths: {
                         type: 'text',
