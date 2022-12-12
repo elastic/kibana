@@ -121,3 +121,5 @@ export const USER_RISK_HEADER_COLIMN =
 export const USER_RISK_COLUMN = '[data-gridcell-column-id="user.risk.calculated_level"]';
 
 export const ACTION_COLUMN = '[data-gridcell-column-id="default-timeline-control-column"]';
+
+export const DATAGRID_CHANGES_IN_PROGRESS = '[data-test-subj="body-data-grid"] .euiProgress';
