@@ -8,14 +8,14 @@
 
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { Observable } from 'rxjs';
-import { useMessage } from '../messaging';
 import type {
   UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
 } from '../types';
+import { useStableCallback } from './use_stable_callback';
 
 export const useRequestParams = ({
   services,
@@ -46,14 +46,11 @@ export const useRequestParams = ({
     [data.query.timefilter.timefilter, originalTimeRange]
   );
 
-  const [timeRange, setTimeRange] = useState(getAbsoluteTimeRange(relativeTimeRange));
-  const updateTimeRange = useCallback(
-    () => setTimeRange(getAbsoluteTimeRange(relativeTimeRange)),
-    [relativeTimeRange]
-  );
+  const timeRange = useRef(getAbsoluteTimeRange(relativeTimeRange));
+  const getTimeRange = useCallback(() => timeRange.current, []);
+  const updateTimeRange = useStableCallback(() => {
+    timeRange.current = getAbsoluteTimeRange(relativeTimeRange);
+  });
 
-  // We need to update the absolute time range whenever a refetch is triggered
-  useMessage(input$, 'refetch', updateTimeRange);
-
-  return { filters, query, timeRange, relativeTimeRange };
+  return { filters, query, getTimeRange, updateTimeRange, relativeTimeRange };
 };

@@ -124,7 +124,7 @@ export function Chart({
     [originalInput$]
   );
 
-  const { filters, query, timeRange, relativeTimeRange } = useRequestParams({
+  const { filters, query, getTimeRange, updateTimeRange, relativeTimeRange } = useRequestParams({
     services,
     query: originalQuery,
     filters: originalFilters,
@@ -145,6 +145,7 @@ export function Chart({
     relativeTimeRange,
     disableAutoFetching,
     input$,
+    beforeRefetch: updateTimeRange,
   });
 
   useTotalHits({
@@ -157,7 +158,7 @@ export function Chart({
     breakdown,
     filters,
     query,
-    timeRange,
+    getTimeRange,
     refetch$,
     onTotalHitsChange,
   });
@@ -304,7 +305,7 @@ export function Chart({
               request={request}
               hits={hits}
               chart={chart}
-              timeRange={timeRange}
+              getTimeRange={getTimeRange}
               refetch$={refetch$}
               lensAttributes={lensAttributes}
               onTotalHitsChange={onTotalHitsChange}

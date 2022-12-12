@@ -34,7 +34,7 @@ export const useTotalHits = ({
   breakdown,
   filters,
   query,
-  timeRange,
+  getTimeRange,
   refetch$,
   onTotalHitsChange,
 }: {
@@ -47,7 +47,7 @@ export const useTotalHits = ({
   breakdown: UnifiedHistogramBreakdownContext | undefined;
   filters: Filter[];
   query: Query | AggregateQuery;
-  timeRange: TimeRange;
+  getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
 }) => {
@@ -62,7 +62,7 @@ export const useTotalHits = ({
       chartVisible,
       filters,
       query,
-      timeRange,
+      timeRange: getTimeRange(),
       onTotalHitsChange,
     });
   });

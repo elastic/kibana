@@ -10,7 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { cloneDeep, isEqual } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
-import { debounceTime, filter } from 'rxjs';
+import { filter, share, tap } from 'rxjs';
 import {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
@@ -18,7 +18,6 @@ import {
   UnifiedHistogramInput$,
   UnifiedHistogramRequestContext,
 } from '../types';
-import { REQUEST_DEBOUNCE_MS } from './consts';
 
 export const useRefetch = ({
   dataView,
@@ -32,6 +31,7 @@ export const useRefetch = ({
   relativeTimeRange,
   disableAutoFetching,
   input$,
+  beforeRefetch,
 }: {
   dataView: DataView;
   request: UnifiedHistogramRequestContext | undefined;
@@ -44,6 +44,7 @@ export const useRefetch = ({
   relativeTimeRange: TimeRange;
   disableAutoFetching?: boolean;
   input$: UnifiedHistogramInput$;
+  beforeRefetch: () => void;
 }) => {
   const refetchDeps = useRef<ReturnType<typeof getRefetchDeps>>();
 
@@ -93,9 +94,10 @@ export const useRefetch = ({
     () =>
       input$.pipe(
         filter((message) => message?.type === 'refetch'),
-        debounceTime(REQUEST_DEBOUNCE_MS)
+        tap(beforeRefetch),
+        share()
       ),
-    [input$]
+    [beforeRefetch, input$]
   );
 };
 

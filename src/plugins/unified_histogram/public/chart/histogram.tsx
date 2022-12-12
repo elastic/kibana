@@ -8,13 +8,12 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { Observable } from 'rxjs';
@@ -31,6 +30,7 @@ import {
 import { buildBucketInterval } from './build_bucket_interval';
 import { useTimeRange } from './use_time_range';
 import { useStableCallback } from './use_stable_callback';
+import { useLensProps } from './use_lens_props';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;
@@ -38,7 +38,7 @@ export interface HistogramProps {
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
-  timeRange: TimeRange;
+  getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
   lensAttributes: TypedLensByValueInput['attributes'];
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
@@ -51,7 +51,7 @@ export function Histogram({
   request,
   hits,
   chart: { timeInterval },
-  timeRange,
+  getTimeRange,
   refetch$,
   lensAttributes: attributes,
   onTotalHitsChange,
@@ -61,7 +61,7 @@ export function Histogram({
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
     bucketInterval,
-    timeRange,
+    timeRange: getTimeRange(),
     timeInterval,
   });
 
@@ -95,7 +95,7 @@ export function Histogram({
           data,
           dataView,
           timeInterval,
-          timeRange,
+          timeRange: getTimeRange(),
           response,
         });
 
@@ -106,24 +106,13 @@ export function Histogram({
     }
   );
 
-  const lensProps = useMemo(
-    () =>
-      getLensProps({
-        timeRange,
-        attributes,
-        request,
-        onLoad,
-      }),
-    [attributes, onLoad, request, timeRange]
-  );
-
-  const [debouncedProps, setDebouncedProps] = useState(lensProps);
-  const updateDebouncedProps = useStableCallback(() => setDebouncedProps(lensProps));
-
-  useEffect(() => {
-    const subscription = refetch$.subscribe(updateDebouncedProps);
-    return () => subscription.unsubscribe();
-  }, [refetch$, updateDebouncedProps]);
+  const lensProps = useLensProps({
+    request,
+    getTimeRange,
+    refetch$,
+    attributes,
+    onLoad,
+  });
 
   const { euiTheme } = useEuiTheme();
   const chartCss = css`
@@ -149,32 +138,9 @@ export function Histogram({
   return (
     <>
       <div data-test-subj="unifiedHistogramChart" data-time-range={timeRangeText} css={chartCss}>
-        <lens.EmbeddableComponent {...debouncedProps} />
+        <lens.EmbeddableComponent {...lensProps} />
       </div>
       {timeRangeDisplay}
     </>
   );
 }
-
-export const getLensProps = ({
-  timeRange,
-  attributes,
-  request,
-  onLoad,
-}: {
-  timeRange: TimeRange;
-  attributes: TypedLensByValueInput['attributes'];
-  request: UnifiedHistogramRequestContext | undefined;
-  onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
-}) => ({
-  id: 'unifiedHistogramLensComponent',
-  viewMode: ViewMode.VIEW,
-  timeRange,
-  attributes,
-  noPadding: true,
-  searchSessionId: request?.searchSessionId,
-  executionContext: {
-    description: 'fetch chart data and total hits',
-  },
-  onLoad,
-});
