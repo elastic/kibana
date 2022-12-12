@@ -70,14 +70,11 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
     [selectedFieldTypes, nameFilter]
   );
 
-  return useMemo(
-    () => ({
-      fieldNameHighlight: fieldListFiltersProps.nameFilter.toLowerCase(),
-      fieldListFiltersProps,
-      onFilterField,
-    }),
-    [fieldListFiltersProps, onFilterField]
-  );
+  return {
+    fieldNameHighlight: nameFilter.toLowerCase(),
+    fieldListFiltersProps,
+    onFilterField,
+  };
 }
 
 export function getFieldType<T extends FieldListItem = DataViewField>(
