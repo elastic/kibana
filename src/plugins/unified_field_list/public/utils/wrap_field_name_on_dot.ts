@@ -7,7 +7,7 @@
  */
 
 // TODO: add tests
-export function wrapOnDot(str?: string): string {
+export function wrapFieldNameOnDot(str?: string): string {
   // u200B is a non-width white-space character, which allows
   // the browser to efficiently word-wrap right after the dot
   // without us having to draw a lot of extra DOM elements, etc

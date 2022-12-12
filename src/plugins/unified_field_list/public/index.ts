@@ -90,4 +90,4 @@ export {
   type QuerySubscriberParams,
 } from './hooks/use_query_subscriber';
 
-export { wrapOnDot } from './utils/wrap_on_dot';
+export { wrapFieldNameOnDot } from './utils/wrap_field_name_on_dot';

@@ -10,7 +10,7 @@ import { partition } from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
+import { useExistingFieldsReader, getFieldType } from '@kbn/unified-field-list-plugin/public';
 import type { OperationType } from '../form_based';
 import type { OperationSupportMatrix } from './operation_support';
 import {
@@ -20,7 +20,6 @@ import {
 } from '../../../shared_components/field_picker';
 import { fieldContainsData } from '../../../shared_components';
 import type { IndexPattern } from '../../../types';
-import { getFieldType } from '../pure_utils';
 
 export type FieldChoiceWithOperationType = FieldOptionValue & {
   operationType: OperationType;

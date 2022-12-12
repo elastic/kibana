@@ -19,7 +19,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   FieldListFilters,
   useFieldFilters,
-  wrapOnDot,
+  wrapFieldNameOnDot,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
@@ -130,8 +130,8 @@ export function TextBasedDataPanel({
             onClick={() => {}}
             fieldIcon={<LensFieldIcon type={field?.meta.type as DataType} />}
             fieldName={
-              <EuiHighlight search={wrapOnDot(fieldNameHighlight)}>
-                {wrapOnDot(field.name)}
+              <EuiHighlight search={wrapFieldNameOnDot(fieldNameHighlight)}>
+                {wrapFieldNameOnDot(field.name)}
               </EuiHighlight>
             }
           />

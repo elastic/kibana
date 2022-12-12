@@ -24,18 +24,18 @@ import {
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverVisualize,
-  wrapOnDot,
+  wrapFieldNameOnDot,
+  getFieldType,
 } from '@kbn/unified-field-list-plugin/public';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { DragDrop } from '../../drag_drop';
-import { DatasourceDataPanelProps, DataType } from '../../types';
+import { DatasourceDataPanelProps } from '../../types';
 import { DOCUMENT_FIELD_NAME } from '../../../common';
 import type { IndexPattern, IndexPatternField } from '../../types';
 import { LensFieldIcon } from '../../shared_components/field_picker/lens_field_icon';
 import type { LensAppServices } from '../../app_plugin/types';
 import { debouncedComponent } from '../../debounced_component';
 import { APP_ID } from '../../../common/constants';
-import { getFieldType } from './pure_utils';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
 
 export interface FieldItemProps {
@@ -151,7 +151,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
 
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
-  const lensFieldIcon = <LensFieldIcon type={getFieldType(field) as DataType} />;
+  const lensFieldIcon = <LensFieldIcon type={getFieldType(field)} />;
   const lensInfoIcon = (
     <EuiIconTip
       anchorClassName="lnsFieldItem__infoIcon"
@@ -216,8 +216,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               }}
               fieldIcon={lensFieldIcon}
               fieldName={
-                <EuiHighlight search={wrapOnDot(highlight)}>
-                  {wrapOnDot(field.displayName)}
+                <EuiHighlight search={wrapFieldNameOnDot(highlight)}>
+                  {wrapFieldNameOnDot(field.displayName)}
                 </EuiHighlight>
               }
               fieldInfoIcon={lensInfoIcon}

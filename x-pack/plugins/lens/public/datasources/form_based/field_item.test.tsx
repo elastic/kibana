@@ -204,7 +204,7 @@ describe('IndexPattern Field Item', () => {
   it('should show gauge icon for gauge fields', async () => {
     const wrapper = await getComponent({
       ...defaultProps,
-      field: { ...defaultProps.field, timeSeriesMetricType: 'gauge' },
+      field: { ...defaultProps.field, timeSeriesMetric: 'gauge' },
     });
 
     // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>

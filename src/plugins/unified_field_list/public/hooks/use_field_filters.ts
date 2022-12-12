@@ -80,9 +80,9 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
 export function getFieldType<T extends FieldListItem = DataViewField>(
   field: T
 ): FieldTypeForFilter {
-  // TODO: migrate `timeSeriesMetricType` logic from Lens to Unified Field List
-  // if (field.timeSeriesMetricType) {
-  //   return field.timeSeriesMetricType;
-  // }
+  const timeSeriesMetric = field.timeSeriesMetric;
+  if (timeSeriesMetric) {
+    return timeSeriesMetric as FieldTypeForFilter;
+  }
   return field.type as FieldTypeForFilter;
 }
