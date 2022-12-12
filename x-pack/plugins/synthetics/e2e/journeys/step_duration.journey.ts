@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { journey, step, expect, before } from '@elastic/synthetics';
-import { waitForLoadingToFinish } from '@kbn/observability-plugin/e2e/utils';
+import { journey, step, expect } from '@elastic/synthetics';
 import { loginPageProvider } from '../page_objects/login';
 
 journey('StepsDuration', async ({ page, params }) => {
   const login = loginPageProvider({ page });
-  before(async () => {
-    await waitForLoadingToFinish({ page });
-  });
 
   const queryParams = new URLSearchParams({
     dateRangeStart: '2021-11-21T22:06:06.502Z',
