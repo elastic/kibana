@@ -26,7 +26,6 @@ export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
       bottom: 25px !important;
       right: calc(${euiTheme.size.s} + 128px); // Accounting for margin on button
       border-radius: 6px;
-      inline-size: 480px !important;
       height: auto;
       animation: euiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1);
       box-shadow: none;
