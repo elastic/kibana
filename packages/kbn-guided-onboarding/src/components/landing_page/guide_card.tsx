@@ -21,7 +21,9 @@ type GuideCardConstants = {
       title: string;
       description: string;
     };
-    // duplicate telemetryId from GuideConfig, we might to refactor this in https://github.com/elastic/kibana/issues/146672
+    // duplicate the telemetry id from the guide config to not load the config from the endpoint
+    // this might change if we decide to use the guide config for the cards
+    // see this issue https://github.com/elastic/kibana/issues/146672
     telemetryId: string;
   };
 };
