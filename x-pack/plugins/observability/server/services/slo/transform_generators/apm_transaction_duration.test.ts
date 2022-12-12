@@ -43,13 +43,14 @@ describe('APM Transaction Duration Transform Generator', () => {
   });
 
   it('uses the provided index params as source index', async () => {
+    const index = 'my-custom-apm-index*';
     const anSLO = createSLO({
       indicator: createAPMTransactionDurationIndicator({
-        index: 'my-custom-apm-index*',
+        index,
       }),
     });
     const transform = generator.getTransformParams(anSLO);
 
-    expect(transform.source.index).toEqual('my-custom-apm-index*');
+    expect(transform.source.index).toEqual(index);
   });
 });
