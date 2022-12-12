@@ -9,23 +9,34 @@ import { getMarkdownEditorStorageKey } from './utils';
 
 describe('getMarkdownEditorStorageKey', () => {
   it('should return correct session key', () => {
+    const appId = 'security-solution';
     const caseId = 'case-id';
     const commentId = 'comment-id';
-    const sessionKey = getMarkdownEditorStorageKey(caseId, commentId);
-    expect(sessionKey).toEqual(`cases.caseView.${caseId}.${commentId}.markdownEditor`);
+    const sessionKey = getMarkdownEditorStorageKey(appId, caseId, commentId);
+    expect(sessionKey).toEqual(`cases.${appId}.${caseId}.${commentId}.markdownEditor`);
   });
 
   it('should return default key when comment id is empty ', () => {
+    const appId = 'security-solution';
     const caseId = 'case-id';
     const commentId = '';
-    const sessionKey = getMarkdownEditorStorageKey(caseId, commentId);
-    expect(sessionKey).toEqual(`cases.markdown`);
+    const sessionKey = getMarkdownEditorStorageKey(appId, caseId, commentId);
+    expect(sessionKey).toEqual(`cases.${appId}.${caseId}.comment.markdownEditor`);
   });
 
   it('should return default key when case id is empty ', () => {
+    const appId = 'security-solution';
     const caseId = '';
     const commentId = 'comment-id';
-    const sessionKey = getMarkdownEditorStorageKey(caseId, commentId);
-    expect(sessionKey).toEqual(`cases.markdown`);
+    const sessionKey = getMarkdownEditorStorageKey(appId, caseId, commentId);
+    expect(sessionKey).toEqual(`cases.${appId}.case.${commentId}.markdownEditor`);
+  });
+
+  it('should return default key when app id is empty ', () => {
+    const appId = '';
+    const caseId = 'case-id';
+    const commentId = 'comment-id';
+    const sessionKey = getMarkdownEditorStorageKey(appId, caseId, commentId);
+    expect(sessionKey).toEqual(`cases.kibana.${caseId}.${commentId}.markdownEditor`);
   });
 });

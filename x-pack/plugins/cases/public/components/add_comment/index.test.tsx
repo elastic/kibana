@@ -213,23 +213,40 @@ describe('AddComment ', () => {
 
 describe('draft comment ', () => {
   let appMockRenderer: AppMockRenderer;
+  const appId = 'testAppId';
 
   beforeEach(() => {
     appMockRenderer = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   it('should clear session storage on submit', async () => {
     const result = appMockRenderer.render(<AddComment {...addCommentProps} />);
-    const draftKey = `cases.caseView.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
+    const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
 
     fireEvent.change(result.getByLabelText('caseComment'), {
       target: { value: sampleData.comment },
     });
 
-    expect(result.getByTestId(`add-comment`)).toBeTruthy();
-    sessionStorage.setItem(draftKey, sampleData.comment);
-    expect(sessionStorage.getItem(draftKey)).toBe(sampleData.comment);
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    await waitFor(() => {
+      expect(result.getByLabelText('caseComment')).toHaveValue(sessionStorage.getItem(draftKey));
+    });
 
     fireEvent.click(result.getByTestId('submit-comment'));
 
@@ -242,6 +259,21 @@ describe('draft comment ', () => {
         updateCase: onCommentPosted,
       });
       expect(result.getByLabelText('caseComment').textContent).toBe('');
+      expect(sessionStorage.getItem(draftKey)).toBe('');
+    });
+  });
+
+  describe('existing storage key', () => {
+    const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
+
+    beforeEach(() => {
+      sessionStorage.setItem(draftKey, 'value set in storage');
+    });
+
+    it('should have draft comment same as existing session storage', async () => {
+      const result = appMockRenderer.render(<AddComment {...addCommentProps} />);
+
+      expect(result.getByLabelText('caseComment')).toHaveValue('value set in storage');
     });
   });
 });

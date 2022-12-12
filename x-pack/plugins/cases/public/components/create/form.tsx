@@ -28,6 +28,7 @@ import type { Case } from '../../containers/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
+import { removeItemFromSessionStorate } from '../utils';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import { SubmitCaseButton } from './submit_button';
@@ -63,6 +64,8 @@ export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
   isLoadingConnectors: boolean;
   withSteps: boolean;
+  owner: string[];
+  draftStorageKey: string;
 }
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
   onCancel: () => void;
@@ -76,15 +79,11 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
-const draftStorageKey = getMarkdownEditorStorageKey('createCase', 'description');
-
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({ connectors, isLoadingConnectors, withSteps }) => {
+  ({ connectors, isLoadingConnectors, withSteps, owner, draftStorageKey }) => {
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
-
-    const { owner } = useCasesContext();
 
     const availableOwners = useAvailableCasesOwners();
     const canShowCaseSolutionSelection = !owner.length && availableOwners.length;
@@ -121,7 +120,13 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           </>
         ),
       }),
-      [isSubmitting, caseAssignmentAuthorized, canShowCaseSolutionSelection, availableOwners]
+      [
+        isSubmitting,
+        caseAssignmentAuthorized,
+        canShowCaseSolutionSelection,
+        availableOwners,
+        draftStorageKey,
+      ]
     );
 
     const secondStep = useMemo(
@@ -190,9 +195,12 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     attachments,
     initialValue,
   }) => {
+    const { owner, appId } = useCasesContext();
+    const draftStorageKey = getMarkdownEditorStorageKey(appId, 'createCase', 'description');
+
     const handleOnConfirmationCallback = (): void => {
       onCancel();
-      window.sessionStorage.removeItem(draftStorageKey);
+      removeItemFromSessionStorate(draftStorageKey);
     };
 
     const { showConfirmationModal, onOpenModal, onConfirmModal, onCancelModal } =
@@ -201,7 +209,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
       });
 
     const handleOnSuccess = (theCase: Case): Promise<void> => {
-      window.sessionStorage.removeItem(draftStorageKey);
+      removeItemFromSessionStorate(draftStorageKey);
       return onSuccess(theCase);
     };
 
@@ -217,6 +225,8 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
             connectors={empty}
             isLoadingConnectors={false}
             withSteps={withSteps}
+            owner={owner}
+            draftStorageKey={draftStorageKey}
           />
           <Container>
             <EuiFlexGroup

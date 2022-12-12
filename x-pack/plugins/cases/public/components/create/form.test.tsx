@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act, render, within, fireEvent } from '@testing-library/react';
+import { waitFor } from '@testing-library/dom';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { NONE_CONNECTOR_ID } from '../../../common/api';
@@ -213,23 +214,47 @@ describe('CreateCaseForm', () => {
     expect(descriptionInput).toHaveValue('description');
   });
 
-  it('should clear session storage key on cancel', () => {
-    const result = render(
-      <MockHookWrapperComponent>
-        <CreateCaseForm
-          {...casesFormProps}
-          initialValue={{ title: 'title', description: 'description' }}
-        />
-      </MockHookWrapperComponent>
-    );
-    const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
-    const cancelBtn = result.getByTestId('create-case-cancel');
+  describe('draft comment ', () => {
+    it('should clear session storage key on cancel', () => {
+      const result = render(
+        <MockHookWrapperComponent>
+          <CreateCaseForm
+            {...casesFormProps}
+            initialValue={{ title: 'title', description: 'description' }}
+          />
+        </MockHookWrapperComponent>
+      );
+      const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
 
-    fireEvent.click(cancelBtn);
+      const cancelBtn = result.getByTestId('create-case-cancel');
 
-    fireEvent.click(result.getByTestId('confirmModalConfirmButton'));
+      fireEvent.click(cancelBtn);
 
-    expect(casesFormProps.onCancel).toHaveBeenCalled();
-    expect(sessionStorage.getItem(draftStorageKey)).toBe('undefined');
+      fireEvent.click(result.getByTestId('confirmModalConfirmButton'));
+
+      expect(casesFormProps.onCancel).toHaveBeenCalled();
+      expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
+    });
+
+    it('should clear session storage key on submit', () => {
+      const result = render(
+        <MockHookWrapperComponent>
+          <CreateCaseForm
+            {...casesFormProps}
+            initialValue={{ title: 'title', description: 'description' }}
+          />
+        </MockHookWrapperComponent>
+      );
+      const draftStorageKey = `cases.kibana.createCase.description.markdownEditor`;
+
+      const submitBtn = result.getByTestId('create-case-submit');
+
+      fireEvent.click(submitBtn);
+
+      waitFor(() => {
+        expect(casesFormProps.onSuccess).toHaveBeenCalled();
+        expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
+      });
+    });
   });
 });

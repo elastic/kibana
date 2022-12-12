@@ -7,7 +7,12 @@
 
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { connectorDeprecationValidator, getConnectorIcon, isDeprecatedConnector } from './utils';
+import {
+  connectorDeprecationValidator,
+  getConnectorIcon,
+  isDeprecatedConnector,
+  removeItemFromSessionStorate,
+} from './utils';
 
 describe('Utils', () => {
   const connector = {
@@ -83,6 +88,27 @@ describe('Utils', () => {
       expect(
         isDeprecatedConnector({ ...connector, isDeprecated: false, isPreconfigured: true })
       ).toBe(false);
+    });
+  });
+
+  describe('removeItemFromSessionStorate', () => {
+    const sessionKey = 'testKey';
+    const sessionValue = 'test value';
+
+    it('successfully removes key from session storage', () => {
+      sessionStorage.setItem(sessionKey, sessionValue);
+
+      expect(sessionStorage.getItem(sessionKey)).toBe(sessionValue);
+
+      removeItemFromSessionStorate(sessionKey);
+
+      expect(sessionStorage.getItem(sessionKey)).toBe(null);
+    });
+
+    it('is null if key is not in session storage', () => {
+      removeItemFromSessionStorate(sessionKey);
+
+      expect(sessionStorage.getItem(sessionKey)).toBe(null);
     });
   });
 });

@@ -12,6 +12,8 @@ import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/h
 import type { Content } from './schema';
 import { schema } from './schema';
 import { MarkdownRenderer, MarkdownEditorForm } from '../markdown_editor';
+import { removeItemFromSessionStorate } from '../utils';
+import { useCasesContext } from '../cases_context/use_cases_context';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import { UserActionMarkdownFooter } from './markdown_form_footer';
 
@@ -45,12 +47,13 @@ const UserActionMarkdownComponent = forwardRef<
   });
 
   const fieldName = 'content';
-  const draftStorageKey = getMarkdownEditorStorageKey(caseId, id);
+  const { appId } = useCasesContext();
+  const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
   const { setFieldValue, submit } = form;
 
   const handleCancelAction = useCallback(() => {
     onChangeEditable(id);
-    window.sessionStorage.removeItem(draftStorageKey);
+    removeItemFromSessionStorate(draftStorageKey);
   }, [id, onChangeEditable, draftStorageKey]);
 
   const handleSaveAction = useCallback(async () => {
@@ -60,7 +63,7 @@ const UserActionMarkdownComponent = forwardRef<
       onSaveContent(data.content);
     }
     onChangeEditable(id);
-    window.sessionStorage.removeItem(draftStorageKey);
+    removeItemFromSessionStorate(draftStorageKey);
   }, [content, id, onChangeEditable, onSaveContent, submit, draftStorageKey]);
 
   const setComment = useCallback(

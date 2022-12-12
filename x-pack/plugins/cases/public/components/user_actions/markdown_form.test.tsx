@@ -7,10 +7,13 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { Content } from './schema';
+import { schema } from './schema';
 import { UserActionMarkdown } from './markdown_form';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, TestProviders } from '../../common/mock';
-import { waitFor, fireEvent } from '@testing-library/react';
+import { waitFor, fireEvent, render, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 const onChangeEditable = jest.fn();
 const onSaveContent = jest.fn();
@@ -18,7 +21,7 @@ const onSaveContent = jest.fn();
 const newValue = 'Hello from Tehas';
 const emptyValue = '';
 const hyperlink = `[hyperlink](http://elastic.co)`;
-const draftStorageKey = `cases.caseView.caseId.markdown-id.markdownEditor`;
+const draftStorageKey = `cases.testAppId.caseId.markdown-id.markdownEditor`;
 const defaultProps = {
   content: `A link to a timeline ${hyperlink}`,
   id: 'markdown-id',
@@ -226,34 +229,110 @@ describe('UserActionMarkdown ', () => {
   });
 
   describe('draft comment ', () => {
-    let appMockRenderer: AppMockRenderer;
+    const content = 'test content';
+    const initialState = { content };
+    const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
+      children,
+      testProviderProps = {},
+    }) => {
+      const { form } = useForm<Content>({
+        defaultValue: initialState,
+        options: { stripEmptyFields: false },
+        schema,
+      });
+
+      return (
+        <TestProviders {...testProviderProps}>
+          <Form form={form}>{children}</Form>
+        </TestProviders>
+      );
+    };
+
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.clearAllTimers();
+      sessionStorage.removeItem(draftStorageKey);
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
 
     beforeEach(() => {
-      appMockRenderer = createAppMockRenderer();
+      jest.clearAllMocks();
     });
 
     it('Save button click clears session storage', async () => {
-      const result = appMockRenderer.render(<UserActionMarkdown {...defaultProps} />);
+      const result = render(
+        <MockHookWrapperComponent>
+          <UserActionMarkdown {...defaultProps} />
+        </MockHookWrapperComponent>
+      );
 
       fireEvent.change(result.getByTestId('euiMarkdownEditorTextArea'), {
         target: { value: newValue },
       });
+
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      expect(sessionStorage.getItem(draftStorageKey)).toBe(newValue);
 
       fireEvent.click(result.getByTestId(`user-action-save-markdown`));
 
       await waitFor(() => {
         expect(onSaveContent).toHaveBeenCalledWith(newValue);
         expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
-        expect(sessionStorage.getItem(draftStorageKey)).toBe('undefined');
+        expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
       });
     });
 
     it('Cancel button click clears session storage', async () => {
-      const result = appMockRenderer.render(<UserActionMarkdown {...defaultProps} />);
+      const result = render(
+        <MockHookWrapperComponent>
+          <UserActionMarkdown {...defaultProps} />
+        </MockHookWrapperComponent>
+      );
+
+      expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
+
+      fireEvent.change(result.getByTestId('euiMarkdownEditorTextArea'), {
+        target: { value: newValue },
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      await waitFor(() => {
+        expect(sessionStorage.getItem(draftStorageKey)).toBe(newValue);
+      });
 
       fireEvent.click(result.getByTestId('user-action-cancel-markdown'));
 
-      expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
+      await waitFor(() => {
+        expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
+      });
+    });
+
+    describe('existing storage key', () => {
+      beforeEach(() => {
+        sessionStorage.setItem(draftStorageKey, 'value set in storage');
+      });
+
+      it('should have session storage value same as draft comment', async () => {
+        const result = render(
+          <MockHookWrapperComponent>
+            <UserActionMarkdown {...defaultProps} />
+          </MockHookWrapperComponent>
+        );
+
+        expect(result.container.querySelector('textarea')!.value).toEqual('value set in storage');
+      });
     });
   });
 });

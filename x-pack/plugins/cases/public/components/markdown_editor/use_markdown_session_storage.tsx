@@ -8,12 +8,11 @@
 import { useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
 import useDebounce from 'react-use/lib/useDebounce';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 const STORAGE_DEBOUNCE_TIME = 500;
 
-interface SessionStorageType {
+export interface SessionStorageType {
   field: FieldHook<string>;
   sessionKey: string;
   initialValue: string | undefined;
@@ -28,7 +27,7 @@ export const useMarkdownSessionStorage = ({
   const isFirstRender = useRef(true);
   const initialValueRef = useRef(initialValue);
 
-  const [sessionValue, setSessionValue] = useSessionStorage<string>(sessionKey);
+  const sessionValue = sessionStorage.getItem(sessionKey) ?? '';
 
   if (!isEmpty(sessionValue) && isFirstRender.current) {
     isFirstRender.current = false;
@@ -43,17 +42,19 @@ export const useMarkdownSessionStorage = ({
   useDebounce(
     () => {
       if (isFirstRender.current) {
+        if (isEmpty(sessionValue) && !isEmpty(field.value)) {
+          /* this condition is used to for lens draft comment, 
+            when user selects and visualization and comes back to Markdown editor,
+            it is a first render for Markdown editor, however field has value of visualization which is not stored in session 
+            hence saving this item in session storage
+          */
+          sessionStorage.setItem(sessionKey, field.value);
+        }
         isFirstRender.current = false;
         return;
       }
 
-      if (sessionKey) {
-        if (field.value !== '') {
-          setSessionValue(field.value);
-        } else {
-          setSessionValue('');
-        }
-      }
+      sessionStorage.setItem(sessionKey, field.value);
     },
     STORAGE_DEBOUNCE_TIME,
     [field.value]

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-export const getMarkdownEditorStorageKey = (caseId: string, commentId: string): string => {
-  if (caseId === '' || commentId === '') {
-    return 'cases.markdown';
-  }
+export const getMarkdownEditorStorageKey = (
+  appId: string,
+  caseId: string,
+  commentId: string
+): string => {
+  const appIdKey = appId !== '' ? appId : 'kibana';
+  const caseIdKey = caseId !== '' ? caseId : 'case';
+  const commentIdKey = commentId !== '' ? commentId : 'comment';
 
-  return `cases.caseView.${caseId}.${commentId}.markdownEditor`;
+  return `cases.${appIdKey}.${caseIdKey}.${commentIdKey}.markdownEditor`;
 };

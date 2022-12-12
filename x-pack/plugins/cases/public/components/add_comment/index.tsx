@@ -69,9 +69,9 @@ export const AddComment = React.memo(
     ) => {
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
-      const { permissions, owner } = useCasesContext();
+      const { permissions, owner, appId } = useCasesContext();
       const { isLoading, createAttachments } = useCreateAttachments();
-      const draftStorageKey = getMarkdownEditorStorageKey(caseId, id);
+      const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
 
       const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,
