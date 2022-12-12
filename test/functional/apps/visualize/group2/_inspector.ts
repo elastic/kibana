@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  describe('inspector-miaou', function describeIndexTests() {
+  describe('inspector', function describeIndexTests() {
     before(async function () {
       await PageObjects.visualize.initTests();
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
