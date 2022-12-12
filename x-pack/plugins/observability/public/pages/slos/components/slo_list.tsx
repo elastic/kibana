@@ -9,13 +9,23 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
+import { SloListItem } from './slo_list_item';
 
 export function SloList() {
-  const { loading, sloList } = useFetchSloList();
+  const {
+    loading,
+    sloList: { results: slos = [] },
+  } = useFetchSloList();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="sloList">
-      <EuiFlexItem>{!loading && <pre>{JSON.stringify(sloList, null, 2)}</pre>}</EuiFlexItem>
+      {!loading && slos.length
+        ? slos.map((slo) => (
+            <EuiFlexItem key={slo.id}>
+              <SloListItem slo={slo} />
+            </EuiFlexItem>
+          ))
+        : null}
     </EuiFlexGroup>
   );
 }
