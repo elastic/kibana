@@ -12,6 +12,7 @@ import { EuiText } from '@elastic/eui';
 import type { SnapshotMetricInput, SnapshotNodeMetric } from '../../../../../common/http_api';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { CloudProviderIconWithTitle, CloudProviders } from './cloud_provider_icon_with_title';
+import { TruncateLinkWithTooltip } from './truncate_link_with_tooltip';
 
 interface HostNodeRow extends HostMetics {
   os?: string | null;
@@ -41,7 +42,13 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     sortable: true,
     truncateText: true,
     render: (title: HostNodeRow['title']) => (
-      <CloudProviderIconWithTitle provider={title?.cloudProvider} title={title?.name} />
+      <CloudProviderIconWithTitle provider={title?.cloudProvider} text={title.name} title={<TruncateLinkWithTooltip
+        text={title.name}
+        linkProps={{
+          app: 'metrics',
+          pathname: `/detail/host/${title.name}`,
+        }}
+      />} />
     ),
   },
   {
