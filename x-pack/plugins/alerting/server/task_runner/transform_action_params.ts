@@ -11,6 +11,8 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   RuleTypeParams,
+  SanitizedRule,
+  SummarizedAlerts,
 } from '../types';
 
 interface TransformActionParamsOptions {
@@ -31,6 +33,13 @@ interface TransformActionParamsOptions {
   kibanaBaseUrl?: string;
   context: AlertInstanceContext;
   ruleUrl?: string;
+}
+
+interface SummarizedAlertsWithAll extends SummarizedAlerts {
+  all: {
+    count: number;
+    alerts: unknown[];
+  };
 }
 
 export function transformActionParams({
@@ -81,6 +90,51 @@ export function transformActionParams({
       actionGroup: alertActionGroup,
       actionGroupName: alertActionGroupName,
     },
+  };
+  return actionsPlugin.renderActionParameterTemplates(
+    actionTypeId,
+    actionId,
+    actionParams,
+    variables
+  );
+}
+
+export function transformSummaryActionParams({
+  alerts,
+  rule,
+  ruleTypeId,
+  actionsPlugin,
+  actionId,
+  actionTypeId,
+  spaceId,
+  actionParams,
+  ruleUrl,
+  kibanaBaseUrl,
+}: {
+  alerts: SummarizedAlertsWithAll;
+  rule: SanitizedRule<RuleTypeParams>;
+  ruleTypeId: string;
+  actionsPlugin: ActionsPluginStartContract;
+  actionId: string;
+  actionTypeId: string;
+  spaceId: string;
+  actionParams: RuleActionParams;
+  kibanaBaseUrl?: string;
+  ruleUrl?: string;
+}): RuleActionParams {
+  const variables = {
+    kibanaBaseUrl,
+    date: new Date().toISOString(),
+    rule: {
+      params: rule.params,
+      id: rule.id,
+      name: rule.name,
+      type: ruleTypeId,
+      url: ruleUrl,
+      tags: rule.tags,
+      spaceId,
+    },
+    alerts,
   };
   return actionsPlugin.renderActionParameterTemplates(
     actionTypeId,

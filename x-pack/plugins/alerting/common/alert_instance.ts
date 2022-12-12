@@ -8,12 +8,12 @@
 import * as t from 'io-ts';
 import { DateFromString } from './date_from_string';
 
-const actionSchema = t.partial({
+const actionSchema = t.type({
   date: DateFromString,
 });
 
 export const actionsSchema = t.record(t.string, actionSchema);
-export type AlertActions = t.TypeOf<typeof actionsSchema>;
+export type ThrottledActions = t.TypeOf<typeof actionsSchema>;
 
 const lastScheduledActionsSchema = t.intersection([
   t.partial({
