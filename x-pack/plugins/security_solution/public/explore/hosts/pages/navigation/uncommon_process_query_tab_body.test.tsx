@@ -14,8 +14,8 @@ import { UncommonProcessQueryTabBody } from './uncommon_process_query_tab_body';
 import { HostsType } from '../../store/model';
 
 jest.mock('../../containers/uncommon_processes');
-jest.mock('../../../common/containers/query_toggle');
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/containers/query_toggle');
+jest.mock('../../../../common/lib/kibana');
 
 describe('Uncommon process query tab body', () => {
   const mockUseUncommonProcesses = useUncommonProcesses as jest.Mock;

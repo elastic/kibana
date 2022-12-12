@@ -10,13 +10,13 @@ import React, { useMemo } from 'react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiInMemoryTable } from '@elastic/eui';
 
-import { HeaderSection } from '../header_section';
-import { InspectButton, InspectButtonContainer } from '../inspect';
+import { HeaderSection } from '../../../../common/components/header_section';
+import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import * as i18n from './translations';
 
-import type { RuleRisk } from '../../../../common/search_strategy';
+import type { RuleRisk } from '../../../../../common/search_strategy';
 
-import { RuleLink } from '../../../detection_engine/rule_management_ui/components/rules_table/use_columns';
+import { RuleLink } from '../../../../detection_engine/rule_management_ui/components/rules_table/use_columns';
 
 export interface TopRiskScoreContributorsProps {
   loading: boolean;

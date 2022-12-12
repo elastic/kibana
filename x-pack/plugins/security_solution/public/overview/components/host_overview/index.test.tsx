@@ -25,7 +25,7 @@ const defaultProps = {
   loading: true,
 };
 
-jest.mock('../../../risk_score/containers/all');
+jest.mock('../../../explore/containers/risk_score/all');
 
 const mockUseRiskScore = useRiskScore as jest.Mock;
 

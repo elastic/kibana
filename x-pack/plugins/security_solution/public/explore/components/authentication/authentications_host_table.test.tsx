@@ -16,7 +16,7 @@ import { TestProviders } from '../../../common/mock';
 import { useAuthentications } from '../../containers/authentications';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
-jest.mock('../../containers/query_toggle', () => ({
+jest.mock('../../../common/containers/query_toggle', () => ({
   useQueryToggle: jest.fn().mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() }),
 }));
 jest.mock('../../containers/authentications', () => ({

@@ -13,9 +13,9 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HostRiskScoreQueryTabBody } from './host_risk_score_tab_body';
 import { HostsType } from '../../store/model';
 
-jest.mock('../../../risk_score/containers');
-jest.mock('../../../common/containers/query_toggle');
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../containers/risk_score');
+jest.mock('../../../../common/containers/query_toggle');
+jest.mock('../../../../common/lib/kibana');
 
 describe('Host risk score query tab body', () => {
   const mockUseRiskScore = useRiskScore as jest.Mock;

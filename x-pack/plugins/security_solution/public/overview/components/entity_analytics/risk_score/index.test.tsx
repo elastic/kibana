@@ -11,7 +11,7 @@ import { TestProviders } from '../../../../common/mock';
 import { EntityAnalyticsRiskScores } from '.';
 import type { UserRiskScore } from '../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
-import type { SeverityCount } from '../../../../explore/risk_score/components/severity/types';
+import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
 import { useRiskScore, useRiskScoreKpi } from '../../../../explore/containers/risk_score';
 import { openAlertsFilter } from '../../detection_response/utils';
 
@@ -41,7 +41,7 @@ const defaultProps = {
 };
 const mockUseRiskScore = useRiskScore as jest.Mock;
 const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
-jest.mock('../../../../risk_score/containers');
+jest.mock('../../../../explore/containers/risk_score');
 
 const mockOpenTimelineWithFilters = jest.fn();
 jest.mock('../../detection_response/hooks/use_navigate_to_timeline', () => {

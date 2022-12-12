@@ -13,13 +13,13 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { AllUsersQueryTabBody } from './all_users_query_tab_body';
 import { UsersType } from '../../store/model';
 
-jest.mock('../../../common/containers/query_toggle');
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/containers/query_toggle');
+jest.mock('../../../../common/lib/kibana');
 
 const mockSearch = jest.fn();
 
-jest.mock('../../../common/containers/use_search_strategy', () => {
-  const original = jest.requireActual('../../../common/containers/use_search_strategy');
+jest.mock('../../../../common/containers/use_search_strategy', () => {
+  const original = jest.requireActual('../../../../common/containers/use_search_strategy');
   return {
     ...original,
     useSearchStrategy: () => ({

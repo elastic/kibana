@@ -14,15 +14,15 @@ import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useRiskScoreFeatureStatus } from '../feature_status';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 
-jest.mock('../../../common/containers/use_search_strategy', () => ({
+jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
 
-jest.mock('../../../common/hooks/use_space_id', () => ({
+jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('default'),
 }));
 
-jest.mock('../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../feature_status');
 
 const mockUseRiskScoreFeatureStatus = useRiskScoreFeatureStatus as jest.Mock;

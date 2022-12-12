@@ -13,14 +13,14 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import type { LensAttributes } from '../../../common/components/visualization_actions/types';
 
-jest.mock('../visualization_actions', () => {
+jest.mock('../../../common/components/visualization_actions', () => {
   return {
     VisualizationActions: () => <div data-test-subj="visualizationActions" />,
     HISTOGRAM_ACTIONS_BUTTON_CLASS: 'histogram-actions-trigger',
   };
 });
 
-jest.mock('../visualization_actions/lens_embeddable', () => {
+jest.mock('../../../common/components/visualization_actions/lens_embeddable', () => {
   return {
     LensEmbeddable: () => <div data-test-subj="embeddable-metric" />,
   };

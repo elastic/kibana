@@ -19,10 +19,10 @@ import { EmbeddedMapComponent } from './embedded_map';
 import { createEmbeddable } from './embedded_map_helpers';
 
 const mockUseIndexPatterns = useIndexPatterns as jest.Mock;
-jest.mock('../../../common/hooks/use_index_patterns');
+jest.mock('../../../../common/hooks/use_index_patterns');
 mockUseIndexPatterns.mockImplementation(() => [true, []]);
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 jest.mock('./embedded_map_helpers', () => ({
   createEmbeddable: jest.fn(),
 }));
@@ -30,7 +30,7 @@ jest.mock('./embedded_map_helpers', () => ({
 const mockGetStorage = jest.fn();
 const mockSetStorage = jest.fn();
 
-jest.mock('../../../common/lib/kibana', () => {
+jest.mock('../../../../common/lib/kibana', () => {
   return {
     useKibana: () => ({
       services: {
@@ -51,7 +51,7 @@ jest.mock('../../../common/lib/kibana', () => {
     }),
   };
 });
-jest.mock('../../../common/containers/sourcerer', () => {
+jest.mock('../../../../common/containers/sourcerer', () => {
   return {
     useSourcererDataView: () => ({
       selectedPatterns: ['filebeat-*', 'packetbeat-*'],

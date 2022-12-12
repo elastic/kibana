@@ -98,7 +98,7 @@ jest.mock('../containers/overview_cti_links/use_all_ti_data_sources');
 const useAllTiDataSourcesMock = useAllTiDataSources as jest.Mock;
 useAllTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
-jest.mock('../../risk_score/containers');
+jest.mock('../../explore/containers/risk_score');
 const useRiskScoreMock = useRiskScore as jest.Mock;
 useRiskScoreMock.mockReturnValue({ loading: false, data: [], isModuleEnabled: false });
 

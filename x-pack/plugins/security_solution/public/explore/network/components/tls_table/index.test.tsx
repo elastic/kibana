@@ -25,7 +25,7 @@ import { networkModel } from '../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 
 describe('Tls Table Component', () => {
   const loadPage = jest.fn();

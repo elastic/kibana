@@ -23,7 +23,7 @@ import type { HostsTableColumns } from '.';
 import * as i18n from './translations';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
 import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
-import { RiskScore } from '../../../risk_score/components/severity/common';
+import { RiskScore } from '../../../components/risk_score/severity/common';
 
 export const getHostsColumns = (
   showRiskColumn: boolean,

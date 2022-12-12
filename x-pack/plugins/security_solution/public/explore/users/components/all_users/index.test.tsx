@@ -18,7 +18,7 @@ import { render } from '@testing-library/react';
 
 const mockUseMlCapabilities = jest.fn().mockReturnValue({ isPlatinumOrTrialLicense: false });
 
-jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
+jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
   useMlCapabilities: () => mockUseMlCapabilities(),
 }));
 

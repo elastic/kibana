@@ -28,7 +28,7 @@ import { networkModel } from '../../store';
 import { NetworkTopCountriesTable } from '.';
 import { mockData } from './mock';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 
 describe('NetworkTopCountries Table Component', () => {
   const loadPage = jest.fn();

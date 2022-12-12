@@ -16,9 +16,9 @@ import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { HostsType } from '../../../hosts/store/model';
 import { UsersType } from '../../../users/store/model';
 
-jest.mock('../../containers');
-jest.mock('../../../common/containers/query_toggle');
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../containers/risk_score');
+jest.mock('../../../../common/containers/query_toggle');
+jest.mock('../../../../common/lib/kibana');
 describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
   'Risk Tab Body entityType: %s',
   (riskEntity) => {

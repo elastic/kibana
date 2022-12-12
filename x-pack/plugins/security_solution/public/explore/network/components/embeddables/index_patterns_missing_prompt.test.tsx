@@ -10,7 +10,7 @@ import React from 'react';
 
 import { IndexPatternsMissingPromptComponent } from './index_patterns_missing_prompt';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 
 describe('IndexPatternsMissingPrompt', () => {
   test('renders correctly against snapshot', () => {

@@ -15,17 +15,17 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useRefetchByRestartingSession } from '../../../../../common/components/page/use_refetch_by_session';
 import { KpiBaseComponentManage } from '../common';
 
-jest.mock('../../../../common/containers/query_toggle');
+jest.mock('../../../../../common/containers/query_toggle');
 jest.mock('../../../containers/kpi_hosts/hosts');
 jest.mock('../common', () => ({
   KpiBaseComponentManage: jest
     .fn()
     .mockReturnValue(<span data-test-subj="KpiBaseComponentManage" />),
 }));
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
-jest.mock('../../../../common/components/page/use_refetch_by_session', () => ({
+jest.mock('../../../../../common/components/page/use_refetch_by_session', () => ({
   useRefetchByRestartingSession: jest.fn(),
 }));
 
