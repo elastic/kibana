@@ -11,14 +11,15 @@ import { Pagination } from '../../types';
 import type { LoadRulesProps } from '../lib/rule_api';
 import { loadRulesWithKueryFilter } from '../lib/rule_api/rules_kuery_filter';
 import { useKibana } from '../../common/lib/kibana';
+import { useRuleTypes } from './use_rule_types';
 
 type UseLoadRulesProps = Omit<LoadRulesProps, 'http'> & {
   hasDefaultRuleTypesFiltersOn?: boolean;
   onPage: (pagination: Pagination) => void;
   onError: (message: string) => void;
+  filteredRuleTypes: string[];
+  authorizedToCreateAnyRules: boolean;
 };
-
-let initialLoad = true;
 
 export function useLoadRules({
   page,
@@ -33,13 +34,18 @@ export function useLoadRules({
   onPage,
   onError,
   hasDefaultRuleTypesFiltersOn = false,
+  filteredRuleTypes,
+  authorizedToCreateAnyRules,
 }: UseLoadRulesProps) {
   const { http } = useKibana().services;
+  const ruleTypesState = useRuleTypes({ onError, filteredRuleTypes });
 
   const {
     refetch,
     isLoading,
+    isInitialLoading,
     data: rulesResponse,
+    fetchStatus,
   } = useQuery({
     queryKey: [
       'loadRules',
@@ -66,6 +72,7 @@ export function useLoadRules({
         sort,
       });
     },
+    enabled: authorizedToCreateAnyRules && ruleTypesState.isInitialized,
     onSuccess: (response) => {
       if (!response?.data?.length && page.index > 0) {
         onPage({ ...page, index: 0 });
@@ -91,19 +98,17 @@ export function useLoadRules({
     isEmpty(tagsFilter)
   );
 
-  const noData = rulesResponse?.data.length === 0 && !isFilterApplied;
-  if (initialLoad && !isLoading) {
-    initialLoad = false;
-  }
+  const noData = rulesResponse?.data ? rulesResponse.data.length === 0 && !isFilterApplied : true;
 
   return {
     rulesState: {
       isLoading,
+      fetchStatus,
       data: rulesResponse?.data ?? [],
       totalItemCount: rulesResponse?.total ?? 0,
     },
     noData,
-    initialLoad,
+    initialLoad: isInitialLoading,
     loadRules: refetch,
   };
 }

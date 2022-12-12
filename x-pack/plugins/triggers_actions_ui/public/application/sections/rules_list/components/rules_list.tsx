@@ -47,6 +47,7 @@ import {
   Percentiles,
   TriggersActionsUiConfig,
   SnoozeSchedule,
+  RuleTypeIndex,
 } from '../../../../types';
 import { RuleAdd, RuleEdit } from '../../rule_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -101,8 +102,8 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
-import { useRuleTypes } from '../../../hooks/use_rule_types';
 import { useActionTypes } from '../../../hooks/use_action_types';
+import { useRuleTypes } from '../../../hooks/use_rule_types';
 
 const ENTER_KEY = 13;
 
@@ -125,6 +126,12 @@ export interface RulesListProps {
   refresh?: Date;
   rulesListKey?: string;
   visibleColumns?: RulesListVisibleColumns[];
+}
+
+export interface RuleTypeState {
+  isLoading: boolean;
+  isInitialized: boolean;
+  data: RuleTypeIndex;
 }
 
 export const percentileFields = {
@@ -260,7 +267,7 @@ export const RulesList = ({
     [toasts]
   );
 
-  // const { actionTypes } = useActionTypes({ onError });
+  const { actionTypes } = useActionTypes({ onError });
   const ruleTypesState = useRuleTypes({ onError, filteredRuleTypes });
 
   const hasAnyAuthorizedRuleType = useMemo(() => {
@@ -292,10 +299,14 @@ export const RulesList = ({
     onPage: setPage,
     onError,
     hasDefaultRuleTypesFiltersOn,
+    filteredRuleTypes,
+    authorizedToCreateAnyRules,
   });
 
   const { tags, loadTags } = useLoadTags({
     onError,
+    filteredRuleTypes,
+    authorizedToCreateAnyRules,
   });
 
   const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
@@ -308,6 +319,8 @@ export const RulesList = ({
       ruleStatusesFilter,
       tagsFilter,
       onError,
+      filteredRuleTypes,
+      authorizedToCreateAnyRules,
     });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
@@ -400,7 +413,7 @@ export const RulesList = ({
     onClearSelection();
   }, [
     searchText,
-    rulesTypesFilter,
+    // rulesTypesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter,
     ruleLastRunOutcomesFilter,
@@ -957,7 +970,6 @@ export const RulesList = ({
       'ruleTypesState.isLoading': ruleTypesState.isLoading,
     });
     if (noData && !rulesState.isLoading && !ruleTypesState.isLoading) {
-      console.log('authorizedToCreateAnyRules', authorizedToCreateAnyRules);
       return authorizedToCreateAnyRules ? (
         <EmptyPrompt
           showCreateRuleButton={showCreateRuleButton}
@@ -967,11 +979,9 @@ export const RulesList = ({
         noPermissionPrompt
       );
     }
-
     if (initialLoad) {
       return <CenterJustifiedSpinner />;
     }
-
     return table;
   };
 

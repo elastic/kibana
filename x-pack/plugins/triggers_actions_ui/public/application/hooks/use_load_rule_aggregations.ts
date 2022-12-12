@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { LoadRuleAggregationsProps } from '../lib/rule_api';
 import { loadRuleAggregationsWithKueryFilter } from '../lib/rule_api/aggregate_kuery_filter';
 import { useKibana } from '../../common/lib/kibana';
+import { useRuleTypes } from './use_rule_types';
 
 const initializeAggregationResult = (values: readonly string[]) => {
   return values.reduce<Record<string, number>>(
@@ -24,6 +25,8 @@ const initializeAggregationResult = (values: readonly string[]) => {
 
 type UseLoadRuleAggregationsProps = Omit<LoadRuleAggregationsProps, 'http'> & {
   onError: (message: string) => void;
+  filteredRuleTypes: string[];
+  authorizedToCreateAnyRules: boolean;
 };
 
 export function useLoadRuleAggregations({
@@ -35,8 +38,12 @@ export function useLoadRuleAggregations({
   ruleStatusesFilter,
   tagsFilter,
   onError,
+  filteredRuleTypes,
+  authorizedToCreateAnyRules,
 }: UseLoadRuleAggregationsProps) {
   const { http } = useKibana().services;
+
+  const ruleTypesState = useRuleTypes({ onError, filteredRuleTypes });
 
   const initialData = () => ({
     ruleExecutionStatus: initializeAggregationResult(RuleExecutionStatusValues),
@@ -78,6 +85,7 @@ export function useLoadRuleAggregations({
       ruleStatusesFilter,
       tagsFilter,
     ],
+    enabled: authorizedToCreateAnyRules && ruleTypesState.isInitialized,
     queryFn: internalLoadRuleAggregations,
     initialData,
     onError: onErrorFn,

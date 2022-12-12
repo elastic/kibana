@@ -10,11 +10,11 @@ import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { loadActionTypes } from '../lib/action_connector_api';
 
-interface UseLoadTagsProps {
+interface UseActionTypesProps {
   onError: (message: string) => void;
 }
 
-export function useActionTypes({ onError }: UseLoadTagsProps) {
+export function useActionTypes({ onError }: UseActionTypesProps) {
   const { http, actionTypeRegistry } = useKibana().services;
 
   const queryFn = () => {
@@ -31,7 +31,7 @@ export function useActionTypes({ onError }: UseLoadTagsProps) {
   };
 
   const { data = [] } = useQuery({
-    queryKey: ['loadActionTypes'],
+    queryKey: ['loadActionTypes', AlertingConnectorFeatureId],
     queryFn,
     onError: onErrorFn,
   });

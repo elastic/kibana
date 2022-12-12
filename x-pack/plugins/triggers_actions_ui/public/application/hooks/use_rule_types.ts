@@ -36,8 +36,12 @@ export function useRuleTypes({ onError, filteredRuleTypes }: UseRuleTypesProps):
     );
   };
 
-  const { data = [], isLoading } = useQuery({
-    queryKey: ['loadRuleTypes'],
+  const {
+    data = [],
+    isLoading,
+    isInitialLoading,
+  } = useQuery({
+    queryKey: ['loadRuleTypes', filteredRuleTypes],
     queryFn,
     onError: onErrorFn,
   });
@@ -56,7 +60,7 @@ export function useRuleTypes({ onError, filteredRuleTypes }: UseRuleTypesProps):
   }
 
   return {
-    isInitialized: true,
+    isInitialized: isInitialLoading === false,
     isLoading,
     data: filteredIndex,
   };

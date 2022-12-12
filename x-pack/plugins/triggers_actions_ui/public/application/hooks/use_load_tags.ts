@@ -8,13 +8,21 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { loadRuleTags } from '../lib/rule_api';
 import { useKibana } from '../../common/lib/kibana';
+import { useRuleTypes } from './use_rule_types';
 
 interface UseLoadTagsProps {
   onError: (message: string) => void;
+  filteredRuleTypes: string[];
+  authorizedToCreateAnyRules: boolean;
 }
 
-export function useLoadTags({ onError }: UseLoadTagsProps) {
+export function useLoadTags({
+  onError,
+  filteredRuleTypes,
+  authorizedToCreateAnyRules,
+}: UseLoadTagsProps) {
   const { http } = useKibana().services;
+  const ruleTypesState = useRuleTypes({ onError, filteredRuleTypes });
 
   const queryFn = () => {
     return loadRuleTags({ http });
@@ -31,6 +39,7 @@ export function useLoadTags({ onError }: UseLoadTagsProps) {
   const { refetch, data } = useQuery({
     queryKey: ['loadRuleTags'],
     queryFn,
+    enabled: authorizedToCreateAnyRules && ruleTypesState.isInitialized,
     onError: onErrorFn,
   });
 
