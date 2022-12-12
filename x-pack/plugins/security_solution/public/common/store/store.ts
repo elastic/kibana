@@ -117,9 +117,9 @@ export const createStoreFactory = async (
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...subPlugins.exceptions.storageDataTables!.tableById,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...subPlugins.hosts.storageDataTables!.tableById,
+        ...subPlugins.explore.exploreDataTables!.hosts.tableById,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...subPlugins.network.storageDataTables!.tableById,
+        ...subPlugins.explore.exploreDataTables!.network.tableById,
       },
     },
   };
@@ -132,9 +132,7 @@ export const createStoreFactory = async (
 
   const initialState = createInitialState(
     {
-      ...subPlugins.hosts.store.initialState,
-      ...subPlugins.users.store.initialState,
-      ...subPlugins.network.store.initialState,
+      ...subPlugins.explore.store.initialState,
       ...timelineInitialState,
       ...subPlugins.management.store.initialState,
     },
@@ -148,9 +146,7 @@ export const createStoreFactory = async (
   );
 
   const rootReducer = {
-    ...subPlugins.hosts.store.reducer,
-    ...subPlugins.users.store.reducer,
-    ...subPlugins.network.store.reducer,
+    ...subPlugins.explore.store.reducer,
     timeline: timelineReducer,
     ...subPlugins.management.store.reducer,
   };

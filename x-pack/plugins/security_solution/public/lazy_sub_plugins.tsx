@@ -15,7 +15,7 @@ import { Detections } from './detections';
 import { Exceptions } from './exceptions';
 import { Hosts } from './explore/hosts';
 import { Users } from './explore/users';
-import { Network } from './explore';
+import { Explore } from './explore';
 import { Kubernetes } from './kubernetes';
 import { Overview } from './overview';
 import { Rules } from './rules';
@@ -34,7 +34,7 @@ const subPluginClasses = {
   Exceptions,
   Hosts,
   Users,
-  Network,
+  Explore,
   Kubernetes,
   Overview,
   Rules,
