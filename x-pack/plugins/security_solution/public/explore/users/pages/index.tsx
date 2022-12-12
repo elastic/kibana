@@ -20,7 +20,17 @@ export const UsersContainer = React.memo(() => {
       <Route path={usersTabPath}>
         <Users />
       </Route>
-
+      <Route // Compatibility redirect for the old external alert path to events page with external alerts showing.
+        path={`${USERS_PATH}/externalAlerts`}
+        render={({ location: { search = '' } }) => (
+          <Redirect
+            to={{
+              pathname: `${USERS_PATH}/${UsersTableType.events}`,
+              search: `${search}&onlyExternalAlerts=true`,
+            }}
+          />
+        )}
+      />
       <Route
         path={usersDetailsTabPath}
         render={({
