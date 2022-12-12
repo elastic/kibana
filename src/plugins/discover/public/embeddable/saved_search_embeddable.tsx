@@ -157,7 +157,8 @@ export class SavedSearchEmbeddable
         return;
       }
       const isFetchRequired = this.isFetchRequired(this.searchProps);
-      if (titleChanged || isFetchRequired || this.isRerenderRequired(this.searchProps)) {
+      const isRerenderRequired = this.isRerenderRequired(this.searchProps);
+      if (titleChanged || isFetchRequired || isRerenderRequired) {
         this.reload(isFetchRequired);
       }
     });
