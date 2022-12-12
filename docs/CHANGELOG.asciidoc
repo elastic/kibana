@@ -101,6 +101,12 @@ To review the breaking changes in previous versions, refer to the following:
 {kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
 
 [float]
+[[security-update-v7.17.8]]
+=== Security update
+
+The 7.17.8 release contains a fix to a potential security vulnerability. For more information, check link:https://discuss.elastic.co/t/7-17-8-8-5-0-security-update/320920[Security announcements].
+
+[float]
 [[enhancement-v7.17.8]]
 === Enhancements
 Reporting::
