@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
+import { startCase } from 'lodash';
 import {
   TREE_NAVIGATION_LOADING,
   TREE_NAVIGATION_SHOW_MORE,
@@ -309,6 +310,10 @@ const DynamicTreeViewItem = ({
     );
   }, [aggData.key, aggData.key_as_string, depth, selected, selectionDepth, tree]);
 
+  const clusterLevel = tree[depth].type.includes('clusterId')
+    ? 'Cluster'
+    : startCase(tree[depth].type);
+
   return (
     <li
       className={`euiTreeView__node
@@ -332,7 +337,7 @@ const DynamicTreeViewItem = ({
           />
         )}
         <TreeViewIcon {...tree[depth].iconProps} css={styles.labelIcon} />
-        <EuiToolTip content={aggData.key}>
+        <EuiToolTip content={`${clusterLevel}: ${aggData.key}`}>
           <span className="euiTreeView__nodeLabel">{aggData.key_as_string || aggData.key}</span>
         </EuiToolTip>
       </button>
