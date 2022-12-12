@@ -20,7 +20,7 @@ export async function bulkCreateApmSourceMapDocs({
   internalESClient: ElasticsearchClient;
 }) {
   const docs = await Promise.all(
-    artifacts.map(async (artifact) => {
+    artifacts.map(async (artifact): Promise<ApmSourceMapDoc> => {
       const { serviceName, serviceVersion, bundleFilepath, sourceMap } =
         await getUnzippedArtifactBody(artifact.body);
 
@@ -28,7 +28,7 @@ export async function bulkCreateApmSourceMapDocs({
         sourceMap
       );
 
-      const doc: ApmSourceMapDoc = {
+      return {
         created: artifact.created,
         content: contentEncoded,
         content_sha256: contentHash,
@@ -36,8 +36,6 @@ export async function bulkCreateApmSourceMapDocs({
         'service.name': serviceName,
         'service.version': serviceVersion,
       };
-
-      return doc;
     })
   );
 
