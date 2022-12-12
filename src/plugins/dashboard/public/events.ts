@@ -7,3 +7,4 @@
  */
 
 export const DASHBOARD_LOADED_EVENT = 'dashboard_loaded';
+export const SAVED_OBJECT_LOADED_TIME = 'saved_object_loaded_time';

@@ -25,6 +25,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { TableListView, type UserContentCommonSchema } from '@kbn/content-management-table-list';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { SAVED_OBJECT_LOADED_TIME } from '../../events';
 import {
   getDashboardBreadcrumb,
   dashboardListingTableStrings,
@@ -284,8 +285,11 @@ export const DashboardListing = ({
           const searchEndTime = window.performance.now();
           const searchDuration = searchEndTime - searchStartTime;
           reportPerformanceMetricEvent(pluginServices.getServices().analytics, {
-            eventName: 'saved_object_loaded_time',
+            eventName: SAVED_OBJECT_LOADED_TIME,
             duration: searchDuration,
+            meta: {
+              saved_object_type: 'dashboard',
+            },
           });
           return {
             total,
