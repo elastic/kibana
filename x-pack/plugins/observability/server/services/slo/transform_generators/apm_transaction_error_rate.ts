@@ -16,8 +16,8 @@ import {
   getSLOTransformId,
 } from '../../../assets/constants';
 import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
+import { DEFAULT_APM_INDEX } from './constants';
 
-const DEFAULT_APM_INDEX = 'metrics-apm*';
 const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
 const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
 
