@@ -187,34 +187,22 @@ export const GettingStarted = () => {
         css={paddingCss}
         data-test-subj="onboarding--landing-page"
       >
-          <EuiTitle size="l" className="eui-textCenter">
-            <h1>{title}</h1>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="m" textAlign="center">
-            <p>{subtitle}</p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiSpacer size="xxl" />
-          <EuiFlexGrid columns={4} gutterSize="l">
-            {['search', 'kubernetes', 'infrastructure', 'siem'].map((useCase) => {
-              if (useCase === 'infrastructure') {
-                return (
-                  <EuiFlexItem key={`linkCard-${useCase}`}>
-                    <InfrastructureLinkCard
-                      navigateToApp={application.navigateToApp}
-                      isDarkTheme={isDarkTheme}
-                      addBasePath={http.basePath.prepend}
-                    />
-                  </EuiFlexItem>
-                );
-              }
+        <EuiTitle size="l" className="eui-textCenter">
+          <h1>{title}</h1>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="m" textAlign="center">
+          <p>{subtitle}</p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiSpacer size="xxl" />
+        <EuiFlexGrid columns={4} gutterSize="l">
+          {['search', 'kubernetes', 'infrastructure', 'siem'].map((useCase) => {
+            if (useCase === 'infrastructure') {
               return (
-                <EuiFlexItem key={`guideCard-${useCase}`}>
-                  <GuideCard
-                    useCase={useCase as GuideCardUseCase}
-                    guides={guidesState}
-                    activateGuide={activateGuide}
+                <EuiFlexItem key={`linkCard-${useCase}`}>
+                  <InfrastructureLinkCard
+                    navigateToApp={application.navigateToApp}
                     isDarkTheme={isDarkTheme}
                     addBasePath={http.basePath.prepend}
                   />
@@ -224,7 +212,7 @@ export const GettingStarted = () => {
             return (
               <EuiFlexItem key={`guideCard-${useCase}`}>
                 <GuideCard
-                  useCase={useCase as UseCase}
+                  useCase={useCase as GuideCardUseCase}
                   guides={guidesState}
                   activateGuide={activateGuide}
                   isDarkTheme={isDarkTheme}
