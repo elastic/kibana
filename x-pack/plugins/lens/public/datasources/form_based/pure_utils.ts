@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataType, IndexPattern } from '../../types';
+import type { DataType, IndexPattern, IndexPatternField } from '../../types';
 import type { FormBasedLayer } from './types';
 import type {
   BaseIndexPatternColumn,
@@ -24,6 +24,13 @@ export function normalizeOperationDataType(type: DataType) {
 
 export function hasField(column: BaseIndexPatternColumn): column is FieldBasedIndexPatternColumn {
   return 'sourceField' in column;
+}
+
+export function getFieldType(field: IndexPatternField) {
+  if (field.timeSeriesMetric) {
+    return field.timeSeriesMetric;
+  }
+  return field.type;
 }
 
 export function getReferencedField(

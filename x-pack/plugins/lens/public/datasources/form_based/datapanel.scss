@@ -24,7 +24,7 @@
   display: flex;
   align-items: center;
 
-  .lnsFieldListPanel__fieldIcon {
+  .lnsFieldListPanel__fieldIcon { // TODO: refactor
     margin-right: $euiSizeS;
   }
 }

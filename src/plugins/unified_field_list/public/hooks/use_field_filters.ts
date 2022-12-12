@@ -12,6 +12,7 @@ import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
 import { type FieldListItem, type FieldTypeForFilter } from '../types';
 import { FIELD_TYPE_NAMES } from '../components/field_list_filters/field_type_names';
+import { getFieldType } from '../utils/get_field_type';
 
 export interface FieldFiltersParams<T extends FieldListItem> {
   allFields: T[] | null;
@@ -75,14 +76,4 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
     fieldListFiltersProps,
     onFilterField,
   };
-}
-
-export function getFieldType<T extends FieldListItem = DataViewField>(
-  field: T
-): FieldTypeForFilter {
-  const timeSeriesMetric = field.timeSeriesMetric;
-  if (timeSeriesMetric) {
-    return timeSeriesMetric as FieldTypeForFilter;
-  }
-  return field.type as FieldTypeForFilter;
 }

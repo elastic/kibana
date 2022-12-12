@@ -18,6 +18,7 @@ import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/publi
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   FieldListFilters,
+  FieldIcon,
   useFieldFilters,
   wrapFieldNameOnDot,
   FieldListGrouped,
@@ -30,8 +31,6 @@ import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
 import { ChildDragDropProvider, DragDrop } from '../../drag_drop';
-import { DataType } from '../../types';
-import { LensFieldIcon } from '../../shared_components';
 
 export type TextBasedDataPanelProps = DatasourceDataPanelProps<TextBasedPrivateState> & {
   data: DataPublicPluginStart;
@@ -128,7 +127,7 @@ export function TextBasedDataPanel({
             className={`lnsFieldItem lnsFieldItem--${field?.meta?.type}`}
             isActive={false}
             onClick={() => {}}
-            fieldIcon={<LensFieldIcon type={field?.meta.type as DataType} />}
+            fieldIcon={<FieldIcon type={field?.meta.type} />}
             fieldName={
               <EuiHighlight search={wrapFieldNameOnDot(fieldNameHighlight)}>
                 {wrapFieldNameOnDot(field.name)}

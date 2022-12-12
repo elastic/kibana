@@ -15,6 +15,7 @@ export type {
 } from '../common/types';
 export { FieldListGrouped, type FieldListGroupedProps } from './components/field_list';
 export { FieldListFilters, type FieldListFiltersProps } from './components/field_list_filters';
+export { FieldIcon, type FieldIconProps } from './components/field_icon';
 export type {
   FieldTopValuesBucketProps,
   FieldTopValuesBucketParams,
@@ -78,7 +79,6 @@ export {
 
 export {
   useFieldFilters,
-  getFieldType, // TODO: refactor Lens code to use this function
   type FieldFiltersParams,
   type FieldFiltersResult,
 } from './hooks/use_field_filters';
@@ -91,3 +91,4 @@ export {
 } from './hooks/use_query_subscriber';
 
 export { wrapFieldNameOnDot } from './utils/wrap_field_name_on_dot';
+export { getFieldType, getFieldIconType } from './utils/get_field_type';

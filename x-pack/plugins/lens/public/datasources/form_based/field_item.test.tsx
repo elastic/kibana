@@ -24,8 +24,8 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '@kbn/unified-field-list-plugin/public/services/field_stats';
+import { FieldIcon } from '@kbn/unified-field-list-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '../../../common';
-import { LensFieldIcon } from '../../shared_components';
 import { FieldStats, FieldVisualizeButton } from '@kbn/unified-field-list-plugin/public';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
@@ -209,7 +209,7 @@ describe('IndexPattern Field Item', () => {
 
     // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
     // which can't be seen, but shows in the text content
-    expect(wrapper.find(LensFieldIcon).first().prop('type')).toEqual('gauge');
+    expect(wrapper.find(FieldIcon).first().prop('type')).toEqual('gauge');
   });
 
   it('should render edit field button if callback is set', async () => {

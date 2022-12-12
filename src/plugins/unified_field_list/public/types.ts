@@ -31,6 +31,7 @@ export interface FieldListItem {
   displayName?: DataViewField['displayName'];
   count?: DataViewField['count'];
   timeSeriesMetric?: DataViewField['timeSeriesMetric'];
+  esTypes?: DataViewField['esTypes'];
 }
 
 export enum FieldsGroupNames {
