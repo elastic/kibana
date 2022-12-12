@@ -316,6 +316,8 @@ export async function getPackageFromSource(options: {
       } catch (err) {
         if (err instanceof RegistryResponseError && err.status === 404) {
           res = await Registry.getBundledArchive(pkgName, pkgVersion);
+        } else {
+          throw err;
         }
       }
     }
