@@ -8,20 +8,13 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isElasticsearchVersionConflictError } from '@kbn/fleet-plugin/server/errors/utils';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
+import { ApmSourceMap } from './create_apm_source_map_index';
 import { SourceMap } from './route';
 import { getEncodedContent, getSourceMapId } from './sourcemap_utils';
 
-export interface ApmSourceMapDoc {
-  created: string;
-  content: string;
-  content_sha256: string;
-  'file.path': string;
-  'service.name': string;
-  'service.version': string;
-}
-
-export async function createApmSourceMapDoc({
+export async function createApmSourceMap({
   internalESClient,
+  fleetId,
   created,
   sourceMapContent,
   bundleFilepath,
@@ -29,6 +22,7 @@ export async function createApmSourceMapDoc({
   serviceVersion,
 }: {
   internalESClient: ElasticsearchClient;
+  fleetId: string;
   created: string;
   sourceMapContent: SourceMap;
   bundleFilepath: string;
@@ -38,17 +32,17 @@ export async function createApmSourceMapDoc({
   const { contentEncoded, contentHash } = await getEncodedContent(
     sourceMapContent
   );
-  const doc: ApmSourceMapDoc = {
+  const doc: ApmSourceMap = {
+    fleet_id: fleetId,
     created,
     content: contentEncoded,
     content_sha256: contentHash,
-    'file.path': bundleFilepath,
-    'service.name': serviceName,
-    'service.version': serviceVersion,
+    file: { path: bundleFilepath },
+    service: { name: serviceName, version: serviceVersion },
   };
 
   try {
-    return await internalESClient.create<ApmSourceMapDoc>({
+    return await internalESClient.create<ApmSourceMap>({
       index: APM_SOURCE_MAP_INDEX,
       id: getSourceMapId({ serviceName, serviceVersion, bundleFilepath }),
       body: doc,

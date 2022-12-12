@@ -56,8 +56,7 @@ import {
 } from '../common/es_fields/apm';
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
-import { createApmSourceMapIndex } from './routes/source_maps/create_apm_source_map_index';
-import { migrateFleetSourceMapArtifacts } from './routes/source_maps/migrate_fleet_source_map_artifacts';
+import { scheduleFleetSourceMapArtifactsMigration } from './routes/source_maps/migrate_fleet_source_map_artifacts';
 
 export class APMPlugin
   implements
@@ -222,6 +221,17 @@ export class APMPlugin
       kibanaVersion: this.initContext.env.packageInfo.version,
     });
 
+    const fleetStartPromise = resourcePlugins.fleet?.start();
+    const taskManager = plugins.taskManager;
+
+    // create source map index and run migrations
+    scheduleFleetSourceMapArtifactsMigration({
+      coreStartPromise: getCoreStart(),
+      fleetStartPromise,
+      taskManager,
+      logger: this.logger,
+    });
+
     return {
       config$,
       getApmIndices: boundGetApmIndices,
@@ -269,18 +279,6 @@ export class APMPlugin
 
     // create custom link index without blocking start lifecycle
     createApmCustomLinkIndex({ client, logger });
-
-    // create source map index
-    createApmSourceMapIndex({ client, logger }).then(() => {
-      const internalESClient = core.elasticsearch.client.asInternalUser;
-
-      // migrate source map to new index (after it has been created)
-      migrateFleetSourceMapArtifacts({
-        fleet: plugins.fleet,
-        internalESClient,
-        logger,
-      });
-    });
 
     // TODO: remove in 9.0
     migrateLegacyAPMIndicesToSpaceAware({ coreStart: core, logger });

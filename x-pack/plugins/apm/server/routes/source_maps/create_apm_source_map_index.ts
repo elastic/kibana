@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { CoreStart, Logger } from '@kbn/core/server';
 import {
   createOrUpdateIndex,
   Mappings,
@@ -13,12 +13,13 @@ import {
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
 
 export async function createApmSourceMapIndex({
-  client,
+  coreStart,
   logger,
 }: {
-  client: ElasticsearchClient;
+  coreStart: CoreStart;
   logger: Logger;
 }) {
+  const client = coreStart.elasticsearch.client.asInternalUser;
   return createOrUpdateIndex({
     index: APM_SOURCE_MAP_INDEX,
     client,
@@ -30,6 +31,9 @@ export async function createApmSourceMapIndex({
 const mappings: Mappings = {
   dynamic: 'strict',
   properties: {
+    fleet_id: {
+      type: 'keyword',
+    },
     created: {
       type: 'date',
     },
@@ -38,19 +42,29 @@ const mappings: Mappings = {
     },
     content_sha256: {
       type: 'keyword',
-      index: false,
     },
     'file.path': {
       type: 'keyword',
-      index: false,
     },
     'service.name': {
       type: 'keyword',
-      index: false,
     },
     'service.version': {
       type: 'keyword',
-      index: false,
     },
   },
 };
+
+export interface ApmSourceMap {
+  fleet_id: string;
+  created: string;
+  content: string;
+  content_sha256: string;
+  file: {
+    path: string;
+  };
+  service: {
+    name: string;
+    version: string;
+  };
+}

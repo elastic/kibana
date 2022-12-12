@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Artifact } from '@kbn/fleet-plugin/server';
 import { getUnzippedArtifactBody } from '../fleet/source_maps';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
-import { ApmSourceMapDoc } from './create_apm_source_map_doc';
+import { ApmSourceMap } from './create_apm_source_map_index';
 import { getEncodedContent, getSourceMapId } from './sourcemap_utils';
 
 export async function bulkCreateApmSourceMapDocs({
@@ -20,7 +20,7 @@ export async function bulkCreateApmSourceMapDocs({
   internalESClient: ElasticsearchClient;
 }) {
   const docs = await Promise.all(
-    artifacts.map(async (artifact): Promise<ApmSourceMapDoc> => {
+    artifacts.map(async (artifact): Promise<ApmSourceMap> => {
       const { serviceName, serviceVersion, bundleFilepath, sourceMap } =
         await getUnzippedArtifactBody(artifact.body);
 
@@ -29,22 +29,27 @@ export async function bulkCreateApmSourceMapDocs({
       );
 
       return {
+        fleet_id: artifact.id,
         created: artifact.created,
         content: contentEncoded,
         content_sha256: contentHash,
-        'file.path': bundleFilepath,
-        'service.name': serviceName,
-        'service.version': serviceVersion,
+        file: {
+          path: bundleFilepath,
+        },
+        service: {
+          name: serviceName,
+          version: serviceVersion,
+        },
       };
     })
   );
 
-  return internalESClient.bulk<ApmSourceMapDoc>({
+  return internalESClient.bulk<ApmSourceMap>({
     body: docs.flatMap((doc) => {
       const id = getSourceMapId({
-        serviceName: doc['service.name'],
-        serviceVersion: doc['service.version'],
-        bundleFilepath: doc['file.path'],
+        serviceName: doc.service.name,
+        serviceVersion: doc.service.version,
+        bundleFilepath: doc.file.path,
       });
       return [{ create: { _index: APM_SOURCE_MAP_INDEX, _id: id } }, doc];
     }),

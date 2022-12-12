@@ -11,7 +11,7 @@ import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Artifact } from '@kbn/fleet-plugin/server';
 import {
   createFleetSourceMapArtifact,
-  deleteApmArtifact,
+  deleteFleetSourcemapArtifact,
   listSourceMapArtifacts,
   updateSourceMapsOnFleetPolicies,
   getCleanedBundleFilePath,
@@ -20,7 +20,9 @@ import {
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
-import { createApmSourceMapDoc } from './create_apm_source_map_doc';
+import { createApmSourceMap } from './create_apm_source_map_doc';
+import { deleteApmSourceMapDoc } from './delete_apm_sourcemap';
+import { runFleetSourcemapArtifactsMigration } from './migrate_fleet_source_map_artifacts';
 
 export const sourceMapRt = t.intersection([
   t.type({
@@ -116,7 +118,8 @@ const uploadSourceMapRoute = createApmServerRoute({
         });
 
         // sync source map to APM managed index
-        await createApmSourceMapDoc({
+        await createApmSourceMap({
+          fleetId: artifact.id,
           internalESClient,
           created: artifact.created,
           sourceMapContent,
@@ -161,7 +164,8 @@ const deleteSourceMapRoute = createApmServerRoute({
     const savedObjectsClient = await getInternalSavedObjectsClient(core.setup);
     try {
       if (fleetPluginStart) {
-        await deleteApmArtifact({ id, fleetPluginStart });
+        await deleteFleetSourcemapArtifact({ id, fleetPluginStart });
+        await deleteApmSourceMapDoc({ internalESClient, fleetId: id });
         await updateSourceMapsOnFleetPolicies({
           core,
           fleetPluginStart,
@@ -179,8 +183,27 @@ const deleteSourceMapRoute = createApmServerRoute({
   },
 });
 
+const migrateFleetArtifactsSourceMapRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/sourcemaps/migrate_fleet_artifacts',
+  options: { tags: ['access:apm', 'access:apm_write'] },
+  handler: async ({ plugins, core, logger }): Promise<void> => {
+    const fleet = await plugins.fleet?.start();
+    const coreStart = await core.start();
+    const internalESClient = coreStart.elasticsearch.client.asInternalUser;
+
+    if (fleet) {
+      return runFleetSourcemapArtifactsMigration({
+        fleet,
+        internalESClient,
+        logger,
+      });
+    }
+  },
+});
+
 export const sourceMapsRouteRepository = {
   ...listSourceMapRoute,
   ...uploadSourceMapRoute,
   ...deleteSourceMapRoute,
+  ...migrateFleetArtifactsSourceMapRoute,
 };

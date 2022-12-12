@@ -7,28 +7,84 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
-import type { Logger } from '@kbn/core/server';
 import { FleetArtifactsClient } from '@kbn/fleet-plugin/server/services';
+import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { CoreStart, Logger } from '@kbn/core/server';
 import { getApmArtifactClient } from '../fleet/source_maps';
 import { bulkCreateApmSourceMapDocs } from './bulk_create_apm_source_map_docs';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
-import { ApmSourceMapDoc } from './create_apm_source_map_doc';
+import {
+  ApmSourceMap,
+  createApmSourceMapIndex,
+} from './create_apm_source_map_index';
 
 const PER_PAGE = 2;
 
-export async function migrateFleetSourceMapArtifacts({
+export function scheduleFleetSourceMapArtifactsMigration({
+  coreStartPromise,
+  fleetStartPromise,
+  taskManager,
+  logger,
+}: {
+  coreStartPromise: Promise<CoreStart>;
+  fleetStartPromise?: Promise<FleetStartContract>;
+  taskManager?: TaskManagerSetupContract;
+  logger: Logger;
+}) {
+  if (!taskManager) {
+    return;
+  }
+
+  taskManager.registerTaskDefinitions({
+    migrateFleetSourcemapArtifacts: {
+      title: 'Migrate fleet source map artifacts',
+      description:
+        'Migrates fleet source map artifacts to `.apm-source-map` index',
+      timeout: '24h',
+      maxAttempts: 5,
+      maxConcurrency: 1,
+      createTaskRunner(context) {
+        // const { state } = context.taskInstance;
+        // console.log({ state });
+        return {
+          async run() {
+            logger.info('Fleet source map task was initiated');
+            const coreStart = await coreStartPromise;
+            const internalESClient =
+              coreStart.elasticsearch.client.asInternalUser;
+
+            const fleet = await fleetStartPromise;
+            if (!fleet) {
+              return;
+            }
+
+            await createApmSourceMapIndex({ coreStart, logger });
+            await runFleetSourcemapArtifactsMigration({
+              fleet,
+              internalESClient,
+              logger,
+            });
+            logger.info('Fleet source map task completed successfully');
+          },
+
+          async cancel() {
+            logger.info('Fleet source map task was cancelled');
+          },
+        };
+      },
+    },
+  });
+}
+
+export async function runFleetSourcemapArtifactsMigration({
   fleet,
   internalESClient,
   logger,
 }: {
-  fleet?: FleetStartContract;
+  fleet: FleetStartContract;
   internalESClient: ElasticsearchClient;
   logger: Logger;
 }) {
-  if (!fleet) {
-    return;
-  }
-
   try {
     const newestMigratedArtifact = await getLatestSourceMapDoc(
       internalESClient
@@ -124,6 +180,6 @@ async function getLatestSourceMapDoc(internalESClient: ElasticsearchClient) {
       query: { match_all: {} },
     },
   };
-  const res = await internalESClient.search<ApmSourceMapDoc>(params);
+  const res = await internalESClient.search<ApmSourceMap>(params);
   return res.hits.hits[0]?._source?.created;
 }

@@ -86,7 +86,7 @@ export async function createFleetSourceMapArtifact({
   });
 }
 
-export async function deleteApmArtifact({
+export async function deleteFleetSourcemapArtifact({
   id,
   fleetPluginStart,
 }: {
