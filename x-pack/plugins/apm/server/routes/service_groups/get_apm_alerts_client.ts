@@ -34,8 +34,8 @@ export async function getApmAlertsClient({
   return {
     search(searchParams: ApmAlertsClientSearchParams) {
       return alertsClient.find({
-        index: apmAlertsIndices.join(','),
         ...searchParams,
+        index: apmAlertsIndices.join(','),
       });
     },
   };
