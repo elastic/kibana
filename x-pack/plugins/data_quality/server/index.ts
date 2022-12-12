@@ -15,4 +15,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DataQualityPlugin(initializerContext);
 }
 
-export { DataQualityPluginSetup, DataQualityPluginStart } from './types';
+export type { DataQualityPluginSetup, DataQualityPluginStart } from './types';
