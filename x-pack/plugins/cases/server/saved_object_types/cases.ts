@@ -138,6 +138,12 @@ export const createCaseSavedObjectType = (
       },
       title: {
         type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 160,
+          },
+        },
       },
       status: {
         type: 'keyword',

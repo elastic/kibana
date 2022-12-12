@@ -494,6 +494,7 @@ enum SortFieldCase {
   closedAt = 'closed_at',
   createdAt = 'created_at',
   status = 'status',
+  title = 'title.keyword',
 }
 
 export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
@@ -506,6 +507,8 @@ export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
     case 'closedAt':
     case 'closed_at':
       return SortFieldCase.closedAt;
+    case 'title':
+      return SortFieldCase.title;
     default:
       return SortFieldCase.createdAt;
   }
