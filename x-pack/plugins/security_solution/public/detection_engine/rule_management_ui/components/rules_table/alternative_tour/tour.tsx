@@ -30,7 +30,7 @@ export const RulesPageTourComponent: React.FC<Props> = ({ children }) => {
   } = useKibana().services;
 
   const isGuidedOnboardingActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$('security', 'rules') ?? of(false),
+    guidedOnboardingApi?.isGuideStepActive$('siem', 'rules') ?? of(false),
     true
   );
 

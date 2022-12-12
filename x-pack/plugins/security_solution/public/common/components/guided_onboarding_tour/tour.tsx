@@ -38,7 +38,7 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
   const { guidedOnboardingApi } = useKibana().services.guidedOnboarding;
 
   const isRulesTourActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$('security', SecurityStepId.rules).pipe(
+    guidedOnboardingApi?.isGuideStepActive$('siem', SecurityStepId.rules).pipe(
       // if no result after 30s the observable will error, but the error handler will just emit false
       timeout(30000),
       catchError((error) => of(false))
@@ -46,7 +46,7 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     false
   );
   const isAlertsCasesTourActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$('security', SecurityStepId.alertsCases).pipe(
+    guidedOnboardingApi?.isGuideStepActive$('siem', SecurityStepId.alertsCases).pipe(
       // if no result after 30s the observable will error, but the error handler will just emit false
       timeout(30000),
       catchError((error) => of(false))
@@ -83,7 +83,7 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     }
     let ignore = false;
     const complete = async () => {
-      await guidedOnboardingApi.completeGuideStep('security', completeStep);
+      await guidedOnboardingApi.completeGuideStep('siem', completeStep);
       if (!ignore) {
         setCompleteStep(null);
         _setActiveStep(1);

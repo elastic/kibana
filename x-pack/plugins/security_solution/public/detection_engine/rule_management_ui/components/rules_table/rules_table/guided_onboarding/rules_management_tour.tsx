@@ -48,7 +48,7 @@ export const RulesManagementTour = () => {
   const { actions } = useRulesTableContext();
 
   const isRulesStepActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$('security', 'rules') ?? of(false),
+    guidedOnboardingApi?.isGuideStepActive$('siem', 'rules') ?? of(false),
     false
   );
 
@@ -105,7 +105,7 @@ export const RulesManagementTour = () => {
   // Synchronize the current "internal" tour step with the global one
   useEffect(() => {
     if (isRulesStepActive && tourStatus === GuidedOnboardingRulesStatus.completed) {
-      guidedOnboardingApi?.completeGuideStep('security', 'rules');
+      guidedOnboardingApi?.completeGuideStep('siem', 'rules');
     }
   }, [guidedOnboardingApi, isRulesStepActive, tourStatus]);
 
