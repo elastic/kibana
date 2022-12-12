@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
-import { ID, useNetworkDns } from './index';
+import { ID, useNetworkDns } from '.';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({

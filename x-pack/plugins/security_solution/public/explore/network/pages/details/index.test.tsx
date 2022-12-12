@@ -21,7 +21,7 @@ import {
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
-import { NetworkDetails } from './index';
+import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({

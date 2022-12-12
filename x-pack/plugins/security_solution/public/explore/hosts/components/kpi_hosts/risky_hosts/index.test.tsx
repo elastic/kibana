@@ -9,7 +9,7 @@ import React from 'react';
 
 import { render } from '@testing-library/react';
 
-import { RiskyHosts } from './index';
+import { RiskyHosts } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import type { KpiRiskScoreStrategyResponse } from '../../../../../../common/search_strategy';
 

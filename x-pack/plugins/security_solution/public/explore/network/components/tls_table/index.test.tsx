@@ -22,7 +22,7 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import { networkModel } from '../../store';
-import { TlsTable } from './index';
+import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
 jest.mock('../../../common/lib/kibana');

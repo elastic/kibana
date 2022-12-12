@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
-import { useNetworkHttp, ID } from './index';
+import { useNetworkHttp, ID } from '.';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import { networkModel } from '../../store';
 

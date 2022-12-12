@@ -8,7 +8,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 import { EnableRiskScore } from '../../../components/risk_score/enable_risk_score';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import type { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { HostRiskScoreTable } from '../../components/host_risk_score_table';
@@ -28,9 +27,11 @@ const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
 export const HostRiskScoreQueryTabBody = ({
   deleteQuery,
+  endDate: to,
   filterQuery,
-  skip,
   setQuery,
+  skip,
+  startDate: from,
   type,
 }: HostsComponentsQueryProps) => {
   const getHostRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
@@ -58,7 +59,6 @@ export const HostRiskScoreQueryTabBody = ({
   useEffect(() => {
     setQuerySkip(!toggleStatus);
   }, [toggleStatus]);
-  const { from, to } = useGlobalTime();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
   const {

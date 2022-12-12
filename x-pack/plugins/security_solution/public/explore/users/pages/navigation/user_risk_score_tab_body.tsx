@@ -9,7 +9,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 
 import { EnableRiskScore } from '../../../components/risk_score/enable_risk_score';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import type { UsersComponentsQueryProps } from './types';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -29,11 +28,13 @@ import { RiskScoresNoDataDetected } from '../../../components/risk_score/risk_sc
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
 export const UserRiskScoreQueryTabBody = ({
-  filterQuery,
-  skip,
-  setQuery,
-  type,
   deleteQuery,
+  endDate: to,
+  filterQuery,
+  setQuery,
+  skip,
+  startDate: from,
+  type,
 }: UsersComponentsQueryProps) => {
   const getUserRiskScoreSelector = useMemo(() => usersSelectors.userRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
@@ -53,7 +54,6 @@ export const UserRiskScoreQueryTabBody = ({
     }),
     [activePage, limit]
   );
-  const { from, to } = useGlobalTime();
 
   const { toggleStatus } = useQueryToggle(UserRiskScoreQueryId.USERS_BY_RISK);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);

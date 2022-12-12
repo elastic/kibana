@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
-import { ID, useNetworkTls } from './index';
+import { ID, useNetworkTls } from '.';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import { networkModel } from '../../store';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
