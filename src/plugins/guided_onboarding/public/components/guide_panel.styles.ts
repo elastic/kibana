@@ -23,10 +23,11 @@ export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
   flyoutOverrides: {
     flyoutContainer: css`
       top: 55px !important;
+      // Unsetting bottom and height default values to create auto height
       bottom: unset !important;
+      height: unset !important;
       right: calc(${euiTheme.size.s} + 128px); // Accounting for margin on button
       border-radius: 6px;
-      height: unset !important;
       animation: euiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1);
       box-shadow: none;
       max-height: 76vh;
