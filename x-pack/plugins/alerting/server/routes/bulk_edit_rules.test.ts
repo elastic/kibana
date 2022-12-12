@@ -97,6 +97,7 @@ describe('bulkEditInternalRulesRoute', () => {
       body: {
         total: 1,
         errors: [],
+        skipped: [],
         rules: [
           expect.objectContaining({
             id: '1',
