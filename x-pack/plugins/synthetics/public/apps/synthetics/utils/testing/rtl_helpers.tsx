@@ -366,3 +366,26 @@ const wrappedInClass = (element: HTMLElement | Element, classWrapper: string): b
 
 export const forMobileOnly = finderWithClassWrapper('hideForDesktop');
 export const forDesktopOnly = finderWithClassWrapper('hideForMobile');
+
+export const makeUptimePermissionsCore = (
+  permissions: Partial<{
+    'alerting:save': boolean;
+    configureSettings: boolean;
+    save: boolean;
+    show: boolean;
+  }>
+) => {
+  return {
+    application: {
+      capabilities: {
+        uptime: {
+          'alerting:save': true,
+          configureSettings: true,
+          save: true,
+          show: true,
+          ...permissions,
+        },
+      },
+    },
+  };
+};

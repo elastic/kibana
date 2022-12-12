@@ -27,7 +27,6 @@ import { createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 import * as module from '../../containers/query_toggle';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import type { LensAttributes } from '../visualization_actions/types';
 
 const from = '2019-06-15T06:00:00.000Z';
@@ -58,13 +57,7 @@ describe('Stat Items Component', () => {
   const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const testProps = {
     description: 'HOSTS',
     fields: [{ key: 'hosts', value: null, color: '#6092C0', icon: 'cross' }],

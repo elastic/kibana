@@ -420,6 +420,7 @@ const ExceptionsViewerComponent = ({
           onConfirm={handleConfirmExceptionFlyout}
           data-test-subj="addExceptionItemFlyout"
           showAlertCloseOptions
+          isNonTimeline={true}
         />
       )}
 

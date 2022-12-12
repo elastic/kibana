@@ -245,7 +245,7 @@ function LocationSelect({
   );
 }
 
-function LoadingState() {
+export function LoadingState() {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
       <EuiFlexItem grow={false}>
