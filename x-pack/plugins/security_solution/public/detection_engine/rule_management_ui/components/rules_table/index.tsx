@@ -8,6 +8,8 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import { RulesManagementTour } from './rules_table/guided_onboarding/rules_management_tour';
+import { useInitializeRulesTableSavedState } from './rules_table/use_initialize_rules_table_saved_state';
+import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_saved_state';
 import { RulesTables } from './rules_tables';
 import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 
@@ -21,6 +23,9 @@ import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
  */
 export const AllRules = React.memo(() => {
   const [activeTab, setActiveTab] = useState(AllRulesTabs.rules);
+
+  useInitializeRulesTableSavedState();
+  useSyncRulesTableSavedState();
 
   return (
     <>
