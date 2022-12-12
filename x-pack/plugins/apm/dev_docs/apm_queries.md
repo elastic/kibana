@@ -1,8 +1,8 @@
 ### Table of Contents
 
 - [Transactions](#transactions)
+- [Transactions in service inventory page](#transactions-in-service-inventory-page)
 - [System metrics](#system-metrics)
-- [Transaction breakdown metrics](#transaction-breakdown-metrics)
 - [Span breakdown metrics](#span-breakdown-metrics)
 - [Service destination metrics](#service-destination-metrics)
 - [Common filters](#common-filters)
