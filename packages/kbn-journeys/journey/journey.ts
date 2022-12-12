@@ -14,6 +14,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { FtrConfigProvider } from '@kbn/test';
 import { FtrProviderContext, KibanaServer } from '@kbn/ftr-common-functional-services';
 
+import { Client } from '@elastic/elasticsearch';
 import { Auth } from '../services/auth';
 import { InputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
@@ -28,6 +29,7 @@ export interface BaseStepCtx {
   inputDelays: InputDelays;
   kbnUrl: KibanaUrl;
   kibanaServer: KibanaServer;
+  esClient: Client;
 }
 
 export type AnyStep = Step<{}>;
@@ -119,6 +121,7 @@ export class Journey<CtxExt extends object> {
       getService('config'),
       getService('esArchiver'),
       getService('kibanaServer'),
+      getService('es'),
       new Auth(getService('config'), getService('log'), getService('kibanaServer')),
       this.config
     ).initMochaSuite(this.#steps);
