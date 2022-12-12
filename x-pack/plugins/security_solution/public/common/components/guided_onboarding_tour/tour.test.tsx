@@ -71,7 +71,7 @@ describe('useTourContext', () => {
         });
         await waitForNextUpdate();
         result.current.endTourStep(tourId);
-        expect(mockCompleteGuideStep).toHaveBeenCalledWith('security', tourId);
+        expect(mockCompleteGuideStep).toHaveBeenCalledWith('siem', tourId);
       });
     });
     it('activeStep is initially 1', () => {

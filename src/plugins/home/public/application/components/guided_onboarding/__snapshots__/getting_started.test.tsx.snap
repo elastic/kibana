@@ -61,76 +61,46 @@ exports[`getting started should render getting started component 1`] = `
         />
       </EuiFlexItem>
       <EuiFlexItem
-        key="guideCard-observability"
+        key="guideCard-kubernetes"
       >
         <GuideCard
           activateGuide={[Function]}
           addBasePath={[Function]}
           guides={Array []}
           isDarkTheme={false}
-          useCase="observability"
+          useCase="kubernetes"
         />
       </EuiFlexItem>
       <EuiFlexItem
-        key="linkCard-observabilityLink"
+        key="linkCard-infrastructure"
       >
-        <ObservabilityLinkCard
+        <InfrastructureLinkCard
           addBasePath={[Function]}
           isDarkTheme={false}
           navigateToApp={[MockFunction]}
         />
       </EuiFlexItem>
       <EuiFlexItem
-        key="guideCard-security"
+        key="guideCard-siem"
       >
-        <EuiFlexItem
-          key="guideCard-search"
-        >
-          <GuideCard
-            activateGuide={[Function]}
-            addBasePath={[Function]}
-            guides={Array []}
-            isDarkTheme={false}
-            useCase="search"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
-          key="guideCard-kubernetes"
-        >
-          <GuideCard
-            activateGuide={[Function]}
-            addBasePath={[Function]}
-            guides={Array []}
-            isDarkTheme={false}
-            useCase="kubernetes"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
-          key="linkCard-infrastructure"
-        >
-          <InfrastructureLinkCard
-            addBasePath={[Function]}
-            isDarkTheme={false}
-            navigateToApp={[MockFunction]}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
-          key="guideCard-siem"
-        >
-          <GuideCard
-            activateGuide={[Function]}
-            addBasePath={[Function]}
-            guides={Array []}
-            isDarkTheme={false}
-            useCase="siem"
-          />
-        </EuiFlexItem>
-      </EuiFlexGrid>
-      <EuiSpacer />
-      <EuiHorizontalRule />
-      <EuiSpacer />
-      <div
-        className="eui-textCenter"
+        <GuideCard
+          activateGuide={[Function]}
+          addBasePath={[Function]}
+          guides={Array []}
+          isDarkTheme={false}
+          useCase="siem"
+        />
+      </EuiFlexItem>
+    </EuiFlexGrid>
+    <EuiSpacer />
+    <EuiHorizontalRule />
+    <EuiSpacer />
+    <div
+      className="eui-textCenter"
+    >
+      <EuiLink
+        data-test-subj="onboarding--skipGuideLink"
+        onClick={[Function]}
       >
         I’d like to do something else (skip)
       </EuiLink>
