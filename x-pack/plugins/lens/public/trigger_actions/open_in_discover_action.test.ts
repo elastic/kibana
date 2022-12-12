@@ -6,12 +6,12 @@
  */
 
 import { DataViewsService } from '@kbn/data-views-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { DOC_TYPE } from '../../common';
 import { Embeddable } from '../embeddable';
 import { createOpenInDiscoverAction } from './open_in_discover_action';
+import type { DiscoverAppLocator } from './open_in_discover_helpers';
 
 describe('open in discover action', () => {
   describe('compatibility check', () => {
@@ -19,7 +19,7 @@ describe('open in discover action', () => {
       const embeddable = { type: 'NOT_LENS' } as IEmbeddable;
 
       const isCompatible = await createOpenInDiscoverAction(
-        {} as DiscoverStart,
+        {} as DiscoverAppLocator,
         {} as DataViewsService,
         true
       ).isCompatible({
@@ -37,7 +37,7 @@ describe('open in discover action', () => {
       // make sure it would work if we had access to Discover
       expect(
         await createOpenInDiscoverAction(
-          {} as DiscoverStart,
+          {} as DiscoverAppLocator,
           {} as DataViewsService,
           hasDiscoverAccess
         ).isCompatible({
@@ -49,7 +49,7 @@ describe('open in discover action', () => {
       hasDiscoverAccess = false;
       expect(
         await createOpenInDiscoverAction(
-          {} as DiscoverStart,
+          {} as DiscoverAppLocator,
           {} as DataViewsService,
           hasDiscoverAccess
         ).isCompatible({
@@ -65,7 +65,7 @@ describe('open in discover action', () => {
       embeddable.canViewUnderlyingData = jest.fn(() => Promise.resolve(false));
       expect(
         await createOpenInDiscoverAction(
-          {} as DiscoverStart,
+          {} as DiscoverAppLocator,
           {} as DataViewsService,
           true
         ).isCompatible({
@@ -79,7 +79,7 @@ describe('open in discover action', () => {
       embeddable.canViewUnderlyingData = jest.fn(() => Promise.resolve(true));
       expect(
         await createOpenInDiscoverAction(
-          {} as DiscoverStart,
+          {} as DiscoverAppLocator,
           {} as DataViewsService,
           true
         ).isCompatible({
@@ -106,16 +106,14 @@ describe('open in discover action', () => {
     };
 
     const discoverUrl = 'https://discover-redirect-url';
-    const discover = {
-      locator: {
-        getRedirectUrl: jest.fn(() => discoverUrl),
-      },
-    } as unknown as DiscoverStart;
+    const locator = {
+      getRedirectUrl: jest.fn(() => discoverUrl),
+    } as unknown as DiscoverAppLocator;
 
     globalThis.open = jest.fn();
 
     await createOpenInDiscoverAction(
-      discover,
+      locator,
       { get: () => ({ isTimeBased: () => true }) } as unknown as DataViewsService,
       true
     ).execute({
@@ -125,7 +123,7 @@ describe('open in discover action', () => {
     }>);
 
     expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
-    expect(discover.locator!.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgs);
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgs);
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
 });

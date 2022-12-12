@@ -394,10 +394,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:visualize:legacyPieChartsLibrary': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'visualization:visualize:legacyHeatmapChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -579,6 +575,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'enterpriseSearch:enableBehavioralAnalyticsSection': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'enterpriseSearch:enableEnginesSection': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

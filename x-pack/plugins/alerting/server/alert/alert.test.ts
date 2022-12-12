@@ -252,6 +252,7 @@ describe('updateLastScheduledActions()', () => {
           date: new Date().toISOString(),
           group: 'default',
         },
+        flappingHistory: [],
       },
     });
   });
@@ -340,11 +341,13 @@ describe('toJSON', () => {
             date: new Date(),
             group: 'default',
           },
+          flappingHistory: [false, true],
+          flapping: false,
         },
       }
     );
     expect(JSON.stringify(alertInstance)).toEqual(
-      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"}}}'
+      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"},"flappingHistory":[false,true],"flapping":false}}'
     );
   });
 });
@@ -358,6 +361,7 @@ describe('toRaw', () => {
           date: new Date(),
           group: 'default',
         },
+        flappingHistory: [false, true, true],
       },
     };
     const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
@@ -365,5 +369,92 @@ describe('toRaw', () => {
       raw
     );
     expect(alertInstance.toRaw()).toEqual(raw);
+  });
+
+  test('returns unserialised underlying partial meta if recovered is true', () => {
+    const raw = {
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+        flappingHistory: [false, true, true],
+        flapping: false,
+      },
+    };
+    const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
+      '1',
+      raw
+    );
+    expect(alertInstance.toRaw(true)).toEqual({
+      meta: {
+        flappingHistory: [false, true, true],
+        flapping: false,
+      },
+    });
+  });
+});
+
+describe('setFlappingHistory', () => {
+  test('sets flappingHistory', () => {
+    const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
+      '1',
+      {
+        meta: { flappingHistory: [false, true, true] },
+      }
+    );
+    alertInstance.setFlappingHistory([false]);
+    expect(alertInstance.getFlappingHistory()).toEqual([false]);
+    expect(alertInstance.toRaw()).toMatchInlineSnapshot(`
+      Object {
+        "meta": Object {
+          "flappingHistory": Array [
+            false,
+          ],
+        },
+        "state": Object {},
+      }
+    `);
+  });
+});
+
+describe('getFlappingHistory', () => {
+  test('correctly sets flappingHistory', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { flappingHistory: [false, false] },
+    });
+    expect(alert.getFlappingHistory()).toEqual([false, false]);
+  });
+});
+
+describe('setFlapping', () => {
+  test('sets flapping', () => {
+    const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
+      '1',
+      {
+        meta: { flapping: true },
+      }
+    );
+    alertInstance.setFlapping(false);
+    expect(alertInstance.getFlapping()).toEqual(false);
+    expect(alertInstance.toRaw()).toMatchInlineSnapshot(`
+      Object {
+        "meta": Object {
+          "flapping": false,
+          "flappingHistory": Array [],
+        },
+        "state": Object {},
+      }
+    `);
+  });
+});
+
+describe('getFlapping', () => {
+  test('correctly sets flapping', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { flapping: true },
+    });
+    expect(alert.getFlapping()).toEqual(true);
   });
 });

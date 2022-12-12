@@ -106,11 +106,13 @@ export const fleetUsagesSchema: RootSchema<any> = {
       },
     },
   },
-  agent_versions: {
+  agents_per_version: {
     type: 'array',
     items: {
-      type: 'keyword',
-      _meta: { description: 'The agent versions enrolled in this deployment.' },
+      properties: {
+        version: { type: 'keyword' },
+        count: { type: 'long' },
+      },
     },
   },
   agents_per_policy: {
@@ -163,6 +165,20 @@ export const fleetUsagesSchema: RootSchema<any> = {
           description: 'Count of agent last checkin status degraded',
         },
       },
+    },
+  },
+  agent_logs_top_errors: {
+    type: 'array',
+    items: {
+      type: 'text',
+      _meta: { description: 'Top messages from agent error logs' },
+    },
+  },
+  fleet_server_logs_top_errors: {
+    type: 'array',
+    items: {
+      type: 'text',
+      _meta: { description: 'Top messages from fleet server error logs' },
     },
   },
 };
