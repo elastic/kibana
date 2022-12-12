@@ -59,7 +59,7 @@ export const AlertsSummaryWidgetUI = ({
               {!!timeRangeTitle && (
                 <>
                   <EuiSpacer size="s" />
-                  <EuiText size="s" color="subdued" data-test-subj={'timeRangeTitle'}>
+                  <EuiText size="s" color="subdued" data-test-subj="timeRangeTitle">
                     {timeRangeTitle}
                   </EuiText>
                 </>
