@@ -8,12 +8,24 @@
 
 import React from 'react';
 import { FieldIcon as KbnFieldIcon, FieldIconProps as KbnFieldIconProps } from '@kbn/react-field';
+import { type DataViewField } from '@kbn/data-views-plugin/common';
+import { type FieldListItem } from '../../types';
+import { getFieldIconType } from '../../utils/get_field_type';
 
 export type FieldIconProps = KbnFieldIconProps;
 
 export const FieldIcon: React.FC<FieldIconProps> = ({ type, ...rest }) => {
   return <KbnFieldIcon type={normalizeFieldType(type)} {...rest} />;
 };
+
+export function getFieldIconProps<T extends FieldListItem = DataViewField>(
+  field: T
+): FieldIconProps {
+  return {
+    type: getFieldIconType(field),
+    scripted: field.scripted,
+  };
+}
 
 function normalizeFieldType(type: string) {
   if (type === 'histogram') {

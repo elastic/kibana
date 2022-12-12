@@ -10,6 +10,8 @@ import React, { useState } from 'react';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFilterButton,
   EuiIcon,
   EuiPopover,
@@ -17,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { FieldTypeForFilter } from '../../types';
 import { FIELD_TYPE_NAMES } from './field_type_names';
+import { FieldIcon } from '../field_icon';
 
 export interface FieldTypeFilterProps {
   selectedFieldTypes: FieldTypeForFilter[];
@@ -77,9 +80,12 @@ export const FieldTypeFilter: React.FC<FieldTypeFilterProps> = ({
               );
             }}
           >
-            <span className="lnsInnerIndexPatternDataPanel__filterTypeInner">
-              {`TODO icon`} {FIELD_TYPE_NAMES[type] ?? type}
-            </span>
+            <EuiFlexGroup responsive={false} gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <FieldIcon type={type} />
+              </EuiFlexItem>
+              <EuiFlexItem>{FIELD_TYPE_NAMES[type] ?? type}</EuiFlexItem>
+            </EuiFlexGroup>
           </EuiContextMenuItem>
         ))}
       />

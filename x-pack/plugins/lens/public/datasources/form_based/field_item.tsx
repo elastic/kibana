@@ -25,7 +25,7 @@ import {
   FieldPopoverHeader,
   FieldPopoverVisualize,
   FieldIcon,
-  getFieldIconType,
+  getFieldIconProps,
   wrapFieldNameOnDot,
 } from '@kbn/unified-field-list-plugin/public';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
@@ -151,7 +151,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
 
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
-  const lensFieldIcon = <FieldIcon type={getFieldIconType(field)} />;
+  const lensFieldIcon = <FieldIcon {...getFieldIconProps(field)} />;
   const lensInfoIcon = (
     <EuiIconTip
       anchorClassName="lnsFieldItem__infoIcon"

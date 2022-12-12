@@ -20,15 +20,6 @@
   border-bottom: 1px solid $euiColorLightestShade;
 }
 
-.lnsInnerIndexPatternDataPanel__filterTypeInner {
-  display: flex;
-  align-items: center;
-
-  .lnsFieldListPanel__fieldIcon { // TODO: refactor
-    margin-right: $euiSizeS;
-  }
-}
-
 .lnsChangeIndexPatternPopover {
   width: 320px;
 }

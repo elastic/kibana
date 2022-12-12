@@ -15,7 +15,7 @@ export type {
 } from '../common/types';
 export { FieldListGrouped, type FieldListGroupedProps } from './components/field_list';
 export { FieldListFilters, type FieldListFiltersProps } from './components/field_list_filters';
-export { FieldIcon, type FieldIconProps } from './components/field_icon';
+export { FieldIcon, type FieldIconProps, getFieldIconProps } from './components/field_icon';
 export type {
   FieldTopValuesBucketProps,
   FieldTopValuesBucketParams,
