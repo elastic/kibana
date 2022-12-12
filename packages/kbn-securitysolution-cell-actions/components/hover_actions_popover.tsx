@@ -123,6 +123,7 @@ export const HoverActionsPopover = React.memo<Props>(
             panelPaddingSize="none"
             repositionOnScroll
             ownFocus={false}
+            data-test-subj={'hoverActionsPopover'}
           >
             {showHoverContent ? (
               <div css={hoverContentWrapperCSS}>

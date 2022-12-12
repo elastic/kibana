@@ -10,20 +10,7 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { CellActions, CellActionsMode, CellActionsProps } from '.';
 import { CellActionsContextProvider } from './cell_actions_context';
-
-const makeActions = (actionsName: string, icon: string, order: number = 0) => ({
-  id: actionsName,
-  type: actionsName,
-  order,
-  getIconType: () => icon,
-  getDisplayName: () => actionsName,
-  getDisplayNameTooltip: () => actionsName,
-  isCompatible: () => Promise.resolve(true),
-  execute: () => {
-    alert(actionsName);
-    return Promise.resolve();
-  },
-});
+import { makeAction } from '../mocks/helpers';
 
 const TRIGGER_ID = 'testTriggerId';
 
@@ -31,11 +18,11 @@ const CONFIG = { field: 'name', value: '123', fieldType: 'text' };
 
 const getCompatibleActions = () =>
   Promise.resolve([
-    makeActions('Filter in', 'plusInCircle', 2),
-    makeActions('Filter out', 'minusInCircle', 3),
-    makeActions('Minimize', 'minimize', 1),
-    makeActions('Send email', 'email', 4),
-    makeActions('Pin field', 'pin', 5),
+    makeAction('Filter in', 'plusInCircle', 2),
+    makeAction('Filter out', 'minusInCircle', 3),
+    makeAction('Minimize', 'minimize', 1),
+    makeAction('Send email', 'email', 4),
+    makeAction('Pin field', 'pin', 5),
   ]);
 
 export default {

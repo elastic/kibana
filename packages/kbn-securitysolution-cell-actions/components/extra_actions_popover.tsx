@@ -13,7 +13,7 @@ import {
   EuiScreenReaderOnly,
   EuiWrappingPopover,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -25,7 +25,6 @@ const euiContextMenuItemCSS = css`
 `;
 
 interface ActionsPopOverProps {
-  anchorRef: React.RefObject<HTMLElement>;
   actionContext: CellActionExecutionContext;
   isOpen: boolean;
   closePopOver: () => void;
@@ -49,6 +48,7 @@ export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
     hasArrow={true}
     repositionOnScroll
     ownFocus
+    data-test-subj="extraActionsPopOver"
   >
     <ExtraActionsPopOverContent
       actions={actions}
@@ -81,6 +81,7 @@ export const ExtraActionsPopOverWithAnchor = ({
       repositionOnScroll
       ownFocus
       attachToAnchor={false}
+      data-test-subj="extraActionsPopOverWithAnchor"
     >
       <ExtraActionsPopOverContent
         actions={actions}
@@ -102,14 +103,10 @@ const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
   actionContext,
   actions,
   closePopOver,
-}) => (
-  <>
-    <EuiScreenReaderOnly>
-      <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field)}</p>
-    </EuiScreenReaderOnly>
-    <EuiContextMenuPanel
-      size="s"
-      items={actions.map((action) => (
+}) => {
+  const items = useMemo(
+    () =>
+      actions.map((action) => (
         <EuiContextMenuItem
           css={euiContextMenuItemCSS}
           key={action.id}
@@ -122,9 +119,17 @@ const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
         >
           {action.getDisplayName(actionContext)}
         </EuiContextMenuItem>
-      ))}
-    />
-  </>
-);
+      )),
+    [actionContext, actions, closePopOver]
+  );
+  return (
+    <>
+      <EuiScreenReaderOnly>
+        <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field)}</p>
+      </EuiScreenReaderOnly>
+      <EuiContextMenuPanel size="s" items={items} />
+    </>
+  );
+};
 
 ExtraActionsPopOverContent.displayName = 'ExtraActionsPopOverContent';

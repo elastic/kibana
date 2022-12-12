@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { ActionItem } from './cell_action_item';
 import { usePartitionActions } from '../hooks/actions';
@@ -31,21 +31,24 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopOver = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
   const closePopOver = useCallback(() => setIsPopoverOpen(false), []);
-  const popOverAnchorRef = useRef<HTMLElement>(null);
   const button = useMemo(
     () => <ExtraActionsButton onClick={togglePopOver} showTooltip={showTooltip} />,
     [togglePopOver, showTooltip]
   );
 
   return (
-    <span>
-      {visibleActions.map((action) => (
-        <ActionItem action={action} actionContext={actionContext} showTooltip={showTooltip} />
+    <span data-test-subj="inlineActions">
+      {visibleActions.map((action, index) => (
+        <ActionItem
+          key={`action-item-${index}`}
+          action={action}
+          actionContext={actionContext}
+          showTooltip={showTooltip}
+        />
       ))}
       {extraActions.length > 0 ? (
         <ExtraActionsPopOver
           actions={extraActions}
-          anchorRef={popOverAnchorRef}
           actionContext={actionContext}
           button={button}
           closePopOver={closePopOver}

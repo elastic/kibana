@@ -7,7 +7,6 @@
  */
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { chunk } from 'lodash/fp';
 import { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
@@ -15,8 +14,10 @@ export const partitionActions = (actions: Action[], showMoreActionsFrom: number)
   if (showMoreActionsFrom <= 1) return { extraActions: actions, visibleActions: [] };
   if (actions.length <= showMoreActionsFrom) return { extraActions: [], visibleActions: actions };
 
-  const [visibleActions, extraActions] = chunk(showMoreActionsFrom - 1, actions);
-  return { extraActions, visibleActions };
+  return {
+    visibleActions: actions.slice(0, showMoreActionsFrom - 1),
+    extraActions: actions.slice(showMoreActionsFrom - 1, actions.length),
+  };
 };
 
 export interface PartitionedActions {

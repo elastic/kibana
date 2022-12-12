@@ -106,7 +106,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
 
   if (mode === CellActionsMode.HOVER_POPOVER) {
     return (
-      <div ref={nodeRef}>
+      <div ref={nodeRef} data-test-subj={'cellActions'}>
         <HoverActionsPopover
           getActions={getActions}
           actionContext={actionContext}
@@ -121,7 +121,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
     );
   } else if (mode === CellActionsMode.ALWAYS_VISIBLE) {
     return (
-      <div ref={nodeRef}>
+      <div ref={nodeRef} data-test-subj={'cellActions'}>
         {children}
         <InlineActions
           getActions={getActions}

@@ -52,6 +52,7 @@ RUNTIME_DEPS = [
   "@npm//lodash",
   "@npm//@emotion/react",
   "@npm//@emotion/css",
+  "@npm//@testing-library/react",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -71,6 +72,8 @@ TYPES_DEPS = [
   "@npm//@types/lodash",
   "@npm//@emotion/react",
   "@npm//@emotion/css",
+  "@npm//@testing-library/react",
+  "@npm//@testing-library/jest-dom",
 ]
 
 jsts_transpiler(
