@@ -341,7 +341,7 @@
 >     // TODO: This test has been added to the `4.x` branch of the handlebars.js repo along with a code-fix,
 >     // but a new version of the handlebars package containing this fix has not yet been published to npm.
 >     //
->     // Before enabling this code, a new version of handlebars needs to be released and the corrosponding
+>     // Before enabling this code, a new version of handlebars needs to be released and the corresponding
 >     // updates needs to be applied to this implementation.
 >     //
 >     // See: https://github.com/handlebars-lang/handlebars.js/commit/30dbf0478109ded8f12bb29832135d480c17e367
@@ -703,20 +703,20 @@
 ---
 >       expect('03').toEqual(levelArg);
 >       expect('whee').toEqual(logArg);
-609,616c511,521
+609,610c511,513
 <     it('should output to info', function() {
 <       var called;
-< 
+---
+>     it('should output to info', function () {
+>       let calls = 0;
+>       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+612,616c515,521
 <       console.info = function(info) {
 <         equals('whee', info);
 <         called = true;
 <         console.info = $info;
 <         console.log = $log;
 ---
->     it('should output to info', function () {
->       let calls = 0;
->       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
-> 
 >       console.info = function (info) {
 >         expect('whee').toEqual(info);
 >         calls++;
@@ -746,19 +746,19 @@
 ---
 >       expectTemplate('{{log blah}}').withInput({ blah: 'whee' }).toCompileTo('');
 >       expect(calls).toEqual(callsExpected);
-631,637c536,543
+631,632c536,538
 <     it('should log at data level', function() {
 <       var called;
-< 
+---
+>     it('should log at data level', function () {
+>       let calls = 0;
+>       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+634,637c540,543
 <       console.error = function(log) {
 <         equals('whee', log);
 <         called = true;
 <         console.error = $error;
 ---
->     it('should log at data level', function () {
->       let calls = 0;
->       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
-> 
 >       console.error = function (log) {
 >         expect('whee').toEqual(log);
 >         calls++;
