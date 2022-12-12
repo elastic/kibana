@@ -26,7 +26,7 @@ import { mockAlertDetailsData } from './__mocks__';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineTabs } from '../../../../common/types/timeline';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
-import { useGetUserCasesPermissions } from '../../lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../lib/kibana';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 
 jest.mock('../../../timelines/components/timeline/body/renderers', () => {
@@ -43,6 +43,7 @@ jest.mock('../../../timelines/components/timeline/body/renderers', () => {
 
 jest.mock('../../lib/kibana');
 const originalKibanaLib = jest.requireActual('../../lib/kibana');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 // Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
 // The returned permissions object will indicate that the user does not have permissions by default
@@ -202,6 +203,30 @@ describe('EventDetails', () => {
     });
 
     it('render osquery tab', async () => {
+      const {
+        services: { osquery },
+      } = useKibanaMock();
+      if (osquery) {
+        jest.spyOn(osquery, 'fetchAllLiveQueries').mockReturnValue({
+          data: {
+            // @ts-expect-error - we don't need all the response details to test the functionality
+            data: {
+              items: [
+                {
+                  _id: 'testId',
+                  _index: 'testIndex',
+                  fields: {
+                    action_id: ['testActionId'],
+                    'queries.action_id': ['testQueryActionId'],
+                    'queries.query': ['select * from users'],
+                    '@timestamp': ['2022-09-08T18:16:30.256Z'],
+                  },
+                },
+              ],
+            },
+          },
+        });
+      }
       const newProps = {
         ...defaultProps,
         rawEventData: {

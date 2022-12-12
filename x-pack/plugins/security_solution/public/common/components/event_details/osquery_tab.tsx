@@ -131,7 +131,6 @@ export const useOsqueryTab = ({
               agentIds={agentIds}
               ruleName={ruleName}
               actionItems={actionItems}
-              alertId={alertId}
               ecsData={ecsData}
             />
           )}
