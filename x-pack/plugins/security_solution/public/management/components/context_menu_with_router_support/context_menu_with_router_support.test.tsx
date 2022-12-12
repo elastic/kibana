@@ -141,6 +141,16 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
     );
   });
 
+  it('should NOT navigate after clicked if navigation is disabled', () => {
+    render({ isNavigationDisabled: true });
+    clickMenuTriggerButton();
+    act(() => {
+      fireEvent.click(renderResult.getByTestId('testMenu-item-1'));
+    });
+
+    expect(appTestContext.coreStart.application.navigateToApp).not.toHaveBeenCalled();
+  });
+
   it('should display loading state', () => {
     render({ loading: true });
     clickMenuTriggerButton();
