@@ -301,8 +301,10 @@ export class ExecutionHandler<
     const executables = [];
 
     for (const action of this.rule.actions) {
-      if (this.isSummaryAction(action) && !this.isSummaryActionThrottled(action)) {
-        executables.push({ action });
+      if (this.isSummaryAction(action)) {
+        if (!this.isSummaryActionThrottled(action)) {
+          executables.push({ action });
+        }
         continue;
       }
       for (const [alertId, alert] of Object.entries(alerts)) {
