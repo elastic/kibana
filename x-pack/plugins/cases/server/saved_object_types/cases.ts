@@ -141,7 +141,6 @@ export const createCaseSavedObjectType = (
         fields: {
           keyword: {
             type: 'keyword',
-            ignore_above: 160,
           },
         },
       },
