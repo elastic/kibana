@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { buildEsQuery } from '@kbn/es-query';
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Filter, Query } from '@kbn/es-query';
 import type { AlertsBySeverityAgg, EntityFilter, ParsedSeverityData } from '../types';
 import type { ESBoolQuery } from '../../../../../../common/typed_json';
@@ -51,7 +52,7 @@ export const getAlertsBySeverityQuery = ({
   aggs: {
     statusBySeverity: {
       terms: {
-        field: 'kibana.alert.severity',
+        field: ALERT_SEVERITY,
       },
     },
   },
