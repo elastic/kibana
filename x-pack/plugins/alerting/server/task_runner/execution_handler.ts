@@ -341,7 +341,10 @@ export class ExecutionHandler<
   }
 
   private hasThrottle(action: RuleAction) {
-    return action.frequency?.throttle !== null;
+    if (!action.frequency) {
+      return false;
+    }
+    return action.frequency.throttle !== null;
   }
 
   private isSummaryActionThrottled(action: RuleAction) {
