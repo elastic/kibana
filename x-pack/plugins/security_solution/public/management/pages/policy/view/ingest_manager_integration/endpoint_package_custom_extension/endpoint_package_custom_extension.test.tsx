@@ -19,7 +19,6 @@ const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 describe('When displaying the EndpointPackageCustomExtension fleet UI extension', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
-  let http: AppContextTestRender['coreStart']['http'];
   const artifactCards = Object.freeze([
     'trustedApps-fleetCard',
     'eventFilters-fleetCard',
@@ -29,7 +28,6 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
 
   beforeEach(() => {
     const mockedTestContext = createFleetContextRendererMock();
-    http = mockedTestContext.coreStart.http;
     render = () => {
       renderResult = mockedTestContext.render(
         <EndpointPackageCustomExtension
