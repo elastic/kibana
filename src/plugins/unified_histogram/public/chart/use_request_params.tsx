@@ -9,12 +9,7 @@
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { useCallback, useMemo, useRef } from 'react';
-import { Observable } from 'rxjs';
-import type {
-  UnifiedHistogramInputMessage,
-  UnifiedHistogramRequestContext,
-  UnifiedHistogramServices,
-} from '../types';
+import type { UnifiedHistogramRequestContext, UnifiedHistogramServices } from '../types';
 import { useStableCallback } from './use_stable_callback';
 
 export const useRequestParams = ({
@@ -23,14 +18,12 @@ export const useRequestParams = ({
   filters: originalFilters,
   timeRange: originalTimeRange,
   request,
-  input$,
 }: {
   services: UnifiedHistogramServices;
   query?: Query | AggregateQuery;
   filters?: Filter[];
   timeRange?: TimeRange;
   request?: UnifiedHistogramRequestContext;
-  input$: Observable<UnifiedHistogramInputMessage>;
 }) => {
   const { data } = services;
 

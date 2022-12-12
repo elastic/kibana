@@ -12,7 +12,7 @@ import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
@@ -85,6 +85,14 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   disableAutoFetching?: boolean;
   /**
+   * Disable triggers for the Lens embeddable
+   */
+  disableTriggers?: LensEmbeddableInput['disableTriggers'];
+  /**
+   * Disabled action IDs for the Lens embeddable
+   */
+  disabledActions?: LensEmbeddableInput['disabledActions'];
+  /**
    * Input observable
    */
   input$?: UnifiedHistogramInput$;
@@ -117,6 +125,14 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Called when the histogram loading status changes
    */
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
+  /**
+   * Callback to pass to the Lens embeddable to handle filter changes
+   */
+  onFilter?: LensEmbeddableInput['onFilter'];
+  /**
+   * Callback to pass to the Lens embeddable to handle brush events
+   */
+  onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
 }
 
 export const UnifiedHistogramLayout = ({
@@ -134,6 +150,8 @@ export const UnifiedHistogramLayout = ({
   topPanelHeight,
   appendHitsCounter,
   disableAutoFetching,
+  disableTriggers,
+  disabledActions,
   input$,
   onTopPanelHeightChange,
   onEditVisualization,
@@ -142,6 +160,8 @@ export const UnifiedHistogramLayout = ({
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
+  onFilter,
+  onBrushEnd,
   children,
 }: UnifiedHistogramLayoutProps) => {
   const topPanelNode = useMemo(
@@ -199,6 +219,8 @@ export const UnifiedHistogramLayout = ({
           appendHitsCounter={appendHitsCounter}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
           disableAutoFetching={disableAutoFetching}
+          disableTriggers={disableTriggers}
+          disabledActions={disabledActions}
           input$={input$}
           onEditVisualization={onEditVisualization}
           onResetChartHeight={onResetChartHeight}
@@ -207,6 +229,8 @@ export const UnifiedHistogramLayout = ({
           onBreakdownFieldChange={onBreakdownFieldChange}
           onTotalHitsChange={onTotalHitsChange}
           onChartLoad={onChartLoad}
+          onFilter={onFilter}
+          onBrushEnd={onBrushEnd}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>{children}</InPortal>

@@ -14,7 +14,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { Observable } from 'rxjs';
 import {
@@ -41,8 +41,12 @@ export interface HistogramProps {
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
   lensAttributes: TypedLensByValueInput['attributes'];
+  disableTriggers?: LensEmbeddableInput['disableTriggers'];
+  disabledActions?: LensEmbeddableInput['disabledActions'];
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
+  onFilter?: LensEmbeddableInput['onFilter'];
+  onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
 }
 
 export function Histogram({
@@ -54,8 +58,12 @@ export function Histogram({
   getTimeRange,
   refetch$,
   lensAttributes: attributes,
+  disableTriggers,
+  disabledActions,
   onTotalHitsChange,
   onChartLoad,
+  onFilter,
+  onBrushEnd,
 }: HistogramProps) {
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
@@ -138,7 +146,13 @@ export function Histogram({
   return (
     <>
       <div data-test-subj="unifiedHistogramChart" data-time-range={timeRangeText} css={chartCss}>
-        <lens.EmbeddableComponent {...lensProps} />
+        <lens.EmbeddableComponent
+          {...lensProps}
+          disableTriggers={disableTriggers}
+          disabledActions={disabledActions}
+          onFilter={onFilter}
+          onBrushEnd={onBrushEnd}
+        />
       </div>
       {timeRangeDisplay}
     </>

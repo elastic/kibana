@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import { HitsCounter } from '../hits_counter';
@@ -57,6 +57,8 @@ export interface ChartProps {
   appendHitsCounter?: ReactElement;
   appendHistogram?: ReactElement;
   disableAutoFetching?: boolean;
+  disableTriggers?: LensEmbeddableInput['disableTriggers'];
+  disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
   onEditVisualization?: (lensAttributes: TypedLensByValueInput['attributes']) => void;
   onResetChartHeight?: () => void;
@@ -65,6 +67,8 @@ export interface ChartProps {
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
+  onFilter?: LensEmbeddableInput['onFilter'];
+  onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -83,6 +87,8 @@ export function Chart({
   appendHitsCounter,
   appendHistogram,
   disableAutoFetching,
+  disableTriggers,
+  disabledActions,
   input$: originalInput$,
   onEditVisualization: originalOnEditVisualization,
   onResetChartHeight,
@@ -91,6 +97,8 @@ export function Chart({
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
+  onFilter,
+  onBrushEnd,
 }: ChartProps) {
   const {
     showChartOptionsPopover,
@@ -130,7 +138,6 @@ export function Chart({
     filters: originalFilters,
     timeRange: originalTimeRange,
     request,
-    input$,
   });
 
   const refetch$ = useRefetch({
@@ -308,8 +315,12 @@ export function Chart({
               getTimeRange={getTimeRange}
               refetch$={refetch$}
               lensAttributes={lensAttributes}
+              disableTriggers={disableTriggers}
+              disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}
               onChartLoad={onChartLoad}
+              onFilter={onFilter}
+              onBrushEnd={onBrushEnd}
             />
           </section>
           {appendHistogram}

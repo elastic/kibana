@@ -41,7 +41,7 @@ export const useLensProps = ({
       },
       onLoad,
     }),
-    [attributes, getTimeRange, onLoad, request]
+    [attributes, getTimeRange, onLoad, request?.searchSessionId]
   );
 
   const [lensProps, setLensProps] = useState(getLensProps());
