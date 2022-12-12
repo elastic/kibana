@@ -13,7 +13,7 @@ const alertsGuideActiveState = {
     { id: 'rules', status: 'complete' },
     { id: 'alertsCases', status: 'active' },
   ],
-  guideId: 'security',
+  guideId: 'siem',
 };
 
 export const startAlertsCasesTour = () =>
