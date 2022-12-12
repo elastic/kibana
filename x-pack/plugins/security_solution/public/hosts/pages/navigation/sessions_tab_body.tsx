@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { TableId } from '../../../../common/types/timeline';
+import { TableId } from '../../../../common/types';
 import { SessionsView } from '../../../common/components/sessions_viewer';
 import { hostNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { useLicense } from '../../../common/hooks/use_license';

@@ -54,6 +54,10 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
+    if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
+    }
+
     if (
       (await doAnyChangesMatch([
         /^packages\/kbn-securitysolution-.*/,
@@ -63,6 +67,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
         /^x-pack\/test\/security_solution_cypress/,
+        /^fleet_packages\.json/, // It contains reference to prebuilt detection rules, we want to run security solution tests if it changes
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {

@@ -27,7 +27,6 @@ import { HostsTableType } from '../../store/model';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import { TableId } from '../../../../common/types';
 
 jest.mock('../../../common/lib/kibana', () => {
@@ -40,7 +39,6 @@ jest.mock('../../../common/lib/kibana', () => {
       services: {
         ...original.useKibana().services,
         cases: mockCasesContract(),
-        timelines: { getTGrid: jest.fn().mockReturnValue(() => <></>) },
       },
     }),
   };
@@ -89,7 +87,6 @@ const myStore = createStore(
     },
   },
   SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
   kibanaObservable,
   storage
 );

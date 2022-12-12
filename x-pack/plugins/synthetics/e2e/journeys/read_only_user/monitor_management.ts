@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { before, expect, journey, Page, step } from '@elastic/synthetics';
+import { expect, journey, Page, step } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { monitorManagementPageProvider } from '../../page_objects/monitor_management';
 
@@ -14,12 +14,8 @@ journey(
   async ({ page, params }: { page: Page; params: any }) => {
     const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
-    before(async () => {
-      await uptime.waitForLoadingToFinish();
-    });
-
     step('Go to monitor-management', async () => {
-      await uptime.navigateToMonitorManagement();
+      await uptime.navigateToMonitorManagement(false);
     });
 
     step('login to Kibana', async () => {

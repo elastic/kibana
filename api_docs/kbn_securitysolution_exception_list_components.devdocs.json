@@ -311,6 +311,39 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.generateLinkedRulesMenuItems",
+        "type": "Function",
+        "tags": [],
+        "label": "generateLinkedRulesMenuItems",
+        "description": [],
+        "signature": [
+          "({ dataTestSubj, linkedRules, securityLinkAnchorComponent, leftIcon, }: MenuItemLinkedRulesProps) => React.ReactElement<any, string | React.JSXElementConstructor<any>>[] | null"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/generate_linked_rules_menu_item/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-exception-list-components",
+            "id": "def-common.generateLinkedRulesMenuItems.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  dataTestSubj,\n  linkedRules,\n  securityLinkAnchorComponent,\n  leftIcon = '',\n}",
+            "description": [],
+            "signature": [
+              "MenuItemLinkedRulesProps"
+            ],
+            "path": "packages/kbn-securitysolution-exception-list-components/src/generate_linked_rules_menu_item/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
         "id": "def-common.HeaderMenu",
         "type": "Function",
         "tags": [],
