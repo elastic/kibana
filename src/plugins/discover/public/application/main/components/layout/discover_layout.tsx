@@ -268,6 +268,15 @@ export function DiscoverLayout({
   ]);
 
   return (
+    <div>
+      <img
+        alt="a bug"
+        src="https://cdn.fosstodon.org/media_attachments/files/109/457/732/762/243/633/original/604d156acd0ee413.png"
+      />
+    </div>
+  );
+
+  return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
       <h1
         id="savedSearchTitle"
