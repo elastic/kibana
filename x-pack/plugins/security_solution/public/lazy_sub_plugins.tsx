@@ -13,8 +13,6 @@
 import { Cases } from './cases';
 import { Detections } from './detections';
 import { Exceptions } from './exceptions';
-import { Hosts } from './explore/hosts';
-import { Users } from './explore/users';
 import { Explore } from './explore';
 import { Kubernetes } from './kubernetes';
 import { Overview } from './overview';
@@ -32,8 +30,6 @@ const subPluginClasses = {
   Detections,
   Cases,
   Exceptions,
-  Hosts,
-  Users,
   Explore,
   Kubernetes,
   Overview,
