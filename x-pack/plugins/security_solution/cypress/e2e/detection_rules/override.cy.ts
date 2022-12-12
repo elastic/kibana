@@ -17,8 +17,6 @@ import {
   RISK_SCORE,
   RULE_NAME,
   RULE_SWITCH,
-  RULES_ROW,
-  RULES_TABLE,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
 import {
@@ -50,7 +48,7 @@ import {
   TIMESTAMP_OVERRIDE_DETAILS,
 } from '../../screens/rule_details';
 
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { expectNumberOfRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import {
@@ -99,10 +97,7 @@ describe('Detection rules, override', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    const expectedNumberOfRules = 1;
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-    });
+    expectNumberOfRules(1);
 
     cy.get(RULE_NAME).should('have.text', this.rule.name);
     cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
