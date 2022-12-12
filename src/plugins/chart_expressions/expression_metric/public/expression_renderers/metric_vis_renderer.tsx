@@ -28,6 +28,7 @@ async function metricFilterable(
 ) {
   const column = getColumnByAccessor(dimensions.breakdownBy ?? dimensions.metric, table.columns);
   const colIndex = table.columns.indexOf(column!);
+  const value = column ? table.rows[0][column.id] : undefined;
   return Boolean(
     await hasCompatibleActions?.({
       name: 'filter',
@@ -37,6 +38,7 @@ async function metricFilterable(
             table,
             column: colIndex,
             row: 0,
+            value,
           },
         ],
       },
