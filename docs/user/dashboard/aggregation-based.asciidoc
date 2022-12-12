@@ -192,6 +192,29 @@ TIP: Aggregation-based panels support a maximum of three *Split series*.
 image:images/aggBased_barChartTutorial2_8.4.png[Bar chart with sample logs data]
 
 [float]
+[[edit-agg-based-visualizations-in-lens]]
+==== Open and edit aggregation-based visualizations in Lens
+
+When you open aggregation-based visualizations in *Lens*, all configuration options appear in the *Lens* visualization editor.
+
+You can open the following aggregation-based visualizations in *Lens*:
+
+* Area
+* Data table
+* Gauge
+* Goal
+* Heat map
+* Horizontal bar
+* Line
+* Metric
+* Pie
+* Vertical bar
+
+To get started, click *Edit visualization in Lens* in the toolbar.
+
+For more information, check out <<lens,Create visualizations with Lens>>.
+
+[float]
 [[save-the-aggregation-based-panel]]
 ===== Save and add the panel
 
