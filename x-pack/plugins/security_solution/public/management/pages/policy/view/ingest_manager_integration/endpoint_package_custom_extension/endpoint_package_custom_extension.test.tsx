@@ -10,8 +10,6 @@ import type { AppContextTestRender } from '../../../../../../common/mock/endpoin
 import { createFleetContextRendererMock, generateFleetPackageInfo } from '../mocks';
 import { EndpointPackageCustomExtension } from './endpoint_package_custom_extension';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
-import { exceptionsListAllHttpMocks } from '../../../../../mocks/exceptions_list_http_mocks';
-import { waitFor } from '@testing-library/react';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
 
@@ -48,64 +46,32 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
     useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
   });
 
-  it.each([...artifactCards])('should show artifact card: `%s`', async (artifactCardtestId) => {
+  it.each([...artifactCards])('should show artifact card: `%s`', (artifactCardtestId) => {
     render();
 
-    await waitFor(() => {
-      expect(renderResult.getByTestId(artifactCardtestId)).toBeTruthy();
-    });
+    expect(renderResult.getByTestId(artifactCardtestId)).toBeTruthy();
   });
 
-  it('should NOT show artifact cards if no endpoint management authz', async () => {
-    useUserPrivilegesMock.mockReturnValue({
-      ...getUserPrivilegesMockDefaultValue(),
-      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
-        canReadBlocklist: false,
-        canReadEventFilters: false,
-        canReadHostIsolationExceptions: false,
-        canReadTrustedApplications: false,
-        canIsolateHost: false,
-      }),
-    });
-
-    render();
-
-    await waitFor(() => {
-      artifactCards.forEach((artifactCard) => {
-        expect(renderResult.queryByTestId(artifactCard)).toBeNull();
+  it.each([...artifactCards])(
+    'should NOT show artifact card if no endpoint management authz: %s',
+    (artifactCardTestId) => {
+      useUserPrivilegesMock.mockReturnValue({
+        ...getUserPrivilegesMockDefaultValue(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canReadBlocklist: false,
+          canReadEventFilters: false,
+          canReadHostIsolationExceptions: false,
+          canDeleteHostIsolationExceptions: false,
+          canReadTrustedApplications: false,
+        }),
       });
+
+      render();
+
+      expect(renderResult.queryByTestId(artifactCardTestId)).toBeNull();
       expect(renderResult.queryByTestId('noPrivilegesPage')).toBeTruthy();
-    });
-  });
-
-  it('should show Host Isolations Exceptions if user has no authz but entries exist', async () => {
-    useUserPrivilegesMock.mockReturnValue({
-      ...getUserPrivilegesMockDefaultValue(),
-      endpointPrivileges: getEndpointPrivilegesInitialStateMock({ canIsolateHost: false }),
-    });
-    // Mock APIs
-    exceptionsListAllHttpMocks(http);
-    render();
-
-    await waitFor(() => {
-      expect(renderResult.getByTestId('hostIsolationExceptions-fleetCard')).toBeTruthy();
-    });
-  });
-
-  it('should NOT show Host Isolation Exceptions if user has no authz and no entries exist', async () => {
-    useUserPrivilegesMock.mockReturnValue({
-      ...getUserPrivilegesMockDefaultValue(),
-      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
-        canReadHostIsolationExceptions: false,
-      }),
-    });
-
-    render();
-
-    await waitFor(() => {
-      expect(renderResult.queryByTestId('hostIsolationExceptions-fleetCard')).toBeNull();
-    });
-  });
+    }
+  );
 
   it('should only show loading spinner if loading', () => {
     useUserPrivilegesMock.mockReturnValue({
