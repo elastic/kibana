@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  describe('inspector', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/147292
+  describe.skip('inspector', function describeIndexTests() {
     before(async function () {
       await PageObjects.visualize.initTests();
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
