@@ -7,23 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const enableDriftPrevention = i18n.translate('xpack.cloudDefend.enableDriftPrevention', {
-  defaultMessage: 'Enable drift prevention',
+export const enableControl = i18n.translate('xpack.cloudDefend.enableControl', {
+  defaultMessage: 'Enable BPF/LSM controls',
 });
 
-export const enableDriftPreventionHelp = i18n.translate(
-  'xpack.cloudDefend.enableDriftPreventionHelp',
-  {
-    defaultMessage:
-      'Drift prevention can be used to block executables from being created or modified in a container.',
-  }
-);
+export const enableControlHelp = i18n.translate('xpack.cloudDefend.enableControlHelp', {
+  defaultMessage:
+    'Enables BPF/LSM control mechanism, for use with FIM and container drift prevention.',
+});
 
-export const driftPreventionYaml = i18n.translate('xpack.cloudDefend.driftPreventionYaml', {
+export const controlYaml = i18n.translate('xpack.cloudDefend.controlYaml', {
   defaultMessage: 'Configuration yaml',
 });
 
-export const driftPreventionYamlHelp = i18n.translate('xpack.cloudDefend.driftPreventionYamlHelp', {
+export const controlYamlHelp = i18n.translate('xpack.cloudDefend.controlYamlHelp', {
   defaultMessage:
-    'Configure drift prevention by creating selectors, and responses below. To learn more click <here>',
+    'Configure BPF/LSM controls by creating selectors, and responses below. To learn more click <here>',
 });

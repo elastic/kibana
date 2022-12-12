@@ -9,7 +9,7 @@ import { EuiSwitch, EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle } fr
 import { CodeEditor, YamlLang } from '@kbn/kibana-react-plugin/public';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { monaco } from '@kbn/monaco';
-import { INPUT_DRIFT_PREVENTION } from '../../../common/constants';
+import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
 import { getInputFromPolicy } from '../../common/utils';
@@ -35,10 +35,10 @@ interface ConfigError {
 export const ConfigYamlView = ({ policy, onChange }: ConfigYamlViewwDeps) => {
   const styles = useStyles();
   const [errors, setErrors] = useState<ConfigError[]>([]);
-  const input = getInputFromPolicy(policy, INPUT_DRIFT_PREVENTION);
+  const input = getInputFromPolicy(policy, INPUT_CONTROL);
   const configuration = input?.vars?.configuration?.value || '';
   const currentModel = useConfigModel(configuration);
-  const driftPreventionEnabled = !!input?.enabled;
+  const controlEnabled = !!input?.enabled;
 
   useEffect(() => {
     const listener = editor.onDidChangeMarkers(([resource]) => {
@@ -86,23 +86,23 @@ export const ConfigYamlView = ({ policy, onChange }: ConfigYamlViewwDeps) => {
       <EuiFlexItem>
         <EuiSwitch
           data-test-subj="cloud-defend-drift-toggle"
-          label={i18n.enableDriftPrevention}
-          checked={driftPreventionEnabled}
+          label={i18n.enableControl}
+          checked={controlEnabled}
           onChange={onToggleEnabled}
         />
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="s">
-          {i18n.enableDriftPreventionHelp}
+          {i18n.enableControlHelp}
         </EuiText>
       </EuiFlexItem>
-      {driftPreventionEnabled && (
+      {controlEnabled && (
         <EuiFlexItem>
           <EuiTitle size="xs">
-            <h4>{i18n.driftPreventionYaml}</h4>
+            <h4>{i18n.controlYaml}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
-            {i18n.driftPreventionYamlHelp}
+            {i18n.controlYamlHelp}
           </EuiText>
           <EuiSpacer size="s" />
           <div css={styles.yamlEditor}>

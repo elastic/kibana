@@ -6,11 +6,7 @@
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import {
-  INTEGRATION_PACKAGE_NAME,
-  INPUT_DRIFT_PREVENTION,
-  ALERTS_DATASET,
-} from '../../../common/constants';
+import { INTEGRATION_PACKAGE_NAME, INPUT_CONTROL, ALERTS_DATASET } from '../../../common/constants';
 
 const MOCK_YAML_CONFIGURATION = `
 selectors:
@@ -49,7 +45,7 @@ export const getCloudDefendNewPolicyMock = (): NewPackagePolicy => ({
   enabled: true,
   inputs: [
     {
-      type: INPUT_DRIFT_PREVENTION,
+      type: INPUT_CONTROL,
       policy_template: INTEGRATION_PACKAGE_NAME,
       enabled: true,
       vars: {
@@ -91,7 +87,7 @@ export const getCloudDefendPolicyMock = (): PackagePolicy => ({
   enabled: true,
   inputs: [
     {
-      type: INPUT_DRIFT_PREVENTION,
+      type: INPUT_CONTROL,
       policy_template: INTEGRATION_PACKAGE_NAME,
       enabled: true,
       vars: {
