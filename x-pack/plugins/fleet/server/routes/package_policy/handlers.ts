@@ -54,8 +54,8 @@ const getAllowedPackageNamesMessage = (allowedPackageNames: string[]): string =>
  * @param data
  * @param allowedPackageNames
  */
-const validatePackagePolicyDataIsScoppedToAllowedPackageNames = (
-  data: Array<PackagePolicy | NewPackagePolicy>,
+const validatePackagePolicyDataIsScopedToAllowedPackageNames = (
+  data: PackagePolicy[],
   allowedPackageNames: string[]
 ): string | undefined => {
   if (!data.length) {
@@ -95,7 +95,7 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
 
     // specific to package-level RBAC
     if (limitedToPackages && limitedToPackages.length) {
-      const validationResult = validatePackagePolicyDataIsScoppedToAllowedPackageNames(
+      const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
         items,
         limitedToPackages
       );
@@ -138,7 +138,7 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
     const body: BulkGetPackagePoliciesResponse = { items: items ?? [] };
 
     if (limitedToPackages && limitedToPackages.length) {
-      const validationResult = validatePackagePolicyDataIsScoppedToAllowedPackageNames(
+      const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
         body.items,
         limitedToPackages
       );
@@ -178,7 +178,7 @@ export const getOnePackagePolicyHandler: FleetRequestHandler<
 
     if (packagePolicy) {
       if (limitedToPackages && limitedToPackages.length) {
-        const validationResult = validatePackagePolicyDataIsScoppedToAllowedPackageNames(
+        const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
           [packagePolicy],
           limitedToPackages
         );
