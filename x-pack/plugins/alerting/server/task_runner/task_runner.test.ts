@@ -667,6 +667,7 @@ describe('Task Runner', () => {
 
       rulesClient.getAlertFromRaw.mockReturnValue({
         ...(mockedRuleTypeSavedObject as Rule),
+        notifyWhen: 'onThrottleInterval',
         throttle: '1d',
       });
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
