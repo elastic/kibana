@@ -1,4 +1,4 @@
-1,24c1,17
+1,19c1,6
 < describe('whitespace control', function() {
 <   it('should strip whitespace around mustache calls', function() {
 <     var hash = { foo: 'bar<' };
@@ -18,11 +18,6 @@
 <     expectTemplate(' {{~&foo~}} ')
 <       .withInput(hash)
 <       .toCompileTo('bar<');
-< 
-<     expectTemplate(' {{~{foo}~}} ')
-<       .withInput(hash)
-<       .toCompileTo('bar<');
-< 
 ---
 > /*
 >  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
@@ -30,9 +25,13 @@
 >  * Elasticsearch B.V. licenses this file to you under the MIT License.
 >  * See `packages/kbn-handlebars/LICENSE` for more information.
 >  */
-> 
+21,23c8
+<     expectTemplate(' {{~{foo}~}} ')
+<       .withInput(hash)
+<       .toCompileTo('bar<');
+---
 > import { expectTemplate } from '../__jest__/test_bench';
-> 
+24a10,17
 > describe('whitespace control', () => {
 >   it('should strip whitespace around mustache calls', () => {
 >     const hash = { foo: 'bar<' };
@@ -41,7 +40,7 @@
 >     expectTemplate(' {{foo~}} ').withInput(hash).toCompileTo(' bar&lt;');
 >     expectTemplate(' {{~&foo~}} ').withInput(hash).toCompileTo('bar<');
 >     expectTemplate(' {{~{foo}~}} ').withInput(hash).toCompileTo('bar<');
-28,46c21,28
+28,42c21,23
 <   describe('blocks', function() {
 <     it('should strip whitespace around simple block calls', function() {
 <       var hash = { foo: 'bar<' };
@@ -57,15 +56,15 @@
 <       expectTemplate(' {{~#if foo}} bar {{~/if}} ')
 <         .withInput(hash)
 <         .toCompileTo(' bar ');
-< 
-<       expectTemplate(' {{#if foo}} bar {{/if}} ')
-<         .withInput(hash)
-<         .toCompileTo('  bar  ');
 ---
 >   describe('blocks', () => {
 >     it('should strip whitespace around simple block calls', () => {
 >       const hash = { foo: 'bar<' };
-> 
+44,46c25,28
+<       expectTemplate(' {{#if foo}} bar {{/if}} ')
+<         .withInput(hash)
+<         .toCompileTo('  bar  ');
+---
 >       expectTemplate(' {{~#if foo~}} bar {{~/if~}} ').withInput(hash).toCompileTo('bar');
 >       expectTemplate(' {{#if foo~}} bar {{/if~}} ').withInput(hash).toCompileTo(' bar ');
 >       expectTemplate(' {{~#if foo}} bar {{~/if}} ').withInput(hash).toCompileTo(' bar ');
@@ -87,7 +86,7 @@
 <       ).toCompileTo('bar');
 ---
 >       expectTemplate(' \n\n{{~^if foo~}} \n\nbar \n\n{{~/if~}}\n\n ').toCompileTo('bar');
-71,80c47,48
+71,88c47,48
 <     it('should strip whitespace around complex block calls', function() {
 <       var hash = { foo: 'bar<' };
 < 
@@ -98,34 +97,34 @@
 <       expectTemplate('{{#if foo~}} bar {{^~}} baz {{/if}}')
 <         .withInput(hash)
 <         .toCompileTo('bar ');
----
->     it('should strip whitespace around complex block calls', () => {
->       const hash = { foo: 'bar<' };
-82,84c50,54
+< 
 <       expectTemplate('{{#if foo}} bar {{~^~}} baz {{~/if}}')
 <         .withInput(hash)
 <         .toCompileTo(' bar');
+< 
+<       expectTemplate('{{#if foo}} bar {{^~}} baz {{/if}}')
+<         .withInput(hash)
+<         .toCompileTo(' bar ');
+---
+>     it('should strip whitespace around complex block calls', () => {
+>       const hash = { foo: 'bar<' };
+90,92c50,54
+<       expectTemplate('{{#if foo~}} bar {{~else~}} baz {{~/if}}')
+<         .withInput(hash)
+<         .toCompileTo('bar');
 ---
 >       expectTemplate('{{#if foo~}} bar {{~^~}} baz {{~/if}}').withInput(hash).toCompileTo('bar');
 >       expectTemplate('{{#if foo~}} bar {{^~}} baz {{/if}}').withInput(hash).toCompileTo('bar ');
 >       expectTemplate('{{#if foo}} bar {{~^~}} baz {{~/if}}').withInput(hash).toCompileTo(' bar');
 >       expectTemplate('{{#if foo}} bar {{^~}} baz {{/if}}').withInput(hash).toCompileTo(' bar ');
 >       expectTemplate('{{#if foo~}} bar {{~else~}} baz {{~/if}}').withInput(hash).toCompileTo('bar');
-86,90c56
-<       expectTemplate('{{#if foo}} bar {{^~}} baz {{/if}}')
-<         .withInput(hash)
-<         .toCompileTo(' bar ');
-< 
-<       expectTemplate('{{#if foo~}} bar {{~else~}} baz {{~/if}}')
----
->       expectTemplate('\n\n{{~#if foo~}} \n\nbar \n\n{{~^~}} \n\nbaz \n\n{{~/if~}}\n\n')
-94,102c60
+94,96c56
 <       expectTemplate(
 <         '\n\n{{~#if foo~}} \n\nbar \n\n{{~^~}} \n\nbaz \n\n{{~/if~}}\n\n'
 <       )
-<         .withInput(hash)
-<         .toCompileTo('bar');
-< 
+---
+>       expectTemplate('\n\n{{~#if foo~}} \n\nbar \n\n{{~^~}} \n\nbaz \n\n{{~/if~}}\n\n')
+100,102c60
 <       expectTemplate(
 <         '\n\n{{~#if foo~}} \n\n{{{foo}}} \n\n{{~^~}} \n\nbaz \n\n{{~/if~}}\n\n'
 <       )
