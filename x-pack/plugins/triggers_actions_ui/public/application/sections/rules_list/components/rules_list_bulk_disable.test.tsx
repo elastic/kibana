@@ -154,7 +154,7 @@ describe.skip('Rules list bulk disable', () => {
     wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
   });
 
-  it('can bulk disable', async () => {
+  it.skip('can bulk disable', async () => {
     wrapper.find('button[data-test-subj="bulkDisable"]').first().simulate('click');
 
     await act(async () => {
@@ -175,6 +175,10 @@ describe.skip('Rules list bulk disable', () => {
         ids: [],
       })
     );
+    expect(
+      wrapper.find('[data-test-subj="checkboxSelectRow-1"]').first().prop('checked')
+    ).toBeFalsy();
+    expect(wrapper.find('button[data-test-subj="bulkDisable"]').exists()).toBeFalsy();
   });
 
   describe('Toast', () => {

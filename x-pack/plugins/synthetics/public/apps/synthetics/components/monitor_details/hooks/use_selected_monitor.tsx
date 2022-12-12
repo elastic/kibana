@@ -15,6 +15,7 @@ import {
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
   selectorMonitorDetailsState,
+  selectorError,
 } from '../../../state';
 
 export const useSelectedMonitor = () => {
@@ -26,6 +27,7 @@ export const useSelectedMonitor = () => {
     () => monitorsList.find((monitor) => monitor[ConfigKey.CONFIG_ID] === monitorId) ?? null,
     [monitorId, monitorsList]
   );
+  const error = useSelector(selectorError);
   const { lastRefresh, refreshInterval } = useSyntheticsRefreshContext();
   const { syntheticsMonitor, syntheticsMonitorLoading, syntheticsMonitorDispatchedAt } =
     useSelector(selectorMonitorDetailsState);
@@ -50,8 +52,10 @@ export const useSelectedMonitor = () => {
   useEffect(() => {
     // Only perform periodic refresh if the last dispatch was earlier enough
     if (
+      monitorId &&
       !syntheticsMonitorLoading &&
       !monitorListLoading &&
+      syntheticsMonitorDispatchedAt > 0 &&
       Date.now() - syntheticsMonitorDispatchedAt > refreshInterval
     ) {
       dispatch(getMonitorAction.get({ monitorId }));
@@ -69,5 +73,6 @@ export const useSelectedMonitor = () => {
   return {
     monitor: availableMonitor,
     loading: syntheticsMonitorLoading || monitorListLoading,
+    error,
   };
 };

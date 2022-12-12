@@ -13186,7 +13186,11 @@
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
+            "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
           },
           {
             "plugin": "alerting",
@@ -13218,11 +13222,7 @@
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
+            "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
             "plugin": "canvas",
@@ -17081,6 +17081,29 @@
                 "path": "src/plugins/discover/server/ui_settings.ts"
               }
             ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.UiSettingsParams.scope",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scope",
+            "description": [
+              "\nScope of the setting. `Global` denotes a setting globally available across namespaces. `Namespace` denotes a setting\nscoped to a namespace. The default value is 'namespace'"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsScope",
+                "text": "UiSettingsScope"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -17724,7 +17747,7 @@
             "section": "def-common.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; searchable?: boolean | undefined; deepLinks?: ",
+          " | undefined; tooltip?: string | undefined; searchable?: boolean | undefined; deepLinks?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -17740,7 +17763,7 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
+          " | undefined; defaultPath?: string | undefined; }"
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
@@ -18247,7 +18270,15 @@
             "section": "def-common.DeprecationSettings",
             "text": "DeprecationSettings"
           },
-          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; }"
+          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; scope?: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsScope",
+            "text": "UiSettingsScope"
+          },
+          " | undefined; }"
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,
@@ -49019,7 +49050,11 @@
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
+            "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
           },
           {
             "plugin": "alerting",
@@ -49051,11 +49086,7 @@
           },
           {
             "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts"
+            "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
             "plugin": "canvas",
@@ -59390,6 +59421,29 @@
                 "path": "src/plugins/discover/server/ui_settings.ts"
               }
             ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.UiSettingsParams.scope",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scope",
+            "description": [
+              "\nScope of the setting. `Global` denotes a setting globally available across namespaces. `Namespace` denotes a setting\nscoped to a namespace. The default value is 'namespace'"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsScope",
+                "text": "UiSettingsScope"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -59426,6 +59480,26 @@
             "path": "packages/core/ui-settings/core-ui-settings-server/src/request_handler_context.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.UiSettingsRequestHandlerContext.globalClient",
+            "type": "Object",
+            "tags": [],
+            "label": "globalClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -59448,7 +59522,7 @@
             "tags": [],
             "label": "register",
             "description": [
-              "\nSets settings with default values for the uiSettings."
+              "\nSets settings with default values for the uiSettings"
             ],
             "signature": [
               "(settings: Record<string, ",
@@ -59468,6 +59542,56 @@
               {
                 "parentPluginId": "core",
                 "id": "def-server.UiSettingsServiceSetup.register.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "settings",
+                "description": [],
+                "signature": [
+                  "Record<string, ",
+                  {
+                    "pluginId": "@kbn/core-ui-settings-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                    "section": "def-common.UiSettingsParams",
+                    "text": "UiSettingsParams"
+                  },
+                  "<unknown>>"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.UiSettingsServiceSetup.registerGlobal",
+            "type": "Function",
+            "tags": [],
+            "label": "registerGlobal",
+            "description": [
+              "\nSets settings with default values for the global uiSettings"
+            ],
+            "signature": [
+              "(settings: Record<string, ",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsParams",
+                "text": "UiSettingsParams"
+              },
+              "<unknown>>) => void"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.UiSettingsServiceSetup.registerGlobal.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "settings",
@@ -59539,6 +59663,61 @@
               {
                 "parentPluginId": "core",
                 "id": "def-server.UiSettingsServiceStart.asScopedToClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObjectsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.UiSettingsServiceStart.globalAsScopedToClient",
+            "type": "Function",
+            "tags": [],
+            "label": "globalAsScopedToClient",
+            "description": [
+              "\nCreates a global {@link IUiSettingsClient} with provided *scoped* saved objects client.\n\nThis should only be used in the specific case where the client needs to be accessed\nfrom outside of the scope of a {@link RequestHandler}.\n"
+            ],
+            "signature": [
+              "(savedObjectsClient: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.UiSettingsServiceStart.globalAsScopedToClient.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "savedObjectsClient",
@@ -64088,7 +64267,15 @@
             "section": "def-common.DeprecationSettings",
             "text": "DeprecationSettings"
           },
-          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; }"
+          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; scope?: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsScope",
+            "text": "UiSettingsScope"
+          },
+          " | undefined; }"
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,

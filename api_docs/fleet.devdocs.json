@@ -9058,7 +9058,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"active\" | \"inactive\""
+              "\"inactive\" | \"active\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -12744,7 +12744,7 @@
             "label": "data_stream",
             "description": [],
             "signature": [
-              "{ dataset: string; type: string; elasticsearch?: { privileges?: { indices?: string[] | undefined; } | undefined; index_mode?: string | undefined; } | undefined; }"
+              "{ dataset: string; type: string; elasticsearch?: { privileges?: { indices?: string[] | undefined; } | undefined; index_mode?: string | undefined; source_mode?: string | undefined; } | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
@@ -15143,6 +15143,21 @@
         "description": [],
         "signature": [
           "\"apm\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\"kspm\""
         ],
         "path": "x-pack/plugins/fleet/common/constants/epm.ts",
         "deprecated": false,
@@ -17620,6 +17635,22 @@
             "type": "Function",
             "tags": [],
             "label": "getRegenerateServiceTokenPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.appRoutesService.postHealthCheckPath",
+            "type": "Function",
+            "tags": [],
+            "label": "postHealthCheckPath",
             "description": [],
             "signature": [
               "() => string"

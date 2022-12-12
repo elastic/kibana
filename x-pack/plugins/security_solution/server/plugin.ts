@@ -31,6 +31,10 @@ import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
 import {
+  securityGuideId,
+  securityGuideConfig,
+} from '../common/guided_onboarding/security_guide_config';
+import {
   createEqlAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
@@ -56,6 +60,7 @@ import {
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
+import { registerEndpointSuggestionsRoutes } from './endpoint/routes/suggestions';
 import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from './endpoint/types';
@@ -102,6 +107,8 @@ import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
+import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
+import { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../common/endpoint/constants';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -301,7 +308,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       previewRuleDataClient,
       this.telemetryReceiver
     );
+
     registerEndpointRoutes(router, endpointContext);
+    registerEndpointSuggestionsRoutes(
+      router,
+      plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
+      endpointContext
+    );
     registerLimitedConcurrencyRoutes(core);
     registerPolicyRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
@@ -349,6 +362,15 @@ export class Plugin implements ISecuritySolutionPlugin {
         config,
       });
 
+      const endpointFieldsStrategy = endpointFieldsProvider(
+        this.endpointAppContextService,
+        depsStart.data.indexPatterns
+      );
+      plugins.data.search.registerSearchStrategy(
+        ENDPOINT_FIELDS_SEARCH_STRATEGY,
+        endpointFieldsStrategy
+      );
+
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
         endpointContext,
@@ -379,6 +401,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     featureUsageService.setup(plugins.licensing);
+
+    /**
+     * Register a config for the security guide
+     */
+    plugins.guidedOnboarding.registerGuideConfig(securityGuideId, securityGuideConfig);
 
     return {};
   }
