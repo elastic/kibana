@@ -11,18 +11,17 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
-import { WithCopyToClipboard } from '../../clipboard/with_copy_to_clipboard';
 import { HoverActionComponentProps } from './types';
-import { COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME } from '../../clipboard';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { COPY_TO_CLIPBOARD } from '../../t_grid/body/translations';
-import { SUCCESS_TOAST_TITLE } from '../../clipboard/translations';
+import { COPY_TO_CLIPBOARD, SUCCESS_TOAST_TITLE } from './translations';
+import { WithCopyToClipboard } from '../../clipboard/with_copy_to_clipboard';
 
 export const FIELD = i18n.translate('xpack.timelines.hoverActions.fieldLabel', {
   defaultMessage: 'Field',
 });
 
 export const COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT = 'c';
+export const COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME = 'copy-to-clipboard';
 
 export interface CopyProps extends HoverActionComponentProps {
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
