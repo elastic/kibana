@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
+import { AttributesTypeUser, CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
@@ -473,6 +473,47 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               uid: 'abc',
             },
           ]);
+        });
+      });
+    });
+
+    describe('8.7.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_severity.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_severity.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      describe('severity', () => {
+        it('severity string labels are converted to matching number', async () => {
+          const caseSeverityLow = await getCase({
+            supertest,
+            caseId: '063d5820-1284-11ed-81af-63a2bdfb2bf6',
+          });
+          const caseSeverityMedium = await getCase({
+            supertest,
+            caseId: '063d5820-1284-11ed-81af-63a2bdfb2bf7',
+          });
+          const caseSeverityHigh = await getCase({
+            supertest,
+            caseId: '063d5820-1284-11ed-81af-63a2bdfb2bf8',
+          });
+          const caseSeverityCritical = await getCase({
+            supertest,
+            caseId: '063d5820-1284-11ed-81af-63a2bdfb2bf9',
+          });
+
+          expect(caseSeverityLow.severity).to.eql(CaseSeverity.LOW);
+          expect(caseSeverityMedium.severity).to.eql(CaseSeverity.MEDIUM);
+          expect(caseSeverityHigh.severity).to.eql(CaseSeverity.HIGH);
+          expect(caseSeverityCritical.severity).to.eql(CaseSeverity.CRITICAL);
         });
       });
     });
