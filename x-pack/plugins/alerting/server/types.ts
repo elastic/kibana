@@ -322,15 +322,10 @@ export interface PublicRuleMonitoringService {
   setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
 }
 
-export type AlertsCount = RuleLastRun['alertsCount'];
 export interface PublicLastRunSetters {
   setLastRunOutcome: (outcome: RuleLastRunOutcomes) => void;
   setLastRunOutcomeMsg: (outcomeMsg: string) => void;
   setLastRunWarning: (warning: RuleLastRun['warning']) => void;
-  setLastRunAlertsCountActive: (active: AlertsCount['active']) => void;
-  setLastRunAlertsCountNew: (newAlerts: AlertsCount['new']) => void;
-  setLastRunAlertsCountRecovered: (recovered: AlertsCount['recovered']) => void;
-  setLastRunAlertsCountIgnored: (error: AlertsCount['ignored']) => void;
   setShouldOverrideFrameworkLastRun: (shouldOverride: boolean) => void;
 }
 
