@@ -230,6 +230,12 @@ Uptime::
 Review the following information about the {kib} 8.5.0 release.
 
 [float]
+[[security-update-v8.5.0]]
+=== Security update
+
+The 8.5.0 release contains a fix to a potential security vulnerability. For more information, check link:https://discuss.elastic.co/t/7-17-8-8-5-0-security-update/320920[Security announcements].
+
+[float]
 [[known-issues-8.5.0]]
 === Known issues
 
