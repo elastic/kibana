@@ -7,6 +7,7 @@
 
 import { AggregationOptionsByType } from '@kbn/es-types';
 
+import Boom from '@hapi/boom';
 import { afterKeyObjectRT } from '../../../../common/http_api';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
@@ -49,19 +50,26 @@ const createMetricHistogramAggs = (options: MetricsAPIRequest): HistogramAggrega
   };
 };
 
+const getAfterKey = (options: MetricsAPIRequest) => {
+  if (!options.afterKey) {
+    return null;
+  }
+  if (afterKeyObjectRT.is(options.afterKey)) {
+    return options.afterKey;
+  } else {
+    return { groupBy0: options.afterKey };
+  }
+};
 export const createCompositeAggregations = (options: MetricsAPIRequest) => {
   if (!Array.isArray(options.groupBy) || !options.groupBy.length) {
-    throw new Error('groupBy must be informed.');
+    throw Boom.badRequest('groupBy must be informed.');
   }
 
-  let after;
-  if (options.afterKey) {
-    if (afterKeyObjectRT.is(options.afterKey)) {
-      after = options.afterKey;
-    } else {
-      after = { groupBy0: options.afterKey };
-    }
+  if (!options.includeTimeseries && !!options.metrics.find((p) => p.id === 'logRate')) {
+    throw Boom.badRequest('logRate metric is not supported without time series');
   }
+
+  const after = getAfterKey(options);
 
   return {
     groupings: {
