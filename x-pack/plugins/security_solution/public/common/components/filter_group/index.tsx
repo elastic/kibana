@@ -15,9 +15,17 @@ import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingChart,
+  EuiPopover,
+} from '@elastic/eui';
 import type { Subscription } from 'rxjs';
-
 import styled from 'styled-components';
 import { cloneDeep, debounce } from 'lodash';
 import { withSuspense } from '@kbn/shared-ux-utility';
@@ -68,6 +76,12 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     useState<Array<FilterUrlFormat[keyof FilterUrlFormat]>>();
 
   const urlDataApplied = useRef<boolean>(false);
+
+  const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
+
+  const toggleContextMenu = useCallback(() => {
+    setIsContextMenuVisible((prev) => !prev);
+  }, []);
 
   const onUrlParamInit = (param: Array<FilterUrlFormat[keyof FilterUrlFormat]> | null) => {
     if (param == null) return;
@@ -139,20 +153,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const onControlGroupLoadHandler = useCallback((controlGroupContainer: ControlGroupContainer) => {
     setControlGroup(controlGroupContainer);
   }, []);
-
-  const clearSelection = useCallback(() => {
-    if (!controlGroupInputUpdates) return;
-
-    const { panels } = controlGroupInputUpdates;
-    Object.values(panels).forEach((control, idx) => {
-      controlGroup?.updateInputForChild(String(idx), {
-        ...control.explicitInput,
-        selectedOptions: [],
-        existsSelected: false,
-        exclude: false,
-      });
-    });
-  }, [controlGroupInputUpdates, controlGroup]);
 
   const setOptions = useCallback(
     async (
@@ -226,6 +226,47 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     controlGroupInput: controlGroupInputUpdates,
   });
 
+  const withContextMenuAction = useCallback(
+    (fn: unknown) => {
+      return () => {
+        if (typeof fn === 'function') {
+          fn();
+        }
+        toggleContextMenu();
+      };
+    },
+    [toggleContextMenu]
+  );
+
+  const resetSelection = useCallback(() => {
+    if (!controlGroupInputUpdates) return;
+
+    const { panels } = controlGroupInputUpdates;
+    Object.values(panels).forEach((control, idx) => {
+      controlGroup?.updateInputForChild(String(idx), {
+        ...control.explicitInput,
+        selectedOptions: initialControls[idx].selectedOptions ?? [],
+        existsSelected: false,
+        exclude: false,
+      });
+    });
+  }, [controlGroupInputUpdates, controlGroup, initialControls]);
+
+  const resetButton = useMemo(
+    () => (
+      <EuiContextMenuItem
+        icon="eraser"
+        onClick={withContextMenuAction(resetSelection)}
+        data-test-subj="filter-group__context--reset"
+      >
+        {`Reset`}
+      </EuiContextMenuItem>
+    ),
+    [withContextMenuAction, resetSelection]
+  );
+
+  const contextMenuItems = useMemo(() => [resetButton], [resetButton]);
+
   return (
     <FilterWrapper className="filter-group__wrapper">
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
@@ -241,14 +282,24 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
           ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            iconType="eraser"
-            color="danger"
-            onClick={clearSelection}
-            data-test-subj="filter-group__clear"
+          <EuiPopover
+            id="filter-group__context-menu"
+            button={
+              <EuiButtonIcon
+                display="empty"
+                size="s"
+                iconType="boxesHorizontal"
+                onClick={toggleContextMenu}
+                data-test-subj="filter-group__context"
+              />
+            }
+            isOpen={isContextMenuVisible}
+            closePopover={toggleContextMenu}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
           >
-            {`Clear`}
-          </EuiButton>
+            <EuiContextMenuPanel items={contextMenuItems} />
+          </EuiPopover>
         </EuiFlexItem>
         {/*
          *<EuiFlexItem grow={false}>
