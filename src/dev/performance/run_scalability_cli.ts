@@ -33,7 +33,10 @@ run(
           .readdirSync(journeyPath)
           .filter((fileName) => path.extname(fileName) === '.json')
           .map((fileName) => {
-            return { name: fileName, path: path.resolve(journeyPath, fileName) };
+            return {
+              name: path.parse(fileName).name,
+              path: path.resolve(journeyPath, fileName),
+            };
           })
       : [{ name: path.parse(journeyPath).name, path: journeyPath }];
 
