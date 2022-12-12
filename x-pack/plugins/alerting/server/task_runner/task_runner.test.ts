@@ -157,7 +157,7 @@ describe('Task Runner', () => {
       nameExtension: string,
       customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
       enqueueFunction: unknown,
-      inputIsArray: boolean
+      isBulk: boolean
     ]
   > = [
     ['', taskRunnerFactoryInitializerParams, actionsClient.bulkEnqueueExecution, true],
@@ -291,12 +291,7 @@ describe('Task Runner', () => {
 
   test.each(ephemeralTestParams)(
     'actionsPlugin.execute is called per alert alert that is scheduled %s',
-    async (
-      nameExtension,
-      customTaskRunnerFactoryInitializerParams,
-      enqueueFunction,
-      inputIsArray
-    ) => {
+    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
         true
       );
@@ -329,7 +324,9 @@ describe('Task Runner', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       await taskRunner.run();
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput(inputIsArray));
+      expect(enqueueFunction).toHaveBeenCalledWith(
+        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
+      );
 
       expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
@@ -668,6 +665,7 @@ describe('Task Runner', () => {
 
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
+        notifyWhen: 'onThrottleInterval',
         throttle: '1d',
       });
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
@@ -868,12 +866,7 @@ describe('Task Runner', () => {
 
   test.each(ephemeralTestParams)(
     'includes the apiKey in the request used to initialize the actionsClient %s',
-    async (
-      nameExtension,
-      customTaskRunnerFactoryInitializerParams,
-      enqueueFunction,
-      inputIsArray
-    ) => {
+    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
         true
       );
@@ -926,7 +919,9 @@ describe('Task Runner', () => {
       );
 
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput(inputIsArray));
+      expect(enqueueFunction).toHaveBeenCalledWith(
+        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
+      );
 
       testAlertingEventLogCalls({
         activeAlerts: 1,
@@ -961,12 +956,7 @@ describe('Task Runner', () => {
 
   test.each(ephemeralTestParams)(
     'fire recovered actions for execution for the alertInstances which is in the recovered state %s',
-    async (
-      nameExtension,
-      customTaskRunnerFactoryInitializerParams,
-      enqueueFunction,
-      inputIsArray
-    ) => {
+    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
         true
       );
@@ -1090,20 +1080,23 @@ describe('Task Runner', () => {
         generateActionOpts({ id: '2', alertId: '2', alertGroup: 'recovered' })
       );
 
-      expect(enqueueFunction).toHaveBeenCalledTimes(2);
-      expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput(inputIsArray));
+      expect(enqueueFunction).toHaveBeenCalledTimes(isBulk ? 1 : 2);
+      expect(enqueueFunction).toHaveBeenCalledWith(
+        isBulk
+          ? [
+              generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true }),
+              generateEnqueueFunctionInput({ isBulk: false, id: '2', isResolved: true }),
+            ]
+          : generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true })
+      );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+      jest.resetAllMocks();
     }
   );
 
   test.each(ephemeralTestParams)(
     "should skip alertInstances which weren't active on the previous execution %s",
-    async (
-      nameExtension,
-      customTaskRunnerFactoryInitializerParams,
-      enqueueFunction,
-      inputIsArray
-    ) => {
+    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
         true
       );
@@ -1148,7 +1141,12 @@ describe('Task Runner', () => {
       rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       const runnerResult = await taskRunner.run();
-      expect(runnerResult.state.alertInstances).toEqual(generateAlertInstance());
+      expect(runnerResult.state.alertInstances).toEqual(
+        generateAlertInstance({
+          id: 1,
+          flappingHistory: [false],
+        })
+      );
 
       expect(logger.debug).toHaveBeenCalledWith(
         `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
@@ -1181,13 +1179,13 @@ describe('Task Runner', () => {
         logAction: 2,
       });
 
-      expect(enqueueFunction).toHaveBeenCalledTimes(2);
-      if (inputIsArray) {
-        expect((enqueueFunction as jest.Mock).mock.calls[1][0][0].id).toEqual('2');
+      expect(enqueueFunction).toHaveBeenCalledTimes(isBulk ? 1 : 2);
+      if (isBulk) {
         expect((enqueueFunction as jest.Mock).mock.calls[0][0][0].id).toEqual('1');
+        expect((enqueueFunction as jest.Mock).mock.calls[0][0][1].id).toEqual('2');
       } else {
-        expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('2');
         expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('1');
+        expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('2');
       }
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
@@ -1195,12 +1193,7 @@ describe('Task Runner', () => {
 
   test.each(ephemeralTestParams)(
     'fire actions under a custom recovery group when specified on an alert type for alertInstances which are in the recovered state %s',
-    async (
-      nameExtension,
-      customTaskRunnerFactoryInitializerParams,
-      enqueueFunction,
-      inputIsArray
-    ) => {
+    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
         true
       );
@@ -1273,7 +1266,12 @@ describe('Task Runner', () => {
       });
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       const runnerResult = await taskRunner.run();
-      expect(runnerResult.state.alertInstances).toEqual(generateAlertInstance());
+      expect(runnerResult.state.alertInstances).toEqual(
+        generateAlertInstance({
+          id: 1,
+          flappingHistory: [false],
+        })
+      );
 
       testAlertingEventLogCalls({
         ruleContext: {
@@ -1289,8 +1287,15 @@ describe('Task Runner', () => {
         logAction: 2,
       });
 
-      expect(enqueueFunction).toHaveBeenCalledTimes(2);
-      expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput(inputIsArray));
+      expect(enqueueFunction).toHaveBeenCalledTimes(isBulk ? 1 : 2);
+      expect(enqueueFunction).toHaveBeenCalledWith(
+        isBulk
+          ? [
+              generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true }),
+              generateEnqueueFunctionInput({ isBulk: false, id: '2', isResolved: true }),
+            ]
+          : generateEnqueueFunctionInput({ isBulk: false, id: '1', foo: true })
+      );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
   );
