@@ -23,10 +23,7 @@ import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
-import {
-  useCanWritePolicyManagementOrHasFleetAccess,
-  usePolicyDetailsSelector,
-} from '../../policy_hooks';
+import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   policyDetails,
   agentStatusSummary,
@@ -54,7 +51,7 @@ export const PolicyFormLayout = React.memo(() => {
   } = useKibana();
   const toasts = useToasts();
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
-  const canWritePolicyManagement = useCanWritePolicyManagementOrHasFleetAccess();
+  const showEditableFormFields = useShowEditableFormFields();
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -183,7 +180,7 @@ export const PolicyFormLayout = React.memo(() => {
               </EuiButtonEmpty>
             </EuiThemeProvider>
           </EuiFlexItem>
-          {canWritePolicyManagement && (
+          {showEditableFormFields && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill={true}

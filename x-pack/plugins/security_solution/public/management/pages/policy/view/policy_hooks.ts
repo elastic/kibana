@@ -97,7 +97,7 @@ export const useIsPolicySettingsBarVisible = () => {
  * when displayed inside of Fleet pages if the user does not have privileges to security solution
  * policy management.
  */
-export const useCanWritePolicyManagementOrHasFleetAccess = (): boolean => {
+export const useShowEditableFormFields = (): boolean => {
   const { canWritePolicyManagement, canAccessFleet } = useUserPrivileges().endpointPrivileges;
 
   return canWritePolicyManagement || canAccessFleet;

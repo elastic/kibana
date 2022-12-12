@@ -12,10 +12,7 @@ import { EuiSwitch } from '@elastic/eui';
 
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { isCredentialHardeningEnabled } from '../../../store/policy_details/selectors';
-import {
-  useCanWritePolicyManagementOrHasFleetAccess,
-  usePolicyDetailsSelector,
-} from '../../policy_hooks';
+import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import { ConfigForm } from '../config_form';
 
 const TRANSLATIONS: Readonly<{ [K in 'title' | 'label']: string }> = {
@@ -36,7 +33,7 @@ const TRANSLATIONS: Readonly<{ [K in 'title' | 'label']: string }> = {
 export const AttackSurfaceReductionForm = memo(() => {
   const credentialHardeningEnabled = usePolicyDetailsSelector(isCredentialHardeningEnabled);
   const dispatch = useDispatch();
-  const canWritePolicyManagement = useCanWritePolicyManagementOrHasFleetAccess();
+  const showEditableFormFields = useShowEditableFormFields();
 
   const handleSwitchChange = useCallback(
     (event) =>
@@ -55,7 +52,7 @@ export const AttackSurfaceReductionForm = memo(() => {
         label={TRANSLATIONS.label}
         checked={credentialHardeningEnabled}
         onChange={handleSwitchChange}
-        disabled={!canWritePolicyManagement}
+        disabled={!showEditableFormFields}
       />
     </ConfigForm>
   );
