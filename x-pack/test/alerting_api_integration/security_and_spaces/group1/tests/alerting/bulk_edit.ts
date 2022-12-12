@@ -101,8 +101,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                     },
                   },
                 ],
-                rules: [],
                 skipped: [],
+                rules: [],
                 total: 1,
               });
               expect(response.statusCode).to.eql(200);
@@ -191,6 +191,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               );
               expect(response.body.rules).to.have.length(10);
               expect(response.body.errors).to.have.length(0);
+              expect(response.body.skipped).to.have.length(0);
               expect(response.body.total).to.be(10);
 
               expect(response.statusCode).to.eql(200);
@@ -588,7 +589,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'superuser at space1':
             case 'global_read at space1':
-              expect(response.body).to.eql({ rules: [], skipped: [], errors: [], total: 0 });
+              expect(response.body).to.eql({ rules: [], errors: [], skipped: [], total: 0 });
               expect(response.statusCode).to.eql(200);
               break;
             case 'no_kibana_privileges at space1':

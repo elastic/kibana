@@ -71,7 +71,7 @@ describe('bulkEditInternalRulesRoute', () => {
       },
     ],
   };
-  const bulkEditResult = { rules: mockedAlerts, errors: [], total: 1 };
+  const bulkEditResult = { rules: mockedAlerts, errors: [], total: 1, skipped: [] };
 
   it('bulk edits rules with tags action', async () => {
     const licenseState = licenseStateMock.create();
