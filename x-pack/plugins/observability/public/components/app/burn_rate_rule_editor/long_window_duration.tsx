@@ -79,7 +79,7 @@ export function LongWindowDuration({ initialDuration, onChange }: Props) {
           <EuiFieldNumber
             isInvalid={!!error}
             min={1}
-            value={durationValue}
+            value={String(durationValue)}
             onChange={onDurationValueChange}
             aria-label={valueLabel}
             data-test-subj="durationValueInput"
