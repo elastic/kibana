@@ -29,6 +29,8 @@ export interface BaseState extends ControlState {
   readonly legacyIndex: string;
   /** Kibana version number */
   readonly kibanaVersion: string;
+  /** The schema we want to get to based on the current values from Saved Object consumers.  */
+  readonly desiredIndexMappings: IndexMapping;
   /** The mappings to apply to the target index */
   readonly targetIndexMappings: IndexMapping;
   /**
@@ -175,6 +177,9 @@ export interface PostInitState extends BaseState {
   readonly targetIndex: string;
   readonly versionIndexReadyActions: Option.Option<AliasAction[]>;
   readonly outdatedDocumentsQuery: QueryDslQueryContainer;
+
+  /** Whether to run a subset of migration steps optimised for scenarios where we do not need to reindex */
+  readonly skipReindex?: true;
 }
 
 export interface DoneState extends PostInitState {

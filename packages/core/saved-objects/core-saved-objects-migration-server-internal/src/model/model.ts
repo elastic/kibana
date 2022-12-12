@@ -42,6 +42,7 @@ import {
 } from './helpers';
 import { createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
+import { diffMappings } from '../core/build_active_mappings';
 
 export const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
 const CLUSTER_SHARD_LIMIT_EXCEEDED_REASON = `[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources.`;
@@ -135,6 +136,21 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           } alias is pointing to a newer version of Kibana: v${indexVersion(
             aliases[stateP.currentAlias]
           )}`,
+        };
+      } else if (
+        // Have the mappings in ES diverged from the mappings defined in the
+        // saved objects registry?
+        Boolean(diffMappings(stateP.targetIndexMappings, stateP.desiredIndexMappings)) &&
+        aliases[stateP.currentAlias] != null
+      ) {
+        const index = aliases[stateP.currentAlias]!;
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+          sourceIndex: Option.some(index),
+          targetIndex: index,
+          versionIndexReadyActions: Option.none,
+          skipReindex: true,
         };
       } else if (
         // Don't actively participate in this migration but wait for another instance to complete it
@@ -999,11 +1015,21 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      const { pitId, hasTransformedDocs, ...state } = stateP;
+      const { pitId, hasTransformedDocs, skipReindex, ...state } = stateP;
       if (hasTransformedDocs) {
         return {
           ...state,
           controlState: 'OUTDATED_DOCUMENTS_REFRESH',
+        };
+      }
+      if (skipReindex) {
+        return {
+          ...stateP,
+          controlState: 'MARK_VERSION_INDEX_READY',
+          versionIndexReadyActions: Option.some([
+            { add: { index: stateP.targetIndex, alias: stateP.currentAlias } },
+            { add: { index: stateP.targetIndex, alias: stateP.versionAlias } },
+          ]) as Option.Some<AliasAction[]>,
         };
       }
       return {
@@ -1016,6 +1042,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_REFRESH') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
+      if (stateP.skipReindex) {
+        return {
+          ...stateP,
+          controlState: 'MARK_VERSION_INDEX_READY',
+          versionIndexReadyActions: Option.some([
+            { add: { index: stateP.targetIndex, alias: stateP.currentAlias } },
+            { add: { index: stateP.targetIndex, alias: stateP.versionAlias } },
+          ]) as Option.Some<AliasAction[]>,
+        };
+      }
       return {
         ...stateP,
         controlState: 'CHECK_TARGET_MAPPINGS',

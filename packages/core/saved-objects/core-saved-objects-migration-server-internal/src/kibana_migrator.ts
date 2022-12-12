@@ -152,6 +152,7 @@ export class KibanaMigrator implements IKibanaMigrator {
             client: this.client,
             kibanaVersion: this.kibanaVersion,
             waitForMigrationCompletion: this.waitForMigrationCompletion,
+            desiredMappings: this.activeMappings, // TODO: Find out how we can make .kibana_task_manager work with this
             targetMappings: buildActiveMappings(indexMap[index].typeMappings),
             logger: this.log,
             preMigrationScript: indexMap[index].script,

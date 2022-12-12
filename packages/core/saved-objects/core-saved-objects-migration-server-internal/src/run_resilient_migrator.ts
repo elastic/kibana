@@ -45,6 +45,7 @@ export async function runResilientMigrator({
   client,
   kibanaVersion,
   waitForMigrationCompletion,
+  desiredMappings,
   targetMappings,
   logger,
   preMigrationScript,
@@ -58,6 +59,11 @@ export async function runResilientMigrator({
   client: ElasticsearchClient;
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
+  /**
+   * The schema we want to get to based on the current values from Saved Object
+   * consumers.
+   */
+  desiredMappings: IndexMapping;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
   logger: Logger;
@@ -71,6 +77,7 @@ export async function runResilientMigrator({
   const initialState = createInitialState({
     kibanaVersion,
     waitForMigrationCompletion,
+    desiredMappings,
     targetMappings,
     preMigrationScript,
     migrationVersionPerType,
