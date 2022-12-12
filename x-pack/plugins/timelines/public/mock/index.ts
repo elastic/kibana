@@ -6,13 +6,9 @@
  */
 
 export * from './browser_fields';
-export * from './header';
 export * from './index_pattern';
 export * from './kibana_react.mock';
 export * from './mock_and_providers';
 export * from './mock_data_providers';
-export * from './mock_timeline_control_columns';
-export * from './mock_timeline_data';
-export * from './test_providers';
 export * from './plugin_mock';
-export * from './t_grid';
+export * from './test_providers';

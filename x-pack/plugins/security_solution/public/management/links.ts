@@ -61,7 +61,6 @@ import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
-import { KibanaServices } from '../common/lib/kibana';
 
 const categories = [
   {
@@ -269,7 +268,7 @@ export const getManagementFilteredLinks = async (
     )
   ) {
     hasHostIsolationExceptions = await checkArtifactHasData(
-      HostIsolationExceptionsApiClient.getInstance(KibanaServices.get().http)
+      HostIsolationExceptionsApiClient.getInstance(core.http)
     );
   }
 
@@ -279,6 +278,8 @@ export const getManagementFilteredLinks = async (
     canReadEndpointList,
     canReadTrustedApplications,
     canReadEventFilters,
+    canReadBlocklist,
+    canReadPolicyManagement,
   } = fleetAuthz
     ? calculateEndpointAuthz(
         licenseService,
@@ -292,6 +293,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadEndpointList) {
     linksToExclude.push(SecurityPageName.endpoints);
+  }
+
+  if (!canReadPolicyManagement) {
+    linksToExclude.push(SecurityPageName.policies);
   }
 
   if (!canReadActionsLogManagement) {
@@ -308,6 +313,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadEventFilters) {
     linksToExclude.push(SecurityPageName.eventFilters);
+  }
+
+  if (!canReadBlocklist) {
+    linksToExclude.push(SecurityPageName.blocklist);
   }
 
   return excludeLinks(linksToExclude);

@@ -7,7 +7,7 @@
 
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import url from 'url';
 
 import {
