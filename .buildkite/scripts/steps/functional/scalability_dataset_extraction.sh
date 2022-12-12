@@ -8,9 +8,10 @@ USER_FROM_VAULT="$(retry 5 5 vault read -field=username secret/kibana-issues/dev
 PASS_FROM_VAULT="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/apm_parser_performance)"
 ES_SERVER_URL="https://kibana-ops-e2e-perf.es.us-central1.gcp.cloud.es.io:9243"
 BUILD_ID="${BUILDKITE_BUILD_ID}"
-GCS_BUCKET="gs://kibana-performance/scalability-tests"
+KIBANA_PERFORMANCE_GCS_BUCKET="gs://kibana-performance/scalability-tests"
 ES_RALLY_GCS_BUCKET="gs://rally-tracks/scalability-traces"
 OUTPUT_REL="target/scalability_tests/${BUILD_ID}"
+ES_OUTPUT_REL=
 OUTPUT_DIR="${KIBANA_DIR}/${OUTPUT_REL}"
 
 .buildkite/scripts/bootstrap.sh
@@ -42,9 +43,14 @@ download_artifact kibana-default-plugins.tar.gz "${OUTPUT_DIR}/" --build "${KIBA
 echo "--- Adding commit info"
 echo "${BUILDKITE_COMMIT}" > "${OUTPUT_DIR}/KIBANA_COMMIT_HASH"
 
-echo "--- Uploading ${OUTPUT_REL} dir to ${GCS_BUCKET}"
+echo "--- Uploading ${OUTPUT_REL} dir to ${KIBANA_PERFORMANCE_GCS_BUCKET}"
 cd "${OUTPUT_DIR}/.."
-gsutil -m cp -r "${BUILD_ID}" "${GCS_BUCKET}"
+gsutil -m cp -r "${BUILD_ID}" "${KIBANA_PERFORMANCE_GCS_BUCKET}"
+cd -
+
+echo "--- Uploading ${OUTPUT_REL} dir to ${KIBANA_PERFORMANCE_GCS_BUCKET}"
+cd "${KIBANA_DIR}/target"
+gsutil -m cp -r "scalability_traces" "${ES_RALLY_GCS_BUCKET}"
 cd -
 
 if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-single-user-performance" ]; then
