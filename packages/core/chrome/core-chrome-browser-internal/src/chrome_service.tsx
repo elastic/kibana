@@ -34,7 +34,6 @@ import { NavLinksService } from './nav_links';
 import { RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import type { InternalChromeStart } from './types';
-import { CustomBrandingService } from '@kbn/core-custom-branding-internal';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -302,7 +301,7 @@ export class ChromeService {
       },
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
-      
+
       setLogo: (logo: string) => {
         if (customBranding$.get('logo') !== undefined) {
           customBranding$.get('logo')!.next(logo);
@@ -311,7 +310,7 @@ export class ChromeService {
 
       setCustomizedLogo: (customizedLogo: string) => {
         if (customBranding$.get('customizedLogo') !== undefined) {
-          customBranding$.get('customizedLogo')!.next(customizedLogo)
+          customBranding$.get('customizedLogo')!.next(customizedLogo);
         }
       },
 
