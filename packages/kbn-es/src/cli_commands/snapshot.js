@@ -11,7 +11,7 @@ const getopts = require('getopts');
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 const { Cluster } = require('../cluster');
-const { parseTimeoutToMs } = require('../utils');
+const { parseTimeoutToMs, getElasticsearchApmSettings } = require('../utils');
 
 exports.description = 'Downloads and run from a nightly snapshot';
 
@@ -71,11 +71,16 @@ exports.run = async (defaults = {}) => {
   });
 
   const cluster = new Cluster({ ssl: options.ssl });
+
   if (options['download-only']) {
     await cluster.downloadSnapshot(options);
   } else {
     const installStartTime = Date.now();
-    const { installPath } = await cluster.installSnapshot(options);
+
+    const { installPath } = await cluster.installSnapshot({
+      ...options,
+      apmSettings: getElasticsearchApmSettings(log),
+    });
 
     if (options.dataArchive) {
       await cluster.extractDataDirectory(installPath, options.dataArchive);

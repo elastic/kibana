@@ -9,7 +9,8 @@
 const dedent = require('dedent');
 const getopts = require('getopts');
 const { Cluster } = require('../cluster');
-const { parseTimeoutToMs } = require('../utils');
+const { parseTimeoutToMs, getElasticsearchApmSettings } = require('../utils');
+import { log as defaultLog } from '../utils/log';
 
 exports.description = 'Build and run from source';
 
@@ -28,7 +29,7 @@ exports.help = (defaults = {}) => {
       --password.[user] Sets password for native realm user [default: ${password}]
       --ssl             Sets up SSL on Elasticsearch
       --plugins         Comma seperated list of Elasticsearch plugins to install
-      --secure-files     Comma seperated list of secure_setting_name=/path pairs
+      --secure-files    Comma seperated list of secure_setting_name=/path pairs
       -E                Additional key=value settings to pass to Elasticsearch
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
@@ -60,7 +61,11 @@ exports.run = async (defaults = {}) => {
   });
 
   const cluster = new Cluster({ ssl: options.ssl });
-  const { installPath } = await cluster.installSource(options);
+
+  const { installPath } = await cluster.installSource({
+    ...options,
+    apmSettings: getElasticsearchApmSettings(defaultLog),
+  });
 
   if (options.dataArchive) {
     await cluster.extractDataDirectory(installPath, options.dataArchive);

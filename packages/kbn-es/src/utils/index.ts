@@ -18,3 +18,5 @@ export { NativeRealm, SYSTEM_INDICES_SUPERUSER } from './native_realm';
 export { buildSnapshot } from './build_snapshot';
 export { archiveForPlatform } from './build_snapshot';
 export * from './parse_timeout_to_ms';
+export { getElasticsearchApmSettings } from './get_elasticsearch_apm_settings';
+export type { ElasticsearchAPMSettings } from './types';

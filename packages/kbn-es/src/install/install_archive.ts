@@ -19,6 +19,7 @@ import { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } from '../paths';
 import { Artifact } from '../artifact';
 import { parseSettings, SettingsFilter } from '../settings';
 import { log as defaultLog } from '../utils/log';
+import type { ElasticsearchAPMSettings } from '../utils';
 
 interface InstallArchiveOptions {
   license?: string;
@@ -27,6 +28,7 @@ interface InstallArchiveOptions {
   installPath?: string;
   log?: ToolingLog;
   esArgs?: string[];
+  apmSettings?: ElasticsearchAPMSettings;
 }
 
 const isHttpUrl = (str: string) => {
@@ -48,6 +50,7 @@ export async function installArchive(archive: string, options: InstallArchiveOpt
     installPath = path.resolve(basePath, path.basename(archive, '.tar.gz')),
     log = defaultLog,
     esArgs = [],
+    apmSettings = undefined,
   } = options;
 
   let dest = archive;
@@ -78,10 +81,28 @@ export async function installArchive(archive: string, options: InstallArchiveOpt
     // starting in 6.3, security is disabled by default. Since we bootstrap
     // the keystore, we can enable security ourselves.
     await appendToConfig(installPath, 'xpack.security.enabled', 'true');
-
     await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
+
+    // Configure Elasticsearch APM
+    const apmKeystore: Array<[string, string]> = [];
+    if (apmSettings) {
+      apmKeystore.push(['tracing.apm.secret_token', apmSettings.apmSecretToken]);
+      await appendToConfig(
+        installPath,
+        'tracing.apm.enabled',
+        apmSettings.enabled ? 'true' : 'false'
+      );
+      await appendToConfig(
+        installPath,
+        'tracing.apm.agent.transaction_sample_rate',
+        apmSettings.samplingRate.toString()
+      );
+      await appendToConfig(installPath, 'tracing.apm.agent.server_url', apmSettings.apmServerUrl);
+      await appendToConfig(installPath, 'tracing.apm.agent.log_level', apmSettings.logLevel);
+    }
     await configureKeystore(installPath, log, [
       ['bootstrap.password', password],
+      ...apmKeystore,
       ...parseSettings(esArgs, { filter: SettingsFilter.SecureOnly }),
     ]);
   }
