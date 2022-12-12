@@ -23,7 +23,6 @@ const DEFAULT_VALUES = {
     },
   },
   hasIndexIngestionPipeline: true,
-  hasPlatinumLicense: true,
   ingestionMethod: 'crawler',
 };
 
@@ -40,16 +39,8 @@ describe('add inference pipeline button', () => {
     const button = wrapper.find(EuiButton);
     expect(button.text()).toBe('Add Inference Pipeline');
   });
-  it('renders permission tooltip with no ml access', () => {
+  it('renders permission tooltip when user cannot get trained models', () => {
     setMockValues({ ...DEFAULT_VALUES, capabilities: {} });
-    const wrapper = mount(<AddMLInferencePipelineButton onClick={onClick} />);
-    expect(wrapper.find(EuiButton)).toHaveLength(1);
-    expect(wrapper.find(EuiToolTip)).toHaveLength(1);
-    const tooltip = wrapper.find(EuiToolTip);
-    expect(tooltip.prop('content')).toContain('permission');
-  });
-  it('renders permission tooltip with no platinum license', () => {
-    setMockValues({ ...DEFAULT_VALUES, hasPlatinumLicense: false });
     const wrapper = mount(<AddMLInferencePipelineButton onClick={onClick} />);
     expect(wrapper.find(EuiButton)).toHaveLength(1);
     expect(wrapper.find(EuiToolTip)).toHaveLength(1);
