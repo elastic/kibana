@@ -7,7 +7,6 @@
 
 import React, { useCallback } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { startCase } from 'lodash';
 import { useEuiTheme } from '../../../hooks';
 import {
   KubernetesCollectionMap,
@@ -18,6 +17,7 @@ import {
 import { useStyles } from './styles';
 import { KUBERNETES_COLLECTION_ICONS_PROPS } from '../helpers';
 import { showBreadcrumbDisplayText } from './helper';
+import { BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS } from '../translations';
 interface BreadcrumbDeps {
   treeNavSelection: Partial<KubernetesCollectionMap>;
   onSelect: (selection: Partial<KubernetesCollectionMap>) => void;
@@ -27,29 +27,31 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
   const styles = useStyles();
   const { euiVars } = useEuiTheme();
   const onBreadCrumbClick = useCallback(
-    (collectionType: KubernetesCollection) => {
-      const selectionCopy = { ...treeNavSelection };
-      switch (collectionType) {
-        case KubernetesTreeViewLevels.clusterId: {
-          onSelect({
-            clusterId: treeNavSelection.clusterId,
-            clusterName: treeNavSelection.clusterName,
-          });
-          break;
+    (collectionType: string) => {
+      return async () => {
+        const selectionCopy = { ...treeNavSelection };
+        switch (collectionType) {
+          case KubernetesTreeViewLevels.clusterId: {
+            onSelect({
+              clusterId: treeNavSelection.clusterId,
+              clusterName: treeNavSelection.clusterName,
+            });
+            break;
+          }
+          case KubernetesTreeViewLevels.namespace:
+          case KubernetesTreeViewLevels.node: {
+            delete selectionCopy.pod;
+            delete selectionCopy.containerImage;
+            onSelect(selectionCopy);
+            break;
+          }
+          case KubernetesTreeViewLevels.pod: {
+            delete selectionCopy.containerImage;
+            onSelect(selectionCopy);
+            break;
+          }
         }
-        case KubernetesTreeViewLevels.namespace:
-        case KubernetesTreeViewLevels.node: {
-          delete selectionCopy.pod;
-          delete selectionCopy.containerImage;
-          onSelect(selectionCopy);
-          break;
-        }
-        case KubernetesTreeViewLevels.pod: {
-          delete selectionCopy.containerImage;
-          onSelect(selectionCopy);
-          break;
-        }
-      }
+      };
     },
     [onSelect, treeNavSelection]
   );
@@ -61,16 +63,13 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
       isBolded: boolean,
       hasRightArrow: boolean = true
     ) => {
-      const clusterLevel =
-        collectionType === KubernetesTreeViewLevels.clusterId
-          ? 'Cluster'
-          : startCase(collectionType);
-      const content =
+      const clusterLevel = BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS[collectionType];
+      const resourceName =
         collectionType === KubernetesTreeViewLevels.clusterId
           ? treeNavSelection.clusterName || treeNavSelection.clusterId
           : treeNavSelection[collectionType];
 
-      const tooltip = `${clusterLevel}: ${content}`;
+      const tooltip = `${clusterLevel}: ${resourceName}`;
       const showBreadcrumbText = showBreadcrumbDisplayText(treeNavSelection, collectionType);
       const { type: iconType, euiVarColor } = treeViewIconProps;
 
@@ -81,9 +80,9 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
             <EuiButtonIcon
               data-test-subj={`kubernetesSecurityBreadcrumbIcon-${collectionType}`}
               iconType={iconType}
-              style={{ color: euiVars[euiVarColor] }}
+              css={styles.breadcrumbIconColor(euiVars[euiVarColor])}
               aria-label={`Click ${clusterLevel} breadcrumb`}
-              onClick={() => onBreadCrumbClick(collectionType)}
+              onClick={onBreadCrumbClick(collectionType)}
             />
           </EuiToolTip>
           {showBreadcrumbText && (
@@ -91,23 +90,16 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
               <EuiButtonEmpty
                 css={isBolded ? styles.breadcrumbButtonBold : styles.breadcrumbButton}
                 color="text"
-                onClick={() => onBreadCrumbClick(collectionType)}
+                onClick={onBreadCrumbClick(collectionType)}
               >
-                {content}
+                {resourceName}
               </EuiButtonEmpty>
             </EuiToolTip>
           )}
         </>
       );
     },
-    [
-      onBreadCrumbClick,
-      styles.breadcrumbButton,
-      styles.breadcrumbButtonBold,
-      styles.breadcrumbRightIcon,
-      treeNavSelection,
-      euiVars,
-    ]
+    [onBreadCrumbClick, styles, treeNavSelection, euiVars]
   );
 
   if (!treeNavSelection.clusterId) {

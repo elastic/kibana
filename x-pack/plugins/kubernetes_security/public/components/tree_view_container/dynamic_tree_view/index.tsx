@@ -16,7 +16,6 @@ import {
   EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
-import { startCase } from 'lodash';
 import {
   TREE_NAVIGATION_LOADING,
   TREE_NAVIGATION_SHOW_MORE,
@@ -27,6 +26,7 @@ import { disableEventDefaults, focusNextElement } from './helpers';
 import { useTreeViewContext } from '../contexts';
 import { TreeViewIcon } from '../tree_view_icon';
 import type { DynamicTreeViewProps, DynamicTreeViewItemProps } from './types';
+import { BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS } from '../translations';
 
 const BUTTON_TEST_ID = 'kubernetesSecurity:dynamicTreeViewButton';
 
@@ -310,9 +310,7 @@ const DynamicTreeViewItem = ({
     );
   }, [aggData.key, aggData.key_as_string, depth, selected, selectionDepth, tree]);
 
-  const clusterLevel = tree[depth].type.includes('clusterId')
-    ? 'Cluster'
-    : startCase(tree[depth].type);
+  const clusterLevel = BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS[tree[depth].type];
 
   return (
     <li
