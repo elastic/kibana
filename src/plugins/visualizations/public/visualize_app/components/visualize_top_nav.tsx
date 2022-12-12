@@ -309,9 +309,9 @@ const TopNav = ({
       showQueryInput={showQueryInput}
       showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
       dataViewPickerComponentProps={
-        shouldShowDataViewPicker
+        shouldShowDataViewPicker && vis.data.indexPattern
           ? {
-              currentDataViewId: vis.data?.indexPattern?.id,
+              currentDataViewId: vis.data.indexPattern.id,
               trigger: {
                 label: isMissingCurrentDataView
                   ? i18n.translate('visualizations.fallbackDataView.label', {
@@ -326,7 +326,7 @@ const TopNav = ({
                             }),
                       },
                     })
-                  : vis.data?.indexPattern?.getName(),
+                  : vis.data.indexPattern.getName(),
               },
               isMissingCurrent: isMissingCurrentDataView,
               onChangeDataView,
