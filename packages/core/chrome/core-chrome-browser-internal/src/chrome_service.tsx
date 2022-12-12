@@ -27,7 +27,8 @@ import type {
   ChromeHelpExtension,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
-import { CustomBranding, CustomBrandingService } from '@kbn/core-custom-branding-internal';
+import { CustomBrandingService } from '@kbn/core-custom-branding-internal';
+import type { CustomBranding } from '@kbn/core-custom-branding';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
@@ -307,6 +308,5 @@ export class ChromeService {
   public stop() {
     this.navLinks.stop();
     this.stop$.next();
-    // custom branding stops when the chrome service stops?
   }
 }

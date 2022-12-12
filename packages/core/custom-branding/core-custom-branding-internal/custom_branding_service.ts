@@ -8,37 +8,27 @@
 
 import type { CustomBranding } from "@kbn/core-custom-branding";
 import { BehaviorSubject } from "rxjs";
-
-interface StartDeps {
-  /** What properties should be set for this Kibana */
-  customBrandingPerOperator: Map<CustomBranding, boolean>;
-  /** The full functionality of custom branding that could be set */
-  customBrandingObject: Partial<CustomBranding> | CustomBranding,
-}
+import useObservable from 'react-use/lib/useObservable'
 
 /** @internal */
 export class CustomBrandingService {
+  logo: string | undefined = useObservable(logo$ ? logo$ : new BehaviorSubject<string | undefined>(undefined));
+  favicon: string | undefined = useObservable(favicon$ ? favicon$ : new BehaviorSubject<string | undefined>(undefined));
+  pageTitle: string | undefined = useObservable(pageTitle$ ? pageTitle$ : new BehaviorSubject<string | undefined>(undefined));
+  customizedLogo: string | undefined = useObservable(customizedLogo$ ? customizedLogo$ : new BehaviorSubject<string | undefined>(undefined));
   // set as async in terms of how this will be gathered and brought into core at start of the service
-  async start({customBrandingObject, customBrandingPerOperator}: StartDeps): Promise<CustomBranding> {
-    const customBranding$ = new BehaviorSubject<Partial<CustomBranding>>(new Map());
+  async start() {
+    const customBranding$ = new Map();
     return {
       get: () => {
-        customBrandingObject.map((property) => {
-        return customBrandingPerOperator.set(property),
-        })
-      },
-      // observable? 
-      get$: () => {
-        return customBranding$
+        return 
       },
       set: () => {
-        return customBrandingPerOperator,
+        return customBranding$.set('logo', this.logo)
+                              .set('favicon', this.favicon)
+                              .set('pageTitle', this.pageTitle)
+                              .set('customizedLogo', this.customizedLogo)
       },
     };
   }
-  // Does setting the properties need to occur at the start of the service? 
-  // IF NOT: 
-  // public applyCustomBranding((customBrandingObject: CustomBranding)) {
-  //     this.customBrandingPerOperator.add(customBrandingObject.next(customBrandingObject));
-  //   },
 }

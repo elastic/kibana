@@ -15,7 +15,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
-import type { CustomBranding } from '@kbn/core-chrome-browser';
+import type { CustomBranding } from '@kbn/core-custom-branding';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';
@@ -28,7 +28,7 @@ interface Props {
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   setIsMounting: (isMounting: boolean) => void;
-  customBranding$?: Observable<CustomBranding | undefined>;
+  customBranding$: Map<string, Observable<CustomBranding>>;
 }
 
 interface Params {
