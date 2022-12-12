@@ -228,6 +228,14 @@ describe('links', () => {
       });
     });
 
+    it('should return all links for user with all sub-feature privileges', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+
+      expect(filteredLinks).toEqual(links);
+    });
+
     it('should hide Trusted Applications for user without privilege', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
@@ -240,14 +248,6 @@ describe('links', () => {
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.trustedApps));
     });
 
-    it('should show Trusted Applications for user with privilege', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
-
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
-
-      expect(filteredLinks).toEqual(links);
-    });
-
     it('should hide Event Filters for user without privilege', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
@@ -258,6 +258,18 @@ describe('links', () => {
       const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.eventFilters));
+    });
+
+    it('should hide Blocklist for user without privilege', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canReadBlocklist: false,
+        })
+      );
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.blocklist));
     });
 
     it('should NOT return policies if `canReadPolicyManagement` is `false`', async () => {
