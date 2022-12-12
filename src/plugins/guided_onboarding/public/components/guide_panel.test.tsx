@@ -16,11 +16,10 @@ import type { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 import type { PluginState } from '../../common';
-import { API_BASE_PATH, testGuideConfig } from '../../common';
+import { API_BASE_PATH, testGuideConfig, testGuideId } from '../../common';
 import { apiService } from '../services/api';
 import type { GuidedOnboardingApi } from '../types';
 import {
-  testGuide,
   testGuideStep1ActiveState,
   testGuideStep1InProgressState,
   testGuideStep2InProgressState,
@@ -35,7 +34,7 @@ const applicationMock = applicationServiceMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();
 
 const mockGetResponse = (path: string, pluginState: PluginState) => {
-  if (path === `${API_BASE_PATH}/configs/${testGuide}`) {
+  if (path === `${API_BASE_PATH}/configs/${testGuideId}`) {
     return Promise.resolve({
       config: testGuideConfig,
     });
