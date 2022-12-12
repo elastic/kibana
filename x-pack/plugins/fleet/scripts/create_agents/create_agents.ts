@@ -36,10 +36,13 @@ const ES_URL = 'http://localhost:9200';
 const ES_SUPERUSER = 'fleet_superuser';
 const ES_PASSWORD = 'password';
 
+const DEFAULT_AGENT_COUNT = 50000;
+
 const INDEX_BULK_OP = '{ "index":{ } }\n';
 
 const {
   delete: deleteAgentsFirst = false,
+  unenrollTimeout: unenrollTimeoutArg,
   status: statusArg = 'online',
   count: countArg,
   kibana: kibanaUrl = DEFAULT_KIBANA_URL,
@@ -53,7 +56,10 @@ const {
 } = yargs(process.argv.slice(2)).argv;
 
 const statusesArg = (statusArg as string).split(',') as AgentStatus[];
-const count = countArg ? Number(countArg).valueOf() : 50000;
+const unenrollTimeout = unenrollTimeoutArg
+  ? Number(unenrollTimeoutArg).valueOf()
+  : DEFAULT_UNENROLL_TIMEOUT;
+const count = countArg ? Number(countArg).valueOf() : DEFAULT_AGENT_COUNT;
 const kbnAuth = 'Basic ' + Buffer.from(kbnUsername + ':' + kbnPassword).toString('base64');
 
 const logger = new ToolingLog({
@@ -64,9 +70,7 @@ const logger = new ToolingLog({
 function setAgentStatus(agent: any, status: AgentStatus) {
   switch (status) {
     case 'inactive':
-      agent.last_checkin = new Date(
-        new Date().getTime() - DEFAULT_UNENROLL_TIMEOUT * 1000
-      ).toISOString();
+      agent.last_checkin = new Date(new Date().getTime() - unenrollTimeout * 1000).toISOString();
       break;
     case 'enrolling':
       agent.last_checkin = null;
@@ -251,7 +255,7 @@ async function createAgentPolicy(id: string) {
       namespace: 'default',
       description: '',
       monitoring_enabled: ['logs'],
-      unenroll_timeout: DEFAULT_UNENROLL_TIMEOUT,
+      unenroll_timeout: unenrollTimeout,
     }),
     headers: {
       Authorization: kbnAuth,
@@ -308,7 +312,7 @@ export async function run() {
 
   logger.info('Creating agent policy');
 
-  const agentPolicyId = uuid();
+  const agentPolicyId = 'script-create-agent-' + uuid();
   const agentPolicy = await createAgentPolicy(agentPolicyId);
   logger.info(`Created agent policy ${agentPolicy.item.id}`);
 

@@ -228,9 +228,6 @@ export async function getAgentsByKuery(
     runtimeFields = buildStatusRuntimeQuery(unenrollTimeouts);
   }
 
-  const body = {
-    ...(kueryNode && { query: toElasticsearchQuery(kueryNode) }),
-  };
   const isDefaultSort = sortField === 'enrolled_at' && sortOrder === 'desc';
   // if using default sorting (enrolled_at), adding a secondary sort on hostname, so that the results are not changing randomly in case many agents were enrolled at the same time
   const secondarySort: estypes.Sort = isDefaultSort
@@ -242,9 +239,12 @@ export async function getAgentsByKuery(
       size,
       track_total_hits: true,
       rest_total_hits_as_int: true,
-      ...(getAgentStatus && { runtime_mappings: runtimeFields, fields: ['calculated_status'] }),
+      ...(getAgentStatus && {
+        runtime_mappings: runtimeFields,
+        fields: Object.keys(runtimeFields),
+      }),
       sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
-      body,
+      query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
       ...(pitId
         ? {
             pit: {
