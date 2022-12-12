@@ -12,7 +12,7 @@ import type { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/pub
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { NoPrivileges } from '../../../../../../common/components/no_privileges';
 import { useCanAccessSomeArtifacts } from '../hooks/use_can_access_some_artifacts';
-import { useHttp, useKibana } from '../../../../../../common/lib/kibana';
+import { useHttp } from '../../../../../../common/lib/kibana';
 import { TrustedAppsApiClient } from '../../../../trusted_apps/service/api_client';
 import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
@@ -116,7 +116,6 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       canReadTrustedApplications,
       canReadHostIsolationExceptions,
     } = useUserPrivileges().endpointPrivileges;
-    const { docLinks } = useKibana().services;
 
     const userCanAccessContent = useCanAccessSomeArtifacts();
 
@@ -126,7 +125,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       }
 
       if (!userCanAccessContent) {
-        return <NoPrivileges documentationUrl={docLinks.links.securitySolution.privileges} />;
+        return <NoPrivileges docLinkSelector={(links) => links.securitySolution.privileges} />;
       }
 
       return (
@@ -160,7 +159,6 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       canReadEventFilters,
       canReadTrustedApplications,
       canReadHostIsolationExceptions,
-      docLinks.links.securitySolution.privileges,
       loading,
       props,
       userCanAccessContent,
