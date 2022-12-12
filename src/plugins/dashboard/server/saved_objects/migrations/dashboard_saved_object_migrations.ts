@@ -15,7 +15,6 @@ import {
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/server';
 
-import { migrateControlGroup } from './migrate_control_group';
 import { migrations730, migrations700 } from './migrate_to_730';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
 import { migrateExplicitlyHiddenTitles } from './migrate_hidden_titles';
@@ -43,7 +42,6 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.11.0': flow(createExtractPanelReferencesMigration(deps)),
     '7.14.0': flow(replaceIndexPatternReference),
     '7.17.3': flow(migrateExplicitlyHiddenTitles),
-    '8.7.0': flow(migrateControlGroup),
   };
 
   return mergeMigrationFunctionMaps(dashboardMigrations, embeddableMigrations);
