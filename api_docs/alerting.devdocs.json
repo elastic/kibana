@@ -3082,7 +3082,17 @@
             "section": "def-server.BulkOperationError",
             "text": "BulkOperationError"
           },
-          "[]; total: number; taskIdsFailedToBeDeleted: string[]; }>; bulkEdit: <Params extends ",
+          "[]; rules: (",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.Rule",
+            "text": "Rule"
+          },
+          "<never> | ",
+          "RuleWithLegacyId",
+          "<never>)[]; total: number; taskIdsFailedToBeDeleted: string[]; }>; bulkEdit: <Params extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
