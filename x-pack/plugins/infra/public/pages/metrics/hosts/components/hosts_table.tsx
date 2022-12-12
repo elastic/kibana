@@ -47,7 +47,7 @@ export const HostsTable = () => {
   // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
   // if we introduce data view selection, we'll have to change this hook and the endpoint to accept a new parameter for the indices
   const { loading, nodes, reload } = useSnapshot({
-    filterQuery: esQuery && JSON.stringify(esQuery),
+    filterQuery: esQuery ? JSON.stringify(esQuery) : null,
     metrics: HOST_METRICS,
     groupBy: [],
     nodeType: 'host',
