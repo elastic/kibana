@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AnalyticsEventsIndexExists } from '../../../../../common/types/analytics';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
@@ -12,14 +13,14 @@ export interface AnalyticsEventsIndexExistsApiLogicArgs {
   indexName: string;
 }
 
-export type AnalyticsEventsIndexExistsApiLogicResponse = boolean;
+export type AnalyticsEventsIndexExistsApiLogicResponse = AnalyticsEventsIndexExists;
 
 export const checkAnalyticsEventsIndexExists = async ({
   indexName,
 }: AnalyticsEventsIndexExistsApiLogicArgs): Promise<AnalyticsEventsIndexExistsApiLogicResponse> => {
   const { http } = HttpLogic.values;
   const route = `/internal/enterprise_search/analytics/events/${indexName}/exists`;
-  const response = await http.get<boolean>(route);
+  const response = await http.get<AnalyticsEventsIndexExists>(route);
 
   return response;
 };

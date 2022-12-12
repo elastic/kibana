@@ -13,7 +13,7 @@ import { analyticsEventsIndexExists } from './analytics_events_index_exists';
 //   analyticsEventsIndexExists: jest.fn(),
 // }));
 
-describe('delete analytics collection lib function', () => {
+describe('analytics collection events exists function', () => {
   const mockClient = {
     asCurrentUser: {
       indices: {

@@ -18,8 +18,8 @@ describe('FetchAnalyticsCollectionApiLogic', () => {
   });
 
   describe('FetchAnalyticsCollectionsApiLogic', () => {
-    it('calls the analytics collections list api', async () => {
-      const promise = Promise.resolve(true);
+    it('calls the analytics collections exists api', async () => {
+      const promise = Promise.resolve({ exists: true });
       const indexName = 'eventsIndex';
       http.get.mockReturnValue(promise);
       const result = checkAnalyticsEventsIndexExists({ indexName });
@@ -27,7 +27,7 @@ describe('FetchAnalyticsCollectionApiLogic', () => {
       expect(http.get).toHaveBeenCalledWith(
         `/internal/enterprise_search/analytics/events/${indexName}/exists`
       );
-      await expect(result).resolves.toEqual(true);
+      await expect(result).resolves.toEqual({ exists: true });
     });
   });
 });

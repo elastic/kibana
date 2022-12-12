@@ -38,20 +38,6 @@ const createIndexNotFoundError = (error: Error, response: KibanaResponseFactory)
   });
 };
 
-const createIndexDoesNotExistError = (error: Error, response: KibanaResponseFactory) => {
-  return createError({
-    errorCode: error.message as ErrorCode,
-    message: i18n.translate(
-      'xpack.enterpriseSearch.server.routes.analyticsEventsIndexExists.analyticsEventsIndexDoesNotExistErrorMessage',
-      {
-        defaultMessage: 'Analytic events index does not exist',
-      }
-    ),
-    response,
-    statusCode: 400,
-  });
-};
-
 interface AnalyticsRouteDependencies extends RouteDependencies {
   data: DataPluginStart;
   savedObjects: SavedObjectsServiceStart;
@@ -185,21 +171,13 @@ export function registerAnalyticsRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
 
-      try {
-        const eventsIndexExists = await analyticsEventsIndexExists(client, request.params.id);
+      const eventsIndexExists = await analyticsEventsIndexExists(client, request.params.id);
 
-        if (!eventsIndexExists) {
-          throw new Error(ErrorCode.ANALYTICS_EVENTS_INDEX_NOT_FOUND);
-        }
-
-        return response.ok();
-      } catch (error) {
-        if ((error as Error).message === ErrorCode.ANALYTICS_EVENTS_INDEX_NOT_FOUND) {
-          return createIndexDoesNotExistError(error, response);
-        }
-
-        throw error;
+      if (!eventsIndexExists) {
+        return response.ok({ body: { exists: false } });
       }
+
+      return response.ok({ body: { exists: true } });
     })
   );
 }

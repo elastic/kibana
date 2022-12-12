@@ -14,26 +14,27 @@ import {
   AnalyticsEventsIndexExistsApiLogicResponse,
 } from '../../api/check_analytics_events_index/check_analytics_events_index_api_logic';
 
-export interface FetchAnalyticsCollectionActions {
+export interface AnalyticsEventsIndexExistsActions {
   apiSuccess: Actions<{}, AnalyticsEventsIndexExistsApiLogicResponse>['apiSuccess'];
   analyticsEventsIndexExists(indexName: string): { indexName: string };
   makeRequest: Actions<{}, AnalyticsEventsIndexExistsApiLogicResponse>['makeRequest'];
 }
-export interface FetchAnalyticsCollectionValues {
+export interface AnalyticsEventsIndexExistsValues {
   isLoading: boolean;
   isPresent: boolean;
   status: Status;
+  data: typeof AnalyticsEventsIndexExistsAPILogic.values.data;
 }
 
 export const AnalyticsEventsIndexExistsLogic = kea<
-  MakeLogicType<FetchAnalyticsCollectionValues, FetchAnalyticsCollectionActions>
+  MakeLogicType<AnalyticsEventsIndexExistsValues, AnalyticsEventsIndexExistsActions>
 >({
   actions: {
     analyticsEventsIndexExists: (indexName) => ({ indexName }),
   },
   connect: {
     actions: [AnalyticsEventsIndexExistsAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
-    values: [AnalyticsEventsIndexExistsAPILogic, ['status']],
+    values: [AnalyticsEventsIndexExistsAPILogic, ['status', 'data']],
   },
   listeners: ({ actions }) => ({
     analyticsEventsIndexExists: ({ indexName }) => {
@@ -42,10 +43,10 @@ export const AnalyticsEventsIndexExistsLogic = kea<
   }),
   path: ['enterprise_search', 'analytics', 'events_index'],
   selectors: ({ selectors }) => ({
-    isPresent: [() => [selectors.status], (status) => [Status.SUCCESS].includes(status)],
     isLoading: [
       () => [selectors.status],
       (status) => [Status.LOADING, Status.IDLE].includes(status),
     ],
+    isPresent: [() => [selectors.data], (data) => data?.exists === true],
   }),
 });
