@@ -47,9 +47,9 @@ describe('<CloudDefendCreatePolicyExtension />', () => {
     onChange.mockClear();
   });
 
-  it('renders a checkbox to toggle drift prevention', () => {
+  it('renders a checkbox to toggle BPF/LSM control mechanism', () => {
     const { getByTestId } = render(<WrappedComponent />);
-    const input = getByTestId('cloud-defend-drift-toggle') as HTMLInputElement;
+    const input = getByTestId('cloud-defend-control-toggle') as HTMLInputElement;
     expect(input).toBeInTheDocument();
     expect(input).toBeEnabled();
   });

@@ -85,7 +85,7 @@ export const ConfigYamlView = ({ policy, onChange }: ConfigYamlViewwDeps) => {
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <EuiSwitch
-          data-test-subj="cloud-defend-drift-toggle"
+          data-test-subj="cloud-defend-control-toggle"
           label={i18n.enableControl}
           checked={controlEnabled}
           onChange={onToggleEnabled}
