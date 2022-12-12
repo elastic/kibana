@@ -21,7 +21,13 @@ import { getSerializeTransform } from '../lib/apm/client/apm_synthtrace_es_clien
 import { fork } from '../lib/utils/stream_utils';
 import { ESDocumentWithOperation } from '../types';
 
-const scenario: Scenario<ApmFields> = async ({ logger }) => {
+const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
+  const {
+    services: numServices = 25,
+    instances: numInstances = 10,
+    txGroups: numTxGroups = 25,
+  } = scenarioOpts ?? {};
+
   return {
     bootstrap: async ({ apmEsClient }) => {
       await apmEsClient.updateComponentTemplate(
@@ -124,9 +130,6 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
       });
     },
     generate: ({ range }) => {
-      const NUM_SERVICES = 50;
-      const NUM_SERVICE_NODES = 25;
-      const NUM_TRANSACTION_GROUPS = 10;
       const TRANSACTION_TYPES = ['request', 'custom'];
       const ENVIRONMENTS = ['production', 'development'];
 
@@ -139,17 +142,17 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
 
       const OUTCOMES = ['success' as const, 'failure' as const, 'unknown' as const];
 
-      const instances = lodashRange(0, NUM_SERVICES).flatMap((serviceId) => {
+      const instances = lodashRange(0, numServices).flatMap((serviceId) => {
         const serviceName = `service-${serviceId}`;
 
         const services = ENVIRONMENTS.map((env) => apm.service(serviceName, env, 'go'));
 
-        return lodashRange(0, NUM_SERVICE_NODES).flatMap((serviceNodeId) =>
+        return lodashRange(0, numInstances).flatMap((serviceNodeId) =>
           services.map((service) => service.instance(`${serviceName}-${serviceNodeId}`))
         );
       });
 
-      const transactionGroupRange = lodashRange(0, NUM_TRANSACTION_GROUPS);
+      const transactionGroupRange = lodashRange(0, numTxGroups);
 
       return range
         .interval('1m')
