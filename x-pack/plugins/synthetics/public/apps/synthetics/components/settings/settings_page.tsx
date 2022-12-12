@@ -7,17 +7,31 @@
 
 import React from 'react';
 import { Redirect, useParams } from 'react-router-dom';
+import { SettingsTabId } from './page_header';
+import { ProjectAPIKeys } from './project_api_keys/project_api_keys';
 import { DataRetentionTab } from './data_retention';
 import { useSettingsBreadcrumbs } from './use_settings_breadcrumbs';
+import { ManagePrivateLocations } from './private_locations/manage_private_locations';
 
 export const SettingsPage = () => {
   useSettingsBreadcrumbs();
 
-  const { tabId } = useParams<{ tabId: string }>();
+  const { tabId } = useParams<{ tabId: SettingsTabId }>();
 
-  if (!tabId) {
-    return <Redirect to="/settings/alerting" />;
-  }
+  const renderTab = () => {
+    switch (tabId) {
+      case 'api-keys':
+        return <ProjectAPIKeys />;
+      case 'private-locations':
+        return <ManagePrivateLocations />;
+      case 'data-retention':
+        return <DataRetentionTab />;
+      case 'alerting':
+        return <div>TODO: Alerting</div>;
+      default:
+        return <Redirect to="/settings/alerting" />;
+    }
+  };
 
-  return <div>{tabId === 'alerting' ? <div>TODO: Alerting</div> : <DataRetentionTab />}</div>;
+  return <div>{renderTab()}</div>;
 };
