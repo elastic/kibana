@@ -15,15 +15,15 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiStepsHorizontal,
   EuiStepsHorizontalProps,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -33,8 +33,8 @@ import {
   CANCEL_BUTTON_LABEL,
   CONTINUE_BUTTON_LABEL,
 } from '../../../../../shared/constants';
-import { IndexNameLogic } from '../../index_name_logic';
 
+import { IndexNameLogic } from '../../index_name_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { ConfigurePipeline } from './configure_pipeline';
@@ -43,15 +43,13 @@ import { NoModelsPanel } from './no_models';
 import { ReviewPipeline } from './review_pipeline';
 import { TestPipeline } from './test_pipeline';
 
-import './add_ml_inference_pipeline_modal.scss';
+import './add_inference_pipeline_flyout.scss';
 
-interface AddMLInferencePipelineModalProps {
+export interface AddInferencePipelineFlyoutProps {
   onClose: () => void;
 }
 
-export const AddMLInferencePipelineModal: React.FC<AddMLInferencePipelineModalProps> = ({
-  onClose,
-}) => {
+export const AddInferencePipelineFlyout = (props: AddInferencePipelineFlyoutProps) => {
   const { indexName } = useValues(IndexNameLogic);
   const { setIndexName } = useActions(MLInferenceLogic);
   useEffect(() => {
@@ -59,25 +57,25 @@ export const AddMLInferencePipelineModal: React.FC<AddMLInferencePipelineModalPr
   }, [indexName]);
 
   return (
-    <EuiModal onClose={onClose} className="enterpriseSearchInferencePipelineModal">
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h1>
+    <EuiFlyout onClose={props.onClose} className="enterpriseSearchInferencePipelineFlyout" size="l">
+      <EuiFlyoutHeader>
+        <EuiTitle size="m">
+          <h3>
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.title',
               {
                 defaultMessage: 'Add an inference pipeline',
               }
             )}
-          </h1>
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <AddProcessorContent onClose={onClose} />
-    </EuiModal>
+          </h3>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <AddInferencePipelineContent {...props} />
+    </EuiFlyout>
   );
 };
 
-export const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClose }) => {
+export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFlyoutProps) => {
   const { ingestionMethod } = useValues(IndexViewLogic);
   const {
     createErrors,
@@ -85,10 +83,12 @@ export const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = (
     isLoading,
     addInferencePipelineModal: { step },
   } = useValues(MLInferenceLogic);
+
   // Using the value of create errors to reduce unnecessary hook calls
   const createErrorsHookDep = createErrors.join('|');
   useEffect(() => {
     if (createErrors.length === 0) return;
+    // TODO - update for flyout
     const modalOverflow = document.getElementsByClassName('euiModalBody__overflow');
     if (modalOverflow.length === 0) return;
     modalOverflow[0].scrollTop = 0;
@@ -96,17 +96,18 @@ export const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = (
 
   if (isLoading) {
     return (
-      <EuiModalBody>
+      <EuiFlyoutBody>
         <EuiLoadingSpinner size="xl" />
-      </EuiModalBody>
+      </EuiFlyoutBody>
     );
   }
   if (supportedMLModels.length === 0) {
     return <NoModelsPanel />;
   }
+
   return (
     <>
-      <EuiModalBody>
+      <EuiFlyoutBody>
         {createErrors.length > 0 && (
           <>
             <EuiCallOut
@@ -124,17 +125,19 @@ export const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = (
             <EuiSpacer />
           </>
         )}
-        <ModalSteps />
+        <AddInferencePipelineHorizontalSteps />
         {step === AddInferencePipelineSteps.Configuration && <ConfigurePipeline />}
         {step === AddInferencePipelineSteps.Test && <TestPipeline />}
         {step === AddInferencePipelineSteps.Review && <ReviewPipeline />}
-      </EuiModalBody>
-      <ModalFooter ingestionMethod={ingestionMethod} onClose={onClose} />
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter className="enterpriseSearchInferencePipelineFlyoutFooter">
+        <AddInferencePipelineFooter onClose={onClose} ingestionMethod={ingestionMethod} />
+      </EuiFlyoutFooter>
     </>
   );
 };
 
-export const ModalSteps: React.FC = () => {
+export const AddInferencePipelineHorizontalSteps: React.FC = () => {
   const {
     addInferencePipelineModal: { step },
     isPipelineDataValid,
@@ -192,8 +195,8 @@ export const ModalSteps: React.FC = () => {
   return <EuiStepsHorizontal steps={navSteps} />;
 };
 
-export const ModalFooter: React.FC<
-  AddMLInferencePipelineModalProps & { ingestionMethod: string }
+export const AddInferencePipelineFooter: React.FC<
+  AddInferencePipelineFlyoutProps & { ingestionMethod: string }
 > = ({ ingestionMethod, onClose }) => {
   const { addInferencePipelineModal: modal, isPipelineDataValid } = useValues(MLInferenceLogic);
   const { attachPipeline, createPipeline, setAddInferencePipelineStep } =
@@ -215,73 +218,71 @@ export const ModalFooter: React.FC<
       break;
   }
   return (
-    <EuiModalFooter className="enterpriseSearchInferencePipelineModalFooter">
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          {previousStep !== undefined ? (
-            <EuiButtonEmpty
-              flush="both"
-              iconType="arrowLeft"
-              onClick={() => setAddInferencePipelineStep(previousStep as AddInferencePipelineSteps)}
-            >
-              {BACK_BUTTON_LABEL}
-            </EuiButtonEmpty>
-          ) : null}
-        </EuiFlexItem>
-        <EuiFlexItem />
-        <EuiFlexItem grow={false}>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        {previousStep !== undefined ? (
           <EuiButtonEmpty
-            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-cancel`}
-            onClick={onClose}
+            flush="both"
+            iconType="arrowLeft"
+            onClick={() => setAddInferencePipelineStep(previousStep as AddInferencePipelineSteps)}
           >
-            {CANCEL_BUTTON_LABEL}
+            {BACK_BUTTON_LABEL}
           </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {nextStep !== undefined ? (
-            <EuiButton
-              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-continue`}
-              iconType="arrowRight"
-              iconSide="right"
-              onClick={() => setAddInferencePipelineStep(nextStep as AddInferencePipelineSteps)}
-              disabled={!isPipelineDataValid}
-              fill
-            >
-              {CONTINUE_BUTTON_LABEL}
-            </EuiButton>
-          ) : attachExistingPipeline ? (
-            <EuiButton
-              color="primary"
-              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-attach`}
-              disabled={!isPipelineDataValid}
-              fill
-              onClick={attachPipeline}
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.footer.attach',
-                {
-                  defaultMessage: 'Attach',
-                }
-              )}
-            </EuiButton>
-          ) : (
-            <EuiButton
-              color="success"
-              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-create`}
-              disabled={!isPipelineDataValid}
-              fill
-              onClick={createPipeline}
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.footer.create',
-                {
-                  defaultMessage: 'Create',
-                }
-              )}
-            </EuiButton>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiModalFooter>
+        ) : null}
+      </EuiFlexItem>
+      <EuiFlexItem />
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-cancel`}
+          onClick={onClose}
+        >
+          {CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {nextStep !== undefined ? (
+          <EuiButton
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-continue`}
+            iconType="arrowRight"
+            iconSide="right"
+            onClick={() => setAddInferencePipelineStep(nextStep as AddInferencePipelineSteps)}
+            disabled={!isPipelineDataValid}
+            fill
+          >
+            {CONTINUE_BUTTON_LABEL}
+          </EuiButton>
+        ) : attachExistingPipeline ? (
+          <EuiButton
+            color="primary"
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-attach`}
+            disabled={!isPipelineDataValid}
+            fill
+            onClick={attachPipeline}
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.footer.attach',
+              {
+                defaultMessage: 'Attach',
+              }
+            )}
+          </EuiButton>
+        ) : (
+          <EuiButton
+            color="success"
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-create`}
+            disabled={!isPipelineDataValid}
+            fill
+            onClick={createPipeline}
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.footer.create',
+              {
+                defaultMessage: 'Create',
+              }
+            )}
+          </EuiButton>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
