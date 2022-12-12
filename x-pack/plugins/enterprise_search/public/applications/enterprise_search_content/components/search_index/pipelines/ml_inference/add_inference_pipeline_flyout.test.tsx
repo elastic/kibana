@@ -21,11 +21,11 @@ import {
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
 import {
-  AddMLInferencePipelineModal,
-  AddProcessorContent,
-  ModalFooter,
-  ModalSteps,
-} from './add_ml_inference_pipeline_modal';
+  AddInferencePipelineFlyout,
+  AddInferencePipelineContent,
+  AddInferencePipelineHorizontalSteps,
+  AddInferencePipelineFooter,
+} from './add_inference_pipeline_flyout';
 import { ConfigurePipeline } from './configure_pipeline';
 import { AddInferencePipelineSteps, EMPTY_PIPELINE_CONFIGURATION } from './ml_inference_logic';
 import { NoModelsPanel } from './no_models';
@@ -61,7 +61,7 @@ const DEFAULT_VALUES = {
 };
 const onClose = jest.fn();
 
-describe('AddMLInferencePipelineModal', () => {
+describe('AddInferencePipelineFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues({ ...DEFAULT_VALUES });
@@ -70,32 +70,32 @@ describe('AddMLInferencePipelineModal', () => {
     });
   });
   it('renders AddProcessorContent', () => {
-    const wrapper = shallow(<AddMLInferencePipelineModal onClose={onClose} />);
-    expect(wrapper.find(AddProcessorContent)).toHaveLength(1);
+    const wrapper = shallow(<AddInferencePipelineFlyout onClose={onClose} />);
+    expect(wrapper.find(AddInferencePipelineContent)).toHaveLength(1);
   });
   describe('AddProcessorContent', () => {
     it('renders spinner when loading', () => {
       setMockValues({ ...DEFAULT_VALUES, isLoading: true });
-      const wrapper = shallow(<AddProcessorContent onClose={onClose} />);
+      const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
       expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
     });
     it('renders no models panel when there are no models', () => {
       setMockValues({ ...DEFAULT_VALUES, supportedMLModels: [] });
-      const wrapper = shallow(<AddProcessorContent onClose={onClose} />);
+      const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
       expect(wrapper.find(NoModelsPanel)).toHaveLength(1);
     });
-    it('renders ModalSteps', () => {
-      const wrapper = shallow(<AddProcessorContent onClose={onClose} />);
-      expect(wrapper.find(ModalSteps)).toHaveLength(1);
+    it('renders AddInferencePipelineHorizontalSteps', () => {
+      const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
+      expect(wrapper.find(AddInferencePipelineHorizontalSteps)).toHaveLength(1);
     });
     it('renders ModalFooter', () => {
-      const wrapper = shallow(<AddProcessorContent onClose={onClose} />);
-      expect(wrapper.find(ModalFooter)).toHaveLength(1);
+      const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
+      expect(wrapper.find(AddInferencePipelineFooter)).toHaveLength(1);
     });
     it('renders errors', () => {
       const errorMsg = 'oh no!';
       setMockValues({ ...DEFAULT_VALUES, createErrors: [errorMsg] });
-      const wrapper = shallow(<AddProcessorContent onClose={onClose} />);
+      const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
 
       expect(wrapper.find(EuiCallOut)).toHaveLength(1);
       const errorCallout = wrapper.find(EuiCallOut);
@@ -105,7 +105,7 @@ describe('AddMLInferencePipelineModal', () => {
       expect(errorCallout.find('p').text()).toBe(errorMsg);
     });
     it('renders configure step', () => {
-      const wrapper = shallow(<AddProcessorContent onClose={onClose} />);
+      const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
       expect(wrapper.find(ConfigurePipeline)).toHaveLength(1);
     });
     it('renders test step', () => {
@@ -115,7 +115,7 @@ describe('AddMLInferencePipelineModal', () => {
           step: AddInferencePipelineSteps.Test,
         },
       });
-      const wrapper = shallow(<AddProcessorContent onClose={onClose} />);
+      const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
       expect(wrapper.find(TestPipeline)).toHaveLength(1);
     });
     it('renders review step', () => {
@@ -125,11 +125,11 @@ describe('AddMLInferencePipelineModal', () => {
           step: AddInferencePipelineSteps.Review,
         },
       });
-      const wrapper = shallow(<AddProcessorContent onClose={onClose} />);
+      const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
       expect(wrapper.find(ReviewPipeline)).toHaveLength(1);
     });
   });
-  describe('ModalSteps', () => {
+  describe('AddInferencePipelineHorizontalSteps', () => {
     const CONFIGURE_STEP_INDEX = 0;
     const TEST_STEP_INDEX = 1;
     const REVIEW_STEP_INDEX = 2;
@@ -140,11 +140,11 @@ describe('AddMLInferencePipelineModal', () => {
       });
     });
     it('renders EuiStepsHorizontal', () => {
-      const wrapper = shallow(<ModalSteps />);
+      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       expect(wrapper.find(EuiStepsHorizontal)).toHaveLength(1);
     });
     it('configure step is complete with valid data', () => {
-      const wrapper = shallow(<ModalSteps />);
+      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
       const configureStep = steps.prop('steps')[CONFIGURE_STEP_INDEX];
       expect(configureStep.title).toBe('Configure');
@@ -155,7 +155,7 @@ describe('AddMLInferencePipelineModal', () => {
         ...DEFAULT_VALUES,
         isPipelineDataValid: false,
       });
-      const wrapper = shallow(<ModalSteps />);
+      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
       const configureStep = steps.prop('steps')[CONFIGURE_STEP_INDEX];
       expect(configureStep.title).toBe('Configure');
@@ -168,7 +168,7 @@ describe('AddMLInferencePipelineModal', () => {
           step: AddInferencePipelineSteps.Test,
         },
       });
-      const wrapper = shallow(<ModalSteps />);
+      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
       const testStep = steps.prop('steps')[TEST_STEP_INDEX];
       expect(testStep.title).toBe('Test');
@@ -181,7 +181,7 @@ describe('AddMLInferencePipelineModal', () => {
           step: AddInferencePipelineSteps.Review,
         },
       });
-      const wrapper = shallow(<ModalSteps />);
+      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
       const reviewStep = steps.prop('steps')[REVIEW_STEP_INDEX];
       expect(reviewStep.title).toBe('Review');
@@ -194,7 +194,7 @@ describe('AddMLInferencePipelineModal', () => {
           step: AddInferencePipelineSteps.Review,
         },
       });
-      const wrapper = shallow(<ModalSteps />);
+      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
       const configStep = steps.prop('steps')[CONFIGURE_STEP_INDEX];
       configStep.onClick({} as any);
@@ -203,14 +203,14 @@ describe('AddMLInferencePipelineModal', () => {
       );
     });
     it('clicking test step updates step', () => {
-      const wrapper = shallow(<ModalSteps />);
+      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
       const testStep = steps.prop('steps')[TEST_STEP_INDEX];
       testStep.onClick({} as any);
       expect(setAddInferencePipelineStep).toHaveBeenCalledWith(AddInferencePipelineSteps.Test);
     });
     it('clicking review step updates step', () => {
-      const wrapper = shallow(<ModalSteps />);
+      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
       const reviewStep = steps.prop('steps')[REVIEW_STEP_INDEX];
       reviewStep.onClick({} as any);
@@ -221,7 +221,7 @@ describe('AddMLInferencePipelineModal', () => {
         ...DEFAULT_VALUES,
         isPipelineDataValid: false,
       });
-      const wrapper = shallow(<ModalSteps />);
+      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
       const testStep = steps.prop('steps')[TEST_STEP_INDEX];
       testStep.onClick({} as any);
@@ -232,7 +232,7 @@ describe('AddMLInferencePipelineModal', () => {
         ...DEFAULT_VALUES,
         isPipelineDataValid: false,
       });
-      const wrapper = shallow(<ModalSteps />);
+      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
       const reviewStep = steps.prop('steps')[REVIEW_STEP_INDEX];
       reviewStep.onClick({} as any);
@@ -250,7 +250,9 @@ describe('AddMLInferencePipelineModal', () => {
       setMockActions(actions);
     });
     it('renders cancel button on config step', () => {
-      const wrapper = shallow(<ModalFooter ingestionMethod={ingestionMethod} onClose={onClose} />);
+      const wrapper = shallow(
+        <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
+      );
       const cancelBtn = wrapper.find(EuiButtonEmpty);
       expect(cancelBtn).toHaveLength(1);
       expect(cancelBtn.prop('children')).toBe('Cancel');
@@ -265,7 +267,9 @@ describe('AddMLInferencePipelineModal', () => {
           step: AddInferencePipelineSteps.Test,
         },
       });
-      const wrapper = shallow(<ModalFooter ingestionMethod={ingestionMethod} onClose={onClose} />);
+      const wrapper = shallow(
+        <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
+      );
       expect(wrapper.find(EuiButtonEmpty)).toHaveLength(2);
       const cancelBtn = wrapper.find(EuiButtonEmpty).at(1);
       expect(cancelBtn.prop('children')).toBe('Cancel');
@@ -280,7 +284,9 @@ describe('AddMLInferencePipelineModal', () => {
           step: AddInferencePipelineSteps.Review,
         },
       });
-      const wrapper = shallow(<ModalFooter ingestionMethod={ingestionMethod} onClose={onClose} />);
+      const wrapper = shallow(
+        <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
+      );
       expect(wrapper.find(EuiButtonEmpty)).toHaveLength(2);
       const cancelBtn = wrapper.find(EuiButtonEmpty).at(1);
       expect(cancelBtn.prop('children')).toBe('Cancel');
@@ -295,7 +301,9 @@ describe('AddMLInferencePipelineModal', () => {
           step: AddInferencePipelineSteps.Test,
         },
       });
-      const wrapper = shallow(<ModalFooter ingestionMethod={ingestionMethod} onClose={onClose} />);
+      const wrapper = shallow(
+        <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
+      );
       expect(wrapper.find(EuiButtonEmpty)).toHaveLength(2);
       const backBtn = wrapper.find(EuiButtonEmpty).at(0);
       expect(backBtn.prop('children')).toBe('Back');
@@ -312,7 +320,9 @@ describe('AddMLInferencePipelineModal', () => {
           step: AddInferencePipelineSteps.Review,
         },
       });
-      const wrapper = shallow(<ModalFooter ingestionMethod={ingestionMethod} onClose={onClose} />);
+      const wrapper = shallow(
+        <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
+      );
       expect(wrapper.find(EuiButtonEmpty)).toHaveLength(2);
       const backBtn = wrapper.find(EuiButtonEmpty).at(0);
       expect(backBtn.prop('children')).toBe('Back');
@@ -322,7 +332,9 @@ describe('AddMLInferencePipelineModal', () => {
       );
     });
     it('renders enabled Continue with valid data', () => {
-      const wrapper = shallow(<ModalFooter ingestionMethod={ingestionMethod} onClose={onClose} />);
+      const wrapper = shallow(
+        <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
+      );
       const contBtn = wrapper.find(EuiButton);
       expect(contBtn).toHaveLength(1);
       expect(contBtn.prop('children')).toBe('Continue');
@@ -334,7 +346,9 @@ describe('AddMLInferencePipelineModal', () => {
     });
     it('renders disabled Continue with invalid data', () => {
       setMockValues({ ...DEFAULT_VALUES, isPipelineDataValid: false });
-      const wrapper = shallow(<ModalFooter ingestionMethod={ingestionMethod} onClose={onClose} />);
+      const wrapper = shallow(
+        <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
+      );
       expect(wrapper.find(EuiButton)).toHaveLength(1);
       expect(wrapper.find(EuiButton).prop('children')).toBe('Continue');
       expect(wrapper.find(EuiButton).prop('disabled')).toBe(true);
@@ -347,7 +361,9 @@ describe('AddMLInferencePipelineModal', () => {
           step: AddInferencePipelineSteps.Test,
         },
       });
-      const wrapper = shallow(<ModalFooter ingestionMethod={ingestionMethod} onClose={onClose} />);
+      const wrapper = shallow(
+        <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
+      );
       const contBtn = wrapper.find(EuiButton);
       expect(contBtn).toHaveLength(1);
       expect(contBtn.prop('children')).toBe('Continue');
@@ -373,7 +389,9 @@ describe('AddMLInferencePipelineModal', () => {
         },
       });
 
-      const wrapper = shallow(<ModalFooter ingestionMethod={ingestionMethod} onClose={onClose} />);
+      const wrapper = shallow(
+        <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
+      );
       const actionButton = wrapper.find(EuiButton);
       expect(actionButton).toHaveLength(1);
       expect(actionButton.prop('children')).toBe('Create');
@@ -397,7 +415,9 @@ describe('AddMLInferencePipelineModal', () => {
         },
       });
 
-      const wrapper = shallow(<ModalFooter ingestionMethod={ingestionMethod} onClose={onClose} />);
+      const wrapper = shallow(
+        <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
+      );
       const actionButton = wrapper.find(EuiButton);
       expect(actionButton).toHaveLength(1);
       expect(actionButton.prop('children')).toBe('Attach');
