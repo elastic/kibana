@@ -52,5 +52,6 @@ export interface GuidedOnboardingApi {
   ) => Promise<{ pluginState: PluginState } | undefined>;
   skipGuidedOnboarding: () => Promise<{ pluginState: PluginState } | undefined>;
   isGuidePanelOpen$: Observable<boolean>;
+  isLoading$: Observable<boolean>;
   getGuideConfig: (guideId: GuideId) => Promise<GuideConfig | undefined>;
 }

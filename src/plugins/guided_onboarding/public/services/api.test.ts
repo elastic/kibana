@@ -36,6 +36,12 @@ describe('GuidedOnboarding ApiService', () => {
   let subscription: Subscription;
   let anotherSubscription: Subscription;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
   beforeEach(() => {
     httpClient = httpServiceMock.createStartContract({ basePath: '/base/path' });
     httpClient.get.mockResolvedValue({

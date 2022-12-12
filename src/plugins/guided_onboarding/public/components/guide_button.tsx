@@ -20,6 +20,7 @@ interface GuideButtonProps {
   toggleGuidePanel: () => void;
   isGuidePanelOpen: boolean;
   navigateToLandingPage: () => void;
+  isLoading: boolean;
 }
 
 const getStepNumber = (state: GuideState): number | undefined => {
@@ -46,10 +47,8 @@ export const GuideButton = ({
   toggleGuidePanel,
   isGuidePanelOpen,
   navigateToLandingPage,
+  isLoading,
 }: GuideButtonProps) => {
-  // TODO handle loading state
-  // https://github.com/elastic/kibana/issues/139799
-
   // if there is no active guide
   if (!pluginState || !pluginState.activeGuide || !pluginState.activeGuide.isActive) {
     // if still active period and the user has not started a guide or skipped the guide,
@@ -83,6 +82,7 @@ export const GuideButton = ({
   );
   const button = (
     <EuiButton
+      isLoading={isLoading}
       onClick={toggleGuidePanel}
       color="success"
       fill

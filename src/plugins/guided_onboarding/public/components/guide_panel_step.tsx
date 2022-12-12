@@ -32,6 +32,7 @@ interface GuideStepProps {
   stepNumber: number;
   handleButtonClick: () => void;
   telemetryGuideId: string;
+  isLoading: boolean;
 }
 
 export const GuideStep = ({
@@ -41,6 +42,7 @@ export const GuideStep = ({
   stepConfig,
   handleButtonClick,
   telemetryGuideId,
+  isLoading,
 }: GuideStepProps) => {
   const { euiTheme } = useEuiTheme();
   const styles = getGuidePanelStepStyles(euiTheme, stepStatus);
@@ -111,7 +113,8 @@ export const GuideStep = ({
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    onClick={() => handleButtonClick()}
+                    isLoading={isLoading}
+                    onClick={handleButtonClick}
                     fill
                     // data-test-subj used for FS tracking and tests
                     data-test-subj={`onboarding--stepButton--${telemetryGuideId}--step${stepNumber}`}

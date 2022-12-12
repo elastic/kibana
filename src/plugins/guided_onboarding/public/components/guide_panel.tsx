@@ -65,6 +65,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
   const [isQuitGuideModalOpen, setIsQuitGuideModalOpen] = useState(false);
   const [pluginState, setPluginState] = useState<PluginState | undefined>(undefined);
   const [guideConfig, setGuideConfig] = useState<GuideConfig | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const styles = getGuidePanelStyles(euiTheme);
 
@@ -72,39 +73,42 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
     setIsGuideOpen((prevIsGuideOpen) => !prevIsGuideOpen);
   };
 
-  const handleStepButtonClick = async (step: GuideStepStatus, stepConfig: StepConfig) => {
-    if (pluginState) {
-      const { id, status } = step;
-      const guideId: GuideId = pluginState!.activeGuide!.guideId!;
+  const handleStepButtonClick = useCallback(
+    async (step: GuideStepStatus, stepConfig: StepConfig) => {
+      if (pluginState) {
+        const { id, status } = step;
+        const guideId: GuideId = pluginState!.activeGuide!.guideId!;
 
-      try {
-        if (status === 'ready_to_complete') {
-          return await api.completeGuideStep(guideId, id);
-        }
+        try {
+          if (status === 'ready_to_complete') {
+            return await api.completeGuideStep(guideId, id);
+          }
 
-        if (status === 'active' || status === 'in_progress') {
-          await api.startGuideStep(guideId, id);
+          if (status === 'active' || status === 'in_progress') {
+            await api.startGuideStep(guideId, id);
 
-          if (stepConfig.location) {
-            await application.navigateToApp(stepConfig.location.appID, {
-              path: stepConfig.location.path,
-            });
+            if (stepConfig.location) {
+              await application.navigateToApp(stepConfig.location.appID, {
+                path: stepConfig.location.path,
+              });
 
-            if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
-              await api.completeGuideStep(guideId, id);
+              if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
+                await api.completeGuideStep(guideId, id);
+              }
             }
           }
+        } catch (error) {
+          notifications.toasts.addDanger({
+            title: i18n.translate('guidedOnboarding.dropdownPanel.stepHandlerError', {
+              defaultMessage: 'Unable to update the guide. Wait a moment and try again.',
+            }),
+            text: error.message,
+          });
         }
-      } catch (error) {
-        notifications.toasts.addDanger({
-          title: i18n.translate('guidedOnboarding.dropdownPanel.stepHandlerError', {
-            defaultMessage: 'Unable to update the guide. Wait a moment and try again.',
-          }),
-          text: error.message,
-        });
       }
-    }
-  };
+    },
+    [api, application, notifications.toasts, pluginState]
+  );
 
   const navigateToLandingPage = () => {
     setIsGuideOpen(false);
@@ -150,6 +154,13 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
   }, [api]);
 
   useEffect(() => {
+    const subscription = api.isLoading$.subscribe((isLoadingValue) => {
+      setIsLoading(isLoadingValue);
+    });
+    return () => subscription.unsubscribe();
+  }, [api]);
+
+  useEffect(() => {
     const subscription = api.isGuidePanelOpen$.subscribe((isGuidePanelOpen) => {
       setIsGuideOpen(isGuidePanelOpen);
     });
@@ -159,16 +170,15 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
   const fetchGuideConfig = useCallback(async () => {
     if (pluginState?.activeGuide?.guideId) {
       const config = await api.getGuideConfig(pluginState.activeGuide.guideId);
-      if (config) setGuideConfig(config);
+      if (config) {
+        setGuideConfig(config);
+      }
     }
   }, [api, pluginState]);
 
   useEffect(() => {
     fetchGuideConfig();
   }, [fetchGuideConfig]);
-
-  // TODO handle loading state
-  // https://github.com/elastic/kibana/issues/139799
 
   const stepsCompleted = getProgress(pluginState?.activeGuide);
   const isGuideReadyToComplete = pluginState?.activeGuide?.status === 'ready_to_complete';
@@ -177,6 +187,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
     <>
       <div css={styles.setupButton}>
         <GuideButton
+          isLoading={isLoading}
           pluginState={pluginState}
           guideConfig={guideConfig}
           toggleGuidePanel={toggleGuide}
@@ -290,6 +301,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
                 if (stepState) {
                   return (
                     <GuideStep
+                      isLoading={isLoading}
                       accordionId={accordionId}
                       stepStatus={stepState.status}
                       stepConfig={step}
@@ -306,6 +318,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
                 <EuiFlexGroup justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      isLoading={isLoading}
                       onClick={() => completeGuide(guideConfig.completedGuideRedirectLocation)}
                       fill
                       // data-test-subj used for FS tracking and testing
