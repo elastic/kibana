@@ -17,6 +17,7 @@ import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import { CustomBrandingService } from '@kbn/core-custom-branding-internal';
 import type {
   App,
   AppDeepLink,
@@ -105,6 +106,12 @@ export class ApplicationService {
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
+  private customizedLogo$ = new BehaviorSubject<string | undefined>(undefined);
+  private logo$ = new BehaviorSubject<string | undefined>(undefined);
+  private customBranding$ = CustomBrandingService({
+    customizedLogo$: this.customizedLogo$,
+    logo$: this.logo$,
+  });
 
   public setup({
     http: { basePath },
@@ -345,6 +352,14 @@ export class ApplicationService {
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
+            customizedLogo$={
+              this.customBranding$.get('customizedLogo') ??
+              this.customBranding$.get('customizedLogo').pipe(takeUntil(this.stop$))
+            }
+            logo$={
+              this.customBranding$.get('logo') ??
+              this.customBranding$.get('logo').pipe(takeUntil(this.stop$))
+            }
           />
         );
       },

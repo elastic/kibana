@@ -34,7 +34,6 @@ import { NavLinksService } from './nav_links';
 import { RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import type { InternalChromeStart } from './types';
-import { CustomBrandingService } from '@kbn/core-custom-branding-internal';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 const SNAPSHOT_REGEX = /-snapshot/i;

@@ -28,24 +28,23 @@ export function CustomBrandingService({ logo, favicon, pageTitle, customizedLogo
   const favicon$ = getObservable$(favicon);
   const pageTitle$ = getObservable$(pageTitle);
   const customizedLogo$ = getObservable$(customizedLogo);
-  async () => {
-    return {
-      // get what is passed to the service
-      get: (property: string | Observable<string> | undefined) => getObservable$(property),
+  return {
+    // get what is passed to the service
+    get: (property: string | Observable<string> | undefined) => getObservable$(property),
 
-      // set the parameters which may have come in as observables if defined
-      set: () =>
-        customBrandingPerOperator$
-          .set('logo', logo$)
-          .set('favicon', favicon$)
-          .set('pageTitle', pageTitle$)
-          .set('customizedLogo', customizedLogo$),
-    };
+    // set the parameters which may have come in as observables if defined
+    set: () =>
+      customBrandingPerOperator$
+        .set('logo', logo$)
+        .set('favicon', favicon$)
+        .set('pageTitle', pageTitle$)
+        .set('customizedLogo', customizedLogo$),
   };
 }
 
 // Helper function
 export const getObservable$ = (logo: string | Observable<string> | undefined) =>
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useObservable(
     logo
       ? (logo as unknown as Observable<string>)

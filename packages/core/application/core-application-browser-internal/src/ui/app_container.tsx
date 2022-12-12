@@ -36,7 +36,7 @@ interface Props {
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   createScopedHistory: (appUrl: string) => ScopedHistory;
   setIsMounting: (isMounting: boolean) => void;
-  customBranding$: Map<string, Observable<string>>;
+  customLogo$?: Observable<string>;
 }
 
 export const AppContainer: FC<Props> = ({
@@ -49,7 +49,7 @@ export const AppContainer: FC<Props> = ({
   appStatus,
   setIsMounting,
   theme$,
-  customBranding$,
+  customLogo$,
 }: Props) => {
   const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
@@ -111,7 +111,7 @@ export const AppContainer: FC<Props> = ({
     appPath,
     setIsMounting,
     theme$,
-    customBranding$,
+    customLogo$,
   ]);
 
   return (
