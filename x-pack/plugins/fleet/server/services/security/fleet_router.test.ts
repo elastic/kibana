@@ -87,12 +87,11 @@ describe('FleetAuthzRouter', () => {
 
     appContextService.start(mockContext);
 
-    const { router: wrappedRouter, onPostAuthHandler } = makeRouterWithFleetAuthz(fakeRouter);
-    wrappedRouter.get({ ...routeConfig } as RouteConfig<any, any, any, any>, fakeHandler);
+    const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter);
+    fleetAuthzRouter.get({ ...routeConfig } as RouteConfig<any, any, any, any>, fakeHandler);
     const wrappedHandler = fakeRouter.get.mock.calls[0][1];
     const wrappedRouteConfig = fakeRouter.get.mock.calls[0][0];
     const resFactory = { forbidden: jest.fn(() => 'forbidden'), ok: jest.fn(() => 'ok') };
-    const fakeToolkit = { next: jest.fn(() => 'next') };
 
     const fakeReq = {
       route: {
@@ -101,11 +100,6 @@ describe('FleetAuthzRouter', () => {
         options: wrappedRouteConfig.options,
       },
     } as any;
-    const onPostRes = await onPostAuthHandler(fakeReq, resFactory as any, fakeToolkit as any);
-
-    if ((onPostRes as unknown) !== 'next') {
-      return onPostRes;
-    }
 
     const res = await wrappedHandler(
       {

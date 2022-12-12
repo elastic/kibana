@@ -416,10 +416,8 @@ export class FleetPlugin
     // Only some endpoints require superuser so we pass a raw IRouter here
 
     // For all the routes we enforce the user to have role superuser
-    const { router: fleetAuthzRouter, onPostAuthHandler: fleetAuthzOnPostAuthHandler } =
-      makeRouterWithFleetAuthz(router);
+    const fleetAuthzRouter = makeRouterWithFleetAuthz(router);
 
-    core.http.registerOnPostAuth(fleetAuthzOnPostAuthHandler);
     registerRoutes(fleetAuthzRouter, config);
 
     this.telemetryEventsSender.setup(deps.telemetry);

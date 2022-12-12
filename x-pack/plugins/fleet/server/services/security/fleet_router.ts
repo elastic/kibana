@@ -10,7 +10,6 @@ import type {
   IRouter,
   KibanaRequest,
   KibanaResponseFactory,
-  OnPostAuthHandler,
   RequestHandler,
   RouteMethod,
 } from '@kbn/core/server';
@@ -24,29 +23,9 @@ import {
   doesNotHaveRequiredFleetAuthz,
 } from './security';
 
-function shouldHandlePostAuthRequest(req: KibanaRequest) {
-  if (req?.route?.options?.tags) {
-    return req.route.options.tags.some((tag) => tag.match(/^fleet:authz/));
-  }
-  return false;
-}
-
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
   router: IRouter<TContext>
-): { router: FleetAuthzRouter<TContext>; onPostAuthHandler: OnPostAuthHandler } {
-  // TODO:PT Delete this middleware function as it is no longer used.
-  const fleetAuthzOnPostAuthHandler: OnPostAuthHandler = async (req, res, toolkit) => {
-    if (!shouldHandlePostAuthRequest(req)) {
-      return toolkit.next();
-    }
-
-    if (!checkSecurityEnabled()) {
-      return res.forbidden();
-    }
-
-    return toolkit.next();
-  };
-
+): FleetAuthzRouter<TContext> {
   const routerAuthzWrapper = async <R extends RouteMethod>({
     context,
     request,
@@ -107,5 +86,5 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     routerPath: router.routerPath,
   };
 
-  return { router: fleetAuthzRouter, onPostAuthHandler: fleetAuthzOnPostAuthHandler };
+  return fleetAuthzRouter;
 }
