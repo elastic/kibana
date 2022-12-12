@@ -17,11 +17,11 @@ import {
   EuiPopover,
   EuiButtonIcon,
   EuiPopoverTitle,
-  EuiButtonGroup,
   toSentenceCase,
   EuiSelectableOption,
   EuiButtonGroupOptionProps,
   EuiPanel,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
@@ -31,7 +31,7 @@ import { css } from '@emotion/react';
 
 export type OptionsListSortBy = '_count' | '_key';
 
-export const DEFAULT_SORT: SortingType = { by: '_count', direction: 'desc' };
+export const DEFAULT_SORT: SortingType = { by: '_key', direction: 'desc' };
 
 export const sortDirections: Readonly<Direction[]> = ['asc', 'desc'] as const;
 export type SortDirection = typeof sortDirections[number];
@@ -40,7 +40,7 @@ export interface SortingType {
   direction: SortDirection;
 }
 
-export const getCompatibleSortingTypes = (): OptionsListSortBy[] => ['_count', '_key'];
+export const getCompatibleSortingTypes = (): OptionsListSortBy[] => ['_key', '_count'];
 
 type SortByItem = EuiSelectableOption & {
   data: { sortBy: OptionsListSortBy };
@@ -70,7 +70,6 @@ export function DataViewsList({
   selectableProps,
   searchListInputId,
 }: DataViewsListProps) {
-  const field = '';
   const sort = DEFAULT_SORT;
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
@@ -81,16 +80,16 @@ export function DataViewsList({
         defaultMessage: 'Sort directions',
       }),
     sortBy: {
-      _count: {
-        getSortByLabel: () =>
-          i18n.translate('controls.optionsList.popover.sortBy.docCount', {
-            defaultMessage: 'By document count',
-          }),
-      },
       _key: {
         getSortByLabel: () =>
           i18n.translate('controls.optionsList.popover.sortBy.alphabetical', {
             defaultMessage: 'Alphabetically',
+          }),
+      },
+      _count: {
+        getSortByLabel: () =>
+          i18n.translate('controls.optionsList.popover.sortBy.docCount', {
+            defaultMessage: 'Document count',
           }),
       },
     },
@@ -127,7 +126,6 @@ export function DataViewsList({
         return {
           id: key,
           iconType: `sort${toSentenceCase(key)}ending`,
-          'data-test-subj': `optionsList__sortOrder_${key}`,
           label: editorAndPopover.sortOrder[key].getSortOrderLabel(),
         } as SortOrderItem;
       }),
@@ -219,40 +217,45 @@ export function DataViewsList({
                     closePopover={() => setIsSortingPopoverOpen(false)}
                     panelClassName={'optionsList--sortPopover'}
                   >
-                    <EuiPopoverTitle paddingSize="s">
-                      <EuiFlexGroup alignItems="center" responsive={false}>
-                        <EuiFlexItem>
-                          {i18n.translate('controls.optionsList.popover.sortTitle', {
-                            defaultMessage: 'Sort',
-                          })}
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonGroup
-                            isIconOnly
-                            buttonSize="compressed"
-                            options={sortOrderOptions}
-                            idSelected={sort.direction}
-                            legend={i18n.translate('controls.optionsList.popover.sortDirections', {
-                              defaultMessage: 'Sort directions',
-                            })}
-                            onChange={(value) => {}}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPopoverTitle>
-                    <EuiSelectable
-                      options={sortByOptions}
-                      singleSelection="always"
-                      onChange={onSortByChange}
-                      id="optionsList_sortingOptions"
-                      listProps={{ bordered: false }}
-                      data-test-subj="optionsListControl__sortingOptions"
-                      aria-label={i18n.translate('controls.optionsList.popover.sortDescription', {
-                        defaultMessage: 'Define the sort order',
-                      })}
-                    >
-                      {(list) => list}
-                    </EuiSelectable>
+                    <div style={{ width: '180px' }}>
+                      <EuiPopoverTitle paddingSize="s">
+                        {i18n.translate('controls.optionsList.popover.sortTitle', {
+                          defaultMessage: 'Sort by',
+                        })}
+                      </EuiPopoverTitle>
+                      <EuiSelectable
+                        options={sortByOptions}
+                        singleSelection="always"
+                        onChange={onSortByChange}
+                        id="optionsList_sortingOptions"
+                        listProps={{ bordered: false }}
+                        data-test-subj="optionsListControl__sortingOptions"
+                        aria-label={i18n.translate('controls.optionsList.popover.sortDescription', {
+                          defaultMessage: 'Define the sort order',
+                        })}
+                      >
+                        {(sortByOption) => sortByOption}
+                      </EuiSelectable>
+                      <EuiHorizontalRule margin="none" />
+                      <EuiPopoverTitle paddingSize="s">
+                        {i18n.translate('controls.optionsList.popover.sortTitle', {
+                          defaultMessage: 'Order',
+                        })}
+                      </EuiPopoverTitle>
+                      <EuiSelectable
+                        options={sortOrderOptions}
+                        singleSelection="always"
+                        onChange={onSortByChange}
+                        id="optionsList_sortingOptions"
+                        listProps={{ bordered: false }}
+                        data-test-subj="optionsListControl__sortingOptions"
+                        aria-label={i18n.translate('controls.optionsList.popover.sortDescription', {
+                          defaultMessage: 'Define the sort order',
+                        })}
+                      >
+                        {(sortOrderOption) => sortOrderOption}
+                      </EuiSelectable>
+                    </div>
                   </EuiPopover>
                 </EuiFlexItem>
               </EuiFlexGroup>
