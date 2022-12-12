@@ -29,17 +29,17 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 
-jest.mock('../../common/containers/sourcerer');
+jest.mock('../../../common/containers/sourcerer');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
-jest.mock('../../common/components/search_bar', () => ({
+jest.mock('../../../common/components/search_bar', () => ({
   SiemSearchBar: () => null,
 }));
-jest.mock('../../common/components/query_bar', () => ({
+jest.mock('../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
-jest.mock('../../common/components/visualization_actions', () => ({
+jest.mock('../../../common/components/visualization_actions', () => ({
   VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
 }));
 
@@ -80,8 +80,8 @@ const mockProps = {
 
 const mockMapVisibility = jest.fn();
 const mockNavigateToApp = jest.fn();
-jest.mock('../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
 
   return {
     ...original,

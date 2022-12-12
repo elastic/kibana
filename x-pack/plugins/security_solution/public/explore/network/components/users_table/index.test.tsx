@@ -27,7 +27,7 @@ import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 
 describe('Users Table Component', () => {
   const loadPage = jest.fn();

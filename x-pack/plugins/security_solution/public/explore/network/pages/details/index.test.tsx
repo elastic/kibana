@@ -24,7 +24,7 @@ import { createStore } from '../../../../common/store';
 import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
-jest.mock('../../../common/containers/use_search_strategy', () => ({
+jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn().mockReturnValue({
     loading: false,
     result: {
@@ -64,8 +64,8 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../containers/details', () => ({
   useNetworkDetails: jest.fn().mockReturnValue([true, { networkDetails: {} }]),
 }));
-jest.mock('../../../common/containers/sourcerer');
-jest.mock('../../../common/containers/use_global_time', () => ({
+jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',
     isInitializing: false,
@@ -83,8 +83,8 @@ const useAddToTimeline = () => ({
   startDragToTimeline: jest.fn(),
 });
 
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
   return {
     ...original,
     useNavigation: () => ({
@@ -103,10 +103,10 @@ jest.mock('../../../common/lib/kibana', () => {
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
-jest.mock('../../../common/components/search_bar', () => ({
+jest.mock('../../../../common/components/search_bar', () => ({
   SiemSearchBar: () => null,
 }));
-jest.mock('../../../common/components/query_bar', () => ({
+jest.mock('../../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
 

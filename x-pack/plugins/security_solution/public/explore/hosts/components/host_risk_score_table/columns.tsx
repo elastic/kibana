@@ -22,7 +22,7 @@ import * as i18n from './translations';
 import { HostsTableType } from '../../store/model';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreFields } from '../../../../../common/search_strategy';
-import { RiskScore } from '../../../risk_score/components/severity/common';
+import { RiskScore } from '../../../components/risk_score/severity/common';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,

@@ -13,9 +13,9 @@ import { AuthenticationsQueryTabBody } from './authentications_query_tab_body';
 import { UsersType } from '../../store/model';
 import { useAuthentications } from '../../../containers/authentications';
 
-jest.mock('../../../common/containers/authentications');
-jest.mock('../../../common/containers/query_toggle');
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../containers/authentications');
+jest.mock('../../../../common/containers/query_toggle');
+jest.mock('../../../../common/lib/kibana');
 
 describe('Authentications query tab body', () => {
   const mockUseAuthentications = useAuthentications as jest.Mock;

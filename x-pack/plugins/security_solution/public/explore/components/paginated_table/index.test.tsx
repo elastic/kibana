@@ -17,7 +17,7 @@ import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { Direction } from '../../../../common/search_strategy';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-jest.mock('../../containers/query_toggle');
+jest.mock('../../../common/containers/query_toggle');
 
 jest.mock('react', () => {
   const r = jest.requireActual('react');

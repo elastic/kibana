@@ -32,15 +32,15 @@ import type { LensAttributes } from '../../../common/components/visualization_ac
 const from = '2019-06-15T06:00:00.000Z';
 const to = '2019-06-18T06:00:00.000Z';
 
-jest.mock('../charts/areachart', () => {
+jest.mock('../../../common/components/charts/areachart', () => {
   return { AreaChart: () => <div className="areachart" /> };
 });
 
-jest.mock('../charts/barchart', () => {
+jest.mock('../../../common/components/charts/barchart', () => {
   return { BarChart: () => <div className="barchart" /> };
 });
 
-jest.mock('../visualization_actions', () => {
+jest.mock('../../../common/components/visualization_actions', () => {
   return {
     VisualizationActions: () => <div className="visualizationActions" />,
     HISTOGRAM_ACTIONS_BUTTON_CLASS: 'histogram-actions-trigger',

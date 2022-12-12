@@ -12,8 +12,8 @@ import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { useFetch } from '../../../../common/hooks/use_fetch';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 
-jest.mock('../../../common/hooks/use_fetch');
-jest.mock('../../../common/components/ml/hooks/use_ml_capabilities');
+jest.mock('../../../../common/hooks/use_fetch');
+jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 
 const mockFetch = jest.fn();
 const mockUseMlCapabilities = useMlCapabilities as jest.Mock;

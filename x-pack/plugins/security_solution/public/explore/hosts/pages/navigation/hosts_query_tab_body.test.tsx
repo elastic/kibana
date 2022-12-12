@@ -14,8 +14,8 @@ import { HostsQueryTabBody } from './hosts_query_tab_body';
 import { HostsType } from '../../store/model';
 
 jest.mock('../../containers/hosts');
-jest.mock('../../../common/containers/query_toggle');
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/containers/query_toggle');
+jest.mock('../../../../common/lib/kibana');
 
 describe('Hosts query tab body', () => {
   const mockUseAllHost = useAllHost as jest.Mock;

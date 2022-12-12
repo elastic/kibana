@@ -13,7 +13,7 @@ import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_ite
 import { useRiskScore } from '../../../../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../../../common/components/empty_value';
-import { RiskScore } from '../../../../../../explore/risk_score/components/severity/common';
+import { RiskScore } from '../../../../../../explore/components/risk_score/severity/common';
 import {
   FirstLastSeen,
   FirstLastSeenType,

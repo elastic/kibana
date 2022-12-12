@@ -29,8 +29,8 @@ import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import { TableId } from '../../../../../common/types';
 
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
 
   return {
     ...original,
@@ -44,13 +44,13 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../common/utils/normalize_time_range');
+jest.mock('../../../../common/utils/normalize_time_range');
 
-jest.mock('../../../common/containers/source', () => ({
+jest.mock('../../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
 }));
 
-jest.mock('../../../common/containers/use_global_time', () => ({
+jest.mock('../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',
     isInitializing: false,
@@ -61,17 +61,17 @@ jest.mock('../../../common/containers/use_global_time', () => ({
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
-jest.mock('../../../common/components/search_bar', () => ({
+jest.mock('../../../../common/components/search_bar', () => ({
   SiemSearchBar: () => null,
 }));
-jest.mock('../../../common/components/query_bar', () => ({
+jest.mock('../../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
-jest.mock('../../../common/components/visualization_actions', () => ({
+jest.mock('../../../../common/components/visualization_actions', () => ({
   VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
 }));
 

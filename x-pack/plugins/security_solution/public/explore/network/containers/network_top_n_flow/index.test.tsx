@@ -12,7 +12,7 @@ import { useSearchStrategy } from '../../../../common/containers/use_search_stra
 import { networkModel } from '../../store';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
-jest.mock('../../../common/containers/use_search_strategy', () => ({
+jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;

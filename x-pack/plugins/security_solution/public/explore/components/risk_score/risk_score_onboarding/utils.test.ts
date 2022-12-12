@@ -24,7 +24,7 @@ import {
   uninstallRiskScoreModule,
 } from './utils';
 
-jest.mock('../../containers/onboarding/api');
+jest.mock('../../../containers/risk_score/onboarding/api');
 
 const mockHttp = {
   post: jest.fn(),

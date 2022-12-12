@@ -16,7 +16,7 @@ import { SummaryValueCell } from '../../../../../../common/components/event_deta
 import { useRiskScore } from '../../../../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../../../common/components/empty_value';
-import { RiskScore } from '../../../../../../explore/risk_score/components/severity/common';
+import { RiskScore } from '../../../../../../explore/components/risk_score/severity/common';
 import {
   FirstLastSeen,
   FirstLastSeenType,

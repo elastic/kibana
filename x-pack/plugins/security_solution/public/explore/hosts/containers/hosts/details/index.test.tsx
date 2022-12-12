@@ -9,7 +9,7 @@ import { TestProviders } from '../../../../../common/mock';
 import { ID, useHostDetails } from '.';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
 
-jest.mock('../../../../common/containers/use_search_strategy', () => ({
+jest.mock('../../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;

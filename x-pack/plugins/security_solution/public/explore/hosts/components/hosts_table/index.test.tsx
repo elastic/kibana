@@ -25,9 +25,9 @@ import { HostsTable } from '.';
 import { mockData } from './mock';
 import { render } from '@testing-library/react';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 
-jest.mock('../../../common/lib/kibana/hooks', () => ({
+jest.mock('../../../../common/lib/kibana/hooks', () => ({
   useNavigateTo: () => ({
     navigateTo: jest.fn(),
   }),
@@ -35,18 +35,18 @@ jest.mock('../../../common/lib/kibana/hooks', () => ({
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
-jest.mock('../../../common/components/search_bar', () => ({
+jest.mock('../../../../common/components/search_bar', () => ({
   SiemSearchBar: () => null,
 }));
-jest.mock('../../../common/components/query_bar', () => ({
+jest.mock('../../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
 
-jest.mock('../../../common/components/link_to');
+jest.mock('../../../../common/components/link_to');
 
 const mockUseMlCapabilities = jest.fn();
 
-jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
+jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
   useMlCapabilities: () => mockUseMlCapabilities(),
 }));
 
