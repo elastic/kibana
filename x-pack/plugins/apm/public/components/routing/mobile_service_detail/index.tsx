@@ -21,6 +21,7 @@ import { MobileServiceTemplate } from '../templates/mobile_service_template';
 import { MobileServiceOverview } from '../../app/mobile/service_overview';
 import { MobileTransactionOverview } from '../../app/mobile/transaction_overview';
 import { TransactionDetails } from '../../app/transaction_details';
+import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to_default_service_route_view';
 
 export function page({
   title,
@@ -91,6 +92,7 @@ export const mobileServiceDetail = {
         kuery: '',
         environment: ENVIRONMENT_ALL.value,
         serviceGroup: '',
+        transactionType: 'mobile',
         latencyAggregationType: LatencyAggregationType.avg,
       },
     },
@@ -188,9 +190,9 @@ export const mobileServiceDetail = {
           hidden: true,
         },
       }),
-      // '/mobile-services/{serviceName}/': {
-      //   element: <RedirectToDefaultServiceRouteView />,
-      // },
+      '/mobile-services/{serviceName}/': {
+        element: <RedirectToDefaultServiceRouteView />,
+      },
     },
   },
 };
