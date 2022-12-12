@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AlertEcsData } from '../../common/contexts';
 
 export interface OsqueryActionResultsProps {
@@ -12,4 +13,5 @@ export interface OsqueryActionResultsProps {
   ruleName?: string[];
   alertId: string;
   ecsData: AlertEcsData;
+  actionItems?: estypes.SearchResponse<object>['hits']['hits'];
 }

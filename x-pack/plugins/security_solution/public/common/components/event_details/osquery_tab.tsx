@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Ecs } from '../../../../common/ecs';
 import { PERMISSION_DENIED } from '../../../detection_engine/rule_response_actions/osquery/translations';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useKibana } from '../../lib/kibana';
 import { EventsViewType } from './event_details';
@@ -92,25 +91,26 @@ export const useOsqueryTab = ({
     return;
   }
 
-  const { OsqueryResults } = osquery;
+  const { OsqueryResults, fetchAllLiveQueries } = osquery;
   const expandedEventFieldsObject = expandDottedObject(
     rawEventData.fields
   ) as ExpandedEventFieldsObject;
 
-  const parameters = expandedEventFieldsObject.kibana?.alert?.rule?.parameters;
-  const responseActions = parameters?.[0].response_actions;
+  const alertId = rawEventData._id;
 
-  const osqueryActionsLength = responseActions?.filter(
-    (action: { action_type_id: string }) => action.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
-  )?.length;
+  const { data: actionsData } = fetchAllLiveQueries({
+    filterQuery: { term: { alert_ids: alertId } },
+    activePage: 0,
+    limit: 100,
+    sortField: '@timestamp',
+  });
+  const actionItems = actionsData?.data.items || [];
 
-  if (!osqueryActionsLength) {
+  if (!actionItems.length) {
     return;
   }
   const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
   const agentIds = expandedEventFieldsObject.agent?.id;
-
-  const alertId = rawEventData._id;
 
   return {
     id: EventsViewType.osqueryView,
@@ -118,7 +118,7 @@ export const useOsqueryTab = ({
     name: i18n.OSQUERY_VIEW,
     append: (
       <EuiNotificationBadge data-test-subj="osquery-actions-notification">
-        {osqueryActionsLength}
+        {actionItems.length}
       </EuiNotificationBadge>
     ),
     content: (
@@ -130,6 +130,7 @@ export const useOsqueryTab = ({
             <OsqueryResults
               agentIds={agentIds}
               ruleName={ruleName}
+              actionItems={actionItems}
               alertId={alertId}
               ecsData={ecsData}
             />

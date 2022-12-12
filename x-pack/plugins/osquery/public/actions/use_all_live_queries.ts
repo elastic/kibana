@@ -10,14 +10,15 @@ import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
-import type { ActionEdges, ActionsStrategyResponse, Direction } from '../../common/search_strategy';
+import type { ActionEdges, ActionsStrategyResponse } from '../../common/search_strategy';
 import type { ESTermQuery, ESExistsQuery } from '../../common/typed_json';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { Direction } from '../../common/search_strategy';
 
-interface UseAllLiveQueries {
+export interface UseAllLiveQueries {
   activePage: number;
-  direction: Direction;
+  direction?: Direction;
   limit: number;
   sortField: string;
   filterQuery?: ESTermQuery | ESExistsQuery | string;
@@ -26,7 +27,7 @@ interface UseAllLiveQueries {
 
 export const useAllLiveQueries = ({
   activePage,
-  direction,
+  direction = Direction.desc,
   limit,
   sortField,
   filterQuery,
