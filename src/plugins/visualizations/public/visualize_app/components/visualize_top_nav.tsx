@@ -270,7 +270,8 @@ const TopNav = ({
   const shouldShowDataViewPicker = Boolean(
     vis.type.editorConfig?.enableDataViewChange &&
       ((vis.data.indexPattern && !vis.data.savedSearchId) ||
-        isFallbackDataView(vis.data.indexPattern)) &&
+        isFallbackDataView(vis.data.indexPattern) ||
+        (vis.data.searchSource && !vis.data.indexPattern)) &&
       indexPatterns.length
   );
 
@@ -283,7 +284,8 @@ const TopNav = ({
     [stateContainer.transitions]
   );
 
-  const isMissingCurrentDataView = isFallbackDataView(vis.data.indexPattern);
+  const isMissingCurrentDataView =
+    isFallbackDataView(vis.data.indexPattern) || (vis.data.searchSource && !vis.data.indexPattern);
 
   return isChromeVisible ? (
     /**
@@ -309,9 +311,9 @@ const TopNav = ({
       showQueryInput={showQueryInput}
       showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
       dataViewPickerComponentProps={
-        shouldShowDataViewPicker && vis.data.indexPattern
+        shouldShowDataViewPicker
           ? {
-              currentDataViewId: vis.data.indexPattern.id,
+              currentDataViewId: vis.data?.indexPattern?.id,
               trigger: {
                 label: isMissingCurrentDataView
                   ? i18n.translate('visualizations.fallbackDataView.label', {
@@ -326,7 +328,7 @@ const TopNav = ({
                             }),
                       },
                     })
-                  : vis.data.indexPattern.getName(),
+                  : vis.data?.indexPattern?.getName(),
               },
               isMissingCurrent: isMissingCurrentDataView,
               onChangeDataView,
