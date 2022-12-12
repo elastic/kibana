@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 import type { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
 
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
@@ -14,6 +13,7 @@ import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { EndpointPolicyEditExtension } from './endpoint_policy_edit_extension';
 import { createFleetContextRendererMock } from '../mocks';
+import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
 
 jest.mock('../../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
@@ -28,10 +28,6 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
   ]);
 
   beforeEach(() => {
-    useUserPrivilegesMock.mockReturnValue({
-      endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
-    });
-
     const mockedTestContext = createFleetContextRendererMock();
 
     render = () =>
@@ -44,31 +40,32 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
       );
   });
 
-  it.each([...artifactCards])('should show artifact card `%s`', async (artifactCardTestId) => {
-    const renderResult = render();
-
-    await waitFor(() => {
-      expect(renderResult.getByTestId(artifactCardTestId)).toBeTruthy();
-    });
+  afterEach(() => {
+    useUserPrivilegesMock.mockReturnValue(getUserPrivilegesMockDefaultValue());
   });
 
-  it('should NOT show artifact cards if no endpoint management authz', async () => {
-    useUserPrivilegesMock.mockReturnValue({
-      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
-        canReadTrustedApplications: false,
-        canReadEventFilters: false,
-        canReadBlocklist: false,
-        canReadHostIsolationExceptions: false,
-      }),
-    });
+  it.each([...artifactCards])('should show artifact card `%s`', (artifactCardTestId) => {
     const renderResult = render();
 
-    await waitFor(() => {
-      artifactCards.forEach((artifactCard) => {
-        expect(renderResult.queryByTestId(artifactCard)).toBeNull();
+    expect(renderResult.getByTestId(artifactCardTestId)).toBeTruthy();
+  });
+
+  it.each([...artifactCards])(
+    'should NOT show artifact cards if no endpoint management authz: %s',
+    (artifactCardTestId) => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canReadTrustedApplications: false,
+          canReadEventFilters: false,
+          canReadBlocklist: false,
+          canReadHostIsolationExceptions: false,
+        }),
       });
-    });
-  });
+      const renderResult = render();
+
+      expect(renderResult.queryByTestId(artifactCardTestId)).toBeNull();
+    }
+  );
 
   it.each([
     ['trustedApps', 'trusted_apps'],
@@ -77,7 +74,7 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
     ['blocklists', 'blocklist'],
   ])(
     'should link to the %s list page if no Authz for policy management',
-    async (artifactTestIdPrefix, pageUrlName) => {
+    (artifactTestIdPrefix, pageUrlName) => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: getEndpointPrivilegesInitialStateMock({
           canReadPolicyManagement: false,
@@ -86,11 +83,9 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
 
       const { getByTestId } = render();
 
-      await waitFor(() => {
-        expect(
-          getByTestId(`${artifactTestIdPrefix}-link-to-exceptions`).getAttribute('href')
-        ).toEqual(`/app/security/administration/${pageUrlName}?includedPolicies=someid%2Cglobal`);
-      });
+      expect(
+        getByTestId(`${artifactTestIdPrefix}-link-to-exceptions`).getAttribute('href')
+      ).toEqual(`/app/security/administration/${pageUrlName}?includedPolicies=someid%2Cglobal`);
     }
   );
 });
