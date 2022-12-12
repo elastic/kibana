@@ -7,6 +7,7 @@
 
 import type { CheckPrivilegesDynamically } from '@kbn/security-plugin/server/authorization/check_privileges_dynamically';
 import type { IRouter, RequestHandler, RouteConfig } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
@@ -21,6 +22,8 @@ import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '..';
 
 import { makeRouterWithFleetAuthz } from './fleet_router';
+
+const mockLogger = loggingSystemMock.createLogger();
 
 function getCheckPrivilegesMockedImplementation(kibanaRoles: string[]) {
   return (checkPrivileges: CheckPrivilegesPayload) => {
@@ -87,7 +90,7 @@ describe('FleetAuthzRouter', () => {
 
     appContextService.start(mockContext);
 
-    const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter);
+    const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter, mockLogger);
     fleetAuthzRouter.get({ ...routeConfig } as RouteConfig<any, any, any, any>, fakeHandler);
     const wrappedHandler = fakeRouter.get.mock.calls[0][1];
     const wrappedRouteConfig = fakeRouter.get.mock.calls[0][0];

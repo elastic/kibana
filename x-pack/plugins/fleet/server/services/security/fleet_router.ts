@@ -10,6 +10,7 @@ import type {
   IRouter,
   KibanaRequest,
   KibanaResponseFactory,
+  Logger,
   RequestHandler,
   RouteMethod,
 } from '@kbn/core/server';
@@ -24,7 +25,8 @@ import {
 } from './security';
 
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
-  router: IRouter<TContext>
+  router: IRouter<TContext>,
+  logger: Logger
 ): FleetAuthzRouter<TContext> {
   const routerAuthzWrapper = async <R extends RouteMethod>({
     context,
@@ -40,9 +42,11 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     hasRequiredAuthz?: FleetAuthzRouteConfig['fleetAuthz'];
   }): Promise<IKibanaResponse<any>> => {
     if (!checkSecurityEnabled()) {
+      const securityEnabledInfo = 'Kibana security must be enabled to use Fleet';
+      logger.info(securityEnabledInfo);
       return response.forbidden({
         body: {
-          message: 'Kibana security must be enable to use Fleet',
+          message: securityEnabledInfo,
         },
       });
     }
@@ -50,6 +54,7 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     const requestedAuthz = await getAuthzFromRequest(request);
 
     if (doesNotHaveRequiredFleetAuthz(requestedAuthz, hasRequiredAuthz)) {
+      logger.info(`User does not have required fleet authz to access path: ${request.route.path}`);
       return response.forbidden();
     }
     return handler(context, request, response);

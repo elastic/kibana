@@ -416,7 +416,10 @@ export class FleetPlugin
     // Only some endpoints require superuser so we pass a raw IRouter here
 
     // For all the routes we enforce the user to have role superuser
-    const fleetAuthzRouter = makeRouterWithFleetAuthz(router);
+    const fleetAuthzRouter = makeRouterWithFleetAuthz(
+      router,
+      this.initializerContext.logger.get('fleet_authz_router')
+    );
 
     registerRoutes(fleetAuthzRouter, config);
 
