@@ -35,10 +35,7 @@ interface CloudDataMigrationAppDeps {
   theme$: Observable<CoreTheme>;
 }
 
-export const CloudDataMigrationApp = ({
-  http,
-  breadcrumbService,
-}: CloudDataMigrationAppDeps) => {
+export const CloudDataMigrationApp = ({ http, breadcrumbService }: CloudDataMigrationAppDeps) => {
   const basePath = http.basePath.get() ?? '';
   const { euiTheme } = useEuiTheme();
   const listItemProps = {
