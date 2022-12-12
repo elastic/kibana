@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { replace } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -15,6 +14,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { MobileTransactionCharts } from '../../../shared/charts/transaction_charts/mobile_transaction_charts';
 import { TransactionsTable } from '../../../shared/transactions_table';
+import { replace } from '../../../shared/links/url_helpers';
 
 export function MobileTransactionOverview() {
   const {
