@@ -12,6 +12,7 @@ import { filteredFrequentItems } from './__mocks__/filtered_frequent_items';
 import {
   getFieldValuePairCounts,
   getSimpleHierarchicalTree,
+  getSimpleHierarchicalTreeLeaves,
   markDuplicates,
 } from './get_simple_hierarchical_tree';
 
@@ -111,15 +112,19 @@ describe('get_simple_hierarchical_tree', () => {
 
   describe('getSimpleHierarchicalTree', () => {
     it('returns the hierarchical tree', () => {
-      const simpleHierarchicalTree = getSimpleHierarchicalTree(filteredFrequentItems, true, false, [
-        'response_code',
-        'url',
-        'user',
-      ]);
-
       // stringify and again parse the tree to remove attached methods
       // and make it comparable against a static representation.
-      expect(JSON.parse(JSON.stringify(simpleHierarchicalTree))).toEqual({
+      expect(
+        JSON.parse(
+          JSON.stringify(
+            getSimpleHierarchicalTree(filteredFrequentItems, true, false, [
+              'response_code',
+              'url',
+              'user',
+            ])
+          )
+        )
+      ).toEqual({
         root: {
           name: '',
           set: [],
@@ -151,6 +156,28 @@ describe('get_simple_hierarchical_tree', () => {
         },
         fields: ['response_code', 'url', 'user'],
       });
+    });
+  });
+
+  describe('getSimpleHierarchicalTreeLeaves', () => {
+    it('returns the hierarchical tree leaves', () => {
+      const simpleHierarchicalTree = getSimpleHierarchicalTree(filteredFrequentItems, true, false, [
+        'response_code',
+        'url',
+        'user',
+      ]);
+      const leaves = getSimpleHierarchicalTreeLeaves(simpleHierarchicalTree.root, []);
+      expect(leaves).toEqual([
+        {
+          id: '2038579476',
+          group: [
+            { fieldName: 'response_code', fieldValue: '500' },
+            { fieldName: 'url', fieldValue: 'home.php' },
+          ],
+          docCount: 792,
+          pValue: 0.010770456205312423,
+        },
+      ]);
     });
   });
 });
