@@ -35,7 +35,7 @@ export function SlosPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <>{SLOS_PAGE_TITLE}</>,
+        pageTitle: SLOS_PAGE_TITLE,
         rightSideItems: [],
         bottomBorder: true,
       }}
