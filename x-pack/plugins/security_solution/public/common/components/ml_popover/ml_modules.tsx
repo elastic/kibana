@@ -11,7 +11,7 @@
  *
  */
 export const mlModules: string[] = [
-  'ssecurity_cloudtrail',
+  'security_cloudtrail',
   'security_packetbeat',
   'security_auth',
   'security_linux_v3',
