@@ -162,9 +162,9 @@ const buildBulkResponse = (
       };
 
   if (numFailed > 0) {
-    return response.custom<BulkEditActionResponse>({
+    return response.custom<BulkEditActionResponse | string>({
       headers: { 'content-type': 'application/json' },
-      body: {
+      body: JSON.stringify({
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
         status_code: 500,
         attributes: {
@@ -172,7 +172,7 @@ const buildBulkResponse = (
           results,
           summary,
         },
-      },
+      }),
       statusCode: 500,
     });
   }
