@@ -6,29 +6,35 @@
  * Side Public License, v 1.
  */
 
-import type { CustomBranding } from "@kbn/core-custom-branding";
 import { BehaviorSubject } from "rxjs";
-import useObservable from 'react-use/lib/useObservable'
+import useObservable, { Observable } from 'react-use/lib/useObservable';
+import type { CustomBranding } from '@kbn/core-custom-branding';
+
+interface Props extends CustomBranding {
+  logo$?: Observable<string>;
+  favicon$?: Observable<string>;
+  pageTitle$?: Observable<string>;
+  customizedLogo$?: Observable<string>;
+}
 
 /** @internal */
-export class CustomBrandingService {
-  logo: string | undefined = useObservable(logo$ ? logo$ : new BehaviorSubject<string | undefined>(undefined));
-  favicon: string | undefined = useObservable(favicon$ ? favicon$ : new BehaviorSubject<string | undefined>(undefined));
-  pageTitle: string | undefined = useObservable(pageTitle$ ? pageTitle$ : new BehaviorSubject<string | undefined>(undefined));
-  customizedLogo: string | undefined = useObservable(customizedLogo$ ? customizedLogo$ : new BehaviorSubject<string | undefined>(undefined));
-  // set as async in terms of how this will be gathered and brought into core at start of the service
-  async start() {
-    const customBranding$ = new Map();
+export function CustomBrandingService({logo, favicon, pageTitle , customizedLogo}: Props){
+  const customBrandingPerOperator$ = new Map<string, string | Observable<string> | undefined>();
+  const logo$ = getObservable$(logo); 
+  const favicon$ = getObservable$(favicon); 
+  const pageTitle$ = getObservable$(pageTitle);
+  const customizedLogo$ = getObservable$(customizedLogo);
+  async () => {
     return {
-      get: () => {
-        return 
-      },
-      set: () => {
-        return customBranding$.set('logo', this.logo)
-                              .set('favicon', this.favicon)
-                              .set('pageTitle', this.pageTitle)
-                              .set('customizedLogo', this.customizedLogo)
-      },
+      // get what is passed to the service
+      get: (property: string | Observable<string> | undefined) => getObservable$(property),
+
+      // set the parameters which may have come in as observables or not
+      set: () => customBrandingPerOperator$.set('logo', logo$).set('favicon', favicon$).set('pageTitle', pageTitle$).set('customizedLogo', customizedLogo$),
     };
   }
 }
+
+
+// Helper function
+export const getObservable$ = (logo: string | Observable<string> | undefined) => useObservable(logo ? logo as unknown as Observable<string> : new BehaviorSubject<string | undefined>(undefined));

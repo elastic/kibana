@@ -28,7 +28,7 @@ interface Props {
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   setIsMounting: (isMounting: boolean) => void;
-  customBranding$: Map<string, Observable<CustomBranding>>;
+  customBranding$: Map<string, CustomBranding>;
 }
 
 interface Params {
