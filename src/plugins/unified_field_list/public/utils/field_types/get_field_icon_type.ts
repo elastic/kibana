@@ -7,18 +7,8 @@
  */
 
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldListItem, FieldTypeForFilter } from '../types';
-
-// TODO: add tests
-export function getFieldType<T extends FieldListItem = DataViewField>(
-  field: T
-): FieldTypeForFilter {
-  const timeSeriesMetric = field.timeSeriesMetric;
-  if (timeSeriesMetric) {
-    return timeSeriesMetric as FieldTypeForFilter;
-  }
-  return field.type as FieldTypeForFilter;
-}
+import type { FieldListItem } from '../../types';
+import { getFieldType } from './get_field_type';
 
 export function getFieldIconType<T extends FieldListItem = DataViewField>(field: T): string {
   const type = getFieldType<T>(field);

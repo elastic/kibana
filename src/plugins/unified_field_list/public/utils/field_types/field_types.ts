@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { FieldTypeKnown } from '../../types';
+
 export enum KNOWN_FIELD_TYPES {
   BOOLEAN = 'boolean',
   CONFLICT = 'conflict',
@@ -23,4 +25,11 @@ export enum KNOWN_FIELD_TYPES {
   STRING = 'string',
   TEXT = 'text',
   VERSION = 'version',
+  // TODO: extend with Lens ones
 }
+
+export const KNOWN_FIELD_TYPE_LIST: string[] = Object.values(KNOWN_FIELD_TYPES);
+
+export const isKnownFieldType = (type?: string): type is FieldTypeKnown => {
+  return !!type && KNOWN_FIELD_TYPE_LIST.includes(type);
+};

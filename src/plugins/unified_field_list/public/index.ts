@@ -57,7 +57,7 @@ export type {
   AddFieldFilterHandler,
   FieldListGroups,
   FieldsGroupDetails,
-  FieldTypeForFilter,
+  FieldTypeKnown,
 } from './types';
 export { ExistenceFetchStatus, FieldsGroupNames } from './types';
 
@@ -91,4 +91,10 @@ export {
 } from './hooks/use_query_subscriber';
 
 export { wrapFieldNameOnDot } from './utils/wrap_field_name_on_dot';
-export { getFieldType, getFieldIconType } from './utils/get_field_type';
+export {
+  getFieldTypeName,
+  getFieldTypeDescription,
+  KNOWN_FIELD_TYPES,
+  getFieldType,
+  getFieldIconType,
+} from './utils/field_types';

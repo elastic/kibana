@@ -17,14 +17,14 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FieldTypeForFilter } from '../../types';
-import { FIELD_TYPE_NAMES } from './field_type_names';
 import { FieldIcon } from '../field_icon';
+import { getFieldTypeName } from '../../utils/field_types';
+import { type FieldTypeKnown } from '../../types';
 
 export interface FieldTypeFilterProps {
-  selectedFieldTypes: FieldTypeForFilter[];
-  availableFieldTypes: FieldTypeForFilter[];
-  onChange: (fieldTypes: FieldTypeForFilter[]) => unknown;
+  selectedFieldTypes: FieldTypeKnown[];
+  availableFieldTypes: FieldTypeKnown[];
+  onChange: (fieldTypes: FieldTypeKnown[]) => unknown;
 }
 
 // TODO: refactor test-subj and className
@@ -84,7 +84,7 @@ export const FieldTypeFilter: React.FC<FieldTypeFilterProps> = ({
               <EuiFlexItem grow={false}>
                 <FieldIcon type={type} />
               </EuiFlexItem>
-              <EuiFlexItem>{FIELD_TYPE_NAMES[type] ?? type}</EuiFlexItem>
+              <EuiFlexItem>{getFieldTypeName(type)}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>
         ))}

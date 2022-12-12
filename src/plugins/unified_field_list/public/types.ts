@@ -27,7 +27,7 @@ export enum ExistenceFetchStatus {
 
 export interface FieldListItem {
   name: DataViewField['name'];
-  type?: DataViewField['type'];
+  type: DataViewField['type'];
   displayName?: DataViewField['displayName'];
   count?: DataViewField['count'];
   timeSeriesMetric?: DataViewField['timeSeriesMetric'];
@@ -66,16 +66,7 @@ export type FieldListGroups<T extends FieldListItem> = {
   [key in FieldsGroupNames]?: FieldsGroup<T>;
 };
 
-export type FieldTypeForFilter =
-  | 'string'
-  | 'number'
-  | 'date'
-  | 'boolean'
-  | 'document'
-  | 'ip'
-  | 'histogram'
-  | 'geo_point'
-  | 'geo_shape'
-  | 'counter'
-  | 'gauge'
-  | 'murmur3';
+export type FieldTypeKnown = Exclude<
+  DataViewField['timeSeriesMetric'] | DataViewField['type'],
+  undefined
+>;

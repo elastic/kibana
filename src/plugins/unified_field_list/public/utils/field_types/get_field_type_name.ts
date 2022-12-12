@@ -8,10 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { KNOWN_FIELD_TYPES } from '../../common/field_types';
+import { KNOWN_FIELD_TYPES } from './field_types';
 
 export const UNKNOWN_FIELD_TYPE_MESSAGE = i18n.translate(
-  'discover.fieldNameIcons.unknownFieldAriaLabel',
+  'unifiedFieldList.fieldNameIcons.unknownFieldAriaLabel',
   {
     defaultMessage: 'Unknown field',
   }
@@ -26,7 +26,7 @@ export function getFieldTypeName(type?: string) {
     // TODO: check if we can remove this logic as outdated
 
     // Note that this type is currently not provided, type for _source is undefined
-    return i18n.translate('discover.fieldNameIcons.sourceFieldAriaLabel', {
+    return i18n.translate('unifiedFieldList.fieldNameIcons.sourceFieldAriaLabel', {
       defaultMessage: 'Source field',
     });
   }
@@ -34,67 +34,67 @@ export function getFieldTypeName(type?: string) {
   const knownType: KNOWN_FIELD_TYPES = type as KNOWN_FIELD_TYPES;
   switch (knownType) {
     case KNOWN_FIELD_TYPES.BOOLEAN:
-      return i18n.translate('discover.fieldNameIcons.booleanAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.booleanAriaLabel', {
         defaultMessage: 'Boolean field',
       });
     case KNOWN_FIELD_TYPES.CONFLICT:
-      return i18n.translate('discover.fieldNameIcons.conflictFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.conflictFieldAriaLabel', {
         defaultMessage: 'Conflicting field',
       });
     case KNOWN_FIELD_TYPES.DATE:
-      return i18n.translate('discover.fieldNameIcons.dateFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.dateFieldAriaLabel', {
         defaultMessage: 'Date field',
       });
     case KNOWN_FIELD_TYPES.DATE_RANGE:
-      return i18n.translate('discover.fieldNameIcons.dateRangeFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.dateRangeFieldAriaLabel', {
         defaultMessage: 'Date range field',
       });
     case KNOWN_FIELD_TYPES.GEO_POINT:
-      return i18n.translate('discover.fieldNameIcons.geoPointFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.geoPointFieldAriaLabel', {
         defaultMessage: 'Geo point field',
       });
     case KNOWN_FIELD_TYPES.GEO_SHAPE:
-      return i18n.translate('discover.fieldNameIcons.geoShapeFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.geoShapeFieldAriaLabel', {
         defaultMessage: 'Geo shape field',
       });
     case KNOWN_FIELD_TYPES.HISTOGRAM:
-      return i18n.translate('discover.fieldNameIcons.histogramFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.histogramFieldAriaLabel', {
         defaultMessage: 'Histogram field',
       });
     case KNOWN_FIELD_TYPES.IP:
-      return i18n.translate('discover.fieldNameIcons.ipAddressFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.ipAddressFieldAriaLabel', {
         defaultMessage: 'IP address field',
       });
     case KNOWN_FIELD_TYPES.IP_RANGE:
-      return i18n.translate('discover.fieldNameIcons.ipRangeFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.ipRangeFieldAriaLabel', {
         defaultMessage: 'IP range field',
       });
     case KNOWN_FIELD_TYPES.MURMUR3:
-      return i18n.translate('discover.fieldNameIcons.murmur3FieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.murmur3FieldAriaLabel', {
         defaultMessage: 'Murmur3 field',
       });
     case KNOWN_FIELD_TYPES.NUMBER:
-      return i18n.translate('discover.fieldNameIcons.numberFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.numberFieldAriaLabel', {
         defaultMessage: 'Number field',
       });
     case KNOWN_FIELD_TYPES.STRING:
-      return i18n.translate('discover.fieldNameIcons.stringFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.stringFieldAriaLabel', {
         defaultMessage: 'String field',
       });
     case KNOWN_FIELD_TYPES.TEXT:
-      return i18n.translate('discover.fieldNameIcons.textFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.textFieldAriaLabel', {
         defaultMessage: 'Text field',
       });
     case KNOWN_FIELD_TYPES.KEYWORD:
-      return i18n.translate('discover.fieldNameIcons.keywordFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.keywordFieldAriaLabel', {
         defaultMessage: 'Keyword field',
       });
     case KNOWN_FIELD_TYPES.NESTED:
-      return i18n.translate('discover.fieldNameIcons.nestedFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.nestedFieldAriaLabel', {
         defaultMessage: 'Nested field',
       });
     case KNOWN_FIELD_TYPES.VERSION:
-      return i18n.translate('discover.fieldNameIcons.versionFieldAriaLabel', {
+      return i18n.translate('unifiedFieldList.fieldNameIcons.versionFieldAriaLabel', {
         defaultMessage: 'Version field',
       });
     default:

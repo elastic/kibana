@@ -10,7 +10,7 @@ import React from 'react';
 import { FieldIcon as KbnFieldIcon, FieldIconProps as KbnFieldIconProps } from '@kbn/react-field';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldListItem } from '../../types';
-import { getFieldIconType } from '../../utils/get_field_type';
+import { getFieldIconType } from '../../utils/field_types';
 
 export type FieldIconProps = KbnFieldIconProps;
 

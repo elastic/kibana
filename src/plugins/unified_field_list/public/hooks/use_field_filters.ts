@@ -7,12 +7,10 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { uniq } from 'lodash';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
-import { type FieldListItem, type FieldTypeForFilter } from '../types';
-import { FIELD_TYPE_NAMES } from '../components/field_list_filters/field_type_names';
-import { getFieldType } from '../utils/get_field_type';
+import { type FieldListItem, type FieldTypeKnown } from '../types';
+import { isKnownFieldType, getFieldIconType, KNOWN_FIELD_TYPE_LIST } from '../utils/field_types';
 
 export interface FieldFiltersParams<T extends FieldListItem> {
   allFields: T[] | null;
@@ -27,20 +25,30 @@ export interface FieldFiltersResult<T extends FieldListItem> {
 export function useFieldFilters<T extends FieldListItem = DataViewField>({
   allFields,
 }: FieldFiltersParams<T>): FieldFiltersResult<T> {
-  const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeForFilter[]>([]);
+  const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>([]);
   const [nameFilter, setNameFilter] = useState<string>('');
-  const availableFieldTypes = useMemo(() => {
+
+  const knownFieldTypeCounts = useMemo(() => {
     if (!allFields?.length) {
       return undefined;
     }
-    return uniq([
-      ...(uniq(allFields.map(getFieldType)).filter(
-        (type) => type in FIELD_TYPE_NAMES
-      ) as FieldTypeForFilter[]),
+    const counts = new Map();
+    allFields.forEach((field) => {
+      const type = getFieldIconType(field);
+      if (isKnownFieldType(type)) {
+        counts.set(type, (counts.get(type) || 0) + 1);
+      }
+    });
+    return counts;
+  }, [allFields]);
+
+  const availableFieldTypes = useMemo(() => {
+    // sorting is defined by items in KNOWN_FIELD_TYPE_LIST
+    return KNOWN_FIELD_TYPE_LIST.filter((type) => {
       // always include current field type filters - there may not be any fields of the type of an existing type filter on data view switch, but we still need to include the existing filter in the list so that the user can remove it
-      ...selectedFieldTypes,
-    ]);
-  }, [allFields, selectedFieldTypes]);
+      return knownFieldTypeCounts?.get(type) > 0 || selectedFieldTypes.includes(type);
+    });
+  }, [knownFieldTypeCounts, selectedFieldTypes]);
 
   const fieldListFiltersProps: FieldListFiltersProps = useMemo(
     () => ({
@@ -64,7 +72,7 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
         return false;
       }
       if (selectedFieldTypes.length > 0) {
-        return selectedFieldTypes.includes(getFieldType(field));
+        return selectedFieldTypes.includes(getFieldIconType(field));
       }
       return true;
     },
