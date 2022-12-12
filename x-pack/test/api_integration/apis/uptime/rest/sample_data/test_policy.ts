@@ -31,7 +31,6 @@ export const getTestSyntheticsPolicy = (
         {
           enabled: true,
           data_stream: { type: 'synthetics', dataset: 'http' },
-          release: 'experimental',
           vars: {
             __ui: {
               value:
@@ -133,7 +132,6 @@ export const getTestSyntheticsPolicy = (
       streams: [
         {
           enabled: false,
-          release: 'experimental',
           data_stream: { type: 'synthetics', dataset: 'tcp' },
           vars: {
             __ui: { type: 'yaml' },
@@ -174,7 +172,6 @@ export const getTestSyntheticsPolicy = (
       streams: [
         {
           enabled: false,
-          release: 'experimental',
           data_stream: { type: 'synthetics', dataset: 'icmp' },
           vars: {
             __ui: { type: 'yaml' },
@@ -206,7 +203,6 @@ export const getTestSyntheticsPolicy = (
       streams: [
         {
           enabled: true,
-          release: 'beta',
           data_stream: { type: 'synthetics', dataset: 'browser' },
           vars: {
             __ui: { type: 'yaml' },
@@ -264,7 +260,6 @@ export const getTestSyntheticsPolicy = (
         {
           enabled: true,
           data_stream: { type: 'synthetics', dataset: 'browser.network' },
-          release: 'beta',
           id: 'synthetics/browser-browser.network-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
             processors: [
@@ -276,7 +271,6 @@ export const getTestSyntheticsPolicy = (
         {
           enabled: true,
           data_stream: { type: 'synthetics', dataset: 'browser.screenshot' },
-          release: 'beta',
           id: 'synthetics/browser-browser.screenshot-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
             processors: [
@@ -332,7 +326,6 @@ export const getTestProjectSyntheticsPolicy = (
         {
           enabled: false,
           data_stream: { type: 'synthetics', dataset: 'http' },
-          release: 'experimental',
           vars: {
             __ui: { type: 'yaml' },
             enabled: { value: true, type: 'bool' },
@@ -382,7 +375,6 @@ export const getTestProjectSyntheticsPolicy = (
         {
           enabled: false,
           data_stream: { type: 'synthetics', dataset: 'tcp' },
-          release: 'experimental',
           vars: {
             __ui: { type: 'yaml' },
             enabled: { value: true, type: 'bool' },
@@ -422,7 +414,6 @@ export const getTestProjectSyntheticsPolicy = (
       streams: [
         {
           enabled: false,
-          release: 'experimental',
           data_stream: { type: 'synthetics', dataset: 'icmp' },
           vars: {
             __ui: { type: 'yaml' },
@@ -455,7 +446,6 @@ export const getTestProjectSyntheticsPolicy = (
         {
           enabled: true,
           data_stream: { type: 'synthetics', dataset: 'browser' },
-          release: 'beta',
           vars: {
             __ui: {
               value:
@@ -547,7 +537,6 @@ export const getTestProjectSyntheticsPolicy = (
         },
         {
           enabled: true,
-          release: 'beta',
           data_stream: { type: 'synthetics', dataset: 'browser.network' },
           id: `synthetics/browser-browser.network-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
           compiled_stream: {
@@ -559,7 +548,6 @@ export const getTestProjectSyntheticsPolicy = (
         },
         {
           enabled: true,
-          release: 'beta',
           data_stream: { type: 'synthetics', dataset: 'browser.screenshot' },
           id: `synthetics/browser-browser.screenshot-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
           compiled_stream: {
