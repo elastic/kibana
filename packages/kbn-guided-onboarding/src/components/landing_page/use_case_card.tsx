@@ -97,7 +97,6 @@ export const UseCaseCard = ({
 
   return (
     <EuiCard
-      display="subdued"
       image={
         <EuiImage
           src={getImageUrl(constants[useCase].imageUrlPrefix)}

@@ -15,7 +15,6 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPageTemplate,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -183,13 +182,11 @@ export const GettingStarted = () => {
 
   return (
     <KibanaPageTemplate panelled={false} grow>
-      <EuiPageTemplate.Section alignment="center">
-        <EuiPanel
-          color="plain"
-          hasShadow
-          css={paddingCss}
-          data-test-subj="onboarding--landing-page"
-        >
+      <EuiPageTemplate.Section
+        alignment="center"
+        css={paddingCss}
+        data-test-subj="onboarding--landing-page"
+      >
           <EuiTitle size="l" className="eui-textCenter">
             <h1>{title}</h1>
           </EuiTitle>
@@ -223,18 +220,29 @@ export const GettingStarted = () => {
                   />
                 </EuiFlexItem>
               );
-            })}
-          </EuiFlexGrid>
-          <EuiSpacer />
-          <EuiHorizontalRule />
-          <EuiSpacer />
-          <div className="eui-textCenter">
-            {/* data-test-subj used for FS tracking */}
-            <EuiLink onClick={onSkip} data-test-subj="onboarding--skipGuideLink">
-              {skipText}
-            </EuiLink>
-          </div>
-        </EuiPanel>
+            }
+            return (
+              <EuiFlexItem key={`guideCard-${useCase}`}>
+                <GuideCard
+                  useCase={useCase as UseCase}
+                  guides={guidesState}
+                  activateGuide={activateGuide}
+                  isDarkTheme={isDarkTheme}
+                  addBasePath={http.basePath.prepend}
+                />
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGrid>
+        <EuiSpacer />
+        <EuiHorizontalRule />
+        <EuiSpacer />
+        <div className="eui-textCenter">
+          {/* data-test-subj used for FS tracking */}
+          <EuiLink onClick={onSkip} data-test-subj="onboarding--skipGuideLink">
+            {skipText}
+          </EuiLink>
+        </div>
       </EuiPageTemplate.Section>
     </KibanaPageTemplate>
   );
