@@ -8,8 +8,7 @@ exports[`getting started should render getting started component 1`] = `
   <_EuiPageSection
     alignment="center"
   >
-    <EuiPanel
-      color="plain"
+    <div
       css={
         Object {
           "map": undefined,
@@ -22,7 +21,6 @@ exports[`getting started should render getting started component 1`] = `
         }
       }
       data-test-subj="onboarding--landing-page"
-      hasShadow={true}
     >
       <EuiTitle
         className="eui-textCenter"
@@ -109,7 +107,7 @@ exports[`getting started should render getting started component 1`] = `
           I’d like to do something else (skip)
         </EuiLink>
       </div>
-    </EuiPanel>
+    </div>
   </_EuiPageSection>
 </_KibanaPageTemplate>
 `;
