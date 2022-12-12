@@ -58,22 +58,6 @@ run(
     }
 
     async function runScalabilityJourney(filePath: string, kibanaBuildDir: string | undefined) {
-      // Pass in a clean APM environment, so that FTR can later
-      // set it's own values.
-      const cleanApmEnv = {
-        ELASTIC_APM_ACTIVE: undefined,
-        ELASTIC_APM_BREAKDOWN_METRICS: undefined,
-        ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: undefined,
-        ELASTIC_APM_CAPTURE_SPAN_STACK_TRACES: undefined,
-        ELASTIC_APM_ENVIRONMENT: undefined,
-        ELASTIC_APM_GLOBAL_LABELS: undefined,
-        ELASTIC_APM_MAX_QUEUE_SIZE: undefined,
-        ELASTIC_APM_METRICS_INTERVAL: undefined,
-        ELASTIC_APM_SERVER_URL: undefined,
-        ELASTIC_APM_SECRET_TOKEN: undefined,
-        ELASTIC_APM_TRANSACTION_SAMPLE_RATE: undefined,
-      };
-
       await procRunner.run('scalability-tests', {
         cmd: 'node',
         args: [
@@ -87,7 +71,12 @@ run(
         cwd: REPO_ROOT,
         wait: true,
         env: {
-          ...cleanApmEnv,
+          // Reset all the ELASTIC APM env vars to undefined, FTR config might set it's own values.
+          ...Object.fromEntries(
+            Object.keys(process.env).flatMap((k) =>
+              k.startsWith('ELASTIC_APM_') ? [[k, undefined]] : []
+            )
+          ),
           SCALABILITY_JOURNEY_PATH: filePath, // journey json file for Gatling test runner
           KIBANA_DIR: REPO_ROOT, // Gatling test runner use it to find kbn/es archives
         },

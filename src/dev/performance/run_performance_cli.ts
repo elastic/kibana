@@ -74,17 +74,6 @@ run(
       phase: 'TEST' | 'WARMUP',
       kibanaBuildDir: string | undefined
     ) {
-      // Pass in a clean APM environment, so that FTR can later
-      // set it's own values.
-      const cleanApmEnv = {
-        ELASTIC_APM_TRANSACTION_SAMPLE_RATE: undefined,
-        ELASTIC_APM_SERVER_URL: undefined,
-        ELASTIC_APM_SECRET_TOKEN: undefined,
-        ELASTIC_APM_ACTIVE: undefined,
-        ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: undefined,
-        ELASTIC_APM_GLOBAL_LABELS: undefined,
-      };
-
       await procRunner.run('functional-tests', {
         cmd: 'node',
         args: [
@@ -97,10 +86,15 @@ run(
         cwd: REPO_ROOT,
         wait: true,
         env: {
+          // Reset all the ELASTIC APM env vars to undefined, FTR config might set it's own values.
+          ...Object.fromEntries(
+            Object.keys(process.env).flatMap((k) =>
+              k.startsWith('ELASTIC_APM_') ? [[k, undefined]] : []
+            )
+          ),
           TEST_PERFORMANCE_PHASE: phase,
           TEST_ES_URL: 'http://elastic:changeme@localhost:9200',
           TEST_ES_DISABLE_STARTUP: 'true',
-          ...cleanApmEnv,
         },
       });
     }
