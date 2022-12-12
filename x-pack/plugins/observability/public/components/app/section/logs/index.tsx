@@ -14,17 +14,24 @@ import {
   Settings,
   XYBrushEvent,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  euiPaletteColorBlind,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
-import React, { Fragment } from 'react';
+import React, { Fragment, Suspense } from 'react';
 import { createBrowserHistory } from 'history';
+import { Await, useLoaderData } from 'react-router-dom';
 import { SectionContainer } from '..';
-import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { LogsFetchDataResponse } from '../../../../typings';
@@ -56,25 +63,10 @@ function getColorPerItem(series?: LogsFetchDataResponse['series']) {
 export function LogsSection({ bucketSize }: Props) {
   const history = createBrowserHistory();
   const chartTheme = useChartTheme();
-  const { forceUpdate, hasDataMap } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
-    useDatePickerContext();
+  const { hasDataMap } = useHasData();
+  const { absoluteStart, absoluteEnd } = useDatePickerContext();
 
-  const { data, status } = useFetcher(
-    () => {
-      if (bucketSize && absoluteStart && absoluteEnd) {
-        return getDataHandler('infra_logs')?.fetchData({
-          absoluteTime: { start: absoluteStart, end: absoluteEnd },
-          relativeTime: { start: relativeStart, end: relativeEnd },
-          ...bucketSize,
-        });
-      }
-    },
-
-    // `forceUpdate` and `lastUpdated` trigger a reload
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate, lastUpdated]
-  );
+  const data = useLoaderData() as any;
 
   if (!hasDataMap.infra_logs?.hasData) {
     return null;
@@ -85,100 +77,113 @@ export function LogsSection({ bucketSize }: Props) {
 
   const formatter = niceTimeFormatter([min, max]);
 
-  const { appLink, stats, series } = data || {};
-
-  const colorsPerItem = getColorPerItem(series);
-
   const isLoading = status === FETCH_STATUS.LOADING;
 
   return (
-    <SectionContainer
-      title={i18n.translate('xpack.observability.overview.logs.title', {
-        defaultMessage: 'Log Events',
-      })}
-      appLink={{
-        href: appLink,
-        label: i18n.translate('xpack.observability.overview.logs.appLink', {
-          defaultMessage: 'Show log stream',
-        }),
-      }}
-      hasError={status === FETCH_STATUS.FAILURE}
-    >
-      <EuiTitle size="xxs">
-        <h4>
-          {i18n.translate('xpack.observability.overview.logs.subtitle', {
-            defaultMessage: 'Logs rate per minute',
-          })}
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup>
-        {!stats || isEmpty(stats) ? (
-          <EuiFlexItem grow={false}>
-            <StyledStat isLoading={isLoading} />
-          </EuiFlexItem>
-        ) : (
-          Object.keys(stats).map((key) => {
-            const stat = stats[key];
-            return (
-              <EuiFlexItem grow={false} key={key}>
-                <StyledStat
-                  title={formatStatValue(stat)}
-                  description={stat.label}
-                  isLoading={isLoading}
-                  color={colorsPerItem[key]}
-                />
-              </EuiFlexItem>
-            );
-          })
-        )}
-      </EuiFlexGroup>
-      <ChartContainer isInitialLoad={isLoading && !data}>
-        <Settings
-          onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
-          theme={chartTheme}
-          showLegend
-          legendPosition={Position.Right}
-          xDomain={{ min, max }}
-          showLegendExtra
-        />
-        {series &&
-          Object.keys(series).map((key) => {
-            const serie = series[key];
-            const chartData = serie.coordinates.map((coordinate) => ({
-              ...coordinate,
-              g: serie.label,
-            }));
-            return (
-              <Fragment key={key}>
-                <BarSeries
-                  id={key}
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor={'x'}
-                  yAccessors={['y']}
-                  stackAccessors={['x']}
-                  splitSeriesAccessors={['g']}
-                  data={chartData}
-                  color={colorsPerItem[key]}
-                />
-                <Axis
-                  id="x-axis"
-                  position={Position.Bottom}
-                  showOverlappingTicks={false}
-                  showOverlappingLabels={false}
-                  tickFormat={formatter}
-                />
-                <Axis
-                  id="y-axis"
-                  gridLine={{ visible: true }}
-                  position={Position.Left}
-                  tickFormat={(d: number) => numeral(d).format('0a')}
-                />
-              </Fragment>
-            );
-          })}
-      </ChartContainer>
-    </SectionContainer>
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <Await resolve={data.logEvents}>
+        {(metrics: LogsFetchDataResponse) => {
+          if (!metrics) {
+            return <EuiLoadingSpinner />;
+          }
+          const colorsPerItem = getColorPerItem(metrics.series);
+          return (
+            <SectionContainer
+              title={i18n.translate('xpack.observability.overview.logs.title', {
+                defaultMessage: 'Log Events',
+              })}
+              appLink={{
+                href: metrics.appLink,
+                label: i18n.translate('xpack.observability.overview.logs.appLink', {
+                  defaultMessage: 'Show log stream',
+                }),
+              }}
+              hasError={status === FETCH_STATUS.FAILURE}
+            >
+              <EuiTitle size="xxs">
+                <h4>
+                  {i18n.translate('xpack.observability.overview.logs.subtitle', {
+                    defaultMessage: 'Logs rate per minute',
+                  })}
+                </h4>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              return (
+              <>
+                <EuiFlexGroup>
+                  {!metrics.stats || isEmpty(metrics.stats) ? (
+                    <EuiFlexItem grow={false}>
+                      <StyledStat isLoading={false} />
+                    </EuiFlexItem>
+                  ) : (
+                    Object.keys(metrics.stats).map((key) => {
+                      const stat = metrics.stats[key];
+                      return (
+                        <EuiFlexItem grow={false} key={key}>
+                          <StyledStat
+                            title={formatStatValue(stat)}
+                            description={stat.label}
+                            isLoading={false}
+                            color={colorsPerItem[key]}
+                          />
+                        </EuiFlexItem>
+                      );
+                    })
+                  )}
+                </EuiFlexGroup>
+
+                <ChartContainer isInitialLoad={isLoading && !data}>
+                  <Settings
+                    onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
+                    theme={chartTheme}
+                    showLegend
+                    legendPosition={Position.Right}
+                    xDomain={{ min, max }}
+                    showLegendExtra
+                  />
+                  {metrics.series &&
+                    Object.keys(metrics.series).map((key) => {
+                      const serie = metrics.series[key];
+                      const chartData = serie.coordinates.map((coordinate) => ({
+                        ...coordinate,
+                        g: serie.label,
+                      }));
+                      return (
+                        <Fragment key={key}>
+                          <BarSeries
+                            id={key}
+                            xScaleType={ScaleType.Time}
+                            yScaleType={ScaleType.Linear}
+                            xAccessor={'x'}
+                            yAccessors={['y']}
+                            stackAccessors={['x']}
+                            splitSeriesAccessors={['g']}
+                            data={chartData}
+                            color={colorsPerItem[key]}
+                          />
+                          <Axis
+                            id="x-axis"
+                            position={Position.Bottom}
+                            showOverlappingTicks={false}
+                            showOverlappingLabels={false}
+                            tickFormat={formatter}
+                          />
+                          <Axis
+                            id="y-axis"
+                            gridLine={{ visible: true }}
+                            position={Position.Left}
+                            tickFormat={(d: number) => numeral(d).format('0a')}
+                          />
+                        </Fragment>
+                      );
+                    })}
+                </ChartContainer>
+              </>
+              );
+            </SectionContainer>
+          );
+        }}
+      </Await>
+    </Suspense>
   );
 }

@@ -49,10 +49,18 @@ export const getRoutes = (http: HttpSetup): Record<string, RouteProps & { paramT
   '*': {
     element: <Navigate to="/overview" />,
     paramType: {},
+    loader: async ({ request }) => {
+      console.log('loader redirect');
+      return {};
+    },
   },
   landing: {
     element: <Navigate to="/overview" />,
     paramType: {},
+    loader: async ({ request }) => {
+      console.log('loader landing');
+      return {};
+    },
   },
   overview: {
     element: (
@@ -61,6 +69,7 @@ export const getRoutes = (http: HttpSetup): Record<string, RouteProps & { paramT
       </DatePickerContextProvider>
     ),
     loader: async ({ request }) => {
+      console.log('overview');
       const url = new URL(request.url);
 
       const { rangeFrom, rangeTo } = new Proxy(new URLSearchParams(url.search), {
@@ -83,7 +92,16 @@ export const getRoutes = (http: HttpSetup): Record<string, RouteProps & { paramT
         end: absoluteEnd,
       });
 
-      const gInfra = () => {
+      const getLogEvents = () => {
+        if (bucketSize && absoluteStart && absoluteEnd)
+          return getDataHandler('infra_logs')?.fetchData({
+            absoluteTime: { start: absoluteStart, end: absoluteEnd },
+            relativeTime: { start: relativeStart, end: relativeEnd },
+            ...bucketSize,
+          });
+      };
+
+      const getInfra = () => {
         if (bucketSize && absoluteStart && absoluteEnd) {
           return getDataHandler('infra_metrics')?.fetchData({
             absoluteTime: {
@@ -96,7 +114,11 @@ export const getRoutes = (http: HttpSetup): Record<string, RouteProps & { paramT
         }
       };
 
-      return defer({ newsFeed: getNewsFeed({ http }), metrics: gInfra() });
+      return defer({
+        newsFeed: getNewsFeed({ http }),
+        metrics: getInfra(),
+        logEvents: getLogEvents(),
+      });
     },
     paramType: {},
   },

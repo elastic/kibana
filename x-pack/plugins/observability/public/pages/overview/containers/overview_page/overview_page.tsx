@@ -69,7 +69,7 @@ export function OverviewPage() {
     },
   ]);
 
-  const newsFeed = (useLoaderData() as any).newsFeed;
+  const data = useLoaderData() as any;
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const refetch = useRef<() => void>();
 
@@ -205,7 +205,7 @@ export function OverviewPage() {
           <EuiFlexGroup>
             <EuiFlexItem grow={4}>
               <Suspense fallback={<EuiLoadingSpinner />}>
-                <Await resolve={newsFeed}>
+                <Await resolve={data.newsFeed}>
                   {({ items }: NewsFeedType) =>
                     items?.length && <NewsFeed items={items.slice(0, 3)} />
                   }

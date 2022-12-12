@@ -57,7 +57,7 @@ export function MetricsSection({ bucketSize }: Props) {
   const [sortField, setSortField] = useState<keyof MetricsFetchDataSeries>('uptime');
   const [sortedData, setSortedData] = useState<MetricsFetchDataResponse | null>(null);
 
-  const data = (useLoaderData() as any).metrics as Promise<MetricsFetchDataResponse>;
+  const data = useLoaderData() as any;
 
   const handleTableChange = useCallback(
     ({ sort }: Criteria<MetricsFetchDataSeries>) => {
@@ -186,28 +186,33 @@ export function MetricsSection({ bucketSize }: Props) {
 
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <Await resolve={data}>
-        {(metrics: MetricsFetchDataResponse) => (
-          <SectionContainer
-            title={i18n.translate('xpack.observability.overview.metrics.title', {
-              defaultMessage: 'Hosts',
-            })}
-            appLink={{
-              href: metrics.appLink,
-              label: i18n.translate('xpack.observability.overview.metrics.appLink', {
-                defaultMessage: 'Show inventory',
-              }),
-            }}
-            hasError={status === FETCH_STATUS.FAILURE}
-          >
-            <EuiBasicTable
-              onChange={handleTableChange}
-              sorting={sorting}
-              items={(sortedData ?? metrics).series ?? []}
-              columns={columns}
-            />
-          </SectionContainer>
-        )}
+      <Await resolve={data.metrics}>
+        {(metrics: MetricsFetchDataResponse) => {
+          if (!metrics) {
+            return <EuiLoadingSpinner />;
+          }
+          return (
+            <SectionContainer
+              title={i18n.translate('xpack.observability.overview.metrics.title', {
+                defaultMessage: 'Hosts',
+              })}
+              appLink={{
+                href: metrics.appLink,
+                label: i18n.translate('xpack.observability.overview.metrics.appLink', {
+                  defaultMessage: 'Show inventory',
+                }),
+              }}
+              hasError={status === FETCH_STATUS.FAILURE}
+            >
+              <EuiBasicTable
+                onChange={handleTableChange}
+                sorting={sorting}
+                items={(sortedData ?? metrics).series ?? []}
+                columns={columns}
+              />
+            </SectionContainer>
+          );
+        }}
       </Await>
     </Suspense>
   );
