@@ -11,11 +11,9 @@ import { SearchSource } from '@kbn/data-plugin/common';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { action } from '@storybook/addon-actions';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FetchStatus } from '../../../../types';
 import {
   AvailableFields$,
-  DataCharts$,
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
@@ -47,11 +45,6 @@ const documentObservables = {
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHits.length),
   }) as DataTotalHits$,
-
-  charts$: new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    response: {} as unknown as SearchResponse,
-  }) as DataCharts$,
 };
 
 const plainRecordObservables = {
@@ -77,11 +70,6 @@ const plainRecordObservables = {
     fetchStatus: FetchStatus.COMPLETE,
     recordRawType: RecordRawType.PLAIN,
   }) as DataTotalHits$,
-
-  charts$: new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    recordRawType: RecordRawType.PLAIN,
-  }) as DataCharts$,
 };
 
 const getCommonProps = (dataView: DataView) => {

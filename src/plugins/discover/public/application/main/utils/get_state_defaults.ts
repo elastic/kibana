@@ -70,6 +70,7 @@ export function getStateDefaults({
     rowHeight: undefined,
     rowsPerPage: undefined,
     grid: undefined,
+    breakdownField: undefined,
   };
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
@@ -88,6 +89,10 @@ export function getStateDefaults({
   }
   if (savedSearch.rowsPerPage) {
     defaultState.rowsPerPage = savedSearch.rowsPerPage;
+  }
+
+  if (savedSearch.breakdownField) {
+    defaultState.breakdownField = savedSearch.breakdownField;
   }
 
   return defaultState;

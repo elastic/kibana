@@ -12,8 +12,16 @@ import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
 } from '@kbn/core/server';
-import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+
+import {
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  createTestServers,
+  createRootWithCorePlugins,
+} from '@kbn/core-test-helpers-kbn-server';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE, FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '../constants';
 import { upgradeAgentPolicySchemaVersion } from '../services/setup/upgrade_agent_policy_schema_version';
@@ -38,13 +46,13 @@ const fakeRequest = {
 } as unknown as KibanaRequest;
 
 describe('upgrade agent policy schema version', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
-  let kbnServer: kbnTestServer.TestKibanaUtils;
+  let esServer: TestElasticsearchUtils;
+  let kbnServer: TestKibanaUtils;
 
   const registryUrl = useDockerRegistry();
 
   const startServers = async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t) => jest.setTimeout(t),
       settings: {
         es: {
@@ -56,7 +64,7 @@ describe('upgrade agent policy schema version', () => {
 
     esServer = await startES();
     const startKibana = async () => {
-      const root = kbnTestServer.createRootWithCorePlugins(
+      const root = createRootWithCorePlugins(
         {
           xpack: {
             fleet: {
@@ -114,13 +122,14 @@ describe('upgrade agent policy schema version', () => {
     await stopServers();
   });
 
-  describe('with package installed with outdated schema version', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/142347
+  describe.skip('with package installed with outdated schema version', () => {
     let soClient: SavedObjectsClientContract;
     let esClient: ElasticsearchClient;
 
     beforeAll(async () => {
       soClient = kbnServer.coreStart.savedObjects.getScopedClient(fakeRequest, {
-        excludedWrappers: ['security'],
+        excludedExtensions: [SECURITY_EXTENSION_ID],
       });
       esClient = kbnServer.coreStart.elasticsearch.client.asInternalUser;
     });

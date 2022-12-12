@@ -145,7 +145,7 @@ export const DiscoverTopNav = ({
    */
   const updateDataViewList = useCallback(
     (newAdHocDataViews: DataView[]) => {
-      stateContainer.actions.appendAdHocDataViews(newAdHocDataViews);
+      stateContainer.actions.setAdHocDataViews(newAdHocDataViews);
       setRefreshListId((prev) => prev + 1);
     },
     [stateContainer.actions]

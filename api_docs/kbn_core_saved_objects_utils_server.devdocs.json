@@ -1597,7 +1597,7 @@
             "tags": [],
             "label": "createEmptyFindResponse",
             "description": [
-              "\nCreates an empty response for a find operation. This is only intended to be used by saved objects client wrappers."
+              "\nCreates an empty response for a find operation."
             ],
             "signature": [
               "<T, A>({ page, perPage, }: ",
@@ -1824,7 +1824,9 @@
             "type": "Object",
             "tags": [],
             "label": "map1",
-            "description": [],
+            "description": [
+              "- The first map to merge"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -1845,7 +1847,9 @@
             "type": "Object",
             "tags": [],
             "label": "map2",
-            "description": [],
+            "description": [
+              "- The second map to merge"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -1861,7 +1865,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The merged map {@link SavedObjectMigrationMap }"
+        ],
         "initialIsOpen": false
       }
     ],

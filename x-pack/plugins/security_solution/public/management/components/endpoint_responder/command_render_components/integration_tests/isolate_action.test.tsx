@@ -23,7 +23,8 @@ import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service
 
 jest.mock('../../../../../common/experimental_features_service');
 
-describe('When using isolate action from response actions console', () => {
+// FLAKY https://github.com/elastic/kibana/issues/145363
+describe.skip('When using isolate action from response actions console', () => {
   let render: (
     capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;

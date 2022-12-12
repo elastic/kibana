@@ -2,10 +2,10 @@
 
 exports[`install footer should render 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-stretch-row"
 >
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <button
       aria-label="Remove Data Set Name"
@@ -25,11 +25,11 @@ exports[`install footer should render 1`] = `
     </button>
   </div>
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <button
       aria-label="View Data Set Name"
-      class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
       data-test-subj="launchSampleDataSetdata-set-id"
       type="button"
     >

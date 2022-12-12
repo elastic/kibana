@@ -195,7 +195,7 @@ export const parseMlInferenceParametersFromPipeline = (
     return null;
   }
   return {
-    destination_field: inferenceProcessor.target_field.replace('ml.inference.', ''),
+    destination_field: inferenceProcessor.target_field?.replace('ml.inference.', ''),
     model_id: inferenceProcessor.model_id,
     pipeline_name: name,
     source_field: sourceField,

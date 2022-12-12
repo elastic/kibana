@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { isRight } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
+import * as t from 'io-ts';
 import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import {
   createKbnUrlStateStorage,
@@ -15,6 +18,8 @@ import {
   IKbnUrlStateStorage,
   useContainerSelector,
 } from '@kbn/kibana-utils-plugin/public';
+import { datemathStringRT } from '../../../../utils/datemath';
+import { ALERT_STATUS_ALL } from '../../../../../common/constants';
 import { useTimefilterService } from '../../../../hooks/use_timefilter_service';
 
 import {
@@ -23,6 +28,17 @@ import {
   AlertSearchBarStateContainer,
   AlertSearchBarContainerState,
 } from './state_container';
+
+export const alertSearchBarState = t.partial({
+  rangeFrom: datemathStringRT,
+  rangeTo: datemathStringRT,
+  kuery: t.string,
+  status: t.union([
+    t.literal(ALERT_STATUS_ACTIVE),
+    t.literal(ALERT_STATUS_RECOVERED),
+    t.literal(ALERT_STATUS_ALL),
+  ]),
+});
 
 export function useAlertSearchBarStateContainer(urlStorageKey: string) {
   const stateContainer = useContainer();
@@ -36,14 +52,14 @@ export function useAlertSearchBarStateContainer(urlStorageKey: string) {
   );
 
   return {
-    rangeFrom,
-    setRangeFrom,
-    rangeTo,
-    setRangeTo,
     kuery,
-    setKuery,
+    onKueryChange: setKuery,
+    onRangeFromChange: setRangeFrom,
+    onRangeToChange: setRangeTo,
+    onStatusChange: setStatus,
+    rangeFrom,
+    rangeTo,
     status,
-    setStatus,
   };
 }
 
@@ -77,7 +93,7 @@ function useUrlStateSyncEffect(
 
 function setupUrlStateSync(
   stateContainer: AlertSearchBarStateContainer,
-  stateStorage: IKbnUrlStateStorage,
+  urlStateStorage: IKbnUrlStateStorage,
   urlStorageKey: string
 ) {
   // This handles filling the state when an incomplete URL set is provided
@@ -91,7 +107,11 @@ function setupUrlStateSync(
       ...stateContainer,
       set: setWithDefaults,
     },
-    stateStorage,
+    stateStorage: {
+      ...urlStateStorage,
+      set: <AlertSearchBarStateContainer,>(key: string, state: AlertSearchBarStateContainer) =>
+        urlStateStorage.set(key, state, { replace: true }),
+    },
   });
 }
 
@@ -101,12 +121,14 @@ function syncUrlStateWithInitialContainerState(
   urlStateStorage: IKbnUrlStateStorage,
   urlStorageKey: string
 ) {
-  const urlState = urlStateStorage.get<Partial<AlertSearchBarContainerState>>(urlStorageKey);
+  const urlState = alertSearchBarState.decode(
+    urlStateStorage.get<Partial<AlertSearchBarContainerState>>(urlStorageKey)
+  );
 
-  if (urlState) {
+  if (isRight(urlState)) {
     const newState = {
       ...defaultState,
-      ...urlState,
+      ...pipe(urlState).right,
     };
 
     stateContainer.set(newState);
@@ -125,5 +147,7 @@ function syncUrlStateWithInitialContainerState(
     stateContainer.set(defaultState);
   }
 
-  urlStateStorage.set(urlStorageKey, stateContainer.get());
+  urlStateStorage.set(urlStorageKey, stateContainer.get(), {
+    replace: true,
+  });
 }

@@ -129,6 +129,10 @@ export interface DiscoverStateContainer {
      */
     setDataView: (dataView: DataView) => void;
     /**
+     * Set new adhoc data view list
+     */
+    setAdHocDataViews: (dataViews: DataView[]) => void;
+    /**
      * Append a given ad-hoc data views to the list of ad-hoc data view
      */
     appendAdHocDataViews: (dataViews: DataView | DataView[]) => void;
@@ -228,6 +232,8 @@ export function getDiscoverStateContainer({
 
   const setDataView = (dataView: DataView) =>
     internalStateContainer.transitions.setDataView(dataView);
+  const setAdHocDataViews = (dataViews: DataView[]) =>
+    internalStateContainer.transitions.setAdHocDataViews(dataViews);
   const appendAdHocDataViews = (dataViews: DataView | DataView[]) =>
     internalStateContainer.transitions.appendAdHocDataViews(dataViews);
   const replaceAdHocDataViewWithId = (id: string, dataView: DataView) =>
@@ -316,6 +322,7 @@ export function getDiscoverStateContainer({
     },
     actions: {
       setDataView,
+      setAdHocDataViews,
       appendAdHocDataViews,
       replaceAdHocDataViewWithId,
       removeAdHocDataViewById,
@@ -439,5 +446,6 @@ function createUrlGeneratorState({
     useHash: false,
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
+    breakdownField: appState.breakdownField,
   };
 }

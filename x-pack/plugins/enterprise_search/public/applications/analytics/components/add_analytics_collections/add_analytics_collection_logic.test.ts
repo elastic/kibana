@@ -32,8 +32,6 @@ describe('addAnalyticsCollectionLogic', () => {
   it('has expected default values', () => {
     expect(AddAnalyticsCollectionLogic.values).toEqual({
       canSubmit: false,
-      hasInputError: false,
-      inputError: null,
       isLoading: false,
       name: '',
       status: Status.IDLE,
@@ -41,51 +39,11 @@ describe('addAnalyticsCollectionLogic', () => {
   });
 
   describe('actions', () => {
-    describe('setInputError', () => {
-      it('should set error state', () => {
-        AddAnalyticsCollectionLogic.actions.setInputError('error');
-        expect(AddAnalyticsCollectionLogic.values).toEqual({
-          canSubmit: false,
-          hasInputError: true,
-          inputError: 'error',
-          isLoading: false,
-          name: '',
-          status: Status.IDLE,
-        });
-      });
-
-      it('should reset error state', () => {
-        AddAnalyticsCollectionLogic.actions.setInputError(null);
-        expect(AddAnalyticsCollectionLogic.values).toEqual({
-          canSubmit: false,
-          hasInputError: false,
-          inputError: null,
-          isLoading: false,
-          name: '',
-          status: Status.IDLE,
-        });
-      });
-    });
-
     describe('setNameValue', () => {
-      it('should error when name is invalid', () => {
-        AddAnalyticsCollectionLogic.actions.setNameValue('!invalid');
-        expect(AddAnalyticsCollectionLogic.values).toEqual({
-          canSubmit: false,
-          hasInputError: true,
-          inputError: 'Name must only contain alphanumeric characters and underscores',
-          isLoading: false,
-          name: '!invalid',
-          status: Status.IDLE,
-        });
-      });
-
-      it('should not show error when name is valid', () => {
+      it('should set name', () => {
         AddAnalyticsCollectionLogic.actions.setNameValue('valid');
         expect(AddAnalyticsCollectionLogic.values).toEqual({
           canSubmit: true,
-          hasInputError: false,
-          inputError: null,
           isLoading: false,
           name: 'valid',
           status: Status.IDLE,
@@ -97,13 +55,14 @@ describe('addAnalyticsCollectionLogic', () => {
   describe('listeners', () => {
     describe('onApiSuccess', () => {
       it('should flash a success toast and navigate to collection view', async () => {
-        jest.useFakeTimers('legacy');
+        jest.useFakeTimers({ legacyFakeTimers: true });
 
         const { navigateToUrl } = mockKibanaValues;
 
         AddAnalyticsCollectionLogic.actions.apiSuccess({
           event_retention_day_length: 180,
-          id: 'bla',
+          events_datastream: 'logs-elastic_analytics.events-test',
+          id: 'test',
           name: 'test',
         } as AnalyticsCollection);
 
@@ -159,6 +118,7 @@ describe('addAnalyticsCollectionLogic', () => {
       it('updates when apiSuccess listener triggered', () => {
         AddAnalyticsCollectionLogic.actions.apiSuccess({
           event_retention_day_length: 180,
+          events_datastream: 'logs-elastic_analytics.events-test',
           id: 'bla',
           name: 'test',
         });

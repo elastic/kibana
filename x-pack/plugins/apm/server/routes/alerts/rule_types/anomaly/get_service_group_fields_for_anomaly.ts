@@ -14,7 +14,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_DURATION,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
   getServiceGroupFields,

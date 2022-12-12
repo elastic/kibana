@@ -156,8 +156,6 @@ User::    The display name of the owner (optional).
 
 After obtaining an Opsgenie instance, configure the API integration. For details, refer to the https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/[Opsgenie documentation].
 
-After creating an Opsgenie instance, https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/[configure the API integration].
-
 If you're using a free trial, go to the `Teams` dashboard and select the appropriate team.
 
 image::management/connectors/images/opsgenie-teams.png[Opsgenie teams dashboard]

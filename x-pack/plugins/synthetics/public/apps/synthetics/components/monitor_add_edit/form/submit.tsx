@@ -118,7 +118,7 @@ export const ActionBar = () => {
       </EuiFlexGroup>
       {isDeleteModalVisible && (
         <DeleteMonitor
-          id={monitorId}
+          configId={monitorId}
           name={monitorObject?.attributes?.[ConfigKey.NAME] ?? ''}
           reloadPage={() => {
             history.push(MONITORS_ROUTE);

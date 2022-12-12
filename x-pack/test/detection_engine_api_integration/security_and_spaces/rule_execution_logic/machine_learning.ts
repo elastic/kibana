@@ -23,7 +23,7 @@ import {
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import expect from 'expect';
+import { expect } from 'expect';
 import {
   createListsIndex,
   deleteAllExceptions,
@@ -64,8 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/142993
-  describe.skip('Machine learning type rules', () => {
+  describe('Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start

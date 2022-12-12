@@ -67,6 +67,10 @@ export interface AppState {
    * Number of rows in the grid per page
    */
   rowsPerPage?: number;
+  /**
+   * Breakdown field of chart
+   */
+  breakdownField?: string;
 }
 
 export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelector } =

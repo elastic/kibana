@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from '../../__mocks__/data_view';
@@ -25,7 +26,7 @@ setHeaderActionMenuMounter(jest.fn());
 setUrlTracker(urlTrackerMock);
 
 describe('DiscoverMainApp', () => {
-  test('renders', () => {
+  test('renders', async () => {
     const dataViewList = [dataViewMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
     }) as unknown as DataViewListItem[];
@@ -39,17 +40,23 @@ describe('DiscoverMainApp', () => {
       initialEntries: ['/'],
     });
 
-    const component = mountWithIntl(
-      <Router history={history}>
-        <KibanaContextProvider services={discoverServiceMock}>
-          <DiscoverMainProvider value={stateContainer}>
-            <DiscoverMainApp {...props} />
-          </DiscoverMainProvider>
-        </KibanaContextProvider>
-      </Router>
-    );
+    await act(async () => {
+      const component = await mountWithIntl(
+        <Router history={history}>
+          <KibanaContextProvider services={discoverServiceMock}>
+            <DiscoverMainProvider value={stateContainer}>
+              <DiscoverMainApp {...props} />
+            </DiscoverMainProvider>
+          </KibanaContextProvider>
+        </Router>
+      );
 
-    expect(component.find(DiscoverTopNav).exists()).toBe(true);
-    expect(component.find(DiscoverTopNav).prop('savedSearch')).toEqual(savedSearchMock);
+      // wait for lazy modules
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await component.update();
+
+      expect(component.find(DiscoverTopNav).exists()).toBe(true);
+      expect(component.find(DiscoverTopNav).prop('savedSearch')).toEqual(savedSearchMock);
+    });
   });
 });

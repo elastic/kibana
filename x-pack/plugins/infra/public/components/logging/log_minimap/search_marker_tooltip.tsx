@@ -8,6 +8,7 @@
 import { calculatePopoverPosition, EuiPortal, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
 // @ts-expect-error style types not defined
 import { euiToolTipStyles } from '@elastic/eui/lib/components/tool_tip/tool_tip.styles';
+import { css } from '@emotion/react';
 import * as React from 'react';
 
 import { AutoSizer } from '../../auto_sizer';
@@ -43,7 +44,7 @@ export class _SearchMarkerTooltip extends React.PureComponent<
 
               return (
                 <div
-                  css={[styles.euiToolTip, styles.left]}
+                  css={css([styles.euiToolTip, styles.left])}
                   style={{
                     left,
                     top,
@@ -51,8 +52,7 @@ export class _SearchMarkerTooltip extends React.PureComponent<
                   ref={measureRef}
                 >
                   <div
-                    css={[styles.euiToolTip__arrow]} // TODO: Add styles.arrowPositions.left in next Kibana EUI upgrade
-                    className="euiToolTip__arrow" // TODO: Remove this when the above is done
+                    css={css([styles.euiToolTip__arrow, styles.arrowPositions.left])}
                     style={{ left: width || 0, top: (height || 0) / 2 - POPOVER_ARROW_SIZE / 2 }}
                   />
                   <div>{children}</div>

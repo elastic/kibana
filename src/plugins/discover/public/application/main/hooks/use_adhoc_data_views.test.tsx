@@ -79,6 +79,7 @@ describe('useAdHocDataViews', () => {
     const hook = renderHook(
       () =>
         useAdHocDataViews({
+          dataView: mockDataView,
           savedSearch: savedSearchMock,
           stateContainer,
           setUrlTracking: jest.fn(),
@@ -111,6 +112,7 @@ describe('useAdHocDataViews', () => {
     const hook = renderHook(
       () =>
         useAdHocDataViews({
+          dataView: mockDataView,
           savedSearch: savedSearchMock,
           stateContainer: getDiscoverStateMock({ isTimeBased: true }),
           setUrlTracking: jest.fn(),

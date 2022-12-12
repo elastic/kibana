@@ -36,6 +36,7 @@ import { usePackQueryForm } from './use_pack_query_form';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
 import { useKibana } from '../../common/lib/kibana';
+import { overflowCss } from '../utils';
 
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
@@ -151,7 +152,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           </EuiFlexGroup>
           <EuiSpacer />
           <EuiFlexGroup>
-            <EuiFlexItem>
+            <EuiFlexItem css={overflowCss}>
               <ECSMappingEditorField />
             </EuiFlexItem>
           </EuiFlexGroup>

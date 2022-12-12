@@ -97,6 +97,14 @@ export const FLEET_SERVER_HOST_API_ROUTES = {
   DELETE_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
 };
 
+export const FLEET_PROXY_API_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/proxies`,
+  CREATE_PATTERN: `${API_ROOT}/proxies`,
+  INFO_PATTERN: `${API_ROOT}/proxies/{itemId}`,
+  UPDATE_PATTERN: `${API_ROOT}/proxies/{itemId}`,
+  DELETE_PATTERN: `${API_ROOT}/proxies/{itemId}`,
+};
+
 // Settings API routes
 export const SETTINGS_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/settings`,
@@ -167,7 +175,6 @@ export const INSTALL_SCRIPT_API_ROUTES = `${API_ROOT}/install/{osType}`;
 
 // Policy preconfig API routes
 export const PRECONFIGURATION_API_ROUTES = {
-  UPDATE_PATTERN: `${API_ROOT}/setup/preconfiguration`,
   RESET_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies`,
   RESET_ONE_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies/{agentPolicyId}`,
 };

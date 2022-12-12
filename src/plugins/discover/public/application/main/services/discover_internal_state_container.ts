@@ -20,6 +20,7 @@ export interface InternalState {
 
 interface InternalStateTransitions {
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
+  setAdHocDataViews: (state: InternalState) => (dataViews: DataView[]) => InternalState;
   appendAdHocDataViews: (
     state: InternalState
   ) => (dataViews: DataView | DataView[]) => InternalState;
@@ -47,6 +48,10 @@ export function getInternalStateContainer() {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
         ...prevState,
         dataView: nextDataView,
+      }),
+      setAdHocDataViews: (prevState: InternalState) => (newAdHocDataViewList: DataView[]) => ({
+        ...prevState,
+        dataViewAdHocList: newAdHocDataViewList,
       }),
       appendAdHocDataViews:
         (prevState: InternalState) => (dataViewsAdHoc: DataView | DataView[]) => ({

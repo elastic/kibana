@@ -6,32 +6,44 @@
  * Side Public License, v 1.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import uuid from 'uuid/v4';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
 import { DiscoverStateContainer } from '../services/discover_state';
 import { useFiltersValidation } from './use_filters_validation';
 import { updateFiltersReferences } from '../utils/update_filter_references';
 
 export const useAdHocDataViews = ({
+  dataView,
   savedSearch,
   stateContainer,
   setUrlTracking,
   filterManager,
   dataViews,
   toastNotifications,
+  trackUiMetric,
 }: {
+  dataView: DataView;
   savedSearch: SavedSearch;
   stateContainer: DiscoverStateContainer;
   setUrlTracking: (dataView: DataView) => void;
   dataViews: DataViewsContract;
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
+  trackUiMetric?: (metricType: string, eventName: string | string[], count?: number) => void;
 }) => {
+  useEffect(() => {
+    if (!dataView.isPersisted()) {
+      trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
+    }
+  }, [dataView, trackUiMetric]);
+
   /**
    * Takes care of checking data view id references in filters
    */

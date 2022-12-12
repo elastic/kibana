@@ -8,20 +8,38 @@
 
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-/** @public */
+/**
+ * Options for bulk delete operation
+ *
+ * @public
+ */
 export interface SavedObjectsBulkDeleteOptions {
+  /** Force deletion of any objects that exist in multiple namespaces (default=false) */
   force?: boolean;
 }
 
-/** @public */
+/**
+ * Single item within the statuses array of the bulk delete response
+ *
+ * @public
+ */
 export interface SavedObjectsBulkDeleteResponseItem {
+  /** saved object id */
   id: string;
+  /** saved object type */
   type: string;
+  /** true if the delete operation succeeded*/
   success: boolean;
+  /** error from delete operation (undefined if no error) */
   error?: SavedObjectError;
 }
 
-/** @public */
+/**
+ * Return type of the Saved Objects `bulkDelete()` method.
+ *
+ * @public
+ */
 export interface SavedObjectsBulkDeleteResponse {
+  /** array of statuses per object */
   statuses: SavedObjectsBulkDeleteResponseItem[];
 }

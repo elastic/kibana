@@ -13,7 +13,12 @@ import type {
   SavedObjectsClientContract,
   IBasePath,
 } from '@kbn/core/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type {
+  AuditLogger,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
 import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
@@ -111,13 +116,14 @@ export class CasesClientFactory {
       includedHiddenTypes: SAVED_OBJECT_TYPES,
       // this tells the security plugin to not perform SO authorization and audit logging since we are handling
       // that manually using our Authorization class and audit logger.
-      excludedWrappers: ['security'],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
     });
 
     const services = this.createServices({
       unsecuredSavedObjectsClient,
       esClient: scopedClusterClient,
       request,
+      auditLogger,
     });
 
     const userInfo = await this.getUserInfo(request);
@@ -148,10 +154,12 @@ export class CasesClientFactory {
     unsecuredSavedObjectsClient,
     esClient,
     request,
+    auditLogger,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     esClient: ElasticsearchClient;
     request: KibanaRequest;
+    auditLogger: AuditLogger;
   }): CasesServices {
     this.validateInitialization();
 
@@ -189,10 +197,12 @@ export class CasesClientFactory {
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),
-      userActionService: new CaseUserActionService(
-        this.logger,
-        this.options.persistableStateAttachmentTypeRegistry
-      ),
+      userActionService: new CaseUserActionService({
+        log: this.logger,
+        persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        auditLogger,
+      }),
       attachmentService,
       licensingService,
       notificationService,

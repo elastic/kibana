@@ -12,7 +12,7 @@ import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';

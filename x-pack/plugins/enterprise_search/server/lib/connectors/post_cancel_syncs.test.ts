@@ -23,6 +23,8 @@ describe('addConnector lib function', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    const now = new Date('2022-05-22T10:10:11.111Z');
+    jest.spyOn(Date, 'now').mockImplementation(() => now.getTime());
   });
 
   it('should call updateByQuery to cancel syncs', async () => {
@@ -39,31 +41,7 @@ describe('addConnector lib function', () => {
           must: [
             {
               term: {
-                connector_id: 'connectorId',
-              },
-            },
-            {
-              terms: {
-                status: [SyncStatus.IN_PROGRESS],
-              },
-            },
-          ],
-        },
-      },
-      refresh: true,
-      script: {
-        lang: 'painless',
-        source: `ctx._source['status'] = '${SyncStatus.CANCELING}'`,
-      },
-    });
-    expect(mockClient.asCurrentUser.updateByQuery).toHaveBeenCalledWith({
-      index: CONNECTORS_JOBS_INDEX,
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                connector_id: 'connectorId',
+                'connector.id': 'connectorId',
               },
             },
             {
@@ -77,7 +55,39 @@ describe('addConnector lib function', () => {
       refresh: true,
       script: {
         lang: 'painless',
-        source: `ctx._source['status'] = '${SyncStatus.CANCELED}'`,
+        source: `
+      ctx._source['status'] = '${SyncStatus.CANCELED}';
+      ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}';
+      ctx._source['canceled_at'] = '${new Date(Date.now()).toISOString()}';
+      ctx._source['completed_at'] = '${new Date(Date.now()).toISOString()}';
+`,
+      },
+    });
+    expect(mockClient.asCurrentUser.updateByQuery).toHaveBeenCalledWith({
+      index: CONNECTORS_JOBS_INDEX,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                'connector.id': 'connectorId',
+              },
+            },
+            {
+              terms: {
+                status: [SyncStatus.IN_PROGRESS],
+              },
+            },
+          ],
+        },
+      },
+      refresh: true,
+      script: {
+        lang: 'painless',
+        source: `
+        ctx._source['status'] = '${SyncStatus.CANCELING}'
+        ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}';
+`,
       },
     });
     await expect(mockClient.asCurrentUser.update).toHaveBeenCalledWith({

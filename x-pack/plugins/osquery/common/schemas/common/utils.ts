@@ -84,7 +84,7 @@ export const convertShardsToArray = (
   reduce(
     shards,
     (acc, value, key) => {
-      if (value) {
+      if (value != null) {
         acc.push({
           policy: {
             key,
