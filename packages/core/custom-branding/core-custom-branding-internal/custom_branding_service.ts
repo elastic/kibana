@@ -15,6 +15,10 @@ interface Props extends CustomBranding {
   favicon$?: Observable<string>;
   pageTitle$?: Observable<string>;
   customizedLogo$?: Observable<string>;
+  logo?: string;
+  favicon?: string;
+  pageTitle?: string;
+  customizedLogo?: string;
 }
 
 /** @internal */
@@ -24,13 +28,12 @@ export function CustomBrandingService({ logo, favicon, pageTitle, customizedLogo
   const favicon$ = getObservable$(favicon);
   const pageTitle$ = getObservable$(pageTitle);
   const customizedLogo$ = getObservable$(customizedLogo);
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   async () => {
     return {
       // get what is passed to the service
       get: (property: string | Observable<string> | undefined) => getObservable$(property),
 
-      // set the parameters which may have come in as observables or not
+      // set the parameters which may have come in as observables if defined
       set: () =>
         customBrandingPerOperator$
           .set('logo', logo$)
@@ -43,7 +46,6 @@ export function CustomBrandingService({ logo, favicon, pageTitle, customizedLogo
 
 // Helper function
 export const getObservable$ = (logo: string | Observable<string> | undefined) =>
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useObservable(
     logo
       ? (logo as unknown as Observable<string>)

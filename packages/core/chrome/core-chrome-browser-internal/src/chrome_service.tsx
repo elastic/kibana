@@ -27,7 +27,6 @@ import type {
   ChromeHelpExtension,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
-import { CustomBrandingService } from '@kbn/core-custom-branding-internal';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
@@ -35,6 +34,7 @@ import { NavLinksService } from './nav_links';
 import { RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import type { InternalChromeStart } from './types';
+import { CustomBrandingService } from '@kbn/core-custom-branding-internal';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -50,6 +50,7 @@ export interface StartDeps {
   http: HttpStart;
   injectedMetadata: InternalInjectedMetadataStart;
   notifications: NotificationsStart;
+  customBranding$: Map<string, Observable<string>>;
 }
 
 /** @internal */
@@ -61,7 +62,6 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
-  private readonly customBranding = CustomBrandingService({});
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -103,6 +103,7 @@ export class ChromeService {
     http,
     injectedMetadata,
     notifications,
+    customBranding$,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
@@ -145,7 +146,6 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
-    const customBranding = this.customBranding.start();
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -207,7 +207,6 @@ export class ChromeService {
       navLinks,
       recentlyAccessed,
       docTitle,
-      customBranding,
 
       getHeaderComponent: () => (
         <Header
@@ -235,6 +234,8 @@ export class ChromeService {
           navControlsExtension$={navControls.getExtension$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
+          logo$={customBranding$.get('logo')!.pipe(takeUntil(this.stop$))}
+          customizedLogo$={customBranding$.get('customizedLogo')!.pipe(takeUntil(this.stop$))}
         />
       ),
 
@@ -301,6 +302,20 @@ export class ChromeService {
       },
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
+      
+      setLogo: (logo: string) => {
+        if (customBranding$.get('logo') !== undefined) {
+          customBranding$.get('logo')!.next(logo);
+        }
+      },
+
+      setCustomizedLogo: (customizedLogo: string) => {
+        if (customBranding$.get('customizedLogo') !== undefined) {
+          customBranding$.get('customizedLogo')!.next(customizedLogo)
+        }
+      },
+
+      getCustomizedLogo$: () => customBranding$.get('customizedLogo')!.pipe(takeUntil(this.stop$)),
     };
   }
 
