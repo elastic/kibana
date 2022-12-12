@@ -23,6 +23,8 @@ import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../types';
+import { DiscoverGridFlyout } from '../../components/discover_grid/discover_grid_flyout';
+import { getDisplayedColumns } from '../../utils/columns';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -73,6 +75,7 @@ export function ContextAppContent({
   setAppState,
   addFilter,
 }: ContextAppContentProps) {
+  console.log('ContextAppContent RENDER');
   const { uiSettings: config } = useDiscoverServices();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
@@ -112,6 +115,57 @@ export function ContextAppContent({
     return [[dataView.timeFieldName!, SortDirection.desc]];
   }, [dataView]);
 
+  // start
+  const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
+  const [isFilterActive, setIsFilterActive] = useState(false);
+  const displayedColumns = getDisplayedColumns(columns, dataView);
+  const defaultColumns = displayedColumns.includes('_source');
+  const usedSelectedDocs = useMemo(() => {
+    if (!selectedDocs.length || !rows?.length) {
+      return [];
+    }
+    const idMap = rows.reduce((map, row) => map.set(row.id, true), new Map());
+    // filter out selected docs that are no longer part of the current data
+    const result = selectedDocs.filter((docId) => idMap.get(docId));
+    if (result.length === 0 && isFilterActive) {
+      setIsFilterActive(false);
+    }
+    return result;
+  }, [selectedDocs, rows, isFilterActive]);
+
+  const displayedRows = useMemo(() => {
+    if (!rows) {
+      return [];
+    }
+    if (!isFilterActive || usedSelectedDocs.length === 0) {
+      return rows;
+    }
+    const rowsFiltered = rows.filter((row) => usedSelectedDocs.includes(row.id));
+    if (!rowsFiltered.length) {
+      // in case the selected docs are no longer part of the sample of 500, show all docs
+      return rows;
+    }
+    return rowsFiltered;
+  }, [rows, usedSelectedDocs, isFilterActive]);
+  // end
+
+  const docDetail = expandedDoc ? (
+    <DiscoverGridFlyout
+      dataView={dataView}
+      hit={expandedDoc}
+      // relies on rows, usedSelectedDocs, isFilterActive - usestate
+      hits={displayedRows}
+      // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+      columns={defaultColumns ? [] : displayedColumns}
+      onFilter={addFilter}
+      onRemoveColumn={onRemoveColumn}
+      onAddColumn={onAddColumn}
+      onClose={() => setExpandedDoc(undefined)}
+      setExpandedDoc={setExpandedDoc}
+    />
+  ) : undefined;
+
+  console.log('about to render');
   return (
     <Fragment>
       <ActionBarMemoized
@@ -144,6 +198,9 @@ export function ContextAppContent({
           <DiscoverGridMemoized
             ariaLabelledBy="surDocumentsAriaLabel"
             columns={columns}
+            displayedColumns={displayedColumns}
+            displayedRows={displayedRows}
+            defaultColumns={defaultColumns}
             rows={rows}
             dataView={dataView}
             expandedDoc={expandedDoc}
@@ -160,6 +217,11 @@ export function ContextAppContent({
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             onSetColumns={onSetColumns}
+            setSelectedDocs={setSelectedDocs}
+            usedSelectedDocs={usedSelectedDocs}
+            isFilterActive={isFilterActive}
+            setIsFilterActive={setIsFilterActive}
+            docDetail={docDetail}
           />
         </div>
       )}
