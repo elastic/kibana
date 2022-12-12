@@ -6,6 +6,7 @@
  */
 
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../common/constants';
+import { SeverityLabels } from '../../common/ui';
 
 /**
  * The name of the saved object reference indicating the action connector ID. This is stored in the Saved Object reference
@@ -37,3 +38,10 @@ export const EXTERNAL_REFERENCE_REF_NAME = 'externalReferenceId';
  * The name of the licensing feature to notify for feature usage with the licensing plugin
  */
 export const LICENSING_CASE_ASSIGNMENT_FEATURE = 'Cases user assignment';
+
+export const SEVERITY_CONVERTION_DICT: Record<string, number> = {
+  [SeverityLabels.low]: 0,
+  [SeverityLabels.medium]: 1,
+  [SeverityLabels.high]: 2,
+  [SeverityLabels.critical]: 3,
+};

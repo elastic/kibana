@@ -13,10 +13,12 @@ import type { SanitizedCaseOwner } from '.';
 import { addOwnerToSO } from '.';
 import type { ESConnectorFields } from '../../services';
 import type { CaseAttributes } from '../../../common/api';
-import { CaseSeverity, ConnectorTypes } from '../../../common/api';
+import { CaseSeverity, OldCaseSeverity, ConnectorTypes } from '../../../common/api';
+
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
+  SEVERITY_CONVERTION_DICT,
 } from '../../common/constants';
 import {
   transformConnectorIdToReference,
@@ -120,7 +122,7 @@ export const addDuration = (
 export const addSeverity = (
   doc: SavedObjectUnsanitizedDoc<CaseAttributes>
 ): SavedObjectSanitizedDoc<CaseAttributes> => {
-  const severity = doc.attributes.severity ?? CaseSeverity.LOW;
+  const severity = doc.attributes.severity ?? OldCaseSeverity.LOW;
   return { ...doc, attributes: { ...doc.attributes, severity }, references: doc.references ?? [] };
 };
 
@@ -129,6 +131,17 @@ export const addAssignees = (
 ): SavedObjectSanitizedDoc<CaseAttributes> => {
   const assignees = doc.attributes.assignees ?? [];
   return { ...doc, attributes: { ...doc.attributes, assignees }, references: doc.references ?? [] };
+};
+
+export const convertSeverity = (
+  doc: SavedObjectUnsanitizedDoc<Omit<CaseAttributes, 'severity'> & { severity: string }>
+): SavedObjectSanitizedDoc<CaseAttributes> => {
+  const convertedSeverity = SEVERITY_CONVERTION_DICT[doc.attributes.severity] ?? CaseSeverity.LOW;
+  return {
+    ...doc,
+    attributes: { ...doc.attributes, severity: convertedSeverity },
+    references: doc.references ?? [],
+  };
 };
 
 export const caseMigrations = {
@@ -194,4 +207,5 @@ export const caseMigrations = {
   '8.1.0': removeCaseType,
   '8.3.0': pipeMigrations(addDuration, addSeverity),
   '8.5.0': addAssignees,
+  '8.7.0': convertSeverity,
 };

@@ -34,11 +34,18 @@ export const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
 });
 
-export enum CaseSeverity {
+export enum OldCaseSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
   CRITICAL = 'critical',
+}
+
+export enum CaseSeverity {
+  LOW = 0,
+  MEDIUM = 1,
+  HIGH = 2,
+  CRITICAL = 3,
 }
 
 export const CaseSeverityRt = rt.union([
