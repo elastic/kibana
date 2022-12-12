@@ -22,7 +22,7 @@ import {
 } from './types';
 
 export const createPureLogViewStateMachine = (initialContext: LogViewContextWithId) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UBqBLMB3AxADbrZ4CSEAwgBYCGAdjBANoAMAuoqAA6qxYAXLKnpcQAD0QBWVgCYAdAGYpixQA4A7ItmKAjGtkA2ADQgAnogC02jfKmyALKwCcrDU8XOHaqQF9fpmiYOAQArtwQtAJgbJxIILz8QiJikgi6rE7yDrpashpqmhrOig6mFgjWmfLFGlJOrHKGzrK6iv6BJCHyofRYfUK0hFgAXpD4sWKJgsKi8WmqivJquoaZUvUuXhrliBlS2RqG9bJum4XOHSBBpLjyxLQQ-VBEqI-PAMqhAMbfYJCQSbxabJOagNJHA6sXQOTwFFx1ZxqXYINRLBzOTGuVb2NqXALXLp4e5vJ6MV7vRgAMVoWEIgI4Uz4MxS82ksgUaPhrAMikMGjqKI5S0xjS0+mcGVhVxu3QATnBUIQAG7PfAK2BK0Kgr6-f4QBlxHjM0GpPY6WxqJFStq1GEotHZLHY46tdTtAmy4kapWq8k+wja2Y0umGplJWZm9Ji5Y6DbOdxyBM7cyIYXyUVuPRWqUezrBYnfahgb4Aa0+AiioVg+CLJfLjA+lYE1d1fwBLEZwJNkbZ6TqCgcUmcUgMMk8qwd6KxUkMaxyegchhlRLudbLFarNfXDagTa3IfpnaNCR7rPBexkumy0P52hKunyKYq6cz4pzmTzhILdwDyvGCoPBAXq4ECxoRueEjmhyyxOD4egnEuZSppUhg1Jk0IZMUCYOO4agrj+JKUlAh4AWAAhymYYGnhBYJQQgTiDg4RguLo9j5C0JgoY4aEaKshh6OonErARtzyAGQYiKREDquRlHUSCvYXggkoKIoBRse4s4clIz5pkuNT8YJVpGGorDLp6q7yDum4trA0myRRVFduBLJ0WkMK6Nepw4oYHIuKOUhCgZfFzsZwmsF+IE9BEURquEkRCI2Pztgax7hm5UaYgofHMUYuRqIYzEopYkryLac7sRsRwGKJ3QJXF5INUlJG0keClnu55oaKw8gCfUGICpFmRcRUlgcmo8iZGimJqE4DjeEVdXEs1zwOYBpIgR1tFRj1ByYl5+gqGOuglY+SxSLkSIjYY+gZBZBL0KgBrwPEIEZaafZeQ45Xqd4ihyIVRz2ihlg5LYchOC0mJ8QKy13L0-QzEMoyQB9Sn0asCi2v9gP8rdyEVPs8gcscKjOH5KjNH4lmEUBzzo5BaS4Qocj2N46yqBiigooYk0aEYKjDvxZkCfD4mKiqDPdjtfbXdk3jDmz3hGDzKErDUgvqHO86XeLNmNs21aM116T-TUQ6wiORiOBsDrXgLZMDcchVRVZf5ozLmV9qc+Qk60MKFEV+RovbmtOwtLsCbI4v09SbWe65n3KbhaG3edum5LILRBShfLYwLI58RTjTmTT+ZiRJoLSSbWV8ST5nqWxxzKKded+eVhdaAmxw5Jo+vFhuhsHgnEC119ivlZdzQtMKzSyCi+ed9n3eQn3Gji6tjDj8pFNp6c4OW7hdug44nKtHNUNFTC3ib7FLU117yeY5PbGrAU6nqNNJUcs4sb6AuI4C1mIb38L4IAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UBqBLMB3AxMgPIDiA+hgJICiA6mZQCJkDCAEgIIByJ1jA2gAYAuolAAHVLCwAXLKgB2YkAA9EAFgAcARgB0ANgBM+nQFZ96gOwBmAJyXBpgDQgAnogC01q7q2DB3qa2moaCOgC+4S5omDgEAKoACowcACrUQqJIIJLScorKagjaAfq6ofrWmkH6ttrq6tYu7ghehuq6lqbemlX65g6mkdHo2Hi6AK4KWNNyAIYANlgAXpD4mcq5svJK2UXetrra+vpd1traQdZVzYglZZbGQYKWttahmo7DIDFjuLoLVBzCAzKCEIgcRiUHhkADK8RYLGofD4G2yW3yu1ARRsHXOhmCT2COk0twQIV0pn8gi0dkqVMM2m+vziAKBIIUYOIkOh5AAYhxKMhUSJNlJtgU9ogqZpOqFnqZzIZroYyYZlbpbLZ-LZ+oz2sd1MzRqyAE5wVALABuoPwACVqLCiMh4qlKEQuHCEUiUQJRejxZjCnd1ZZdL0LoI6mdrmSKVT-LTddYqdpNMbYuNzbBLTbOfbHc7Xe7PQKhSKshJAztgwhiZSLhdHpp1IZLNpLGqNVqdXrtAbLBm-roAMYACzAI4A1qDYTI5jIJrB8OxqCwANK8uGpNLxWFexHIxgVsV5GtS4qWTRhywnUJa4xt0ydtyIV6+Anakw6axGayDqIfhNcZx0nGdOTnBclxXNg103GFYR3VI9zIMthT9SscmrSVsTuUxtGscMBjTc57GvLtCJ7KM+wHIczQta01gdblmGIcgqDoNEqzPHDVBDUwOhCa4dWVUJbzJLwDGuTRanMdRglqKojUAllxkBYFQT5OYsAWJjqFSO0AE0uKwnisT4hA7A6W9HkVX8-HsNV1AeY4ThsQRDB0XVDDorMGImTEtJ0vSDOM-1uIlcyim1PRKmMIxLn-Ex1CclyTlOawPK8-RfP+UDp1nedF1gILdIgAtQpMjFz1w4p1A7XRvG0N5bEMKk3kaVLOlcjKsuaoxcsmcQIAXW0khSN0EO9I8TwDMza3sMNtVsbotH6d5bBS19Wk0Q59A8oIGhMMICSZFTgP+CZhtG-NxrSLc0NmiKgwvfsfEseTanVeTjH-CT1UOGkW2MB8AgZQarpGuROVKvSWLINiKBoWgquwqLEFOWUU2CBptWufbSW2jx+1MXRHEy-D1V-D77EiQCFFQCA4GUVTcFPSLawI2Vahky56mqK9+gkxoOmCRMBL1cwUwh6ZZiwRYVkgdmXtqtMyh5-Q+a0Z8ZOcbaSlJ9UTkaZqenMWxBvUjkoGVmqLKsQwybatqVt2kIXxaEw5X6a86heN4XkG7Nc1BW3eOiz5fG17U2q0X64z0R51pkk4aXwwb8vAqBIOKsP0eKfDAdMCpajWxxVW2q8DDkgi3kuYIhnOzN-mDxiIDz2tGQuavE3LixGiaSvual+w+ccR4Lab4crc07Syo7i8rHVi5lWfDsCTaslf0d9eVvbXVqX6IP-MCuelbmjmL1H8pBEqdtzG6fCt6MI4J5sex+nq68M4nAqIKKpcsN24XxVhZS4oRfCmF6PFBoE8t5BCOFld4zlLgCRpBDa60MbYgLttFE4BhQj1Q+gJKwip-qtnDIyFs6hqL1QaOmKerJIY3SgEAheqttZHHwpjf8VQgb-QJJQtM9UkoNFbABSIQA */
   createMachine<LogViewContext, LogViewEvent, LogViewTypestate>(
     {
       context: initialContext,
@@ -42,11 +42,11 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
             src: 'loadLogView',
           },
           on: {
-            loadingSucceeded: {
+            LOADING_SUCCEEDED: {
               target: 'resolving',
               actions: 'storeLogView',
             },
-            loadingFailed: {
+            LOADING_FAILED: {
               target: 'loadingFailed',
               actions: 'storeError',
             },
@@ -57,13 +57,13 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
             src: 'resolveLogView',
           },
           on: {
-            resolutionSucceeded: {
-              target: 'checkingStatus',
-              actions: 'storeResolvedLogView',
-            },
-            resolutionFailed: {
+            RESOLUTION_FAILED: {
               target: 'resolutionFailed',
               actions: 'storeError',
+            },
+            RESOLUTION_SUCCEEDED: {
+              target: 'checkingStatus',
+              actions: 'storeResolvedLogView',
             },
           },
         },
@@ -72,20 +72,20 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
             src: 'loadLogViewStatus',
           },
           on: {
-            checkingStatusSucceeded: {
-              target: 'resolved',
-              actions: 'storeStatus',
-            },
-            checkingStatusFailed: {
+            CHECKING_STATUS_FAILED: {
               target: 'checkingStatusFailed',
               actions: 'storeError',
+            },
+            CHECKING_STATUS_SUCCEEDED: {
+              target: 'resolved',
+              actions: 'storeStatus',
             },
           },
         },
         resolved: {
           entry: 'notifyLoadingSucceeded',
           on: {
-            reloadLogView: {
+            RELOAD_LOG_VIEW: {
               target: 'loading',
             },
           },
@@ -93,7 +93,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         loadingFailed: {
           entry: 'notifyLoadingFailed',
           on: {
-            retry: {
+            RETRY: {
               target: 'loading',
             },
           },
@@ -101,7 +101,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         resolutionFailed: {
           entry: 'notifyLoadingFailed',
           on: {
-            retry: {
+            RETRY: {
               target: 'resolving',
             },
           },
@@ -109,7 +109,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         checkingStatusFailed: {
           entry: 'notifyLoadingFailed',
           on: {
-            retry: {
+            RETRY: {
               target: 'checkingStatus',
             },
           },
@@ -120,31 +120,31 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
             src: 'updateLogView',
           },
           on: {
-            updatingSucceeded: {
-              target: 'resolving',
-              actions: 'storeLogView',
-            },
-            updatingFailed: {
+            UPDATING_FAILED: {
               target: 'updatingFailed',
               actions: 'storeError',
+            },
+            UPDATING_SUCCEEDED: {
+              target: 'resolving',
+              actions: 'storeLogView',
             },
           },
         },
         updatingFailed: {
           entry: 'notifyLoadingFailed',
           on: {
-            reloadLogView: {
+            RELOAD_LOG_VIEW: {
               target: 'loading',
             },
           },
         },
       },
       on: {
-        logViewIdChanged: {
+        LOG_VIEW_ID_CHANGED: {
           target: '.loading',
           actions: 'storeLogViewId',
         },
-        update: {
+        UPDATE: {
           target: '.updating',
         },
       },
@@ -228,20 +228,20 @@ export const createLogViewStateMachine = ({
         ).pipe(
           map(
             (logView): LogViewEvent => ({
-              type: 'loadingSucceeded',
+              type: 'LOADING_SUCCEEDED',
               logView,
             })
           ),
           catchError((error) =>
             of<LogViewEvent>({
-              type: 'loadingFailed',
+              type: 'LOADING_FAILED',
               error,
             })
           )
         ),
       updateLogView: (context, event) =>
         from(
-          'logViewId' in context && event.type === 'update'
+          'logViewId' in context && event.type === 'UPDATE'
             ? logViews.putLogView(context.logViewId, event.attributes)
             : throwError(
                 () =>
@@ -252,13 +252,13 @@ export const createLogViewStateMachine = ({
         ).pipe(
           map(
             (logView): LogViewEvent => ({
-              type: 'updatingSucceeded',
+              type: 'UPDATING_SUCCEEDED',
               logView,
             })
           ),
           catchError((error) =>
             of<LogViewEvent>({
-              type: 'updatingFailed',
+              type: 'UPDATING_FAILED',
               error,
             })
           )
@@ -273,13 +273,13 @@ export const createLogViewStateMachine = ({
         ).pipe(
           map(
             (resolvedLogView): LogViewEvent => ({
-              type: 'resolutionSucceeded',
+              type: 'RESOLUTION_SUCCEEDED',
               resolvedLogView,
             })
           ),
           catchError((error) =>
             of<LogViewEvent>({
-              type: 'resolutionFailed',
+              type: 'RESOLUTION_FAILED',
               error,
             })
           )
@@ -294,13 +294,13 @@ export const createLogViewStateMachine = ({
         ).pipe(
           map(
             (status): LogViewEvent => ({
-              type: 'checkingStatusSucceeded',
+              type: 'CHECKING_STATUS_SUCCEEDED',
               status,
             })
           ),
           catchError((error) =>
             of<LogViewEvent>({
-              type: 'checkingStatusFailed',
+              type: 'CHECKING_STATUS_FAILED',
               error,
             })
           )

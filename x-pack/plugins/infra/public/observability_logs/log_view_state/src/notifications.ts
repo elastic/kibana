@@ -11,16 +11,16 @@ import { LogViewContext, LogViewEvent } from './types';
 
 export type LogViewNotificationEvent =
   | {
-      type: 'loadingLogViewStarted';
+      type: 'LOADING_LOG_VIEW_STARTED';
       logViewId: string;
     }
   | {
-      type: 'loadingLogViewSucceeded';
+      type: 'LOADING_LOG_VIEW_SUCCEEDED';
       resolvedLogView: ResolvedLogView;
       status: LogViewStatus;
     }
   | {
-      type: 'loadingLogViewFailed';
+      type: 'LOADING_LOG_VIEW_FAILED';
       error: Error;
     };
 
@@ -31,14 +31,14 @@ export const logViewNotificationEventSelectors = {
   loadingLogViewStarted: (context: LogViewContext) =>
     'logViewId' in context
       ? ({
-          type: 'loadingLogViewStarted',
+          type: 'LOADING_LOG_VIEW_STARTED',
           logViewId: context.logViewId,
         } as LogViewNotificationEvent)
       : undefined,
   loadingLogViewSucceeded: (context: LogViewContext) =>
     'resolvedLogView' in context && 'status' in context
       ? ({
-          type: 'loadingLogViewSucceeded',
+          type: 'LOADING_LOG_VIEW_SUCCEEDED',
           resolvedLogView: context.resolvedLogView,
           status: context.status,
         } as LogViewNotificationEvent)
@@ -46,7 +46,7 @@ export const logViewNotificationEventSelectors = {
   loadingLogViewFailed: (context: LogViewContext) =>
     'error' in context
       ? ({
-          type: 'loadingLogViewFailed',
+          type: 'LOADING_LOG_VIEW_FAILED',
           error: context.error,
         } as LogViewNotificationEvent)
       : undefined,

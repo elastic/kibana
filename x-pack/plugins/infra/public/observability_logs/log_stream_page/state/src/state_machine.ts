@@ -16,7 +16,7 @@ import type {
 } from './types';
 
 export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPageContext = {}) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKAXATmAhgLYAK+M2+WYAdAK4B2Alk1o-sowF6QDEa+EZlAAy6AGqMwAdwo4qEANoAGALqJQAB1SxGrVPXUgAHogC0ARmoA2ACwAOGzYCsATgDMNt3adWA7L4AaEABPRAAmP2obMPslOzCw3zdfcysAXzSgtExcAhIyMAoqOiYWNg5uCD5UASFRKAlpADF8RmRIZTUkEC0dPQNukwRTMPMw6zc3c1SE1yclGyDQhDcrK2srFycnG18I1aVUjKz0bDwiUnIsShoGZl1yrl5+QXoRcUkZWgBjb7BIDqqQy9B76QxDFK+ahKfzbSZuOLmbZLRBjJRRMIeLzmOIuHG+GzHEDZM55S6Fa7FO5ldhPKovOofaQYH5-AGKcxdTTaUEDUAQxzQmExGzuRYhRBOSbUVwwqwLcx4ra+Ikk3IXApFGgMt71RpSaq1XVMqQtNqArk9Hn9cHhNzjOxKHy+HxKeUubxuFEIeYuai+Ozy7wxJQuaKEzLE07q-JXG7UHXvBqfQ2vJP6lm-f4QC3A62MMGDRCeP02N1hPEVpQxVLeg7UdyjXzysILVyq6PnWMU+OJvUpvsmzNsnMcy0gm1FhA2NbUSauWypMvbZEShBWLzQ-Fh5xOJFIjs5LvkrUJmpp-vNVrtennxnJ5nXOS57oTgt84xmSy2BxOXwuJQ3TsBEHDCb0pXGPcIisOwCSsJwIjCQ9SQ1ONigAC3wWBLykABJehBD+WASnuVhaUqHg8D+RgADdIAAQWQZBSBwIgwCoHBYE6PM+nfW0EHMe0bDnHFHUVf8XF8atvWcP0K3sFxFLEtwwwySN6FQHN4G6NVj01SkwB43l+JGeUJimGYwjmBZvQsdY5R8NYnWSbYkMjXSyX0+NqQecjICMyd+WLMC13MaJqCRQC4m8PF4IWZCYxPAyzyNdNPgCvip0SGUdjWQNvH8LYbLXLw7DnFwrDGPxMQQqyEr0tDtTvY0H1Na9-NffNCyCn1qDsMZRX2Pw8Ri714L9JICUOHFog9erPMa6hMOwk18MIuAMu6z8BME4T7H2cwXRiRC602ah5Ng+ZYKdBx5tQnsMKwnC1sYIiSJpCoOu5XitqGaZ4iieIN0OhDoisELlmcMr-3sV1gydFV3M7BaHpoZbnoI164GoUjHkqTaPz+1zzvsUrFS2MJAxkpxobDbwgwQhG7u7U9CEYWAdBa-UXqIgn+ME1JztDBItiu50xtcf1kmSSFDqUSY1LSIA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKAXATmAhgLYAK+M2+WYAdAK4B2Alk1o-sowF6QDEAMgHkAggBEAkgDkA4gH1BsgGpiAogHUZGACpCASpuUiA2gAYAuolAAHVLEatU9CyAAeiALQAmAJzUPHgGwArIEALAAcHmHhXsEhADQgAJ6IAQDM1IHGYQDs2ZnZxl5e-l6pAL5lCWiYuAQkZGAUVHRMLGwc3BD8wuLScgKKKuoAYkJifAYm5kgg1rb2jjOuCJ4hAIzUqZklHgX+xqlrkQnJCKlB1P4loYH+qV7hHoEVVejYeESk5FiUNAzMdnaXF4glEklk8hkSjUGgAqgBheHKAyTMxOOaAhxOZbZNbZajGXLBVIkrJrYInRBHYzUEIeVIhVJhNZZLws7IhF4garvOpfRo-Zr-NrsYFdUG9CEDKFDOGI5EiSZraZWGyYxagHEhEIEwkeI7Zc7GO6UhCZHzZML7MKBDwhQp0zmVblvWqfBpNGhofAQZhQPjoBSMMAAd26YL6kOhIzGEyMaJmGIW2JS4VpJTCWXp5K82Q8pvN1Et1tt9oedq5PLd9W+v2o3t99H9geDYYl4P6gxhGARSJR8ZVszVyaWiEZPnt-m8Ry8xjta38pqN1FK+uy+w8xhCgS8lddHxrArrDb9AagQdD4clnZl3d7CqVg6TjCxo4QISumy2MWNMWiAVNO58WMFkImMOc50CMI9xqA9+U9etUB9U8W1DYZ8EYZAQR6Dso1lLRdH0Ad0WHF8NRcdxvF8AJYgiKIwhiUIC1SDwMgNcC8g5O1nmdKs4I9QUaAAC3wWAzwvEMxHoX0AGM4BaAFWFFToeB0ZQkTEBQDBkIQ+D4GRiF0IQAFllH0HQMCmEj5jIlMEDWFj0mNfw1i8SJcVCVJTXtfEGJc7d6RCLjDQqZ16FQCA4CcPi+QE35rPVOzPAYzZtjcvYDgc003DWHVCSCIJbkNWcvCtGDeXdWshVaQFlMgBKR01Md8ySKk6WoclwKyG02SCLdyureDBMQ5Cm3E1sGtst9dgyUIritG1ch-eJWrOMIwk2Yojn8PMtj8HjXlg2Kqq9JDG2bc9W3QzD6sTUjXyas1qGZO03LuHa2R6wCdyLVIORAlk6VKgb+JO6gRLE1DJOkxg5PgO6bIeij7IcnVHlufwQlnFzMaXTdNpcqC8jZQ5chB46j2aCHxtDKTZPk4Vao6W7VUR8jljWNYIlpCIMax40FxW04fOeraAoZYLyl4-cKYQ6mobp2H5MUoFOkmpGOZ3fEdvWQ0STc21vMJUX-NtCW6Wg6WjsqymaEIRhYFsMaFZhuH1fZqlDn8XxCj8RisiK76LT+v7cTDg4pYqIA */
   createMachine<LogStreamPageContext, LogStreamPageEvent, LogStreamPageTypestate>(
     {
       context: initialContext,
@@ -29,14 +29,14 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
       states: {
         uninitialized: {
           on: {
-            loadingLogViewStarted: {
+            LOADING_LOG_VIEW_STARTED: {
               target: 'loadingLogView',
             },
-            loadingLogViewFailed: {
+            LOADING_LOG_VIEW_FAILED: {
               target: 'loadingLogViewFailed',
               actions: 'storeLogViewError',
             },
-            loadingLogViewSucceeded: [
+            LOADING_LOG_VIEW_SUCCEEDED: [
               {
                 target: 'hasLogViewIndices',
                 cond: 'hasLogViewIndices',
@@ -51,11 +51,11 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
         },
         loadingLogView: {
           on: {
-            loadingLogViewFailed: {
+            LOADING_LOG_VIEW_FAILED: {
               target: 'loadingLogViewFailed',
               actions: 'storeLogViewError',
             },
-            loadingLogViewSucceeded: [
+            LOADING_LOG_VIEW_SUCCEEDED: [
               {
                 target: 'hasLogViewIndices',
                 cond: 'hasLogViewIndices',
@@ -70,7 +70,7 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
         },
         loadingLogViewFailed: {
           on: {
-            loadingLogViewStarted: {
+            LOADING_LOG_VIEW_STARTED: {
               target: 'loadingLogView',
             },
           },
@@ -80,7 +80,7 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
           states: {
             uninitialized: {
               on: {
-                receivedAllParameters: {
+                RECEIVED_ALL_PARAMETERS: {
                   target: 'initialized',
                 },
               },
@@ -94,12 +94,12 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
     {
       actions: {
         storeLogViewError: assign((_context, event) =>
-          event.type === 'loadingLogViewFailed'
+          event.type === 'LOADING_LOG_VIEW_FAILED'
             ? ({ logViewError: event.error } as LogStreamPageContextWithLogViewError)
             : {}
         ),
         storeResolvedLogView: assign((_context, event) =>
-          event.type === 'loadingLogViewSucceeded'
+          event.type === 'LOADING_LOG_VIEW_SUCCEEDED'
             ? ({
                 logViewStatus: event.status,
                 resolvedLogView: event.resolvedLogView,
@@ -109,7 +109,7 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
       },
       guards: {
         hasLogViewIndices: (_context, event) =>
-          event.type === 'loadingLogViewSucceeded' &&
+          event.type === 'LOADING_LOG_VIEW_SUCCEEDED' &&
           ['empty', 'available'].includes(event.status.index),
       },
     }

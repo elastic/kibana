@@ -88,7 +88,7 @@ export const ConnectedLogViewErrorPage: React.FC = () => {
 
   const retry = useCallback(() => {
     logViewStateService.send({
-      type: 'retry',
+      type: 'RETRY',
     });
   }, [logViewStateService]);
 

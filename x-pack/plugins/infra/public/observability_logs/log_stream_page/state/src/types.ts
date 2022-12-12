@@ -15,7 +15,7 @@ import type {
 export type LogStreamPageEvent =
   | LogViewNotificationEvent
   | {
-      type: 'receivedAllParameters';
+      type: 'RECEIVED_ALL_PARAMETERS';
     };
 
 export interface LogStreamPageContextWithLogView {

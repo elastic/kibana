@@ -86,50 +86,50 @@ export type LogViewStateValue = LogViewTypestate['value'];
 
 export type LogViewEvent =
   | {
-      type: 'logViewIdChanged';
+      type: 'LOG_VIEW_ID_CHANGED';
       logViewId: string;
     }
   | {
-      type: 'loadingSucceeded';
+      type: 'LOADING_SUCCEEDED';
       logView: LogView;
     }
   | {
-      type: 'loadingFailed';
+      type: 'LOADING_FAILED';
       error: Error;
     }
   | {
-      type: 'resolutionSucceeded';
+      type: 'RESOLUTION_SUCCEEDED';
       resolvedLogView: ResolvedLogView;
     }
   | {
-      type: 'update';
+      type: 'UPDATE';
       attributes: Partial<LogViewAttributes>;
     }
   | {
-      type: 'updatingSucceeded';
+      type: 'UPDATING_SUCCEEDED';
       logView: LogView;
     }
   | {
-      type: 'updatingFailed';
+      type: 'UPDATING_FAILED';
       error: Error;
     }
   | {
-      type: 'resolutionFailed';
+      type: 'RESOLUTION_FAILED';
       error: Error;
     }
   | {
-      type: 'checkingStatusSucceeded';
+      type: 'CHECKING_STATUS_SUCCEEDED';
       status: LogViewStatus;
     }
   | {
-      type: 'checkingStatusFailed';
+      type: 'CHECKING_STATUS_FAILED';
       error: Error;
     }
   | {
-      type: 'retry';
+      type: 'RETRY';
     }
   | {
-      type: 'reloadLogView';
+      type: 'RELOAD_LOG_VIEW';
     };
 
 export type LogViewActorRef = ActorRef<LogViewEvent, LogViewContext>;

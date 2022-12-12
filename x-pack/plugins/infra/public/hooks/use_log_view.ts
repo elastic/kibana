@@ -97,7 +97,7 @@ export const useLogView = ({
   const retry = useCallback(
     () =>
       logViewStateService.send({
-        type: 'retry',
+        type: 'RETRY',
       }),
     [logViewStateService]
   );
@@ -105,7 +105,7 @@ export const useLogView = ({
   const update = useCallback(
     async (logViewAttributes: Partial<LogViewAttributes>) => {
       logViewStateService.send({
-        type: 'update',
+        type: 'UPDATE',
         attributes: logViewAttributes,
       });
 
