@@ -9,7 +9,7 @@ import '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
-import { EuiCodeBlock, EuiDescriptionListDescription } from '@elastic/eui';
+import { EuiCodeBlock } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
@@ -32,12 +32,20 @@ describe('AnalyticsCollectionIntegrate', () => {
     const wrapper = mountWithIntl(
       <AnalyticsCollectionIntegrate collection={analyticsCollections} />
     );
-    expect(wrapper.find(EuiCodeBlock)).toHaveLength(2);
+    expect(wrapper.find(EuiCodeBlock)).toHaveLength(3);
+    wrapper.find('[data-test-subj="searchuiEmbed"]').at(0).simulate('click');
+    expect(wrapper.find(EuiCodeBlock)).toHaveLength(3);
+    wrapper.find('[data-test-subj="javascriptClientEmbed"]').at(0).simulate('click');
+    expect(wrapper.find(EuiCodeBlock)).toHaveLength(5);
+  });
 
-    expect(wrapper.find(EuiDescriptionListDescription).get(0)).toMatchInlineSnapshot(`
-          <EuiDescriptionListDescription>
-            /analytics/api/collections/1
-          </EuiDescriptionListDescription>
-      `);
+  it('check value of analyticsDNSUrl & webClientSrc', () => {
+    const wrapper = mountWithIntl(
+      <AnalyticsCollectionIntegrate collection={analyticsCollections} />
+    );
+    expect(wrapper.find(EuiCodeBlock).at(0).text()).toContain(
+      'data-dsn="/analytics/api/collections/1"'
+    );
+    expect(wrapper.find(EuiCodeBlock).at(0).text()).toContain('src="/analytics.js"');
   });
 });
