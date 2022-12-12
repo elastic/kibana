@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { asPercent } from '../../../../common/utils/formatters';
 import { SLO } from '../../../typings';
 import { isSloHealthy } from '../helpers/is_slo_healthy';
@@ -21,7 +22,9 @@ export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
     <EuiFlexGroup direction="row" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiStat
-          description="SLI value"
+          description={i18n.translate('observability.slos.slo.stats.sliValue', {
+            defaultMessage: 'SLI value',
+          })}
           title={asPercent(slo.summary.sliValue, 1, 'n/a')}
           titleColor={isHealthy ? '' : 'danger'}
           titleSize="m"
@@ -30,7 +33,9 @@ export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiStat
-          description="Objective"
+          description={i18n.translate('observability.slos.slo.stats.objective', {
+            defaultMessage: 'Objective',
+          })}
           title={asPercent(slo.objective.target, 1, 'n/a')}
           titleColor={isHealthy ? '' : 'danger'}
           titleSize="m"
@@ -39,7 +44,9 @@ export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiStat
-          description="Budget remaining"
+          description={i18n.translate('observability.slos.slo.stats.budgetRemaining', {
+            defaultMessage: 'Budget remaining',
+          })}
           title={asPercent(slo.summary.errorBudget.remaining, 1, 'n/a')}
           titleColor={isHealthy ? '' : 'danger'}
           titleSize="m"
