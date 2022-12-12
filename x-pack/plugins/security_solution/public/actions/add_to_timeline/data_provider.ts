@@ -115,7 +115,6 @@ export const createDataProviders = ({
     } else {
       id = `event-details-value-default-draggable-${appendedUniqueId}`;
     }
-    // memo.values.push(valueAsString);
     dataProviders.push(getDataProvider(field, id, value));
     return dataProviders;
   }, []);
