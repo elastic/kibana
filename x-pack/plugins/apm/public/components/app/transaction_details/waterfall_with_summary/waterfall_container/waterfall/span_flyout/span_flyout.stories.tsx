@@ -7,9 +7,8 @@
 
 import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { SpanFlyout } from '.';
+import { MockApmPluginStorybook } from '../../../../../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 type Args = ComponentProps<typeof SpanFlyout>;
 
@@ -19,15 +18,9 @@ export default {
   decorators: [
     (StoryComponent: ComponentType) => {
       return (
-        <MemoryRouter
-          initialEntries={[
-            '/services/testServiceName/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=Api::CustomersController%23index&transactionType=request&latencyAggregationType=avg&flyoutDetailTab=&waterfallItemId=0863ecffc80f0aed&traceId=1d63e25e7345627176e172ae690f9462&transactionId=969fe48e33f4e13c',
-          ]}
-        >
-          <MockApmPluginContextWrapper>
-            <StoryComponent />
-          </MockApmPluginContextWrapper>
-        </MemoryRouter>
+        <MockApmPluginStorybook routePath="/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=Api::CustomersController%23index&transactionType=request&latencyAggregationType=avg&flyoutDetailTab=&waterfallItemId=0863ecffc80f0aed&traceId=1d63e25e7345627176e172ae690f9462&transactionId=969fe48e33f4e13c">
+          <StoryComponent />
+        </MockApmPluginStorybook>
       );
     },
   ],
@@ -252,6 +245,10 @@ TransactionSpan.args = {
       us: 1627439071802242,
     },
   },
+  spanLinksCount: {
+    linkedChildren: 0,
+    linkedParents: 0,
+  },
 };
 
 export const DatabaseSpan: Story<Args> = (args) => {
@@ -312,5 +309,9 @@ DatabaseSpan.args = {
     timestamp: {
       us: 1627439071805402,
     },
+  },
+  spanLinksCount: {
+    linkedChildren: 0,
+    linkedParents: 0,
   },
 };
