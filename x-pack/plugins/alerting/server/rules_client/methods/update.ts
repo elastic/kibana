@@ -23,7 +23,13 @@ import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_key
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getMappedParams } from '../common/mapped_params_utils';
 import { NormalizedAlertAction, RulesClientContext } from '../types';
-import { validateActions, extractReferences, updateMeta, getPartialRuleFromRaw } from '../lib';
+import {
+  validateActions,
+  extractReferences,
+  updateMeta,
+  getPartialRuleFromRaw,
+  incrementRevision,
+} from '../lib';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
@@ -138,8 +144,9 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 async function updateAlert<Params extends RuleTypeParams>(
   context: RulesClientContext,
   { id, data }: UpdateOptions<Params>,
-  { attributes, version }: SavedObject<RawRule>
+  currentRule: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
+  const { attributes, version } = currentRule;
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
   // Validate
@@ -178,6 +185,9 @@ async function updateAlert<Params extends RuleTypeParams>(
   const apiKeyAttributes = apiKeyAsAlertAttributes(createdAPIKey, username);
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 
+  // Increment revision if applicable field has changed
+  const revision = incrementRevision(currentRule, updatedParams);
+
   let updatedObject: SavedObject<RawRule>;
   const createAttributes = updateMeta(context, {
     ...attributes,
@@ -186,6 +196,7 @@ async function updateAlert<Params extends RuleTypeParams>(
     params: updatedParams as RawRule['params'],
     actions,
     notifyWhen,
+    revision,
     updatedBy: username,
     updatedAt: new Date().toISOString(),
   });

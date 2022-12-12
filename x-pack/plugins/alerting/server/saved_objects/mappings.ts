@@ -197,6 +197,9 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
+    revision: {
+      type: 'long',
+    },
     snoozeSchedule: {
       type: 'nested',
       properties: {

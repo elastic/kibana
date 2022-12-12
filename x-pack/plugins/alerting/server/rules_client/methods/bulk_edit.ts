@@ -40,7 +40,13 @@ import {
   API_KEY_GENERATE_CONCURRENCY,
 } from '../common/constants';
 import { getMappedParams } from '../common/mapped_params_utils';
-import { getAlertFromRaw, extractReferences, validateActions, updateMeta } from '../lib';
+import {
+  getAlertFromRaw,
+  extractReferences,
+  validateActions,
+  updateMeta,
+  incrementRevision,
+} from '../lib';
 import {
   NormalizedAlertAction,
   BulkOperationError,
@@ -463,12 +469,16 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
             attributes.throttle ?? null
           );
 
+          // Increment revision if applicable field has changed
+          const revision = incrementRevision(rule, updatedParams);
+
           const updatedAttributes = updateMeta(context, {
             ...attributes,
             ...apiKeyAttributes,
             params: updatedParams as RawRule['params'],
             actions: rawAlertActions,
             notifyWhen,
+            revision,
             updatedBy: username,
             updatedAt: new Date().toISOString(),
           });

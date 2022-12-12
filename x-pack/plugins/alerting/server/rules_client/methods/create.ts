@@ -41,6 +41,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'isSnoozedUntil'
     | 'lastRun'
     | 'nextRun'
+    | 'revision'
   > & { actions: NormalizedAlertAction[] };
   options?: SavedObjectOptions;
 }
@@ -129,6 +130,7 @@ export async function create<Params extends RuleTypeParams = never>(
     throttle,
     executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
     monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
+    revision: 0,
   };
 
   const mappedParams = getMappedParams(updatedParams);
