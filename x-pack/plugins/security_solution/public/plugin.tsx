@@ -76,6 +76,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private appUpdater$ = new Subject<AppUpdater>();
 
   private storage = new Storage(localStorage);
+  private sessionStorage = new Storage(sessionStorage);
 
   /**
    * Lazily instantiated subPlugins.
@@ -132,6 +133,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
         storage: this.storage,
+        sessionStorage: this.sessionStorage,
         security: startPluginsDeps.security,
         onAppLeave: params.onAppLeave,
         securityLayout: {
