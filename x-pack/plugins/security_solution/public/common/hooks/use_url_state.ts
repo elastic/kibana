@@ -31,4 +31,5 @@ export enum URL_PARAM_KEY {
   timeline = 'timeline',
   timerange = 'timerange',
   pageFilter = 'pageFilters',
+  rulesTable = 'rulesTable',
 }
