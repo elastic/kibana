@@ -137,19 +137,6 @@ export function useDiscoverState({
     trackUiMetric,
   });
 
-  // const [savedDataViewList, setSavedDataViewList] = useState(initialDataViewList);
-
-  // /**
-  //  * Updates data views selector state
-  //  */
-  // const updateDataViewList = useCallback(
-  //   async (newAdHocDataViews: DataView[]) => {
-  //     setSavedDataViewList(await data.dataViews.getIdsWithTitle());
-  //     onAddAdHocDataViews(newAdHocDataViews);
-  //   },
-  //   [data.dataViews, onAddAdHocDataViews]
-  // );
-
   /**
    * Data fetching logic
    */
