@@ -89,25 +89,9 @@ const AlertRequiredSchema = rt.type({
   }),
 });
 const AlertOptionalSchema = rt.partial({
-  anomaly: rt.partial({
-    bucket_span: rt.partial({
-      minutes: schemaString,
-    }),
-    start: schemaString,
-  }),
   kibana: rt.partial({
     alert: rt.partial({
       action_group: schemaString,
-      ancestors: rt.array(
-        rt.partial({
-          depth: schemaStringOrNumber,
-          id: schemaString,
-          index: schemaString,
-          rule: schemaString,
-          type: schemaString,
-        })
-      ),
-      depth: schemaStringOrNumber,
       duration: rt.partial({
         us: schemaStringOrNumber,
       }),
@@ -123,42 +107,7 @@ const AlertOptionalSchema = rt.partial({
         })
       ),
       flapping: schemaBoolean,
-      group: rt.partial({
-        id: schemaString,
-        index: schemaNumber,
-      }),
-      new_terms: schemaStringArray,
-      original_event: rt.partial({
-        action: schemaString,
-        agent_id_status: schemaString,
-        category: schemaStringArray,
-        code: schemaString,
-        created: schemaDate,
-        dataset: schemaString,
-        duration: schemaString,
-        end: schemaDate,
-        hash: schemaString,
-        id: schemaString,
-        ingested: schemaDate,
-        kind: schemaString,
-        module: schemaString,
-        original: schemaString,
-        outcome: schemaString,
-        provider: schemaString,
-        reason: schemaString,
-        reference: schemaString,
-        risk_score: schemaNumber,
-        risk_score_norm: schemaNumber,
-        sequence: schemaStringOrNumber,
-        severity: schemaStringOrNumber,
-        start: schemaDate,
-        timezone: schemaString,
-        type: schemaStringArray,
-        url: schemaString,
-      }),
-      original_time: schemaDate,
       reason: schemaString,
-      risk_score: schemaNumber,
       rule: rt.partial({
         execution: rt.partial({
           uuid: schemaString,
@@ -168,32 +117,10 @@ const AlertOptionalSchema = rt.partial({
       }),
       severity: schemaString,
       start: schemaDate,
-      threshold_result: rt.partial({
-        count: schemaStringOrNumber,
-        from: schemaDate,
-        terms: rt.array(
-          rt.partial({
-            field: schemaString,
-            value: schemaString,
-          })
-        ),
-      }),
       time_range: schemaDateRange,
       workflow_status: schemaString,
     }),
     version: schemaString,
-  }),
-  monitor: rt.partial({
-    id: schemaString,
-    name: schemaString,
-    type: schemaString,
-  }),
-  processor: rt.partial({
-    event: schemaString,
-  }),
-  transaction: rt.partial({
-    name: schemaString,
-    type: schemaString,
   }),
 });
 
