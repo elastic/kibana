@@ -39,7 +39,7 @@ export function BurnRate({ onChange, maxBurnRate }: Props) {
         step={0.1}
         min={1}
         max={maxBurnRate}
-        value={burnRate}
+        value={String(burnRate)}
         onChange={(event) => onBurnRateChange(event)}
         data-test-subj="burnRate"
       />
