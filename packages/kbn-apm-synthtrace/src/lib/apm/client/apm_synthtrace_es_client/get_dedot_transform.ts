@@ -21,6 +21,10 @@ export function getDedotTransform() {
         version: document['observer.version'],
         version_major: document['observer.version_major'],
       };
+      delete document['observer.type'];
+      delete document['observer.version'];
+      delete document['observer.version_major'];
+
       const target = document['processor.event'] === 'metric' ? document : dedot(document, {});
       delete target.meta;
       target['@timestamp'] = new Date(target['@timestamp']!).toISOString();
