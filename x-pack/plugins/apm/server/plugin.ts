@@ -51,6 +51,8 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  AGENT_NAME,
+  SERVICE_LANGUAGE_NAME,
 } from '../common/es_fields/apm';
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
@@ -131,6 +133,16 @@ export class APMPlugin
               },
               [PROCESSOR_EVENT]: {
                 type: 'keyword',
+              },
+              [AGENT_NAME]: {
+                type: 'keyword',
+              },
+              [SERVICE_LANGUAGE_NAME]: {
+                type: 'keyword',
+              },
+              labels: {
+                type: 'object',
+                dynamic: true,
               },
             },
             'strict'
