@@ -65,7 +65,6 @@ export function MobileTransactionOverview() {
       />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
-        {/* TODO replace with mobile table */}
         <TransactionsTable
           hideViewTransactionsLink
           numberOfTransactionsPerPage={25}

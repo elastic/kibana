@@ -168,7 +168,6 @@ export const mobileServiceDetail = {
           },
         },
       },
-      // TODO take this out - service/
       '/mobile-services/{serviceName}/service-map': page({
         tab: 'service-map',
         title: i18n.translate('xpack.apm.views.serviceMap.title', {
