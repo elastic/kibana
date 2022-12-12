@@ -492,7 +492,7 @@ describe('internalBulkResolve', () => {
       ]);
     });
 
-    test(`calls checkAuthorization with correct actions, types, spaces, and enforce map`, async () => {
+    test(`calls performAuthorization with correct actions, types, spaces, and enforce map`, async () => {
       setupPerformAuthFullyAuthorized(mockSecurityExt);
 
       await internalBulkResolve(params);

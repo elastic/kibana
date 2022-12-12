@@ -216,7 +216,7 @@ export interface RedactNamespacesParams<T, A extends string> {
 export interface ISavedObjectsSecurityExtension {
   /**
    * Performs authorization (check & enforce) of actions on specified types in specified spaces.
-   * @param params - actions, types & spaces map, audit callback, options
+   * @param params - actions, types & spaces map, audit callback, options (enforce bypassed if enforce map is undefined)
    * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
    */
   performAuthorization: <T extends string>(

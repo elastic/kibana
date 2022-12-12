@@ -789,28 +789,6 @@ describe('#updateObjectsSpaces', () => {
         expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
       });
 
-      // test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
-      //   await updateObjectsSpaces(params);
-
-      //   expect(client.bulk).toHaveBeenCalledTimes(1);
-      //   expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      //   expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      //   expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-      //     expect.objectContaining({
-      //       action: 'share_to_space',
-      //     })
-      //   );
-      //   const expectedTypesAndSpaces = new Map([
-      //     [SHAREABLE_OBJ_TYPE, new Set([defaultSpace, EXISTING_SPACE, otherSpace])],
-      //   ]);
-
-      //   const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
-      //     mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-
-      //   expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
-      //   expect(actualTypeMap).toBe(authMap);
-      // });
-
       test(`adds audit event per object when successful`, async () => {
         await updateObjectsSpaces(params);
 
@@ -883,7 +861,7 @@ describe('#updateObjectsSpaces', () => {
         expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
       });
 
-      test(`calls checkAuthorization with '*' when spacesToRemove includes '*'`, async () => {
+      test(`calls performAuthorization with '*' when spacesToRemove includes '*'`, async () => {
         const spacesToAdd = [otherSpace];
         const spacesToRemove = ['*'];
         setupForAllSpaces(spacesToAdd, spacesToRemove);

@@ -252,32 +252,12 @@ async function optionallyUseSecurity(
   }
   const action =
     purpose === 'updateObjectsSpaces' ? ('share_to_space' as const) : ('bulk_get' as const);
-  // const { typeMap } = await securityExtension.checkAuthorization({
-  //   types: typesToAuthorize,
-  //   spaces: spacesToAuthorize,
-  //   actions: new Set([action]),
-  // });
 
   // Enforce authorization based on all *requested* object types and the current space
   const typesAndSpaces = objects.reduce(
     (acc, { type }) => (acc.has(type) ? acc : acc.set(type, new Set([namespaceString]))), // Always enforce authZ for the active space
     new Map<string, Set<string>>()
   );
-  // securityExtension!.enforceAuthorization({
-  //   typesAndSpaces,
-  //   action,
-  //   typeMap,
-  //   auditCallback: (error) => {
-  //     if (!error) return; // We will audit success results below, after redaction
-  //     for (const { type, id } of objects) {
-  //       securityExtension!.addAuditEvent({
-  //         action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
-  //         savedObject: { type, id },
-  //         error,
-  //       });
-  //     }
-  //   },
-  // });
 
   const { typeMap } = await securityExtension?.performAuthorization({
     actions: new Set([action]),

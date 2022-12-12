@@ -72,6 +72,7 @@ export type {
 } from './src/extensions/encryption';
 export type {
   CheckAuthorizationParams,
+  PerformAuthorizationParams,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
@@ -79,7 +80,6 @@ export type {
   AddAuditEventParams,
   RedactNamespacesParams,
   ISavedObjectsSecurityExtension,
-  PerformAuthorizationParams,
 } from './src/extensions/security';
 export { AuditAction } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
