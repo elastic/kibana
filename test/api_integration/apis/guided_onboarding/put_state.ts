@@ -10,13 +10,13 @@ import expect from '@kbn/expect';
 import {
   testGuideStep1ActiveState,
   testGuideNotActiveState,
-  testGuide,
 } from '@kbn/guided-onboarding-plugin/public/services/api.mocks';
 import {
   pluginStateSavedObjectsType,
   pluginStateSavedObjectsId,
   guideStateSavedObjectsType,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
+import { testGuideId } from '@kbn/guided-onboarding-plugin/common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createGuides, createPluginState } from './helpers';
 
@@ -97,7 +97,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
 
       const createdSO = await kibanaServer.savedObjects.get({
         type: guideStateSavedObjectsType,
-        id: testGuide,
+        id: testGuideId,
       });
 
       expect(createdSO.attributes).to.eql(testGuideStep1ActiveState);
@@ -116,7 +116,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
 
       const createdSO = await kibanaServer.savedObjects.get({
         type: guideStateSavedObjectsType,
-        id: testGuide,
+        id: testGuideId,
       });
 
       expect(createdSO.attributes).to.eql(testGuideNotActiveState);
@@ -144,7 +144,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
       // Check that all guides except observability are inactive
       const testGuideSO = await kibanaServer.savedObjects.get({
         type: guideStateSavedObjectsType,
-        id: testGuide,
+        id: testGuideId,
       });
       expect(testGuideSO.attributes.isActive).to.eql(false);
 
