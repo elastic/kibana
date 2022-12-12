@@ -97,14 +97,14 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
       />
       {toggleStatus && (
         <EuiFlexGroup data-test-subj="alerts-charts-container">
-          <PlaceHolder title={'Detections'} />
+          <PlaceHolder title={i18n.DETECTIONS_TITLE} />
           <SeverityLevelChart
             data={severityData}
             isLoading={isSeverityLoading}
             uniqueQueryId={uniqueQueryId}
             addFilter={addFilter}
           />
-          <PlaceHolder title={'Alert by host type'} />
+          <PlaceHolder title={i18n.ALERT_BY_HOST_TITLE} />
         </EuiFlexGroup>
       )}
     </KpiPanel>

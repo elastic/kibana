@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash/fp';
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ShapeTreeNode, ElementClickListener } from '@elastic/charts';
 import * as i18n from '../translations';
@@ -68,7 +69,7 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
           : '';
 
       if (addFilter != null && !isEmpty(level.trim())) {
-        addFilter({ field: 'kibana.alert.severity', value: level.toLowerCase() });
+        addFilter({ field: ALERT_SEVERITY, value: level.toLowerCase() });
       }
     },
     [addFilter]
@@ -80,7 +81,7 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
         <EuiPanel>
           <HeaderSection
             id={uniqueQueryId}
-            inspectTitle={i18n.SEVERITY_LEVELS_INSPECT_TITLE}
+            inspectTitle={i18n.SEVERITY_LEVELS_TITLE}
             outerDirection="row"
             title={i18n.SEVERITY_LEVELS_TITLE}
             titleSize="xs"

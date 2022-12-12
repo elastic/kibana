@@ -14,7 +14,6 @@ import type { ESBoolQuery } from '../../../../../../common/typed_json';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
-// import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useInspectButton } from '../../common/hooks';
 import { parseSeverityAlerts } from '../helpers';
 

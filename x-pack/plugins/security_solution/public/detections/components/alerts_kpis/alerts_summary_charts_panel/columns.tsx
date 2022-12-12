@@ -9,6 +9,7 @@ import { EuiHealth, EuiText } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { capitalize } from 'lodash';
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -29,8 +30,8 @@ export const getSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityTab
       <EuiHealth color={SEVERITY_COLOR[severity]} textSize="xs">
         <DefaultDraggable
           isDraggable={false}
-          field={'kibana.alert.severity'}
-          hideTopN={true}
+          field={ALERT_SEVERITY}
+          hideTopN
           id={`alert-severity-draggable-${severity}`}
           value={capitalize(severity)}
           queryValue={severity}

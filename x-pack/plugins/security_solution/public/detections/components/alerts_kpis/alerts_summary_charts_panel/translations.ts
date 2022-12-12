@@ -13,17 +13,10 @@ export const CHARTS_TITLE = i18n.translate(
   }
 );
 
-export const SEVERITY_LEVELS_INSPECT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionResponse.alertsBySeverity.inspectModalSeverityTitle',
+export const SEVERITY_LEVELS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.alertsBySeverity.severityTitle',
   {
     defaultMessage: 'Severity levels',
-  }
-);
-
-export const SEVERITY_LEVELS_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionResponse.alertsBySeverity.chartSeverityTitle',
-  {
-    defaultMessage: 'Severity Levels',
   }
 );
 
@@ -52,5 +45,19 @@ export const SEVERITY_COUNT_COULMN_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.alertsBySeverity.tableColumnCountTitle',
   {
     defaultMessage: 'Counts',
+  }
+);
+
+export const DETECTIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.alertsBySeverity.chartDetectionTitle',
+  {
+    defaultMessage: 'Detections',
+  }
+);
+
+export const ALERT_BY_HOST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.alertsBySeverity.chartAlertHostTitle',
+  {
+    defaultMessage: 'Alert by host type',
   }
 );
