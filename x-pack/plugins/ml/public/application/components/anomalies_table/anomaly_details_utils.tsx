@@ -26,7 +26,10 @@ import {
 import { AnomaliesTableRecord, MLAnomalyDoc } from '../../../../common/types/anomalies';
 import { formatValue } from '../../formatters/format_value';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
-import { getSeverityColor } from '../../../../common/util/anomaly_utils';
+import {
+  getAnomalyScoreExplanationImpactValue,
+  getSeverityColor,
+} from '../../../../common/util/anomaly_utils';
 
 const TIME_FIELD_NAME = 'timestamp';
 
@@ -597,14 +600,6 @@ function getAnomalyType(explanation: MLAnomalyDoc['anomaly_score_explanation']) 
   return explanation.anomaly_type === 'dip' ? dip : spike;
 }
 
-function getImpactValue(score: number) {
-  if (score < 2) return 1;
-  if (score < 4) return 2;
-  if (score < 7) return 3;
-  if (score < 12) return 4;
-  return 5;
-}
-
 const impactTooltips = {
   anomaly_characteristics: {
     low: i18n.translate(
@@ -681,7 +676,7 @@ function getImpactTooltip(
   score: number,
   type: 'anomaly_characteristics' | 'single_bucket' | 'multi_bucket'
 ) {
-  const value = getImpactValue(score);
+  const value = getAnomalyScoreExplanationImpactValue(score);
 
   if (value < 3) {
     return impactTooltips[type].low;
@@ -698,7 +693,7 @@ const ImpactVisual: FC<{ score: number }> = ({ score }) => {
     euiTheme: { colors },
   } = useEuiTheme();
 
-  const impact = getImpactValue(score);
+  const impact = getAnomalyScoreExplanationImpactValue(score);
   const boxPx = '10px';
   const emptyBox = colors.lightShade;
   const fullBox = colors.primary;

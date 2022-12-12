@@ -42,7 +42,6 @@ import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
 import type { TimelineEpicDependencies, TimelineState } from '../../timelines/store/timeline/types';
 import { dataTableSelectors } from './data_table';
-import type { DataTableReducer } from './data_table';
 import type { KibanaDataView, SourcererModel } from './sourcerer/model';
 import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
@@ -125,7 +124,6 @@ export const createStoreFactory = async (
     },
   };
 
-  const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
   const timelineReducer = reduceReducers(
     timelineInitialState.timeline,
     startPlugins.timelines?.getTimelineReducer() ?? {},
@@ -155,17 +153,11 @@ export const createStoreFactory = async (
     ...subPlugins.network.store.reducer,
     timeline: timelineReducer,
     ...subPlugins.management.store.reducer,
-    ...tGridReducer,
   };
 
-  return createStore(
-    initialState,
-    rootReducer,
-    { dataTable: tGridReducer },
-    libs$.pipe(pluck('kibana')),
-    storage,
-    [...(subPlugins.management.store.middleware ?? [])]
-  );
+  return createStore(initialState, rootReducer, libs$.pipe(pluck('kibana')), storage, [
+    ...(subPlugins.management.store.middleware ?? []),
+  ]);
 };
 
 /**
@@ -174,7 +166,6 @@ export const createStoreFactory = async (
 export const createStore = (
   state: State,
   pluginsReducer: SubPluginsInitReducer,
-  tgridReducer: DataTableReducer, // TODO: remove this param, when the table reducer will be moved to security_solution
   kibana: Observable<CoreStart>,
   storage: Storage,
   additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
@@ -198,7 +189,7 @@ export const createStore = (
   );
 
   store = createReduxStore(
-    createReducer(pluginsReducer, tgridReducer),
+    createReducer(pluginsReducer),
     state as PreloadedState<State>,
     composeEnhancers(
       applyMiddleware(epicMiddleware, telemetryMiddleware, ...(additionalMiddleware ?? []))
