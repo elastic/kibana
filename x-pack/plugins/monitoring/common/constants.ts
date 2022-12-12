@@ -251,6 +251,7 @@ export const RULE_THREAD_POOL_SEARCH_REJECTIONS = `${RULE_PREFIX}alert_thread_po
 export const RULE_THREAD_POOL_WRITE_REJECTIONS = `${RULE_PREFIX}alert_thread_pool_write_rejections`;
 export const RULE_CCR_READ_EXCEPTIONS = `${RULE_PREFIX}ccr_read_exceptions`;
 export const RULE_LARGE_SHARD_SIZE = `${RULE_PREFIX}shard_size`;
+export const RULE_RULES_FAILURE = `${RULE_PREFIX}alert_rules_failure`;
 
 /**
  * Legacy rules details/label for server and public use
@@ -493,6 +494,28 @@ export const RULE_DETAILS = {
     description: i18n.translate('xpack.monitoring.alerts.shardSize.description', {
       defaultMessage: 'Alert if the average shard size is larger than the configured threshold.',
     }),
+  },
+  [RULE_RULES_FAILURE]: {
+    label: i18n.translate('xpack.monitoring.alerts.ruleFailures.label', {
+      defaultMessage: 'Rules failures',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.ruleFailures.description', {
+      defaultMessage: 'Alert when the rules failures for a node is consistently high.',
+    }),
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.ruleFailures.paramDetails.threshold.label', {
+          defaultMessage: `Notify when rules failures is over`,
+        }),
+        type: AlertParamType.Percentage,
+      } as CommonAlertParamDetail,
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.ruleFailures.paramDetails.duration.label', {
+          defaultMessage: `Look at the average over`,
+        }),
+        type: AlertParamType.Duration,
+      } as CommonAlertParamDetail,
+    },
   },
 };
 

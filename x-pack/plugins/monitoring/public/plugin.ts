@@ -38,6 +38,7 @@ import {
   MonitoringStartPluginDependencies,
   LegacyMonitoringStartPluginDependencies,
 } from './types';
+import { createRulesFailureAlertType } from './alerts/rules_failure_alert';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -178,6 +179,7 @@ export class MonitoringPlugin
     );
     ruleTypeRegistry.register(createCCRReadExceptionsAlertType(config));
     ruleTypeRegistry.register(createLargeShardSizeAlertType(config));
+    ruleTypeRegistry.register(createRulesFailureAlertType(config));
     const legacyAlertTypes = createLegacyAlertTypes(config);
     for (const legacyAlertType of legacyAlertTypes) {
       ruleTypeRegistry.register(legacyAlertType);
