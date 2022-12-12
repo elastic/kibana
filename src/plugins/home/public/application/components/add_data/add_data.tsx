@@ -151,7 +151,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                       })}
                       src={
                         addBasePath('/plugins/kibanaReact/assets/') +
-                        'illustration-cloud-migration.png'
+                        'illustration_cloud_migration.png'
                       }
                     />
                   </EuiFlexItem>

@@ -38,7 +38,6 @@ interface CloudDataMigrationAppDeps {
 export const CloudDataMigrationApp = ({
   http,
   breadcrumbService,
-  theme$,
 }: CloudDataMigrationAppDeps) => {
   const basePath = http.basePath.get() ?? '';
   const { euiTheme } = useEuiTheme();
@@ -68,7 +67,7 @@ export const CloudDataMigrationApp = ({
               defaultMessage: 'Illustration for cloud data migration',
             })}
             css={styles.illustrationCss}
-            src={`${basePath}/plugins/kibanaReact/assets/` + 'illustration-cloud-migration.png'}
+            src={`${basePath}/plugins/kibanaReact/assets/` + 'illustration_cloud_migration.png'}
           />
         </EuiFlexItem>
         <EuiFlexItem>
