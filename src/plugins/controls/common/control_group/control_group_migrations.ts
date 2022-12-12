@@ -56,7 +56,6 @@ export const removeHideExcludeAndHideExists = (input: ControlGroupInput) => {
       {}
     );
     input.panels = newPanels;
-    // console.log(newPanels);
   }
   return input;
 };
