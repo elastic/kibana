@@ -11,7 +11,7 @@ BUILD_ID="${BUILDKITE_BUILD_ID}"
 KIBANA_PERFORMANCE_GCS_BUCKET="gs://kibana-performance/scalability-tests"
 ES_RALLY_GCS_BUCKET="gs://rally-tracks/scalability-traces"
 OUTPUT_REL="target/scalability_tests/${BUILD_ID}"
-ES_OUTPUT_REL=
+ES_OUTPUT_REL="target/scalability_traces"
 OUTPUT_DIR="${KIBANA_DIR}/${OUTPUT_REL}"
 
 .buildkite/scripts/bootstrap.sh
@@ -48,9 +48,9 @@ cd "${OUTPUT_DIR}/.."
 gsutil -m cp -r "${BUILD_ID}" "${KIBANA_PERFORMANCE_GCS_BUCKET}"
 cd -
 
-echo "--- Uploading ${OUTPUT_REL} dir to ${KIBANA_PERFORMANCE_GCS_BUCKET}"
+echo "--- Uploading ${ES_OUTPUT_REL} dir to ${KIBANA_PERFORMANCE_GCS_BUCKET}"
 cd "${KIBANA_DIR}/target"
-gsutil -m cp -r "scalability_traces" "${ES_RALLY_GCS_BUCKET}"
+gsutil -m cp -r "scalability_traces" "${KIBANA_PERFORMANCE_GCS_BUCKET}"
 cd -
 
 if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-single-user-performance" ]; then
