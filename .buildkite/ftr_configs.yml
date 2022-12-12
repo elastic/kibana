@@ -287,4 +287,4 @@ enabled:
   - x-pack/performance/journeys/web_logs_dashboard.ts
   - x-pack/performance/journeys/data_stress_test_lens.ts
   - x-pack/performance/journeys/ecommerce_dashboard_saved_search_only.ts
-  - x-pack/performance/journeys/saved_objects_dashboard_list.ts
+  - x-pack/performance/journeys/saved_object_dashboard_list.ts
