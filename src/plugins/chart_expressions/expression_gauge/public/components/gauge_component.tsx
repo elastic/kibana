@@ -181,6 +181,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       commonLabel,
     } = args;
 
+    const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
+
     const getColor = useCallback(
       (
         value,
@@ -354,7 +356,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
             debugState={window._echDebugStateFlag ?? false}
             theme={[{ background: { color: 'transparent' } }, chartTheme]}
-            baseTheme={chartsThemeService.useChartsBaseTheme()}
+            baseTheme={chartBaseTheme}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             onRenderChange={onRenderChange}
