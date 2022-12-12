@@ -13,6 +13,7 @@ import { defineDisableUserRoutes } from './disable';
 import { defineEnableUserRoutes } from './enable';
 import { defineGetUserRoutes } from './get';
 import { defineGetAllUsersRoutes } from './get_all';
+import { defineGetHeadersRoutes } from './get_headers';
 
 export function defineUsersRoutes(params: RouteDefinitionParams) {
   defineGetUserRoutes(params);
@@ -21,5 +22,6 @@ export function defineUsersRoutes(params: RouteDefinitionParams) {
   defineDeleteUserRoutes(params);
   defineDisableUserRoutes(params);
   defineEnableUserRoutes(params);
+  defineGetHeadersRoutes(params);
   defineChangeUserPasswordRoutes(params);
 }

@@ -31,7 +31,7 @@ export function defineGetUserRoutes({ router }: RouteDefinitionParams) {
           return response.notFound();
         }
 
-        return response.ok({ body: { ...users[username], headers: request.headers } });
+        return response.ok({ body: users[username] });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
       }
