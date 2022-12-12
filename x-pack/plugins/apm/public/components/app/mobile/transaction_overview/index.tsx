@@ -29,20 +29,13 @@ export function MobileTransactionOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType, serviceName, fallbackToTransactions } =
-    useApmServiceContext();
+  const { transactionType, fallbackToTransactions } = useApmServiceContext();
 
   const history = useHistory();
 
   // redirect to first transaction type
   if (!transactionTypeFromUrl && transactionType) {
     replace(history, { query: { transactionType } });
-  }
-
-  // TODO: improve urlParams typings.
-  // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
-  if (!serviceName) {
-    return null;
   }
 
   return (

@@ -92,7 +92,6 @@ export const mobileServiceDetail = {
         kuery: '',
         environment: ENVIRONMENT_ALL.value,
         serviceGroup: '',
-        transactionType: 'mobile',
         latencyAggregationType: LatencyAggregationType.avg,
       },
     },
