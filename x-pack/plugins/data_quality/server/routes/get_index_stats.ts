@@ -5,34 +5,31 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { transformError, buildResponse } from '@kbn/securitysolution-es-utils';
 
 import { fetchStats } from '../lib';
 import { GET_INDEX_STATS } from '../../common/constants';
+import { buildRouteValidation } from '../schemas/common';
+import { GetIndexStatsParams } from '../schemas/get_index_stats';
 
 export const getIndexStatsRoute = (router: IRouter) => {
   router.get(
     {
       path: GET_INDEX_STATS,
-      validate: {
-        params: schema.object({
-          index_name: schema.string(),
-        }),
-      },
+      validate: { params: buildRouteValidation(GetIndexStatsParams) },
     },
     async (context, request, response) => {
       const resp = buildResponse(response);
 
       try {
         const { client } = (await context.core).elasticsearch;
-        const decodedIndexName = decodeURIComponent(request.params.index_name);
+        const decodedIndexName = decodeURIComponent(request.params.pattern);
 
-        const mappings = await fetchStats(client, decodedIndexName);
+        const stats = await fetchStats(client, decodedIndexName);
 
         return response.ok({
-          body: mappings.indices,
+          body: stats.indices,
         });
       } catch (err) {
         const error = transformError(err);

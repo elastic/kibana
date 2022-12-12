@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CustomHttpResponseOptions, KibanaResponseFactory } from '@kbn/core/server';
+import type { CustomHttpResponseOptions, KibanaResponseFactory } from '@kbn/core-http-server';
 
 const statusToErrorMessage = (
   statusCode: number
@@ -40,7 +40,6 @@ export class ResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
   error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
-    // KibanaResponse is not exported so we cannot use a return type here and that is why the linter is turned off above
     const contentType: CustomHttpResponseOptions<T>['headers'] = {
       'content-type': 'application/json',
     };

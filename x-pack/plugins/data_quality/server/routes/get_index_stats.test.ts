@@ -24,7 +24,7 @@ describe('getIndexStatsRoute route', () => {
     method: 'get',
     path: GET_INDEX_STATS,
     params: {
-      index_name: 'auditbeat-*',
+      pattern: 'auditbeat-*',
     },
   });
 
@@ -55,5 +55,28 @@ describe('getIndexStatsRoute route', () => {
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.status).toEqual(500);
     expect(response.body).toEqual({ message: errorMessage, status_code: 500 });
+  });
+});
+
+describe('request validation', () => {
+  let server: ReturnType<typeof serverMock.create>;
+
+  beforeEach(() => {
+    server = serverMock.create();
+
+    getIndexStatsRoute(server.router);
+  });
+
+  test('disallows invalid pattern', () => {
+    const request = requestMock.create({
+      method: 'get',
+      path: GET_INDEX_STATS,
+      params: {
+        pattern: 123,
+      },
+    });
+    const result = server.validate(request);
+
+    expect(result.badRequest).toHaveBeenCalled();
   });
 });

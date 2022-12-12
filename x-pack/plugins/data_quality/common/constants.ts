@@ -9,5 +9,5 @@ export const PLUGIN_ID = 'dataQuality';
 export const PLUGIN_NAME = 'dataQuality';
 
 export const BASE_PATH = '/internal/data_quality';
-export const GET_INDEX_STATS = `${BASE_PATH}/stats/{index_name}`;
-export const GET_INDEX_MAPPINGS = `${BASE_PATH}/mappings/{index_name}`;
+export const GET_INDEX_STATS = `${BASE_PATH}/stats/{pattern}`;
+export const GET_INDEX_MAPPINGS = `${BASE_PATH}/mappings/{pattern}`;
