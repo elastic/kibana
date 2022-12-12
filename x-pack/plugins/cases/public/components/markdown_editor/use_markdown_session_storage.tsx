@@ -8,6 +8,7 @@
 import { useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
 import useDebounce from 'react-use/lib/useDebounce';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 const STORAGE_DEBOUNCE_TIME = 500;
@@ -27,7 +28,7 @@ export const useMarkdownSessionStorage = ({
   const isFirstRender = useRef(true);
   const initialValueRef = useRef(initialValue);
 
-  const sessionValue = sessionStorage.getItem(sessionKey) ?? '';
+  const [sessionValue, setSessionValue] = useSessionStorage(sessionKey, '', true);
 
   if (!isEmpty(sessionValue) && isFirstRender.current) {
     isFirstRender.current = false;
@@ -48,13 +49,13 @@ export const useMarkdownSessionStorage = ({
             it is a first render for Markdown editor, however field has value of visualization which is not stored in session 
             hence saving this item in session storage
           */
-          sessionStorage.setItem(sessionKey, field.value);
+
+          setSessionValue(field.value);
         }
         isFirstRender.current = false;
         return;
       }
-
-      sessionStorage.setItem(sessionKey, field.value);
+      setSessionValue(field.value);
     },
     STORAGE_DEBOUNCE_TIME,
     [field.value]

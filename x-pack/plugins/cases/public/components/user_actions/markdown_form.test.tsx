@@ -298,7 +298,7 @@ describe('UserActionMarkdown ', () => {
         </MockHookWrapperComponent>
       );
 
-      expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
+      expect(sessionStorage.getItem(draftStorageKey)).toBe('');
 
       fireEvent.change(result.getByTestId('euiMarkdownEditorTextArea'), {
         target: { value: newValue },

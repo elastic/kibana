@@ -64,7 +64,7 @@ describe('useMarkdownSessionStorage', () => {
     );
 
     await waitFor(() => {
-      expect(sessionStorage.getItem(sessionKey)).toBe(null);
+      expect(sessionStorage.getItem(sessionKey)).toBe('');
     });
   });
 
@@ -79,7 +79,7 @@ describe('useMarkdownSessionStorage', () => {
       }
     );
 
-    expect(sessionStorage.getItem(sessionKey)).toBe(null);
+    expect(sessionStorage.getItem(sessionKey)).toBe('');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -106,8 +106,6 @@ describe('useMarkdownSessionStorage', () => {
     act(() => {
       jest.advanceTimersByTime(1000);
     });
-
-    // await waitForComponentToUpdate();
 
     rerender({ field: { ...field, value: 'new value' }, sessionKey, initialValue });
 
