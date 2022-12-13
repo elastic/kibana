@@ -21,6 +21,7 @@ export async function fetchSearchSourceQuery(
   ruleId: string,
   params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined,
+  spacePrefix: string,
   services: {
     logger: Logger;
     searchSourceClient: ISearchStartSearchSource;
@@ -62,8 +63,9 @@ export async function fetchSearchSourceQuery(
     ...redirectUrlParams,
   });
 
+  const [firstPart, rest] = redirectUrl.split('/app');
   return {
-    link: redirectUrl,
+    link: firstPart + spacePrefix + '/app' + rest,
     numMatches: Number(searchResult.hits.total),
     searchResult,
     dateStart,

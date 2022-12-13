@@ -62,11 +62,17 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
           logger,
         }
       )
-    : await fetchSearchSourceQuery(ruleId, params as OnlySearchSourceRuleParams, latestTimestamp, {
-        searchSourceClient,
-        logger,
-        share: services.share,
-      });
+    : await fetchSearchSourceQuery(
+        ruleId,
+        params as OnlySearchSourceRuleParams,
+        latestTimestamp,
+        spacePrefix,
+        {
+          searchSourceClient,
+          logger,
+          share: services.share,
+        }
+      );
 
   // apply the rule condition
   const conditionMet = compareFn(numMatches, params.threshold);
