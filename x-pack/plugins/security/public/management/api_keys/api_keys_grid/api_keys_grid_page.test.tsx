@@ -108,11 +108,15 @@ describe('APIKeysGridPage', () => {
     );
 
     expect(await queryByTestId('apiKeysCreateTableButton')).toBeNull();
+
     expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
+
     await findByText(/first-api-key/);
 
     const secondKey = getByText(/second-api-key/).closest('td');
-    expect(secondKey!.querySelector('a')).not.toBeNull();
+    const secondKeyEuiLink = secondKey!.querySelector('button');
+    expect(secondKeyEuiLink).not.toBeNull();
+    expect(secondKeyEuiLink!.getAttribute('data-test-subj')).toBe('roleRowName-second-api-key');
   });
 
   afterAll(() => {
