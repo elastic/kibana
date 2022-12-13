@@ -16,48 +16,40 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function fetchTraces({
+  async function fetchSpanDetails({
     traceId,
-    query,
+    spanId,
+    parentTransactionId,
   }: {
     traceId: string;
-    query: { start: string; end: string; entryTransactionId: string };
+    spanId: string;
+    parentTransactionId?: string;
   }) {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/traces/{traceId}`,
+      endpoint: `GET /internal/apm/traces/{traceId}/spans/{spanId}`,
       params: {
-        path: { traceId },
-        query,
+        path: { traceId, spanId },
+        query: { parentTransactionId },
       },
     });
   }
 
-  registry.when('Trace does not exist', { config: 'basic', archives: [] }, () => {
+  registry.when('Span details dont exist', { config: 'basic', archives: [] }, () => {
     it('handles empty state', async () => {
-      const response = await fetchTraces({
+      const response = await fetchSpanDetails({
         traceId: 'foo',
-        query: {
-          start: new Date(start).toISOString(),
-          end: new Date(end).toISOString(),
-          entryTransactionId: 'foo',
-        },
+        spanId: 'bar',
       });
 
       expect(response.status).to.be(200);
-      expect(response.body).to.eql({
-        traceItems: {
-          exceedsMax: false,
-          traceDocs: [],
-          errorDocs: [],
-          spanLinksCountById: {},
-        },
-      });
+      expect(response.body).to.eql({});
     });
   });
 
-  registry.when('Trace exists', { config: 'basic', archives: [] }, () => {
-    let entryTransactionId: string;
-    let serviceATraceId: string;
+  registry.when('Span details', { config: 'basic', archives: [] }, () => {
+    let traceId: string;
+    let spanId: string;
+    let parentTransactionId: string;
     before(async () => {
       const instanceJava = apm
         .service({ name: 'synth-apple', environment: 'production', agentName: 'java' })
@@ -91,53 +83,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ];
         });
       const entities = events.toArray();
-      entryTransactionId = entities[0]['transaction.id']!;
-      serviceATraceId = entities.slice(0, 1)[0]['trace.id']!;
+      const span = entities.find((entity) => {
+        return entity['processor.event'] === 'span';
+      });
+      spanId = span?.['span.id']!;
+      parentTransactionId = span?.['parent.id']!;
+      traceId = span?.['trace.id']!;
 
       await synthtraceEsClient.index(new EntityArrayIterable(entities));
     });
 
     after(() => synthtraceEsClient.clean());
 
-    describe('return trace', () => {
-      let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
+    describe('span details', () => {
+      let spanDetails: Awaited<ReturnType<typeof fetchSpanDetails>>['body'];
       before(async () => {
-        const response = await fetchTraces({
-          traceId: serviceATraceId,
-          query: {
-            start: new Date(start).toISOString(),
-            end: new Date(end).toISOString(),
-            entryTransactionId,
-          },
+        const response = await fetchSpanDetails({
+          traceId,
+          spanId,
+          parentTransactionId,
         });
         expect(response.status).to.eql(200);
-        traces = response.body;
+        spanDetails = response.body;
       });
-      it('returns some errors', () => {
-        expect(traces.traceItems.errorDocs.length).to.be.greaterThan(0);
-        expect(traces.traceItems.errorDocs[0].error.exception?.[0].message).to.eql(
-          '[ResponseError] index_not_found_exception'
-        );
-      });
-
-      it('returns some trace docs', () => {
-        expect(traces.traceItems.traceDocs.length).to.be.greaterThan(0);
-        expect(
-          traces.traceItems.traceDocs.map((item) => {
-            if (item.span && 'name' in item.span) {
-              return item.span.name;
-            }
-            if (item.transaction && 'name' in item.transaction) {
-              return item.transaction.name;
-            }
-          })
-        ).to.eql(['GET /apple 🍏', 'get_green_apple_🍏']);
-      });
-
-      it('returns entry transaction details', () => {
-        expect(traces.entryTransaction).to.not.be(undefined);
-        expect(traces.entryTransaction?.transaction.id).to.equal(entryTransactionId);
-        expect(traces.entryTransaction?.transaction.name).to.equal('GET /apple 🍏');
+      it('returns span details', () => {
+        expect(spanDetails.span?.span.name).to.eql('get_green_apple_🍏');
+        expect(spanDetails.parentTransaction?.transaction.name).to.eql('GET /apple 🍏');
       });
     });
   });
