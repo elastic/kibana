@@ -7,29 +7,29 @@
 
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { buildEsQuery } from '@kbn/es-query';
-import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import type { AlertsBySeverityAgg, UseAlertsQueryProps, SeverityData } from '../types';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
 import { useInspectButton } from '../../common/hooks';
-import { parseSeverityData, getAlertsQuery } from '../helpers';
+import type { AlertsByHostAgg, HostData, UseAlertsQueryProps } from '../types';
+import { DEFAULT_QUERY_SIZE, parseHostData, getAlertsQuery } from '../helpers';
 
 const aggregations = {
-  statusBySeverity: {
+  alertsByHost: {
     terms: {
-      field: ALERT_SEVERITY,
+      field: 'host.name',
+      size: DEFAULT_QUERY_SIZE,
     },
   },
 };
 
-export type UseAlertsBySeverity = (props: UseAlertsQueryProps) => {
-  items: SeverityData[] | null;
+export type UseAlertsByHost = (props: UseAlertsQueryProps) => {
+  items: HostData[] | null;
   isLoading: boolean;
   updatedAt: number;
 };
 
-export const useSeverityChartData: UseAlertsBySeverity = ({
+export const useHostNameChartData: UseAlertsByHost = ({
   uniqueQueryId,
   entityFilter,
   query,
@@ -40,7 +40,7 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
-  const [items, setItems] = useState<null | SeverityData[]>(null);
+  const [items, setItems] = useState<null | HostData[]>(null);
 
   const additionalFilters = useMemo(() => {
     try {
@@ -63,7 +63,7 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
     request,
     response,
     setQuery: setAlertsQuery,
-  } = useQueryAlerts<{}, AlertsBySeverityAgg>({
+  } = useQueryAlerts<{}, AlertsByHostAgg>({
     query: getAlertsQuery({
       from,
       to,
@@ -94,7 +94,7 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
     if (data == null) {
       setItems(null);
     } else {
-      setItems(parseSeverityData(data));
+      setItems(parseHostData(data));
     }
     setUpdatedAt(Date.now());
   }, [data]);
