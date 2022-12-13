@@ -39,6 +39,17 @@ export const HostsContainer = React.memo(() => (
     <Route path={`${HOSTS_PATH}/ml-hosts`}>
       <MlHostConditionalContainer />
     </Route>
+    <Route // Compatibility redirect for the old external alert path to events page with external alerts showing.
+      path={`${HOSTS_PATH}/externalAlerts`}
+      render={({ location: { search = '' } }) => (
+        <Redirect
+          to={{
+            pathname: `${HOSTS_PATH}/${HostsTableType.events}`,
+            search: `${search}&onlyExternalAlerts=true`,
+          }}
+        />
+      )}
+    />
     <Route path={getHostsTabPath()}>
       <Hosts />
     </Route>
