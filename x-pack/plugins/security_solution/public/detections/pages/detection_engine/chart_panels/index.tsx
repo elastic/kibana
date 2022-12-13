@@ -11,15 +11,17 @@ import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAlertsLocalStorage } from './alerts_local_storage';
 import type { AlertsSettings } from './alerts_local_storage/types';
 import { ChartContextMenu } from './chart_context_menu';
 import { ChartSelect } from './chart_select';
-import { TABLE, TREEMAP, TREND } from './chart_select/translations';
+import * as i18n from './chart_select/translations';
 import { AlertsTreemapPanel } from '../../../../common/components/alerts_treemap_panel';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box_reset';
 import { AlertsHistogramPanel } from '../../../components/alerts_kpis/alerts_histogram_panel';
+import { AlertsSummaryChartsPanel } from '../../../components/alerts_kpis/alerts_summary_charts_panel';
 import {
   DEFAULT_STACK_BY_FIELD,
   DEFAULT_STACK_BY_FIELD1,
@@ -30,6 +32,7 @@ import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translati
 const TABLE_PANEL_HEIGHT = 330; // px
 const TRENT_CHART_HEIGHT = 127; // px
 const TREND_CHART_PANEL_HEIGHT = 256; // px
+const ALERTS_CHARTS_PANEL_HEIGHT = 330; // px
 
 const FullHeightFlexItem = styled(EuiFlexItem)`
   height: 100%;
@@ -134,7 +137,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
     ),
     [alertViewSelection, setAlertViewSelection]
   );
-
+  const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
   return (
     <div data-test-subj="chartPanels">
       {alertViewSelection === 'trend' && (
@@ -149,7 +152,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               comboboxRef={stackByField0ComboboxRef}
               defaultStackByOption={trendChartStackBy}
               filters={alertsHistogramDefaultFilters}
-              inspectTitle={TREND}
+              inspectTitle={i18n.TREND}
               setComboboxInputRef={setStackByField0ComboboxInputRef}
               onFieldSelected={updateCommonStackBy0}
               panelHeight={TREND_CHART_PANEL_HEIGHT}
@@ -177,7 +180,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
               filters={alertsHistogramDefaultFilters}
-              inspectTitle={TABLE}
+              inspectTitle={i18n.TABLE}
               panelHeight={TABLE_PANEL_HEIGHT}
               query={query}
               runtimeMappings={runtimeMappings}
@@ -205,7 +208,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               addFilter={addFilter}
               alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
-              inspectTitle={TREEMAP}
+              inspectTitle={i18n.TREEMAP}
               isPanelExpanded={isTreemapPanelExpanded}
               filters={alertsHistogramDefaultFilters}
               query={query}
@@ -221,6 +224,25 @@ const ChartPanelsComponent: React.FC<Props> = ({
               stackByField1={riskChartStackBy1}
               title={title}
               riskSubAggregationField="kibana.alert.risk_score"
+              runtimeMappings={runtimeMappings}
+            />
+          )}
+        </FullHeightFlexItem>
+      )}
+
+      {isAlertsPageChartsEnabled && alertViewSelection === 'charts' && (
+        <FullHeightFlexItem grow={1}>
+          {isLoadingIndexPattern ? (
+            <EuiLoadingSpinner data-test-subj="alertsChartsLoadingSpinner" size="xl" />
+          ) : (
+            <AlertsSummaryChartsPanel
+              alignHeader="flexStart"
+              addFilter={addFilter}
+              filters={alertsHistogramDefaultFilters}
+              query={query}
+              panelHeight={ALERTS_CHARTS_PANEL_HEIGHT}
+              signalIndexName={signalIndexName}
+              title={title}
               runtimeMappings={runtimeMappings}
             />
           )}
