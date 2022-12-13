@@ -29,7 +29,7 @@ class HandlebarsTestBench {
   private options: TestOptions;
   private compileOptions?: ExtendedCompileOptions;
   private runtimeOptions?: ExtendedRuntimeOptions;
-  private helpers: { [key: string]: Handlebars.HelperDelegate | undefined } = {};
+  private helpers: { [name: string]: Handlebars.HelperDelegate | undefined } = {};
   private decorators: DecoratorsHash = {};
   private input: any = {};
 
@@ -58,7 +58,7 @@ class HandlebarsTestBench {
     return this;
   }
 
-  withHelpers(helperFunctions: { [key: string]: Handlebars.HelperDelegate }) {
+  withHelpers(helperFunctions: { [name: string]: Handlebars.HelperDelegate }) {
     for (const [name, helper] of Object.entries(helperFunctions)) {
       this.withHelper(name, helper);
     }
