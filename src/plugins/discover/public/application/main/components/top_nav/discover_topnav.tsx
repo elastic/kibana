@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
-import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
+import { type DataViewListItem, DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { ENABLE_SQL } from '../../../../../common';
@@ -38,6 +38,8 @@ export type DiscoverTopNavProps = Pick<
   onFieldEdited: () => Promise<void>;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
+  savedDataViewList: DataViewListItem[];
+  updateDataViewList: (newAdHocDataViews: DataView[]) => void;
 };
 
 export const DiscoverTopNav = ({
@@ -56,11 +58,12 @@ export const DiscoverTopNav = ({
   onFieldEdited,
   persistDataView,
   updateAdHocDataViewId,
+  savedDataViewList,
+  updateDataViewList,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
   const adHocDataViewList = useInternalStateSelector((state) => state.dataViewAdHocList);
   const dataView = useInternalStateSelector((state) => state.dataView!);
-  const [refreshListId, setRefreshListId] = useState(0);
 
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
@@ -140,17 +143,6 @@ export const DiscoverTopNav = ({
     });
   }, [dataViewEditor, onChangeDataView, stateContainer.actions]);
 
-  /**
-   * Updates data views selector state
-   */
-  const updateDataViewList = useCallback(
-    (newAdHocDataViews: DataView[]) => {
-      stateContainer.actions.setAdHocDataViews(newAdHocDataViews);
-      setRefreshListId((prev) => prev + 1);
-    },
-    [stateContainer.actions]
-  );
-
   const onCreateDefaultAdHocDataView = useCallback(
     async (pattern: string) => {
       const newDataView = await dataViews.create({
@@ -221,7 +213,7 @@ export const DiscoverTopNav = ({
   if (isSQLModeEnabled) {
     supportedTextBasedLanguages.push('SQL');
   }
-  const dataViewPickerProps = {
+  const dataViewPickerProps: DataViewPickerProps = {
     trigger: {
       label: dataView?.getName() || '',
       'data-test-subj': 'discover-dataView-switch-link',
@@ -234,7 +226,7 @@ export const DiscoverTopNav = ({
     onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews: adHocDataViewList,
-    refreshListId,
+    savedDataViews: savedDataViewList,
   };
 
   const onTextBasedSavedAndExit = useCallback(

@@ -62,7 +62,7 @@ export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
-  refreshListId,
+  savedDataViews,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
@@ -114,7 +114,7 @@ export function ChangeDataView({
       setDataViewsList(dataViewsRefs);
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, refreshListId]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
 
   useEffect(() => {
     if (trigger.label) {

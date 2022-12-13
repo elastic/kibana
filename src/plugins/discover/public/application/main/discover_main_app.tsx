@@ -60,6 +60,8 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     searchSource,
     stateContainer,
     searchSessionManager,
+    savedDataViewList,
+    updateDataViewList,
   } = useDiscoverState({
     services,
     history: usedHistory,
@@ -116,6 +118,8 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
         persistDataView={persistDataView}
         updateAdHocDataViewId={updateAdHocDataViewId}
         searchSessionManager={searchSessionManager}
+        savedDataViewList={savedDataViewList}
+        updateDataViewList={updateDataViewList}
       />
     </DiscoverMainProvider>
   );
