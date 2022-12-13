@@ -1,0 +1,7 @@
+type: string
+description: Indicates how often alerts generate actions.
+enum:
+  - onActionGroupChange
+  - onActiveAlert
+  - onThrottleInterval
+example: onActiveAlert

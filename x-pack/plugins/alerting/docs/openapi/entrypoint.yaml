@@ -15,8 +15,8 @@ servers:
   - url: 'http://localhost:5601'
     description: local
 paths:
-# '/s/{spaceId}/api/alerting/rule/{ruleId}':
-#   $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}.yaml'
+  '/s/{spaceId}/api/alerting/rule/{ruleId}':
+    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}.yaml'
 # '/s/{spaceId}/api/alerting/rule/{ruleId}/_disable':
 #   $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_disable.yaml'
 # '/s/{spaceId}/api/alerting/rule/{ruleId}/_enable':

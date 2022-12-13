@@ -1,0 +1,22 @@
+type: array
+default: []
+required:
+  - group
+  - id
+  - params
+nullable: true
+items:
+  type: object
+  properties:
+    group:
+      type: string
+      description: The group name for the actions. If you don't need to group actions, set to `default`.
+      example: default
+    id:
+      type: string
+      description: The identifier for the connector saved object.
+      example: 9dca3e00-74f5-11ed-9801-35303b735aef
+    params:
+      type: object
+      description: The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.
+      additionalProperties: true

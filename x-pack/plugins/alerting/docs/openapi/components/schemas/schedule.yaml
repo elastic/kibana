@@ -1,0 +1,6 @@
+type: object
+description: The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.
+properties:
+  interval:
+    type: string
+    example: 1m
