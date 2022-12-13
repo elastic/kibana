@@ -53,6 +53,7 @@ function FiltersBuilder({
         alias: true,
       })
     ) {
+      filtersRef.current = filters;
       dispatch({ type: 'updateFilters', payload: { filters } });
     }
   }, [filters]);
