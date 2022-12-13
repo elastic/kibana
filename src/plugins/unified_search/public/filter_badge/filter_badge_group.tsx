@@ -8,7 +8,7 @@
 
 import React from 'react';
 import type { Filter, BooleanRelation, DataViewBase } from '@kbn/es-query';
-import { EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { EuiTextColor } from '@elastic/eui';
 import { FilterBadgeErrorBoundary } from './filter_badge_error_boundary';
 import { FilterExpressionBadge } from './filter_badge_expression';
 import { conditionCss } from './filter_badge.styles';
@@ -22,12 +22,10 @@ export interface FilterBadgeGroupProps {
 }
 
 const BooleanRelationDelimiter = ({ conditional }: { conditional: BooleanRelation }) => {
-  const { euiTheme } = useEuiTheme();
   /**
    *  Spaces have been added to make the title readable.
-   *  To eliminate the extra paddings of the text around it, margin-inline with a negative value was added.
    */
-  return <EuiTextColor className={conditionCss(euiTheme)}>{` ${conditional} `}</EuiTextColor>;
+  return <EuiTextColor className={conditionCss}>{` ${conditional} `}</EuiTextColor>;
 };
 
 export function FilterBadgeGroup({

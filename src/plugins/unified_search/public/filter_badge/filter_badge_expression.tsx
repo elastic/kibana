@@ -9,7 +9,7 @@
 import React from 'react';
 import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import type { Filter, DataViewBase } from '@kbn/es-query';
-import { EuiTextColor, useEuiPaddingCSS } from '@elastic/eui';
+import { EuiTextColor } from '@elastic/eui';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { FilterContent } from './filter_content';
 import { getBooleanRelationType } from '../utils';
@@ -54,15 +54,12 @@ export function FilterExpressionBadge({
   dataViews,
   filterLabelStatus,
 }: FilterBadgeExpressionProps) {
-  const paddingLeftCss = useEuiPaddingCSS('left').xs;
-  const paddingRightCss = useEuiPaddingCSS('right').xs;
-
   const conditionalOperationType = getBooleanRelationType(filter);
 
   return conditionalOperationType ? (
     <>
       {shouldShowBrackets && (
-        <span css={paddingLeftCss}>
+        <span>
           <EuiTextColor className={bracketColorCss}>(</EuiTextColor>
         </span>
       )}
@@ -73,13 +70,13 @@ export function FilterExpressionBadge({
         booleanRelation={getBooleanRelationType(filter)}
       />
       {shouldShowBrackets && (
-        <span css={paddingRightCss}>
+        <span>
           <EuiTextColor className={bracketColorCss}>)</EuiTextColor>
         </span>
       )}
     </>
   ) : (
-    <span css={[paddingLeftCss, paddingRightCss]}>
+    <span>
       <FilterBadgeContent
         filter={filter}
         dataViews={dataViews}

@@ -50,7 +50,11 @@ import {
 import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
 import { flattenFilters } from './lib/helpers';
-import { filterBadgeStyle, filtersBuilderMaxHeightCss } from './filter_editor.styles';
+import {
+  filterBadgeStyle,
+  filterPreviewLabelStyle,
+  filtersBuilderMaxHeightCss,
+} from './filter_editor.styles';
 
 export const strings = {
   getPanelTitleAdd: () =>
@@ -315,7 +319,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
           <EuiFormRow
             fullWidth
             hasEmptyLabelSpace={true}
-            className={filterBadgeStyle}
+            className={cx(filterBadgeStyle, filterPreviewLabelStyle)}
             label={
               <strong>
                 <FormattedMessage

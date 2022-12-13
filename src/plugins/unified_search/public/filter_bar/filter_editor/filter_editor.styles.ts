@@ -19,3 +19,9 @@ export const filterBadgeStyle = css`
     line-height: 1.5;
   }
 `;
+
+export const filterPreviewLabelStyle = css`
+  & .euiFormLabel[for] {
+    cursor: default;
+  }
+`;
