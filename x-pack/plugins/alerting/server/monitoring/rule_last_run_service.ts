@@ -5,63 +5,57 @@
  * 2.0.
  */
 
-import { getDefaultLastRun } from '../lib/last_run';
-import { AlertsCount, PublicLastRunSetters, RuleLastRun, RuleLastRunOutcomes } from '../types';
+import { PublicLastRunSetters } from '../types';
+
+export type RuleLastRunResults = {
+  errors: string[];
+  warnings: string[];
+  outcomeMessages: string[];
+};
 
 export class RuleLastRunService {
-  private lastRun: RuleLastRun = getDefaultLastRun();
-  private shouldOverrideFrameworkLastRun: boolean = false;
+  private errors: string[] = [];
+  private warnings: string[] = [];
+  private outcomeMessages: string[] = [];
 
-  public getLastRun(): RuleLastRun {
-    return this.lastRun;
+  public getLastRunErrors(): string[] {
+    return this.errors;
+  }
+
+  public getLastRunWarnings(): string[] {
+    return this.warnings;
+  }
+
+  public getLastRunOutcomeMessages(): string[] {
+    return this.outcomeMessages;
+  }
+
+  public getLastRunResults(): RuleLastRunResults {
+    return {
+      errors: this.errors,
+      warnings: this.warnings,
+      outcomeMessages: this.outcomeMessages,
+    };
   }
 
   public getLastRunSetters(): PublicLastRunSetters {
     return {
-      setLastRunOutcome: this.setLastRunOutcome.bind(this),
-      setLastRunOutcomeMsg: this.setLastRunOutcomeMsg.bind(this),
-      setLastRunWarning: this.setLastRunWarning.bind(this),
-      setLastRunAlertsCountActive: this.setLastRunAlertsCountActive.bind(this),
-      setLastRunAlertsCountNew: this.setLastRunAlertsCountNew.bind(this),
-      setLastRunAlertsCountRecovered: this.setLastRunAlertsCountRecovered.bind(this),
-      setLastRunAlertsCountIgnored: this.setLastRunAlertsCountIgnored.bind(this),
-      setShouldOverrideFrameworkLastRun: this.setShouldOverrideFrameworkLastRun.bind(this),
+      addLastRunError: this.addLastRunError.bind(this),
+      addLastRunWarning: this.addLastRunWarning.bind(this),
+      addLastRunOutcomeMessage: this.addLastRunOutcomeMessage.bind(this),
     };
   }
 
-  public setShouldOverrideFrameworkLastRun(shouldOverride: boolean) {
-    this.shouldOverrideFrameworkLastRun = shouldOverride;
+  private addLastRunError(error: string) {
+    this.errors.push(error)
   }
 
-  public getShouldOverrideFrameworkLastRun(): boolean {
-    return this.shouldOverrideFrameworkLastRun;
+  private addLastRunWarning(warning: string) {
+    this.warnings.push(warning)
   }
 
-  private setLastRunOutcome(outcome: RuleLastRunOutcomes) {
-    this.lastRun.outcome = outcome;
+  private addLastRunOutcomeMessage(outcomeMessage: string) {
+    this.outcomeMessages.push(outcomeMessage)
   }
 
-  private setLastRunOutcomeMsg(outcomeMsg: string) {
-    this.lastRun.outcomeMsg = outcomeMsg;
-  }
-
-  private setLastRunWarning(warning: RuleLastRun['warning']) {
-    this.lastRun.warning = warning;
-  }
-
-  private setLastRunAlertsCountActive(active: AlertsCount['active']) {
-    this.lastRun.alertsCount.active = active;
-  }
-
-  private setLastRunAlertsCountNew(newAlerts: AlertsCount['new']) {
-    this.lastRun.alertsCount.new = newAlerts;
-  }
-
-  private setLastRunAlertsCountRecovered(recovered: AlertsCount['recovered']) {
-    this.lastRun.alertsCount.recovered = recovered;
-  }
-
-  private setLastRunAlertsCountIgnored(ignored: AlertsCount['ignored']) {
-    this.lastRun.alertsCount.ignored = ignored;
-  }
 }

@@ -45,7 +45,6 @@ import {
   RuleSnooze,
   IntervalSchedule,
   RuleLastRun,
-  RuleLastRunOutcomes,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -323,15 +322,9 @@ export interface PublicRuleMonitoringService {
 }
 
 export interface PublicLastRunSetters {
-  setLastRunOutcome: (outcome: RuleLastRunOutcomes) => void;
-  setLastRunOutcomeMsg: (outcomeMsg: string) => void;
-  setLastRunWarning: (warning: RuleLastRun['warning']) => void;
-  setShouldOverrideFrameworkLastRun: (shouldOverride: boolean) => void;
-}
-
-export interface PublicLastRunGetters {
-  getLastRun: () => RuleLastRun;
-  getShouldOverrideFrameworkLastRun: () => boolean;
+  addLastRunError: (outcome: string) => void;
+  addLastRunWarning: (outcomeMsg: string) => void;
+  addLastRunOutcomeMessage: (warning: string) => void;
 }
 
 export type PublicRuleLastRunService = PublicLastRunSetters;
