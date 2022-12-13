@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
-import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate';
+import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate/analytics_collection_integrate';
 import { AnalyticsCollectionSettings } from './analytics_collection_settings';
 
 import { AnalyticsCollectionView } from './analytics_collection_view';
