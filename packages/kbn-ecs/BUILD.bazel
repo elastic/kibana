@@ -35,14 +35,11 @@ NPM_MODULE_EXTRA_FILES = [
   "package.json",
 ]
 
-RUNTIME_DEPS = [
-  "@npm//react"
-]
+RUNTIME_DEPS = []
 
 TYPES_DEPS = [
   "@npm//@types/node",
-  "@npm//@types/jest",
-  "@npm//@types/react"
+  "@npm//@types/jest"
 ]
 
 jsts_transpiler(
