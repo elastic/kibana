@@ -8,6 +8,7 @@
 import { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { useApmParams } from '../../../../../../hooks/use_apm_params';
 import { SpanFlyout } from './span_flyout';
 import { TransactionFlyout } from './transaction_flyout';
 import { IWaterfall } from './waterfall_helpers/waterfall_helpers';
@@ -15,7 +16,13 @@ import { IWaterfall } from './waterfall_helpers/waterfall_helpers';
 interface Props {
   waterfallItemId?: string;
   waterfall: IWaterfall;
-  toggleFlyout: ({ history }: { history: History }) => void;
+  toggleFlyout: ({
+    history,
+    flyoutDetailTab,
+  }: {
+    history: History;
+    flyoutDetailTab?: string;
+  }) => void;
 }
 
 export function WaterfallFlyout({
@@ -24,6 +31,9 @@ export function WaterfallFlyout({
   toggleFlyout,
 }: Props) {
   const history = useHistory();
+  const {
+    query: { flyoutDetailTab },
+  } = useApmParams('/services/{serviceName}/transactions/view');
   const currentItem = waterfall.items.find(
     (item) => item.id === waterfallItemId
   );
@@ -44,20 +54,22 @@ export function WaterfallFlyout({
           totalDuration={waterfall.duration}
           span={currentItem.doc}
           parentTransaction={parentTransaction}
-          onClose={() => toggleFlyout({ history })}
+          onClose={() => toggleFlyout({ history, flyoutDetailTab: undefined })}
           spanLinksCount={currentItem.spanLinksCount}
+          flyoutDetailTab={flyoutDetailTab}
         />
       );
     case 'transaction':
       return (
         <TransactionFlyout
           transaction={currentItem.doc}
-          onClose={() => toggleFlyout({ history })}
+          onClose={() => toggleFlyout({ history, flyoutDetailTab: undefined })}
           rootTransactionDuration={
             waterfall.rootTransaction?.transaction.duration.us
           }
           errorCount={waterfall.getErrorCount(currentItem.id)}
           spanLinksCount={currentItem.spanLinksCount}
+          flyoutDetailTab={flyoutDetailTab}
         />
       );
     default:

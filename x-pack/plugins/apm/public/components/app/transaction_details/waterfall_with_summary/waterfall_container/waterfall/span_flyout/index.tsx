@@ -90,6 +90,7 @@ interface Props {
   totalDuration?: number;
   onClose: () => void;
   spanLinksCount: SpanLinksCount;
+  flyoutDetailTab?: string;
 }
 
 export function SpanFlyout({
@@ -98,6 +99,7 @@ export function SpanFlyout({
   totalDuration,
   onClose,
   spanLinksCount,
+  flyoutDetailTab,
 }: Props) {
   if (!span) {
     return null;
@@ -118,6 +120,46 @@ export function SpanFlyout({
     spanId: span.span.id,
     processorEvent: ProcessorEvent.span,
   });
+
+  const tabs = [
+    {
+      id: 'metadata',
+      name: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
+        defaultMessage: 'Metadata',
+      }),
+      content: (
+        <Fragment>
+          <EuiSpacer size="m" />
+          <SpanMetadata span={span} />
+        </Fragment>
+      ),
+    },
+    ...(!isEmpty(stackframes)
+      ? [
+          {
+            id: 'stack-trace',
+            name: i18n.translate(
+              'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
+              {
+                defaultMessage: 'Stack Trace',
+              }
+            ),
+            content: (
+              <Fragment>
+                <EuiSpacer size="l" />
+                <Stacktrace
+                  stackframes={stackframes}
+                  codeLanguage={codeLanguage}
+                />
+              </Fragment>
+            ),
+          },
+        ]
+      : []),
+    ...(spanLinksTabContent ? [spanLinksTabContent] : []),
+  ];
+
+  const initialTab = tabs.find(({ id }) => id === flyoutDetailTab) ?? tabs[0];
 
   return (
     <EuiPortal>
@@ -227,48 +269,7 @@ export function SpanFlyout({
           />
           <EuiHorizontalRule />
           <SpanDatabase spanDb={spanDb} />
-          <EuiTabbedContent
-            tabs={[
-              {
-                id: 'metadata',
-                name: i18n.translate(
-                  'xpack.apm.propertiesTable.tabs.metadataLabel',
-                  {
-                    defaultMessage: 'Metadata',
-                  }
-                ),
-                content: (
-                  <Fragment>
-                    <EuiSpacer size="m" />
-                    <SpanMetadata span={span} />
-                  </Fragment>
-                ),
-              },
-              ...(!isEmpty(stackframes)
-                ? [
-                    {
-                      id: 'stack-trace',
-                      name: i18n.translate(
-                        'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
-                        {
-                          defaultMessage: 'Stack Trace',
-                        }
-                      ),
-                      content: (
-                        <Fragment>
-                          <EuiSpacer size="l" />
-                          <Stacktrace
-                            stackframes={stackframes}
-                            codeLanguage={codeLanguage}
-                          />
-                        </Fragment>
-                      ),
-                    },
-                  ]
-                : []),
-              ...(spanLinksTabContent ? [spanLinksTabContent] : []),
-            ]}
-          />
+          <EuiTabbedContent initialSelectedTab={initialTab} tabs={tabs} />
         </EuiFlyoutBody>
       </ResponsiveFlyout>
     </EuiPortal>

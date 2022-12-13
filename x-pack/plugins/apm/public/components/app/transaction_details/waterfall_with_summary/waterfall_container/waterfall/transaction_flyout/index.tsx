@@ -35,6 +35,7 @@ interface Props {
   errorCount?: number;
   rootTransactionDuration?: number;
   spanLinksCount: SpanLinksCount;
+  flyoutDetailTab?: string;
 }
 
 export function TransactionFlyout({
@@ -43,6 +44,7 @@ export function TransactionFlyout({
   errorCount = 0,
   rootTransactionDuration,
   spanLinksCount,
+  flyoutDetailTab,
 }: Props) {
   if (!transactionDoc) {
     return null;
@@ -54,6 +56,24 @@ export function TransactionFlyout({
     spanId: transactionDoc.transaction.id,
     processorEvent: ProcessorEvent.transaction,
   });
+
+  const tabs = [
+    {
+      id: 'metadata',
+      name: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
+        defaultMessage: 'Metadata',
+      }),
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          <TransactionMetadata transaction={transactionDoc} />
+        </>
+      ),
+    },
+    ...(spanLinksTabContent ? [spanLinksTabContent] : []),
+  ];
+
+  const initialTab = tabs.find(({ id }) => id === flyoutDetailTab) ?? tabs[0];
 
   return (
     <EuiPortal>
@@ -92,26 +112,7 @@ export function TransactionFlyout({
           />
           <EuiHorizontalRule margin="m" />
           <DroppedSpansWarning transactionDoc={transactionDoc} />
-          <EuiTabbedContent
-            tabs={[
-              {
-                id: 'metadata',
-                name: i18n.translate(
-                  'xpack.apm.propertiesTable.tabs.metadataLabel',
-                  {
-                    defaultMessage: 'Metadata',
-                  }
-                ),
-                content: (
-                  <>
-                    <EuiSpacer size="m" />
-                    <TransactionMetadata transaction={transactionDoc} />
-                  </>
-                ),
-              },
-              ...(spanLinksTabContent ? [spanLinksTabContent] : []),
-            ]}
-          />
+          <EuiTabbedContent initialSelectedTab={initialTab} tabs={tabs} />
         </EuiFlyoutBody>
       </ResponsiveFlyout>
     </EuiPortal>
