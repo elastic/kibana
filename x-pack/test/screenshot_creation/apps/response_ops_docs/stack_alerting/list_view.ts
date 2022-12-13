@@ -35,6 +35,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1024
       );
     });
+
+    it('rules list screenshot', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await commonScreenshots.takeScreenshot(
+        'rules-ui',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+    });
   });
 
   const createServerLogConnector = async (name: string) => {
