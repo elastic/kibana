@@ -7,32 +7,22 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiSwitch, EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { CodeEditor, YamlLang } from '@kbn/kibana-react-plugin/public';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { monaco } from '@kbn/monaco';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
 import { getInputFromPolicy } from '../../common/utils';
 import * as i18n from './translations';
+import type { SettingsDeps } from '../../types';
 
 const { editor } = monaco;
-
-interface OnChangeDeps {
-  isValid: boolean;
-  updatedPolicy: NewPackagePolicy;
-}
-
-interface ConfigYamlViewDeps {
-  policy: NewPackagePolicy;
-  onChange(opts: OnChangeDeps): void;
-}
 
 interface ConfigError {
   line: number;
   message: string;
 }
 
-export const ConfigYamlView = ({ policy, onChange }: ConfigYamlViewDeps) => {
+export const ControlYamlView = ({ policy, onChange }: SettingsDeps) => {
   const styles = useStyles();
   const [errors, setErrors] = useState<ConfigError[]>([]);
   const input = getInputFromPolicy(policy, INPUT_CONTROL);
@@ -71,36 +61,10 @@ export const ConfigYamlView = ({ policy, onChange }: ConfigYamlViewDeps) => {
     [errors.length, input, onChange, policy]
   );
 
-  const onToggleEnabled = useCallback(
-    (e) => {
-      if (input) {
-        input.enabled = e.target.checked;
-        onChange({ isValid: errors.length === 0, updatedPolicy: policy });
-      }
-    },
-    [errors.length, input, onChange, policy]
-  );
-
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiSwitch
-          data-test-subj="cloud-defend-control-toggle"
-          label={i18n.enableControl}
-          checked={controlEnabled}
-          onChange={onToggleEnabled}
-        />
-        <EuiSpacer size="s" />
-        <EuiText color="subdued" size="s">
-          {i18n.enableControlHelp}
-        </EuiText>
-      </EuiFlexItem>
       {controlEnabled && (
         <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>{i18n.controlYaml}</h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
             {i18n.controlYamlHelp}
           </EuiText>

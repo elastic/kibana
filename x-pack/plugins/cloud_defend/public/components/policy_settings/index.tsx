@@ -6,23 +6,13 @@
  */
 import React, { useCallback } from 'react';
 import { EuiSwitch, EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { getInputFromPolicy } from '../../common/utils';
 import * as i18n from './translations';
 import { ControlSettings } from '../control_settings';
+import type { SettingsDeps } from '../../types';
 
-interface OnChangeDeps {
-  isValid: boolean;
-  updatedPolicy: NewPackagePolicy;
-}
-
-interface PolicySettingsDeps {
-  policy: NewPackagePolicy;
-  onChange(opts: OnChangeDeps): void;
-}
-
-export const PolicySettings = ({ policy, onChange }: PolicySettingsDeps) => {
+export const PolicySettings = ({ policy, onChange }: SettingsDeps) => {
   const controlInput = getInputFromPolicy(policy, INPUT_CONTROL);
   const controlEnabled = !!controlInput?.enabled;
 

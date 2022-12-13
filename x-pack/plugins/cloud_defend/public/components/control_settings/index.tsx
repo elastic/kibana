@@ -12,6 +12,8 @@ import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import { getInputFromPolicy } from '../../common/utils';
 import * as i18n from './translations';
+import { ControlGeneralView } from '../control_general_view';
+import { ControlYamlView } from '../control_yaml_view';
 
 const VIEW_MODE_GENERAL = 'general';
 const VIEW_MODE_YAML = 'yaml';
@@ -47,6 +49,9 @@ export const ControlSettings = ({ policy, onChange }: ControlSettingsDeps) => {
     setViewMode(VIEW_MODE_YAML);
   }, []);
 
+  const isGeneralViewSelected = viewMode === VIEW_MODE_GENERAL;
+  const isYamlViewSelected = viewMode === VIEW_MODE_YAML;
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -54,18 +59,18 @@ export const ControlSettings = ({ policy, onChange }: ControlSettingsDeps) => {
           <EuiTab
             id={VIEW_MODE_GENERAL}
             onClick={onViewModeGeneral}
-            isSelected={viewMode === VIEW_MODE_GENERAL}
+            isSelected={isGeneralViewSelected}
           >
             {i18n.viewModeGeneral}
           </EuiTab>
-          <EuiTab
-            id={VIEW_MODE_YAML}
-            onClick={onViewModeYaml}
-            isSelected={viewMode === VIEW_MODE_YAML}
-          >
+          <EuiTab id={VIEW_MODE_YAML} onClick={onViewModeYaml} isSelected={isYamlViewSelected}>
             {i18n.viewModeYaml}
           </EuiTab>
         </EuiTabs>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {isGeneralViewSelected && <ControlGeneralView policy={policy} onChange={onChange} />}
+        {isYamlViewSelected && <ControlYamlView policy={policy} onChange={onChange} />}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

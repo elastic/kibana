@@ -6,6 +6,7 @@
  */
 
 import type { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudDefendPluginSetup {}
@@ -17,4 +18,14 @@ export interface CloudDefendPluginSetupDeps {
 }
 export interface CloudDefendPluginStartDeps {
   fleet: FleetStart;
+}
+
+interface OnChangeDeps {
+  isValid: boolean;
+  updatedPolicy: NewPackagePolicy;
+}
+
+export interface SettingsDeps {
+  policy: NewPackagePolicy;
+  onChange(opts: OnChangeDeps): void;
 }
