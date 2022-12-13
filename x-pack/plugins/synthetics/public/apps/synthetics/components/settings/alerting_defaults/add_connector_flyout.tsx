@@ -45,8 +45,7 @@ export const AddConnectorFlyout = ({ focusInput, isDisabled }: Props) => {
         },
         featureId: 'uptime',
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [dispatch, focusInput, getAddConnectorFlyout]
   );
 
   return (
