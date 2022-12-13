@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "ft_module_siem_auditbeat",
+    "index": "ft_module_security_auditbeat",
     "mappings": {
       "properties": {
         "@timestamp": {
