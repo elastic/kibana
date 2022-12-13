@@ -85,7 +85,9 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetPackagePoliciesRequestSchema.query>
 > = async (context, request, response) => {
-  const { client: soClient, limitedToPackages } = await (await context.fleet).getSoClient();
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.epm.internalSoClient;
+  const limitedToPackages = fleetContext.limitedToPackages;
 
   try {
     const { items, total, page, perPage } = await packagePolicyService.list(
@@ -127,7 +129,9 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof BulkGetPackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
-  const { client: soClient, limitedToPackages } = await (await context.fleet).getSoClient();
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.epm.internalSoClient;
+  const limitedToPackages = fleetContext.limitedToPackages;
   const { ids, ignoreMissing } = request.body;
 
   try {
@@ -168,7 +172,9 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
 export const getOnePackagePolicyHandler: FleetRequestHandler<
   TypeOf<typeof GetOnePackagePolicyRequestSchema.params>
 > = async (context, request, response) => {
-  const { client: soClient, limitedToPackages } = await (await context.fleet).getSoClient();
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.epm.internalSoClient;
+  const limitedToPackages = fleetContext.limitedToPackages;
   const { packagePolicyId } = request.params;
   const notFoundResponse = () =>
     response.notFound({ body: { message: `Package policy ${packagePolicyId} not found` } });
@@ -350,7 +356,9 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  const { client: soClient, limitedToPackages } = await (await context.fleet).getSoClient();
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.epm.internalSoClient;
+  const limitedToPackages = fleetContext.limitedToPackages;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);

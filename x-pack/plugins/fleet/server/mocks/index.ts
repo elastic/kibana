@@ -96,12 +96,7 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
       internalSoClient: soClient,
     },
     spaceId: 'default',
-    getSoClient: jest.fn(async () => {
-      return {
-        client: soClient,
-        limitedToPackages: undefined,
-      };
-    }),
+    limitedToPackages: undefined,
   };
 };
 

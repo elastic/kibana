@@ -57,12 +57,7 @@ describe('FleetSetupHandler', () => {
           internalSoClient: soClient,
         },
         spaceId: 'default',
-        getSoClient: jest.fn(async () => {
-          return {
-            client: soClient,
-            limitedToPackages: undefined,
-          };
-        }),
+        limitedToPackages: undefined,
       },
     };
     response = httpServerMock.createResponseFactory();

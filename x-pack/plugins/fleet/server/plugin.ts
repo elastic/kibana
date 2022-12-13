@@ -385,20 +385,10 @@ export class FleetPlugin
             return deps.spaces.spacesService.getSpaceId(request);
           },
 
-          async getSoClient() {
+          get limitedToPackages() {
             if (routeAuthz && routeAuthz.granted) {
-              return {
-                client: routeAuthz.grantedByFleetPrivileges
-                  ? coreContext.savedObjects.client
-                  : getInternalSoClient(),
-                limitedToPackages: routeAuthz.scopeDataToPackages,
-              };
+              return routeAuthz.scopeDataToPackages;
             }
-
-            return {
-              client: coreContext.savedObjects.client,
-              limitedToPackages: undefined,
-            };
           },
         };
       }
