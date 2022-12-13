@@ -65,7 +65,7 @@ function DefaultEditorAggGroup({
   const schemaNames = schemas.map((s) => s.name);
   const group: IAggConfig[] = useMemo(
     () =>
-      state.data.aggs!.aggs.filter(
+      state.data.aggs?.aggs.filter(
         (agg: IAggConfig) => agg.schema && schemaNames.includes(agg.schema)
       ) || [],
     [state.data.aggs, schemaNames]
