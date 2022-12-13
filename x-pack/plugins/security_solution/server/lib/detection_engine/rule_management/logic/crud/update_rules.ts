@@ -76,9 +76,22 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
-    throttle: transformToAlertThrottle(ruleUpdate.throttle),
-    notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
+    actions:
+      ruleUpdate.actions != null
+        ? ruleUpdate.actions?.map((action) => {
+            const alertAction = transformRuleToAlertAction(action);
+            const notifyWhen = transformToNotifyWhen(ruleUpdate.throttle);
+            const throttle = transformToAlertThrottle(ruleUpdate.throttle);
+            return {
+              ...alertAction,
+              frequency: {
+                summary: throttle !== null,
+                notifyWhen,
+                throttle,
+              },
+            };
+          })
+        : [],
   };
 
   const update = await rulesClient.update({

@@ -463,14 +463,24 @@ export const convertPatchAPIToInternalSchema = (
     },
     schedule: { interval: nextParams.interval ?? existingRule.schedule.interval },
     actions: nextParams.actions
-      ? nextParams.actions.map(transformRuleToAlertAction)
+      ? nextParams.actions?.map((action) => {
+          const alertAction = transformRuleToAlertAction(action);
+          const notifyWhen = nextParams.throttle
+            ? transformToNotifyWhen(nextParams.throttle)
+            : existingRule.notifyWhen ?? null;
+          const throttle = nextParams.throttle
+            ? transformToAlertThrottle(nextParams.throttle)
+            : existingRule.throttle ?? null;
+          return {
+            ...alertAction,
+            frequency: {
+              summary: throttle !== null,
+              notifyWhen,
+              throttle,
+            },
+          };
+        })
       : existingRule.actions,
-    throttle: nextParams.throttle
-      ? transformToAlertThrottle(nextParams.throttle)
-      : existingRule.throttle ?? null,
-    notifyWhen: nextParams.throttle
-      ? transformToNotifyWhen(nextParams.throttle)
-      : existingRule.notifyWhen ?? null,
   };
 };
 
@@ -526,9 +536,20 @@ export const convertCreateAPIToInternalSchema = (
     },
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? defaultEnabled,
-    actions: input.actions?.map(transformRuleToAlertAction) ?? [],
-    throttle: transformToAlertThrottle(input.throttle),
-    notifyWhen: transformToNotifyWhen(input.throttle),
+    actions:
+      input.actions?.map((action) => {
+        const alertAction = transformRuleToAlertAction(action);
+        const notifyWhen = transformToNotifyWhen(input.throttle);
+        const throttle = transformToAlertThrottle(input.throttle);
+        return {
+          ...alertAction,
+          frequency: {
+            summary: throttle !== null,
+            notifyWhen,
+            throttle,
+          },
+        };
+      }) ?? [],
   };
 };
 
