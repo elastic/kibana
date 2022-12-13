@@ -19,6 +19,7 @@ Any modifications made to this file will be overwritten.
   <h4><a href="#Alerting">Alerting</a></h4>
   <ul>
   <li><a href="#findRules"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rules/_find</code></a></li>
+  <li><a href="#getRule"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
   <li><a href="#updateRule"><code><span class="http-method">put</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
   </ul>
 
@@ -200,6 +201,105 @@ Any modifications made to this file will be overwritten.
     <h4 class="field-label">200</h4>
     Indicates a successful call.
         <a href="#findRules_200_response">findRules_200_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getRule"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></pre></div>
+    <div class="method-summary">Retrieve a rule by its identifier. (<span class="nickname">getRule</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rules you're seeking. For example, the <strong>Management &gt; Stack Rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong> features, or <strong>Security</strong> features. To get rules associated with the <strong>Stack Monitoring</strong> feature, use the <code>monitoring_user</code> built-in role.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The ID of the rule that you want to retrieve. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#rule_response_properties">rule_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "throttle" : "10m",
+  "created_at" : "2022-12-05T23:36:58.284Z",
+  "last_run" : {
+    "alerts_count" : {
+      "ignored" : 6,
+      "new" : 1,
+      "recovered" : 5,
+      "active" : 0
+    },
+    "outcome_msg" : "outcome_msg",
+    "warning" : "warning",
+    "outcome" : "succeeded"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "created_by" : "elastic",
+  "enabled" : true,
+  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+  "rule_type_id" : "monitoring_alert_cluster_health",
+  "tags" : [ "tags", "tags" ],
+  "api_key_owner" : "elastic",
+  "schedule" : {
+    "interval" : "1m"
+  },
+  "notify_when" : "onActiveAlert",
+  "next_run" : "2022-12-06T00:14:43.818Z",
+  "updated_at" : "2022-12-05T23:36:58.284Z",
+  "execution_status" : {
+    "last_execution_date" : "2022-12-06T00:13:43.89Z",
+    "last_duration" : 55,
+    "status" : "ok"
+  },
+  "name" : "cluster_health_rule",
+  "updated_by" : "elastic",
+  "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "mute_all" : false,
+  "actions" : [ {
+    "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+    "params" : {
+      "key" : ""
+    },
+    "group" : "default"
+  }, {
+    "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+    "params" : {
+      "key" : ""
+    },
+    "group" : "default"
+  } ],
+  "consumer" : "alerts"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#rule_response_properties">rule_response_properties</a>
   </div> <!-- method -->
   <hr/>
   <div class="method"><a name="updateRule"/>

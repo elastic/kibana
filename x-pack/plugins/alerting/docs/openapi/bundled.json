@@ -26,6 +26,46 @@
   ],
   "paths": {
     "/s/{spaceId}/api/alerting/rule/{ruleId}": {
+      "get": {
+        "summary": "Retrieve a rule by its identifier.",
+        "operationId": "getRule",
+        "description": "You must have `read` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're seeking. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. To get rules associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the rule that you want to retrieve.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/rule_response_properties"
+                },
+                "examples": {
+                  "updateRuleResponse": {
+                    "$ref": "#/components/examples/get_rule_response"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "put": {
         "summary": "Updates the attributes for a rule.",
         "operationId": "updateRule",
@@ -355,44 +395,6 @@
         "default": null,
         "example": "10m"
       },
-      "update_rule_request": {
-        "title": "Update rule request",
-        "description": "The update rule API request body varies depending on the type of rule and actions.",
-        "type": "object",
-        "required": [
-          "name",
-          "notify_when",
-          "params",
-          "schedule"
-        ],
-        "properties": {
-          "actions": {
-            "$ref": "#/components/schemas/actions"
-          },
-          "name": {
-            "type": "string",
-            "description": "The name of the rule.",
-            "example": "cluster_health_rule"
-          },
-          "notify_when": {
-            "$ref": "#/components/schemas/notify_when"
-          },
-          "params": {
-            "type": "object",
-            "description": "The parameters for the rule.",
-            "additionalProperties": true
-          },
-          "schedule": {
-            "$ref": "#/components/schemas/schedule"
-          },
-          "tags": {
-            "$ref": "#/components/schemas/tags"
-          },
-          "throttle": {
-            "$ref": "#/components/schemas/throttle"
-          }
-        }
-      },
       "rule_response_properties": {
         "title": "Rule response properties",
         "type": "object",
@@ -567,9 +569,118 @@
             "example": "elastic"
           }
         }
+      },
+      "update_rule_request": {
+        "title": "Update rule request",
+        "description": "The update rule API request body varies depending on the type of rule and actions.",
+        "type": "object",
+        "required": [
+          "name",
+          "notify_when",
+          "params",
+          "schedule"
+        ],
+        "properties": {
+          "actions": {
+            "$ref": "#/components/schemas/actions"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the rule.",
+            "example": "cluster_health_rule"
+          },
+          "notify_when": {
+            "$ref": "#/components/schemas/notify_when"
+          },
+          "params": {
+            "type": "object",
+            "description": "The parameters for the rule.",
+            "additionalProperties": true
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/schedule"
+          },
+          "tags": {
+            "$ref": "#/components/schemas/tags"
+          },
+          "throttle": {
+            "$ref": "#/components/schemas/throttle"
+          }
+        }
       }
     },
     "examples": {
+      "get_rule_response": {
+        "summary": "The get rule API returns a JSON object that contains details about the rule.",
+        "value": {
+          "id": "31697a40-7b36-11ed-aa79-f742c05329b2",
+          "consumer": "alerts",
+          "tags": [
+            "cpu"
+          ],
+          "name": "my alert",
+          "enabled": true,
+          "throttle": null,
+          "schedule": {
+            "interval": "1m"
+          },
+          "params": {
+            "aggType": "avg",
+            "termSize": 6,
+            "thresholdComparator": ">",
+            "timeWindowSize": 5,
+            "timeWindowUnit": "m",
+            "groupBy": "top",
+            "threshold": [
+              1000
+            ],
+            "index": [
+              "test-index"
+            ],
+            "timeField": "@timestamp",
+            "aggField": "sheet.version",
+            "termField": "name.keyword"
+          },
+          "rule_type_id": ".index-threshold",
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "created_at": "2022-12-13T22:33:41.163Z",
+          "updated_at": "2022-12-13T22:33:41.163Z",
+          "api_key_owner": "elastic",
+          "notify_when": "onActionGroupChange",
+          "muted_alert_ids": [],
+          "mute_all": false,
+          "scheduled_task_id": "31697a40-7b36-11ed-aa79-f742c05329b2",
+          "execution_status": {
+            "status": "ok",
+            "last_execution_date": "2022-12-13T22:33:44.388Z",
+            "last_duration": 83
+          },
+          "actions": [
+            {
+              "group": "threshold met",
+              "id": "1007a0c0-7a6e-11ed-89d5-abec321c0def",
+              "params": {
+                "level": "info",
+                "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}",
+                "connector_type_id": ".server-log"
+              }
+            }
+          ],
+          "last_run": {
+            "alerts_count": {
+              "new": 0,
+              "ignored": 0,
+              "recovered": 0,
+              "active": 0
+            },
+            "outcome_msg": null,
+            "warning": null,
+            "outcome": "succeeded"
+          },
+          "next_run": "2022-12-13T22:34:44.314Z"
+        }
+      },
       "update_rule_request": {
         "summary": "Update an index threshold rule.",
         "value": {

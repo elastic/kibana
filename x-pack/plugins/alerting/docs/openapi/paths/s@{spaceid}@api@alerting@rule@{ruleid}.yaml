@@ -1,3 +1,34 @@
+get:
+  summary: Retrieve a rule by its identifier.
+  operationId: getRule
+  description: >
+    You must have `read` privileges for the appropriate Kibana features,
+    depending on the `consumer` and `rule_type_id` of the rules you're seeking.
+    For example, the **Management > Stack Rules** feature,
+    **Analytics > Discover** and **Machine Learning** features, **Observability**
+    features, or **Security** features. To get rules associated with the
+    **Stack Monitoring** feature, use the `monitoring_user` built-in role.
+  tags:
+    - alerting
+  parameters:
+    - name: ruleId
+      in: path
+      required: true
+      description: The ID of the rule that you want to retrieve.
+      schema:
+        type: string
+      example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+    - $ref: '../components/parameters/space_id.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/rule_response_properties.yaml' 
+          examples:
+            updateRuleResponse:
+              $ref: '../components/examples/get_rule_response.yaml'
 put:
   summary: Updates the attributes for a rule.
   operationId: updateRule
