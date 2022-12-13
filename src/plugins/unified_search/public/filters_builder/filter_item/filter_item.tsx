@@ -258,7 +258,7 @@ export function FilterItem({
                           justifyContent="center"
                           wrap
                         >
-                          <EuiFlexItem className={fieldAndParamCss}>
+                          <EuiFlexItem className={fieldAndParamCss(euiTheme)}>
                             <EuiFormRow>
                               <FieldInput
                                 field={field}
@@ -277,7 +277,7 @@ export function FilterItem({
                               />
                             </EuiFormRow>
                           </EuiFlexItem>
-                          <EuiFlexItem className={fieldAndParamCss}>
+                          <EuiFlexItem className={fieldAndParamCss(euiTheme)}>
                             <EuiFormRow>
                               <div data-test-subj="filterParams">
                                 <ParamsEditor
