@@ -135,6 +135,8 @@ describe('blocks', () => {
       if (renderAST) expect(renderAST({})).toEqual('');
       if (renderEval) expect(renderEval({})).toEqual('');
       expect(calls).toEqual(callsExpected);
+
+      global.kbnHandlebarsEnv = null;
     });
 
     it('should pass expected options to nested decorator', () => {
@@ -205,6 +207,10 @@ describe('blocks', () => {
     describe('registration', () => {
       beforeEach(() => {
         global.kbnHandlebarsEnv = Handlebars.create();
+      });
+
+      afterEach(() => {
+        global.kbnHandlebarsEnv = null;
       });
 
       it('should be able to call decorators registered using the `registerDecorator` function', () => {
