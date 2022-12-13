@@ -118,7 +118,11 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
       );
     }
 
-    return <EuiCodeBlock language="js">{JSON.stringify(data, null, 2)}</EuiCodeBlock>;
+    return (
+      <EuiCodeBlock language="json" isCopyable={true}>
+        {JSON.stringify(data, null, 2)}
+      </EuiCodeBlock>
+    );
   }
 
   render() {
