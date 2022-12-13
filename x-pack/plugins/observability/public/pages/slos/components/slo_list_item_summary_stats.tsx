@@ -18,12 +18,15 @@ export interface SloListItemSummaryStatsProps {
 export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
   const isHealthy = isSloHealthy(slo);
 
+  const difference = slo.summary.sliValue - slo.objective.target;
+  const differenceValue = `${difference > 0 ? '+' : ''}${asPercent(difference, 1, 'n/a')}`;
+
   return (
     <EuiFlexGroup direction="row" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiStat
-          description={i18n.translate('observability.slos.slo.stats.sliValue', {
-            defaultMessage: 'SLI value',
+          description={i18n.translate('observability.slos.slo.stats.observedValue', {
+            defaultMessage: 'Observed value',
           })}
           title={asPercent(slo.summary.sliValue, 1, 'n/a')}
           titleColor={isHealthy ? '' : 'danger'}
@@ -33,10 +36,20 @@ export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiStat
-          description={i18n.translate('observability.slos.slo.stats.objective', {
-            defaultMessage: 'Objective',
+          description={i18n.translate('observability.slos.slo.stats.slo', {
+            defaultMessage: 'SLO',
           })}
           title={asPercent(slo.objective.target, 1, 'n/a')}
+          titleSize="m"
+          reverse
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          description={i18n.translate('observability.slos.slo.stats.difference', {
+            defaultMessage: 'Difference',
+          })}
+          title={differenceValue}
           titleColor={isHealthy ? '' : 'danger'}
           titleSize="m"
           reverse
