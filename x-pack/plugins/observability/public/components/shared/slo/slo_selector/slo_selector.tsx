@@ -14,14 +14,19 @@ import { SLO } from '../../../../typings';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 
 interface Props {
+  initialSlo?: SLO;
   onSelected: (slo: SLO | undefined) => void;
 }
 
-function SloSelector({ onSelected }: Props) {
+function SloSelector({ initialSlo, onSelected }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
   const { loading, sloList } = useFetchSloList(searchValue);
+
+  useEffect(() => {
+    setSelectedOptions(initialSlo ? [{ value: initialSlo.id, label: initialSlo.name }] : []);
+  }, [initialSlo]);
 
   useEffect(() => {
     const isLoadedWithData = !loading && sloList !== undefined;
