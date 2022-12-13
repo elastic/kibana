@@ -50,7 +50,7 @@ export const compileFnName: 'compile' | 'compileAST' = allowUnsafeEval() ? 'comp
  */
 export type ExtendedCompileOptions = Pick<
   CompileOptions,
-  'knownHelpers' | 'knownHelpersOnly' | 'strict' | 'assumeObjects' | 'noEscape' | 'data'
+  'data' | 'knownHelpers' | 'knownHelpersOnly' | 'noEscape' | 'strict' | 'assumeObjects'
 >;
 
 /**
@@ -61,7 +61,7 @@ export type ExtendedCompileOptions = Pick<
  */
 export type ExtendedRuntimeOptions = Pick<
   RuntimeOptions,
-  'helpers' | 'blockParams' | 'data' | 'decorators'
+  'data' | 'helpers' | 'decorators' | 'blockParams'
 >;
 
 /**
@@ -77,12 +77,12 @@ export type DecoratorFunction = (
   options: any
 ) => any;
 
-export interface DecoratorsHash {
-  [name: string]: DecoratorFunction;
-}
-
 export interface HelpersHash {
   [name: string]: Handlebars.HelperDelegate;
+}
+
+export interface DecoratorsHash {
+  [name: string]: DecoratorFunction;
 }
 
 /**
@@ -298,6 +298,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   Program(program: hbs.AST.Program) {
     this.blockParamNames.unshift(program.blockParams);
 
+    // Run any decorators that might exist on the root
     this.processDecorators(program, this.generateProgramFunction(program));
     this.processedRootDecorators = true;
 
@@ -314,13 +315,13 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   // This space intentionally left blank: We want to override the Visitor class implementation
-  // of `DecoratorBlock`, but since we handle decorators separately before traversing the
-  // nodes, we just want to make this a no-op.
+  // of this method, but since we handle decorators separately before traversing the nodes, we
+  // just want to make this a no-op.
   DecoratorBlock(decorator: hbs.AST.DecoratorBlock) {}
 
   // This space intentionally left blank: We want to override the Visitor class implementation
-  // of `DecoratorBlock`, but since we handle decorators separately before traversing the
-  // nodes, we just want to make this a no-op.
+  // of this method, but since we handle decorators separately before traversing the nodes, we
+  // just want to make this a no-op.
   Decorator(decorator: hbs.AST.Decorator) {}
 
   SubExpression(sexpr: hbs.AST.SubExpression) {
@@ -407,6 +408,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   private processStatementOrExpression(node: ProcessableNode) {
+    // Calling `transformLiteralToPath` has side-effects!
+    // It converts a node from type `ProcessableNode` to `ProcessableNodeWithPathParts`
     transformLiteralToPath(node);
 
     switch (this.classifyNode(node as ProcessableNodeWithPathParts)) {
@@ -533,6 +536,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private invokeKnownHelper(node: ProcessableNodeWithPathParts) {
     const name = node.path.parts[0];
     const helper = this.setupHelper(node, name);
+    // TypeScript: `helper.fn` might be `undefined` at this point, but to match the upstream behavior we call it without any guards
     const result = helper.fn.apply(helper.context, helper.params);
     this.output.push(result);
   }
@@ -558,6 +562,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       }
     }
 
+    // TypeScript: `helper.fn` might be `undefined` at this point, but to match the upstream behavior we call it without any guards
     const result = helper.fn.apply(helper.context, helper.params);
 
     this.output.push(result);
@@ -573,8 +578,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       }
     } else {
       if (
-        // @ts-expect-error: The `escaped` property is only on MustacheStatement nodes
-        node.escaped === false ||
+        (node as hbs.AST.MustacheStatement).escaped === false ||
         this.compileOptions.noEscape === true ||
         typeof invokeResult !== 'string'
       ) {
@@ -679,8 +683,9 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       nextContext: any,
       runtimeOptions: ExtendedRuntimeOptions = {}
     ) => {
-      // inherit data in blockParams from parent program
       runtimeOptions = Object.assign({}, runtimeOptions);
+
+      // inherit data in blockParams from parent program
       runtimeOptions.data = runtimeOptions.data || this.runtimeOptions!.data;
       if (runtimeOptions.blockParams) {
         runtimeOptions.blockParams = runtimeOptions.blockParams.concat(
