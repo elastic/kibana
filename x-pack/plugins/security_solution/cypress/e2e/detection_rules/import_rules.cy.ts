@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { RULES_ROW, RULES_TABLE, TOASTER } from '../../screens/alerts_detection_rules';
-import { importRules, importRulesWithOverwriteAll } from '../../tasks/alerts_detection_rules';
+import { TOASTER } from '../../screens/alerts_detection_rules';
+import {
+  expectNumberOfRules,
+  expectToContainRule,
+  importRules,
+  importRulesWithOverwriteAll,
+} from '../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules, reload } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
@@ -36,12 +41,8 @@ describe('Import rules', () => {
         'Successfully imported 1 ruleSuccessfully imported 1 exception.'
       );
 
-      cy.get(RULES_TABLE).then(($table) => {
-        const rulesRow = cy.wrap($table.find(RULES_ROW));
-
-        rulesRow.should('have.length', expectedNumberOfRules);
-        rulesRow.should('include.text', expectedImportedRuleName);
-      });
+      expectNumberOfRules(expectedNumberOfRules);
+      expectToContainRule(expectedImportedRuleName);
     });
   });
 
