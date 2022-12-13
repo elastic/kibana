@@ -98,13 +98,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
       const aliases = aliasesRes.right;
 
+      // The source index .kibana is pointing to. E.g: ".kibana_8.7.0_001"
+      const source = aliases[stateP.currentAlias];
+
       const versionMigrationIsComplete = versionMigrationCompleted(
         stateP.currentAlias,
         stateP.versionAlias,
         aliases
       );
-
-      const source = aliases[stateP.currentAlias];
 
       if (versionMigrationIsComplete) {
         const targetIndex = `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`;
@@ -164,13 +165,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       }
 
-      const mappingsAreTheSame =
+      const mappingsAreUnchanged =
         // the source exists
         Boolean(indices[source!]?.mappings?._meta?.migrationMappingPropertyHashes) &&
         // ...and mappings are unchanged
         !diffMappings(stateP.targetIndexMappings, indices[source!].mappings);
 
-      if (mappingsAreTheSame) {
+      if (mappingsAreUnchanged) {
         const targetIndex = source!;
 
         return {
