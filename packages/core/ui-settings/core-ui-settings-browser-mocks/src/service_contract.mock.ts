@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export type { UiSettingsState, IUiSettingsClient, SettingsStart } from './src/types';
+export const serviceContractMock = (): jest.Mocked<any> => {
+  return {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+};

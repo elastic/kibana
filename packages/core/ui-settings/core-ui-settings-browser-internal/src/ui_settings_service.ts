@@ -20,7 +20,10 @@ export interface UiSettingsServiceDeps {
   injectedMetadata: InternalInjectedMetadataSetup;
 }
 
-/** @Deprecated */
+/**
+ * @Internal
+ * @Deprecated
+ **/
 export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;

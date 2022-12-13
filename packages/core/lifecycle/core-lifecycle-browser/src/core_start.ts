@@ -53,7 +53,7 @@ export interface CoreStart {
   /** {@link OverlayStart} */
   overlays: OverlayStart;
   /** {@link IUiSettingsClient} */
-  /** {@Deprecated Use {@link SettingsStart instead}*/
+  /** @Deprecated Use {@link CoreStart.settings} instead */
   uiSettings: IUiSettingsClient;
   /** {@link SettingsStart} */
   settings: SettingsStart;

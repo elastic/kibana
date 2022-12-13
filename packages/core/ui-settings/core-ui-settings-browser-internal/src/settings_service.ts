@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { SettingsSetup, SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
 import { UiSettingsGlobalClient } from './ui_settings_global_client';
@@ -27,7 +27,7 @@ export class SettingsService {
   private uiSettingsGlobalClient?: UiSettingsGlobalClient;
   private done$ = new Subject();
 
-  public setup({ http, injectedMetadata }: SettingsServiceDeps): SettingsSetup {
+  public setup({ http, injectedMetadata }: SettingsServiceDeps): SettingsStart {
     this.uiSettingsApi = new UiSettingsApi(http);
     http.addLoadingCountSource(this.uiSettingsApi.getLoadingCount$());
 
@@ -55,6 +55,9 @@ export class SettingsService {
   }
 
   public start(): SettingsStart {
+    if (!this.uiSettingsClient || !this.uiSettingsGlobalClient) {
+      throw new Error('#setup must be called before start');
+    }
     return {
       client: this.uiSettingsClient,
       globalClient: this.uiSettingsGlobalClient,

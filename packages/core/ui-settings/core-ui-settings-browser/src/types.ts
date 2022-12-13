@@ -100,16 +100,8 @@ export interface IUiSettingsClient {
   getUpdateErrors$: () => Observable<Error>;
 }
 
-interface SettingsService {
+/** @public */
+export interface SettingsStart {
   client: IUiSettingsClient;
   globalClient: IUiSettingsClient;
 }
-
-/** @public */
-export interface SettingsStart {
-  client?: IUiSettingsClient;
-  globalClient?: IUiSettingsClient;
-}
-/** @public **/
-/** {@link SettingsSetup} */
-export type SettingsSetup = SettingsService;

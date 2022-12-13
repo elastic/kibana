@@ -43,7 +43,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   /** {@link NotificationsSetup} */
   notifications: NotificationsSetup;
   /** {@link IUiSettingsClient} */
-  /** @Deprecated Use {@link SettingsSetup instead} */
+  /** @Deprecated Use {@link CoreSetup.settings} instead */
   uiSettings: IUiSettingsClient;
   /** {@link SettingsSetup} */
   settings: SettingsSetup;
