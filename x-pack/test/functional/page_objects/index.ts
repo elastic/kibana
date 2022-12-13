@@ -18,6 +18,7 @@ import { ReportingPageObject } from './reporting_page';
 import { AccountSettingsPageObject } from './account_settings_page';
 import { ObservabilityPageProvider } from './observability_page';
 import { InfraHomePageProvider } from './infra_home_page';
+import { InfraLogsSettingsPageProvider } from './infra_logs_settings_page';
 import { InfraLogsPageProvider } from './infra_logs_page';
 import { GisPageObject } from './gis_page';
 import { GeoFileUploadPageObject } from './geo_file_upload';
@@ -62,6 +63,7 @@ export const pageObjects = {
   infraHome: InfraHomePageProvider,
   infraMetricsExplorer: InfraMetricsExplorerProvider,
   infraLogs: InfraLogsPageProvider,
+  infraLogsSettings: InfraLogsSettingsPageProvider,
   infraSavedViews: InfraSavedViewsProvider,
   maps: GisPageObject,
   geoFileUpload: GeoFileUploadPageObject,
