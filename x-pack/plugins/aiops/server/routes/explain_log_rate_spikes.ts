@@ -44,21 +44,10 @@ import type { AiopsLicense } from '../types';
 import { duplicateIdentifier } from './queries/duplicate_identifier';
 import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
 import { fetchIndexInfo } from './queries/fetch_index_info';
-import {
-  dropDuplicates,
-  fetchFrequentItems,
-  groupDuplicates,
-} from './queries/fetch_frequent_items';
-import { getFieldValuePairCounts } from './queries/get_field_value_pair_counts';
+import { dropDuplicates, fetchFrequentItems } from './queries/fetch_frequent_items';
 import { getHistogramQuery } from './queries/get_histogram_query';
 import { getGroupFilter } from './queries/get_group_filter';
-import { getMarkedDuplicates } from './queries/get_marked_duplicates';
-import { getSimpleHierarchicalTree } from './queries/get_simple_hierarchical_tree';
-import { getSimpleHierarchicalTreeLeaves } from './queries/get_simple_hierarchical_tree_leaves';
-import { getFilteredFrequentItems } from './queries/get_filtered_frequent_items';
-import { getGroupsWithReaddedDuplicates } from './queries/get_groups_with_readded_duplicates';
-import { getMissingChangePoints } from './queries/get_missing_change_points';
-import { transformChangePointToGroup } from './queries/transform_change_point_to_group';
+import { getChangePointGroups } from './queries/get_change_point_groups';
 
 // 10s ping frequency to keep the stream alive.
 const PING_FREQUENCY = 10000;
@@ -434,14 +423,8 @@ export const defineExplainLogRateSpikesRoute = (
               })
             );
 
-            // These are the deduplicated change points we pass to the `frequent_items` aggregation.
+            // Deduplicated change points we pass to the `frequent_items` aggregation.
             const deduplicatedChangePoints = dropDuplicates(changePoints, duplicateIdentifier);
-
-            // We use the grouped change points to later repopulate
-            // the `frequent_items` result with the missing duplicates.
-            const groupedChangePoints = groupDuplicates(changePoints, duplicateIdentifier).filter(
-              (g) => g.group.length > 1
-            );
 
             try {
               const { fields, df } = await fetchFrequentItems(
@@ -465,47 +448,9 @@ export const defineExplainLogRateSpikesRoute = (
               }
 
               if (fields.length > 0 && df.length > 0) {
-                const filteredDf = getFilteredFrequentItems(df, changePoints);
+                const changePointGroups = getChangePointGroups(df, changePoints, fields);
 
-                // `frequent_items` returns lot of different small groups of field/value pairs that co-occur.
-                // The following steps analyse these small groups, identify overlap between these groups,
-                // and then summarize them in larger groups where possible.
-
-                // Get a tree structure based on `frequent_items`.
-                const { root } = getSimpleHierarchicalTree(filteredDf, true, false, fields);
-
-                // Each leave of the tree will be a summarized group of co-occuring field/value pairs.
-                const treeLeaves = getSimpleHierarchicalTreeLeaves(root, []);
-
-                // To be able to display a more cleaned up results table in the UI, we identify field/value pairs
-                // that occur in multiple groups. This will allow us to highlight field/value pairs that are
-                // unique to a group in a better way. This step will also re-add duplicates we identified in the
-                // beginning and didn't pass on to the `frequent_items` agg.
-                const fieldValuePairCounts = getFieldValuePairCounts(treeLeaves);
-                const changePointGroupsWithMarkedDuplicates = getMarkedDuplicates(
-                  treeLeaves,
-                  fieldValuePairCounts
-                );
-                const changePointGroups = getGroupsWithReaddedDuplicates(
-                  changePointGroupsWithMarkedDuplicates,
-                  groupedChangePoints
-                );
-
-                // Some field/value pairs might not be part of the `frequent_items` result set, for example
-                // because they don't co-occur with other field/value pairs or because of the limits we set on the query.
-                // In this next part we identify those missing pairs and add them as individual groups.
-                const missingChangePoints = getMissingChangePoints(
-                  deduplicatedChangePoints,
-                  changePointGroups
-                );
-
-                changePointGroups.push(
-                  ...missingChangePoints.map((changePoint) =>
-                    transformChangePointToGroup(changePoint, groupedChangePoints)
-                  )
-                );
-
-                // Finally, we'll find out if there's at least one group with at least two items,
+                // We'll find out if there's at least one group with at least two items,
                 // only then will we return the groups to the clients and make the grouping option available.
                 const maxItems = Math.max(...changePointGroups.map((g) => g.group.length));
 
