@@ -392,17 +392,13 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     decorator: hbs.AST.DecoratorBlock | hbs.AST.Decorator,
     prog: Handlebars.TemplateDelegate
   ) {
-    // TypeScript: The types indicate that `decorator.path` technically can be an `hbs.AST.Literal`. However, the upstream codebase always treats it as an `hbs.AST.PathExpression`, so we do too.
-    const name = (decorator.path as hbs.AST.PathExpression).original;
     const props = {};
-    // TypeScript: Because `decorator` can be of type `hbs.AST.Decorator`, TS indicates that `decorator.path` technically can be an `hbs.AST.Literal`. However, the upstream codebase always treats it as an `hbs.AST.PathExpression`, so we do too.
-    const options = this.setupParams(decorator as hbs.AST.DecoratorBlock, name);
-    // @ts-expect-error: Property 'lookupProperty' does not exist on type 'HelperOptions'
-    delete options.lookupProperty; // There's really no tests/documentation on this, but to match the upstream codebase we'll remove `lookupProperty` from the decorator context
+    const options = this.setupDecoratorOptions(decorator);
 
     const result = this.container.lookupProperty<DecoratorFunction>(
       this.container.decorators,
-      name
+      // @ts-expect-error: Property 'name' does not exist on type 'HelperOptions' - The types are wrong
+      options.name
     )(prog, props, this.container, options);
 
     Object.assign(result || prog, props);
@@ -642,6 +638,32 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     };
   }
 
+  private setupDecoratorOptions(
+    decorator: hbs.AST.Decorator | hbs.AST.DecoratorBlock
+  ): Handlebars.HelperOptions {
+    // TypeScript: The types indicate that `decorator.path` technically can be an `hbs.AST.Literal`. However, the upstream codebase always treats it as an `hbs.AST.PathExpression`, so we do too.
+    const name = (decorator.path as hbs.AST.PathExpression).original;
+    const options = this.setupParams(decorator as hbs.AST.DecoratorBlock, name);
+
+    if (decorator.params.length > 0) {
+      if (!this.processedRootDecorators) {
+        // When processing the root decorators, temporarily remove the root context so it's not accessible to the decorator
+        const context = this.scopes.shift();
+        // @ts-expect-error: Property 'args' does not exist on type 'HelperOptions'. The 'args' property is expected in decorators
+        options.args = this.resolveNodes(decorator.params);
+        this.scopes.unshift(context);
+      } else {
+        // @ts-expect-error: Property 'args' does not exist on type 'HelperOptions'. The 'args' property is expected in decorators
+        options.args = this.resolveNodes(decorator.params);
+      }
+    }
+
+    // @ts-expect-error: Property 'lookupProperty' does not exist on type 'HelperOptions'
+    delete options.lookupProperty; // There's really no tests/documentation on this, but to match the upstream codebase we'll remove `lookupProperty` from the decorator context
+
+    return options;
+  }
+
   private setupParams(
     node: ProcessableNodeWithPathParts,
     helperName: string
@@ -653,19 +675,6 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       data: this.runtimeOptions!.data,
       loc: { start: node.loc.start, end: node.loc.end },
     };
-
-    if (node.params.length > 0) {
-      if (!this.processedRootDecorators) {
-        // When processing the root decorators, temporarily remove the root context so it's not accessible to the decorator
-        const context = this.scopes.shift();
-        // @ts-expect-error: Property 'args' does not exist on type 'HelperOptions'. The 'args' property is expected in decorators
-        options.args = this.resolveNodes(node.params);
-        this.scopes.unshift(context);
-      } else {
-        // @ts-expect-error: Property 'args' does not exist on type 'HelperOptions'. The 'args' property is expected in decorators
-        options.args = this.resolveNodes(node.params);
-      }
-    }
 
     if (isBlock(node)) {
       options.fn = this.generateProgramFunction(node.program);
