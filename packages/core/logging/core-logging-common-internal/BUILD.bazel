@@ -47,7 +47,6 @@ TYPES_DEPS = [
   "@npm//moment-timezone",
   "@npm//lodash",
   "//packages/kbn-logging:npm_module_types",
-  "//packages/kbn-ecs:npm_module_types",
 ]
 
 jsts_transpiler(

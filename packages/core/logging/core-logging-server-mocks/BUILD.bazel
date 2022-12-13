@@ -42,7 +42,6 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "//packages/kbn-utility-types:npm_module_types",
   "//packages/kbn-logging:npm_module_types",
-  "//packages/kbn-ecs:npm_module_types",
   "//packages/kbn-logging-mocks:npm_module_types",
   "//packages/core/logging/core-logging-server:npm_module_types",
   "//packages/core/logging/core-logging-server-internal:npm_module_types",
