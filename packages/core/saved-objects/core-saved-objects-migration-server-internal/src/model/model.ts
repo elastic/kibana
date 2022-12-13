@@ -12,7 +12,6 @@ import * as Option from 'fp-ts/lib/Option';
 import { type AliasAction, isTypeof } from '../actions';
 import type { AllActionStates, State } from '../state';
 import type { ResponseType } from '../next';
-import { disableUnknownTypeMappingFields } from '../core';
 import {
   createInitialProgress,
   incrementProcessedProgress,
@@ -191,10 +190,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'LEGACY_SET_WRITE_BLOCK',
           sourceIndex: Option.some(legacyReindexTarget) as Option.Some<string>,
           targetIndex: target,
-          targetIndexMappings: disableUnknownTypeMappingFields(
-            stateP.targetIndexMappings,
-            indices[stateP.legacyIndex].mappings
-          ),
           legacyReindexTargetMappings: indices[stateP.legacyIndex].mappings,
           legacyPreMigrationDoneActions: [
             { remove_index: { index: stateP.legacyIndex } },
@@ -486,10 +481,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       excludeOnUpgradeQuery,
       sourceIndex: source,
       targetIndex: target,
-      targetIndexMappings: disableUnknownTypeMappingFields(
-        stateP.targetIndexMappings,
-        stateP.sourceIndexMappings
-      ),
       versionIndexReadyActions: Option.some<AliasAction[]>([
         { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
         { add: { index: target, alias: stateP.currentAlias } },

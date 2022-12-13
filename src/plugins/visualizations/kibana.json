@@ -18,7 +18,8 @@
     "presentationUtil",
     "dataViews",
     "dataViewEditor",
-    "unifiedSearch"
+    "unifiedSearch",
+    "usageCollection"
   ],
   "optionalPlugins": ["home", "share", "spaces", "savedObjectsTaggingOss"],
   "requiredBundles": ["kibanaUtils", "savedSearch", "kibanaReact", "charts"],
