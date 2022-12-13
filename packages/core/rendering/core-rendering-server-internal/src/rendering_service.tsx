@@ -98,12 +98,12 @@ export class RenderingService {
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
     const settings = {
-      defaults: uiSettings.client.getRegistered() ?? {},
-      user: isAnonymousPage ? {} : await uiSettings.client.getUserProvided(),
+      defaults: uiSettings.client?.getRegistered() ?? {},
+      user: isAnonymousPage ? {} : await uiSettings.client?.getUserProvided(),
     };
     const globalSettings = {
-      defaults: uiSettings.globalClient.getRegistered() ?? {},
-      user: isAnonymousPage ? {} : await uiSettings.globalClient.getUserProvided(),
+      defaults: uiSettings.globalClient?.getRegistered() ?? {},
+      user: isAnonymousPage ? {} : await uiSettings.globalClient?.getUserProvided(),
     };
 
     let clusterInfo = {};
