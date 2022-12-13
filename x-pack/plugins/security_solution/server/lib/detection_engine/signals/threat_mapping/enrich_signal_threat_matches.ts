@@ -18,7 +18,7 @@ import type {
 } from './types';
 import { extractNamedQueries } from './utils';
 
-const MAX_NUMBER_OF_THREATS_PER_SIGNAL = 1000;
+export const MAX_SIGNAL_MATCHES_NUMBER = 1000;
 
 export const getSignalMatchesFromThreatList = (
   threatList: ThreatListItem[] = []
@@ -36,7 +36,12 @@ export const getSignalMatchesFromThreatList = (
         signalMap[signalId] = [];
       }
 
-      if (signalMap[signalId].length >= MAX_NUMBER_OF_THREATS_PER_SIGNAL) {
+      // creating map of signal with large number of threats could lead to out of memory Kibana crash
+      // large number of threats also can cause signals bulk create failure due too large payload (413)
+      // large number of threats significantly slower alert details page render
+      // so, its number is limited to MAX_THREATS_PER_SIGNAL_NUMBER
+      // more details https://github.com/elastic/kibana/issues/143595#issuecomment-1335433592
+      if (signalMap[signalId].length >= MAX_SIGNAL_MATCHES_NUMBER) {
         return;
       }
 
