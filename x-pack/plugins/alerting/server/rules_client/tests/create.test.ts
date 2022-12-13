@@ -751,7 +751,7 @@ describe('create()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -838,7 +838,7 @@ describe('create()', () => {
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -943,7 +943,7 @@ describe('create()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -1025,7 +1025,7 @@ describe('create()', () => {
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -1085,7 +1085,7 @@ describe('create()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: { bar: true },
         schedule: { interval: '1m' },
         tags: ['foo'],
@@ -1118,7 +1118,7 @@ describe('create()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -1155,7 +1155,7 @@ describe('create()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
         "id": "1",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -1284,7 +1284,7 @@ describe('create()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
         schedule: { interval: '1m' },
         tags: ['foo'],
@@ -1452,7 +1452,7 @@ describe('create()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'action_0' },
         schedule: { interval: '1m' },
         tags: ['foo'],
@@ -1824,7 +1824,7 @@ describe('create()', () => {
       muteAll: false,
       snoozeSchedule: [],
       mutedInstanceIds: [],
-      notifyWhen: 'onActiveAlert',
+      notifyWhen: null,
       actions: [
         {
           group: 'default',
@@ -1877,7 +1877,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         muteAll: false,
         snoozeSchedule: [],
         mutedInstanceIds: [],
@@ -1922,7 +1922,7 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -2003,7 +2003,7 @@ describe('create()', () => {
           interval: '1m',
         },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: {
           bar: true,
           risk_score: 42,
@@ -2397,7 +2397,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         muteAll: false,
         snoozeSchedule: [],
         mutedInstanceIds: [],
@@ -2499,7 +2499,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         muteAll: false,
         snoozeSchedule: [],
         mutedInstanceIds: [],
