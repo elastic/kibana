@@ -104,6 +104,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         });
       }
     } catch (e) {
+      console.log(e);
       toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToUpdateRuleAPIKeysMessage',
