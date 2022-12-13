@@ -13,8 +13,8 @@ import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
 import { FIRED_ACTION, getRuleExecutor } from './executor';
 
-const windowSchema = schema.object({
-  duration: schema.number(),
+const durationSchema = schema.object({
+  value: schema.number(),
   unit: schema.string(),
 });
 
@@ -30,8 +30,8 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
       params: schema.object({
         sloId: schema.string(),
         threshold: schema.number(),
-        longWindow: windowSchema,
-        shortWindow: windowSchema,
+        longWindow: durationSchema,
+        shortWindow: durationSchema,
       }),
     },
     defaultActionGroupId: FIRED_ACTION.id,
