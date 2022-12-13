@@ -6,9 +6,10 @@
  */
 
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiSwitch, EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { EuiSwitch, EuiToolTip } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
@@ -24,7 +25,6 @@ const ToolbarLayout = styled.div`
 
 interface RulesTableToolbarProps {
   activeTab: AllRulesTabs;
-  onTabChange: (tab: AllRulesTabs) => void;
 }
 
 export enum AllRulesTabs {
@@ -32,69 +32,57 @@ export enum AllRulesTabs {
   monitoring = 'monitoring',
 }
 
-const allRulesTabs = [
-  {
-    id: AllRulesTabs.rules,
-    name: i18n.RULES_TAB,
-    disabled: false,
-  },
-  {
-    id: AllRulesTabs.monitoring,
-    name: i18n.MONITORING_TAB,
-    disabled: false,
-  },
-];
-
-export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
-  ({ onTabChange, activeTab }) => {
-    const {
-      state: { isInMemorySorting },
-      actions: { setIsInMemorySorting },
-    } = useRulesTableContext();
-    const { startTransaction } = useStartTransaction();
-
-    const handleInMemorySwitch = useCallback(
-      (e: EuiSwitchEvent) => {
-        startTransaction({
-          name: isInMemorySorting
-            ? RULES_TABLE_ACTIONS.PREVIEW_OFF
-            : RULES_TABLE_ACTIONS.PREVIEW_ON,
-        });
-        setIsInMemorySorting(e.target.checked);
+export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(({ activeTab }) => {
+  const {
+    state: { isInMemorySorting },
+    actions: { setIsInMemorySorting },
+  } = useRulesTableContext();
+  const { startTransaction } = useStartTransaction();
+  const allRulesTabs = useMemo(
+    () => ({
+      [AllRulesTabs.rules]: {
+        id: '',
+        name: i18n.RULES_TAB,
+        disabled: false,
+        href: '/rules',
       },
-      [isInMemorySorting, setIsInMemorySorting, startTransaction]
-    );
+      [AllRulesTabs.monitoring]: {
+        id: AllRulesTabs.monitoring,
+        name: i18n.MONITORING_TAB,
+        disabled: false,
+        href: '/rules/monitoring',
+      },
+    }),
+    []
+  );
 
-    return (
-      <ToolbarLayout>
-        <EuiTabs>
-          {allRulesTabs.map((tab) => (
-            <EuiTab
-              data-test-subj={`allRulesTableTab-${tab.id}`}
-              onClick={() => onTabChange(tab.id)}
-              isSelected={tab.id === activeTab}
-              disabled={tab.disabled}
-              key={tab.id}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-        <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
-          <EuiSwitch
-            data-test-subj={
-              isInMemorySorting
-                ? 'allRulesTableTechnicalPreviewOff'
-                : 'allRulesTableTechnicalPreviewOn'
-            }
-            label={isInMemorySorting ? i18n.EXPERIMENTAL_ON : i18n.EXPERIMENTAL_OFF}
-            checked={isInMemorySorting}
-            onChange={handleInMemorySwitch}
-          />
-        </EuiToolTip>
-      </ToolbarLayout>
-    );
-  }
-);
+  const handleInMemorySwitch = useCallback(
+    (e: EuiSwitchEvent) => {
+      startTransaction({
+        name: isInMemorySorting ? RULES_TABLE_ACTIONS.PREVIEW_OFF : RULES_TABLE_ACTIONS.PREVIEW_ON,
+      });
+      setIsInMemorySorting(e.target.checked);
+    },
+    [isInMemorySorting, setIsInMemorySorting, startTransaction]
+  );
+
+  return (
+    <ToolbarLayout>
+      <SecuritySolutionTabNavigation navTabs={allRulesTabs} />
+      <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
+        <EuiSwitch
+          data-test-subj={
+            isInMemorySorting
+              ? 'allRulesTableTechnicalPreviewOff'
+              : 'allRulesTableTechnicalPreviewOn'
+          }
+          label={isInMemorySorting ? i18n.EXPERIMENTAL_ON : i18n.EXPERIMENTAL_OFF}
+          checked={isInMemorySorting}
+          onChange={handleInMemorySwitch}
+        />
+      </EuiToolTip>
+    </ToolbarLayout>
+  );
+});
 
 RulesTableToolbar.displayName = 'RulesTableToolbar';
