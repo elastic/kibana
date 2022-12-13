@@ -26,7 +26,6 @@ describe('EnterpriseSearchAnalytics', () => {
   });
 
   it('always renders the overview', () => {
-
     const wrapper = shallow(<Analytics />);
 
     expect(wrapper.find(AnalyticsOverview)).toHaveLength(1);

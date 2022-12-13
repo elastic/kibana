@@ -8,7 +8,6 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { VersionMismatchPage } from '../shared/version_mismatch';
