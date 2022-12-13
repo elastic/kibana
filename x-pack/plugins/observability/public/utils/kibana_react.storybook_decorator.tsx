@@ -27,6 +27,5 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
     >
       <Story />
     </KibanaContextProvider>
-    //
   );
 }
