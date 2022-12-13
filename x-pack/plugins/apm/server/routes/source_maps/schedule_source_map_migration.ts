@@ -19,7 +19,7 @@ import { createApmSourceMapIndexTemplate } from './create_apm_source_map_index_t
 
 const PER_PAGE = 10;
 const TASK_ID = 'apm-source-map-migration-task-id';
-const TASK_TYPE = 'apm-source-map-migration-task-type';
+const TASK_TYPE = 'apm-source-map-migration-task';
 
 export async function scheduleSourceMapMigration({
   coreStartPromise,
