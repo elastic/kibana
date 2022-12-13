@@ -101,11 +101,11 @@ describe('KibanaSavedObjectsSLORepository', () => {
   describe('find', () => {
     const DEFAULT_PAGINATION = { page: 1, perPage: 25 };
 
-    it('includes the filter on name when provided', async () => {
+    it('includes the filter on name with wildcard when provided', async () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
       soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
 
-      const result = await repository.find({ name: 'availability' }, DEFAULT_PAGINATION);
+      const result = await repository.find({ name: 'availability*' }, DEFAULT_PAGINATION);
 
       expect(result).toEqual({
         page: 1,
@@ -117,7 +117,27 @@ describe('KibanaSavedObjectsSLORepository', () => {
         type: SO_SLO_TYPE,
         page: 1,
         perPage: 25,
-        filter: `slo.attributes.name: availability`,
+        filter: `slo.attributes.name: availability*`,
+      });
+    });
+
+    it('includes the filter on name with added wildcard when not provided', async () => {
+      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+      soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+
+      const result = await repository.find({ name: 'availa' }, DEFAULT_PAGINATION);
+
+      expect(result).toEqual({
+        page: 1,
+        perPage: 25,
+        total: 1,
+        results: [SOME_SLO],
+      });
+      expect(soClientMock.find).toHaveBeenCalledWith({
+        type: SO_SLO_TYPE,
+        page: 1,
+        perPage: 25,
+        filter: `slo.attributes.name: availa*`,
       });
     });
 

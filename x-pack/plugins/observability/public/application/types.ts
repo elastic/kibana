@@ -22,6 +22,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -39,6 +40,7 @@ export interface ObservabilityAppServices {
   notifications: NotificationsStart;
   overlays: OverlayStart;
   savedObjectsClient: SavedObjectsStart['client'];
+  share: SharePluginStart;
   stateTransfer: EmbeddableStateTransfer;
   storage: IStorageWrapper;
   theme: ThemeServiceStart;

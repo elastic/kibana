@@ -56,6 +56,22 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           enabled: false,
           type: 'object',
         },
+        frequency: {
+          properties: {
+            summary: {
+              index: false,
+              type: 'boolean',
+            },
+            notifyWhen: {
+              index: false,
+              type: 'keyword',
+            },
+            throttle: {
+              index: false,
+              type: 'keyword',
+            },
+          },
+        },
       },
     },
     params: {
