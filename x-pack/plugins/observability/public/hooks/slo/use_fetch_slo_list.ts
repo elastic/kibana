@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 
 import type { SLO, SLOList } from '../../typings/slo';
 import { useDataFetcher } from '../use_data_fetcher';
 
-const EMPTY_LIST = {
+const EMPTY_LIST: SLOList = {
   results: [],
   total: 0,
   page: 0,
@@ -22,27 +22,38 @@ interface SLOListParams {
   name?: string;
 }
 
-interface UseFetchSloListResponse {
+export interface UseFetchSloListResponse {
   loading: boolean;
   sloList: SLOList;
 }
 
-const useFetchSloList = (name?: string): UseFetchSloListResponse => {
+export function useFetchSloList({
+  name,
+  refetch,
+}: {
+  refetch: boolean;
+  name?: string;
+}): UseFetchSloListResponse {
+  const [sloList, setSloList] = useState(EMPTY_LIST);
   const params: SLOListParams = useMemo(() => ({ name }), [name]);
   const shouldExecuteApiCall = useCallback(
-    (apiCallParams: SLOListParams) => apiCallParams.name === params.name,
-    [params]
+    (apiCallParams: SLOListParams) => apiCallParams.name === params.name || refetch,
+    [params, refetch]
   );
 
-  const { loading, data: sloList } = useDataFetcher<SLOListParams, SLOList>({
+  const { loading, data } = useDataFetcher<SLOListParams, SLOList>({
     paramsForApiCall: params,
-    initialDataState: EMPTY_LIST,
+    initialDataState: sloList,
     executeApiCall: fetchSloList,
     shouldExecuteApiCall,
   });
 
+  useEffect(() => {
+    setSloList(data);
+  }, [data]);
+
   return { loading, sloList };
-};
+}
 
 const fetchSloList = async (
   params: SLOListParams,
@@ -92,6 +103,3 @@ function toSLO(result: any): SLO {
     },
   };
 }
-
-export { useFetchSloList };
-export type { UseFetchSloListResponse };
