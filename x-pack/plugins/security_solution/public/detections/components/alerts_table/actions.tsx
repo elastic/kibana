@@ -28,9 +28,8 @@ import {
   ALERT_SUPPRESSION_TERMS,
 } from '@kbn/rule-data-utils';
 
-import type { TGridModel } from '@kbn/timelines-plugin/public';
-
 import { lastValueFrom } from 'rxjs';
+import type { DataTableModel } from '../../../common/store/data_table/types';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
@@ -448,7 +447,7 @@ const createThresholdTimeline = async (
     filters?: Filter[];
     query?: string;
     dataProviders?: DataProvider[];
-    columns?: TGridModel['columns'];
+    columns?: DataTableModel['columns'];
   },
   getExceptionFilter: GetExceptionFilter
 ) => {
@@ -603,7 +602,7 @@ const createNewTermsTimeline = async (
     filters?: Filter[];
     query?: string;
     dataProviders?: DataProvider[];
-    columns?: TGridModel['columns'];
+    columns?: DataTableModel['columns'];
   },
   getExceptionFilter: GetExceptionFilter
 ) => {
@@ -722,18 +721,32 @@ const getSuppressedAlertData = (ecsData: Ecs | Ecs[]) => {
   );
   const dataProviderPartials = terms.map((term) => {
     const fieldId = term.field.replace('.', '-');
-    return {
-      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${fieldId}-${term.value}`,
-      name: fieldId,
-      enabled: true,
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field: term.field,
-        value: term.value,
-        operator: ':' as const,
-      },
-    };
+    const id = `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${fieldId}-${term.value}`;
+    return term.value == null
+      ? {
+          id,
+          name: fieldId,
+          enabled: true,
+          excluded: true,
+          kqlQuery: '',
+          queryMatch: {
+            field: term.field,
+            value: '',
+            operator: ':*' as const,
+          },
+        }
+      : {
+          id,
+          name: fieldId,
+          enabled: true,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field: term.field,
+            value: term.value,
+            operator: ':' as const,
+          },
+        };
   });
   const dataProvider = {
     ...dataProviderPartials[0],
@@ -754,7 +767,7 @@ const createSuppressedTimeline = async (
     filters?: Filter[];
     query?: string;
     dataProviders?: DataProvider[];
-    columns?: TGridModel['columns'];
+    columns?: DataTableModel['columns'];
   },
   getExceptionFilter: GetExceptionFilter
 ) => {

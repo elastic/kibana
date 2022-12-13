@@ -132,7 +132,7 @@ export function buildFieldList(indexPattern: DataView, metaFields: string[]): Fi
       script: field.script,
       // id is a special case - it doesn't show up in the meta field list,
       // but as it's not part of source, it has to be handled separately.
-      isMeta: metaFields.includes(field.name) || field.name === '_id',
+      isMeta: metaFields?.includes(field.name) || field.name === '_id',
       runtimeField: !field.isMapped ? field.runtimeField : undefined,
     };
   });

@@ -80,6 +80,21 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the `get-file` endpoint response action
    */
   responseActionGetFileEnabled: false,
+
+  /**
+   * Enables top charts on Alerts Page
+   */
+  alertsPageChartsEnabled: false,
+
+  /**
+   * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
+   * https://www.elastic.co/guide/en/security/current/user-risk-score.html
+   * https://www.elastic.co/guide/en/security/current/host-risk-score.html
+   *
+   * Issue: https://github.com/elastic/kibana/issues/146777
+   */
+  riskyHostsEnabled: false, // DEPRECATED
+  riskyUsersEnabled: false, // DEPRECATED
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -184,21 +184,30 @@ export async function fetchInfo(
     return res;
   } catch (err) {
     if (err instanceof RegistryResponseError && err.status === 404) {
-      // Check bundled packages in case the exact package being requested is available on disk
-      const bundledPackage = await getBundledPackageByName(pkgName);
-
-      if (bundledPackage && bundledPackage.version === pkgVersion) {
-        const archivePackage = await generatePackageInfoFromArchiveBuffer(
-          bundledPackage.buffer,
-          'application/zip'
-        );
-
+      const archivePackage = await getBundledArchive(pkgName, pkgVersion);
+      if (archivePackage) {
         return archivePackage.packageInfo;
       }
-
       throw new PackageNotFoundError(`${pkgName}@${pkgVersion} not found`);
     }
     throw err;
+  }
+}
+
+export async function getBundledArchive(
+  pkgName: string,
+  pkgVersion: string
+): Promise<{ paths: string[]; packageInfo: ArchivePackage } | undefined> {
+  // Check bundled packages in case the exact package being requested is available on disk
+  const bundledPackage = await getBundledPackageByName(pkgName);
+
+  if (bundledPackage && bundledPackage.version === pkgVersion) {
+    const archivePackage = await generatePackageInfoFromArchiveBuffer(
+      bundledPackage.buffer,
+      'application/zip'
+    );
+
+    return archivePackage;
   }
 }
 
@@ -360,8 +369,8 @@ export async function fetchArchiveBuffer({
   if (!archivePath) {
     archivePath = `/epr/${pkgName}/${pkgName}-${pkgVersion}.zip`;
   }
-
-  const archiveUrl = `${getRegistryUrl()}${archivePath}`;
+  const registryUrl = getRegistryUrl();
+  const archiveUrl = `${registryUrl}${archivePath}`;
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
 
   if (shouldVerify) {
