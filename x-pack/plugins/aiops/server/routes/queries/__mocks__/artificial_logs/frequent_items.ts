@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ItemsetResult } from '../fetch_frequent_items';
+import type { ItemsetResult } from '../../types';
 
 export const frequentItems: ItemsetResult[] = [
   {

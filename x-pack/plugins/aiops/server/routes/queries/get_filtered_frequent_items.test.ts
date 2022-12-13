@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { changePoints } from './__mocks__/change_points';
-import { frequentItems } from './__mocks__/frequent_items';
-import { filteredFrequentItems } from './__mocks__/filtered_frequent_items';
+import { changePoints } from './__mocks__/artificial_logs/change_points';
+import { frequentItems } from './__mocks__/artificial_logs/frequent_items';
+import { filteredFrequentItems } from './__mocks__/artificial_logs/filtered_frequent_items';
 
 import { getFilteredFrequentItems } from './get_filtered_frequent_items';
 

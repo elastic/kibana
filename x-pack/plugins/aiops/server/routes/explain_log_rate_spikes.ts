@@ -6,7 +6,6 @@
  */
 
 import { queue } from 'async';
-import { uniqWith, isEqual } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -23,7 +22,6 @@ import type {
   NumericHistogramField,
 } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
-import { stringHash } from '@kbn/ml-string-hash';
 
 import {
   addChangePointsAction,
@@ -43,6 +41,7 @@ import { API_ENDPOINT } from '../../common/api';
 import { isRequestAbortedError } from '../lib/is_request_aborted_error';
 import type { AiopsLicense } from '../types';
 
+import { duplicateIdentifier } from './queries/duplicate_identifier';
 import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
 import { fetchIndexInfo } from './queries/fetch_index_info';
 import {
@@ -50,15 +49,16 @@ import {
   fetchFrequentItems,
   groupDuplicates,
 } from './queries/fetch_frequent_items';
+import { getFieldValuePairCounts } from './queries/get_field_value_pair_counts';
 import { getHistogramQuery } from './queries/get_histogram_query';
-import {
-  getFieldValuePairCounts,
-  getSimpleHierarchicalTree,
-  getSimpleHierarchicalTreeLeaves,
-  markDuplicates,
-} from './queries/get_simple_hierarchical_tree';
 import { getGroupFilter } from './queries/get_group_filter';
+import { getMarkedDuplicates } from './queries/get_marked_duplicates';
+import { getSimpleHierarchicalTree } from './queries/get_simple_hierarchical_tree';
+import { getSimpleHierarchicalTreeLeaves } from './queries/get_simple_hierarchical_tree_leaves';
 import { getFilteredFrequentItems } from './queries/get_filtered_frequent_items';
+import { getGroupsWithReaddedDuplicates } from './queries/get_groups_with_readded_duplicates';
+import { getMissingChangePoints } from './queries/get_missing_change_points';
+import { transformChangePointToGroup } from './queries/transform_change_point_to_group';
 
 // 10s ping frequency to keep the stream alive.
 const PING_FREQUENCY = 10000;
@@ -434,16 +434,6 @@ export const defineExplainLogRateSpikesRoute = (
               })
             );
 
-            // To optimize the `frequent_items` query, we identify duplicate change points by count attributes.
-            // Note this is a compromise and not 100% accurate because there could be change points that
-            // have the exact same counts but still don't co-occur.
-            const duplicateIdentifier: Array<keyof ChangePoint> = [
-              'doc_count',
-              'bg_count',
-              'total_doc_count',
-              'total_bg_count',
-            ];
-
             // These are the deduplicated change points we pass to the `frequent_items` aggregation.
             const deduplicatedChangePoints = dropDuplicates(changePoints, duplicateIdentifier);
 
@@ -492,92 +482,26 @@ export const defineExplainLogRateSpikesRoute = (
                 // unique to a group in a better way. This step will also re-add duplicates we identified in the
                 // beginning and didn't pass on to the `frequent_items` agg.
                 const fieldValuePairCounts = getFieldValuePairCounts(treeLeaves);
-                const changePointGroups = markDuplicates(treeLeaves, fieldValuePairCounts).map(
-                  (g) => {
-                    const group = [...g.group];
-
-                    for (const groupItem of g.group) {
-                      const { duplicate } = groupItem;
-                      const duplicates = groupedChangePoints.find((d) =>
-                        d.group.some(
-                          (dg) =>
-                            dg.fieldName === groupItem.fieldName &&
-                            dg.fieldValue === groupItem.fieldValue
-                        )
-                      );
-
-                      if (duplicates !== undefined) {
-                        group.push(
-                          ...duplicates.group.map((d) => {
-                            return {
-                              fieldName: d.fieldName,
-                              fieldValue: d.fieldValue,
-                              duplicate,
-                            };
-                          })
-                        );
-                      }
-                    }
-
-                    return {
-                      ...g,
-                      group: uniqWith(group, (a, b) => isEqual(a, b)),
-                    };
-                  }
+                const changePointGroupsWithMarkedDuplicates = getMarkedDuplicates(
+                  treeLeaves,
+                  fieldValuePairCounts
+                );
+                const changePointGroups = getGroupsWithReaddedDuplicates(
+                  changePointGroupsWithMarkedDuplicates,
+                  groupedChangePoints
                 );
 
                 // Some field/value pairs might not be part of the `frequent_items` result set, for example
                 // because they don't co-occur with other field/value pairs or because of the limits we set on the query.
                 // In this next part we identify those missing pairs and add them as individual groups.
-                const missingChangePoints = deduplicatedChangePoints.filter((cp) => {
-                  return !changePointGroups.some((cpg) => {
-                    return cpg.group.some(
-                      (d) => d.fieldName === cp.fieldName && d.fieldValue === cp.fieldValue
-                    );
-                  });
-                });
+                const missingChangePoints = getMissingChangePoints(
+                  deduplicatedChangePoints,
+                  changePointGroups
+                );
 
                 changePointGroups.push(
-                  ...missingChangePoints.map(
-                    ({ fieldName, fieldValue, doc_count: docCount, pValue }) => {
-                      const duplicates = groupedChangePoints.find((d) =>
-                        d.group.some(
-                          (dg) => dg.fieldName === fieldName && dg.fieldValue === fieldValue
-                        )
-                      );
-                      if (duplicates !== undefined) {
-                        return {
-                          id: `${stringHash(
-                            JSON.stringify(
-                              duplicates.group.map((d) => ({
-                                fieldName: d.fieldName,
-                                fieldValue: d.fieldValue,
-                              }))
-                            )
-                          )}`,
-                          group: duplicates.group.map((d) => ({
-                            fieldName: d.fieldName,
-                            fieldValue: d.fieldValue,
-                            duplicate: false,
-                          })),
-                          docCount,
-                          pValue,
-                        };
-                      } else {
-                        return {
-                          id: `${stringHash(JSON.stringify({ fieldName, fieldValue }))}`,
-                          group: [
-                            {
-                              fieldName,
-                              fieldValue,
-                              duplicate: false,
-                            },
-                          ],
-                          docCount,
-                          pValue,
-                        };
-                      }
-                    }
+                  ...missingChangePoints.map((changePoint) =>
+                    transformChangePointToGroup(changePoint, groupedChangePoints)
                   )
                 );
 

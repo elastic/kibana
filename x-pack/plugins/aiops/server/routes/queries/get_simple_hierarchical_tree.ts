@@ -5,45 +5,14 @@
  * 2.0.
  */
 
-// import { omit, uniq } from 'lodash';
+import type { ItemsetResult, SimpleHierarchicalTreeNode } from './types';
+import { getValueCounts } from './get_value_counts';
+import { getValuesDescending } from './get_values_descending';
 
-import type { ChangePointGroup, FieldValuePair } from '@kbn/ml-agg-utils';
-import { stringHash } from '@kbn/ml-string-hash';
+function NewNodeFactory(name: string): SimpleHierarchicalTreeNode {
+  const children: SimpleHierarchicalTreeNode[] = [];
 
-import type { ItemsetResult } from './fetch_frequent_items';
-
-function getValueCounts(df: ItemsetResult[], field: string) {
-  return df.reduce<Record<string, number>>((p, c) => {
-    if (c.set[field] === undefined) {
-      return p;
-    }
-    p[c.set[field]] = p[c.set[field]] ? p[c.set[field]] + 1 : 1;
-    return p;
-  }, {});
-}
-
-function getValuesDescending(df: ItemsetResult[], field: string): string[] {
-  const valueCounts = getValueCounts(df, field);
-  const keys = Object.keys(valueCounts);
-
-  return keys.sort((a, b) => {
-    return valueCounts[b] - valueCounts[a];
-  });
-}
-
-interface NewNode {
-  name: string;
-  set: FieldValuePair[];
-  docCount: number;
-  pValue: number | null;
-  children: NewNode[];
-  addNode: (node: NewNode) => void;
-}
-
-function NewNodeFactory(name: string): NewNode {
-  const children: NewNode[] = [];
-
-  const addNode = (node: NewNode) => {
+  const addNode = (node: SimpleHierarchicalTreeNode) => {
     children.push(node);
   };
 
@@ -58,11 +27,9 @@ function NewNodeFactory(name: string): NewNode {
 }
 
 /**
- * Simple (poorly implemented) function that constructs a tree from an itemset DataFrame sorted by support (count)
+ * Simple function that constructs a tree from an itemset DataFrame sorted by support (count)
  * The resulting tree components are non-overlapping subsets of the data.
  * In summary, we start with the most inclusive itemset (highest count), and perform a depth first search in field order.
- *
- * TODO - the code style here is hacky and should be re-written
  *
  * @param displayParent
  * @param parentDocCount
@@ -76,7 +43,7 @@ function NewNodeFactory(name: string): NewNode {
  */
 function dfDepthFirstSearch(
   fields: string[],
-  displayParent: NewNode,
+  displayParent: SimpleHierarchicalTreeNode,
   parentDocCount: number,
   parentLabel: string,
   field: string,
@@ -104,7 +71,7 @@ function dfDepthFirstSearch(
 
   let label = `${parentLabel} ${value}`;
 
-  let displayNode: NewNode;
+  let displayNode: SimpleHierarchicalTreeNode;
   if (parentDocCount === docCount && collapseRedundant) {
     // collapse identical paths
     displayParent.name += ` ${value}`;
@@ -207,71 +174,4 @@ export function getSimpleHierarchicalTree(
   }
 
   return { root: newRoot, fields };
-}
-
-/**
- * Get leaves from hierarchical tree.
- */
-export function getSimpleHierarchicalTreeLeaves(
-  tree: NewNode,
-  leaves: ChangePointGroup[],
-  level = 1
-) {
-  if (tree.children.length === 0) {
-    leaves.push({
-      id: `${stringHash(JSON.stringify(tree.set))}`,
-      group: tree.set,
-      docCount: tree.docCount,
-      pValue: tree.pValue,
-    });
-  } else {
-    for (const child of tree.children) {
-      const newLeaves = getSimpleHierarchicalTreeLeaves(child, [], level + 1);
-      if (newLeaves.length > 0) {
-        leaves.push(...newLeaves);
-      }
-    }
-  }
-
-  if (leaves.length === 1 && leaves[0].group.length === 0 && leaves[0].docCount === 0) {
-    return [];
-  }
-
-  return leaves;
-}
-
-type FieldValuePairCounts = Record<string, Record<string, number>>;
-/**
- * Get a nested record of field/value pairs with counts
- */
-export function getFieldValuePairCounts(cpgs: ChangePointGroup[]): FieldValuePairCounts {
-  return cpgs.reduce<FieldValuePairCounts>((p, { group }) => {
-    group.forEach(({ fieldName, fieldValue }) => {
-      if (p[fieldName] === undefined) {
-        p[fieldName] = {};
-      }
-      p[fieldName][fieldValue] = p[fieldName][fieldValue] ? p[fieldName][fieldValue] + 1 : 1;
-    });
-    return p;
-  }, {});
-}
-
-/**
- * Analyse duplicate field/value pairs in change point groups.
- */
-export function markDuplicates(
-  cpgs: ChangePointGroup[],
-  fieldValuePairCounts: FieldValuePairCounts
-): ChangePointGroup[] {
-  return cpgs.map((cpg) => {
-    return {
-      ...cpg,
-      group: cpg.group.map((g) => {
-        return {
-          ...g,
-          duplicate: fieldValuePairCounts[g.fieldName][g.fieldValue] > 1,
-        };
-      }),
-    };
-  });
 }
