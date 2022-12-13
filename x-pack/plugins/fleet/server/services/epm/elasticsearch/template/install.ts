@@ -290,7 +290,17 @@ export function buildComponentTemplates(params: {
       mappings: {
         properties: mappingsProperties,
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
-        ...omit(indexTemplateMappings, 'properties', 'dynamic_templates'),
+        ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', '_source'),
+        ...(indexTemplateMappings?._source || registryElasticsearch?.source_mode
+          ? {
+              _source: {
+                ...indexTemplateMappings?._source,
+                ...(registryElasticsearch?.source_mode === 'synthetic'
+                  ? { mode: 'synthetic' }
+                  : {}),
+              },
+            }
+          : {}),
       },
     },
     _meta,

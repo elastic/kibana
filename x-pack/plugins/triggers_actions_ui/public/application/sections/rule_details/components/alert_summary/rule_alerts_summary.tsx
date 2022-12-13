@@ -14,7 +14,7 @@ import { useLoadRuleTypes } from '../../../../hooks/use_load_rule_types';
 import { RuleAlertsSummaryProps } from '.';
 import { AlertSummaryWidgetError, AlertsSummaryWidgetUI } from './components';
 
-export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummaryProps) => {
+export const RuleAlertsSummary = ({ rule, filteredRuleTypes, onClick }: RuleAlertsSummaryProps) => {
   const [features, setFeatures] = useState<string>('');
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
@@ -40,6 +40,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
   return (
     <AlertsSummaryWidgetUI
       active={active}
+      onClick={onClick}
       recovered={recovered}
       timeRange={
         <FormattedMessage

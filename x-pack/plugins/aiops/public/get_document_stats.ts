@@ -71,7 +71,11 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
       date_histogram: {
         field: timeFieldName,
         fixed_interval: `${intervalMs}ms`,
-        min_doc_count: 1,
+        min_doc_count: 0,
+        extended_bounds: {
+          min: earliestMs,
+          max: latestMs,
+        },
       },
     },
   };
