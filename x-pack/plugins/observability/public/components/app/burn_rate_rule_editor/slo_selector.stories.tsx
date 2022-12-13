@@ -8,12 +8,12 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { SLO } from '../../../../typings';
+import { SLO } from '../../../typings';
 import { SloSelector as Component } from './slo_selector';
 
 export default {
   component: Component,
-  title: 'app/SLO/Shared/SloSelector',
+  title: 'app/SLO/BurnRateRule',
 };
 
 const Template: ComponentStory<typeof Component> = () => (
@@ -21,5 +21,5 @@ const Template: ComponentStory<typeof Component> = () => (
 );
 const defaultProps = {};
 
-export const Default = Template.bind({});
-Default.args = defaultProps;
+export const SloSelector = Template.bind({});
+SloSelector.args = defaultProps;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
@@ -79,9 +79,7 @@ export function BurnRateRuleEditor(props: Props) {
     <EuiFlexGroup direction="column">
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
-          <EuiFormRow label="Select SLO" fullWidth>
-            <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} />
-          </EuiFormRow>
+          <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} />
         </EuiFlexItem>
       </EuiFlexGroup>
 

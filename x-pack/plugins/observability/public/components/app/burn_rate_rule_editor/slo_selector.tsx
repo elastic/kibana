@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -46,25 +46,31 @@ function SloSelector({ initialSlo, onSelected }: Props) {
   const onSearchChange = useMemo(() => debounce((value: string) => setSearchValue(value), 300), []);
 
   return (
-    <EuiComboBox
-      aria-label={i18n.translate('xpack.observability.slo.sloSelector.ariaLabel', {
-        defaultMessage: 'SLO Selector',
-      })}
-      placeholder={i18n.translate('xpack.observability.slo.sloSelector.placeholder', {
-        defaultMessage: 'Select a SLO',
-      })}
-      data-test-subj="sloSelector"
-      singleSelection={{ asPlainText: true }}
-      options={options}
-      selectedOptions={selectedOptions}
-      async
-      isLoading={loading}
-      onChange={onChange}
-      fullWidth
-      onSearchChange={onSearchChange}
-    />
+    <EuiFormRow label={rowLabel} fullWidth>
+      <EuiComboBox
+        aria-label={i18n.translate('xpack.observability.slo.rules.sloSelector.ariaLabel', {
+          defaultMessage: 'SLO Selector',
+        })}
+        placeholder={i18n.translate('xpack.observability.slo.rules.sloSelector.placeholder', {
+          defaultMessage: 'Select a SLO',
+        })}
+        data-test-subj="sloSelector"
+        singleSelection={{ asPlainText: true }}
+        options={options}
+        selectedOptions={selectedOptions}
+        async
+        isLoading={loading}
+        onChange={onChange}
+        fullWidth
+        onSearchChange={onSearchChange}
+      />
+    </EuiFormRow>
   );
 }
+
+const rowLabel = i18n.translate('xpack.observability.slo.rules.sloSelector.rowLabel', {
+  defaultMessage: 'Select SLO',
+});
 
 export { SloSelector };
 export type { Props as SloSelectorProps };
