@@ -11,8 +11,9 @@ BUILD_ID="${BUILDKITE_BUILD_ID}"
 KIBANA_PERFORMANCE_GCS_BUCKET="gs://kibana-performance/scalability-tests"
 ES_RALLY_GCS_BUCKET="gs://rally-tracks/scalability-traces"
 OUTPUT_REL="target/scalability_tests/${BUILD_ID}"
-ES_OUTPUT_REL="target/scalability_traces"
 OUTPUT_DIR="${KIBANA_DIR}/${OUTPUT_REL}"
+ES_OUTPUT_REL="target/performance/es/scalability_traces"
+ES_OUTPUT_DIR="${KIBANA_DIR}/${ES_OUTPUT_REL}"
 
 .buildkite/scripts/bootstrap.sh
 
@@ -33,7 +34,7 @@ echo "--- Creating scalability dataset in ${OUTPUT_REL}"
 mkdir -p "${OUTPUT_DIR}"
 
 echo "--- Archiving scalability trace and uploading as build artifact"
-tar -czf "${OUTPUT_DIR}/scalability_traces.tar.gz" -C target "scalability_traces/kibana"
+tar -czf "${OUTPUT_DIR}/scalability_traces.tar.gz" -C "target/performance/kibana" "scalability_traces"
 buildkite-agent artifact upload "${OUTPUT_DIR}/scalability_traces.tar.gz"
 
 echo "--- Downloading Kibana artifacts used in tests"
@@ -49,7 +50,7 @@ gsutil -m cp -r "${BUILD_ID}" "${KIBANA_PERFORMANCE_GCS_BUCKET}"
 cd -
 
 echo "--- Uploading ${ES_OUTPUT_REL} dir to ${KIBANA_PERFORMANCE_GCS_BUCKET}"
-cd "${KIBANA_DIR}/target"
+cd "${ES_OUTPUT_DIR}/.."
 gsutil -m cp -r "scalability_traces" "${KIBANA_PERFORMANCE_GCS_BUCKET}"
 cd -
 

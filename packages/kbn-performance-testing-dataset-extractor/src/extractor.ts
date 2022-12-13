@@ -80,10 +80,10 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   const esStreams = requestsToStreams<Request>(esRequests);
   const kibanaStreams = requestsToStreams<Request>(kibanaRequests);
 
-  const outputDir = path.resolve('target/scalability_traces');
+  const outputDir = path.resolve('target/performance');
 
   if (scalabilitySetup) {
-    const kibanaOutputDir = path.resolve(outputDir, 'kibana');
+    const kibanaOutputDir = path.resolve(outputDir, 'kibana', 'scalability_traces');
     const kibanaOutputFileName = `${journeyName.replace(/ /g, '')}.json`;
     const kibanaOutput = {
       journeyName,
@@ -95,7 +95,13 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
     await saveFile(kibanaOutput, kibanaOutputDir, kibanaOutputFileName, log);
   }
 
-  const esOutputDir = path.resolve(outputDir, `${kibanaVersion}/${journeyName}`);
+  const esOutputDir = path.resolve(
+    outputDir,
+    'es',
+    'scalability_traces',
+    kibanaVersion,
+    journeyName
+  );
   const esOutputFileName = 'journey.json';
   const esOutput = {
     journeyName,
