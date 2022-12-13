@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import '../../../__mocks__/shallow_useeffect.mock';
+import '../../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
 import { EuiCodeBlock } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import { AnalyticsCollection } from '../../../../../../common/types/analytics';
 
 import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate';
 
