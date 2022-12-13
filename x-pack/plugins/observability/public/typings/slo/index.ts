@@ -5,9 +5,19 @@
  * 2.0.
  */
 
+type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
+
+interface Duration {
+  value: number;
+  unit: DurationUnit;
+}
+
 interface SLO {
   id: string;
   name: string;
+  timeWindow: {
+    duration: Duration;
+  };
   objective: {
     target: number;
   };
@@ -26,4 +36,4 @@ interface SLOList {
   total: number;
 }
 
-export type { SLO, SLOList };
+export type { Duration, DurationUnit, SLO, SLOList };
