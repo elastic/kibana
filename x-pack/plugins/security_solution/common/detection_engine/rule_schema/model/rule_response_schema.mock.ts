@@ -31,6 +31,7 @@ const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponse
   immutable: false,
   name: 'Query with a rule id',
   references: ['test 1', 'test 2'],
+  revision: 0,
   severity: 'high' as const,
   severity_mapping: [],
   updated_by: 'elastic_kibana',

@@ -330,5 +330,6 @@ function getRule(): Rule<{ x: number }> {
       lastExecutionDate: RuleExecuteDate,
       lastDuration: 1194,
     },
+    revision: 0,
   };
 }

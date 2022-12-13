@@ -63,6 +63,7 @@ describe('resolveRuleRoute', () => {
     },
     outcome: 'aliasMatch',
     alias_target_id: '2',
+    revision: 0,
   };
 
   const resolveResult: AsApiContract<ResolvedSanitizedRule<{ bar: boolean }>> = {
@@ -87,6 +88,7 @@ describe('resolveRuleRoute', () => {
     created_at: mockedRule.createdAt,
     updated_at: mockedRule.updatedAt,
     id: mockedRule.id,
+    revision: mockedRule.revision,
     execution_status: {
       status: mockedRule.executionStatus.status,
       last_execution_date: mockedRule.executionStatus.lastExecutionDate,

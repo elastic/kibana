@@ -75,6 +75,7 @@ const findTestUtils = (
         created_at: match.created_at,
         updated_at: match.updated_at,
         execution_status: match.execution_status,
+        revision: 0,
         ...(match.next_run ? { next_run: match.next_run } : {}),
         ...(match.last_run ? { last_run: match.last_run } : {}),
         ...(describeType === 'internal'

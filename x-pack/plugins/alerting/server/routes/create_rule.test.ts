@@ -67,6 +67,7 @@ describe('createRuleRoute', () => {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
+    revision: 0,
   };
 
   const ruleToCreate: AsApiContract<CreateOptions<{ bar: boolean }>['data']> = {
@@ -92,6 +93,7 @@ describe('createRuleRoute', () => {
     created_at: mockedAlert.createdAt,
     updated_at: mockedAlert.updatedAt,
     id: mockedAlert.id,
+    revision: mockedAlert.revision,
     execution_status: {
       status: mockedAlert.executionStatus.status,
       last_execution_date: mockedAlert.executionStatus.lastExecutionDate,

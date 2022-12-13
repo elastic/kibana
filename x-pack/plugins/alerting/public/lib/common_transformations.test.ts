@@ -45,6 +45,7 @@ describe('common_transformations', () => {
       notify_when: 'onActiveAlert',
       mute_all: false,
       muted_alert_ids: ['bob', 'jim'],
+      revision: 0,
       execution_status: {
         last_execution_date: dateExecuted.toISOString(),
         last_duration: 42,
@@ -222,6 +223,7 @@ describe('common_transformations', () => {
       notify_when: 'onActiveAlert',
       mute_all: false,
       muted_alert_ids: ['bob', 'jim'],
+      revision: 0,
       execution_status: {
         last_execution_date: dateExecuted.toISOString(),
         status: 'error',
