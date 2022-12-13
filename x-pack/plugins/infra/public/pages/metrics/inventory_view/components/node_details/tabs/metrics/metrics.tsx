@@ -128,7 +128,7 @@ const TabComponent = (props: TabProps) => {
     currentTime,
     accountId,
     region,
-    sendRequestImmediatly: false,
+    sendRequestImmediately: false,
     timerange: timeRange,
   });
 
@@ -141,7 +141,7 @@ const TabComponent = (props: TabProps) => {
     currentTime,
     accountId,
     region,
-    sendRequestImmediatly: false,
+    sendRequestImmediately: false,
     timerange: timeRange,
   });
 

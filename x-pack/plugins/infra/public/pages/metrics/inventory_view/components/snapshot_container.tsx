@@ -42,7 +42,7 @@ export const SnapshotContainer = ({ render }: Props) => {
     currentTime,
     accountId,
     region,
-    sendRequestImmediatly: false,
+    sendRequestImmediately: false,
   });
 
   return render({ loading, nodes, reload, interval });

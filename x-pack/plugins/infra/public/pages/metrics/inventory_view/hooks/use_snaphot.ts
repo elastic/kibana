@@ -22,14 +22,14 @@ export interface UseSnapshotRequest
   extends Omit<SnapshotRequest, 'filterQuery' | 'timerange' | 'includeTimeseries'> {
   filterQuery: string | null | symbol | undefined;
   currentTime: number;
-  sendRequestImmediatly?: boolean;
+  sendRequestImmediately?: boolean;
   includeTimeseries?: boolean;
   timerange?: InfraTimerangeInput;
 }
 export function useSnapshot({
   timerange,
   currentTime,
-  sendRequestImmediatly = true,
+  sendRequestImmediately = true,
   includeTimeseries = true,
   ...args
 }: UseSnapshotRequest) {
@@ -60,11 +60,11 @@ export function useSnapshot({
 
   useEffect(() => {
     (async () => {
-      if (sendRequestImmediatly) {
+      if (sendRequestImmediately) {
         await makeRequest();
       }
     })();
-  }, [makeRequest, sendRequestImmediatly]);
+  }, [makeRequest, sendRequestImmediately]);
 
   return {
     error: (error && error.message) || null,

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { createPlainError, throwErrors } from '../../../common/runtime_types';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import { TIMESTAMP_FIELD } from '../../../common/constants';
 import { MetricsAPIRequest, MetricsAPIResponse } from '../../../common/http_api';
 import {
@@ -78,37 +76,29 @@ export const query = async (
   const { bucketSize } = calculateBucketSize({ ...options.timerange, interval });
 
   if (hasGroupBy) {
-    return pipe(
-      CompositeResponseRT.decode(response.aggregations),
-      fold(throwErrors(createPlainError), (aggregations) => {
-        const { groupings } = aggregations;
-        const limit = options.limit ?? DEFAULT_LIMIT;
-        const returnAfterKey = !!groupings.after_key && groupings.buckets.length === limit;
-        const afterKey = returnAfterKey ? groupings.after_key : null;
+    const aggregations = decodeOrThrow(CompositeResponseRT)(response.aggregations);
+    const { groupings } = aggregations;
+    const limit = options.limit ?? DEFAULT_LIMIT;
+    const returnAfterKey = !!groupings.after_key && groupings.buckets.length === limit;
+    const afterKey = returnAfterKey ? groupings.after_key : null;
 
-        return {
-          series: getSeriesFromCompositeAggregations(groupings, options, bucketSize * 1000),
-          info: {
-            afterKey,
-            interval: rawOptions.includeTimeseries ? bucketSize : undefined,
-          },
-        };
-      })
-    );
+    return {
+      series: getSeriesFromCompositeAggregations(groupings, options, bucketSize * 1000),
+      info: {
+        afterKey,
+        interval: rawOptions.includeTimeseries ? bucketSize : undefined,
+      },
+    };
   }
 
-  return pipe(
-    AggregationResponseRT.decode(response.aggregations),
-    fold(throwErrors(createPlainError), (aggregations) => {
-      return {
-        series: getSeriesFromHistogram(aggregations, options, bucketSize * 1000),
-        info: {
-          afterKey: null,
-          interval: bucketSize,
-        },
-      };
-    })
-  );
+  const aggregations = decodeOrThrow(AggregationResponseRT)(response.aggregations);
+  return {
+    series: getSeriesFromHistogram(aggregations, options, bucketSize * 1000),
+    info: {
+      afterKey: null,
+      interval: bucketSize,
+    },
+  };
 };
 
 const getSeriesFromHistogram = (
