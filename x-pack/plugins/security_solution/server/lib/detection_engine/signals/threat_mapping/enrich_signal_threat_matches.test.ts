@@ -16,7 +16,7 @@ import {
   enrichSignalThreatMatches,
   groupAndMergeSignalMatches,
   getSignalMatchesFromThreatList,
-  MAX_SIGNAL_MATCHES_NUMBER,
+  MAX_NUMBER_OF_SIGNAL_MATCHES,
 } from './enrich_signal_threat_matches';
 import { getNamedQueryMock, getSignalHitMock } from './enrich_signal_threat_matches.mock';
 import type { GetMatchedThreats, ThreatListItem, ThreatMatchNamedQuery } from './types';
@@ -895,7 +895,7 @@ describe('getSignalMatchesFromThreatList', () => {
     ]);
   });
 
-  it('limits number of signal matches to MAX_SIGNAL_MATCHES_NUMBER', () => {
+  it('limits number of signal matches to MAX_NUMBER_OF_SIGNAL_MATCHES', () => {
     const threatList = Array.from(Array(2000), (index) =>
       getThreatListItemMock({
         _id: `threatId-${index}`,
@@ -914,6 +914,6 @@ describe('getSignalMatchesFromThreatList', () => {
 
     const signalMatches = getSignalMatchesFromThreatList(threatList);
 
-    expect(signalMatches[0].queries).toHaveLength(MAX_SIGNAL_MATCHES_NUMBER);
+    expect(signalMatches[0].queries).toHaveLength(MAX_NUMBER_OF_SIGNAL_MATCHES);
   });
 });

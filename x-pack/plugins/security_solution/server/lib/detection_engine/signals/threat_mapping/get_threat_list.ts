@@ -20,7 +20,7 @@ import type {
  */
 export const INDICATOR_PER_PAGE = 1000;
 
-const MAX_INDICATORS_NUMBER = 10 * 1000;
+const MAX_NUMBER_OF_THREATS = 10 * 1000;
 
 export const getThreatList = async ({
   esClient,
@@ -127,7 +127,7 @@ export const getAllThreatListHits = async (
 
   // to prevent loading in memory large number of results, that could lead to out of memory Kibana crash,
   // number of indicators is limited to MAX_INDICATORS_NUMBER
-  while (threatList.hits.hits.length !== 0 && allThreatListHits.length < MAX_INDICATORS_NUMBER) {
+  while (threatList.hits.hits.length !== 0 && allThreatListHits.length < MAX_NUMBER_OF_THREATS) {
     threatList = await getThreatList({
       ...params,
       searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
