@@ -110,16 +110,13 @@ export const createStoreFactory = async (
   const dataTableInitialState = {
     dataTable: {
       tableById: {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
         ...subPlugins.alerts.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...subPlugins.rules.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...subPlugins.exceptions.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...subPlugins.explore.exploreDataTables!.hosts.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...subPlugins.explore.exploreDataTables!.network.tableById,
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
       },
     },
   };
