@@ -39,7 +39,7 @@ export const getSignalMatchesFromThreatList = (
       // creating map of signal with large number of threats could lead to out of memory Kibana crash
       // large number of threats also can cause signals bulk create failure due too large payload (413)
       // large number of threats significantly slower alert details page render
-      // so, its number is limited to MAX_THREATS_PER_SIGNAL_NUMBER
+      // so, its number is limited to MAX_NUMBER_OF_SIGNAL_MATCHES
       // more details https://github.com/elastic/kibana/issues/143595#issuecomment-1335433592
       if (signalMap[signalId].length >= MAX_NUMBER_OF_SIGNAL_MATCHES) {
         return;
