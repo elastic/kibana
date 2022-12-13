@@ -85,6 +85,9 @@ function setAgentStatus(agent: any, status: AgentStatus) {
     case 'unenrolling':
       agent.unenrollment_started_at = new Date().toISOString();
       break;
+    case 'unenrolled':
+      agent.unenrolled_at = new Date().toISOString();
+      break;
     case 'error':
       agent.last_checkin_status = 'ERROR';
       break;

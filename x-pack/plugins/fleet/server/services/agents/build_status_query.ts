@@ -28,7 +28,9 @@ const _buildInactiveClause = (
     .join(' || ');
 
   const policyHasNoInactivityTimeout = `lastCheckinMillis < ${now - DEFAULT_MS_BEFORE_INACTIVE}L`;
-  return `lastCheckinMillis > 0 && ((${policyClauses}) || ${policyHasNoInactivityTimeout})`;
+  const agentIsInactive =
+    (policyClauses.length ? `(${policyClauses}) || ` : '') + policyHasNoInactivityTimeout;
+  return `lastCheckinMillis > 0 && (${agentIsInactive})`;
 };
 
 function _buildSource(unenrollTimeouts: Array<{ policy_ids: string[]; unenroll_timeout: number }>) {

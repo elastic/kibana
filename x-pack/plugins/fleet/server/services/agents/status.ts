@@ -9,11 +9,13 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import pMap from 'p-map';
 
 import type { KueryNode } from '@kbn/es-query';
+import { toElasticsearchQuery } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 
 import type {
   AggregationsTermsAggregateBase,
   AggregationsTermsBucketBase,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { AGENTS_INDEX, AGENTS_PREFIX } from '../../constants';
@@ -70,20 +72,110 @@ function joinKuerys(...kuerys: Array<string | undefined>) {
     }, undefined as KueryNode | undefined);
 }
 
+export async function getAgentStatusForAgentPolicyExperimental(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  agentPolicyId?: string,
+  filterKuery?: string
+) {
+  const logger = appContextService.getLogger();
+  const unenrollTimeouts = await agentPolicyService.getUnenrollTimeouts(soClient);
+  const runtimeFields = buildStatusRuntimeQuery(unenrollTimeouts);
+
+  const clauses: QueryDslQueryContainer[] = [];
+
+  if (filterKuery) {
+    const kueryAsElasticsearchQuery = toElasticsearchQuery(fromKueryExpression(filterKuery));
+    clauses.push(kueryAsElasticsearchQuery);
+  }
+
+  if (agentPolicyId) {
+    clauses.push({
+      term: {
+        [`${AGENTS_PREFIX}.policy_id`]: agentPolicyId,
+      },
+    });
+  }
+
+  const query =
+    clauses.length > 0
+      ? {
+          bool: {
+            must: clauses,
+          },
+        }
+      : undefined;
+
+  const statuses: Partial<Record<AgentStatus, number>> = {
+    online: 0,
+    error: 0,
+    inactive: 0,
+    offline: 0,
+    updating: 0,
+    unenrolled: 0,
+  };
+
+  let response;
+
+  try {
+    response = await esClient.search<
+      null,
+      { status: AggregationsTermsAggregateBase<AggregationsStatusTermsBucketKeys> }
+    >({
+      index: AGENTS_INDEX,
+      size: 0,
+      query,
+      fields: Object.keys(runtimeFields),
+      runtime_mappings: runtimeFields,
+      aggregations: {
+        status: {
+          terms: {
+            field: 'calculated_status',
+            size: Object.keys(statuses).length,
+          },
+        },
+      },
+    });
+  } catch (error) {
+    logger.error(`Error getting agent statuses: ${error}`);
+    throw error;
+  }
+
+  const buckets = response?.aggregations?.status?.buckets || [];
+
+  if (!Array.isArray(buckets)) {
+    throw new Error('buckets is not an array');
+  }
+
+  buckets.forEach((bucket) => {
+    if (statuses[bucket.key] !== undefined) {
+      statuses[bucket.key] = bucket.doc_count;
+    }
+  });
+
+  return {
+    ...statuses,
+    /* @deprecated no agents will have other status */
+    other: 0,
+    /* @deprecated Agent events do not exists anymore */
+    events: 0,
+    total: Object.values(statuses).reduce((acc, val) => acc + val, 0),
+  };
+}
+
 export async function getAgentStatusForAgentPolicy(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   agentPolicyId?: string,
   filterKuery?: string
 ) {
+  const logger = appContextService.getLogger();
   let pitId: string | undefined;
   try {
     pitId = await openPointInTime(esClient);
   } catch (error) {
     if (error.statusCode === 404) {
-      appContextService
-        .getLogger()
-        .debug('Index .fleet-agents does not exist yet, skipping point in time.');
+      logger.debug('Index .fleet-agents does not exist yet, skipping point in time.');
     } else {
       throw error;
     }
@@ -121,54 +213,7 @@ export async function getAgentStatusForAgentPolicy(
     await closePointInTime(esClient, pitId);
   }
 
-  const unenrollTimeouts = await agentPolicyService.getUnenrollTimeouts(soClient);
-  const runtimeFields = buildStatusRuntimeQuery(unenrollTimeouts);
-  const aggResult = await esClient.search<
-    null,
-    { status: AggregationsTermsAggregateBase<AggregationsStatusTermsBucketKeys> }
-  >({
-    index: AGENTS_INDEX,
-    size: 0,
-    // post_filter: {}, TODO: add post_filter / query
-    fields: Object.keys(runtimeFields),
-    runtime_mappings: runtimeFields,
-    aggregations: {
-      status: {
-        terms: {
-          field: 'calculated_status',
-          size: 10,
-        },
-      },
-    },
-  });
-
-  const statuses: Partial<Record<AgentStatus, number>> = {
-    online: 0,
-    error: 0,
-    inactive: 0,
-    offline: 0,
-    updating: 0,
-    unenrolled: 0,
-  };
-
-  const buckets = aggResult?.aggregations?.status?.buckets || [];
-
-  if (!Array.isArray(buckets)) {
-    throw new Error('buckets is not an array');
-  }
-
-  buckets.forEach((bucket) => {
-    if (statuses[bucket.key] !== undefined) {
-      statuses[bucket.key] = bucket.doc_count;
-    }
-  });
-
   const result = {
-    __aggResult: {
-      ...statuses,
-      other: 0,
-      total: Object.values(statuses).reduce((acc, val) => acc + val, 0),
-    },
     total: allActive.total,
     inactive: all.total - allActive.total - unenrolled.total,
     online: online.total,
@@ -180,7 +225,15 @@ export async function getAgentStatusForAgentPolicy(
     /* @deprecated Agent events do not exists anymore */
     events: 0,
   };
-  return result;
+
+  const aggResult = await getAgentStatusForAgentPolicyExperimental(
+    esClient,
+    soClient,
+    agentPolicyId,
+    filterKuery
+  );
+
+  return { ...result, aggResult };
 }
 export async function getIncomingDataByAgentsId(
   esClient: ElasticsearchClient,
