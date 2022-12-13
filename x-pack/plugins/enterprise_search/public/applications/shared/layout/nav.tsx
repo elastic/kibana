@@ -78,7 +78,7 @@ export const useEnterpriseSearchNav = () => {
     ...(enginesSectionEnabled
       ? [
           {
-            id: 'enterpiseSearchEngines',
+            id: 'enterpriseSearchEngines',
             name: i18n.translate('xpack.enterpriseSearch.nav.enginesTitle', {
               defaultMessage: 'Engines',
             }),
