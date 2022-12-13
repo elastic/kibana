@@ -85,6 +85,29 @@ describe('tagKibanaAssets', () => {
     });
   });
 
+  it('should use destinationId instead of original SO id if imported asset has it', async () => {
+    savedObjectTagClient.get.mockResolvedValue({ name: '', color: '', description: '' });
+    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] } as any;
+
+    await tagKibanaAssets({
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle: 'System',
+      pkgName: 'system',
+      spaceId: 'default',
+      importedAssets: [{ id: 'dashboard1', destinationId: 'destination1' } as any],
+    });
+
+    expect(savedObjectTagClient.create).not.toHaveBeenCalled();
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
+      tags: ['fleet-managed-default', 'fleet-pkg-system-default'],
+      assign: [{ id: 'destination1', type: 'dashboard' }],
+      unassign: [],
+      refresh: false,
+    });
+  });
+
   it('should skip non taggable asset types', async () => {
     savedObjectTagClient.get.mockRejectedValue(new Error('tag not found'));
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
