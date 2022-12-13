@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-import { sloList } from '../../../../common/data/slo';
-import { UseFetchSloListResponse } from '../use_fetch_slo_list';
-
-export const useFetchSloList = (name?: string): UseFetchSloListResponse => {
-  return {
-    loading: false,
-    sloList,
-  };
-};
+// eslint-disable-next-line import/no-default-export
+export { BurnRateRuleEditor as default } from './burn_rate_rule_editor';

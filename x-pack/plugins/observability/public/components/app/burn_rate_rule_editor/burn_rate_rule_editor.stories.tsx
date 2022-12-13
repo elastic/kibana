@@ -8,18 +8,17 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { SLO } from '../../../../typings';
-import { SloSelector as Component } from './slo_selector';
+import { BurnRateRuleEditor as Component } from './burn_rate_rule_editor';
 
 export default {
   component: Component,
-  title: 'app/SLO/Shared/SloSelector',
+  title: 'app/SLO/BurnRateRule',
+  argTypes: {},
 };
 
-const Template: ComponentStory<typeof Component> = () => (
-  <Component onSelected={(slo: SLO | undefined) => console.log(slo)} />
-);
+const Template: ComponentStory<typeof Component> = () => <Component />;
+
 const defaultProps = {};
 
-export const Default = Template.bind({});
-Default.args = defaultProps;
+export const BurnRateRuleEditor = Template.bind({});
+BurnRateRuleEditor.args = defaultProps;
