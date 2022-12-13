@@ -444,7 +444,7 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -661,7 +661,7 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
