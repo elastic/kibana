@@ -495,6 +495,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           createdAt: response.body.createdAt,
           updatedAt: response.body.updatedAt,
           executionStatus: response.body.executionStatus,
+          revision: 0,
           ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
           ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
         });

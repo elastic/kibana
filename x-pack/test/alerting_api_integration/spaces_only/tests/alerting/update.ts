@@ -168,6 +168,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           createdAt: response.body.createdAt,
           updatedAt: response.body.updatedAt,
           executionStatus: response.body.executionStatus,
+          revision: 1,
           ...(response.body.nextRun ? { nextRun: response.body.nextRun } : {}),
           ...(response.body.lastRun ? { lastRun: response.body.lastRun } : {}),
         });
