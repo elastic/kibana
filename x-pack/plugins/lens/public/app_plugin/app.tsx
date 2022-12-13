@@ -250,6 +250,19 @@ export function App({
         ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'Edit visualization' })
         : persistedDoc.title;
     }
+    if (
+      !persistedDoc?.title &&
+      initialContext &&
+      'isEmbeddable' in initialContext &&
+      initialContext.isEmbeddable
+    ) {
+      currentDocTitle = i18n.translate('xpack.lens.breadcrumbsEditInLensFromDashboard', {
+        defaultMessage: 'Converting {title} visualization',
+        values: {
+          title: initialContext.title ? `"${initialContext.title}"` : initialContext.visTypeTitle,
+        },
+      });
+    }
     breadcrumbs.push({ text: currentDocTitle });
     chrome.setBreadcrumbs(breadcrumbs);
   }, [
@@ -414,6 +427,19 @@ export function App({
     };
   }, []);
 
+  const returnToOriginSwitchLabelForContext =
+    initialContext &&
+    'isEmbeddable' in initialContext &&
+    initialContext.isEmbeddable &&
+    !persistedDoc
+      ? i18n.translate('xpack.lens.app.replacePanel', {
+          defaultMessage: 'Replace panel on {originatingApp}',
+          values: {
+            originatingApp: initialContext?.originatingApp,
+          },
+        })
+      : undefined;
+
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp" role="main">
@@ -453,7 +479,11 @@ export function App({
       {isSaveModalVisible && (
         <SaveModalContainer
           lensServices={lensAppServices}
-          originatingApp={isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+          originatingApp={
+            isLinkedToOriginatingApp
+              ? incomingState?.originatingApp ?? initialContext?.originatingApp
+              : undefined
+          }
           isSaveable={isSaveable}
           runSave={runSave}
           onClose={() => {
@@ -466,13 +496,15 @@ export function App({
           initialInput={initialInput}
           redirectTo={redirectTo}
           redirectToOrigin={redirectToOrigin}
+          initialContext={initialContext}
           returnToOriginSwitchLabel={
-            getIsByValueMode() && initialInput
+            returnToOriginSwitchLabelForContext ??
+            (getIsByValueMode() && initialInput
               ? i18n.translate('xpack.lens.app.updatePanel', {
                   defaultMessage: 'Update panel on {originatingAppName}',
                   values: { originatingAppName: getOriginatingAppName() },
                 })
-              : undefined
+              : undefined)
           }
         />
       )}
