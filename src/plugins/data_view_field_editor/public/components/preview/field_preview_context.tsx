@@ -410,7 +410,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
     const response = await getFieldPreview({
       index: currentDocIndex,
-      document: document!._source!,
+      document: document?._source!,
       context: (parentName ? 'composite_field' : `${type!}_field`) as PainlessExecuteContext,
       script: previewScript,
     });
