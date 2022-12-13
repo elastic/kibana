@@ -119,12 +119,6 @@ class HandlebarsTestBench {
     }
   }
 
-  toThrowErrorMatchingSnapshot() {
-    const { renderEval, renderAST } = this.compile();
-    expect(() => renderEval(this.input)).toThrowErrorMatchingSnapshot();
-    expect(() => renderAST(this.input)).toThrowErrorMatchingSnapshot();
-  }
-
   private compileAndExecute() {
     if (process.env.EVAL) {
       return {
@@ -168,15 +162,6 @@ class HandlebarsTestBench {
     );
 
     return renderAST(this.input, runtimeOptions);
-  }
-
-  private compile() {
-    const handlebarsEnv = getHandlebarsEnv();
-
-    return {
-      renderEval: this.compileEval(handlebarsEnv),
-      renderAST: this.compileAST(handlebarsEnv),
-    };
   }
 
   private compileEval(handlebarsEnv = getHandlebarsEnv()) {

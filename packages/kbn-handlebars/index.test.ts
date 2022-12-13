@@ -35,7 +35,10 @@ describe('Handlebars.compileAST', () => {
   });
 
   it('invalid template', () => {
-    expectTemplate('{{value').withInput({ value: 42 }).toThrowErrorMatchingSnapshot();
+    expectTemplate('{{value').withInput({ value: 42 }).toThrow(`Parse error on line 1:
+{{value
+--^
+Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 'INVALID'`);
   });
 
   if (!process.env.EVAL) {
@@ -226,7 +229,7 @@ describe('blocks', () => {
 
         kbnHandlebarsEnv!.unregisterDecorator('decorator');
 
-        expectTemplate('{{*decorator}}').toThrowErrorMatchingSnapshot();
+        expectTemplate('{{*decorator}}').toThrow('lookupProperty(...) is not a function');
         expect(calls).toEqual(0);
       });
     });

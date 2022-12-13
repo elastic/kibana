@@ -394,17 +394,18 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   ) {
     // TypeScript: The types indicate that `decorator.path` technically can be an `hbs.AST.Literal`. However, the upstream codebase always treats it as an `hbs.AST.PathExpression`, so we do too.
     const name = (decorator.path as hbs.AST.PathExpression).original;
-    const decoratorFn = this.container.lookupProperty<DecoratorFunction>(
-      this.container.decorators,
-      name
-    );
     const props = {};
     // TypeScript: Because `decorator` can be of type `hbs.AST.Decorator`, TS indicates that `decorator.path` technically can be an `hbs.AST.Literal`. However, the upstream codebase always treats it as an `hbs.AST.PathExpression`, so we do too.
     const options = this.setupParams(decorator as hbs.AST.DecoratorBlock, name);
     // @ts-expect-error: Property 'lookupProperty' does not exist on type 'HelperOptions'
     delete options.lookupProperty; // There's really no tests/documentation on this, but to match the upstream codebase we'll remove `lookupProperty` from the decorator context
 
-    Object.assign(decoratorFn(prog, props, this.container, options) || prog, props);
+    const result = this.container.lookupProperty<DecoratorFunction>(
+      this.container.decorators,
+      name
+    )(prog, props, this.container, options);
+
+    Object.assign(result || prog, props);
   }
 
   private processStatementOrExpression(node: ProcessableNode) {
