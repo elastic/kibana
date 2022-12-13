@@ -81,7 +81,13 @@ export const javascriptEmbedSteps = (webClientSrc: string, analyticsDNSUrl: stri
               defaultMessage="Track individual events, like clicks, by calling the trackEvent method. {link}"
               values={{
                 link: (
-                  <EuiLink href="http://www.elastic.co" target="_blank">
+                  <EuiLink
+                    href="http://www.elastic.co"
+                    target="_blank"
+                    data-telemetry-id={
+                      'entSearch-analytics-integrate-javascriptEmbed-trackEventDocumentationLink'
+                    }
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptEmbed.stepThree.link',
                       {

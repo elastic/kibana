@@ -32,6 +32,7 @@ export const searchUIEmbedSteps = (setSelectedTab: (tab: TabKey) => void) => [
               values={{
                 embedLink: (
                   <EuiLink
+                    data-telemetry-id={'entSearch-analytics-integrate-javascriptClientEmbed-tab'}
                     onClick={() => {
                       setSelectedTab('javascriptClientEmbed');
                     }}
@@ -46,6 +47,7 @@ export const searchUIEmbedSteps = (setSelectedTab: (tab: TabKey) => void) => [
                 ),
                 clientLink: (
                   <EuiLink
+                    data-telemetry-id={'entSearch-analytics-integrate-javascriptEmbed-tab'}
                     onClick={() => {
                       setSelectedTab('javascriptEmbed');
                     }}

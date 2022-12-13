@@ -94,6 +94,7 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
             }}
             isSelected={selectedTab === tab.key}
             data-test-subj={tab.key}
+            data-telemetry-id={`entSearch-analytics-integrate-${tab.key}-tab`}
           >
             {tab.title}
           </EuiTab>
