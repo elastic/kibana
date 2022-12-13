@@ -7,7 +7,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useHttp } from '@kbn/cases-plugin/public/common/lib/kibana';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import type { KubernetesCollectionMap, QueryDslQueryContainerBool } from '../../types';
 import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
 import { addTreeNavSelectionToFilterQuery } from './helpers';
@@ -78,7 +79,7 @@ export const useFetchAgentIdForResponder = (
   filterQuery: QueryDslQueryContainerBool,
   index?: string
 ) => {
-  const http = useHttp();
+  const { http } = useKibana<CoreStart>().services;
   const cachingKeys = [QUERY_KEY_AGENT_ID, filterQuery, index];
   const query = useQuery(cachingKeys, async (): Promise<AgentIdResult> => {
     const res = await http.get<AgentIdResult>(AGENT_ID_ROUTE, {
