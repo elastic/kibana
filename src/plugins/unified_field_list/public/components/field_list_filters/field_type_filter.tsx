@@ -33,6 +33,7 @@ export interface FieldTypeFilterProps<T extends FieldListItem> {
   allFields: T[] | null;
   getCustomFieldType?: GetCustomFieldType<T>;
   selectedFieldTypes: FieldTypeKnown[];
+  onSupportedFieldFilter?: (field: T) => boolean;
   onChange: (fieldTypes: FieldTypeKnown[]) => unknown;
 }
 
@@ -43,6 +44,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   allFields,
   getCustomFieldType,
   selectedFieldTypes,
+  onSupportedFieldFilter,
   onChange,
 }: FieldTypeFilterProps<T>) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -56,13 +58,16 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
     }
     const counts = new Map();
     allFields.forEach((field) => {
+      if (onSupportedFieldFilter && !onSupportedFieldFilter(field)) {
+        return;
+      }
       const type = getFieldIconType(field, getCustomFieldType);
       if (isKnownFieldType(type)) {
         counts.set(type, (counts.get(type) || 0) + 1);
       }
     });
     setTypeCounts(counts);
-  }, [isOpen, allFields, setTypeCounts, getCustomFieldType]);
+  }, [isOpen, allFields, setTypeCounts, getCustomFieldType, onSupportedFieldFilter]);
 
   const availableFieldTypes = useMemo(() => {
     // sorting is defined by items in KNOWN_FIELD_TYPE_LIST

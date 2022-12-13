@@ -15,6 +15,7 @@ import { getFieldIconType } from '../utils/field_types';
 export interface FieldFiltersParams<T extends FieldListItem> {
   allFields: T[] | null;
   getCustomFieldType?: GetCustomFieldType<T>;
+  onSupportedFieldFilter?: (field: T) => boolean;
 }
 
 export interface FieldFiltersResult<T extends FieldListItem> {
@@ -26,6 +27,7 @@ export interface FieldFiltersResult<T extends FieldListItem> {
 export function useFieldFilters<T extends FieldListItem = DataViewField>({
   allFields,
   getCustomFieldType,
+  onSupportedFieldFilter,
 }: FieldFiltersParams<T>): FieldFiltersResult<T> {
   const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>([]);
   const [nameFilter, setNameFilter] = useState<string>('');
@@ -35,6 +37,7 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
       selectedFieldTypes,
       allFields,
       getCustomFieldType,
+      onSupportedFieldFilter,
       onChangeFieldTypes: setSelectedFieldTypes,
       nameFilter,
       onChangeNameFilter: setNameFilter,
@@ -44,6 +47,7 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
       selectedFieldTypes,
       allFields,
       getCustomFieldType,
+      onSupportedFieldFilter,
       setSelectedFieldTypes,
       nameFilter,
       setNameFilter,

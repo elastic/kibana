@@ -16,6 +16,7 @@ export interface FieldListFiltersProps<T extends FieldListItem> {
   selectedFieldTypes?: FieldTypeFilterProps<T>['selectedFieldTypes'];
   allFields?: FieldTypeFilterProps<T>['allFields'];
   getCustomFieldType?: FieldTypeFilterProps<T>['getCustomFieldType'];
+  onSupportedFieldFilter?: FieldTypeFilterProps<T>['onSupportedFieldFilter'];
   onChangeFieldTypes?: FieldTypeFilterProps<T>['onChange'];
   nameFilter: FieldNameSearchProps['nameFilter'];
   fieldSearchDescriptionId?: FieldNameSearchProps['fieldSearchDescriptionId'];
@@ -26,6 +27,7 @@ export function FieldListFilters<T extends FieldListItem = DataViewField>({
   selectedFieldTypes,
   allFields,
   getCustomFieldType,
+  onSupportedFieldFilter,
   onChangeFieldTypes,
   nameFilter,
   fieldSearchDescriptionId,
@@ -39,6 +41,7 @@ export function FieldListFilters<T extends FieldListItem = DataViewField>({
             selectedFieldTypes={selectedFieldTypes}
             allFields={allFields}
             getCustomFieldType={getCustomFieldType}
+            onSupportedFieldFilter={onSupportedFieldFilter}
             onChange={onChangeFieldTypes}
           />
         ) : undefined
