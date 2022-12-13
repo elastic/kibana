@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
-import { render } from '../../../../utils/test_helper';
-import { SloSelector } from './slo_selector';
-import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import { wait } from '@testing-library/user-event/dist/utils';
-import { emptySloList } from '../../../../../common/data/slo';
+import React from 'react';
 
-jest.mock('../../../../hooks/slo/use_fetch_slo_list');
+import { emptySloList } from '../../../../common/data/slo';
+import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
+import { render } from '../../../utils/test_helper';
+import { SloSelector } from './slo_selector';
+
+jest.mock('../../../hooks/slo/use_fetch_slo_list');
+
 const useFetchSloListMock = useFetchSloList as jest.Mock;
 
 describe('SLO Selector', () => {

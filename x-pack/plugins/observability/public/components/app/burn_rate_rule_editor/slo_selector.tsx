@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { SLO } from '../../../../typings';
-import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
+import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
+import { SLO } from '../../../typings';
 
 interface Props {
   initialSlo?: SLO;
