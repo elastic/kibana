@@ -10,6 +10,7 @@ import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import moment from 'moment';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
@@ -26,14 +27,13 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
               t.type({
                 gte: t.string,
                 lte: t.string,
+                featureIds: t.array(t.string),
               })
             ),
             t.exact(
               t.partial({
-                featureIds: t.array(t.string),
                 fixed_interval: t.string,
                 filter: t.object,
-                index: t.string,
               })
             ),
           ])
@@ -47,7 +47,7 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { gte, lte, featureIds, filter, fixed_interval: fixedInterval, index } = request.body;
+        const { gte, lte, featureIds, filter, fixed_interval: fixedInterval } = request.body;
         if (
           !(
             moment(gte, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true).isValid() &&
@@ -67,9 +67,8 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
           gte,
           lte,
           featureIds,
-          filter,
+          filter: filter as estypes.QueryDslQueryContainer[],
           fixedInterval,
-          index,
         });
         return response.ok({
           body: aggs,

@@ -21,7 +21,6 @@ export default ({ getService }: FtrProviderContext) => {
   const ALERT_SUMMARY_URL = `${TEST_URL}/_alert_summary`;
   const LOGS_ALERT_ID = '123456789XYZ';
   const LOGS_ALERT_ID2 = 'space1alertLogs';
-  const LOGS_ALERT_INDEX = '.alerts-observability.logs.alerts-default';
 
   describe('Alerts - GET - _alert_summary', () => {
     before(async () => {
@@ -30,41 +29,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
-    });
-
-    it('Alert summary for all LOGS alerts', async () => {
-      const alertSummary = await supertestWithoutAuth
-        .post(`${getSpaceUrlPrefix(SPACE1)}${ALERT_SUMMARY_URL}`)
-        .auth(superUser.username, superUser.password)
-        .set('kbn-xsrf', 'true')
-        .send({
-          gte: '2020-12-16T15:00:00.000Z',
-          lte: '2020-12-16T16:00:00.000Z',
-          index: LOGS_ALERT_INDEX,
-          fixed_interval: '10m',
-        })
-        .expect(200);
-
-      expect(alertSummary.body).to.eql({
-        activeAlerts: [
-          { key_as_string: '1608130800000', key: 1608130800000, doc_count: 0 },
-          { key_as_string: '1608131400000', key: 1608131400000, doc_count: 2 },
-          { key_as_string: '1608132000000', key: 1608132000000, doc_count: 2 },
-          { key_as_string: '1608132600000', key: 1608132600000, doc_count: 1 },
-          { key_as_string: '1608133200000', key: 1608133200000, doc_count: 1 },
-          { key_as_string: '1608133800000', key: 1608133800000, doc_count: 1 },
-          { key_as_string: '1608134400000', key: 1608134400000, doc_count: 1 },
-        ],
-        recoveredAlerts: [
-          { key_as_string: '2020-12-16T15:00:00.000Z', key: 1608130800000, doc_count: 0 },
-          { key_as_string: '2020-12-16T15:10:00.000Z', key: 1608131400000, doc_count: 0 },
-          { key_as_string: '2020-12-16T15:20:00.000Z', key: 1608132000000, doc_count: 1 },
-          { key_as_string: '2020-12-16T15:30:00.000Z', key: 1608132600000, doc_count: 0 },
-          { key_as_string: '2020-12-16T15:40:00.000Z', key: 1608133200000, doc_count: 0 },
-          { key_as_string: '2020-12-16T15:50:00.000Z', key: 1608133800000, doc_count: 0 },
-          { key_as_string: '2020-12-16T16:00:00.000Z', key: 1608134400000, doc_count: 0 },
-        ],
-      });
     });
 
     it('Alert summary for all LOGS alerts with features', async () => {
@@ -115,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
               _id: [LOGS_ALERT_ID2],
             },
           },
-          index: LOGS_ALERT_INDEX,
+          featureIds: ['logs'],
           fixed_interval: '10m',
         })
         .expect(200);
@@ -155,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
               _id: [LOGS_ALERT_ID],
             },
           },
-          index: LOGS_ALERT_INDEX,
+          featureIds: ['logs'],
           fixed_interval: '10m',
         })
         .expect(200);

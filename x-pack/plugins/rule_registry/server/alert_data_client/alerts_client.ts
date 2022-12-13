@@ -36,7 +36,6 @@ import {
 import { Logger, ElasticsearchClient, EcsEventOutcome } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
-import { isEmpty } from 'lodash';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -101,10 +100,9 @@ interface GetAlertSummaryParams {
   id?: string;
   gte: string;
   lte: string;
-  featureIds?: string | string[];
-  filter?: object;
+  featureIds: string[];
+  filter?: estypes.QueryDslQueryContainer[];
   fixedInterval?: string;
-  index?: string;
 }
 
 interface SingleSearchAfterAndAudit {
@@ -521,105 +519,79 @@ export class AlertsClient {
     featureIds,
     filter,
     fixedInterval = '1m',
-    index,
   }: GetAlertSummaryParams) {
     try {
-      let indexToUse = index;
-      if (featureIds && !isEmpty(featureIds)) {
-        indexToUse = (
-          (await this.getAuthorizedAlertsIndices(
-            Array.isArray(featureIds) ? featureIds : [featureIds]
-          )) ?? []
-        ).join(',');
-      }
+      const indexToUse = ((await this.getAuthorizedAlertsIndices(featureIds)) ?? []).join(',');
 
       // first search for the alert by id, then use the alert info to check if user has access to it
-      const [activeResponse, recoveredResponse] = await Promise.all([
-        this.singleSearchAfterAndAudit({
-          index: indexToUse,
-          operation: ReadOperations.Get,
-          aggs: {
-            active_alerts_bucket: {
-              date_histogram: {
-                field: ALERT_TIME_RANGE,
-                fixed_interval: fixedInterval,
-                hard_bounds: {
-                  min: gte,
-                  max: lte,
-                },
-                extended_bounds: {
-                  min: gte,
-                  max: lte,
+      const responseAlertSum = await this.singleSearchAfterAndAudit({
+        index: indexToUse,
+        operation: ReadOperations.Get,
+        aggs: {
+          active_alerts_bucket: {
+            date_histogram: {
+              field: ALERT_TIME_RANGE,
+              fixed_interval: fixedInterval,
+              hard_bounds: {
+                min: gte,
+                max: lte,
+              },
+              extended_bounds: {
+                min: gte,
+                max: lte,
+                min_doc_count: 0,
+              },
+            },
+          },
+          recovered_alerts: {
+            filter: {
+              term: {
+                [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+              },
+            },
+            aggs: {
+              container: {
+                date_histogram: {
+                  field: ALERT_END,
+                  fixed_interval: fixedInterval,
+                  extended_bounds: {
+                    min: gte,
+                    max: lte,
+                    min_doc_count: 0,
+                  },
                 },
               },
             },
           },
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    [ALERT_TIME_RANGE]: {
-                      gt: gte,
-                      lt: lte,
-                    },
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  [ALERT_TIME_RANGE]: {
+                    gt: gte,
+                    lt: lte,
                   },
-                },
-                ...(filter ? [filter] : []),
-              ],
-            },
-          },
-          size: 0,
-        }),
-        this.singleSearchAfterAndAudit({
-          index: indexToUse,
-          operation: ReadOperations.Get,
-          aggs: {
-            recovered_alerts_bucket: {
-              date_histogram: {
-                field: ALERT_END,
-                fixed_interval: fixedInterval,
-                extended_bounds: {
-                  min: gte,
-                  max: lte,
                 },
               },
-            },
+              ...(filter ? [filter] : []),
+            ],
           },
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    [ALERT_END]: {
-                      gt: gte,
-                      lt: lte,
-                    },
-                  },
-                },
-                {
-                  term: {
-                    [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
-                  },
-                },
-                ...(filter ? [filter] : []),
-              ],
-            },
-          },
-          size: 0,
-        }),
-      ]);
+        },
+        size: 0,
+      });
 
       return {
         activeAlerts:
           (
-            activeResponse.aggregations
+            responseAlertSum.aggregations
               ?.active_alerts_bucket as estypes.AggregationsAutoDateHistogramAggregate
           )?.buckets ?? [],
         recoveredAlerts:
           (
-            recoveredResponse.aggregations
-              ?.recovered_alerts_bucket as estypes.AggregationsAutoDateHistogramAggregate
+            (responseAlertSum.aggregations?.recovered_alerts as estypes.AggregationsFilterAggregate)
+              ?.container as estypes.AggregationsAutoDateHistogramAggregate
           )?.buckets ?? [],
       };
     } catch (error) {
