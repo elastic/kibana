@@ -27,8 +27,8 @@ import { initDataView, SourcererScopeName } from './sourcerer/model';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
-import type { DataTableReducer } from './data_table';
 import type { DataTableState } from './data_table/types';
+import { dataTableReducer } from './data_table/reducer';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   UsersPluginReducer &
@@ -117,18 +117,14 @@ export const createInitialState = (
  * Factory for the Security app's redux reducer.
  */
 export const createReducer: (
-  pluginsReducer: SubPluginsInitReducer,
-  tgridReducer: DataTableReducer // TODO: remove this param when the table reducer will be moved to security_solution
-) => Reducer<State, AppAction | AnyAction> = (
-  pluginsReducer: SubPluginsInitReducer,
-  tgridReducer: DataTableReducer
-) =>
+  pluginsReducer: SubPluginsInitReducer
+) => Reducer<State, AppAction | AnyAction> = (pluginsReducer: SubPluginsInitReducer) =>
   combineReducers({
     app: appReducer,
     dragAndDrop: dragAndDropReducer,
     inputs: inputsReducer,
     sourcerer: sourcererReducer,
     globalUrlParam: globalUrlParamReducer,
+    dataTable: dataTableReducer,
     ...pluginsReducer,
-    ...tgridReducer,
   });

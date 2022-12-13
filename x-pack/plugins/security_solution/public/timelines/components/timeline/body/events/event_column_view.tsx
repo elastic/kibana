@@ -7,7 +7,12 @@
 
 import React, { useMemo } from 'react';
 
-import type { SetEventsLoading, SetEventsDeleted } from '@kbn/timelines-plugin/common';
+import type {
+  ControlColumnProps,
+  RowCellRender,
+  SetEventsDeleted,
+  SetEventsLoading,
+} from '../../../../../../common/types';
 import type { Ecs } from '../../../../../../common/ecs';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import type { OnRowSelected } from '../../events';
@@ -17,8 +22,6 @@ import type { inputsModel } from '../../../../../common/store';
 import type {
   ColumnHeaderOptions,
   CellValueElementProps,
-  ControlColumnProps,
-  RowCellRender,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
 

@@ -471,8 +471,7 @@ export class TaskRunner<
         );
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
-        await executionHandler.run(activeAlerts);
-        await executionHandler.run(currentRecoveredAlerts, true);
+        await executionHandler.run({ ...activeAlerts, ...currentRecoveredAlerts });
       }
     });
 
@@ -673,7 +672,18 @@ export class TaskRunner<
 
       // fetch the rule again to ensure we return the correct schedule as it may have
       // changed during the task execution
-      schedule = asOk((await preparedResult.rulesClient.get({ id: ruleId })).schedule);
+      schedule = asOk(
+        (
+          await loadRule<Params>({
+            paramValidator: this.ruleType.validate?.params,
+            ruleId,
+            spaceId,
+            context: this.context,
+            ruleTypeRegistry: this.ruleTypeRegistry,
+            alertingEventLogger: this.alertingEventLogger,
+          })
+        ).rule.schedule
+      );
     } catch (err) {
       stateWithMetrics = asErr(err);
       schedule = asErr(err);

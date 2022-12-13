@@ -306,21 +306,22 @@
 >       helper: () => 'winning',
 293a271
 >     // @ts-expect-error
-295,298c273,275
+295,299d272
 <     var helpers = {
 <       './helper': function() {
 <         return 'fail';
 <       }
----
-> 
->     const helpers = {
->       './helper': () => 'fail',
-301,309c278,279
+<     };
+301,304c274,276
 <     expectTemplate('{{./helper 1}}')
 <       .withInput(hash)
 <       .withHelpers(helpers)
 <       .toCompileTo('winning');
-< 
+---
+>     const helpers = {
+>       './helper': () => 'fail',
+>     };
+306,309c278,279
 <     expectTemplate('{{hash/helper 1}}')
 <       .withInput(hash)
 <       .withHelpers(helpers)
@@ -431,19 +432,19 @@
 >       expect(kbnHandlebarsEnv!.helpers.foo).toBeDefined();
 >       kbnHandlebarsEnv!.unregisterHelper('foo');
 >       expect(kbnHandlebarsEnv!.helpers.foo).toBeUndefined();
-398,404c362,368
+398,400c362,364
 <     it('allows multiple globals', function() {
 <       var helpers = handlebarsEnv.helpers;
 <       handlebarsEnv.helpers = {};
-< 
-<       handlebarsEnv.registerHelper({
-<         if: helpers['if'],
-<         world: function() {
 ---
 >     it('allows multiple globals', () => {
 >       const ifHelper = kbnHandlebarsEnv!.helpers.if;
 >       deleteAllKeys(kbnHandlebarsEnv!.helpers);
-> 
+402,404c366,368
+<       handlebarsEnv.registerHelper({
+<         if: helpers['if'],
+<         world: function() {
+---
 >       kbnHandlebarsEnv!.registerHelper({
 >         if: ifHelper,
 >         world() {

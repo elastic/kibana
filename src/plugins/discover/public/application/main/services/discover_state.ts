@@ -98,6 +98,10 @@ export interface AppState {
    * Number of rows in the grid per page
    */
   rowsPerPage?: number;
+  /**
+   * Current histogram breakdown field name
+   */
+  breakdownField?: string;
 }
 
 export interface AppStateUrl extends Omit<AppState, 'sort'> {
@@ -447,5 +451,6 @@ function createUrlGeneratorState({
     useHash: false,
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
+    breakdownField: appState.breakdownField,
   };
 }

@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('unifiedHistogramChart');
       // check the table columns
       const columns = await PageObjects.discover.getColumnHeaders();
-      expect(columns).to.eql(['extension.raw', '@timestamp', 'bytes']);
+      expect(columns).to.eql(['@timestamp', 'extension.raw', 'bytes']);
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
     });
@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('unifiedHistogramChart');
       // check the columns
       const columns = await PageObjects.discover.getColumnHeaders();
-      expect(columns).to.eql(['extension.raw', '@timestamp', 'memory']);
+      expect(columns).to.eql(['@timestamp', 'extension.raw', 'memory']);
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
         '( ( bytes > 2000 ) AND ( ( extension.raw: "css" ) OR ( extension.raw: "gif" ) OR ( extension.raw: "jpg" ) ) )'
@@ -175,7 +175,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
-
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
         '( ( bytes > 4000 ) AND ( ( extension.raw: "css" ) OR ( extension.raw: "gif" ) OR ( extension.raw: "jpg" ) ) )'
