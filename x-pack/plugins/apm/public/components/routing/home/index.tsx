@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import { Outlet, Route } from '@kbn/typed-react-router-config';
+import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React, { ComponentProps } from 'react';
 import { offsetRt } from '../../../../common/comparison_rt';
@@ -24,54 +24,10 @@ import { TraceExplorerWaterfall } from '../../app/trace_explorer/trace_explorer_
 import { TraceOverview } from '../../app/trace_overview';
 import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 import { RedirectTo } from '../redirect_to';
-import { ApmMainTemplate } from '../templates/apm_main_template';
 import { ServiceGroupTemplate } from '../templates/service_group_template';
 import { dependencies } from './dependencies';
 import { legacyBackends } from './legacy_backends';
 import { storageExplorer } from './storage_explorer';
-
-export function page<
-  TPath extends string,
-  TChildren extends Record<string, Route> | undefined = undefined,
-  TParams extends t.Type<any> | undefined = undefined
->({
-  path,
-  element,
-  children,
-  title,
-  showServiceGroupSaveButton = false,
-  params,
-}: {
-  path: TPath;
-  element: React.ReactElement<any, any>;
-  children?: TChildren;
-  title: string;
-  showServiceGroupSaveButton?: boolean;
-  params?: TParams;
-}): Record<
-  TPath,
-  {
-    element: React.ReactElement<any, any>;
-  } & (TChildren extends Record<string, Route> ? { children: TChildren } : {}) &
-    (TParams extends t.Type<any> ? { params: TParams } : {})
-> {
-  return {
-    [path]: {
-      element: (
-        <Breadcrumb title={title} href={path}>
-          <ApmMainTemplate
-            pageTitle={title}
-            showServiceGroupSaveButton={showServiceGroupSaveButton}
-          >
-            {element}
-          </ApmMainTemplate>
-        </Breadcrumb>
-      ),
-      children,
-      params,
-    },
-  } as any;
-}
 
 function serviceGroupPage<TPath extends string>({
   path,
