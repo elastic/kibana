@@ -66,7 +66,7 @@ describe('normalizeQuery', () => {
   test('should remove the top level aggregation if filter.match_all is empty', () => {
     const doc = getMockedDoc();
 
-    doc.aggs[seriesId].filter = {
+    doc.aggs[seriesId].indexFilter = {
       match_all: {},
     };
 
@@ -88,7 +88,7 @@ describe('normalizeQuery', () => {
   test('should not remove the top level aggregation if filter.match_all is not empty', () => {
     const doc = getMockedDoc();
 
-    doc.aggs[seriesId].filter = {
+    doc.aggs[seriesId].indexFilter = {
       match_all: { filter: 1 },
     };
 
@@ -103,7 +103,7 @@ describe('normalizeQuery', () => {
     const doc = getMockedDoc();
     const pipelineId = 'd4167fe0-afb0-11e9-b141-7b94c69f37eb';
 
-    doc.aggs[seriesId].filter = {
+    doc.aggs[seriesId].indexFilter = {
       match_all: {},
     };
     doc.aggs[seriesId].aggs[pipelineId] = {

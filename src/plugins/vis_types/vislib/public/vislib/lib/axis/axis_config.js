@@ -131,7 +131,7 @@ export class AxisConfig {
       }
 
       if (this.isLogScale()) {
-        this._values.labels.filter = true;
+        this._values.labels.indexFilter = true;
       }
     }
 
@@ -143,7 +143,7 @@ export class AxisConfig {
     // horizontal axis with ordinal scale should have labels rotated (so we can fit more)
     // unless explicitly overridden by user
     if (this.isHorizontal() && this.isOrdinal()) {
-      this._values.labels.filter = _.get(axisConfigArgs, 'labels.filter', false);
+      this._values.labels.indexFilter = _.get(axisConfigArgs, 'labels.filter', false);
       this._values.labels.rotate = _.get(axisConfigArgs, 'labels.rotate', 90);
       this._values.labels.truncate = _.get(axisConfigArgs, 'labels.truncate', 100);
     }
