@@ -41,9 +41,12 @@ export interface Services {
   useToasts: () => ToastsStart;
 }
 
-export type ObservabilityAlertSearchBarProps = AlertSearchBarContainerState &
-  AlertSearchBarStateTransitions &
-  CommonAlertSearchBarProps;
+export interface ObservabilityAlertSearchBarProps
+  extends AlertSearchBarContainerState,
+    AlertSearchBarStateTransitions,
+    CommonAlertSearchBarProps {
+  services: Services;
+}
 
 interface AlertSearchBarContainerState {
   rangeFrom: string;
