@@ -7,7 +7,34 @@ date: 2022-07-07
 tags: ['kibana', 'onboarding', 'setup', 'performance', 'development', 'telemetry']
 ---
 
-## Reporting performance events
+## Build and track Kibana performance metrics
+Having access to performance metrics allows us to better understand user experience across Kibana, identify issues and fix it.
+
+# What can be defined as metric?
+
+What kind of metrics we consider? How much time it takes to start Kibana server, create saved objects or render dashboard with multiple visualizations
+just to name a few.
+
+
+#How do we collect metrics?
+We use event-based telemetry (EBT) to report metrics to Elastic 'stack-telemetry' Staging cluster.
+
+Let's assume we intend to report the performance of a specific action called `APP_ACTION`.
+In order to do so, we need to first measure the timing of that action.
+Once we have the time measurement, we can use the `reportPerformanceMetricEvent` API to report it.
+
+```typescript
+reportPerformanceMetricEvent(analytics, {
+  eventName: APP_ACTION,     
+  duration, // Duration in milliseconds
+});
+```
+
+
+
+
+
+In order to better understand the performance of Kibana features, e.g. how much  monitor performance of Kibana The process can be divided into 2 part
 
 ### Simple performance events
 
