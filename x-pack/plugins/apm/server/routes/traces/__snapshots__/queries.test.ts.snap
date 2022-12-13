@@ -9,7 +9,7 @@ Object {
   },
   "body": Object {
     "_source": Array [
-      "timestamp",
+      "timestamp.us",
       "trace.id",
       "transaction.id",
       "parent.id",

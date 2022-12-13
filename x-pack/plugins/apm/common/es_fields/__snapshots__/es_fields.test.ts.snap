@@ -246,11 +246,7 @@ exports[`Error SPAN_TYPE 1`] = `undefined`;
 
 exports[`Error TIER 1`] = `undefined`;
 
-exports[`Error TIMESTAMP 1`] = `
-Object {
-  "us": 1337,
-}
-`;
+exports[`Error TIMESTAMP 1`] = `1337`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
@@ -515,11 +511,7 @@ exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
 exports[`Span TIER 1`] = `undefined`;
 
-exports[`Span TIMESTAMP 1`] = `
-Object {
-  "us": 1337,
-}
-`;
+exports[`Span TIMESTAMP 1`] = `1337`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
@@ -802,11 +794,7 @@ exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
 exports[`Transaction TIER 1`] = `undefined`;
 
-exports[`Transaction TIMESTAMP 1`] = `
-Object {
-  "us": 1337,
-}
-`;
+exports[`Transaction TIMESTAMP 1`] = `1337`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 
