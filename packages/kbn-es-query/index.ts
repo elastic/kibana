@@ -58,8 +58,6 @@ export {
   isOfAggregateQueryType,
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
-  getTimeFieldFromTextBasedQuery,
-  removeCustomFilteringFromQuery,
 } from './src/es_query';
 
 export {

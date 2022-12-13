@@ -44,31 +44,3 @@ export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
   }
   return '';
 }
-
-export function getTimeFieldFromTextBasedQuery(textBasedQuery: AggregateQuery): string | undefined {
-  if ('sql' in textBasedQuery) {
-    const query = textBasedQuery.sql?.replaceAll('"', '').replaceAll("'", '');
-    const timeFieldNameMatch = query?.match(/TIMEFILTER\((.*)\)/);
-    const timeFieldName = timeFieldNameMatch ? timeFieldNameMatch[1] : undefined;
-    return timeFieldName;
-  }
-  return undefined;
-}
-
-export function removeCustomFilteringFromQuery(
-  textBasedQuery: AggregateQuery,
-  timeField?: string
-): AggregateQuery {
-  if ('sql' in textBasedQuery) {
-    let query = textBasedQuery.sql;
-    if (timeField) {
-      query = query
-        .replace(` WHERE TIMEFILTER("${timeField}")`, '')
-        .replace(` WHERE TIMEFILTER(${timeField})`, '');
-      return {
-        sql: query,
-      };
-    }
-  }
-  return textBasedQuery;
-}

@@ -5,18 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import {
-  isOfAggregateQueryType,
-  Query,
-  getTimeFieldFromTextBasedQuery,
-  removeCustomFilteringFromQuery,
-} from '@kbn/es-query';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryState } from '..';
 import { textBasedQueryStateToExpressionAst } from './text_based_query_state_to_ast';
 
 interface Args extends QueryState {
-  dataViewsService: DataViewsContract;
+  dataView: DataView;
   inputQuery?: Query;
   timeFieldName?: string;
 }
@@ -32,19 +27,16 @@ export async function textBasedQueryStateToAstWithValidation({
   query,
   inputQuery,
   time,
-  dataViewsService,
+  dataView,
 }: Args) {
   let ast;
   if (query && isOfAggregateQueryType(query)) {
-    const timeField = getTimeFieldFromTextBasedQuery(query);
-    const finalQuery = removeCustomFilteringFromQuery(query, timeField);
-
     ast = textBasedQueryStateToExpressionAst({
       filters,
-      query: finalQuery,
+      query,
       inputQuery,
       time,
-      timeFieldName: timeField,
+      timeFieldName: dataView.timeFieldName,
     });
   }
   return ast;
