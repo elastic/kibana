@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ActionEdges } from '../../../common/search_strategy';
 import type { AlertEcsData } from '../../common/contexts';
 
 export interface OsqueryActionResultsProps {
   agentIds?: string[];
   ruleName?: string[];
   ecsData: AlertEcsData;
-  actionItems?: estypes.SearchResponse<object>['hits']['hits'];
+  actionItems?: ActionEdges;
 }
