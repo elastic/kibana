@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { LazyOptInExampleFlyout } from './lazy_opt_in_example_flyout';
-export { telemetryManagementSectionWrapper } from './telemetry_management_section_wrapper';
+import { lazy } from 'react';
+
+export const LazyOptInExampleFlyout = lazy(() =>
+  import('./opt_in_example_flyout').then(({ OptInExampleFlyout }) => ({
+    default: OptInExampleFlyout,
+  }))
+);
