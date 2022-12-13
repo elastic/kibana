@@ -169,7 +169,7 @@ const generateCommonArguments = (
     truncateLegend:
       layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
     palette: generatePaletteAstArguments(paletteService, state.palette),
-    addTooltip: false,
+    addTooltip: true,
   };
 };
 

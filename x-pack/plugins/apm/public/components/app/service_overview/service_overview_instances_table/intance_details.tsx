@@ -30,7 +30,7 @@ import {
   KUBERNETES_DEPLOYMENT_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
 
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { isPending } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getAgentIcon } from '../../../shared/agent_icon/get_agent_icon';
@@ -103,10 +103,7 @@ export function InstanceDetails({
     serviceNodeName,
   });
 
-  if (
-    status === FETCH_STATUS.LOADING ||
-    status === FETCH_STATUS.NOT_INITIATED
-  ) {
+  if (isPending(status)) {
     return (
       <div style={{ width: '50%' }}>
         <EuiLoadingContent data-test-subj="loadingSpinner" />

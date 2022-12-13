@@ -26,6 +26,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
   // User actions
   const clickNextButton = () => {
     testBed.find('nextButton').simulate('click');
+    jest.advanceTimersByTime(0); // advance timers to allow the form to validate
   };
 
   const clickBackButton = () => {
@@ -38,6 +39,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
   const clickEditFieldUpdateButton = () => {
     testBed.find('editFieldUpdateButton').simulate('click');
+    jest.advanceTimersByTime(0); // advance timers to allow the form to validate
   };
 
   const deleteMappingsFieldAt = (index: number) => {
@@ -102,6 +104,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
       await act(async () => {
         form.setInputValue('nameParameterInput', name);
+        jest.advanceTimersByTime(0);
         find('createFieldForm.mockComboBox').simulate('change', [
           {
             label: type,
@@ -112,6 +115,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
       await act(async () => {
         find('createFieldForm.addButton').simulate('click');
+        jest.advanceTimersByTime(0);
       });
 
       component.update();
@@ -155,6 +159,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
       act(() => {
         find('mockComboBox').simulate('change', indexPatternsFormatted); // Using mocked EuiComboBox
+        jest.advanceTimersByTime(0);
       });
     }
 
@@ -201,6 +206,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
     await act(async () => {
       clickNextButton();
+      jest.advanceTimersByTime(0);
     });
 
     component.update();
@@ -214,11 +220,13 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
         find('settingsEditor').simulate('change', {
           jsonString: settings,
         }); // Using mocked EuiCodeEditor
+        jest.advanceTimersByTime(0);
       }
     });
 
     await act(async () => {
       clickNextButton();
+      jest.advanceTimersByTime(0);
     });
 
     component.update();
@@ -236,6 +244,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
     await act(async () => {
       clickNextButton();
+      jest.advanceTimersByTime(0);
     });
 
     component.update();
@@ -249,6 +258,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
         find('aliasesEditor').simulate('change', {
           jsonString: aliases,
         }); // Using mocked EuiCodeEditor
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     }

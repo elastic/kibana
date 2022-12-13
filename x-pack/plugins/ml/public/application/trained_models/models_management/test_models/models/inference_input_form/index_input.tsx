@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo, useCallback } from 'react';
+import React, { FC, useState, useMemo, useCallback, FormEventHandler } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,6 +18,7 @@ import {
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiText,
+  EuiForm,
 } from '@elastic/eui';
 
 import { ErrorMessage } from '../../inference_error';
@@ -41,17 +42,21 @@ export const IndexInputForm: FC<Props> = ({ inferrer }) => {
   const outputComponent = useMemo(() => inferrer.getOutputComponent(), [inferrer]);
   const infoComponent = useMemo(() => inferrer.getInfoComponent(), [inferrer]);
 
-  const run = useCallback(async () => {
-    setErrorText(null);
-    try {
-      await inferrer.infer();
-    } catch (e) {
-      setErrorText(extractErrorMessage(e));
-    }
-  }, [inferrer]);
+  const run: FormEventHandler<HTMLFormElement> = useCallback(
+    async (event) => {
+      event.preventDefault();
+      setErrorText(null);
+      try {
+        await inferrer.infer();
+      } catch (e) {
+        setErrorText(extractErrorMessage(e));
+      }
+    },
+    [inferrer]
+  );
 
   return (
-    <>
+    <EuiForm component={'form'} onSubmit={run}>
       <>{infoComponent}</>
       <InferenceInputFormIndexControls inferrer={inferrer} data={data} />
 
@@ -60,9 +65,10 @@ export const IndexInputForm: FC<Props> = ({ inferrer }) => {
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButton
-            onClick={run}
             disabled={runningState === RUNNING_STATE.RUNNING || isValid === false}
             fullWidth={false}
+            data-test-subj={'mlTestModelTestButton'}
+            type={'submit'}
           >
             <FormattedMessage
               id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.runButton"
@@ -105,6 +111,6 @@ export const IndexInputForm: FC<Props> = ({ inferrer }) => {
         : null}
 
       {runningState === RUNNING_STATE.FINISHED ? <>{outputComponent}</> : null}
-    </>
+    </EuiForm>
   );
 };

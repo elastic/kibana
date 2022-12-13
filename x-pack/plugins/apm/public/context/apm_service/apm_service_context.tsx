@@ -19,6 +19,7 @@ import { useApmParams } from '../../hooks/use_apm_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
 import { replace } from '../../components/shared/links/url_helpers';
+import { FETCH_STATUS } from '../../hooks/use_fetcher';
 
 export interface APMServiceContextValue {
   serviceName: string;
@@ -27,12 +28,14 @@ export interface APMServiceContextValue {
   transactionTypes: string[];
   runtimeName?: string;
   fallbackToTransactions: boolean;
+  serviceAgentStatus: FETCH_STATUS;
 }
 
 export const APMServiceContext = createContext<APMServiceContextValue>({
   serviceName: '',
   transactionTypes: [],
   fallbackToTransactions: false,
+  serviceAgentStatus: FETCH_STATUS.NOT_INITIATED,
 });
 
 export function ApmServiceContextProvider({
@@ -50,7 +53,11 @@ export function ApmServiceContextProvider({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { agentName, runtimeName } = useServiceAgentFetcher({
+  const {
+    agentName,
+    runtimeName,
+    status: serviceAgentStatus,
+  } = useServiceAgentFetcher({
     serviceName,
     start,
     end,
@@ -82,6 +89,7 @@ export function ApmServiceContextProvider({
         transactionTypes,
         runtimeName,
         fallbackToTransactions,
+        serviceAgentStatus,
       }}
       children={children}
     />
