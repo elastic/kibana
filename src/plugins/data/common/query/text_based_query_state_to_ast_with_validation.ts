@@ -11,7 +11,7 @@ import type { QueryState } from '..';
 import { textBasedQueryStateToExpressionAst } from './text_based_query_state_to_ast';
 
 interface Args extends QueryState {
-  dataView: DataView;
+  dataView?: DataView;
   inputQuery?: Query;
   timeFieldName?: string;
 }
@@ -36,7 +36,7 @@ export async function textBasedQueryStateToAstWithValidation({
       query,
       inputQuery,
       time,
-      timeFieldName: dataView.timeFieldName,
+      timeFieldName: dataView?.timeFieldName,
     });
   }
   return ast;
