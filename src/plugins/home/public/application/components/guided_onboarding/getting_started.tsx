@@ -95,16 +95,18 @@ export const GettingStarted = () => {
     }
   }, [cloud, history]);
 
+  useEffect(() => {
+    // disable welcome screen on the home page
+    localStorage.setItem(KEY_ENABLE_WELCOME, JSON.stringify(false));
+  }, []);
+
   const onSkip = async () => {
     try {
       await guidedOnboardingService?.skipGuidedOnboarding();
     } catch (error) {
       // if the state update fails, it's safe to ignore the error
     }
-
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
-    // disable welcome screen on the home page
-    localStorage.setItem(KEY_ENABLE_WELCOME, JSON.stringify(false));
     application.navigateToApp('home');
   };
   const { euiTheme } = useEuiTheme();
