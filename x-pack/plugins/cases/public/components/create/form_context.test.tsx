@@ -91,6 +91,8 @@ const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
   isLoadingConnectors: false,
   connectors: [],
   withSteps: true,
+  owner: ['securitySolution'],
+  draftStorageKey: 'cases.kibana.createCase.description.markdownEditor',
 };
 
 const defaultPostPushToService = {
