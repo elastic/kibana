@@ -182,7 +182,7 @@ describe('Create case', () => {
 
   afterEach(() => {
     sessionStorage.removeItem(defaultCreateCaseForm.draftStorageKey);
-  })
+  });
 
   describe('Step 1 - Case Fields', () => {
     it('renders correctly', async () => {
