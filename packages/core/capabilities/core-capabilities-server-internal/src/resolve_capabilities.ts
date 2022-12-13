@@ -7,6 +7,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { withSpan } from '@kbn/apm-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
@@ -27,12 +28,14 @@ export const getCapabilitiesResolver =
     applications: string[],
     useDefaultCapabilities: boolean
   ): Promise<Capabilities> => {
-    return resolveCapabilities(
-      capabilities(),
-      switchers(),
-      request,
-      applications,
-      useDefaultCapabilities
+    return withSpan({ name: 'resolve capabilities', type: 'capabilities' }, () =>
+      resolveCapabilities(
+        capabilities(),
+        switchers(),
+        request,
+        applications,
+        useDefaultCapabilities
+      )
     );
   };
 

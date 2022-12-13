@@ -62,6 +62,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
         await validateRuleDefaultExceptionList({
           exceptionsList: request.body.exceptions_list,
           rulesClient,
+          ruleRuleId: request.body.rule_id,
           ruleId: request.body.id,
         });
 
