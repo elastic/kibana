@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { DefaultEmail as DefaultEmailType } from '../../../../../../common/runtime_types';
 
 export const validateEmail = (email: string) => {
-  return String(email)
+  return email
     .toLowerCase()
     .match(
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
