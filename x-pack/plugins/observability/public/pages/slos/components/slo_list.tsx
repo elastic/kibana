@@ -5,24 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { SloListItem } from './slo_list_item';
 
 export function SloList() {
+  const [shouldReload, setShouldReload] = useState(false);
+
   const {
-    loading,
     sloList: { results: slos = [] },
-  } = useFetchSloList();
+  } = useFetchSloList({ refetch: shouldReload });
+
+  const handleDelete = () => {
+    setShouldReload(true);
+  };
+
+  useEffect(() => {
+    if (shouldReload) {
+      setShouldReload(false);
+    }
+  }, [shouldReload]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="sloList">
-      {!loading && slos.length
+      {slos.length
         ? slos.map((slo) => (
             <EuiFlexItem key={slo.id}>
-              <SloListItem slo={slo} />
+              <SloListItem slo={slo} onDelete={handleDelete} />
             </EuiFlexItem>
           ))
         : null}
