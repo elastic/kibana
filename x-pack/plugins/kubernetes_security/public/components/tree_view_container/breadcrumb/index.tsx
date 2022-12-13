@@ -129,7 +129,7 @@ export const Breadcrumb = ({
   return (
     <div css={styles.breadcrumb}>
       <EuiFlexGroup justifyContent={'spaceBetween'}>
-        <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <EuiFlexItem css={styles.breadcrumbsWrapper}>
           {renderBreadcrumbLink(
             KubernetesTreeViewLevels.clusterId,
             KUBERNETES_COLLECTION_ICONS_PROPS.clusterId,
