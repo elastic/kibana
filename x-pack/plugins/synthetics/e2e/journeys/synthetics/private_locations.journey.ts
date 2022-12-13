@@ -72,7 +72,7 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
   });
   let locationId: string;
   step('Click text=AlertingPrivate LocationsData Retention', async () => {
-    await page.click('text=AlertingPrivate LocationsData Retention');
+    await page.click('text=Private Locations');
     await page.click('h1:has-text("Settings")');
 
     const privateLocations = await getPrivateLocations(params);

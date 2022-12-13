@@ -8,8 +8,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 
-import type { SLO, SLOList } from '../../typings/slo';
+import type { SLOList } from '../../typings/slo';
 import { useDataFetcher } from '../use_data_fetcher';
+import { toSLO } from '../../utils/slo/slo';
 
 const EMPTY_LIST: SLOList = {
   results: [],
@@ -87,19 +88,5 @@ function toSLOList(response: Record<string, unknown>): SLOList {
     page: Number(response.page),
     perPage: Number(response.per_page),
     total: Number(response.total),
-  };
-}
-
-function toSLO(result: any): SLO {
-  return {
-    id: String(result.id),
-    name: String(result.name),
-    objective: { target: Number(result.objective.target) },
-    summary: {
-      sliValue: Number(result.summary.sli_value),
-      errorBudget: {
-        remaining: Number(result.summary.error_budget.remaining),
-      },
-    },
   };
 }
