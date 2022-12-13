@@ -46,7 +46,6 @@ import type {
   CheckVersionIndexReadyActions,
   UpdateTargetMappingsMeta,
   CheckTargetMappingsState,
-  InitState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
