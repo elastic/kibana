@@ -393,8 +393,10 @@ export default function ({ getService }: FtrProviderContext) {
         const { total } = savedObjectsResponse.body;
         expect(total).to.eql(monitors.length);
         const apiResponsePolicy = await supertest.get(
-          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+          '/api/fleet/package_policies?page=1&perPage=2000'
         );
+        // TMP debgging tests
+        console.log('apiResponsePolicy.body', apiResponsePolicy.body);
 
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
