@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useIsUserTyping } from '../../../common/use_is_user_typing';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import type { Case } from '../../../../common';
@@ -31,27 +31,32 @@ import type { ItemSelectableOption, ItemsSelectionState } from '../types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
+import { SmallUserAvatar } from '../../user_profiles/small_user_avatar';
 
 interface Props {
   selectedCases: Case[];
   userProfiles: Map<string, UserProfileWithAvatar>;
   isLoading: boolean;
+  unknownUsers: string[];
   onChangeAssignees: (args: ItemsSelectionState) => void;
 }
 
-type AssigneeSelectableOption = ItemSelectableOption<Partial<UserProfileWithAvatar>>;
+type AssigneeSelectableOption = ItemSelectableOption<
+  Partial<UserProfileWithAvatar> & { unknownUser?: boolean }
+>;
 
 const EditAssigneesSelectableComponent: React.FC<Props> = ({
   selectedCases,
   userProfiles,
   isLoading,
+  unknownUsers,
   onChangeAssignees,
 }) => {
   const { owner: owners } = useCasesContext();
   const { euiTheme } = useEuiTheme();
   const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
-  // TODO: Include unknown users
-  const userProfileIds = [...userProfiles.keys()];
+
+  const userProfileIds = [...userProfiles.keys(), ...unknownUsers];
 
   const [searchValue, setSearchValue] = useState<string>('');
   const { data: searchResultUserProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
@@ -62,13 +67,12 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
 
   const itemToSelectableOption = useCallback(
     (item: { key: string; data: Record<string, unknown> }): AssigneeSelectableOption => {
-      // TODO: Fix types
-      const userProfileFromData = item.data as unknown as UserProfileWithAvatar;
+      const userProfileFromData = item.data as unknown as Partial<UserProfileWithAvatar>;
       const userProfile = isEmpty(userProfileFromData)
         ? userProfiles.get(item.key)
         : userProfileFromData;
 
-      if (userProfile) {
+      if (isUserProfile(userProfile)) {
         return toSelectableOption(userProfile);
       }
 
@@ -80,12 +84,12 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
         return toSelectableOption(profileInSuggestedUsers);
       }
 
-      // TODO: Put unknown label
       return {
         key: item.key,
-        label: item.key,
+        label: i18n.UNKNOWN,
+        data: { unknownUser: true },
         'data-test-subj': `cases-actions-assignees-edit-selectable-assignee-${item.key}`,
-      } as AssigneeSelectableOption;
+      } as unknown as AssigneeSelectableOption;
     },
     [searchResultUserProfiles, userProfiles]
   );
@@ -111,10 +115,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
     (option: AssigneeSelectableOption, search: string) => {
       const icon = option.itemIcon ?? 'empty';
       const dataTestSubj = `cases-actions-assignees-edit-selectable-assignee-${option.key}-icon-${icon}`;
-
-      if (!option.user) {
-        return <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>;
-      }
+      const userInfo = option.user ? { user: option.user, data: option.data } : undefined;
 
       return (
         <EuiFlexGroup>
@@ -129,7 +130,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
                 <EuiIcon type={icon} data-test-subj={dataTestSubj} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <UserAvatar user={option.user} avatar={option.data?.avatar} size="s" />
+                <SmallUserAvatar userInfo={userInfo} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -142,7 +143,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
             <EuiFlexItem>
               <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
             </EuiFlexItem>
-            {option.user.email && option.user.email !== option.label ? (
+            {option.user?.email && option.user?.email !== option.label ? (
               <EuiFlexItem grow={false}>
                 <EuiTextColor color={option.disabled ? 'disabled' : 'subdued'}>
                   {searchValue ? (
@@ -250,11 +251,16 @@ const getDisplayOptions = ({
   /**
    * In the initial view, when the user does not perform any search,
    * we want to filter out options that are not in the initial user profile
-   * mapping or profiles returned by the search result that are not selected
+   * mapping or profiles returned by the search result that are not selected.
+   * We want to keep unknown users as they can only be available from the
+   * selected cases and not from search results
    */
   const filteredOptions = isEmpty(searchValue)
     ? options.filter(
-        (option) => initialUserProfiles.has(option?.data?.uid) || option?.data?.itemIcon !== 'empty'
+        (option) =>
+          initialUserProfiles.has(option?.data?.uid) ||
+          option?.data?.itemIcon !== 'empty' ||
+          option.data?.unknownUser
       )
     : [...options];
 
@@ -285,3 +291,7 @@ const isMatchingOption = <Option extends UserProfileWithAvatar | null>(
 ) => {
   return option.key === profile.uid;
 };
+
+const isUserProfile = (
+  userProfile?: Partial<UserProfileWithAvatar>
+): userProfile is UserProfileWithAvatar => !!userProfile && !!userProfile.uid && !!userProfile.user;

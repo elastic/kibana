@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-export { CANCEL } from '../../../common/translations';
+export { CANCEL, UNKNOWN } from '../../../common/translations';
 export { EDITED_CASES, SELECTED_CASES, SAVE_SELECTION, SEARCH_PLACEHOLDER } from '../translations';
 
 export const EDIT_ASSIGNEES = i18n.translate('xpack.cases.actions.assignees.edit', {

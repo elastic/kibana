@@ -29,6 +29,7 @@ describe('EditAssigneesSelectable', () => {
     isLoading: false,
     userProfiles: userProfilesMap,
     onChangeAssignees: jest.fn(),
+    unknownUsers: [],
   };
 
   /**
@@ -43,6 +44,7 @@ describe('EditAssigneesSelectable', () => {
     ],
     isLoading: false,
     userProfiles: userProfilesMap,
+    unknownUsers: [],
     onChangeAssignees: jest.fn(),
   };
 
@@ -357,6 +359,53 @@ describe('EditAssigneesSelectable', () => {
       expect(
         result.getAllByTestId('case-user-profiles-assignees-popover-no-matches')[0]
       ).toBeInTheDocument();
+    });
+
+    await waitForComponentToUpdate();
+  });
+
+  it('shows unknown users', async () => {
+    const result = appMock.render(<EditAssigneesSelectable {...props} unknownUsers={['123']} />);
+
+    await waitFor(() => {
+      expect(result.getByText('Unknown')).toBeInTheDocument();
+    });
+
+    await waitForComponentToUpdate();
+  });
+
+  it('selects unknown users', async () => {
+    const result = appMock.render(<EditAssigneesSelectable {...props} unknownUsers={['123']} />);
+
+    await waitFor(() => {
+      expect(result.getByText('Unknown')).toBeInTheDocument();
+    });
+
+    userEvent.click(result.getByText('Unknown'));
+
+    expect(props.onChangeAssignees).toBeCalledWith({
+      selectedItems: ['u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0', '123'],
+      unSelectedItems: [],
+    });
+
+    await waitForComponentToUpdate();
+  });
+
+  it('deselects unknown users', async () => {
+    const selectedCases = [{ ...basicCase, assignees: [{ uid: '123' }] }];
+    const result = appMock.render(
+      <EditAssigneesSelectable {...props} selectedCases={selectedCases} unknownUsers={['123']} />
+    );
+
+    await waitFor(() => {
+      expect(result.getByText('Unknown')).toBeInTheDocument();
+    });
+
+    userEvent.click(result.getByText('Unknown'));
+
+    expect(props.onChangeAssignees).toBeCalledWith({
+      selectedItems: [],
+      unSelectedItems: ['123'],
     });
 
     await waitForComponentToUpdate();
