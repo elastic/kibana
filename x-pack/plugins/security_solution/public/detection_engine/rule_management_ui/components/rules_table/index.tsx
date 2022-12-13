@@ -48,7 +48,7 @@ export const AllRules = React.memo(() => {
         <Route path="/rules/:tabName">
           <TabContainer />
         </Route>
-        <Route index>
+        <Route>
           <TabContainer />
         </Route>
       </Switch>
