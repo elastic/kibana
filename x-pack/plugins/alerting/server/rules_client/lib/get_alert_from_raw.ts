@@ -26,6 +26,16 @@ import {
 } from '../common';
 import { RulesClientContext } from '../types';
 
+export interface GetAlertFromRawParams {
+  id: string;
+  ruleTypeId: string;
+  rawRule: RawRule;
+  references: SavedObjectReference[] | undefined;
+  includeLegacyId?: boolean;
+  excludeFromPublicApi?: boolean;
+  includeSnoozeData?: boolean;
+}
+
 export function getAlertFromRaw<Params extends RuleTypeParams>(
   context: RulesClientContext,
   id: string,
