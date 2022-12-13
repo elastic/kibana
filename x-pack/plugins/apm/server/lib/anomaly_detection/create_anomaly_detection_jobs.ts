@@ -70,8 +70,11 @@ export async function createAnomalyDetectionJobs({
             apmMetricIndex,
           })
         );
-      } catch ({ id, error }) {
-        failedJobs.push({ id, error });
+      } catch (e) {
+        if (!e.id || !e.error) {
+          throw e;
+        }
+        failedJobs.push({ id: e.id, error: e.error });
       }
     }
 
