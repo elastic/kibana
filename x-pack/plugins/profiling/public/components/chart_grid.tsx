@@ -44,6 +44,7 @@ export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts, showFrames 
                 metadata={subchart.Metadata}
                 height={200}
                 data={subchart.Series}
+                sample={null}
                 showAxes
                 onShowMoreClick={() => {
                   setSelectedSubchart(subchart);
@@ -71,6 +72,7 @@ export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts, showFrames 
             metadata={selectedSubchart.Metadata}
             height={200}
             data={selectedSubchart.Series}
+            sample={null}
             showAxes
             onShowMoreClick={null}
             showFrames={showFrames}
