@@ -20,9 +20,9 @@ import {
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
-import { createApmSourceMap } from './create_apm_source_map_doc';
-import { deleteApmSourceMapDoc } from './delete_apm_sourcemap';
-import { runFleetSourcemapArtifactsMigration } from './migrate_fleet_source_map_artifacts';
+import { createApmSourceMap } from './create_apm_source_map';
+import { deleteApmSourceMap } from './delete_apm_sourcemap';
+import { runFleetSourcemapArtifactsMigration } from './schedule_source_map_migration';
 
 export const sourceMapRt = t.intersection([
   t.type({
@@ -92,7 +92,12 @@ const uploadSourceMapRoute = createApmServerRoute({
         .pipe(sourceMapRt),
     }),
   }),
-  handler: async ({ params, plugins, core }): Promise<Artifact | undefined> => {
+  handler: async ({
+    params,
+    plugins,
+    core,
+    logger,
+  }): Promise<Artifact | undefined> => {
     const {
       service_name: serviceName,
       service_version: serviceVersion,
@@ -119,8 +124,9 @@ const uploadSourceMapRoute = createApmServerRoute({
 
         // sync source map to APM managed index
         await createApmSourceMap({
-          fleetId: artifact.id,
           internalESClient,
+          logger,
+          fleetId: artifact.id,
           created: artifact.created,
           sourceMapContent,
           bundleFilepath: cleanedBundleFilepath,
@@ -165,7 +171,7 @@ const deleteSourceMapRoute = createApmServerRoute({
     try {
       if (fleetPluginStart) {
         await deleteFleetSourcemapArtifact({ id, fleetPluginStart });
-        await deleteApmSourceMapDoc({ internalESClient, fleetId: id });
+        await deleteApmSourceMap({ internalESClient, fleetId: id });
         await updateSourceMapsOnFleetPolicies({
           core,
           fleetPluginStart,

@@ -56,7 +56,8 @@ import {
 } from '../common/es_fields/apm';
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
-import { scheduleFleetSourceMapArtifactsMigration } from './routes/source_maps/migrate_fleet_source_map_artifacts';
+import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source_map_migration';
+import { createApmSourceMapTemplate } from './routes/source_maps/create_apm_source_map_index_template';
 
 export class APMPlugin
   implements
@@ -110,6 +111,9 @@ export class APMPlugin
 
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
+
+    const getPluginStart = () =>
+      core.getStartServices().then(([coreStart, pluginStart]) => pluginStart);
 
     const { ruleDataService } = plugins.ruleRegistry;
     const ruleDataClient = ruleDataService.initializeIndex({
@@ -225,8 +229,9 @@ export class APMPlugin
     const taskManager = plugins.taskManager;
 
     // create source map index and run migrations
-    scheduleFleetSourceMapArtifactsMigration({
+    scheduleSourceMapMigration({
       coreStartPromise: getCoreStart(),
+      pluginStartPromise: getPluginStart(),
       fleetStartPromise,
       taskManager,
       logger: this.logger,
@@ -274,11 +279,14 @@ export class APMPlugin
     const logger = this.logger;
     const client = core.elasticsearch.client.asInternalUser;
 
-    // create agent configuration index without blocking start lifecycle
+    // create .apm-agent-configuration index without blocking start lifecycle
     createApmAgentConfigurationIndex({ client, logger });
 
-    // create custom link index without blocking start lifecycle
+    // create .apm-custom-link index without blocking start lifecycle
     createApmCustomLinkIndex({ client, logger });
+
+    // create .apm-source-map index without blocking start lifecycle
+    createApmSourceMapTemplate({ client, logger });
 
     // TODO: remove in 9.0
     migrateLegacyAPMIndicesToSpaceAware({ coreStart: core, logger });

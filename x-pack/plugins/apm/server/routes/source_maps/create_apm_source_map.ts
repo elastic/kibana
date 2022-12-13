@@ -7,13 +7,15 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isElasticsearchVersionConflictError } from '@kbn/fleet-plugin/server/errors/utils';
+import { Logger } from '@kbn/core/server';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
-import { ApmSourceMap } from './create_apm_source_map_index';
+import { ApmSourceMap } from './create_apm_source_map_index_template';
 import { SourceMap } from './route';
 import { getEncodedContent, getSourceMapId } from './sourcemap_utils';
 
 export async function createApmSourceMap({
   internalESClient,
+  logger,
   fleetId,
   created,
   sourceMapContent,
@@ -22,6 +24,7 @@ export async function createApmSourceMap({
   serviceVersion,
 }: {
   internalESClient: ElasticsearchClient;
+  logger: Logger;
   fleetId: string;
   created: string;
   sourceMapContent: SourceMap;
@@ -42,9 +45,11 @@ export async function createApmSourceMap({
   };
 
   try {
+    const id = getSourceMapId({ serviceName, serviceVersion, bundleFilepath });
+    logger.debug(`Create APM source map ${id}`);
     return await internalESClient.create<ApmSourceMap>({
       index: APM_SOURCE_MAP_INDEX,
-      id: getSourceMapId({ serviceName, serviceVersion, bundleFilepath }),
+      id,
       body: doc,
     });
   } catch (e) {

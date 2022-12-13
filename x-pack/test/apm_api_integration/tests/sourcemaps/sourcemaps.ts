@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { ApmSourceMap } from '@kbn/apm-plugin/server/routes/source_maps/create_apm_source_map_index_template';
 import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
 import expect from '@kbn/expect';
 import { first, last, times } from 'lodash';
@@ -13,6 +14,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
+  const esClient = getService('es');
 
   async function uploadSourcemap({
     bundleFilePath,
@@ -67,7 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      it('can upload a source map', async () => {
+      before(async () => {
         resp = await uploadSourcemap({
           serviceName: 'my_service',
           serviceVersion: '1.0.0',
@@ -78,7 +80,38 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             mappings: '',
           },
         });
-        expect(resp).to.not.empty();
+      });
+
+      it('is uploaded as a fleet artifact', async () => {
+        const res = await esClient.search({
+          index: '.fleet-artifacts',
+          size: 1,
+          query: {
+            bool: {
+              filter: [{ term: { type: 'sourcemap' } }, { term: { package_name: 'apm' } }],
+            },
+          },
+        });
+
+        // @ts-expect-error
+        expect(res.hits.hits[0]._source.identifier).to.be('my_service-1.0.0');
+      });
+
+      it('is added to .apm-source-map index', async () => {
+        const res = await esClient.search({
+          index: '.apm-source-map',
+        });
+
+        const doc = res.hits.hits[0]._source as ApmSourceMap;
+        expect(doc.content).to.be(
+          'eJyrVipLLSrOzM9TsjI0MtZRKs4vLUpOLVayilZSitVRyk0sKMjMSwfylZRqAURLDgo='
+        );
+        expect(doc.content_sha256).to.be(
+          '02dd950aa88a66183d312a7a5f44d72fc9e3914cdbbe5e3a04f1509a8a3d7d83'
+        );
+        expect(doc.file.path).to.be('bar');
+        expect(doc.service.name).to.be('my_service');
+        expect(doc.service.version).to.be('1.0.0');
       });
     });
 
@@ -144,10 +177,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('delete source maps', () => {
-      it('can delete a source map', async () => {
+    function getRandomString() {
+      return Math.random().toString(36).substring(7);
+    }
+
+    describe.only('delete source maps', () => {
+      before(async () => {
         const sourcemap = await uploadSourcemap({
-          serviceName: 'my_service',
+          serviceName: `my_service_${getRandomString()}`,
           serviceVersion: '1.0.0',
           bundleFilePath: 'bar',
           sourcemap: {
@@ -157,11 +194,54 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
+        // wait for the sourcemap to be indexed in .apm-source-map index before deleting it
+        await waitFor(async () => {
+          const res = await esClient.search({ index: '.apm-source-map' });
+          return res.hits.hits.length === 1;
+        });
+
         await deleteSourcemap(sourcemap.id);
+      });
+
+      it('can delete a fleet source map artifact', async () => {
         const { artifacts, total } = await listSourcemaps();
         expect(artifacts).to.be.empty();
         expect(total).to.be(0);
       });
+
+      it('can delete an apm source map', async () => {
+        // wait for the sourcemap to be deleted from .apm-source-map index before checking
+        await waitFor(async () => {
+          const res = await esClient.search({ index: '.apm-source-map' });
+          return res.hits.hits.length === 0;
+        });
+
+        // check that the sourcemap is deleted from .apm-source-map index
+        const res = await esClient.search({ index: '.apm-source-map' });
+        expect(res.hits.hits.length).to.eql(0);
+      });
     });
+
+    // describe('migrate fleet artifacts', () => {
+    //   it('it will migrate fleet artifacts to `.apm-source-map`', async () => {
+    //     migrateFleetSourceMapArtifacts({ internalESClient: es });
+    //   });
+    // });
   });
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitFor(cb: () => Promise<boolean>, retries = 50): Promise<void> {
+  if (retries === 0) {
+    throw new Error(`Maximum number of retries reached`);
+  }
+
+  const res = await cb();
+  if (!res) {
+    await sleep(100);
+    return waitFor(cb, retries - 1);
+  }
 }

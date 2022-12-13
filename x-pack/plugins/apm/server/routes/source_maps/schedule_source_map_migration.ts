@@ -11,22 +11,25 @@ import { FleetArtifactsClient } from '@kbn/fleet-plugin/server/services';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { CoreStart, Logger } from '@kbn/core/server';
 import { getApmArtifactClient } from '../fleet/source_maps';
-import { bulkCreateApmSourceMapDocs } from './bulk_create_apm_source_map_docs';
+import { bulkCreateApmSourceMaps } from './bulk_create_apm_source_maps';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
-import {
-  ApmSourceMap,
-  createApmSourceMapIndex,
-} from './create_apm_source_map_index';
+import { ApmSourceMap } from './create_apm_source_map_index_template';
+import { APMPluginStartDependencies } from '../../types';
+import { createApmSourceMapTemplate } from './create_apm_source_map_index_template';
 
-const PER_PAGE = 2;
+const PER_PAGE = 10;
+const TASK_ID = 'apm-source-map-migration-task-id';
+const TASK_TYPE = 'apm-source-map-migration-task-type';
 
-export function scheduleFleetSourceMapArtifactsMigration({
+export async function scheduleSourceMapMigration({
   coreStartPromise,
+  pluginStartPromise,
   fleetStartPromise,
   taskManager,
   logger,
 }: {
   coreStartPromise: Promise<CoreStart>;
+  pluginStartPromise: Promise<APMPluginStartDependencies>;
   fleetStartPromise?: Promise<FleetStartContract>;
   taskManager?: TaskManagerSetupContract;
   logger: Logger;
@@ -35,8 +38,10 @@ export function scheduleFleetSourceMapArtifactsMigration({
     return;
   }
 
+  logger.debug(`Register task "${TASK_TYPE}"`);
+
   taskManager.registerTaskDefinitions({
-    migrateFleetSourcemapArtifacts: {
+    [TASK_TYPE]: {
       title: 'Migrate fleet source map artifacts',
       description:
         'Migrates fleet source map artifacts to `.apm-source-map` index',
@@ -45,35 +50,53 @@ export function scheduleFleetSourceMapArtifactsMigration({
       maxConcurrency: 1,
       createTaskRunner(context) {
         // const { state } = context.taskInstance;
-        // console.log({ state });
+        // logger.debug({ state });
         return {
           async run() {
-            logger.info('Fleet source map task was initiated');
+            logger.debug(`Run task: "${TASK_TYPE}"`);
             const coreStart = await coreStartPromise;
             const internalESClient =
               coreStart.elasticsearch.client.asInternalUser;
 
-            const fleet = await fleetStartPromise;
-            if (!fleet) {
-              return;
-            }
-
-            await createApmSourceMapIndex({ coreStart, logger });
-            await runFleetSourcemapArtifactsMigration({
-              fleet,
-              internalESClient,
+            // ensure that the index template has been created before running migration
+            await createApmSourceMapTemplate({
+              client: internalESClient,
               logger,
             });
-            logger.info('Fleet source map task completed successfully');
+
+            const fleet = await fleetStartPromise;
+            if (fleet) {
+              await runFleetSourcemapArtifactsMigration({
+                fleet,
+                internalESClient,
+                logger,
+              });
+            }
+
+            logger.debug(`Task completed: "${TASK_TYPE}"`);
           },
 
           async cancel() {
-            logger.info('Fleet source map task was cancelled');
+            logger.debug(`Task cancelled: "${TASK_TYPE}"`);
           },
         };
       },
     },
   });
+
+  const pluginStart = await pluginStartPromise;
+  const taskManagerStart = pluginStart.taskManager;
+
+  if (taskManagerStart) {
+    logger.debug(`Task scheduled: "${TASK_TYPE}"`);
+    await pluginStart.taskManager?.ensureScheduled({
+      id: TASK_ID,
+      taskType: TASK_TYPE,
+      scope: ['apm'],
+      params: {},
+      state: {},
+    });
+  }
 }
 
 export async function runFleetSourcemapArtifactsMigration({
@@ -86,11 +109,11 @@ export async function runFleetSourcemapArtifactsMigration({
   logger: Logger;
 }) {
   try {
-    const newestMigratedArtifact = await getLatestSourceMapDoc(
+    const latestApmSourceMapTimestamp = await getLatestApmSourceMap(
       internalESClient
     );
-    const createdDateFilter = newestMigratedArtifact
-      ? ` AND created:>${newestMigratedArtifact.replaceAll(':', '\\:')}` // kuery only supports lucene syntax
+    const createdDateFilter = latestApmSourceMapTimestamp
+      ? ` AND created:>${asLuceneEncoding(latestApmSourceMapTimestamp)}`
       : '';
 
     await paginateArtifacts({
@@ -104,6 +127,11 @@ export async function runFleetSourcemapArtifactsMigration({
     logger.error('Failed to migrate APM fleet source map artifacts');
     logger.error(e);
   }
+}
+
+// will convert "2022-12-12T21:21:51.203Z" to "2022-12-12T21\:21\:51.203Z" because colons are not allowed when using Lucene syntax
+function asLuceneEncoding(timestamp: string) {
+  return timestamp.replaceAll(':', '\\:');
 }
 
 async function getArtifactsForPage({
@@ -151,7 +179,7 @@ async function paginateArtifacts({
   const migratedCount = (page - 1) * PER_PAGE + artifacts.length;
   logger.info(`Source map migration: Migrating ${migratedCount} of ${total}`);
 
-  await bulkCreateApmSourceMapDocs({ artifacts, internalESClient });
+  await bulkCreateApmSourceMaps({ artifacts, internalESClient });
 
   const hasMorePages = total > migratedCount;
   if (hasMorePages) {
@@ -169,7 +197,7 @@ async function paginateArtifacts({
   }
 }
 
-async function getLatestSourceMapDoc(internalESClient: ElasticsearchClient) {
+async function getLatestApmSourceMap(internalESClient: ElasticsearchClient) {
   const params = {
     index: APM_SOURCE_MAP_INDEX,
     track_total_hits: false,

@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
 
-export async function deleteApmSourceMapDoc({
+export async function deleteApmSourceMap({
   internalESClient,
   fleetId,
 }: {
@@ -19,13 +19,7 @@ export async function deleteApmSourceMapDoc({
     index: APM_SOURCE_MAP_INDEX,
     query: {
       bool: {
-        filter: [
-          {
-            term: {
-              fleet_id: fleetId,
-            },
-          },
-        ],
+        filter: [{ term: { fleet_id: fleetId } }],
       },
     },
   });
