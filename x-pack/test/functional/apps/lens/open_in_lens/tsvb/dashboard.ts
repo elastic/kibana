@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
       });
 
-      await lens.saveAndReturn();
+      await lens.replaceInDashboard();
       await retry.try(async () => {
         const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount);
@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
       });
 
-      await lens.saveAndReturn();
+      await lens.replaceInDashboard();
       await retry.try(async () => {
         const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount);
