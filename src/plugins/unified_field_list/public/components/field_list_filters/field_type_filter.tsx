@@ -16,8 +16,14 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
-  EuiSpacer,
+  EuiPanel,
+  EuiText,
+  EuiLink,
+  EuiPopoverTitle,
+  EuiPopoverFooter,
+  EuiNotificationBadge,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon } from '../field_icon';
@@ -105,41 +111,77 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
         </EuiFilterButton>
       }
     >
-      {availableFieldTypes.length > 0 ? (
-        <EuiContextMenuPanel
-          data-test-subj="lnsIndexPatternTypeFilterOptions"
-          items={availableFieldTypes.map((type) => (
-            <EuiContextMenuItem
-              className="lnsInnerIndexPatternDataPanel__filterType"
-              key={type}
-              icon={selectedFieldTypes.includes(type) ? 'check' : 'empty'}
-              data-test-subj={`typeFilter-${type}`}
-              onClick={() => {
-                onChange(
-                  selectedFieldTypes.includes(type)
-                    ? selectedFieldTypes.filter((t) => t !== type)
-                    : [...selectedFieldTypes, type]
-                );
-              }}
-            >
-              <EuiFlexGroup responsive={false} gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <FieldIcon type={type} />
-                </EuiFlexItem>
-                <EuiFlexItem>{getFieldTypeName(type)}</EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiContextMenuItem>
-          ))}
-        />
-      ) : (
-        <EuiFlexGroup responsive={false} alignItems="center" justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="l" />
-            <EuiLoadingSpinner />
-            <EuiSpacer size="l" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      <>
+        <EuiPopoverTitle paddingSize="m">
+          {i18n.translate('unifiedFieldList.fieldTypeFilter.title', {
+            defaultMessage: 'Filter by field type',
+          })}
+        </EuiPopoverTitle>
+        {availableFieldTypes.length > 0 ? (
+          <EuiContextMenuPanel
+            data-test-subj="lnsIndexPatternTypeFilterOptions"
+            items={availableFieldTypes.map((type) => (
+              <EuiContextMenuItem
+                className="lnsInnerIndexPatternDataPanel__filterType"
+                key={type}
+                icon={selectedFieldTypes.includes(type) ? 'check' : 'empty'}
+                data-test-subj={`typeFilter-${type}`}
+                onClick={() => {
+                  onChange(
+                    selectedFieldTypes.includes(type)
+                      ? selectedFieldTypes.filter((t) => t !== type)
+                      : [...selectedFieldTypes, type]
+                  );
+                }}
+              >
+                <EuiFlexGroup responsive={false} gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <FieldIcon type={type} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s">{getFieldTypeName(type)}</EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiNotificationBadge color="subdued" size="m">
+                      {typeCounts?.get(type) ?? 0}
+                    </EuiNotificationBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiContextMenuItem>
+            ))}
+          />
+        ) : (
+          <EuiFlexGroup responsive={false} alignItems="center" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiPanel color="transparent" paddingSize="l">
+                <EuiLoadingSpinner />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        <EuiPopoverFooter>
+          <EuiPanel color="transparent" paddingSize="m">
+            <EuiText size="s">
+              <p>
+                {i18n.translate('discover.fieldTypesPopover.learnMoreText', {
+                  defaultMessage: 'Learn more about',
+                })}
+                &nbsp;
+                <EuiLink
+                  href={/* docLinks.links.discover.fieldTypeHelp */ '#'} // TODO: fix the link
+                  target="_blank"
+                  external
+                >
+                  <FormattedMessage
+                    id="discover.fieldTypesPopover.fieldTypesDocLinkLabel"
+                    defaultMessage="field types"
+                  />
+                </EuiLink>
+              </p>
+            </EuiText>
+          </EuiPanel>
+        </EuiPopoverFooter>
+      </>
     </EuiPopover>
   );
 }
