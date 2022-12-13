@@ -8,7 +8,7 @@
 
 export { PANEL_TYPES } from './panel_types';
 export { MODEL_TYPES } from './model_types';
-export { TSVB_METRIC_TYPES, BUCKET_TYPES } from './metric_types';
+export { TSVB_METRIC_TYPES, BUCKET_TYPES, BASIC_AGGS_TYPES } from './metric_types';
 export { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from './timerange_data_modes';
 
 export enum PALETTES {
