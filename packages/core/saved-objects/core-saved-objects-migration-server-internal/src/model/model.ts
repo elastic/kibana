@@ -111,6 +111,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       if (versionMigrationIsComplete || !mappingsHaveChanged) {
         const source = aliases[stateP.currentAlias]!;
 
+        const targetIndex = mappingsHaveChanged
+          ? // We are going to reindex to a new index
+            `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`
+          : // Reuse the existing index
+            source;
+
         return {
           ...stateP,
           // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
@@ -121,7 +127,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // Source is a none because we didn't do any migration from a source
           // index
           sourceIndex: Option.none,
-          targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+          targetIndex,
           sourceIndexMappings: indices[source].mappings,
           ...(mappingsHaveChanged && {
             targetIndexMappings: mergeMigrationMappingPropertyHashes(
@@ -1022,7 +1028,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ...stateP,
           controlState: 'MARK_VERSION_INDEX_READY',
           versionIndexReadyActions: Option.some([
-            { add: { index: stateP.targetIndex, alias: stateP.currentAlias } },
             { add: { index: stateP.targetIndex, alias: stateP.versionAlias } },
           ]) as Option.Some<AliasAction[]>,
         };
@@ -1042,7 +1047,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ...stateP,
           controlState: 'MARK_VERSION_INDEX_READY',
           versionIndexReadyActions: Option.some([
-            { add: { index: stateP.targetIndex, alias: stateP.currentAlias } },
             { add: { index: stateP.targetIndex, alias: stateP.versionAlias } },
           ]) as Option.Some<AliasAction[]>,
         };

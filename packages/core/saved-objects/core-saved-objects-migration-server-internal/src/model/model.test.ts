@@ -2618,8 +2618,9 @@ describe('migrations v2 model', () => {
       const unchangedMappingsState: State = {
         ...baseState,
         controlState: 'INIT',
+        kibanaVersion: '7.12.0', // new version!
         currentAlias: '.kibana',
-        versionAlias: '.kibana_7.11.0',
+        versionAlias: '.kibana_7.12.0',
         versionIndex: '.kibana_7.11.0_001',
         desiredIndexMappings: indexMapping,
       };
@@ -2635,8 +2636,14 @@ describe('migrations v2 model', () => {
           },
         });
         const newState = model(unchangedMappingsState, res) as PostInitState;
+
         expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
         expect(newState.skipReindex).toBe(true);
+
+        expect(newState.versionAlias).toEqual('.kibana_7.12.0');
+        expect(newState.currentAlias).toEqual('.kibana');
+        // will point to
+        expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
       });
     });
   });
