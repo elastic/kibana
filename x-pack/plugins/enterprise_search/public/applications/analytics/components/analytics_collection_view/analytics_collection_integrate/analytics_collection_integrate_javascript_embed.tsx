@@ -43,7 +43,7 @@ export const javascriptEmbedSteps = (webClientSrc: string, analyticsDNSUrl: stri
     title: i18n.translate(
       'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptEmbed.stepTwo.title',
       {
-        defaultMessage: 'Initialise the client',
+        defaultMessage: 'Initialize the client',
       }
     ),
     children: (
@@ -54,7 +54,7 @@ export const javascriptEmbedSteps = (webClientSrc: string, analyticsDNSUrl: stri
               'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptEmbed.stepTwo.description',
               {
                 defaultMessage:
-                  'You must initialise the client before you can track events. We recommend initialising just below the script tag.',
+                  'You must initialize the client before you can track events. We recommend initialising just below the script tag.',
               }
             )}
           </p>

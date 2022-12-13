@@ -128,7 +128,7 @@ dsn: "${analyticsDNSUrl}",
               'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.descriptionTwo',
               {
                 defaultMessage:
-                  'Once initialised, you will be able to track page views in your application.',
+                  'Once initialized, you will be able to track page views in your application.',
               }
             )}
           </p>
