@@ -78,11 +78,13 @@ function getWaterfallMaxLevel(waterfall: IWaterfall) {
   return maxLevel;
 }
 
-function WaterfallComponent({
+export function Waterfall({
   waterfall,
   waterfallItemId,
   showCriticalPath,
 }: Props) {
+  console.log('## render waterfall');
+
   const history = useHistory();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
@@ -163,5 +165,3 @@ function WaterfallComponent({
     </Container>
   );
 }
-
-export const Waterfall = React.memo(WaterfallComponent);

@@ -26,7 +26,7 @@ interface Props {
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
 }
 
-function WaterfallContainerComponent({
+export function WaterfallContainer({
   serviceName,
   waterfallItemId,
   waterfall,
@@ -38,7 +38,7 @@ function WaterfallContainerComponent({
   if (!waterfall) {
     return null;
   }
-
+  console.log('## render waterfall container');
   const { legends, items } = waterfall;
 
   // Service colors are needed to color the dot in the error popover
@@ -84,49 +84,47 @@ function WaterfallContainerComponent({
   });
 
   return (
-    <EuiFlexGroup direction="column">
-      {isCriticalPathFeatureEnabled ? (
+    <Profiler
+      id="waterfall_container"
+      onRender={(id, phase, actualDuration) => {
+        console.log('### id:', id, 'phase:', phase, 'took', actualDuration);
+      }}
+    >
+      <EuiFlexGroup direction="column">
+        {isCriticalPathFeatureEnabled ? (
+          <EuiFlexItem>
+            <EuiSwitch
+              id="showCriticalPath"
+              label={
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    {i18n.translate('xpack.apm.waterfall.showCriticalPath', {
+                      defaultMessage: 'Show critical path',
+                    })}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <TechnicalPreviewBadge icon="beaker" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              checked={showCriticalPath}
+              onChange={(event) => {
+                onShowCriticalPathChange(event.target.checked);
+              }}
+            />
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem>
-          <EuiSwitch
-            id="showCriticalPath"
-            label={
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  {i18n.translate('xpack.apm.waterfall.showCriticalPath', {
-                    defaultMessage: 'Show critical path',
-                  })}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <TechnicalPreviewBadge icon="beaker" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-            checked={showCriticalPath}
-            onChange={(event) => {
-              onShowCriticalPathChange(event.target.checked);
-            }}
-          />
+          <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
         </EuiFlexItem>
-      ) : null}
-      <EuiFlexItem>
-        <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <Profiler
-          id="waterfall_container"
-          onRender={(id, phase, actualDuration) => {
-            console.log('### id:', id, 'phase:', phase, 'took', actualDuration);
-          }}
-        >
+        <EuiFlexItem>
           <Waterfall
             showCriticalPath={showCriticalPath}
             waterfallItemId={waterfallItemId}
             waterfall={waterfall}
           />
-        </Profiler>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Profiler>
   );
 }
-
-export const WaterfallContainer = React.memo(WaterfallContainerComponent);

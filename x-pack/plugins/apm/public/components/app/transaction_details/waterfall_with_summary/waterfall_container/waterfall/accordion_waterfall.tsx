@@ -79,7 +79,7 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
   }
 `;
 
-function AccordionWaterfallComponent(props: AccordionWaterfallProps) {
+export function AccordionWaterfall(props: AccordionWaterfallProps) {
   const {
     item,
     level,
@@ -178,7 +178,7 @@ function AccordionWaterfallComponent(props: AccordionWaterfallProps) {
       onToggle={toggleAccordion}
     >
       {children.map((child) => (
-        <AccordionWaterfallComponent
+        <AccordionWaterfall
           {...props}
           key={child.id}
           isOpen={isOpen}
@@ -226,5 +226,3 @@ function ToggleAccordionButton({
     </div>
   );
 }
-
-export const AccordionWaterfall = React.memo(AccordionWaterfallComponent);
