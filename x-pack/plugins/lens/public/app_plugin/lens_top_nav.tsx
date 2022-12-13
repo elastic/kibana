@@ -591,11 +591,12 @@ export const LensTopNavMenu = ({
               {
                 newTitle:
                   title ||
-                  (initialContext && 'title' in initialContext && initialContext.title
+                  (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable
                     ? i18n.translate('xpack.lens.app.convertedLabel', {
                         defaultMessage: '{title} (converted)',
                         values: {
-                          title: initialContext.title,
+                          title:
+                            initialContext.title || `${initialContext.visTypeTitle} visualization`,
                         },
                       })
                     : ''),
