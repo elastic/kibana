@@ -358,8 +358,9 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
                   } catch (e) {
                     // If validateActions fails on the first attempt, try to remove the rule-level frequency params.
                     // The loop will attempt to validate again. Only allow the error to throw uncaught if it happens twice.
-                    if (typeof attributes.notifyWhen !== 'undefined') delete attributes.notifyWhen;
-                    if (attributes.throttle) delete attributes.throttle;
+                    if (typeof attributes.notifyWhen !== 'undefined')
+                      attributes.notifyWhen = undefined;
+                    if (attributes.throttle) attributes.throttle = undefined;
                   }
                 }
                 ruleActions = applyBulkEditOperation(operation, ruleActions);
