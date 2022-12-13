@@ -20,6 +20,8 @@ import type {
  */
 export const INDICATOR_PER_PAGE = 1000;
 
+const MAX_INDICATORS_NUMBER = 10 * 1000;
+
 export const getThreatList = async ({
   esClient,
   index,
@@ -123,7 +125,7 @@ export const getAllThreatListHits = async (
 
   allThreatListHits = allThreatListHits.concat(threatList.hits.hits);
 
-  while (threatList.hits.hits.length !== 0) {
+  while (threatList.hits.hits.length !== 0 && allThreatListHits.length < MAX_INDICATORS_NUMBER) {
     threatList = await getThreatList({
       ...params,
       searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,

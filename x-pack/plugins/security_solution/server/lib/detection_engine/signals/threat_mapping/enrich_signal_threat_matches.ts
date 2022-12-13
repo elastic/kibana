@@ -18,6 +18,8 @@ import type {
 } from './types';
 import { extractNamedQueries } from './utils';
 
+const MAX_NUMBER_OF_THREATS_PER_SIGNAL = 1000;
+
 export const getSignalMatchesFromThreatList = (
   threatList: ThreatListItem[] = []
 ): SignalMatch[] => {
@@ -32,6 +34,10 @@ export const getSignalMatchesFromThreatList = (
 
       if (!signalMap[signalId]) {
         signalMap[signalId] = [];
+      }
+
+      if (signalMap[signalId].length >= MAX_NUMBER_OF_THREATS_PER_SIGNAL) {
+        return;
       }
 
       signalMap[signalId].push({
