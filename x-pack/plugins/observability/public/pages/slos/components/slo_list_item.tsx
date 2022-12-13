@@ -137,19 +137,22 @@ export function SloListItem({ slo, onDelete }: SloListItemProps) {
             <EuiContextMenuPanel
               size="s"
               items={[
-                <EuiContextMenuItem key="copy" icon="pencil" onClick={handleEdit}>
-                  {i18n.translate('observability.slos.slo.item.actions.edit', {
-                    defaultMessage: 'Edit',
-                  })}
-                </EuiContextMenuItem>,
+                // Todo:
+                // - Implement Edit functionality
+                // - Implement Clone functionality
+                // <EuiContextMenuItem key="copy" icon="pencil" onClick={handleEdit}>
+                //   {i18n.translate('observability.slos.slo.item.actions.edit', {
+                //     defaultMessage: 'Edit',
+                //   })}
+                // </EuiContextMenuItem>,
+                // <EuiContextMenuItem key="share" icon="copy" onClick={handleClone}>
+                //   {i18n.translate('observability.slos.slo.item.actions.clone', {
+                //     defaultMessage: 'Clone',
+                //   })}
+                // </EuiContextMenuItem>,
                 <EuiContextMenuItem key="edit" icon="trash" onClick={handleDelete}>
                   {i18n.translate('observability.slos.slo.item.actions.delete', {
                     defaultMessage: 'Delete',
-                  })}
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem key="share" icon="copy" onClick={handleClone}>
-                  {i18n.translate('observability.slos.slo.item.actions.clone', {
-                    defaultMessage: 'Clone',
                   })}
                 </EuiContextMenuItem>,
               ]}
