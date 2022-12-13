@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Timeline } from '../../../../../shared/charts/timeline';
@@ -55,7 +55,30 @@ interface Props {
   showCriticalPath: boolean;
 }
 
-export function Waterfall({
+function getWaterfallMaxLevel(waterfall: IWaterfall) {
+  const entryId = waterfall.entryWaterfallTransaction?.id;
+  if (!entryId) {
+    return 0;
+  }
+  let maxLevel = 1;
+  function countLevels(id: string, currentLevel: number) {
+    const children = waterfall.childrenByParentId[id] || [];
+    if (children.length) {
+      children.forEach((child) => {
+        countLevels(child.id, currentLevel + 1);
+      });
+    } else {
+      if (maxLevel < currentLevel) {
+        maxLevel = currentLevel;
+      }
+    }
+  }
+
+  countLevels(entryId, 1);
+  return maxLevel;
+}
+
+function WaterfallComponent({
   waterfall,
   waterfallItemId,
   showCriticalPath,
@@ -70,15 +93,17 @@ export function Waterfall({
   const agentMarks = getAgentMarks(waterfall.entryWaterfallTransaction?.doc);
   const errorMarks = getErrorMarks(waterfall.errorItems);
 
-  // Calculate the left margin relative to the deepest level, or 100px, whichever
-  // is more.
-  const [maxLevel, setMaxLevel] = useState(0);
-  const timelineMargins = {
-    top: 40,
-    left: Math.max(100, maxLevel * 10),
-    right: 50,
-    bottom: 0,
-  };
+  const timelineMargins = useMemo(() => {
+    // Calculate the left margin relative to the deepest level, or 100px, whichever
+    // is more.
+    const maxLevel = getWaterfallMaxLevel(waterfall);
+    return {
+      top: 40,
+      left: Math.max(100, maxLevel * 10),
+      right: 50,
+      bottom: 0,
+    };
+  }, [waterfall]);
 
   return (
     <Container>
@@ -117,7 +142,6 @@ export function Waterfall({
               isOpen={isAccordionOpen}
               item={waterfall.entryWaterfallTransaction}
               level={0}
-              setMaxLevel={setMaxLevel}
               waterfallItemId={waterfallItemId}
               duration={duration}
               waterfall={waterfall}
@@ -139,3 +163,5 @@ export function Waterfall({
     </Container>
   );
 }
+
+export const Waterfall = React.memo(WaterfallComponent);

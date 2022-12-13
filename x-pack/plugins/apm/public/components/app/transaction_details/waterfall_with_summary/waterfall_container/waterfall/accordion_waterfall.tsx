@@ -13,18 +13,18 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { groupBy } from 'lodash';
 import { transparentize } from 'polished';
+import React, { useState } from 'react';
+import { getCriticalPath } from '../../../../../../../common/critical_path/get_critical_path';
+import { useTheme } from '../../../../../../hooks/use_theme';
 import { Margins } from '../../../../../shared/charts/timeline';
 import {
   IWaterfall,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 import { WaterfallItem } from './waterfall_item';
-import { getCriticalPath } from '../../../../../../../common/critical_path/get_critical_path';
-import { useTheme } from '../../../../../../hooks/use_theme';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
@@ -32,7 +32,6 @@ interface AccordionWaterfallProps {
   level: number;
   duration: IWaterfall['duration'];
   waterfallItemId?: string;
-  setMaxLevel: Dispatch<SetStateAction<number>>;
   waterfall: IWaterfall;
   timelineMargins: Margins;
   onClickWaterfallItem: (item: IWaterfallSpanOrTransaction) => void;
@@ -80,27 +79,20 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
   }
 `;
 
-export function AccordionWaterfall(props: AccordionWaterfallProps) {
+function AccordionWaterfallComponent(props: AccordionWaterfallProps) {
   const {
     item,
     level,
     duration,
     waterfall,
     waterfallItemId,
-    setMaxLevel,
     timelineMargins,
     onClickWaterfallItem,
     showCriticalPath,
   } = props;
-
   const theme = useTheme();
 
   const [isOpen, setIsOpen] = useState(props.isOpen);
-  const [nextLevel] = useState(level + 1);
-
-  useEffect(() => {
-    setMaxLevel(nextLevel);
-  }, [nextLevel, setMaxLevel]);
 
   let children = waterfall.childrenByParentId[item.id] || [];
 
@@ -186,11 +178,11 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
       onToggle={toggleAccordion}
     >
       {children.map((child) => (
-        <AccordionWaterfall
+        <AccordionWaterfallComponent
           {...props}
           key={child.id}
           isOpen={isOpen}
-          level={nextLevel}
+          level={level + 1}
           item={child}
         />
       ))}
@@ -234,3 +226,5 @@ function ToggleAccordionButton({
     </div>
   );
 }
+
+export const AccordionWaterfall = React.memo(AccordionWaterfallComponent);

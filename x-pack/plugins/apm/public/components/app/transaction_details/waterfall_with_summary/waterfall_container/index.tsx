@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
-import React from 'react';
+import React, { Profiler } from 'react';
 import { useCriticalPathFeatureEnabledSetting } from '../../../../../hooks/use_critical_path_feature_enabled_setting';
 import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
 import { Waterfall } from './waterfall';
@@ -26,7 +26,7 @@ interface Props {
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
 }
 
-export function WaterfallContainer({
+function WaterfallContainerComponent({
   serviceName,
   waterfallItemId,
   waterfall,
@@ -112,12 +112,21 @@ export function WaterfallContainer({
         <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <Waterfall
-          showCriticalPath={showCriticalPath}
-          waterfallItemId={waterfallItemId}
-          waterfall={waterfall}
-        />
+        <Profiler
+          id="waterfall_container"
+          onRender={(id, phase, actualDuration) => {
+            console.log('### id:', id, 'phase:', phase, 'took', actualDuration);
+          }}
+        >
+          <Waterfall
+            showCriticalPath={showCriticalPath}
+            waterfallItemId={waterfallItemId}
+            waterfall={waterfall}
+          />
+        </Profiler>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
+
+export const WaterfallContainer = React.memo(WaterfallContainerComponent);
