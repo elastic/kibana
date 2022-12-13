@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { Panel } from '../../../../common/types';
 import { _legacyBuildProcessorFunction } from '../build_processor_function';
-// @ts-expect-error
 import { processors } from '../response_processors/series';
 import {
   createFieldsFetcher,
