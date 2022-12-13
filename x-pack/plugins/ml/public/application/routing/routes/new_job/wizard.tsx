@@ -96,6 +96,16 @@ const getRareBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) =>
   },
 ];
 
+const getGeoBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  ...getBaseBreadcrumbs(navigateToPath, basePath),
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.geoLabel', {
+      defaultMessage: 'Geo',
+    }),
+    href: '',
+  },
+];
+
 export const singleMetricRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
@@ -159,6 +169,12 @@ export const rareRouteFactory = (navigateToPath: NavigateToPath, basePath: strin
   path: '/jobs/new_job/rare',
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.RARE} deps={deps} />,
   breadcrumbs: getRareBreadcrumbs(navigateToPath, basePath),
+});
+
+export const geoRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
+  path: '/jobs/new_job/geo',
+  render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.GEO} deps={deps} />,
+  breadcrumbs: getGeoBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
