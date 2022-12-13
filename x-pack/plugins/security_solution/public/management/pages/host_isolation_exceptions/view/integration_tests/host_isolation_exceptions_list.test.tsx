@@ -30,6 +30,8 @@ describe('When on the host isolation exceptions page', () => {
   let mockedContext: AppContextTestRender;
   let apiMocks: ReturnType<typeof exceptionsListAllHttpMocks>;
 
+  const pageTestId = 'hostIsolationExceptionsListPage';
+
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
@@ -51,9 +53,7 @@ describe('When on the host isolation exceptions page', () => {
     const { findAllByTestId } = render();
 
     await waitFor(async () => {
-      await expect(findAllByTestId('hostIsolationExceptionsListPage-card')).resolves.toHaveLength(
-        10
-      );
+      await expect(findAllByTestId(`${pageTestId}-card`)).resolves.toHaveLength(10);
     });
 
     apiMocks.responseProvider.exceptionsFind.mockClear();
@@ -89,9 +89,7 @@ describe('When on the host isolation exceptions page', () => {
       it('should allow the Create action', async () => {
         const { queryByTestId } = render();
 
-        await waitFor(() =>
-          expect(queryByTestId('hostIsolationExceptionsListPage-pageAddButton')).toBeTruthy()
-        );
+        await waitFor(() => expect(queryByTestId(`${pageTestId}-pageAddButton`)).toBeTruthy());
       });
 
       it('should allow the Edit and Delete actions', async () => {
@@ -102,8 +100,8 @@ describe('When on the host isolation exceptions page', () => {
           testId: 'hostIsolationExceptionsListPage',
         });
 
-        expect(getByTestId('hostIsolationExceptionsListPage-card-cardEditAction')).toBeTruthy();
-        expect(getByTestId('hostIsolationExceptionsListPage-card-cardDeleteAction')).toBeTruthy();
+        expect(getByTestId(`${pageTestId}-card-cardEditAction`)).toBeTruthy();
+        expect(getByTestId(`${pageTestId}-card-cardDeleteAction`)).toBeTruthy();
       });
     });
 
@@ -120,23 +118,17 @@ describe('When on the host isolation exceptions page', () => {
       it('should disable the Create action', async () => {
         const { queryByTestId } = render();
 
-        await waitFor(() =>
-          expect(queryByTestId('hostIsolationExceptionsListPage-container')).toBeTruthy()
-        );
+        await waitFor(() => expect(queryByTestId(`${pageTestId}-container`)).toBeTruthy());
 
-        expect(queryByTestId('hostIsolationExceptionsListPage-pageAddButton')).toBeNull();
+        expect(queryByTestId(`${pageTestId}-pageAddButton`)).toBeNull();
       });
 
       it('should disable the Edit and Delete actions', async () => {
         const { queryByTestId } = render();
 
-        await waitFor(() =>
-          expect(queryByTestId('hostIsolationExceptionsListPage-container')).toBeTruthy()
-        );
+        await waitFor(() => expect(queryByTestId(`${pageTestId}-container`)).toBeTruthy());
 
-        expect(
-          queryByTestId('hostIsolationExceptionsListPage-card-header-actions-button')
-        ).toBeNull();
+        expect(queryByTestId(`${pageTestId}-card-header-actions-button`)).toBeNull();
       });
     });
 
@@ -158,40 +150,34 @@ describe('When on the host isolation exceptions page', () => {
         const { findAllByTestId, queryByTestId, getByTestId } = await render();
 
         await waitFor(async () => {
-          await expect(
-            findAllByTestId('hostIsolationExceptionsListPage-card')
-          ).resolves.toHaveLength(10);
+          await expect(findAllByTestId(`${pageTestId}-card`)).resolves.toHaveLength(10);
         });
         await getFirstCard(renderResult, {
           showActions: true,
           testId: 'hostIsolationExceptionsListPage',
         });
 
-        expect(queryByTestId('hostIsolationExceptionsListPage-pageAddButton')).toBeNull();
-        expect(getByTestId('hostIsolationExceptionsListPage-card-cardDeleteAction')).toBeTruthy();
-        expect(queryByTestId('hostIsolationExceptionsListPage-card-cardEditAction')).toBeNull();
+        expect(queryByTestId(`${pageTestId}-pageAddButton`)).toBeNull();
+        expect(getByTestId(`${pageTestId}-card-cardDeleteAction`)).toBeTruthy();
+        expect(queryByTestId(`${pageTestId}-card-cardEditAction`)).toBeNull();
       });
 
       it('should allow Delete action', async () => {
         const { findAllByTestId, getByTestId } = await render();
 
         await waitFor(async () => {
-          await expect(
-            findAllByTestId('hostIsolationExceptionsListPage-card')
-          ).resolves.toHaveLength(10);
+          await expect(findAllByTestId(`${pageTestId}-card`)).resolves.toHaveLength(10);
         });
         await getFirstCard(renderResult, {
           showActions: true,
           testId: 'hostIsolationExceptionsListPage',
         });
 
-        const deleteButton = getByTestId('hostIsolationExceptionsListPage-card-cardDeleteAction');
+        const deleteButton = getByTestId(`${pageTestId}-card-cardDeleteAction`);
         expect(deleteButton).toBeTruthy();
 
         userEvent.click(deleteButton);
-        const confirmDeleteButton = getByTestId(
-          'hostIsolationExceptionsListPage-deleteModal-submitButton'
-        );
+        const confirmDeleteButton = getByTestId(`${pageTestId}-deleteModal-submitButton`);
         userEvent.click(confirmDeleteButton);
         await waitFor(() => {
           expect(apiMocks.responseProvider.exceptionDelete).toHaveReturnedWith(
