@@ -987,7 +987,7 @@ describe('Execution Handler', () => {
       `);
   });
 
-  test('does not trigger summary actions if it is still throttling (custom interval)', async () => {
+  test('does not trigger summary actions if it is still being throttled (custom interval)', async () => {
     getSummarizedAlertsMock.mockResolvedValue({
       new: { count: 0, alerts: [] },
       ongoing: { count: 0, alerts: [] },
@@ -1026,7 +1026,7 @@ describe('Execution Handler', () => {
     await executionHandler.run({});
     expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
     expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
-      "skipping scheduling the action 'testActionTypeId:1', summary action is still throttled"
+      "skipping scheduling the action 'testActionTypeId:1', summary action is still being throttled"
     );
     expect(getSummarizedAlertsMock).not.toHaveBeenCalled();
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();

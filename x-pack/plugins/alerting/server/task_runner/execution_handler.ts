@@ -354,7 +354,7 @@ export class ExecutionHandler<
 
     if (throttled) {
       this.logger.debug(
-        `skipping scheduling the action '${action.actionTypeId}:${action.id}', summary action is still throttled`
+        `skipping scheduling the action '${action.actionTypeId}:${action.id}', summary action is still being throttled`
       );
     }
     return throttled;
