@@ -53,13 +53,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await testSubjects.exists('addFilter')).to.be(false);
       await testSubjects.click('unifiedTextLangEditor-expand');
       const textBasedQuery = await monacoEditor.getCodeEditorValue();
-      expect(textBasedQuery).to.be('SELECT * FROM "log*" WHERE TIMEFILTER(@timestamp)');
+      expect(textBasedQuery).to.be('SELECT * FROM "log*"');
       await testSubjects.click('unifiedTextLangEditor-minimize');
     });
 
     it('should allow adding and using a field', async () => {
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash-*" WHERE TIMEFILTER(@timestamp) GROUP BY extension'
+        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow saving the text based languages chart into a saved object', async () => {
       await switchToTextBasedLanguage('SQL');
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash-*" WHERE TIMEFILTER(@timestamp) GROUP BY extension'
+        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
