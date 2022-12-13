@@ -488,7 +488,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
       slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack`,
       teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
-      connectors: `${KIBANA_DOCS}alerting-getting-started.html#alerting-concepts-connectorss`,
+      connectors: `${KIBANA_DOCS}action-types.html`,
     },
     maps: {
       guide: `${KIBANA_DOCS}maps.html`,
