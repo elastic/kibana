@@ -39,8 +39,6 @@ describe('FleetSetupHandler', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
   beforeEach(async () => {
-    const soClient = savedObjectsClientMock.create();
-
     context = {
       ...xpackMocks.createRequestHandlerContext(),
       fleet: {
@@ -53,9 +51,7 @@ describe('FleetSetupHandler', () => {
           asCurrentUser: createPackagePolicyServiceMock(),
           asInternalUser: createPackagePolicyServiceMock(),
         },
-        epm: {
-          internalSoClient: soClient,
-        },
+        internalSoClient: savedObjectsClientMock.create(),
         spaceId: 'default',
         limitedToPackages: undefined,
       },

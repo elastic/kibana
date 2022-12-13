@@ -375,11 +375,10 @@ export class FleetPlugin
             };
           },
           authz,
-          epm: {
+
+          get internalSoClient() {
             // Use a lazy getter to avoid constructing this client when not used by a request handler
-            get internalSoClient() {
-              return getInternalSoClient();
-            },
+            return getInternalSoClient();
           },
           get spaceId() {
             return deps.spaces.spacesService.getSpaceId(request);
