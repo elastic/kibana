@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
@@ -16,20 +15,12 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useSeverityChartData } from './severity_donut/use_severity_chart_data';
 import { SeverityLevelChart } from './severity_donut/severity_level_chart';
+import { DetectionsTable } from './detections_table/detections_table';
+import { HostPieChart } from './host_pie_chart/host_name_pie_chart';
+import { useHostNameChartData } from './host_pie_chart/use_host_name_chart_data';
+import { useDetectionsChartData } from './detections_table/use_detections_chart_data';
 
 const DETECTIONS_ALERTS_CHARTS_ID = 'detections-alerts-charts';
-
-const PlaceHolder = ({ title }: { title: string }) => {
-  return (
-    <EuiFlexItem>
-      <EuiPanel>
-        <EuiTitle size="xs">
-          <h4>{title}</h4>
-        </EuiTitle>
-      </EuiPanel>
-    </EuiFlexItem>
-  );
-};
 
 interface Props {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
@@ -78,6 +69,24 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
     uniqueQueryId,
   });
 
+  const { items: detectionsData, isLoading: isDetectionsLoading } = useDetectionsChartData({
+    filters,
+    query,
+    signalIndexName,
+    runtimeMappings,
+    skip: querySkip,
+    uniqueQueryId,
+  });
+
+  const { items: hostData, isLoading: isHostsLoading } = useHostNameChartData({
+    filters,
+    query,
+    signalIndexName,
+    runtimeMappings,
+    skip: querySkip,
+    uniqueQueryId,
+  });
+
   return (
     <KpiPanel
       $toggleStatus={toggleStatus}
@@ -97,14 +106,25 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
       />
       {toggleStatus && (
         <EuiFlexGroup data-test-subj="alerts-charts-container">
-          <PlaceHolder title={i18n.DETECTIONS_TITLE} />
+          <DetectionsTable
+            data={detectionsData}
+            isLoading={isDetectionsLoading}
+            uniqueQueryId={uniqueQueryId}
+          />
+          {/* <PlaceHolder title={i18n.DETECTIONS_TITLE} /> */}
           <SeverityLevelChart
             data={severityData}
             isLoading={isSeverityLoading}
             uniqueQueryId={uniqueQueryId}
             addFilter={addFilter}
           />
-          <PlaceHolder title={i18n.ALERT_BY_HOST_TITLE} />
+          {/* <PlaceHolder title={i18n.ALERT_BY_HOST_TITLE} /> */}
+          <HostPieChart
+            data={hostData}
+            isLoading={isHostsLoading}
+            uniqueQueryId={uniqueQueryId}
+            // addFilter={addFilter}
+          />
         </EuiFlexGroup>
       )}
     </KpiPanel>

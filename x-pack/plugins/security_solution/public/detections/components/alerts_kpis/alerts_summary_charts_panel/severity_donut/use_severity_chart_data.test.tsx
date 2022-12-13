@@ -9,8 +9,9 @@ import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
 import { mockAlertsData, alertsBySeverityQuery, parsedAlerts, from, to } from './mock_data';
-import type { UseAlertsBySeverity, UseSeverityChartProps } from './use_severity_chart_data';
+import type { UseAlertsBySeverity } from './use_severity_chart_data';
 import { useSeverityChartData } from './use_severity_chart_data';
+import type { UseAlertsQueryProps } from '../types';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
@@ -41,8 +42,8 @@ jest.mock('../../../../../common/containers/use_global_time', () => {
 });
 
 // helper function to render the hook
-const renderUseSeverityChartData = (props: Partial<UseSeverityChartProps> = {}) =>
-  renderHook<UseSeverityChartProps, ReturnType<UseAlertsBySeverity>>(
+const renderUseSeverityChartData = (props: Partial<UseAlertsQueryProps> = {}) =>
+  renderHook<UseAlertsQueryProps, ReturnType<UseAlertsBySeverity>>(
     () =>
       useSeverityChartData({
         uniqueQueryId: 'test',

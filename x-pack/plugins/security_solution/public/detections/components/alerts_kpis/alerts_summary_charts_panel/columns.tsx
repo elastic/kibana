@@ -9,19 +9,14 @@ import { EuiHealth, EuiText } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { capitalize } from 'lodash';
-import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { ALERT_SEVERITY, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import * as i18n from './translations';
+import type { SeverityData, DetectionsData } from './types';
 
-interface SeverityTableItem {
-  key: Severity;
-  value: number;
-  label: string;
-}
-
-export const getSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityTableItem>> => [
+export const getSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityData>> => [
   {
     field: 'key',
     name: i18n.SEVERITY_LEVEL_COLUMN_TITLE,
@@ -49,6 +44,49 @@ export const getSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityTab
     render: (alertCount: number) => (
       <EuiText grow={false} size="xs">
         <FormattedCount count={alertCount} />
+      </EuiText>
+    ),
+  },
+];
+
+export const getDetectionsTableColumns = (): Array<EuiBasicTableColumn<DetectionsData>> => [
+  {
+    field: 'rule',
+    name: i18n.DETECTIONS_TYPE_COLUMN_TITLE,
+    'data-test-subj': 'detectionsTable-type',
+    render: (rule: string) => (
+      <EuiText grow={false} size="xs">
+        <DefaultDraggable
+          isDraggable={false}
+          field={ALERT_RULE_NAME}
+          hideTopN={true}
+          id={`alert-detection-draggable-${rule}`}
+          value={rule}
+          queryValue={rule}
+          tooltipContent={null}
+        />
+      </EuiText>
+    ),
+  },
+  {
+    field: 'preventions',
+    name: i18n.DETECTIONS_PREVENTIONS_COLUMN_TITLE,
+    dataType: 'number',
+    'data-test-subj': 'detectionsTable-preventions',
+    render: (preventionCount: number) => (
+      <EuiText grow={false} size="xs">
+        <FormattedCount count={preventionCount} />
+      </EuiText>
+    ),
+  },
+  {
+    field: 'detections',
+    name: i18n.DETECTIONS_TITLE,
+    dataType: 'number',
+    'data-test-subj': 'detectionsTable-detections',
+    render: (detectionCount: number) => (
+      <EuiText grow={false} size="xs">
+        <FormattedCount count={detectionCount} />
       </EuiText>
     ),
   },

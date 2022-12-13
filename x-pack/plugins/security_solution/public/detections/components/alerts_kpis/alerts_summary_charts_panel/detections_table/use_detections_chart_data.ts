@@ -4,32 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { buildEsQuery } from '@kbn/es-query';
-import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import type { AlertsBySeverityAgg, UseAlertsQueryProps, SeverityData } from '../types';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import type { AlertsByRuleAgg, DetectionsData, UseAlertsQueryProps } from '../types';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
 import { useInspectButton } from '../../common/hooks';
-import { parseSeverityData, getAlertsQuery } from '../helpers';
+import { DEFAULT_QUERY_SIZE, parseDetectionsData, getAlertsQuery } from '../helpers';
 
 const aggregations = {
-  statusBySeverity: {
+  alertsByRule: {
     terms: {
-      field: ALERT_SEVERITY,
+      field: ALERT_RULE_NAME,
+      size: DEFAULT_QUERY_SIZE,
+    },
+    aggs: {
+      ruleByEventType: {
+        terms: {
+          field: 'event.type',
+          size: DEFAULT_QUERY_SIZE,
+        },
+      },
     },
   },
 };
 
-export type UseAlertsBySeverity = (props: UseAlertsQueryProps) => {
-  items: SeverityData[] | null;
+export type UseAlertsByRule = (props: UseAlertsQueryProps) => {
+  items: DetectionsData[] | null;
   isLoading: boolean;
   updatedAt: number;
 };
 
-export const useSeverityChartData: UseAlertsBySeverity = ({
+export const useDetectionsChartData: UseAlertsByRule = ({
   uniqueQueryId,
   entityFilter,
   query,
@@ -40,7 +48,7 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
-  const [items, setItems] = useState<null | SeverityData[]>(null);
+  const [items, setItems] = useState<null | DetectionsData[]>(null);
 
   const additionalFilters = useMemo(() => {
     try {
@@ -63,7 +71,7 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
     request,
     response,
     setQuery: setAlertsQuery,
-  } = useQueryAlerts<{}, AlertsBySeverityAgg>({
+  } = useQueryAlerts<{}, AlertsByRuleAgg>({
     query: getAlertsQuery({
       from,
       to,
@@ -94,7 +102,7 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
     if (data == null) {
       setItems(null);
     } else {
-      setItems(parseSeverityData(data));
+      setItems(parseDetectionsData(data));
     }
     setUpdatedAt(Date.now());
   }, [data]);
