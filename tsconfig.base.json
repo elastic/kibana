@@ -816,6 +816,8 @@
       "@kbn/charts-plugin/*": ["src/plugins/charts/*"],
       "@kbn/console-plugin": ["src/plugins/console"],
       "@kbn/console-plugin/*": ["src/plugins/console/*"],
+      "@kbn/content-plugin": ["src/plugins/content"],
+      "@kbn/content-plugin/*": ["src/plugins/content/*"],
       "@kbn/controls-plugin": ["src/plugins/controls"],
       "@kbn/controls-plugin/*": ["src/plugins/controls/*"],
       "@kbn/custom-integrations-plugin": ["src/plugins/custom_integrations"],
