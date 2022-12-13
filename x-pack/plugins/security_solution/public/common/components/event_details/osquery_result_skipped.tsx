@@ -13,16 +13,15 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { map, reduce } from 'lodash';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { replaceParamsQuery } from '../../../../common/utils/replace_params_query';
 import type { AlertRawEventData } from './osquery_tab';
-import * as i18n from './translations';
 
 export interface OsquerySkippedResultsItemType {
   key: number;
@@ -49,9 +48,6 @@ export const OsquerySkippedResults = ({ responseActions, rawEventData }: SkippeR
 
   return (
     <>
-      <EuiTitle size="xxs" css={{ paddingLeft: '36px' }}>
-        <p>{i18n.OSQUERY_SKIPPED_QUERIES}</p>
-      </EuiTitle>
       {map(actions, (action, index) => (
         <React.Fragment key={index}>
           <OsquerySkippedResultsItem action={action} />
@@ -65,14 +61,28 @@ const OsquerySkippedResultsItem = ({ action }: { action: OsquerySkippedResultsIt
   const renderQuery = useMemo(() => {
     return (
       <ul>
+        <EuiText size="s" css={{ padding: '8px 0 0 8px' }}>
+          <FormattedMessage
+            id="xpack.securitySolution.eventDetails.osqueryTab.skippedQueries"
+            defaultMessage="These queries {bold} due to parameter's value not found in the Alert"
+            values={{
+              bold: (
+                <strong>
+                  <FormattedMessage
+                    id="xpack.securitySolution.eventDetails.osqueryTab.notCalled"
+                    defaultMessage="haven't been called"
+                  />
+                </strong>
+              ),
+            }}
+          />
+        </EuiText>
         <EuiText size="s">
           {map(action.value, (query) => (
             <li>
-              <EuiSpacer size="xs" />
-              <StyledEuiCodeBlock language="sql" fontSize="s" paddingSize="s">
+              <StyledEuiCodeBlock language="sql" fontSize="s" paddingSize="s" transparentBackground>
                 {query}
               </StyledEuiCodeBlock>
-              <EuiSpacer size="xs" />
             </li>
           ))}
         </EuiText>
@@ -81,13 +91,11 @@ const OsquerySkippedResultsItem = ({ action }: { action: OsquerySkippedResultsIt
   }, [action]);
 
   return (
-    <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
+    <EuiFlexGroup alignItems={'flexStart'} gutterSize={'s'}>
       <EuiFlexItem grow={false}>
         <EuiAvatar name="osquery" color={'subdued'} iconType="logoOsquery" />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
-        <EuiSpacer size="s" />
-
         <EuiPanel color={'danger'} paddingSize={'s'}>
           {renderQuery}
         </EuiPanel>
