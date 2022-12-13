@@ -8,10 +8,10 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import '@kbn/kibana-react-plugin/public/code_editor/code_editor.test.helpers';
 import { TestProvider } from '../../test/test_provider';
-import { getCloudDefendNewPolicyMock } from './mocks';
-import { ConfigYamlView } from '.';
-import './__mocks__/worker';
-import './__mocks__/resizeobserver';
+import { getCloudDefendNewPolicyMock } from '../../test/mocks';
+import { PolicySettings } from '.';
+import '../../test/__mocks__/worker';
+import '../../test/__mocks__/resizeobserver';
 
 // @ts-ignore-next
 window.Worker = Worker;
@@ -38,7 +38,7 @@ describe('<CloudDefendCreatePolicyExtension />', () => {
   const WrappedComponent = ({ policy = getCloudDefendNewPolicyMock() }) => {
     return (
       <TestProvider>
-        <ConfigYamlView policy={policy} onChange={onChange} />;
+        <PolicySettings policy={policy} onChange={onChange} />;
       </TestProvider>
     );
   };
