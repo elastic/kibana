@@ -56,13 +56,7 @@ export function DeleteConfirmationModal({
       data-test-subj="sloDeleteConfirmationModal"
       title={getTitle()}
       cancelButtonText={getCancelButtonText()}
-      confirmButtonText={i18n.translate(
-        'xpack.observability.slos.slo.deleteConfirmationModal.deleteButtonLabel',
-        {
-          defaultMessage: 'Delete {name}',
-          values: { name },
-        }
-      )}
+      confirmButtonText={getConfirmButtonText(name)}
       onCancel={onCancel}
       onConfirm={handleConfirm}
     >
@@ -82,6 +76,12 @@ const getTitle = () =>
 const getCancelButtonText = () =>
   i18n.translate('xpack.observability.slos.slo.deleteConfirmationModal.cancelButtonLabel', {
     defaultMessage: 'Cancel',
+  });
+
+const getConfirmButtonText = (name: string) =>
+  i18n.translate('xpack.observability.slos.slo.deleteConfirmationModal.deleteButtonLabel', {
+    defaultMessage: 'Delete {name}',
+    values: { name },
   });
 
 const getDeleteSuccesfulMessage = (name: string) =>
