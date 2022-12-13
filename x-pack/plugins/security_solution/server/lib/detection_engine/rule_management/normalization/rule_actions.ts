@@ -68,7 +68,6 @@ export const transformFromAlertThrottle = (
   legacyRuleActions: LegacyRuleActions | null | undefined
 ): string => {
   if (legacyRuleActions == null || (rule.actions != null && rule.actions.length > 0)) {
-    console.log('TRANSFORM', rule.notifyWhen, rule.actions, rule.actions[0]?.frequency);
     if (rule.muteAll || rule.actions.length === 0) {
       return NOTIFICATION_THROTTLE_NO_ACTIONS;
     } else if (rule.notifyWhen == null) {
