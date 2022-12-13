@@ -29,7 +29,7 @@ import {
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_SIGNALS_INDEX,
 } from '../../../common/constants';
-import { networkModel } from '../../network/store';
+import { networkModel } from '../../explore/network/store';
 import {
   TimelineType,
   TimelineStatus,
@@ -42,7 +42,7 @@ import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/mo
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../store/sourcerer/helpers';
 import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
-import { usersModel } from '../../users/store';
+import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 
 export const mockSourcererState = {
