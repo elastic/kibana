@@ -744,6 +744,8 @@
       "@kbn/jest-serializers/*": ["packages/kbn-jest-serializers/*"],
       "@kbn/journeys": ["packages/kbn-journeys"],
       "@kbn/journeys/*": ["packages/kbn-journeys/*"],
+      "@kbn/kbn-health-gateway-status-plugin": ["test/health_gateway/plugins/status"],
+      "@kbn/kbn-health-gateway-status-plugin/*": ["test/health_gateway/plugins/status/*"],
       "@kbn/kbn-sample-panel-action-plugin": ["test/plugin_functional/plugins/kbn_sample_panel_action"],
       "@kbn/kbn-sample-panel-action-plugin/*": ["test/plugin_functional/plugins/kbn_sample_panel_action/*"],
       "@kbn/kbn-top-nav-plugin": ["test/plugin_functional/plugins/kbn_top_nav"],
