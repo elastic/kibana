@@ -449,6 +449,12 @@ describe('ALL - Packs', () => {
           queries: {},
         });
       });
+      cy.visit('/app/fleet/policies');
+      cy.contains('td', 'testGlobal')
+        .parent()
+        .within(() => {
+          cy.contains('rev. 2').click();
+        });
     });
     it('add proper shard to policies packs config', () => {
       const shardPack = 'shardPack';
