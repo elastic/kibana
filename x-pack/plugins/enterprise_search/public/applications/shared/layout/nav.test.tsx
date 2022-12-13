@@ -13,10 +13,7 @@ import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { ProductAccess } from '../../../../common/types';
 
-import {
-  enableBehavioralAnalyticsSection,
-  enableEnginesSection,
-} from '../../../../common/ui_settings_keys';
+import { enableEnginesSection } from '../../../../common/ui_settings_keys';
 
 import { useEnterpriseSearchNav } from './nav';
 
@@ -99,10 +96,6 @@ describe('useEnterpriseSearchContentNav', () => {
         name: 'Search',
       },
     ]);
-    expect(mockKibanaValues.uiSettings.get).toHaveBeenCalledWith(
-      enableBehavioralAnalyticsSection,
-      false
-    );
     expect(mockKibanaValues.uiSettings.get).toHaveBeenCalledWith(enableEnginesSection, false);
   });
 
