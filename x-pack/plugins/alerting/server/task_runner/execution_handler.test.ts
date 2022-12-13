@@ -15,7 +15,13 @@ import {
 import { KibanaRequest } from '@kbn/core/server';
 import { InjectActionParamsOpts, injectActionParams } from './inject_action_params';
 import { NormalizedRuleType } from '../rule_type_registry';
-import { ActionsCompletion, RuleTypeParams, RuleTypeState, SanitizedRule } from '../types';
+import {
+  ActionsCompletion,
+  AlertActions,
+  RuleTypeParams,
+  RuleTypeState,
+  SanitizedRule,
+} from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -71,6 +77,7 @@ const rule = {
     contextVal: 'My other {{context.value}} goes here',
     stateVal: 'My other {{state.value}} goes here',
   },
+  notifyWhen: 'onActiveAlert',
   actions: [
     {
       id: '1',
@@ -112,39 +119,58 @@ const defaultExecutionParams = {
 
 let ruleRunMetricsStore: RuleRunMetricsStore;
 let clock: sinon.SinonFakeTimers;
-type ActionGroup = 'default' | 'other-group' | 'recovered';
+type ActiveActionGroup = 'default' | 'other-group';
 const generateAlert = ({
   id,
   group = 'default',
   context,
   state,
   scheduleActions = true,
+  lastScheduledActions = {},
+  lastScheduledActionsGroup = 'default',
 }: {
   id: number;
-  group?: ActionGroup;
+  group?: ActiveActionGroup | 'recovered';
   context?: AlertInstanceContext;
   state?: AlertInstanceState;
   scheduleActions?: boolean;
+  lastScheduledActions?: AlertActions;
+  lastScheduledActionsGroup?: string;
 }) => {
-  const alert = new Alert<
-    AlertInstanceState,
-    AlertInstanceContext,
-    'default' | 'other-group' | 'recovered'
-  >(String(id), {
-    state: state || { test: true },
-    meta: {
-      lastScheduledActions: {
-        date: new Date(),
-        group,
+  const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>(
+    String(id),
+    {
+      state: state || { test: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: lastScheduledActionsGroup,
+          actions: lastScheduledActions,
+        },
       },
-    },
-  });
+    }
+  );
   if (scheduleActions) {
-    alert.scheduleActions(group);
+    alert.scheduleActions(group as ActiveActionGroup);
   }
   if (context) {
     alert.setContext(context);
   }
+
+  return { [id]: alert };
+};
+
+const generateRecoveredAlert = ({ id, state }: { id: number; state?: AlertInstanceState }) => {
+  const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'recovered'>(String(id), {
+    state: state || { test: true },
+    meta: {
+      lastScheduledActions: {
+        date: new Date(),
+        group: 'recovered',
+        actions: {},
+      },
+    },
+  });
   return { [id]: alert };
 };
 
@@ -156,6 +182,8 @@ const generateExecutionParams = (params = {}) => {
     ruleRunMetricsStore,
   };
 };
+
+const DATE_1970 = new Date('1970-01-01T00:00:00.000Z');
 
 describe('Execution Handler', () => {
   beforeEach(() => {
@@ -179,8 +207,15 @@ describe('Execution Handler', () => {
   afterAll(() => clock.restore());
 
   test('enqueues execution per selected action', async () => {
+    const alerts = generateAlert({ id: 1 });
     const executionHandler = new ExecutionHandler(generateExecutionParams());
-    await executionHandler.run(generateAlert({ id: 1 }));
+    await executionHandler.run(alerts);
+
+    expect(Object.values(alerts)[0].getLastScheduledActions()).toEqual({
+      actions: {},
+      date: DATE_1970,
+      group: 'default',
+    });
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
@@ -320,7 +355,7 @@ describe('Execution Handler', () => {
           ...defaultExecutionParams.rule,
           actions: [
             {
-              id: '1',
+              id: '2',
               group: 'default',
               actionTypeId: '.slack',
               params: {
@@ -328,7 +363,7 @@ describe('Execution Handler', () => {
               },
             },
             {
-              id: '2',
+              id: '3',
               group: 'default',
               actionTypeId: '.slack',
               params: {
@@ -343,6 +378,7 @@ describe('Execution Handler', () => {
     );
 
     await executionHandler.run(generateAlert({ id: 2 }));
+
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(2);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
@@ -452,6 +488,7 @@ describe('Execution Handler', () => {
     await executionHandler.run(
       generateAlert({ id: 2, group: 'invalid-group' as 'default' | 'other-group' })
     );
+
     expect(defaultExecutionParams.logger.error).toHaveBeenCalledWith(
       'Invalid action group "invalid-group" for rule "test".'
     );
@@ -462,6 +499,38 @@ describe('Execution Handler', () => {
   });
 
   test('Stops triggering actions when the number of total triggered actions is reached the number of max executable actions', async () => {
+    const actions = [
+      {
+        id: '1',
+        group: 'default',
+        actionTypeId: 'test2',
+        params: {
+          foo: true,
+          contextVal: 'My other {{context.value}} goes here',
+          stateVal: 'My other {{state.value}} goes here',
+        },
+      },
+      {
+        id: '2',
+        group: 'default',
+        actionTypeId: 'test2',
+        params: {
+          foo: true,
+          contextVal: 'My other {{context.value}} goes here',
+          stateVal: 'My other {{state.value}} goes here',
+        },
+      },
+      {
+        id: '3',
+        group: 'default',
+        actionTypeId: 'test3',
+        params: {
+          foo: true,
+          contextVal: '{{context.value}} goes here',
+          stateVal: '{{state.value}} goes here',
+        },
+      },
+    ];
     const executionHandler = new ExecutionHandler(
       generateExecutionParams({
         ...defaultExecutionParams,
@@ -475,38 +544,7 @@ describe('Execution Handler', () => {
         },
         rule: {
           ...defaultExecutionParams.rule,
-          actions: [
-            {
-              id: '1',
-              group: 'default',
-              actionTypeId: 'test2',
-              params: {
-                foo: true,
-                contextVal: 'My other {{context.value}} goes here',
-                stateVal: 'My other {{state.value}} goes here',
-              },
-            },
-            {
-              id: '2',
-              group: 'default',
-              actionTypeId: 'test2',
-              params: {
-                foo: true,
-                contextVal: 'My other {{context.value}} goes here',
-                stateVal: 'My other {{state.value}} goes here',
-              },
-            },
-            {
-              id: '3',
-              group: 'default',
-              actionTypeId: 'test3',
-              params: {
-                foo: true,
-                contextVal: '{{context.value}} goes here',
-                stateVal: '{{state.value}} goes here',
-              },
-            },
-          ],
+          actions,
         },
       })
     );
@@ -520,6 +558,49 @@ describe('Execution Handler', () => {
   });
 
   test('Skips triggering actions for a specific action type when it reaches the limit for that specific action type', async () => {
+    const actions = [
+      ...defaultExecutionParams.rule.actions,
+      {
+        id: '2',
+        group: 'default',
+        actionTypeId: 'test-action-type-id',
+        params: {
+          foo: true,
+          contextVal: 'My other {{context.value}} goes here',
+          stateVal: 'My other {{state.value}} goes here',
+        },
+      },
+      {
+        id: '3',
+        group: 'default',
+        actionTypeId: 'test-action-type-id',
+        params: {
+          foo: true,
+          contextVal: '{{context.value}} goes here',
+          stateVal: '{{state.value}} goes here',
+        },
+      },
+      {
+        id: '4',
+        group: 'default',
+        actionTypeId: 'another-action-type-id',
+        params: {
+          foo: true,
+          contextVal: '{{context.value}} goes here',
+          stateVal: '{{state.value}} goes here',
+        },
+      },
+      {
+        id: '5',
+        group: 'default',
+        actionTypeId: 'another-action-type-id',
+        params: {
+          foo: true,
+          contextVal: '{{context.value}} goes here',
+          stateVal: '{{state.value}} goes here',
+        },
+      },
+    ];
     const executionHandler = new ExecutionHandler(
       generateExecutionParams({
         ...defaultExecutionParams,
@@ -536,49 +617,7 @@ describe('Execution Handler', () => {
         },
         rule: {
           ...defaultExecutionParams.rule,
-          actions: [
-            ...defaultExecutionParams.rule.actions,
-            {
-              id: '2',
-              group: 'default',
-              actionTypeId: 'test-action-type-id',
-              params: {
-                foo: true,
-                contextVal: 'My other {{context.value}} goes here',
-                stateVal: 'My other {{state.value}} goes here',
-              },
-            },
-            {
-              id: '3',
-              group: 'default',
-              actionTypeId: 'test-action-type-id',
-              params: {
-                foo: true,
-                contextVal: '{{context.value}} goes here',
-                stateVal: '{{state.value}} goes here',
-              },
-            },
-            {
-              id: '4',
-              group: 'default',
-              actionTypeId: 'another-action-type-id',
-              params: {
-                foo: true,
-                contextVal: '{{context.value}} goes here',
-                stateVal: '{{state.value}} goes here',
-              },
-            },
-            {
-              id: '5',
-              group: 'default',
-              actionTypeId: 'another-action-type-id',
-              params: {
-                foo: true,
-                contextVal: '{{context.value}} goes here',
-                stateVal: '{{state.value}} goes here',
-              },
-            },
-          ],
+          actions,
         },
       })
     );
@@ -599,29 +638,31 @@ describe('Execution Handler', () => {
   });
 
   test('schedules alerts with recovered actions', async () => {
+    const actions = [
+      {
+        id: '1',
+        group: 'recovered',
+        actionTypeId: 'test',
+        params: {
+          foo: true,
+          contextVal: 'My {{context.value}} goes here',
+          stateVal: 'My {{state.value}} goes here',
+          alertVal:
+            'My {{alertId}} {{alertName}} {{spaceId}} {{tags}} {{alertInstanceId}} goes here',
+        },
+      },
+    ];
     const executionHandler = new ExecutionHandler(
       generateExecutionParams({
         ...defaultExecutionParams,
         rule: {
           ...defaultExecutionParams.rule,
-          actions: [
-            {
-              id: '1',
-              group: 'recovered',
-              actionTypeId: 'test',
-              params: {
-                foo: true,
-                contextVal: 'My {{context.value}} goes here',
-                stateVal: 'My {{state.value}} goes here',
-                alertVal:
-                  'My {{alertId}} {{alertName}} {{spaceId}} {{tags}} {{alertInstanceId}} goes here',
-              },
-            },
-          ],
+          actions,
         },
       })
     );
-    await executionHandler.run(generateAlert({ id: 1, scheduleActions: false }), true);
+    await executionHandler.run(generateRecoveredAlert({ id: 1 }));
+
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
@@ -683,7 +724,7 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.run(generateAlert({ id: 1, scheduleActions: false }), true);
+    await executionHandler.run(generateRecoveredAlert({ id: 1 }));
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
     expect(defaultExecutionParams.logger.debug).nthCalledWith(
@@ -698,6 +739,7 @@ describe('Execution Handler', () => {
         ...defaultExecutionParams,
         rule: {
           ...defaultExecutionParams.rule,
+          notifyWhen: 'onThrottleInterval',
           throttle: '1m',
         },
       })
@@ -711,6 +753,68 @@ describe('Execution Handler', () => {
       1,
       `skipping scheduling of actions for '1' in rule ${defaultExecutionParams.ruleLabel}: rule is throttled`
     );
+  });
+
+  test('does not schedule actions that are throttled', async () => {
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        ...defaultExecutionParams,
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions: [
+            {
+              ...defaultExecutionParams.rule.actions[0],
+              frequency: {
+                summary: false,
+                notifyWhen: 'onThrottleInterval',
+                throttle: '1h',
+              },
+            },
+          ],
+        },
+      })
+    );
+    await executionHandler.run(
+      generateAlert({
+        id: 1,
+        lastScheduledActions: { 'test:default:1h': { date: new Date(DATE_1970) } },
+      })
+    );
+
+    clock.tick(30000);
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
+    expect(defaultExecutionParams.logger.debug).nthCalledWith(
+      1,
+      `skipping scheduling of actions for '1' in rule ${defaultExecutionParams.ruleLabel}: rule is throttled`
+    );
+  });
+
+  test('schedule actions that are throttled but alert has a changed action group', async () => {
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        ...defaultExecutionParams,
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions: [
+            {
+              ...defaultExecutionParams.rule.actions[0],
+              frequency: {
+                summary: false,
+                notifyWhen: 'onThrottleInterval',
+                throttle: '1h',
+              },
+            },
+          ],
+        },
+      })
+    );
+    await executionHandler.run(generateAlert({ id: 1, lastScheduledActionsGroup: 'recovered' }));
+
+    clock.tick(30000);
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(alertingEventLogger.logAction).toHaveBeenCalledTimes(1);
   });
 
   test('does not schedule active alerts that are muted', async () => {
