@@ -42,7 +42,6 @@ RUNTIME_DEPS = [
   "//packages/kbn-safer-lodash-set",
   "//packages/kbn-config-schema",
   "//packages/kbn-std",
-  "//packages/kbn-ecs",
   "//packages/core/logging/core-logging-common-internal",
 ]
 
