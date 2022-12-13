@@ -14,10 +14,46 @@ import { SettingsService } from './settings_service';
 
 const httpSetup = httpServiceMock.createSetupContract();
 
+const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+injectedMetadata.getLegacyMetadata.mockReturnValue({
+  app: {
+    id: 'foo',
+    title: 'Foo App',
+  },
+  nav: [],
+  uiSettings: {
+    defaults: { foo: { value: 'bar' }, bar: { value: 'baz' } },
+    user: {},
+  },
+  globalUiSettings: {
+    defaults: { baz: { value: 'eggs' }, laz: { value: 'has' } },
+    user: { first: { value: 'second' } },
+  },
+} as any);
+
 const defaultDeps = {
   http: httpSetup,
-  injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+  injectedMetadata,
 };
+
+describe('#setup', () => {
+  it('initializes two clients correctly', () => {
+    const service = new SettingsService();
+    const { client, globalClient } = service.setup(defaultDeps);
+    expect(client.get('foo')).toEqual('bar');
+    expect(client.get('bar')).toEqual('baz');
+    expect(globalClient.get('baz')).toEqual('eggs');
+    expect(globalClient.get('laz')).toEqual('has');
+    expect(globalClient.get('first')).toEqual('second');
+  });
+});
+
+describe('#start', () => {
+  it('throws if called before #setup', () => {
+    const service = new SettingsService();
+    expect(() => service.start()).toThrow('#setup must be called before start');
+  });
+});
 
 describe('#stop', () => {
   it('runs fine if service never set up', () => {
