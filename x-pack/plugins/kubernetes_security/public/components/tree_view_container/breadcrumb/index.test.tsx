@@ -19,22 +19,29 @@ const MOCK_TREE_SELECTION: KubernetesCollectionMap = {
   containerImage: 'selected image',
 };
 
+const RESPONSE_ACTION_TEST_BUTTON = 'kubernetesSecurity:kubernetesSecurityResponseAction';
 describe('Tree view Breadcrumb component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
   let onSelect: jest.Mock;
+  let onResponseActionButtonClick: jest.Mock;
+  const responseActionButtonProps = { tooltip: { content: 'test' }, isDisabled: false };
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     onSelect = jest.fn();
+    onResponseActionButtonClick = jest.fn();
   });
 
   describe('When Breadcrumb is mounted', () => {
     it('renders Breadcrumb button content correctly', async () => {
       renderResult = mockedContext.render(
         <Breadcrumb
+          treeNavResponseActionDisabled={false}
           treeNavSelection={{ ...MOCK_TREE_SELECTION, node: undefined }}
+          responseActionClick={onResponseActionButtonClick}
+          responseActionButtonProps={responseActionButtonProps}
           onSelect={onSelect}
         />
       );
@@ -50,9 +57,10 @@ describe('Tree view Breadcrumb component', () => {
     it('should render breadcrumb icons', async () => {
       renderResult = mockedContext.render(
         <Breadcrumb
-          treeNavSelection={{
-            ...MOCK_TREE_SELECTION,
-          }}
+          responseActionClick={onResponseActionButtonClick}
+          treeNavResponseActionDisabled={false}
+          treeNavSelection={MOCK_TREE_SELECTION}
+          responseActionButtonProps={responseActionButtonProps}
           onSelect={onSelect}
         />
       );
@@ -68,19 +76,29 @@ describe('Tree view Breadcrumb component', () => {
       expect(renderResult).toMatchSnapshot();
     });
     it('returns null when no selected collection', async () => {
-      renderResult = mockedContext.render(<Breadcrumb treeNavSelection={{}} onSelect={onSelect} />);
-
+      renderResult = mockedContext.render(
+        <Breadcrumb
+          responseActionClick={onResponseActionButtonClick}
+          treeNavResponseActionDisabled={false}
+          treeNavSelection={{}}
+          responseActionButtonProps={responseActionButtonProps}
+          onSelect={onSelect}
+        />
+      );
       expect(renderResult.container).toBeEmptyDOMElement();
     });
 
     it('should display cluster icon button when no cluster name is provided', async () => {
       renderResult = mockedContext.render(
         <Breadcrumb
+          treeNavResponseActionDisabled={false}
+          responseActionClick={onResponseActionButtonClick}
           treeNavSelection={{
             ...MOCK_TREE_SELECTION,
             clusterName: undefined,
             node: undefined,
           }}
+          responseActionButtonProps={responseActionButtonProps}
           onSelect={onSelect}
         />
       );
@@ -96,7 +114,10 @@ describe('Tree view Breadcrumb component', () => {
     it('should return null when no cluster in selection', async () => {
       renderResult = mockedContext.render(
         <Breadcrumb
+          treeNavResponseActionDisabled={false}
+          responseActionClick={onResponseActionButtonClick}
           treeNavSelection={{ ...MOCK_TREE_SELECTION, clusterId: undefined }}
+          responseActionButtonProps={responseActionButtonProps}
           onSelect={onSelect}
         />
       );
@@ -105,16 +126,14 @@ describe('Tree view Breadcrumb component', () => {
     });
 
     it('clicking on breadcrumb item triggers onSelect', async () => {
-      const treeNavSelection = {
-        clusterId: 'selected cluster id',
-        clusterName: 'selected cluster name',
-        namespace: 'selected namespace',
-        node: 'selected node',
-        pod: 'selected pod',
-      };
-
       renderResult = mockedContext.render(
-        <Breadcrumb treeNavSelection={treeNavSelection} onSelect={onSelect} />
+        <Breadcrumb
+          responseActionClick={onResponseActionButtonClick}
+          treeNavResponseActionDisabled={false}
+          treeNavSelection={{ ...MOCK_TREE_SELECTION, node: undefined }}
+          onSelect={onSelect}
+          responseActionButtonProps={responseActionButtonProps}
+        />
       );
       expect(renderResult.queryByText(MOCK_TREE_SELECTION.pod)).toBeVisible();
       renderResult.getByText(MOCK_TREE_SELECTION.pod).click();
@@ -124,6 +143,8 @@ describe('Tree view Breadcrumb component', () => {
     it('should render last  breadcrumb content only', async () => {
       renderResult = mockedContext.render(
         <Breadcrumb
+          treeNavResponseActionDisabled={true}
+          responseActionClick={onResponseActionButtonClick}
           treeNavSelection={{
             clusterId: MOCK_TREE_SELECTION.clusterId,
             clusterName: MOCK_TREE_SELECTION.clusterName,
@@ -131,6 +152,7 @@ describe('Tree view Breadcrumb component', () => {
             containerImage: MOCK_TREE_SELECTION.containerImage,
           }}
           onSelect={onSelect}
+          responseActionButtonProps={responseActionButtonProps}
         />
       );
 
