@@ -1725,7 +1725,7 @@ export default ({ getService }: FtrProviderContext): void => {
                     .expect(200);
 
                   // Check that the updated rule is returned with the response
-                  expect(body.attributes.results.updated[0].throttle).to.eql(undefined);
+                  expect(body.attributes.results.updated[0].throttle).to.eql('rule');
 
                   // Check that the updates have been persisted
                   const { body: rule } = await fetchRule(ruleId).expect(200);
