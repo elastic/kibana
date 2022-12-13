@@ -109,6 +109,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const [agentCount, setAgentCount] = useState<number>(0);
 
+  const integrationInfo = useMemo(
+    () =>
+      (params as AddToPolicyParams).integration
+        ? packageInfo?.policy_templates?.find(
+            (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
+          )
+        : undefined,
+    [packageInfo?.policy_templates, params]
+  );
+
   // Save package policy
   const {
     onSubmit,
@@ -131,6 +141,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedPolicyTab,
     withSysMonitoring,
     queryParamsPolicyId,
+    integrationToEnable: integrationInfo?.name,
   });
 
   const setPolicyValidation = useCallback(
@@ -214,16 +225,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     withSysMonitoring,
     packageInfo,
   });
-
-  const integrationInfo = useMemo(
-    () =>
-      (params as AddToPolicyParams).integration
-        ? packageInfo?.policy_templates?.find(
-            (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
-          )
-        : undefined,
-    [packageInfo?.policy_templates, params]
-  );
 
   const layoutProps = useMemo(
     () => ({
