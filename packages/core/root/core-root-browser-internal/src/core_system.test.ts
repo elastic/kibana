@@ -41,6 +41,7 @@ import {
   fetchOptionalMemoryInfoMock,
   MockLoggingSystem,
   LoggingSystemConstructor,
+  MockSettingsService,
 } from './core_system.test.mocks';
 import type { EnvironmentMode } from '@kbn/config';
 import { CoreSystem } from './core_system';
@@ -268,6 +269,11 @@ describe('#setup()', () => {
     expect(MockUiSettingsService.setup).toHaveBeenCalledTimes(1);
   });
 
+  it('calls settings#setup()', async () => {
+    await setupCore();
+    expect(MockSettingsService.setup).toHaveBeenCalledTimes(1);
+  });
+
   it('calls fatalErrors#setup()', async () => {
     await setupCore();
     expect(MockFatalErrorsService.setup).toHaveBeenCalledTimes(1);
@@ -411,6 +417,11 @@ describe('#start()', () => {
   it('calls uiSettings#start()', async () => {
     await startCore();
     expect(MockUiSettingsService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls settings#start()', async () => {
+    await startCore();
+    expect(MockSettingsService.start).toHaveBeenCalledTimes(1);
   });
 
   it('calls i18n#start()', async () => {
