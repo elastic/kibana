@@ -73,7 +73,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
   if (stateP.controlState === 'INIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-
     if (Either.isLeft(res)) {
       const left = res.left;
       if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
@@ -99,10 +98,17 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
       const aliases = aliasesRes.right;
 
-      if (
-        // This version's migration has already been completed.
-        versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliases)
-      ) {
+      const versionMigrationIsComplete = versionMigrationCompleted(
+        stateP.currentAlias,
+        stateP.versionAlias,
+        aliases
+      );
+
+      const mappingsHaveChanged = Boolean(
+        diffMappings(stateP.targetIndexMappings, stateP.desiredIndexMappings)
+      );
+
+      if (versionMigrationIsComplete || !mappingsHaveChanged) {
         const source = aliases[stateP.currentAlias]!;
 
         return {
@@ -111,15 +117,19 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // installed / enabled we can transform any old documents and update
           // the mappings for this plugin's types.
           controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+
           // Source is a none because we didn't do any migration from a source
           // index
           sourceIndex: Option.none,
           targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
           sourceIndexMappings: indices[source].mappings,
-          targetIndexMappings: mergeMigrationMappingPropertyHashes(
-            stateP.targetIndexMappings,
-            indices[aliases[stateP.currentAlias]!].mappings
-          ),
+          ...(mappingsHaveChanged && {
+            targetIndexMappings: mergeMigrationMappingPropertyHashes(
+              stateP.targetIndexMappings,
+              indices[aliases[stateP.currentAlias]!].mappings
+            ),
+          }),
+          ...(!mappingsHaveChanged && { skipReindex: true }),
           versionIndexReadyActions: Option.none,
         };
       } else if (
@@ -136,21 +146,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           } alias is pointing to a newer version of Kibana: v${indexVersion(
             aliases[stateP.currentAlias]
           )}`,
-        };
-      } else if (
-        // Have the mappings in ES diverged from the mappings defined in the
-        // saved objects registry?
-        Boolean(diffMappings(stateP.targetIndexMappings, stateP.desiredIndexMappings)) &&
-        aliases[stateP.currentAlias] != null
-      ) {
-        const index = aliases[stateP.currentAlias]!;
-        return {
-          ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-          sourceIndex: Option.some(index),
-          targetIndex: index,
-          versionIndexReadyActions: Option.none,
-          skipReindex: true,
         };
       } else if (
         // Don't actively participate in this migration but wait for another instance to complete it
