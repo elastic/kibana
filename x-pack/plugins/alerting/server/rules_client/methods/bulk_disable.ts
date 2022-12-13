@@ -192,7 +192,7 @@ const bulkDisableRulesWithOCC = async (
       }
     });
   }
-
+  await rulesFinder.close();
   const result = await context.unsecuredSavedObjectsClient.bulkCreate(rulesToDisable, {
     overwrite: true,
   });
