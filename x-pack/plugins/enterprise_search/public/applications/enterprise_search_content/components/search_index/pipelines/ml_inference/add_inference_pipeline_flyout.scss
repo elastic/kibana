@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-.enterpriseSearchInferencePipelineModal {
-  width: $euiSizeXXL * 20;
-
+.enterpriseSearchInferencePipelineFlyout {
   .resizableContainer {
     min-height: $euiSizeXL * 10;
 
@@ -16,7 +14,7 @@
     }
   }
 
-  .enterpriseSearchInferencePipelineModalFooter {
+  .enterpriseSearchInferencePipelineFlyoutFooter {
     .euiButtonEmpty__content {
       padding-left: $euiSizeM;
       padding-right: $euiSizeM;
