@@ -99,7 +99,6 @@ export const createActionHandler = async (
       ? map(params.queries, (query) =>
           pickBy(
             {
-              // @ts-expect-error where does type 'number' comes from?
               ...query,
               action_id: uuid.v4(),
               agents: selectedAgents,

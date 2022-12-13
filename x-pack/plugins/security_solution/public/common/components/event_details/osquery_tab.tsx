@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCode, EuiEmptyPrompt, EuiNotificationBadge } from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,6 +16,11 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { useKibana } from '../../lib/kibana';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
+import { OsquerySkippedResults } from './osquery_result_skipped';
+import type {
+  RESPONSE_ACTION_TYPES,
+  ResponseAction,
+} from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -23,7 +28,7 @@ const TabContentWrapper = styled.div`
 `;
 type RuleParameters = Array<{
   response_actions: Array<{
-    action_type_id: string;
+    action_type_id: RESPONSE_ACTION_TYPES.OSQUERY;
     params: Record<string, unknown>;
   }>;
 }>;
@@ -91,10 +96,18 @@ export const useOsqueryTab = ({
     return;
   }
 
-  const { OsqueryResults, fetchAllLiveQueries } = osquery;
   const expandedEventFieldsObject = expandDottedObject(
     rawEventData.fields
   ) as ExpandedEventFieldsObject;
+
+  const responseActions =
+    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
+
+  if (!responseActions?.length) {
+    return;
+  }
+
+  const { OsqueryResults, fetchAllLiveQueries } = osquery;
 
   const alertId = rawEventData._id;
 
@@ -106,9 +119,6 @@ export const useOsqueryTab = ({
   });
   const actionItems = actionsData?.data.items || [];
 
-  if (!actionItems.length) {
-    return;
-  }
   const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
   const agentIds = expandedEventFieldsObject.agent?.id;
 
@@ -127,12 +137,20 @@ export const useOsqueryTab = ({
           {!application?.capabilities?.osquery?.read ? (
             emptyPrompt
           ) : (
-            <OsqueryResults
-              agentIds={agentIds}
-              ruleName={ruleName}
-              actionItems={actionItems}
-              ecsData={ecsData}
-            />
+            <>
+              <OsqueryResults
+                agentIds={agentIds}
+                ruleName={ruleName}
+                actionItems={actionItems}
+                ecsData={ecsData}
+              />
+              <EuiSpacer size="s" />
+              <OsquerySkippedResults
+                responseActions={responseActions as ResponseAction[]}
+                rawEventData={rawEventData}
+              />
+              <EuiSpacer size="s" />
+            </>
           )}
         </TabContentWrapper>
       </>

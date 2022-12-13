@@ -123,5 +123,5 @@ export const objectQueries = t.record(
 export type ObjectQueries = t.TypeOf<typeof objectQueries>;
 export const queries = t.union([arrayQueries, objectQueries]);
 export type Queries = t.TypeOf<typeof queries>;
-export const queriesOrUndefined = t.union([queries, t.undefined]);
+export const queriesOrUndefined = t.union([arrayQueries, t.undefined]); // in the future we might need to support `objectQueries` so use `queries` instead of `arrayQueries` - now removing this because of strange type issue where query is a number
 export type QueriesOrUndefined = t.TypeOf<typeof queriesOrUndefined>;

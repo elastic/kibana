@@ -135,3 +135,10 @@ export const ALERT_REASON = i18n.translate('xpack.securitySolution.eventDetails.
 export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
   defaultMessage: 'View all fields in table',
 });
+
+export const OSQUERY_SKIPPED_QUERIES = i18n.translate(
+  'xpack.securitySolution.eventDetails.osqueryTab.skippedQueries',
+  {
+    defaultMessage: `These queries haven't been called due to parameter's value not found in the Alert.`,
+  }
+);
