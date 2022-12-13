@@ -66,6 +66,7 @@ const getThreeRules = (response: any) => {
       scheduledTaskId: response.body.rules[i].scheduledTaskId,
       executionStatus: response.body.rules[i].executionStatus,
       monitoring: response.body.rules[i].monitoring,
+      revision: 0,
       ...(response.body.rules[i].nextRun ? { nextRun: response.body.rules[i].nextRun } : {}),
       ...(response.body.rules[i].lastRun ? { lastRun: response.body.rules[i].lastRun } : {}),
     });

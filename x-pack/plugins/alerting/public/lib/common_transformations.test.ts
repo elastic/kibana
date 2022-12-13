@@ -180,6 +180,7 @@ describe('common_transformations', () => {
             ],
           },
         },
+        "revision": 0,
         "schedule": Object {
           "interval": "1s",
         },

@@ -45,6 +45,7 @@ const mockRule: RuleTableItem = {
   ruleType: 'Test Rule Type',
   isEditable: true,
   enabledInLicense: true,
+  revision: 0,
 };
 
 export const RulesListNotifyBadgeSandbox = ({ triggersActionsUi }: SandboxProps) => {

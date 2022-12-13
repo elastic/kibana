@@ -446,6 +446,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 0,
         "schedule": Object {
           "interval": "1m",
         },
@@ -663,6 +664,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 0,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1085,6 +1087,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true },
+        revision: 0,
         schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
@@ -1284,6 +1287,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
+        revision: 0,
         schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
@@ -1452,6 +1456,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true, parameterThatIsSavedObjectRef: 'action_0' },
+        revision: 0,
         schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
@@ -1623,6 +1628,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
       },
       {
         id: 'mock-saved-object-id',
@@ -1755,6 +1761,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
       },
       {
         id: 'mock-saved-object-id',
@@ -1887,6 +1894,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
       },
       {
         id: 'mock-saved-object-id',
@@ -2027,6 +2035,7 @@ describe('create()', () => {
         muteAll: false,
         snoozeSchedule: [],
         mutedInstanceIds: [],
+        revision: 0,
         executionStatus: {
           status: 'pending',
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -2407,6 +2416,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
       },
       {
         id: 'mock-saved-object-id',
@@ -2509,6 +2519,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
       },
       {
         id: 'mock-saved-object-id',

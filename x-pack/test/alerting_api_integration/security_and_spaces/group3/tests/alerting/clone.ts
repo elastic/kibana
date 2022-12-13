@@ -163,6 +163,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
+                revision: 0, // TODO: Finalize proper clone behavior (copy previous revision, or reset to initial default?)
                 last_run: {
                   alerts_count: {
                     active: 0,

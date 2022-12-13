@@ -62,6 +62,7 @@ type NewMonitorStatusAlert = Omit<
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'executionStatus'
+  | 'revision'
   | 'ruleTypeId'
   | 'notifyWhen'
   | 'actions'
