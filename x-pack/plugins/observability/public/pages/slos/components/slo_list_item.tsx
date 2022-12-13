@@ -46,17 +46,9 @@ export function SloListItem({ slo, onDelete }: SloListItemProps) {
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
   };
 
-  const handleEdit = () => {
-    setIsActionsPopoverOpen(false);
-  };
-
   const handleDelete = () => {
     setDeleteConfirmationModalOpen(true);
     setIsDeleting(true);
-    setIsActionsPopoverOpen(false);
-  };
-
-  const handleClone = () => {
     setIsActionsPopoverOpen(false);
   };
 
@@ -137,19 +129,6 @@ export function SloListItem({ slo, onDelete }: SloListItemProps) {
             <EuiContextMenuPanel
               size="s"
               items={[
-                // Todo:
-                // - Implement Edit functionality
-                // - Implement Clone functionality
-                // <EuiContextMenuItem key="copy" icon="pencil" onClick={handleEdit}>
-                //   {i18n.translate('observability.slos.slo.item.actions.edit', {
-                //     defaultMessage: 'Edit',
-                //   })}
-                // </EuiContextMenuItem>,
-                // <EuiContextMenuItem key="share" icon="copy" onClick={handleClone}>
-                //   {i18n.translate('observability.slos.slo.item.actions.clone', {
-                //     defaultMessage: 'Clone',
-                //   })}
-                // </EuiContextMenuItem>,
                 <EuiContextMenuItem key="edit" icon="trash" onClick={handleDelete}>
                   {i18n.translate('observability.slos.slo.item.actions.delete', {
                     defaultMessage: 'Delete',
