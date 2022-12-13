@@ -14,7 +14,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 
 import { Duration, DurationUnit } from '../../../typings';
 
@@ -28,21 +28,19 @@ const durationUnitOptions: DurationUnitOption[] = [
   { value: 'h', text: 'hour' },
 ];
 
-const MIN_DURATION_IN_MINUTES = 30;
-const MAX_DURATION_IN_MINUTES = 1440;
-const MAX_DURATION_IN_HOURS = 24;
-
 interface Props {
   initialDuration?: Duration;
+  errors?: string[];
   onChange: (duration: Duration) => void;
 }
 
-export function LongWindowDuration({ initialDuration, onChange }: Props) {
+export function LongWindowDuration({ initialDuration, onChange, errors }: Props) {
+  const selectId = useGeneratedHtmlId({ prefix: 'durationUnitSelect' });
   const [durationValue, setDurationValue] = useState<number>(initialDuration?.value ?? 1);
   const [durationUnit, setDurationUnit] = useState<DurationUnit>(
     initialDuration?.unit ?? durationUnitOptions[0].value
   );
-  const [error, setError] = useState<string | undefined>(undefined);
+  const hasError = errors !== undefined && errors.length > 0;
 
   const onDurationValueChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
@@ -56,28 +54,17 @@ export function LongWindowDuration({ initialDuration, onChange }: Props) {
     onChange({ value: durationValue, unit });
   };
 
-  useEffect(() => {
-    if (isValidDuration(durationValue, durationUnit)) {
-      setError(undefined);
-    } else {
-      setError(errorText);
-    }
-  }, [durationValue, durationUnit]);
-
-  const isValidDuration = (value: number, unit: DurationUnit): boolean => {
-    return (
-      (unit === 'm' && value >= MIN_DURATION_IN_MINUTES && value <= MAX_DURATION_IN_MINUTES) ||
-      (unit === 'h' && value <= MAX_DURATION_IN_HOURS)
-    );
-  };
-
-  const selectId = useGeneratedHtmlId({ prefix: 'durationUnitSelect' });
   return (
-    <EuiFormRow label={rowLabel} fullWidth isInvalid={!!error} error={error}>
+    <EuiFormRow
+      label={rowLabel}
+      fullWidth
+      isInvalid={hasError}
+      error={hasError ? errors[0] : undefined}
+    >
       <EuiFlexGroup direction="row">
         <EuiFlexItem grow={false} style={{ width: 100 }}>
           <EuiFieldNumber
-            isInvalid={!!error}
+            isInvalid={hasError}
             min={1}
             value={String(durationValue)}
             onChange={onDurationValueChange}
@@ -88,7 +75,7 @@ export function LongWindowDuration({ initialDuration, onChange }: Props) {
         <EuiFlexItem>
           <EuiSelect
             id={selectId}
-            isInvalid={!!error}
+            isInvalid={hasError}
             options={durationUnitOptions}
             value={durationUnit}
             onChange={onDurationUnitChange}
@@ -111,9 +98,4 @@ const valueLabel = i18n.translate('xpack.observability.slo.rules.longWindow.valu
 
 const unitLabel = i18n.translate('xpack.observability.slo.rules.longWindow.unitLabel', {
   defaultMessage: 'Select a duration unit for the long window',
-});
-
-const errorText = i18n.translate('xpack.observability.slo.rules.longWindow.errorText', {
-  defaultMessage:
-    'The long window must be at least 30 minutes and cannot exceed 24 hours or 1440 minutes.',
 });

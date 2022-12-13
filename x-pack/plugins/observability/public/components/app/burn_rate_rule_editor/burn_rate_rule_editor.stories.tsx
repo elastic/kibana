@@ -18,7 +18,7 @@ export default {
 };
 
 const Template: ComponentStory<typeof Component> = () => (
-  <Component ruleParams={{} as BurnRateRuleParams} setRuleParams={() => {}} />
+  <Component ruleParams={{} as BurnRateRuleParams} setRuleParams={() => {}} errors={{}} />
 );
 
 const defaultProps = {};

@@ -15,14 +15,16 @@ import { SLO } from '../../../typings';
 
 interface Props {
   initialSlo?: SLO;
+  errors?: string[];
   onSelected: (slo: SLO | undefined) => void;
 }
 
-function SloSelector({ initialSlo, onSelected }: Props) {
+function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
   const { loading, sloList } = useFetchSloList(searchValue);
+  const hasError = errors !== undefined && errors.length > 0;
 
   useEffect(() => {
     setSelectedOptions(initialSlo ? [{ value: initialSlo.id, label: initialSlo.name }] : []);
@@ -46,7 +48,12 @@ function SloSelector({ initialSlo, onSelected }: Props) {
   const onSearchChange = useMemo(() => debounce((value: string) => setSearchValue(value), 300), []);
 
   return (
-    <EuiFormRow label={rowLabel} fullWidth>
+    <EuiFormRow
+      label={rowLabel}
+      fullWidth
+      isInvalid={hasError}
+      error={hasError ? errors[0] : undefined}
+    >
       <EuiComboBox
         aria-label={i18n.translate('xpack.observability.slo.rules.sloSelector.ariaLabel', {
           defaultMessage: 'SLO Selector',
@@ -63,6 +70,7 @@ function SloSelector({ initialSlo, onSelected }: Props) {
         onChange={onChange}
         fullWidth
         onSearchChange={onSearchChange}
+        isInvalid={hasError}
       />
     </EuiFormRow>
   );
