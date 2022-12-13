@@ -12,3 +12,9 @@ export { EDITED_CASES, SELECTED_CASES, SAVE_SELECTION, SEARCH_PLACEHOLDER } from
 export const EDIT_ASSIGNEES = i18n.translate('xpack.cases.actions.assignees.edit', {
   defaultMessage: 'Edit assignees',
 });
+
+export const SELECTED_ASSIGNEES = (selectedAssignees: number) =>
+  i18n.translate('xpack.cases.actions.assignees.selectedAssignees', {
+    defaultMessage: 'Selected: {selectedAssignees}',
+    values: { selectedAssignees },
+  });

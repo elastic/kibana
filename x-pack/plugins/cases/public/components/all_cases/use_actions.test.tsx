@@ -22,6 +22,7 @@ import {
 } from '../../common/mock';
 
 jest.mock('../../containers/api');
+jest.mock('../../containers/user_profiles/api');
 
 describe('useActions', () => {
   let appMockRender: AppMockRenderer;
@@ -227,6 +228,96 @@ describe('useActions', () => {
       });
 
       expect(res.queryByTestId('confirm-delete-case-modal')).toBeFalsy();
+    });
+  });
+
+  describe('Flyouts', () => {
+    it('change the tags of the case', async () => {
+      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+      const res = appMockRender.render(comp);
+
+      act(() => {
+        userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      });
+
+      await waitFor(() => {
+        expect(res.getByTestId('cases-bulk-action-tags')).toBeInTheDocument();
+      });
+
+      act(() => {
+        userEvent.click(res.getByTestId('cases-bulk-action-tags'), undefined, {
+          skipPointerEventsCheck: true,
+        });
+      });
+
+      await waitFor(() => {
+        expect(res.getByTestId('cases-edit-tags-flyout')).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        expect(res.getByText('coke')).toBeInTheDocument();
+      });
+
+      userEvent.click(res.getByText('coke'));
+      userEvent.click(res.getByTestId('cases-edit-tags-flyout-submit'));
+
+      await waitFor(() => {
+        expect(updateCasesSpy).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(res.queryByTestId('cases-edit-tags-flyout')).toBeFalsy();
+      });
+    });
+
+    it('change the assignees of the case', async () => {
+      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+      const res = appMockRender.render(comp);
+
+      act(() => {
+        userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      });
+
+      await waitFor(() => {
+        expect(res.getByTestId('cases-bulk-action-assignees')).toBeInTheDocument();
+      });
+
+      act(() => {
+        userEvent.click(res.getByTestId('cases-bulk-action-assignees'), undefined, {
+          skipPointerEventsCheck: true,
+        });
+      });
+
+      await waitFor(() => {
+        expect(res.getByTestId('cases-edit-assignees-flyout')).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        expect(res.getByText('Damaged Raccoon')).toBeInTheDocument();
+      });
+
+      userEvent.click(res.getByText('Damaged Raccoon'));
+      userEvent.click(res.getByTestId('cases-edit-assignees-flyout-submit'));
+
+      await waitFor(() => {
+        expect(updateCasesSpy).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(res.queryByTestId('cases-edit-assignees-flyout')).toBeFalsy();
+      });
     });
   });
 

@@ -244,7 +244,7 @@ export const useItemsState = ({
   const [state, dispatch] = useReducer(
     itemsReducer,
     { items, selectedCases, fieldSelector },
-    (args) => getInitialItemsState(args)
+    getInitialItemsState
   );
 
   const stateToOptions = useCallback((): ItemSelectableOption[] => {

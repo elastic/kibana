@@ -585,7 +585,7 @@ describe('useItemsState', () => {
   });
 
   it('calls fieldSelector correctly', async () => {
-    const { result } = renderHook(() => useItemsState(props), {
+    renderHook(() => useItemsState(props), {
       wrapper: appMockRender.AppWrapper,
     });
 

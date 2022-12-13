@@ -290,6 +290,59 @@ export function CasesTableServiceProvider(
       await testSubjects.missingOrFail('cases-edit-tags-flyout');
     },
 
+    async bulkEditAssignees(selectedCases: number[], assigneesToClick: string[]) {
+      const rows = await find.allByCssSelector('.euiTableRowCellCheckbox');
+
+      for (const caseIndex of selectedCases) {
+        assertCaseExists(caseIndex, rows.length);
+        rows[caseIndex].click();
+      }
+
+      await this.openBulkActions();
+      await testSubjects.existOrFail('cases-bulk-action-assignees');
+      await testSubjects.click('cases-bulk-action-assignees');
+
+      await testSubjects.existOrFail('cases-edit-assignees-flyout');
+
+      for (const assignee of assigneesToClick) {
+        await testSubjects.existOrFail(
+          `cases-actions-assignees-edit-selectable-assignee-${assignee}`
+        );
+        await testSubjects.click(`cases-actions-assignees-edit-selectable-assignee-${assignee}`);
+      }
+
+      await testSubjects.click('cases-edit-assignees-flyout-submit');
+      await testSubjects.missingOrFail('cases-edit-assignees-flyout');
+    },
+
+    async bulkAddNewAssignees(selectedCases: number[], searchTerm: string) {
+      const rows = await find.allByCssSelector('.euiTableRowCellCheckbox');
+
+      for (const caseIndex of selectedCases) {
+        assertCaseExists(caseIndex, rows.length);
+        rows[caseIndex].click();
+      }
+
+      await this.openBulkActions();
+      await testSubjects.existOrFail('cases-bulk-action-assignees');
+      await testSubjects.click('cases-bulk-action-assignees');
+
+      await testSubjects.existOrFail('cases-edit-assignees-flyout');
+
+      await testSubjects.existOrFail('cases-actions-assignees-edit-selectable-search-input');
+      const searchInput = await testSubjects.find(
+        'cases-actions-assignees-edit-selectable-search-input'
+      );
+
+      await testSubjects.existOrFail('cases-actions-assignees-edit-selectable-search-input');
+      await searchInput.type(searchTerm);
+
+      await casesCommon.selectFirstRowInAssigneesPopover();
+
+      await testSubjects.click('cases-edit-assignees-flyout-submit');
+      await testSubjects.missingOrFail('cases-edit-assignees-flyout');
+    },
+
     async selectAndChangeStatusOfAllCases(status: CaseStatuses) {
       await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });

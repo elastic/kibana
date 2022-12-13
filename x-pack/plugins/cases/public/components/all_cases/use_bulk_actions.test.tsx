@@ -23,6 +23,7 @@ import * as api from '../../containers/api';
 import { basicCase } from '../../containers/mock';
 
 jest.mock('../../containers/api');
+jest.mock('../../containers/user_profiles/api');
 
 describe('useBulkActions', () => {
   let appMockRender: AppMockRenderer;
@@ -45,6 +46,7 @@ describe('useBulkActions', () => {
 
       expect(result.current).toMatchInlineSnapshot(`
         Object {
+          "flyouts": <React.Fragment />,
           "modals": <React.Fragment />,
           "panels": Array [
             Object {
@@ -78,6 +80,17 @@ describe('useBulkActions', () => {
                   />,
                   "key": "cases-bulk-action-tags",
                   "name": "Edit tags",
+                  "onClick": [Function],
+                },
+                Object {
+                  "data-test-subj": "cases-bulk-action-assignees",
+                  "disabled": false,
+                  "icon": <EuiIcon
+                    size="m"
+                    type="userAvatar"
+                  />,
+                  "key": "cases-bulk-action-assignees",
+                  "name": "Edit assignees",
                   "onClick": [Function],
                 },
                 Object {
@@ -344,6 +357,110 @@ describe('useBulkActions', () => {
         );
 
         expect(res.queryByTestId('confirm-delete-case-modal')).toBeFalsy();
+      });
+    });
+  });
+
+  describe('Flyouts', () => {
+    it('change the tags of the case', async () => {
+      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+      const { result, waitFor: waitForHook } = renderHook(
+        () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      let flyouts = result.current.flyouts;
+      const panels = result.current.panels;
+
+      const res = appMockRender.render(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {flyouts}
+        </>
+      );
+
+      act(() => {
+        userEvent.click(res.getByTestId('cases-bulk-action-tags'));
+      });
+
+      flyouts = result.current.flyouts;
+
+      res.rerender(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {flyouts}
+        </>
+      );
+
+      await waitFor(() => {
+        expect(res.getByTestId('cases-edit-tags-flyout')).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        expect(res.getByText('coke')).toBeInTheDocument();
+      });
+
+      act(() => {
+        userEvent.click(res.getByText('coke'));
+        userEvent.click(res.getByTestId('cases-edit-tags-flyout-submit'));
+      });
+
+      await waitForHook(() => {
+        expect(updateCasesSpy).toHaveBeenCalled();
+      });
+    });
+
+    it('change the assignees of the case', async () => {
+      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+      const { result, waitFor: waitForHook } = renderHook(
+        () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      let flyouts = result.current.flyouts;
+      const panels = result.current.panels;
+
+      const res = appMockRender.render(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {flyouts}
+        </>
+      );
+
+      act(() => {
+        userEvent.click(res.getByTestId('cases-bulk-action-assignees'));
+      });
+
+      flyouts = result.current.flyouts;
+
+      res.rerender(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {flyouts}
+        </>
+      );
+
+      await waitFor(() => {
+        expect(res.getByTestId('cases-edit-assignees-flyout')).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        expect(res.getByText('Damaged Raccoon')).toBeInTheDocument();
+      });
+
+      act(() => {
+        userEvent.click(res.getByText('Damaged Raccoon'));
+        userEvent.click(res.getByTestId('cases-edit-assignees-flyout-submit'));
+      });
+
+      await waitForHook(() => {
+        expect(updateCasesSpy).toHaveBeenCalled();
       });
     });
   });

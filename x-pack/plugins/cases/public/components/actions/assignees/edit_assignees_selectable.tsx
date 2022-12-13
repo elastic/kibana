@@ -15,6 +15,9 @@ import {
   EuiTextColor,
   EuiHighlight,
   EuiIcon,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -26,6 +29,8 @@ import * as i18n from './translations';
 import { useItemsState } from '../use_items_state';
 import type { ItemSelectableOption, ItemsSelectionState } from '../types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
+import { EmptyMessage } from '../../user_profiles/empty_message';
+import { NoMatches } from '../../user_profiles/no_matches';
 
 interface Props {
   selectedCases: Case[];
@@ -43,6 +48,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
   onChangeAssignees,
 }) => {
   const { owner: owners } = useCasesContext();
+  const { euiTheme } = useEuiTheme();
   const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
   // TODO: Include unknown users
   const userProfileIds = [...userProfiles.keys()];
@@ -78,12 +84,13 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
       return {
         key: item.key,
         label: item.key,
+        'data-test-subj': `cases-actions-assignees-edit-selectable-assignee-${item.key}`,
       } as AssigneeSelectableOption;
     },
     [searchResultUserProfiles, userProfiles]
   );
 
-  const { options, onChange } = useItemsState({
+  const { options, totalSelectedItems, onChange } = useItemsState({
     items: userProfileIds,
     selectedCases,
     fieldSelector: (theCase) => theCase.assignees.map(({ uid }) => uid),
@@ -95,13 +102,15 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
     searchResultUserProfiles: searchResultUserProfiles ?? [],
     options,
     searchValue,
+    initialUserProfiles: userProfiles,
   });
 
   const isLoadingData = isLoading || isLoadingSuggest || isUserTyping;
 
   const renderOption = useCallback(
     (option: AssigneeSelectableOption, search: string) => {
-      const dataTestSubj = `cases-actions-tags-edit-selectable-tag-${option.label}-icon-${option.itemIcon}`;
+      const icon = option.itemIcon ?? 'empty';
+      const dataTestSubj = `cases-actions-assignees-edit-selectable-assignee-${option.key}-icon-${icon}`;
 
       if (!option.user) {
         return <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>;
@@ -117,7 +126,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
               responsive={false}
             >
               <EuiFlexItem grow={false}>
-                <EuiIcon type={option.itemIcon} data-test-subj={dataTestSubj} />
+                <EuiIcon type={icon} data-test-subj={dataTestSubj} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <UserAvatar user={option.user} avatar={option.data?.avatar} size="s" />
@@ -169,20 +178,40 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
         isClearable: !isLoadingData,
         onChange: onSearchChange,
         value: searchValue,
-        'data-test-subj': 'cases-actions-tags-edit-selectable-search-input',
+        'data-test-subj': 'cases-actions-assignees-edit-selectable-search-input',
       }}
       renderOption={renderOption}
       listProps={{ showIcons: false }}
       onChange={onChange}
-      noMatchesMessage={'no match'}
-      emptyMessage={'empty assignees'}
-      data-test-subj="cases-actions-tags-edit-selectable"
+      noMatchesMessage={!isLoadingData ? <NoMatches /> : <EmptyMessage />}
+      emptyMessage={<EmptyMessage />}
+      data-test-subj="cases-actions-assignees-edit-selectable"
       height="full"
     >
       {(list, search) => {
         return (
           <>
             {search}
+            <EuiSpacer size="s" />
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              responsive={false}
+              direction="row"
+              css={{ flexGrow: 0 }}
+              gutterSize="none"
+            >
+              <EuiFlexItem
+                grow={false}
+                css={{
+                  paddingLeft: euiTheme.size.s,
+                }}
+              >
+                <EuiText size="xs" color="subdued">
+                  {i18n.SELECTED_ASSIGNEES(totalSelectedItems)}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             {list}
           </>
@@ -200,34 +229,36 @@ const getDisplayOptions = ({
   searchResultUserProfiles,
   options,
   searchValue,
+  initialUserProfiles,
 }: {
   searchResultUserProfiles: UserProfileWithAvatar[];
   options: AssigneeSelectableOption[];
   searchValue: string;
+  initialUserProfiles: Map<string, UserProfileWithAvatar>;
 }) => {
-  const searchResultsOptions =
-    searchResultUserProfiles
-      ?.filter((profile) => !options.find((option) => isMatchingOption(option, profile)))
-      ?.map((profile) => toSelectableOption(profile)) ?? [];
+  /**
+   * If the user does not perform any search we do not want to show
+   * the results of an empty search to the initial list of users.
+   * We also filter out users that appears both in the initial list
+   * and the search results
+   */
+  const searchResultsOptions = isEmpty(searchValue)
+    ? []
+    : searchResultUserProfiles
+        ?.filter((profile) => !options.find((option) => isMatchingOption(option, profile)))
+        ?.map((profile) => toSelectableOption(profile)) ?? [];
+  /**
+   * In the initial view, when the user does not perform any search,
+   * we want to filter out options that are not in the initial user profile
+   * mapping or profiles returned by the search result that are not selected
+   */
+  const filteredOptions = isEmpty(searchValue)
+    ? options.filter(
+        (option) => initialUserProfiles.has(option?.data?.uid) || option?.data?.itemIcon !== 'empty'
+      )
+    : [...options];
 
-  const [selectedOrPartialOptions, unselectedOptions] = options.reduce(
-    (acc, option) => {
-      // TODO fix type
-      if (option?.data?.itemIcon !== 'empty') {
-        acc[0].push(option);
-      } else {
-        acc[1].push(option);
-      }
-
-      return acc;
-    },
-    [[], []] as [AssigneeSelectableOption[], AssigneeSelectableOption[]]
-  );
-
-  const finalOptions = [
-    ...sortOptionsAlphabetically(selectedOrPartialOptions),
-    ...sortOptionsAlphabetically([...unselectedOptions, ...searchResultsOptions]),
-  ];
+  const finalOptions = sortOptionsAlphabetically([...searchResultsOptions, ...filteredOptions]);
 
   return finalOptions;
 };
@@ -244,6 +275,7 @@ const toSelectableOption = (userProfile: UserProfileWithAvatar): AssigneeSelecta
     key: userProfile.uid,
     label: getUserDisplayName(userProfile.user),
     data: userProfile,
+    'data-test-subj': `cases-actions-assignees-edit-selectable-assignee-${userProfile.uid}`,
   } as unknown as AssigneeSelectableOption;
 };
 

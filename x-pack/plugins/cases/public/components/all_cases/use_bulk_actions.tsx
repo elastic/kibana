@@ -31,6 +31,7 @@ interface UseBulkActionsProps {
 interface UseBulkActionsReturnValue {
   panels: EuiContextMenuPanelDescriptor[];
   modals: JSX.Element;
+  flyouts: JSX.Element;
 }
 
 export const useBulkActions = ({
@@ -156,6 +157,10 @@ export const useBulkActions = ({
             onConfirm={deleteAction.onConfirmDeletion}
           />
         ) : null}
+      </>
+    ),
+    flyouts: (
+      <>
         {tagsAction.isFlyoutOpen ? (
           <EditTagsFlyout
             onClose={tagsAction.onFlyoutClosed}

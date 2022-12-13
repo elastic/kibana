@@ -47,6 +47,7 @@ const itemToSelectableOption = (item: {
   return {
     key: item.key,
     label: item.key,
+    'data-test-subj': `cases-actions-tags-edit-selectable-tag-${item.key}`,
   } as ItemSelectableOption;
 };
 
@@ -65,6 +66,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
       onChangeItems: onChangeTags,
     }
   );
+
   const [searchValue, setSearchValue] = useState<string>('');
   const { euiTheme } = useEuiTheme();
 
