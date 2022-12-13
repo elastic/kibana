@@ -1063,11 +1063,9 @@ export const RulesList = ({
   const onEnable = useCallback(async () => {
     setIsEnablingRules(true);
 
-    const { errors, total } = await bulkEnableRules({
-      ...(isAllSelected ? { filter: getFilter() } : {}),
-      ...(isAllSelected ? {} : { ids: selectedIds }),
-      http,
-    });
+    const { errors, total } = isAllSelected
+      ? await bulkEnableRules({ http, filter: getFilter() })
+      : await bulkEnableRules({ http, ids: selectedIds });
 
     setIsEnablingRules(false);
     showToast({ action: 'ENABLE', errors, total });
@@ -1078,11 +1076,9 @@ export const RulesList = ({
   const onDisable = useCallback(async () => {
     setIsDisablingRules(true);
 
-    const { errors, total } = await bulkDisableRules({
-      ...(isAllSelected ? { filter: getFilter() } : {}),
-      ...(isAllSelected ? {} : { ids: selectedIds }),
-      http,
-    });
+    const { errors, total } = isAllSelected
+      ? await bulkDisableRules({ http, filter: getFilter() })
+      : await bulkDisableRules({ http, ids: selectedIds });
 
     setIsDisablingRules(false);
     showToast({ action: 'DISABLE', errors, total });

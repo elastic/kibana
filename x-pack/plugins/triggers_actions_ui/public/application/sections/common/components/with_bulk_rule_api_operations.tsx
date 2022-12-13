@@ -23,8 +23,8 @@ import {
   SnoozeSchedule,
   BulkEditResponse,
   BulkDeleteResponse,
-  BulkEnableResponse,
-  BulkDisableResponse,
+  BulkOperationResponse,
+  BulkOperationAttributesWithoutHttp,
 } from '../../../../types';
 import {
   deleteRules,
@@ -106,14 +106,8 @@ export interface ComponentOpts {
     filter?: KueryNode | null;
     ids?: string[];
   }) => Promise<BulkDeleteResponse>;
-  bulkEnableRules: (props: {
-    filter?: KueryNode | null;
-    ids?: string[];
-  }) => Promise<BulkEnableResponse>;
-  bulkDisableRules: (props: {
-    filter?: KueryNode | null;
-    ids?: string[];
-  }) => Promise<BulkDisableResponse>;
+  bulkEnableRules: (props: BulkOperationAttributesWithoutHttp) => Promise<BulkOperationResponse>;
+  bulkDisableRules: (props: BulkOperationAttributesWithoutHttp) => Promise<BulkOperationResponse>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -221,13 +215,10 @@ export function withBulkRuleOperations<T>(
         bulkDeleteRules={async (bulkDeleteProps: { filter?: KueryNode | null; ids?: string[] }) => {
           return await bulkDeleteRules({ http, ...bulkDeleteProps });
         }}
-        bulkEnableRules={async (bulkEnableProps: { filter?: KueryNode | null; ids?: string[] }) => {
+        bulkEnableRules={async (bulkEnableProps: BulkOperationAttributesWithoutHttp) => {
           return await bulkEnableRules({ http, ...bulkEnableProps });
         }}
-        bulkDisableRules={async (bulkDisableProps: {
-          filter?: KueryNode | null;
-          ids?: string[];
-        }) => {
+        bulkDisableRules={async (bulkDisableProps: BulkOperationAttributesWithoutHttp) => {
           return await bulkDisableRules({ http, ...bulkDisableProps });
         }}
       />
