@@ -59,9 +59,7 @@ export async function fetchSearchSourceQuery(
     query: initialSearchSource.getField('query'),
     timeRange: { from: dateStart, to: dateEnd },
   };
-  const redirectUrl = discoverLocator!.getRedirectUrl({
-    ...redirectUrlParams,
-  });
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
 
   const [firstPart, rest] = redirectUrl.split('/app');
   return {

@@ -41,10 +41,7 @@ export function formatGenericMlUrl(
         url = setStateToKbnUrl(
           key,
           restParams[key],
-          {
-            useHash: false,
-            storeInHashQuery: false,
-          },
+          { useHash: false, storeInHashQuery: false },
           url
         );
       });

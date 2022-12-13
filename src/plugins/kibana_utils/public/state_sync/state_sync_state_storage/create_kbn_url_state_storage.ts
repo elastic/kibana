@@ -86,10 +86,7 @@ export const createKbnUrlStateStorage = (
           return setStateToKbnUrl(
             key,
             state,
-            {
-              useHash,
-              storeInHashQuery: useHashQuery,
-            },
+            { useHash, storeInHashQuery: useHashQuery },
             currentUrl
           );
         } catch (error) {
