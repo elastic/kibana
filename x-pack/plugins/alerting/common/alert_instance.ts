@@ -12,8 +12,8 @@ const actionSchema = t.type({
   date: DateFromString,
 });
 
-export const actionsSchema = t.record(t.string, actionSchema);
-export type ThrottledActions = t.TypeOf<typeof actionsSchema>;
+export const throttledActionSchema = t.record(t.string, actionSchema);
+export type ThrottledActions = t.TypeOf<typeof throttledActionSchema>;
 
 const lastScheduledActionsSchema = t.intersection([
   t.partial({
@@ -23,7 +23,7 @@ const lastScheduledActionsSchema = t.intersection([
     group: t.string,
     date: DateFromString,
   }),
-  t.partial({ actions: actionsSchema }),
+  t.partial({ actions: throttledActionSchema }),
 ]);
 
 export type LastScheduledActions = t.TypeOf<typeof lastScheduledActionsSchema>;

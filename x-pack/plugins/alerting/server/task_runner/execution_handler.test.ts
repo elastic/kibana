@@ -949,8 +949,10 @@ describe('Execution Handler', () => {
       spaceId: 'test1',
     });
     expect(result).toEqual({
-      'testActionTypeId:summary:1d': {
-        date: new Date(),
+      throttledActions: {
+        'testActionTypeId:summary:1d': {
+          date: new Date(),
+        },
       },
     });
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
@@ -1083,11 +1085,13 @@ describe('Execution Handler', () => {
 
     const result = await executionHandler.run({});
     expect(result).toEqual({
-      'testActionTypeId:summary:1d': {
-        date: new Date(),
-      },
-      'testActionTypeId:summary:10d': {
-        date: new Date(),
+      throttledActions: {
+        'testActionTypeId:summary:1d': {
+          date: new Date(),
+        },
+        'testActionTypeId:summary:10d': {
+          date: new Date(),
+        },
       },
     });
   });

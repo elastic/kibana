@@ -12,7 +12,6 @@ import {
   AlertInstanceContext,
   RuleTypeParams,
   SanitizedRule,
-  SummarizedAlerts,
 } from '../types';
 
 interface TransformActionParamsOptions {
@@ -35,10 +34,22 @@ interface TransformActionParamsOptions {
   ruleUrl?: string;
 }
 
-interface SummarizedAlertsWithAll extends SummarizedAlerts {
+interface SummarizedAlertsWithAll {
+  new: {
+    count: number;
+    data: unknown[];
+  };
+  ongoing: {
+    count: number;
+    data: unknown[];
+  };
+  recovered: {
+    count: number;
+    data: unknown[];
+  };
   all: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
 }
 
@@ -78,6 +89,7 @@ export function transformActionParams({
     kibanaBaseUrl,
     params: alertParams,
     rule: {
+      params: alertParams,
       id: alertId,
       name: alertName,
       type: alertType,

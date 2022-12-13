@@ -14,7 +14,7 @@ import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/s
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { parseDuration, RawRule, RuleNotifyWhenTypeValues, ThrottledActions } from '../types';
+import { parseDuration, RawRule, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
 import { ExecutionHandlerOptions, RuleTaskInstance } from './types';
@@ -31,11 +31,22 @@ import {
   RuleTypeState,
   SanitizedRule,
 } from '../../common';
+import {
+  generateActionHash,
+  getSummaryActionsFromTaskState,
+  hasActionFrequencyThrottled,
+  isSummaryAction,
+  isSummaryActionThrottled,
+} from './rule_action_helper';
 
 enum Reasons {
   MUTED = 'muted',
   THROTTLED = 'throttled',
   ACTION_GROUP_NOT_CHANGED = 'actionGroupHasNotChanged',
+}
+
+export interface RunResult {
+  throttledActions: ThrottledActions;
 }
 
 export class ExecutionHandler<
@@ -119,9 +130,12 @@ export class ExecutionHandler<
       string,
       Alert<State, Context, ActionGroupIds> | Alert<State, Context, RecoveryActionGroupId>
     >
-  ): Promise<ThrottledActions> {
+  ): Promise<RunResult> {
     const executables = this.generateExecutables(alerts);
-    const summaryActions: ThrottledActions = this.getSummaryActionsFromTaskState(this.rule.actions);
+    const throttledActions: ThrottledActions = getSummaryActionsFromTaskState({
+      actions: this.rule.actions,
+      summaryActions: this.taskInstance.state?.summaryActions,
+    });
 
     if (!!executables.length) {
       const {
@@ -185,61 +199,7 @@ export class ExecutionHandler<
         ruleRunMetricsStore.incrementNumberOfTriggeredActions();
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
-        if (alert) {
-          const actionToRun = {
-            ...action,
-            params: injectActionParams({
-              ruleId,
-              spaceId,
-              actionTypeId,
-              actionParams: transformActionParams({
-                actionsPlugin,
-                alertId: ruleId,
-                alertType: this.ruleType.id,
-                actionTypeId,
-                alertName: this.rule.name,
-                spaceId,
-                tags: this.rule.tags,
-                alertInstanceId: alert.getId(),
-                alertActionGroup: actionGroup,
-                alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
-                context: alert.getContext(),
-                actionId: action.id,
-                state: alert.getScheduledActionOptions()?.state || {},
-                kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                alertParams: this.rule.params,
-                actionParams: action.params,
-                ruleUrl: this.buildRuleUrl(spaceId),
-              }),
-            }),
-          };
-
-          await this.actionRunOrAddToBulk({
-            enqueueOptions: this.getEnqueueOptions(actionToRun),
-            bulkActions,
-          });
-
-          logActions.push({
-            id: action.id,
-            typeId: action.actionTypeId,
-            alertId: alert.getId(),
-            alertGroup: action.group,
-          });
-
-          if (this.isRecoveredAlert(actionGroup)) {
-            alert.scheduleActions(action.group as ActionGroupIds);
-          } else {
-            if (this.isActionOnThrottleInterval(action)) {
-              alert.updateLastScheduledActions(
-                action.group as ActionGroupIds,
-                this.generateActionHash(action)
-              );
-            } else {
-              alert.updateLastScheduledActions(action.group as ActionGroupIds);
-            }
-            alert.unscheduleActions();
-          }
-        } else {
+        if (isSummaryAction(action)) {
           const summarizedAlerts = await this.getSummarizedAlerts({ action, spaceId, ruleId });
           const actionToRun = {
             ...action,
@@ -267,8 +227,8 @@ export class ExecutionHandler<
             bulkActions,
           });
 
-          if (this.isActionOnThrottleInterval(action)) {
-            summaryActions[this.generateActionHash(action)] = { date: new Date() };
+          if (hasActionFrequencyThrottled(action)) {
+            throttledActions[generateActionHash(action)] = { date: new Date() };
           }
 
           logActions.push({
@@ -277,6 +237,61 @@ export class ExecutionHandler<
             alertId: 'summary',
             alertGroup: action.group,
           });
+        } else {
+          const executableAlert = alert!;
+          const actionToRun = {
+            ...action,
+            params: injectActionParams({
+              ruleId,
+              spaceId,
+              actionTypeId,
+              actionParams: transformActionParams({
+                actionsPlugin,
+                alertId: ruleId,
+                alertType: this.ruleType.id,
+                actionTypeId,
+                alertName: this.rule.name,
+                spaceId,
+                tags: this.rule.tags,
+                alertInstanceId: executableAlert.getId(),
+                alertActionGroup: actionGroup,
+                alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
+                context: executableAlert.getContext(),
+                actionId: action.id,
+                state: executableAlert.getScheduledActionOptions()?.state || {},
+                kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+                alertParams: this.rule.params,
+                actionParams: action.params,
+                ruleUrl: this.buildRuleUrl(spaceId),
+              }),
+            }),
+          };
+
+          await this.actionRunOrAddToBulk({
+            enqueueOptions: this.getEnqueueOptions(actionToRun),
+            bulkActions,
+          });
+
+          logActions.push({
+            id: action.id,
+            typeId: action.actionTypeId,
+            alertId: executableAlert.getId(),
+            alertGroup: action.group,
+          });
+
+          if (this.isRecoveredAlert(actionGroup)) {
+            executableAlert.scheduleActions(action.group as ActionGroupIds);
+          } else {
+            if (hasActionFrequencyThrottled(action)) {
+              executableAlert.updateLastScheduledActions(
+                action.group as ActionGroupIds,
+                generateActionHash(action)
+              );
+            } else {
+              executableAlert.updateLastScheduledActions(action.group as ActionGroupIds);
+            }
+            executableAlert.unscheduleActions();
+          }
         }
       }
 
@@ -292,7 +307,7 @@ export class ExecutionHandler<
         }
       }
     }
-    return summaryActions;
+    return { throttledActions };
   }
 
   private isAlertMuted(alertId: string) {
@@ -320,44 +335,6 @@ export class ExecutionHandler<
 
   private isRecoveredAlert(actionGroup: string) {
     return actionGroup === this.ruleType.recoveryActionGroup.id;
-  }
-
-  private isSummaryAction(action: RuleAction) {
-    return action.frequency?.summary || false;
-  }
-
-  private isActionOnThrottleInterval(action: RuleAction) {
-    if (!action.frequency) {
-      return false;
-    }
-    return (
-      action.frequency.notifyWhen === RuleNotifyWhenTypeValues[2] &&
-      typeof action.frequency.throttle === 'string'
-    );
-  }
-
-  private isSummaryActionThrottled(action: RuleAction) {
-    if (!this.isActionOnThrottleInterval(action)) {
-      return false;
-    }
-    const summaryActions = this.taskInstance.state?.summaryActions;
-    if (!summaryActions) {
-      return false;
-    }
-    const hash = this.generateActionHash(action);
-    const triggeredSummaryAction = summaryActions[hash];
-    if (!triggeredSummaryAction) {
-      return false;
-    }
-    const throttleMills = parseDuration(action.frequency!.throttle!);
-    const throttled = triggeredSummaryAction.date.getTime() + throttleMills > Date.now();
-
-    if (throttled) {
-      this.logger.debug(
-        `skipping scheduling the action '${action.actionTypeId}:${action.id}', summary action is still being throttled`
-      );
-    }
-    return throttled;
   }
 
   private isExecutableActiveAlert({
@@ -389,7 +366,7 @@ export class ExecutionHandler<
       const throttled = action.frequency?.throttle
         ? alert.isThrottled({
             throttle: action.frequency.throttle ?? null,
-            actionHash: this.generateActionHash(action),
+            actionHash: generateActionHash(action),
           })
         : alert.isThrottled({ throttle: rule.throttle ?? null });
 
@@ -469,33 +446,20 @@ export class ExecutionHandler<
     };
   }
 
-  private generateActionHash(action: RuleAction) {
-    return `${action.actionTypeId}:${action.group || 'summary'}:${
-      action.frequency?.throttle || 'no-throttling'
-    }`;
-  }
-
-  private getSummaryActionsFromTaskState(actions: RuleAction[]) {
-    const summaryActions = this.taskInstance.state?.summaryActions || {};
-
-    return Object.entries(summaryActions).reduce((newObj, [key, val]) => {
-      const actionExists = actions.some((action) => this.generateActionHash(action) === key);
-      if (actionExists) {
-        return { ...newObj, [key]: val };
-      } else {
-        return newObj;
-      }
-    }, {});
-  }
-
   private generateExecutables(
     alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
   ) {
     const executables = [];
 
     for (const action of this.rule.actions) {
-      if (this.isSummaryAction(action)) {
-        if (!this.isSummaryActionThrottled(action)) {
+      if (isSummaryAction(action)) {
+        if (
+          !isSummaryActionThrottled({
+            action,
+            summaryActions: this.taskInstance.state?.summaryActions,
+            logger: this.logger,
+          })
+        ) {
           executables.push({ action });
         }
         continue;
@@ -534,7 +498,7 @@ export class ExecutionHandler<
   }) {
     let options;
 
-    if (this.isActionOnThrottleInterval(action)) {
+    if (hasActionFrequencyThrottled(action)) {
       const throttleMills = parseDuration(action.frequency!.throttle!);
       const start = new Date(Date.now() - throttleMills);
 
@@ -556,10 +520,21 @@ export class ExecutionHandler<
 
     const total = alerts.new.count + alerts.ongoing.count + alerts.recovered.count;
     return {
-      ...alerts,
+      new: {
+        count: alerts.new.count,
+        data: alerts.new.alerts,
+      },
+      ongoing: {
+        count: alerts.ongoing.count,
+        data: alerts.ongoing.alerts,
+      },
+      recovered: {
+        count: alerts.recovered.count,
+        data: alerts.recovered.alerts,
+      },
       all: {
         count: total,
-        alerts: [...alerts.new.alerts, ...alerts.ongoing.alerts, ...alerts.recovered.alerts],
+        data: [...alerts.new.alerts, ...alerts.ongoing.alerts, ...alerts.recovered.alerts],
       },
     };
   }
