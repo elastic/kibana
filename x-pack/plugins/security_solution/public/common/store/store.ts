@@ -28,7 +28,6 @@ import {
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
   SERVER_APP_ID,
-  SOURCERER_API_URL,
 } from '../../../common/constants';
 import { telemetryMiddleware } from '../lib/telemetry';
 import { appSelectors } from './app';
@@ -45,7 +44,6 @@ import { dataTableSelectors } from './data_table';
 import type { KibanaDataView, SourcererModel } from './sourcerer/model';
 import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
-import type { SecurityDataView } from '../containers/sourcerer/api';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 type ComposeType = typeof compose;
