@@ -78,6 +78,14 @@ be able to make requests to the `/` endpoint:
 $ curl "https://localhost:3000/"
 ```
 
+## Local Testing
+### Load up the local cluster with rules, alerts and connectors
+```sh
+$ pushd MACHINE-LEARNING-QA-REPO
+$ ./gradlew :env-bootstrap:runSuite -Dsuite=rac100 -Dstack.es_port=9205 -Dstack.kibana_port=5605 -Dstack.username=elastic -Dstack.password=changeme 
+```
+> In my case, this was using docker compose locally
+
 ## Cloud Testing
 
 per https://github.com/elastic/kibana/issues/147017
