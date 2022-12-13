@@ -10,12 +10,12 @@ import React from 'react';
 import { FieldIcon as KbnFieldIcon, FieldIconProps as KbnFieldIconProps } from '@kbn/react-field';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldListItem } from '../../types';
-import { getFieldIconType } from '../../utils/field_types';
+import { getFieldIconType, getFieldTypeName } from '../../utils/field_types';
 
 export type FieldIconProps = KbnFieldIconProps;
 
 export const FieldIcon: React.FC<FieldIconProps> = ({ type, ...rest }) => {
-  return <KbnFieldIcon type={normalizeFieldType(type)} {...rest} />;
+  return <KbnFieldIcon type={normalizeFieldType(type)} label={getFieldTypeName(type)} {...rest} />;
 };
 
 export function getFieldIconProps<T extends FieldListItem = DataViewField>(
@@ -29,6 +29,7 @@ export function getFieldIconProps<T extends FieldListItem = DataViewField>(
 
 function normalizeFieldType(type: string) {
   if (type === 'histogram') {
+    // TODO: check why are we replacing this type
     return 'number';
   }
   return type === 'document' ? 'number' : type;

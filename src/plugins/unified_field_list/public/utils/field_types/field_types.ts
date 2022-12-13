@@ -9,10 +9,13 @@
 import { FieldTypeKnown } from '../../types';
 
 export enum KNOWN_FIELD_TYPES {
+  DOCUMENT = 'document', // "Records" on Lens page
   BOOLEAN = 'boolean',
   CONFLICT = 'conflict',
+  COUNTER = 'counter',
   DATE = 'date',
   DATE_RANGE = 'date_range',
+  GAUGE = 'gauge',
   GEO_POINT = 'geo_point',
   GEO_SHAPE = 'geo_shape',
   HISTOGRAM = 'histogram',
@@ -25,7 +28,6 @@ export enum KNOWN_FIELD_TYPES {
   STRING = 'string',
   TEXT = 'text',
   VERSION = 'version',
-  // TODO: extend with Lens ones
 }
 
 export const KNOWN_FIELD_TYPE_LIST: string[] = Object.values(KNOWN_FIELD_TYPES);

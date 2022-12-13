@@ -20,6 +20,10 @@ const UNKNOWN_FIELD_TYPE_DESC = i18n.translate(
 export function getFieldTypeDescription(type: string, docLinks: DocLinksStart) {
   const knownType: KNOWN_FIELD_TYPES = type as KNOWN_FIELD_TYPES;
   switch (knownType) {
+    case KNOWN_FIELD_TYPES.DOCUMENT:
+      return i18n.translate('unifiedFieldList.fieldNameDescription.recordField', {
+        defaultMessage: 'Number of records.', // TODO: add a better description
+      });
     case KNOWN_FIELD_TYPES.BOOLEAN:
       return i18n.translate('unifiedFieldList.fieldNameDescription.booleanField', {
         defaultMessage: 'True and false values.',
@@ -27,6 +31,10 @@ export function getFieldTypeDescription(type: string, docLinks: DocLinksStart) {
     case KNOWN_FIELD_TYPES.CONFLICT:
       return i18n.translate('unifiedFieldList.fieldNameDescription.conflictField', {
         defaultMessage: 'Field has values of different types. Resolve in Management > Data Views.',
+      });
+    case KNOWN_FIELD_TYPES.COUNTER:
+      return i18n.translate('unifiedFieldList.fieldNameDescription.counterField', {
+        defaultMessage: 'Counter metric.', // TODO: add a better description
       });
     case KNOWN_FIELD_TYPES.DATE:
       return i18n.translate('unifiedFieldList.fieldNameDescription.dateField', {
@@ -54,6 +62,10 @@ export function getFieldTypeDescription(type: string, docLinks: DocLinksStart) {
             ) +
             '</a>',
         },
+      });
+    case KNOWN_FIELD_TYPES.GAUGE:
+      return i18n.translate('unifiedFieldList.fieldNameDescription.gaugeField', {
+        defaultMessage: 'Gauge metric.', // TODO: add a better description
       });
     case KNOWN_FIELD_TYPES.GEO_POINT:
       return i18n.translate('unifiedFieldList.fieldNameDescription.geoPointField', {

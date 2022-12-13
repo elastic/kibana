@@ -1,26 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`UnifiedFieldList <FieldIcon /> FieldIcon accepts FieldIcon props 1`] = `
+exports[`UnifiedFieldList <FieldIcon /> accepts additional props 1`] = `
 <FieldIcon
   fill="none"
-  type="date"
-/>
-`;
-
-exports[`UnifiedFieldList <FieldIcon /> FieldIcon renders properly 1`] = `
-<FieldIcon
+  label="Date field"
   type="date"
 />
 `;
 
 exports[`UnifiedFieldList <FieldIcon /> renders Document type properly 1`] = `
 <FieldIcon
+  label="Number of records"
   type="number"
 />
 `;
 
 exports[`UnifiedFieldList <FieldIcon /> renders Histogram type properly 1`] = `
 <FieldIcon
+  label="Histogram field"
   type="number"
+/>
+`;
+
+exports[`UnifiedFieldList <FieldIcon /> renders properly 1`] = `
+<FieldIcon
+  label="Date field"
+  type="date"
 />
 `;

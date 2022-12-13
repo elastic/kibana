@@ -10,17 +10,17 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { FieldIcon } from './field_icon';
-import { getFieldType } from '../../utils/get_field_type';
+import { getFieldType } from '../../utils/field_types';
 
 const dateField = dataView.getFieldByName('@timestamp')!;
 
 describe('UnifiedFieldList <FieldIcon />', () => {
-  test('FieldIcon renders properly', () => {
+  test('renders properly', () => {
     const component = shallow(<FieldIcon type={getFieldType(dateField)} />);
     expect(component).toMatchSnapshot();
   });
 
-  test('FieldIcon accepts FieldIcon props', () => {
+  test('accepts additional props', () => {
     const component = shallow(<FieldIcon type={getFieldType(dateField)} fill="none" />);
     expect(component).toMatchSnapshot();
   });

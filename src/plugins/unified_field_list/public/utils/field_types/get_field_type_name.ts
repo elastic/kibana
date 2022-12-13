@@ -33,6 +33,10 @@ export function getFieldTypeName(type?: string) {
 
   const knownType: KNOWN_FIELD_TYPES = type as KNOWN_FIELD_TYPES;
   switch (knownType) {
+    case KNOWN_FIELD_TYPES.DOCUMENT:
+      return i18n.translate('unifiedFieldList.fieldNameIcons.recordAriaLabel', {
+        defaultMessage: 'Number of records',
+      });
     case KNOWN_FIELD_TYPES.BOOLEAN:
       return i18n.translate('unifiedFieldList.fieldNameIcons.booleanAriaLabel', {
         defaultMessage: 'Boolean field',
@@ -41,6 +45,10 @@ export function getFieldTypeName(type?: string) {
       return i18n.translate('unifiedFieldList.fieldNameIcons.conflictFieldAriaLabel', {
         defaultMessage: 'Conflicting field',
       });
+    case KNOWN_FIELD_TYPES.COUNTER:
+      return i18n.translate('unifiedFieldList.fieldNameIcons.counterFieldAriaLabel', {
+        defaultMessage: 'Counter metric',
+      });
     case KNOWN_FIELD_TYPES.DATE:
       return i18n.translate('unifiedFieldList.fieldNameIcons.dateFieldAriaLabel', {
         defaultMessage: 'Date field',
@@ -48,6 +56,10 @@ export function getFieldTypeName(type?: string) {
     case KNOWN_FIELD_TYPES.DATE_RANGE:
       return i18n.translate('unifiedFieldList.fieldNameIcons.dateRangeFieldAriaLabel', {
         defaultMessage: 'Date range field',
+      });
+    case KNOWN_FIELD_TYPES.GAUGE:
+      return i18n.translate('unifiedFieldList.fieldNameIcons.gaugeFieldAriaLabel', {
+        defaultMessage: 'Gauge metric',
       });
     case KNOWN_FIELD_TYPES.GEO_POINT:
       return i18n.translate('unifiedFieldList.fieldNameIcons.geoPointFieldAriaLabel', {
