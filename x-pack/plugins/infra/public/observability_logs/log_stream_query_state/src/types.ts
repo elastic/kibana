@@ -58,23 +58,23 @@ export type LogStreamQueryStateValue = LogStreamQueryTypestate['value'];
 
 export type LogStreamQueryEvent =
   | {
-      type: 'queryFromUrlChanged';
+      type: 'QUERY_FROM_URL_CHANGED';
       query: AnyQuery;
     }
   | {
-      type: 'queryFromUiChanged';
+      type: 'QUERY_FROM_UI_CHANGED';
       query: AnyQuery;
     }
   | {
-      type: 'dataViewsChanged';
+      type: 'DATA_VIEWS_CHANGED';
       dataViews: DataViewBase[];
     }
   | {
-      type: 'validationSucceeded';
+      type: 'VALIDATION_SUCCEEDED';
       parsedQuery: ParsedQuery;
     }
   | {
-      type: 'validationFailed';
+      type: 'VALIDATION_FAILED';
       error: Error;
     };
 
