@@ -19,6 +19,7 @@ import {
   SPACE_IDS,
   ALERT_RULE_TAGS,
   TIMESTAMP,
+  ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.0.0.
@@ -35,6 +36,7 @@ const commonAlertIdFieldNames = [ALERT_INSTANCE_ID, ALERT_UUID];
 export type CommonAlertIdFieldName800 = Values<typeof commonAlertIdFieldNames>;
 
 export interface CommonAlertFields800 {
+  [ALERT_RULE_PARAMETERS]: unknown;
   [ALERT_RULE_CATEGORY]: string;
   [ALERT_RULE_CONSUMER]: string;
   [ALERT_RULE_EXECUTION_UUID]: string;
