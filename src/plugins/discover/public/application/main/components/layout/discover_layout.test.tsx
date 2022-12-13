@@ -167,7 +167,7 @@ describe('Discover component', () => {
     expect(
       container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
     ).toBeNull();
-  });
+  }, 10000);
 
   test('selected data view with time field displays chart toggle', async () => {
     const container = document.createElement('div');
