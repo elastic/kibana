@@ -67,8 +67,7 @@ interface State {
   error: any;
   createdApiKey?: CreateApiKeyResponse;
   selectedApiKey?: ApiKey;
-  updatedApiKey?: UpdateApiKeyResponse;
-  lastUpdatedApiKeyName?: string;
+  isUpdateFlyoutVisible: boolean;
 }
 
 const DATE_FORMAT = 'MMMM Do YYYY HH:mm:ss';
@@ -90,8 +89,7 @@ export class APIKeysGridPage extends Component<Props, State> {
       selectedItems: [],
       error: undefined,
       selectedApiKey: undefined,
-      updatedApiKey: undefined,
-      lastUpdatedApiKeyName: undefined,
+      isUpdateFlyoutVisible: false,
     };
   }
 
@@ -100,38 +98,54 @@ export class APIKeysGridPage extends Component<Props, State> {
   }
 
   public render() {
-    const breadcrumb = this.determineFlyoutBreadcrumb();
-
     return (
+      // Flyout to create new ApiKey
       <>
-        <Route path="/flyout">
+        <Route path="/create">
           <Breadcrumb
             text={i18n.translate('xpack.security.management.apiKeys.createBreadcrumb', {
-              defaultMessage: `{breadcrumb}`,
-              values: { breadcrumb },
+              defaultMessage: 'Create',
             })}
-            href="/flyout"
+            href="/create"
           >
             <ApiKeyFlyout
-              onSuccess={(createApiKeyResponse, updateApiKeyResponse) => {
+              onSuccess={(createApiKeyResponse) => {
                 this.props.history.push({ pathname: '/' });
+
                 this.reloadApiKeys();
+
                 this.setState({
                   createdApiKey: createApiKeyResponse,
-                  updatedApiKey: updateApiKeyResponse,
-                  lastUpdatedApiKeyName: this.state.selectedApiKey?.name,
-                  selectedApiKey: undefined,
                 });
               }}
               onCancel={() => {
                 this.props.history.push({ pathname: '/' });
                 this.setState({ selectedApiKey: undefined });
               }}
-              selectedApiKey={this.state.selectedApiKey}
-              readonly={this.props.readOnly}
             />
           </Breadcrumb>
         </Route>
+
+        {
+          // Flyout to update or view ApiKey
+          this.state.isUpdateFlyoutVisible && (
+            <ApiKeyFlyout
+              onSuccess={(createApiKeyResponse, updateApiKeyResponse) => {
+                this.reloadApiKeys();
+                this.displayUpdatedApiKeyToast(updateApiKeyResponse);
+                this.setState({
+                  selectedApiKey: undefined,
+                  isUpdateFlyoutVisible: false,
+                });
+              }}
+              onCancel={() => {
+                this.setState({ selectedApiKey: undefined, isUpdateFlyoutVisible: false });
+              }}
+              apiKey={this.state.selectedApiKey}
+              readonly={this.props.readOnly}
+            />
+          )
+        }
         {this.renderContent()}
       </>
     );
@@ -182,10 +196,11 @@ export class APIKeysGridPage extends Component<Props, State> {
         return (
           <ApiKeysEmptyPrompt>
             <EuiButton
-              {...reactRouterNavigate(this.props.history, '/flyout')}
+              {...reactRouterNavigate(this.props.history, '/create')}
               fill
               iconType="plusInCircleFilled"
               data-test-subj="apiKeysCreatePromptButton"
+              href={'/'}
             >
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.createButton"
@@ -200,8 +215,6 @@ export class APIKeysGridPage extends Component<Props, State> {
     const concatenated = `${this.state.createdApiKey?.id}:${this.state.createdApiKey?.api_key}`;
 
     const description = this.determineDescription(isAdmin, this.props.readOnly ?? false);
-
-    const updatedApiKeyCallOut = this.shouldShowUpdatedApiKeyCallOut(this.state.updatedApiKey);
 
     return (
       <>
@@ -220,7 +233,7 @@ export class APIKeysGridPage extends Component<Props, State> {
               ? undefined
               : [
                   <EuiButton
-                    {...reactRouterNavigate(this.props.history, '/flyout')}
+                    {...reactRouterNavigate(this.props.history, '/create')}
                     fill
                     iconType="plusInCircleFilled"
                     data-test-subj="apiKeysCreateTableButton"
@@ -233,8 +246,6 @@ export class APIKeysGridPage extends Component<Props, State> {
                 ]
           }
         />
-
-        {updatedApiKeyCallOut}
 
         {this.state.createdApiKey && !this.state.isLoadingTable && (
           <>
@@ -508,9 +519,9 @@ export class APIKeysGridPage extends Component<Props, State> {
             <EuiText color="subdued" size="s">
               <EuiLink
                 data-test-subj={`roleRowName-${recordAP.name}`}
-                {...reactRouterNavigate(this.props.history, `/flyout`, () => {
-                  this.setState({ selectedApiKey: recordAP });
-                })}
+                onClick={() => {
+                  this.setState({ selectedApiKey: recordAP, isUpdateFlyoutVisible: true });
+                }}
               >
                 {name}
               </EuiLink>
@@ -699,21 +710,21 @@ export class APIKeysGridPage extends Component<Props, State> {
       return (
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-          defaultMessage="View and delete API keys. An API key sends requests on behalf of a user."
+          defaultMessage="View and delete API keys, which send requests on behalf of a user."
         />
       );
     } else if (readOnly) {
       return (
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.apiKeysReadOnlyDescription"
-          defaultMessage="View your API keys. An API key sends requests on your behalf."
+          defaultMessage="View your API keys, which send requests on your behalf."
         />
       );
     } else {
       return (
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.apiKeysOwnDescription"
-          defaultMessage="View and delete your API keys. An API key sends requests on your behalf."
+          defaultMessage="View and delete your API keys, which send requests on your behalf."
         />
       );
     }
@@ -737,55 +748,15 @@ export class APIKeysGridPage extends Component<Props, State> {
     }
   }
 
-  private shouldShowUpdatedApiKeyCallOut(updateApiKeyResponse?: UpdateApiKeyResponse) {
-    let result;
-
+  private displayUpdatedApiKeyToast(updateApiKeyResponse?: UpdateApiKeyResponse) {
     if (updateApiKeyResponse) {
-      if (updateApiKeyResponse.updated) {
-        result = (
-          <>
-            <EuiSpacer size="l" />
-            <EuiCallOut
-              color="success"
-              iconType="check"
-              title={i18n.translate('xpack.security.management.apiKeys.updateSuccessMessage', {
-                defaultMessage: "Updated API key '{name}'",
-                values: { name: this.state.lastUpdatedApiKeyName },
-              })}
-            />
-          </>
-        );
-      } else {
-        result = (
-          <>
-            <EuiSpacer size="l" />
-            <EuiCallOut
-              color="warning"
-              iconType="alert"
-              title={i18n.translate('xpack.security.management.apiKeys.noUpdateMessage', {
-                defaultMessage: "No updates made for API key '{name}'",
-                values: { name: this.state.lastUpdatedApiKeyName },
-              })}
-            />
-          </>
-        );
-      }
+      this.props.notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.security.management.apiKeys.updateSuccessMessage', {
+          defaultMessage: "Updated API key '{name}'",
+          values: { name: this.state.selectedApiKey?.name },
+        }),
+        'data-test-subj': 'updateApiKeySuccessToast',
+      });
     }
-
-    return result;
-  }
-
-  determineFlyoutBreadcrumb(): string {
-    let result = 'Create';
-
-    if (this.state.selectedApiKey) {
-      if (this.props.readOnly) {
-        result = 'View';
-      } else {
-        result = 'Update';
-      }
-    }
-
-    return result;
   }
 }

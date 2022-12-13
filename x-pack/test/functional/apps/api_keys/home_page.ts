@@ -17,7 +17,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
-  const retryService = getService('retry');
 
   const testRoles: Record<string, any> = {
     viewer: {
@@ -80,7 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('when submitting form, close dialog and displays new api key', async () => {
         const apiKeyName = 'Happy API Key';
         await pageObjects.apiKeys.clickOnPromptCreateApiKey();
-        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/flyout');
+        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/create');
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Create API Key');
 
         expect(await pageObjects.apiKeys.getFlyoutUsername()).to.be('test_user');
@@ -100,7 +99,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('with optional expiration, redirects back and displays base64', async () => {
         const apiKeyName = 'Happy expiration API key';
         await pageObjects.apiKeys.clickOnPromptCreateApiKey();
-        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/flyout');
+        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/create');
 
         await pageObjects.apiKeys.setApiKeyName(apiKeyName);
         await pageObjects.apiKeys.toggleCustomExpiration();
@@ -114,7 +113,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const newApiKeyCreation = await pageObjects.apiKeys.getNewApiKeyCreation();
 
         expect(await browser.getCurrentUrl()).to.not.contain(
-          'app/management/security/api_keys/flyout'
+          'app/management/security/api_keys/create'
         );
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
         expect(await pageObjects.apiKeys.isApiKeyModalExists()).to.be(false);
@@ -161,7 +160,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Update newly created API Key
         await pageObjects.apiKeys.clickExistingApiKeyToOpenFlyout(apiKeyName);
 
-        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/flyout');
+        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
 
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Update API Key');
 
@@ -204,19 +203,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Submit values to update API key
         await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
 
-        // Wait for processing and flyout to close
-        await retryService.try(async () => {
-          expect(await browser.getCurrentUrl()).to.not.contain(
-            'app/management/security/api_keys/flyout'
-          );
-        });
+        // Get success message
+        const updatedApiKeyToastText = await pageObjects.apiKeys.getApiKeyUpdateSuccessToast();
+        expect(updatedApiKeyToastText).to.be(`Updated API key '${apiKeyName}'`);
 
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
         expect(await pageObjects.apiKeys.isApiKeyModalExists()).to.be(false);
-
-        // Get success message
-        const updatedApiKeyMessage = await pageObjects.apiKeys.getNewApiKeyCreation();
-        expect(updatedApiKeyMessage).to.be(`Updated API key '${apiKeyName}'`);
       });
     });
 
@@ -277,8 +269,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // View newly created API Key
         await pageObjects.apiKeys.clickExistingApiKeyToOpenFlyout(apiKeyName);
-        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/flyout');
-        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('View API Key');
+        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
+        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('API key details');
 
         // Verify name input box are disabled
         const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
@@ -296,10 +288,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await apiKeyMetadataSwitch.isEnabled()).to.be(false);
         expect(await apiKeyRestrictPrivilegesSwitch.isEnabled()).to.be(false);
 
-        // Verify the submit button is disabled
-        const buttonDisabled = await pageObjects.apiKeys.submitButtonOnApiKeyFlyoutDisabled();
-        expect(buttonDisabled).to.be('true');
-
         // Close flyout with cancel
         await pageObjects.apiKeys.clickCancelButtonOnApiKeyFlyout();
 
@@ -307,7 +295,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
       });
 
-      it('should show the View API Key flyout if the expiration date is passed', async () => {
+      it('should show the `API key details` flyout if the expiration date is passed', async () => {
         const apiKeyName = 'expired-key';
 
         await es.security.grantApiKey({
@@ -327,8 +315,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.apiKeys.clickExistingApiKeyToOpenFlyout(apiKeyName);
 
-        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/flyout');
-        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('View API Key');
+        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
+        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('API key details');
 
         // Verify name input box are disabled
         const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
@@ -346,14 +334,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await apiKeyMetadataSwitch.isEnabled()).to.be(false);
         expect(await apiKeyRestrictPrivilegesSwitch.isEnabled()).to.be(false);
 
-        // Verify the submit button is disabled
-        const buttonDisabled = await pageObjects.apiKeys.submitButtonOnApiKeyFlyoutDisabled();
-        expect(buttonDisabled).to.be('true');
-
         await pageObjects.apiKeys.clickCancelButtonOnApiKeyFlyout();
       });
 
-      it('should show the View API Key flyout if the API key does not belong to the user', async () => {
+      it('should show the `API key details flyout` if the API key does not belong to the user', async () => {
         const apiKeyName = 'other-key';
 
         await es.security.grantApiKey({
@@ -372,8 +356,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.apiKeys.clickExistingApiKeyToOpenFlyout(apiKeyName);
 
-        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/flyout');
-        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('View API Key');
+        expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
+        expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('API key details');
 
         expect(await pageObjects.apiKeys.getFlyoutUsername()).to.be('elastic');
 
@@ -392,10 +376,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify metadata and restrict privileges switches are now disabled
         expect(await apiKeyMetadataSwitch.isEnabled()).to.be(false);
         expect(await apiKeyRestrictPrivilegesSwitch.isEnabled()).to.be(false);
-
-        // Verify the submit button is disabled
-        const buttonDisabled = await pageObjects.apiKeys.submitButtonOnApiKeyFlyoutDisabled();
-        expect(buttonDisabled).to.be('true');
 
         await pageObjects.apiKeys.clickCancelButtonOnApiKeyFlyout();
       });

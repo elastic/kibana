@@ -65,7 +65,7 @@ export interface ApiKeyFlyoutProps {
     updateApiKeyResponse: UpdateApiKeyResponse | undefined
   ) => void;
   onCancel: FormFlyoutProps['onCancel'];
-  selectedApiKey?: ApiKey;
+  apiKey?: ApiKey;
   readonly?: boolean;
 }
 
@@ -82,8 +82,7 @@ const defaultDefaultValues: ApiKeyFormValues = {
 export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   onSuccess,
   onCancel,
-  defaultValues = defaultDefaultValues,
-  selectedApiKey,
+  apiKey,
   readonly = false,
 }) => {
   let formTitle = 'Create API Key';
@@ -94,27 +93,15 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
 
   let canEditApiKey = false;
 
-  if (selectedApiKey) {
-    // Collect data from the selected API key to pre-populate the form
-    const doesMetadataExist = Object.keys(selectedApiKey.metadata).length > 0;
-    const doCustomPrivilegesExist = Object.keys(selectedApiKey.role_descriptors ?? 0).length > 0;
+  let defaultValues = defaultDefaultValues;
 
-    defaultValues = {
-      name: selectedApiKey.name,
-      customExpiration: !!selectedApiKey.expiration,
-      expiration: !!selectedApiKey.expiration ? selectedApiKey.expiration.toString() : '',
-      includeMetadata: doesMetadataExist,
-      metadata: doesMetadataExist ? JSON.stringify(selectedApiKey.metadata, null, 2) : '{}',
-      customPrivileges: doCustomPrivilegesExist,
-      role_descriptors: doCustomPrivilegesExist
-        ? JSON.stringify(selectedApiKey.role_descriptors, null, 2)
-        : '{}',
-    };
+  if (apiKey) {
+    defaultValues = retrieveValuesFromApiKeyToDefaultFlyout(apiKey);
 
-    canEditApiKey = isEditable(currentUser, selectedApiKey);
+    canEditApiKey = isEditable(currentUser, apiKey);
 
     if (readonly || !canEditApiKey) {
-      formTitle = 'View API Key';
+      formTitle = 'API key details';
       inProgressButtonText = ''; // This won't be seen since Submit will be disabled
       errorTitle = '';
     } else {
@@ -134,9 +121,9 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   const [form, eventHandlers] = useForm({
     onSubmit: async (values) => {
       try {
-        if (selectedApiKey) {
+        if (apiKey) {
           const updateApiKeyResponse = await new APIKeysAPIClient(services.http!).updateApiKey(
-            mapUpdateApiKeyValues(selectedApiKey.id, values)
+            mapUpdateApiKeyValues(apiKey.id, values)
           );
 
           onSuccess?.(undefined, updateApiKeyResponse);
@@ -174,7 +161,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
         {}
       );
 
-      if (!form.touched.role_descriptors && !selectedApiKey) {
+      if (!form.touched.role_descriptors && !apiKey) {
         form.setValue('role_descriptors', JSON.stringify(userPermissions, null, 2));
       }
     }
@@ -199,11 +186,9 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
       )}
       isLoading={form.isSubmitting}
       isDisabled={
-        isLoading ||
-        (form.isSubmitted && form.isInvalid) ||
-        readonly ||
-        (selectedApiKey && !canEditApiKey)
+        isLoading || (form.isSubmitted && form.isInvalid) || readonly || (apiKey && !canEditApiKey)
       }
+      isSubmitButtonHidden={readonly || (!!apiKey && !canEditApiKey)}
       size="s"
       ownFocus
     >
@@ -254,7 +239,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   }}
                   data-test-subj="apiKeyFlyoutUsername"
                 >
-                  {selectedApiKey ? selectedApiKey.username : currentUser?.username}
+                  {apiKey ? apiKey.username : currentUser?.username}
                 </EuiText>
                 <EuiSpacer size="xs" />
               </EuiFlexItem>
@@ -265,9 +250,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
             label={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.nameLabel', {
               defaultMessage: 'Name',
             })}
-            helpText={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.nameHelpText', {
-              defaultMessage: 'What is this key used for?',
-            })}
             error={form.errors.name}
             isInvalid={form.touched.name && !!form.errors.name}
           >
@@ -276,11 +258,24 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               defaultValue={form.values.name}
               isInvalid={form.touched.name && !!form.errors.name}
               inputRef={firstFieldRef}
-              disabled={!!selectedApiKey || readonly}
+              disabled={!!apiKey || readonly}
               fullWidth
               data-test-subj="apiKeyNameInput"
             />
           </EuiFormRow>
+
+          {!!apiKey && (
+            <>
+              <EuiSpacer />
+              <EuiFormRow
+                label={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.statusLabel', {
+                  defaultMessage: 'Status',
+                })}
+              >
+                {determineReadonlyExpiration(form.values?.expiration)}
+              </EuiFormRow>
+            </>
+          )}
 
           <EuiSpacer />
           <EuiFormFieldset>
@@ -291,10 +286,10 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   defaultMessage: 'Restrict privileges',
                 }
               )}
-              checked={!!form.values.customPrivileges}
+              checked={form.values.customPrivileges}
               data-test-subj="apiKeysRoleDescriptorsSwitch"
               onChange={(e) => form.setValue('customPrivileges', e.target.checked)}
-              disabled={readonly || (selectedApiKey && !canEditApiKey)}
+              disabled={readonly || (apiKey && !canEditApiKey)}
             />
             {form.values.customPrivileges && (
               <>
@@ -320,7 +315,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     onChange={(value) => form.setValue('role_descriptors', value)}
                     languageId="xjson"
                     height={200}
-                    options={{ readOnly: readonly || (selectedApiKey && !canEditApiKey) }}
+                    options={{ readOnly: readonly || (apiKey && !canEditApiKey) }}
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />
@@ -328,67 +323,57 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
             )}
           </EuiFormFieldset>
 
-          <EuiSpacer />
-          {!!selectedApiKey ? (
-            <EuiFormRow
-              label={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.statusLabel', {
-                defaultMessage: 'Status',
-              })}
-            >
-              {determineReadonlyExpiration(form.values?.expiration)}
-            </EuiFormRow>
-          ) : (
-            <EuiFormFieldset>
-              <EuiSwitch
-                label={i18n.translate(
-                  'xpack.security.accountManagement.apiKeyFlyout.customExpirationLabel',
-                  {
-                    defaultMessage: 'Expire after time',
-                  }
-                )}
-                checked={!!form.values.customExpiration}
-                onChange={(e) => form.setValue('customExpiration', e.target.checked)}
-                disabled={readonly || !!selectedApiKey}
-                data-test-subj="apiKeyCustomExpirationSwitch"
-              />
-              {form.values.customExpiration && (
-                <>
-                  <EuiSpacer size="m" />
-
-                  <EuiFormRow
-                    error={form.errors.expiration}
-                    isInvalid={
-                      form.touched.expiration && !!form.errors.expiration && !selectedApiKey
+          {!apiKey && (
+            <>
+              <EuiSpacer />
+              <EuiFormFieldset>
+                <EuiSwitch
+                  label={i18n.translate(
+                    'xpack.security.accountManagement.apiKeyFlyout.customExpirationLabel',
+                    {
+                      defaultMessage: 'Expire after time',
                     }
-                    label={i18n.translate(
-                      'xpack.security.accountManagement.apiKeyFlyout.customExpirationInputLabel',
-                      {
-                        defaultMessage: 'Lifetime (days)',
-                      }
-                    )}
-                  >
-                    <EuiFieldNumber
-                      append={i18n.translate(
-                        'xpack.security.accountManagement.apiKeyFlyout.expirationUnit',
+                  )}
+                  checked={form.values.customExpiration}
+                  onChange={(e) => form.setValue('customExpiration', e.target.checked)}
+                  disabled={readonly || !!apiKey}
+                  data-test-subj="apiKeyCustomExpirationSwitch"
+                />
+                {form.values.customExpiration && (
+                  <>
+                    <EuiSpacer size="m" />
+
+                    <EuiFormRow
+                      error={form.errors.expiration}
+                      isInvalid={form.touched.expiration && !!form.errors.expiration && !apiKey}
+                      label={i18n.translate(
+                        'xpack.security.accountManagement.apiKeyFlyout.customExpirationInputLabel',
                         {
-                          defaultMessage: 'days',
+                          defaultMessage: 'Lifetime',
                         }
                       )}
-                      name="expiration"
-                      min={0}
-                      defaultValue={form.values.expiration}
-                      isInvalid={
-                        form.touched.expiration && !!form.errors.expiration && !selectedApiKey
-                      }
-                      fullWidth
-                      data-test-subj="apiKeyCustomExpirationInput"
-                      disabled={readonly || !!selectedApiKey}
-                    />
-                  </EuiFormRow>
-                  <EuiSpacer size="s" />
-                </>
-              )}
-            </EuiFormFieldset>
+                    >
+                      <EuiFieldNumber
+                        append={i18n.translate(
+                          'xpack.security.accountManagement.apiKeyFlyout.expirationUnit',
+                          {
+                            defaultMessage: 'days',
+                          }
+                        )}
+                        name="expiration"
+                        min={0}
+                        defaultValue={form.values.expiration}
+                        isInvalid={form.touched.expiration && !!form.errors.expiration && !apiKey}
+                        fullWidth
+                        data-test-subj="apiKeyCustomExpirationInput"
+                        disabled={readonly || !!apiKey}
+                      />
+                    </EuiFormRow>
+                    <EuiSpacer size="s" />
+                  </>
+                )}
+              </EuiFormFieldset>
+            </>
           )}
           <EuiSpacer />
           <EuiFormFieldset>
@@ -400,8 +385,8 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                 }
               )}
               data-test-subj="apiKeysMetadataSwitch"
-              checked={!!form.values.includeMetadata}
-              disabled={readonly || (selectedApiKey && !canEditApiKey)}
+              checked={form.values.includeMetadata}
+              disabled={readonly || (apiKey && !canEditApiKey)}
               onChange={(e) => form.setValue('includeMetadata', e.target.checked)}
             />
             {form.values.includeMetadata && (
@@ -428,7 +413,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     onChange={(value) => form.setValue('metadata', value)}
                     languageId="xjson"
                     height={200}
-                    options={{ readOnly: readonly || (selectedApiKey && !canEditApiKey) }}
+                    options={{ readOnly: readonly || (apiKey && !canEditApiKey) }}
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />
@@ -444,7 +429,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   );
 };
 
-export function validate(values: ApiKeyFormValues, isEdit: boolean = false) {
+export function validate(values: ApiKeyFormValues) {
   const errors: ValidationErrors<ApiKeyFormValues> = {};
 
   if (!values.name) {
@@ -453,7 +438,7 @@ export function validate(values: ApiKeyFormValues, isEdit: boolean = false) {
     });
   }
 
-  if (values.customExpiration && !isEdit) {
+  if (values.customExpiration) {
     const parsedExpiration = parseFloat(values.expiration);
     if (isNaN(parsedExpiration) || parsedExpiration <= 0) {
       errors.expiration = i18n.translate(
@@ -531,14 +516,14 @@ export function mapUpdateApiKeyValues(id: string, values: ApiKeyFormValues): Upd
       values.customPrivileges && values.role_descriptors
         ? JSON.parse(values.role_descriptors)
         : undefined,
-    metadata: values.includeMetadata && values.metadata ? JSON.parse(values.metadata) : undefined,
+    metadata: values.includeMetadata && values.metadata ? JSON.parse(values.metadata) : {},
   };
 }
 
-function isEditable(currentUser: AuthenticatedUser | undefined, selectedApiKey: ApiKey): boolean {
+function isEditable(currentUser: AuthenticatedUser | undefined, apiKey: ApiKey): boolean {
   let result = false;
-  const isApiKeyOwner = currentUser && currentUser.username === selectedApiKey.username;
-  const isNotExpired = !selectedApiKey.expiration || moment(selectedApiKey.expiration).isAfter();
+  const isApiKeyOwner = currentUser && currentUser.username === apiKey.username;
+  const isNotExpired = !apiKey.expiration || moment(apiKey.expiration).isAfter();
 
   if (isApiKeyOwner && isNotExpired) {
     result = true;
@@ -587,4 +572,22 @@ function determineReadonlyExpiration(expiration?: string) {
       </EuiToolTip>
     </EuiHealth>
   );
+}
+
+function retrieveValuesFromApiKeyToDefaultFlyout(apiKey: ApiKey): ApiKeyFormValues {
+  // Collect data from the selected API key to pre-populate the form
+  const doesMetadataExist = Object.keys(apiKey.metadata).length > 0;
+  const doCustomPrivilegesExist = Object.keys(apiKey.role_descriptors ?? 0).length > 0;
+
+  return {
+    name: apiKey.name,
+    customExpiration: !!apiKey.expiration,
+    expiration: !!apiKey.expiration ? apiKey.expiration.toString() : '',
+    includeMetadata: doesMetadataExist,
+    metadata: doesMetadataExist ? JSON.stringify(apiKey.metadata, null, 2) : '{}',
+    customPrivileges: doCustomPrivilegesExist,
+    role_descriptors: doCustomPrivilegesExist
+      ? JSON.stringify(apiKey.role_descriptors, null, 2)
+      : '{}',
+  };
 }

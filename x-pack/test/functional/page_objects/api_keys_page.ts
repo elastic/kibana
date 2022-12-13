@@ -49,25 +49,12 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.setValue('apiKeyCustomExpirationInput', expirationTime);
     },
 
-    async getApiKeyCustomExpirationSwitch() {
-      return await testSubjects.find('apiKeyCustomExpirationSwitch');
-    },
-
-    async getApiKeyCustomExpirationInput() {
-      return await testSubjects.find('apiKeyCustomExpirationInput');
-    },
-
     async toggleCustomExpiration() {
       return await testSubjects.click('apiKeyCustomExpirationSwitch');
     },
 
     async clickSubmitButtonOnApiKeyFlyout() {
       return await testSubjects.click('formFlyoutSubmitButton');
-    },
-
-    async submitButtonOnApiKeyFlyoutDisabled() {
-      const button = await testSubjects.find('formFlyoutSubmitButton', 20000);
-      return await button.getAttribute('disabled');
     },
 
     async clickCancelButtonOnApiKeyFlyout() {
@@ -148,6 +135,11 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     async getFlyoutApiKeyStatus() {
       const apiKeyStatusField = await testSubjects.find('apiKeyStatus');
       return apiKeyStatusField.getVisibleText();
+    },
+
+    async getApiKeyUpdateSuccessToast() {
+      const toast = await testSubjects.find('updateApiKeySuccessToast');
+      return toast.getVisibleText();
     },
   };
 }
