@@ -16,8 +16,6 @@ paths:
   # plugin-wide endpoint(s)
   /setup:
     $ref: paths/setup.yaml
-  /setup/preconfiguration:
-    $ref: paths/setup_preconfiguration.yaml
   /settings:
     $ref: paths/settings.yaml
   # App endpoints
@@ -77,6 +75,10 @@ paths:
     $ref: 'paths/agents@bulk_update_tags.yaml'
   /agents/tags:
     $ref: paths/agent_tags.yaml
+  '/agents/{agentId}/request_diagnostics':
+    $ref: 'paths/agents@{agent_id}@request_diagnostics.yaml'
+  /agents/bulk_request_diagnostics:
+    $ref: 'paths/agents@bulk_request_diagnostics.yaml'
   #  Agent policies endpoints
   /agent_policies:
     $ref: paths/agent_policies.yaml
@@ -129,6 +131,11 @@ paths:
     $ref: paths/fleet_server_hosts.yaml
   /fleet_server_hosts/{itemId}:
     $ref: paths/fleet_server_hosts@{item_id}.yaml
+  # Fleet proxies
+  /proxies:
+    $ref: paths/proxies.yaml
+  /proxies/{itemId}:
+    $ref: paths/proxies@{item_id}.yaml
 components:
   securitySchemes:
     basicAuth:

@@ -6,7 +6,7 @@
  */
 
 import type { Ecs } from '../../../../../../../common/ecs';
-import { RowRendererId } from '../../../../../../../common/types';
+import { RowRendererId, TimelineId } from '../../../../../../../common/types';
 import { combineRenderers } from '.';
 
 describe('combineRenderers', () => {
@@ -68,7 +68,7 @@ describe('combineRenderers', () => {
 
   describe('renderRow', () => {
     const isDraggable = false;
-    const timelineId = 'test';
+    const scopeId = TimelineId.test;
 
     it('renders `a` and `b` when `a` is an instance and `b` is an instance', () => {
       a.isInstance.mockReturnValue(true);
@@ -78,20 +78,20 @@ describe('combineRenderers', () => {
         contextId,
         data,
         isDraggable: false,
-        timelineId,
+        scopeId,
       });
 
       expect(a.renderRow).toBeCalledWith({
         contextId,
         data,
         isDraggable,
-        timelineId,
+        scopeId,
       });
       expect(b.renderRow).toBeCalledWith({
         contextId,
         data,
         isDraggable,
-        timelineId,
+        scopeId,
       });
     });
 
@@ -103,14 +103,14 @@ describe('combineRenderers', () => {
         contextId,
         data,
         isDraggable,
-        timelineId,
+        scopeId,
       });
 
       expect(a.renderRow).toBeCalledWith({
         contextId,
         data,
         isDraggable,
-        timelineId,
+        scopeId,
       });
       expect(b.renderRow).not.toBeCalled();
     });
@@ -123,7 +123,7 @@ describe('combineRenderers', () => {
         contextId,
         data,
         isDraggable,
-        timelineId,
+        scopeId,
       });
 
       expect(a.renderRow).not.toBeCalled();
@@ -131,7 +131,7 @@ describe('combineRenderers', () => {
         contextId,
         data,
         isDraggable,
-        timelineId,
+        scopeId,
       });
     });
 

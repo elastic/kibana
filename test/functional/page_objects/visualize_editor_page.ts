@@ -425,6 +425,13 @@ export class VisualizeEditorPageObject extends FtrService {
     await option.click();
   }
 
+  public async selectYAxisPosition(axisId: string, position: string) {
+    const option = await (
+      await this.testSubjects.find(`valueAxisPosition-${axisId}`)
+    ).findByCssSelector(`option[value="${position}"]`);
+    await option.click();
+  }
+
   public async selectYAxisMode(mode: string) {
     const selector = await this.find.byCssSelector(`#valueAxisMode0 > option[value="${mode}"]`);
     await selector.click();
@@ -520,6 +527,10 @@ export class VisualizeEditorPageObject extends FtrService {
 
   public async toggleGridCategoryLines() {
     return await this.testSubjects.click('showCategoryLines');
+  }
+
+  public async toggleShowThresholdLine() {
+    return await this.testSubjects.click('xyShowThresholdLine');
   }
 
   public async toggleValuesOnChart() {

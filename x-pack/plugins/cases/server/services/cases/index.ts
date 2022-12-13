@@ -7,7 +7,6 @@
 
 import type {
   Logger,
-  SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsBulkResponse,
@@ -16,6 +15,8 @@ import type {
   SavedObjectsUpdateResponse,
   SavedObjectsResolveResponse,
   SavedObjectsFindOptions,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -28,7 +29,6 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import type {
-  GetCaseIdsByAlertIdAggs,
   CaseResponse,
   CasesFindRequest,
   CommentAttributes,
@@ -37,7 +37,7 @@ import type {
   CaseStatuses,
 } from '../../../common/api';
 import { caseStatuses } from '../../../common/api';
-import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import type { CaseSavedObject, SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../../client/utils';
@@ -94,7 +94,7 @@ interface PostCaseArgs extends IndexRefresh {
 interface PatchCase extends IndexRefresh {
   caseId: string;
   updatedAttributes: Partial<CaseAttributes & PushedArgs>;
-  originalCase: SavedObject<CaseAttributes>;
+  originalCase: CaseSavedObject;
   version?: string;
 }
 type PatchCaseArgs = PatchCase;
@@ -120,6 +120,15 @@ interface GetTagsArgs {
 interface GetReportersArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   filter?: KueryNode;
+}
+
+interface GetCaseIdsByAlertIdAggs {
+  references: {
+    doc_count: number;
+    caseIds: {
+      buckets: Array<{ key: string }>;
+    };
+  };
 }
 
 export class CasesService {
@@ -222,13 +231,13 @@ export class CasesService {
 
     const casesWithComments = new Map<string, CaseResponse>();
     for (const [id, caseInfo] of casesMap.entries()) {
-      const { alerts, nonAlerts } = commentTotals.get(id) ?? { alerts: 0, nonAlerts: 0 };
+      const { alerts, userComments } = commentTotals.get(id) ?? { alerts: 0, userComments: 0 };
 
       casesWithComments.set(
         id,
         flattenCaseSavedObject({
           savedObject: caseInfo,
-          totalComment: nonAlerts,
+          totalComment: userComments,
           totalAlerts: alerts,
         })
       );
@@ -301,7 +310,22 @@ export class CasesService {
     }
   }
 
-  public async getCase({ id: caseId }: GetCaseArgs): Promise<SavedObject<CaseAttributes>> {
+  public async bulkDeleteCaseEntities({
+    entities,
+    options,
+  }: {
+    entities: SavedObjectsBulkDeleteObject[];
+    options?: SavedObjectsBulkDeleteOptions;
+  }) {
+    try {
+      this.log.debug(`Attempting to bulk delete case entities ${JSON.stringify(entities)}`);
+      return await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
+    } catch (error) {
+      this.log.error(`Error bulk deleting case entities ${JSON.stringify(entities)}: ${error}`);
+    }
+  }
+
+  public async getCase({ id: caseId }: GetCaseArgs): Promise<CaseSavedObject> {
     try {
       this.log.debug(`Attempting to GET case ${caseId}`);
       const caseSavedObject = await this.unsecuredSavedObjectsClient.get<ESCaseAttributes>(
@@ -535,11 +559,7 @@ export class CasesService {
     }
   }
 
-  public async postNewCase({
-    attributes,
-    id,
-    refresh,
-  }: PostCaseArgs): Promise<SavedObject<CaseAttributes>> {
+  public async postNewCase({ attributes, id, refresh }: PostCaseArgs): Promise<CaseSavedObject> {
     try {
       this.log.debug(`Attempting to POST a new case`);
       const transformedAttributes = transformAttributesToESModel(attributes);

@@ -10,8 +10,6 @@ import SemVer from 'semver/classes/semver';
 import { merge } from 'lodash';
 
 import { HttpSetup } from '@kbn/core/public';
-import { MAJOR_VERSION } from '../../../common/constants';
-
 import { AuthorizationContext, Authorization, Privileges } from '../../../public/shared_imports';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
@@ -23,7 +21,7 @@ import { init as initHttpRequests } from './http_requests';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
-export const kibanaVersion = new SemVer(MAJOR_VERSION);
+export const kibanaVersion = new SemVer('8.0.0');
 
 const createAuthorizationContextValue = (privileges: Privileges) => {
   return {

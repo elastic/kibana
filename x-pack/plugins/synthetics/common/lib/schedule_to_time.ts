@@ -12,6 +12,10 @@ export function scheduleToMilli(schedule: SyntheticsMonitorSchedule): number {
   return timeValue * getMilliFactorForScheduleUnit(schedule.unit);
 }
 
+export function scheduleToMinutes(schedule: SyntheticsMonitorSchedule): number {
+  return Math.floor(scheduleToMilli(schedule) / (60 * 1000));
+}
+
 function getMilliFactorForScheduleUnit(scheduleUnit: ScheduleUnit): number {
   switch (scheduleUnit) {
     case ScheduleUnit.SECONDS:

@@ -158,6 +158,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       return uiState?.get('vis.legendOpen', bwcLegendStateDefault);
     });
 
+    const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
+
     const toggleLegend = useCallback(() => {
       if (!interactive) {
         return;
@@ -239,6 +241,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     let chartData = formattedTable.table.rows.filter(
       (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
     );
+
+    const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
+      datatables: [formattedTable.table],
+    });
 
     const onElementClick = useCallback(
       (e: HeatmapElementEvent[]) => {
@@ -440,9 +446,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       }
       return `${metricFormatter.convert(value) ?? ''}`;
     };
-    const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
-      datatables: [formattedTable.table],
-    });
 
     const { colors, ranges } = computeColorRanges(
       paletteService,
@@ -589,6 +592,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               debugState={window._echDebugStateFlag ?? false}
               tooltip={tooltip}
               theme={[themeOverrides, chartTheme]}
+              baseTheme={chartBaseTheme}
               xDomain={{
                 min:
                   dateHistogramMeta && dateHistogramMeta.timeRange
@@ -619,8 +623,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               xScale={xScale}
               ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
               xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
-              xAxisLabelName={xAxisColumn?.name}
-              yAxisLabelName={yAxisColumn?.name}
+              xAxisLabelName={xAxisColumn?.name || ''}
+              yAxisLabelName={yAxisColumn?.name || ''}
               xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
               yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
               xAxisLabelFormatter={(v) =>

@@ -110,7 +110,6 @@ describe('ExceptionItemComments', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionItemCommentsAccordion"]').exists()).toBeFalsy();
     expect(
       wrapper.find('[data-test-subj="newExceptionItemCommentTextArea"]').at(1).props().value
     ).toEqual('This is a new comment');

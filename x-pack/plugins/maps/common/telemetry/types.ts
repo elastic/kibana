@@ -29,6 +29,7 @@ export enum LAYER_KEYS {
   EMS_REGION = 'ems_region',
   EMS_BASEMAP = 'ems_basemap',
   KBN_TMS_RASTER = 'kbn_tms_raster',
+  LAYER_GROUP = 'layer_group',
   UX_TMS_RASTER = 'ux_tms_raster', // configured in the UX layer wizard of Maps
   UX_TMS_MVT = 'ux_tms_mvt', // configured in the UX layer wizard of Maps
   UX_WMS = 'ux_wms', // configured in the UX layer wizard of Maps

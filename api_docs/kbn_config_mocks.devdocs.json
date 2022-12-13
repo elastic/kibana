@@ -24,7 +24,13 @@
           " | undefined; packageInfo?: ",
           "RawPackageInfo",
           " | undefined; }) => ",
-          "Env"
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.Env",
+            "text": "Env"
+          }
         ],
         "path": "packages/kbn-config-mocks/src/env.mock.ts",
         "deprecated": false,
@@ -187,7 +193,13 @@
         "label": "ConfigDeprecationContextMock",
         "description": [],
         "signature": [
-          "ConfigDeprecationContext"
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecationContext",
+            "text": "ConfigDeprecationContext"
+          }
         ],
         "path": "packages/kbn-config-mocks/src/deprecations.mock.ts",
         "deprecated": false,
@@ -203,11 +215,29 @@
         "description": [],
         "signature": [
           "{ has: jest.MockInstance<boolean, [configPath: ",
-          "ConfigPath",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigPath",
+            "text": "ConfigPath"
+          },
           "]>; get: jest.MockInstance<any, [configPath: ",
-          "ConfigPath",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigPath",
+            "text": "ConfigPath"
+          },
           "]>; set: jest.MockInstance<void, [configPath: ",
-          "ConfigPath",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigPath",
+            "text": "ConfigPath"
+          },
           ", value: any]>; getFlattenedPaths: jest.MockInstance<string[], []>; toRaw: jest.MockInstance<Record<string, any>, []>; } & ",
           "Config"
         ],
@@ -231,27 +261,81 @@
           "<",
           "Config",
           ">, []>; setSchema: jest.MockInstance<void, [path: ",
-          "ConfigPath",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigPath",
+            "text": "ConfigPath"
+          },
           ", schema: ",
-          "Type",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
           "<unknown>]>; addDeprecationProvider: jest.MockInstance<void, [path: ",
-          "ConfigPath",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigPath",
+            "text": "ConfigPath"
+          },
           ", provider: ",
-          "ConfigDeprecationProvider",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigDeprecationProvider",
+            "text": "ConfigDeprecationProvider"
+          },
           "]>; getHandledDeprecatedConfigs: jest.MockInstance<[string, ",
-          "DeprecatedConfigDetails",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.DeprecatedConfigDetails",
+            "text": "DeprecatedConfigDetails"
+          },
           "[]][], []>; atPath: jest.MockInstance<",
           "Observable",
           "<unknown>, [path: ",
-          "ConfigPath",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigPath",
+            "text": "ConfigPath"
+          },
           "]>; atPathSync: jest.MockInstance<unknown, [path: ",
-          "ConfigPath",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigPath",
+            "text": "ConfigPath"
+          },
           "]>; isEnabledAtPath: jest.MockInstance<Promise<boolean>, [path: ",
-          "ConfigPath",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigPath",
+            "text": "ConfigPath"
+          },
           "]>; getUnusedPaths: jest.MockInstance<Promise<string[]>, []>; getUsedPaths: jest.MockInstance<Promise<string[]>, []>; getDeprecatedConfigPath$: jest.MockInstance<",
           "Observable",
           "<",
-          "ChangedDeprecatedPaths",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ChangedDeprecatedPaths",
+            "text": "ChangedDeprecatedPaths"
+          },
           ">, []>; } & ",
           "IConfigService"
         ],
@@ -271,7 +355,13 @@
           "{ stop: jest.MockInstance<void, []>; getConfig$: jest.MockInstance<",
           "Observable",
           "<Record<string, any>>, []>; loadConfig: jest.MockInstance<void, []>; reloadConfig: jest.MockInstance<void, []>; } & ",
-          "PublicMethodsOf",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.PublicMethodsOf",
+            "text": "PublicMethodsOf"
+          },
           "<",
           "RawConfigService",
           ">"
@@ -303,7 +393,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "ConfigDeprecationContext"
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecationContext",
+                "text": "ConfigDeprecationContext"
+              }
             ],
             "path": "packages/kbn-config-mocks/src/deprecations.mock.ts",
             "deprecated": false,

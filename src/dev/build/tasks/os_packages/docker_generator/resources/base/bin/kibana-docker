@@ -44,6 +44,7 @@ kibana_vars=(
     data.search.asyncSearch.waitForCompletion
     data.search.asyncSearch.keepAlive
     data.search.asyncSearch.batchedReduceSize
+    data.search.asyncSearch.pollInterval
     data.search.sessions.defaultExpiration
     data.search.sessions.enabled
     data.search.sessions.maxUpdateRetries
@@ -391,8 +392,6 @@ kibana_vars=(
     xpack.securitySolution.maxTimelineImportExportSize
     xpack.securitySolution.maxTimelineImportPayloadBytes
     xpack.securitySolution.packagerTaskInterval
-    xpack.securitySolution.prebuiltRulesFromFileSystem
-    xpack.securitySolution.prebuiltRulesFromSavedObjects
     xpack.spaces.maxSpaces
     xpack.task_manager.max_attempts
     xpack.task_manager.max_poll_inactivity_cycles

@@ -19,6 +19,7 @@ import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import {
@@ -47,7 +48,11 @@ import {
   migratePackagePolicyToV840,
 } from './migrations/to_v8_4_0';
 import { migratePackagePolicyToV850, migrateAgentPolicyToV850 } from './migrations/to_v8_5_0';
-import { migrateSettingsToV860 } from './migrations/to_v8_6_0';
+import {
+  migrateSettingsToV860,
+  migrateInstallationToV860,
+  migratePackagePolicyToV860,
+} from './migrations/to_v8_6_0';
 
 /*
  * Saved object types and mappings
@@ -70,6 +75,7 @@ const getSavedObjectTypes = (
       properties: {
         fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
+        prerelease_integrations_enabled: { type: 'boolean' },
       },
     },
     migrations: {
@@ -104,6 +110,7 @@ const getSavedObjectTypes = (
         data_output_id: { type: 'keyword' },
         monitoring_output_id: { type: 'keyword' },
         download_source_id: { type: 'keyword' },
+        fleet_server_host_id: { type: 'keyword' },
       },
     },
     migrations: {
@@ -134,6 +141,7 @@ const getSavedObjectTypes = (
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
+        proxy_id: { type: 'keyword' },
       },
     },
     migrations: {
@@ -226,6 +234,7 @@ const getSavedObjectTypes = (
       '8.3.0': migratePackagePolicyToV830,
       '8.4.0': migratePackagePolicyToV840,
       '8.5.0': migratePackagePolicyToV850,
+      '8.6.0': migratePackagePolicyToV860,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -282,6 +291,7 @@ const getSavedObjectTypes = (
               type: 'nested',
               properties: {
                 synthetic_source: { type: 'boolean' },
+                tsdb: { type: 'boolean' },
               },
             },
           },
@@ -295,6 +305,7 @@ const getSavedObjectTypes = (
       '8.0.0': migrateInstallationToV800,
       '8.3.0': migrateInstallationToV830,
       '8.4.0': migrateInstallationToV840,
+      '8.6.0': migrateInstallationToV860,
     },
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {
@@ -358,6 +369,26 @@ const getSavedObjectTypes = (
         is_default: { type: 'boolean' },
         host_urls: { type: 'keyword', index: false },
         is_preconfigured: { type: 'boolean' },
+        proxy_id: { type: 'keyword' },
+      },
+    },
+  },
+  [FLEET_PROXY_SAVED_OBJECT_TYPE]: {
+    name: FLEET_PROXY_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        name: { type: 'keyword' },
+        url: { type: 'keyword', index: false },
+        proxy_headers: { type: 'text', index: false },
+        certificate_authorities: { type: 'keyword', index: false },
+        certificate: { type: 'keyword', index: false },
+        certificate_key: { type: 'keyword', index: false },
+        is_preconfigured: { type: 'boolean' },
       },
     },
   },
@@ -391,6 +422,7 @@ export function registerEncryptedSavedObjects(
       'config',
       'config_yaml',
       'is_preconfigured',
+      'proxy_id',
     ]),
   });
   // Encrypted saved objects

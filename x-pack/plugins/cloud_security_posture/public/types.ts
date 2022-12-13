@@ -13,8 +13,12 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 import type { CspRouterProps } from './application/csp_router';
-import type { BreadcrumbEntry, CloudSecurityPosturePageId } from './common/navigation/types';
+import type { CloudSecurityPosturePageId } from './common/navigation/types';
 
 /**
  * The cloud security posture's public plugin setup interface.
@@ -36,6 +40,7 @@ export interface CspClientPluginSetupDeps {
   fleet: FleetSetup;
   cloud: CloudSetup;
   // optional
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface CspClientPluginStartDeps {
@@ -47,6 +52,7 @@ export interface CspClientPluginStartDeps {
   fleet: FleetStart;
   licensing: LicensingPluginStart;
   // optional
+  usageCollection?: UsageCollectionStart;
 }
 
 /**
@@ -56,7 +62,8 @@ export interface CspSecuritySolutionContext {
   /** Gets the `FiltersGlobal` component for embedding a filter bar in the security solution application. */
   getFiltersGlobalComponent: () => ComponentType<{ children: ReactNode }>;
   /** Gets the `SpyRoute` component for navigation highlighting and breadcrumbs. */
-  getSpyRouteComponent: () => ComponentType<{ pageName?: CloudSecurityPosturePageId }>;
-  /** Gets the `Manage` breadcrumb entry. */
-  getManageBreadcrumbEntry: () => BreadcrumbEntry | undefined;
+  getSpyRouteComponent: () => ComponentType<{
+    pageName: CloudSecurityPosturePageId;
+    state?: Record<string, string | undefined>;
+  }>;
 }

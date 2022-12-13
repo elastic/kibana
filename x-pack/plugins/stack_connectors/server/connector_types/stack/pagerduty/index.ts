@@ -223,6 +223,20 @@ async function executor(
     };
   }
 
+  if (response == null) {
+    const message = i18n.translate(
+      'xpack.stackConnectors.pagerduty.unexpectedNullResponseErrorMessage',
+      {
+        defaultMessage: 'unexpected null response from pagerduty',
+      }
+    );
+    return {
+      status: 'error',
+      actionId,
+      message,
+    };
+  }
+
   logger.debug(`response posting pagerduty event: ${response.status}`);
 
   if (response.status === 202) {

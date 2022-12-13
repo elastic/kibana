@@ -28,7 +28,7 @@ export interface DefaultDraggableType {
   name?: string | null;
   queryValue?: string | null;
   children?: React.ReactNode;
-  timelineId?: string;
+  scopeId?: string;
   tooltipContent?: React.ReactNode;
   tooltipPosition?: ToolTipPositions;
 }
@@ -107,7 +107,7 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
     value,
     name,
     children,
-    timelineId,
+    scopeId,
     tooltipContent,
     tooltipPosition,
     queryValue,
@@ -158,7 +158,7 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
         hideTopN={hideTopN}
         isDraggable={isDraggable}
         render={renderCallback}
-        timelineId={timelineId}
+        scopeId={scopeId}
       />
     );
   }
@@ -207,7 +207,7 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
   name,
   color = 'hollow',
   children,
-  timelineId,
+  scopeId,
   tooltipContent,
   queryValue,
 }) =>
@@ -220,7 +220,7 @@ const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
       field={field}
       name={name}
       value={value}
-      timelineId={timelineId}
+      scopeId={scopeId}
       tooltipContent={tooltipContent}
       queryValue={queryValue}
     >

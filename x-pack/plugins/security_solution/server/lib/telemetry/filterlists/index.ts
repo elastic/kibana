@@ -6,6 +6,9 @@
  */
 import type { AllowlistFields } from './types';
 import type { TelemetryEvent } from '../types';
+import { endpointAllowlistFields } from './endpoint_alerts';
+import { exceptionListAllowlistFields } from './exception_lists';
+import { prebuiltRuleAllowlistFields } from './prebuilt_rules_alerts';
 
 /**
  * Filters out Key/Values not required for downstream analysis
@@ -38,6 +41,40 @@ export function copyAllowlistedFields(
   }, {});
 }
 
-export { endpointAllowlistFields } from './endpoint_alerts';
-export { exceptionListAllowlistFields } from './exception_lists';
-export { prebuiltRuleAllowlistFields } from './prebuilt_rules_alerts';
+export class FilterList {
+  private _endpointAlerts = endpointAllowlistFields;
+  private _exceptionLists = exceptionListAllowlistFields;
+  private _prebuiltRulesAlerts = prebuiltRuleAllowlistFields;
+
+  public get endpointAlerts(): AllowlistFields {
+    return this._endpointAlerts;
+  }
+
+  public set endpointAlerts(list: AllowlistFields) {
+    this._endpointAlerts = list;
+  }
+
+  public get exceptionLists(): AllowlistFields {
+    return this._exceptionLists;
+  }
+
+  public set exceptionLists(list: AllowlistFields) {
+    this._exceptionLists = list;
+  }
+
+  public get prebuiltRulesAlerts(): AllowlistFields {
+    return this._prebuiltRulesAlerts;
+  }
+
+  public set prebuiltRulesAlerts(list: AllowlistFields) {
+    this._prebuiltRulesAlerts = list;
+  }
+
+  public resetAllToDefault() {
+    this._endpointAlerts = endpointAllowlistFields;
+    this._exceptionLists = exceptionListAllowlistFields;
+    this._prebuiltRulesAlerts = prebuiltRuleAllowlistFields;
+  }
+}
+
+export const filterList = new FilterList();

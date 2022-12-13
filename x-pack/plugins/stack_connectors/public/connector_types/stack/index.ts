@@ -13,4 +13,5 @@ export { getServiceNowITOMConnectorType } from './servicenow_itom';
 export { getSlackConnectorType } from './slack';
 export { getTeamsConnectorType } from './teams';
 export { getWebhookConnectorType } from './webhook';
+export { getOpsgenieConnectorType } from './opsgenie';
 export { getXmattersConnectorType } from './xmatters';

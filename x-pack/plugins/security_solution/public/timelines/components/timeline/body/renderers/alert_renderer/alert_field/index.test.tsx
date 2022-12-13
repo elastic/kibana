@@ -10,11 +10,12 @@ import React from 'react';
 
 import { TestProviders } from '../../../../../../../common/mock';
 import { AlertField } from '.';
+import { TimelineId } from '../../../../../../../../common/types';
 
 const contextId = 'test';
 const eventId = 'abcd';
 const field = 'destination.ip';
-const timelineId = 'test';
+const timelineId = TimelineId.test;
 const prefix = 'this is the beginning';
 const suffix = 'the end';
 
@@ -30,7 +31,7 @@ describe('AlertField', () => {
           eventId={eventId}
           field={field}
           isDraggable={false}
-          timelineId={timelineId}
+          scopeId={timelineId}
           values={undefined} // <-- undefined
         />
       </TestProviders>
@@ -47,7 +48,7 @@ describe('AlertField', () => {
           eventId={eventId}
           field={field}
           isDraggable={false}
-          timelineId={timelineId}
+          scopeId={timelineId}
           values={multipleValues}
         />
       </TestProviders>
@@ -65,7 +66,7 @@ describe('AlertField', () => {
           field={field}
           isDraggable={false}
           prefix={prefix}
-          timelineId={timelineId}
+          scopeId={timelineId}
           values={multipleValues}
         />
       </TestProviders>
@@ -82,7 +83,7 @@ describe('AlertField', () => {
           eventId={eventId}
           field={field}
           isDraggable={false}
-          timelineId={timelineId}
+          scopeId={timelineId}
           values={singleValue} // <-- a single value
         />
       </TestProviders>
@@ -99,7 +100,7 @@ describe('AlertField', () => {
           eventId={eventId}
           field={field}
           isDraggable={false}
-          timelineId={timelineId}
+          scopeId={timelineId}
           values={multipleValues} // <-- multiple values
         />
       </TestProviders>
@@ -116,7 +117,7 @@ describe('AlertField', () => {
           eventId={eventId}
           field={field}
           isDraggable={false}
-          timelineId={timelineId}
+          scopeId={timelineId}
           values={multipleValues}
         />
       </TestProviders>
@@ -134,7 +135,7 @@ describe('AlertField', () => {
           field={field}
           isDraggable={false}
           suffix={suffix}
-          timelineId={timelineId}
+          scopeId={timelineId}
           values={multipleValues}
         />
       </TestProviders>
@@ -153,7 +154,7 @@ describe('AlertField', () => {
           isDraggable={false}
           prefix={prefix}
           suffix={suffix}
-          timelineId={timelineId}
+          scopeId={timelineId}
           values={multipleValues} // <-- multiple values
         />
       </TestProviders>

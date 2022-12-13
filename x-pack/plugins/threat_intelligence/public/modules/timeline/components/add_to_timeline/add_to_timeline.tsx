@@ -18,8 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { generateDataProvider } from '../../utils';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicators';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { Indicator } from '../../../../../common/types/indicator';
+import { useKibana } from '../../../../hooks';
 import { useStyles } from './styles';
 import { useAddToTimeline } from '../../hooks';
 

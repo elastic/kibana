@@ -659,6 +659,28 @@ export class VisualBuilderPageObject extends FtrService {
     await this.comboBox.setElement(fieldEl, field);
   }
 
+  public async setFieldForAggregateBy(field: string): Promise<void> {
+    const aggregateBy = await this.testSubjects.find('tsvbAggregateBySelect');
+
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(aggregateBy, field);
+      if (!(await this.comboBox.isOptionSelected(aggregateBy, field))) {
+        throw new Error(`aggregate by field - ${field} is not selected`);
+      }
+    });
+  }
+
+  public async setFunctionForAggregateFunction(func: string): Promise<void> {
+    const aggregateFunction = await this.testSubjects.find('tsvbAggregateFunctionCombobox');
+
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(aggregateFunction, func);
+      if (!(await this.comboBox.isOptionSelected(aggregateFunction, func))) {
+        throw new Error(`aggregate function - ${func} is not selected`);
+      }
+    });
+  }
+
   public async checkFieldForAggregationValidity(aggNth: number = 0): Promise<boolean> {
     const fieldEl = await this.getFieldForAggregation(aggNth);
 
@@ -802,7 +824,8 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async setMetricsGroupBy(option: string) {
     const groupBy = await this.testSubjects.find('groupBySelect');
-    await this.comboBox.setElement(groupBy, option, { clickWithMouse: true });
+    await this.comboBox.setElement(groupBy, option);
+    return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setMetricsGroupByTerms(

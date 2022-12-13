@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { EMPTY_VALUE } from '../../../../../common/constants';
+import { EMPTY_VALUE } from '../../../../common/constants';
 import { AddToTimelineButtonIcon } from '.';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 

@@ -7,8 +7,9 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { CollapseFunctions } from './constants';
 import type { SupportedMetric } from './lib/convert/supported_metrics';
-import type { Layer, XYAnnotationsLayerConfig, XYLayerConfig } from './types';
+import type { CollapseFunction, Layer, XYAnnotationsLayerConfig, XYLayerConfig } from './types';
 
 export const isAnnotationsLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
@@ -17,7 +18,17 @@ export const isAnnotationsLayer = (
 export const getIndexPatternIds = (layers: Layer[]) =>
   layers.map(({ indexPatternId }) => indexPatternId);
 
+const isValidFieldType = (
+  visType: string,
+  { supportedDataTypes }: SupportedMetric,
+  field: DataViewField
+) => {
+  const availableDataTypes = supportedDataTypes[visType] ?? supportedDataTypes.default;
+  return availableDataTypes.includes(field.type);
+};
+
 export const isFieldValid = (
+  visType: string,
   field: DataViewField | undefined,
   aggregation: SupportedMetric
 ): field is DataViewField => {
@@ -25,9 +36,12 @@ export const isFieldValid = (
     return false;
   }
 
-  if (field && (!field.aggregatable || !aggregation.supportedDataTypes.includes(field.type))) {
+  if (field && (!field.aggregatable || !isValidFieldType(visType, aggregation, field))) {
     return false;
   }
 
   return true;
 };
+
+export const isCollapseFunction = (candidate: string | undefined): candidate is CollapseFunction =>
+  Boolean(candidate && CollapseFunctions.includes(candidate as CollapseFunction));

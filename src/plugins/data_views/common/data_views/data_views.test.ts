@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { defaults } from 'lodash';
+import { defaults, get, set } from 'lodash';
 import { DataViewsService, DataView } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
@@ -29,6 +29,10 @@ let object: any = {};
 
 function setDocsourcePayload(id: string | null, providedPayload: any) {
   object = defaults(providedPayload || {}, stubbedSavedObjectIndexPattern(id));
+}
+
+function doWithTimeout<T = unknown>(fn: () => T, timeout: number = 0): Promise<T> {
+  return new Promise((resolve) => setTimeout(() => resolve(fn()), timeout));
 }
 
 const savedObject = {
@@ -151,10 +155,45 @@ describe('IndexPatterns', () => {
 
   test('does cache ad-hoc data views', async () => {
     const id = '1';
-    const dataView = await indexPatterns.create({ id });
-    const gettedDataView = await indexPatterns.get(id);
 
-    expect(dataView).toBe(gettedDataView);
+    const createFromSpecOriginal = get(indexPatterns, 'createFromSpec');
+    let mockedCreateFromSpec: jest.Mock;
+
+    set(
+      indexPatterns,
+      'createFromSpec',
+      (mockedCreateFromSpec = jest
+        .fn()
+        .mockImplementation((spec: DataViewSpec, skipFetchFields = false, displayErrors = true) =>
+          doWithTimeout(
+            () => createFromSpecOriginal.call(indexPatterns, spec, skipFetchFields, displayErrors),
+            1000
+          )
+        ))
+    );
+
+    // run creating in parallel
+    await Promise.all([
+      indexPatterns.create({ id }),
+      indexPatterns.create({ id }),
+      indexPatterns.create({ id }),
+      doWithTimeout(() => indexPatterns.create({ id }), 1),
+      doWithTimeout(() => indexPatterns.create({ id }), 10),
+
+      doWithTimeout(() => indexPatterns.get(id), 10),
+      doWithTimeout(() => indexPatterns.get(id), 40),
+    ]).then((results) =>
+      results.forEach((value) => {
+        expect(value.id).toBe(id);
+      })
+    );
+
+    // tests after promise was resolved
+    expect((await indexPatterns.get(id)).id).toBe(id);
+    expect((await indexPatterns.create({ id })).id).toBe(id);
+
+    expect(mockedCreateFromSpec).toHaveBeenCalledTimes(1);
+    expect(mockedCreateFromSpec).toHaveBeenCalledWith({ id: '1' }, false, true);
   });
 
   test('allowNoIndex flag preserves existing fields when index is missing', async () => {

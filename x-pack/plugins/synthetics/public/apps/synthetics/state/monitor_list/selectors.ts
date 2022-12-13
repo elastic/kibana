@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 
-import { EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
+import { ConfigKey, EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
 import { SyntheticsAppState } from '../root_reducer';
 
 export const selectMonitorListState = (state: SyntheticsAppState) => state.monitorList;
@@ -16,8 +16,9 @@ export const selectEncryptedSyntheticsSavedMonitors = createSelector(
   (state) =>
     state.data.monitors.map((monitor) => ({
       ...monitor.attributes,
-      id: monitor.id,
+      id: monitor.attributes[ConfigKey.MONITOR_QUERY_ID],
       updated_at: monitor.updated_at,
+      created_at: monitor.created_at,
     })) as EncryptedSyntheticsSavedMonitor[]
 );
 export const selectMonitorUpsertStatuses = (state: SyntheticsAppState) =>

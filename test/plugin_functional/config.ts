@@ -68,6 +68,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.cloud_integrations.experiments.launch_darkly.client_id=a_string',
         '--xpack.cloud_integrations.full_story.enabled=true',
         '--xpack.cloud_integrations.full_story.org_id=a_string',
+        '--xpack.cloud_integrations.gain_sight.enabled=true',
+        '--xpack.cloud_integrations.gain_sight.org_id=a_string',
         ...plugins.map(
           (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),

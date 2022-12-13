@@ -112,7 +112,13 @@
             "label": "client",
             "description": [],
             "signature": [
-              "SavedObjectsClientContract"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "x-pack/plugins/saved_objects_tagging/server/types.ts",
             "deprecated": false,
@@ -140,7 +146,13 @@
             "label": "client",
             "description": [],
             "signature": [
-              "SavedObjectsClientContract"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "x-pack/plugins/saved_objects_tagging/server/types.ts",
             "deprecated": false,
@@ -595,7 +607,13 @@
         "description": [],
         "signature": [
           "(capabilities: ",
-          "Capabilities",
+          {
+            "pluginId": "@kbn/core-capabilities-common",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+            "section": "def-common.Capabilities",
+            "text": "Capabilities"
+          },
           ") => ",
           {
             "pluginId": "savedObjectsTagging",
@@ -617,7 +635,13 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              "Capabilities"
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              }
             ],
             "path": "x-pack/plugins/saved_objects_tagging/common/capabilities.ts",
             "deprecated": false,
@@ -1341,7 +1365,13 @@
         "label": "TagSavedObject",
         "description": [],
         "signature": [
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<",
           {
             "pluginId": "savedObjectsTaggingOss",

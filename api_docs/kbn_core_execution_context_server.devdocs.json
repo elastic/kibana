@@ -34,7 +34,13 @@
             ],
             "signature": [
               "<R>(context: ",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               " | undefined, fn: (...args: any[]) => R) => R"
             ],
             "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
@@ -49,7 +55,13 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "KibanaExecutionContext",
+                  {
+                    "pluginId": "@kbn/core-execution-context-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                    "section": "def-common.KibanaExecutionContext",
+                    "text": "KibanaExecutionContext"
+                  },
                   " | undefined"
                 ],
                 "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
@@ -131,7 +143,13 @@
             "description": [],
             "signature": [
               "() => Readonly<",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-server/src/types.ts",

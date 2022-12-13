@@ -8,7 +8,7 @@
 
 import { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { StepStatus } from '../../common/types';
+import type { StepStatus } from '@kbn/guided-onboarding';
 
 export const getGuidePanelStepStyles = (euiTheme: EuiThemeComputed, stepStatus: StepStatus) => ({
   stepNumber: css`
@@ -27,6 +27,15 @@ export const getGuidePanelStepStyles = (euiTheme: EuiThemeComputed, stepStatus: 
     color: ${stepStatus === 'inactive' ? euiTheme.colors.subduedText : euiTheme.colors.text};
     .euiAccordion-isOpen & {
       color: ${euiTheme.colors.title};
+    }
+  `,
+  description: css`
+    p {
+      margin-left: 32px;
+      margin-block-end: 0;
+    }
+    ul {
+      padding-left: 28px;
     }
   `,
 });

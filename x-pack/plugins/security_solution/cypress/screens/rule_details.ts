@@ -43,6 +43,8 @@ export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
 
+export const ENDPOINT_EXCEPTIONS_TAB = 'a[data-test-subj="navigation-endpoint_exceptions"]';
+
 export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
 
 export const INDICATOR_INDEX_QUERY = 'Indicator index query';
@@ -123,3 +125,9 @@ export const DEFINE_RULE_PANEL_PROGRESS =
   '[data-test-subj="defineRule"] [data-test-subj="stepPanelProgress"]';
 
 export const EDIT_RULE_SETTINGS_LINK = '[data-test-subj="editRuleSettingsLink"]';
+
+export const THREAT_TACTIC = '[data-test-subj="threatTacticLink"]';
+
+export const THREAT_TECHNIQUE = '[data-test-subj="threatTechniqueLink"]';
+
+export const THREAT_SUBTECHNIQUE = '[data-test-subj="threatSubtechniqueLink"]';

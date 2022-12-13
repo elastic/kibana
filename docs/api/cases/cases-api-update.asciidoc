@@ -6,6 +6,12 @@
 
 Updates one or more cases.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
 === {api-request-title}
 
 `PATCH <kibana host>:<port>/api/cases`
@@ -34,6 +40,19 @@ default space is used.
 .Properties of `cases` objects
 [%collapsible%open]
 ====
+
+`assignees`::
+(Optional, array of objects) Array containing users that are assigned to the case.
++
+.Properties of assignee objects
+[%collapsible%open]
+=====
+`uid`::
+(Required, string) A unique identifier for the user profile. These identifiers
+can be found by using the
+{ref}/security-api-suggest-user-profile.html[suggest user profile API].
+=====
+
 `connector`::
 (Optional, object) An object that contains the connector configuration.
 +
@@ -51,10 +70,10 @@ connector, specify `null`. If you want to omit any individual field, specify
 For {ibm-r} connectors, specify:
 
 `issueTypes`:::
-(Required, array of numbers) The issue types of the issue.
+(Required, array of strings) The issue types of the issue.
 
 `severityCode`:::
-(Required, number) The severity code of the issue.
+(Required, string) The severity code of the issue.
 
 For {jira} connectors, specify:
 
@@ -197,6 +216,7 @@ PATCH api/cases
       },
       "description": "A new description.",
       "tags": [ "tag-1", "tag-2" ],
+      "assignees": [],
       "settings": {
         "syncAlerts": true
       }

@@ -22,6 +22,7 @@ export const DEFAULT_VALUES: InferencePipeline = {
   modelId: 'sample-bert-ner-model',
   modelState: TrainedModelState.Started,
   pipelineName: 'Sample Processor',
+  pipelineReferences: [],
   types: ['pytorch', 'ner'],
 };
 

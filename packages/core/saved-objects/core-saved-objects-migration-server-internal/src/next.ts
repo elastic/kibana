@@ -40,6 +40,8 @@ import type {
   OutdatedDocumentsRefresh,
   CheckUnknownDocumentsState,
   CalculateExcludeFiltersState,
+  WaitForMigrationCompletionState,
+  CheckTargetMappingsState,
 } from './state';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
@@ -60,6 +62,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
   return {
     INIT: (state: InitState) =>
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
+    WAIT_FOR_MIGRATION_COMPLETION: (state: WaitForMigrationCompletionState) =>
+      Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
@@ -126,6 +130,11 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.cloneIndex({ client, source: state.tempIndex, target: state.targetIndex }),
     REFRESH_TARGET: (state: RefreshTarget) =>
       Actions.refreshIndex({ client, targetIndex: state.targetIndex }),
+    CHECK_TARGET_MAPPINGS: (state: CheckTargetMappingsState) =>
+      Actions.checkTargetMappings({
+        sourceIndexMappings: state.sourceIndexMappings,
+        targetIndexMappings: state.targetIndexMappings,
+      }),
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
       Actions.updateAndPickupMappings({
         client,
@@ -138,6 +147,13 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         taskId: state.updateTargetMappingsTaskId,
         timeout: '60s',
       }),
+    UPDATE_TARGET_MAPPINGS_META: (state: UpdateTargetMappingsState) =>
+      Actions.updateTargetMappingsMeta({
+        client,
+        index: state.targetIndex,
+        meta: state.targetIndexMappings._meta,
+      }),
+    CHECK_VERSION_INDEX_READY_ACTIONS: () => Actions.noop,
     OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: (state: OutdatedDocumentsSearchOpenPit) =>
       Actions.openPit({ client, index: state.targetIndex }),
     OUTDATED_DOCUMENTS_SEARCH_READ: (state: OutdatedDocumentsSearchRead) =>

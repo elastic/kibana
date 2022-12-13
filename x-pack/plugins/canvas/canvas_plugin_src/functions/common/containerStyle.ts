@@ -6,7 +6,7 @@
  */
 
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { isValidUrl } from '@kbn/presentation-util-plugin/common/lib';
+import { isValidUrl } from '@kbn/presentation-util-plugin/common';
 import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 

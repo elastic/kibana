@@ -15,7 +15,6 @@ export type QueryPointEventAnnotationArgs = {
   timeField?: string;
   extraFields?: string[];
   textField?: string;
-  ignoreGlobalFilters?: boolean;
 } & PointStyleProps;
 
 export type QueryPointEventAnnotationOutput = QueryPointEventAnnotationArgs & {

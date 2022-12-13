@@ -72,6 +72,7 @@ import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash } from './utils';
 import { SearchAbortController } from './search_abort_controller';
+import { SearchConfigSchema } from '../../../config';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
@@ -83,6 +84,7 @@ export interface SearchInterceptorDeps {
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
   theme: ThemeServiceSetup;
+  searchConfig: SearchConfigSchema;
 }
 
 const MAX_CACHE_ITEMS = 50;
@@ -302,6 +304,7 @@ export class SearchInterceptor {
     });
 
     return pollSearch(search, cancel, {
+      pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
       ...options,
       abortSignal: searchAbortController.getSignal(),
     }).pipe(

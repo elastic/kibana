@@ -38,7 +38,7 @@ const redirectToJobsManagementPage = jest.fn(() => Promise.resolve());
 
 describe('useResolver', () => {
   afterEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
   afterEach(() => {
     jest.advanceTimersByTime(0);

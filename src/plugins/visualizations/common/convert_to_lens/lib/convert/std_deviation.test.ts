@@ -22,6 +22,7 @@ jest.mock('../utils', () => ({
 }));
 
 describe('convertToStdDeviationFormulaColumns', () => {
+  const visType = 'heatmap';
   const dataView = stubLogstashDataView;
   const stdLowerAggId = 'agg-id.std_lower';
   const stdUpperAggId = 'agg-id.std_upper';
@@ -51,22 +52,25 @@ describe('convertToStdDeviationFormulaColumns', () => {
 
   test.each<
     [string, Parameters<typeof convertToStdDeviationFormulaColumns>, Partial<FormulaColumn> | null]
-  >([['null if no aggId is passed', [{ agg: { ...agg, aggId: undefined }, dataView }], null]])(
-    'should return %s',
-    (_, input, expected) => {
-      if (expected === null) {
-        expect(convertToStdDeviationFormulaColumns(...input)).toBeNull();
-      } else {
-        expect(convertToStdDeviationFormulaColumns(...input)).toEqual(
-          expect.objectContaining(expected)
-        );
-      }
+  >([
+    [
+      'null if no aggId is passed',
+      [{ agg: { ...agg, aggId: undefined }, dataView, visType }],
+      null,
+    ],
+  ])('should return %s', (_, input, expected) => {
+    if (expected === null) {
+      expect(convertToStdDeviationFormulaColumns(...input)).toBeNull();
+    } else {
+      expect(convertToStdDeviationFormulaColumns(...input)).toEqual(
+        expect.objectContaining(expected)
+      );
     }
-  );
+  });
 
   test('should return null if field is not present', () => {
     mockGetFieldNameFromField.mockReturnValue(null);
-    expect(convertToStdDeviationFormulaColumns({ agg, dataView })).toBeNull();
+    expect(convertToStdDeviationFormulaColumns({ agg, dataView, visType })).toBeNull();
     expect(mockGetFieldNameFromField).toBeCalledTimes(1);
     expect(dataView.getFieldByName).toBeCalledTimes(0);
   });
@@ -74,14 +78,14 @@ describe('convertToStdDeviationFormulaColumns', () => {
   test("should return null if field doesn't exist in dataView", () => {
     mockGetFieldByName.mockReturnValue(null);
     dataView.getFieldByName = mockGetFieldByName;
-    expect(convertToStdDeviationFormulaColumns({ agg, dataView })).toBeNull();
+    expect(convertToStdDeviationFormulaColumns({ agg, dataView, visType })).toBeNull();
     expect(mockGetFieldNameFromField).toBeCalledTimes(1);
     expect(dataView.getFieldByName).toBeCalledTimes(1);
   });
 
   test('should return null if agg id is invalid', () => {
     expect(
-      convertToStdDeviationFormulaColumns({ agg: { ...agg, aggId: 'some-id' }, dataView })
+      convertToStdDeviationFormulaColumns({ agg: { ...agg, aggId: 'some-id' }, dataView, visType })
     ).toBeNull();
     expect(mockGetFieldNameFromField).toBeCalledTimes(1);
     expect(dataView.getFieldByName).toBeCalledTimes(1);
@@ -89,7 +93,11 @@ describe('convertToStdDeviationFormulaColumns', () => {
 
   test('should return formula column for lower std deviation', () => {
     expect(
-      convertToStdDeviationFormulaColumns({ agg: { ...agg, aggId: stdLowerAggId }, dataView })
+      convertToStdDeviationFormulaColumns({
+        agg: { ...agg, aggId: stdLowerAggId },
+        dataView,
+        visType,
+      })
     ).toEqual(
       expect.objectContaining({
         label,
@@ -102,7 +110,11 @@ describe('convertToStdDeviationFormulaColumns', () => {
 
   test('should return formula column for upper std deviation', () => {
     expect(
-      convertToStdDeviationFormulaColumns({ agg: { ...agg, aggId: stdUpperAggId }, dataView })
+      convertToStdDeviationFormulaColumns({
+        agg: { ...agg, aggId: stdUpperAggId },
+        dataView,
+        visType,
+      })
     ).toEqual(
       expect.objectContaining({
         label,

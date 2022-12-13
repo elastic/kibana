@@ -15,7 +15,6 @@ import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types'
 import {
   hasAreaLayer,
   hasBarLayer,
-  hasHistogramBarLayer,
   validateExtents,
   validateFillOpacity,
   validateMarkSizeRatioLimits,
@@ -112,9 +111,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
 
-  const hasNotHistogramBars = !hasHistogramBarLayer(dataLayers);
-
-  validateValueLabels(args.valueLabels, hasBar, hasNotHistogramBars);
+  validateValueLabels(args.valueLabels, hasBar);
   validateMarkSizeRatioWithAccessor(args.markSizeRatio, dataLayers[0].markSizeAccessor);
   validateMarkSizeRatioLimits(args.markSizeRatio);
   validateLineWidthForChartType(lineWidth, args.seriesType);

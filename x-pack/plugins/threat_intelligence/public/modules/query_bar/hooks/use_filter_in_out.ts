@@ -12,8 +12,8 @@ import {
   getIndicatorFieldAndValue,
   useIndicatorsFiltersContext,
 } from '../../indicators';
-import { FilterIn, FilterOut, updateFiltersArray } from '../utils';
 import { Indicator } from '../../../../common/types/indicator';
+import { FilterIn, FilterOut, updateFiltersArray } from '../utils';
 
 export interface UseFilterInParam {
   /**

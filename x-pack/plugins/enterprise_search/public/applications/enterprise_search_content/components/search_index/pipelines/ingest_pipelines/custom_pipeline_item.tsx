@@ -56,15 +56,17 @@ export const CustomPipelineItem: React.FC<{
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.processorsDescription',
-                {
-                  defaultMessage: '{processorsCount} Processors',
-                  values: { processorsCount },
-                }
-              )}
-            </EuiBadge>
+            <span>
+              <EuiBadge color="hollow">
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.processorsDescription',
+                  {
+                    defaultMessage: '{processorsCount} Processors',
+                    values: { processorsCount },
+                  }
+                )}
+              </EuiBadge>
+            </span>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

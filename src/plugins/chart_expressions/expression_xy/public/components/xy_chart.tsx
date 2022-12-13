@@ -275,8 +275,10 @@ export function XYChart({
     [uiState]
   );
 
+  // Exclude the reference layers from the cursor update
+  const cursorSyncLayers = filteredLayers.filter(isDataLayer);
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
-    datatables: filteredLayers.map(({ table }) => table),
+    datatables: cursorSyncLayers.map(({ table }) => table),
   });
 
   const onRenderChange = useCallback(
@@ -523,12 +525,7 @@ export function XYChart({
     };
   };
 
-  const shouldShowValueLabels = uiState
-    ? valueLabels !== ValueLabelModes.HIDE
-    : // No stacked bar charts
-      dataLayers.every((layer) => !layer.isStacked) &&
-      // No histogram charts
-      !isHistogramViz;
+  const shouldShowValueLabels = !uiState || valueLabels !== ValueLabelModes.HIDE;
 
   const valueLabelsStyling =
     shouldShowValueLabels &&

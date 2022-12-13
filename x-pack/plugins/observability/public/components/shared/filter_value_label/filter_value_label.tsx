@@ -20,7 +20,7 @@ export function buildFilterLabel({
   negate,
 }: {
   label: string;
-  value: string | string[];
+  value: string | Array<string | number>;
   negate: boolean;
   field: string;
   dataView: DataView;
@@ -46,10 +46,14 @@ export function buildFilterLabel({
 export interface FilterValueLabelProps {
   field: string;
   label: string;
-  value: string | string[];
+  value: string | Array<string | number>;
   negate: boolean;
-  removeFilter: (field: string, value: string | string[], notVal: boolean) => void;
-  invertFilter: (val: { field: string; value: string | string[]; negate: boolean }) => void;
+  removeFilter: (field: string, value: string | Array<string | number>, notVal: boolean) => void;
+  invertFilter: (val: {
+    field: string;
+    value: string | Array<string | number>;
+    negate: boolean;
+  }) => void;
   dataView: DataView;
   allowExclusion?: boolean;
 }

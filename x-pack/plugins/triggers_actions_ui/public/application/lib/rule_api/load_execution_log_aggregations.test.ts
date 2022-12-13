@@ -47,7 +47,8 @@ describe('loadExecutionLogAggregations', () => {
       id: 'test-id',
       dateStart: '2022-03-23T16:17:53.482Z',
       dateEnd: '2022-03-23T16:17:53.482Z',
-      outcomeFilter: ['success'],
+      outcomeFilter: ['success', 'warning'],
+      message: 'test-message',
       perPage: 10,
       page: 0,
       sort: [sortTimestamp],
@@ -84,7 +85,7 @@ describe('loadExecutionLogAggregations', () => {
           "query": Object {
             "date_end": "2022-03-23T16:17:53.482Z",
             "date_start": "2022-03-23T16:17:53.482Z",
-            "filter": "kibana.alerting.outcome:success OR (event.outcome: success AND NOT kibana.alerting.outcome:*)",
+            "filter": "(message: \\"test-message\\" OR error.message: \\"test-message\\") and (kibana.alerting.outcome:success OR (event.outcome: success AND NOT kibana.alerting.outcome:*) OR kibana.alerting.outcome: warning)",
             "page": 1,
             "per_page": 10,
             "sort": "[{\\"timestamp\\":{\\"order\\":\\"asc\\"}}]",

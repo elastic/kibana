@@ -52,20 +52,7 @@ exports[`WithSolutionNav renders wrapped component 1`] = `
   }
   pageSideBarProps={
     Object {
-      "className": "kbnStickyMenu",
-      "css": Object {
-        "map": undefined,
-        "name": "sx7fqw",
-        "next": undefined,
-        "styles": "
-    flex: 0 1 0%;
-    overflow: hidden;
-    @media screen and (prefers-reduced-motion: no-preference) {
-      transition: min-width 150ms cubic-bezier(.694, .0482, .335, 1);
-    }
-  ",
-        "toString": [Function],
-      },
+      "className": "css-c34ez9",
       "minWidth": undefined,
       "paddingSize": "none",
     }
@@ -125,20 +112,7 @@ exports[`WithSolutionNav with children 1`] = `
   }
   pageSideBarProps={
     Object {
-      "className": "kbnStickyMenu",
-      "css": Object {
-        "map": undefined,
-        "name": "sx7fqw",
-        "next": undefined,
-        "styles": "
-    flex: 0 1 0%;
-    overflow: hidden;
-    @media screen and (prefers-reduced-motion: no-preference) {
-      transition: min-width 150ms cubic-bezier(.694, .0482, .335, 1);
-    }
-  ",
-        "toString": [Function],
-      },
+      "className": "css-c34ez9",
       "minWidth": undefined,
       "paddingSize": "none",
     }

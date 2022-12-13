@@ -22,6 +22,7 @@ import {
   RuleExecutorServices,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 
 import {
   RuleParams,
@@ -47,7 +48,7 @@ import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_seconds';
 import { InfraBackendLibs } from '../../infra_types';
-import { UNGROUPED_FACTORY_KEY } from '../common/utils';
+import { getAlertDetailsUrl, getGroupByObject, UNGROUPED_FACTORY_KEY } from '../common/utils';
 import {
   getReasonMessageForGroupedCountAlert,
   getReasonMessageForGroupedRatioAlert,
@@ -101,13 +102,14 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     LogThresholdAlertState,
     LogThresholdAlertContext,
     LogThresholdActionGroups
-  >(async ({ services, params, startedAt }) => {
+  >(async ({ services, params, spaceId, startedAt }) => {
     const {
       alertFactory: { alertLimit },
       alertWithLifecycle,
       savedObjectsClient,
       scopedClusterClient,
       getAlertStartedDate,
+      getAlertUuid,
     } = services;
     const { basePath } = libs;
 
@@ -124,17 +126,30 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       if (actions && actions.length > 0) {
         const indexedStartedAt = getAlertStartedDate(id) ?? startedAt.toISOString();
         const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
-        const viewInAppUrl = basePath.publicBaseUrl
-          ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
-          : relativeViewInAppUrl;
+
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          relativeViewInAppUrl
+        );
 
         const sharedContext = {
           timestamp: startedAt.toISOString(),
           viewInAppUrl,
         };
+
         actions.forEach((actionSet) => {
           const { actionGroup, context } = actionSet;
-          alert.scheduleActions(actionGroup, { ...sharedContext, ...context });
+
+          const alertInstanceId = (context.group || id) as string;
+
+          const alertUuid = getAlertUuid(alertInstanceId);
+
+          alert.scheduleActions(actionGroup, {
+            ...sharedContext,
+            ...context,
+            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+          });
         });
       }
 
@@ -179,13 +194,15 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
 
       const { getRecoveredAlerts } = services.alertFactory.done();
       const recoveredAlerts = getRecoveredAlerts();
-      processRecoveredAlerts(
-        recoveredAlerts,
-        startedAt,
-        getAlertStartedDate,
+      processRecoveredAlerts({
         basePath,
-        validatedParams
-      );
+        getAlertStartedDate,
+        getAlertUuid,
+        recoveredAlerts,
+        spaceId,
+        startedAt,
+        validatedParams,
+      });
     } catch (e) {
       throw new Error(e);
     }
@@ -466,6 +483,12 @@ export const processGroupByResults = (
         timeSize,
         timeUnit
       );
+
+      const groupByKeysObjectMapping = getGroupByObject(
+        params.groupBy,
+        new Set<string>(groupResults.map((groupResult) => groupResult.name))
+      );
+
       const actions = [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -473,6 +496,7 @@ export const processGroupByResults = (
             matchingDocuments: documentCount,
             conditions: createConditionsMessageForCriteria(criteria),
             group: group.name,
+            groupByKeys: groupByKeysObjectMapping[group.name],
             isRatio: false,
             reason: reasonMessage,
           },
@@ -525,6 +549,12 @@ export const processGroupByRatioResults = (
         timeSize,
         timeUnit
       );
+
+      const groupByKeysObjectMapping = getGroupByObject(
+        params.groupBy,
+        new Set<string>(numeratorGroupResults.map((groupResult) => groupResult.name))
+      );
+
       const actions = [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -533,6 +563,7 @@ export const processGroupByRatioResults = (
             numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
             denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
             group: numeratorGroup.name,
+            groupByKeys: groupByKeysObjectMapping[numeratorGroup.name],
             isRatio: true,
             reason: reasonMessage,
           },
@@ -876,44 +907,61 @@ type LogThresholdRecoveredAlert = {
   getId: () => string;
 } & LogThresholdAlert;
 
-const processRecoveredAlerts = (
-  recoveredAlerts: LogThresholdRecoveredAlert[],
-  startedAt: Date,
-  getAlertStartedDate: (alertId: string) => string | null,
-  basePath: IBasePath,
-  validatedParams: RuleParams
-) => {
+const processRecoveredAlerts = ({
+  basePath,
+  getAlertStartedDate,
+  getAlertUuid,
+  recoveredAlerts,
+  spaceId,
+  startedAt,
+  validatedParams,
+}: {
+  basePath: IBasePath;
+  getAlertStartedDate: (alertId: string) => string | null;
+  getAlertUuid: (alertId: string) => string | null;
+  recoveredAlerts: LogThresholdRecoveredAlert[];
+  spaceId: string;
+  startedAt: Date;
+  validatedParams: RuleParams;
+}) => {
+  const groupByKeysObjectForRecovered = getGroupByObject(
+    validatedParams.groupBy,
+    new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.getId()))
+  );
+
   for (const alert of recoveredAlerts) {
     const recoveredAlertId = alert.getId();
     const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
     const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
-    const viewInAppUrl = basePath.publicBaseUrl
-      ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
-      : relativeViewInAppUrl;
+    const alertUuid = getAlertUuid(recoveredAlertId);
+
+    const viewInAppUrl = addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
 
     const baseContext = {
+      alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
       group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
+      groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
       timestamp: startedAt.toISOString(),
       viewInAppUrl,
     };
 
     if (isRatioRuleParams(validatedParams)) {
       const { criteria } = validatedParams;
-      const context = {
+
+      alert.setContext({
         ...baseContext,
         numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
         denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
         isRatio: true,
-      };
-      alert.setContext(context);
+      });
     } else {
       const { criteria } = validatedParams;
-      const context = {
+
+      alert.setContext({
         ...baseContext,
         conditions: createConditionsMessageForCriteria(criteria),
         isRatio: false,
-      };
-      alert.setContext(context);
+      });
     }
   }
 };

@@ -6,17 +6,43 @@
  */
 
 import { useFetcher } from '@kbn/observability-plugin/public';
-import { SyntheticsJourneyApiResponse } from '../../../../../../common/runtime_types';
+import { useParams } from 'react-router-dom';
+import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
+import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../../../common/runtime_types';
 import { fetchJourneySteps } from '../../../state';
 
-export const useJourneySteps = (checkGroup: string | undefined) => {
+export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
+  const { stepIndex } = useParams<{ stepIndex: string }>();
+  const { checkGroupId: urlCheckGroup } = useParams<{ checkGroupId: string }>();
+
+  const checkGroupId = checkGroup ?? urlCheckGroup;
+
   const { data, loading } = useFetcher(() => {
-    if (!checkGroup) {
+    if (!checkGroupId) {
       return Promise.resolve(null);
     }
 
-    return fetchJourneySteps({ checkGroup });
-  }, [checkGroup]);
+    return fetchJourneySteps({ checkGroup: checkGroupId });
+  }, [checkGroupId, lastRefresh]);
 
-  return { data: data as SyntheticsJourneyApiResponse, loading: loading ?? false };
+  const isFailed =
+    data?.steps.some(
+      (step) =>
+        step.synthetics?.step?.status === 'failed' || step.synthetics?.step?.status === 'skipped'
+    ) ?? false;
+
+  const stepEnds: JourneyStep[] = (data?.steps ?? []).filter(isStepEnd);
+
+  const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
+
+  return {
+    data: data as SyntheticsJourneyApiResponse,
+    loading: loading ?? false,
+    isFailed,
+    stepEnds,
+    stepLabels,
+    currentStep: stepIndex
+      ? data?.steps.find((step) => step.synthetics?.step?.index === Number(stepIndex))
+      : undefined,
+  };
 };

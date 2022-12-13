@@ -9,7 +9,7 @@
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
-import { getFormulaEquivalent } from './metrics_helpers';
+import { getFormulaEquivalent, getTimeScale } from './metrics_helpers';
 
 const getAdditionalArgs = (metric: Metric) => {
   if (metric.type === TSVB_METRIC_TYPES.POSITIVE_ONLY) {
@@ -54,5 +54,6 @@ export const getPipelineSeriesFormula = (
   }
   const additionalArgs = getAdditionalArgs(metric);
 
-  return `${aggFormula}(${subFormula}${additionalArgs})`;
+  const formula = `${aggFormula}(${subFormula}${additionalArgs})`;
+  return metric.unit ? `normalize_by_unit(${formula}, unit='${getTimeScale(metric)}')` : formula;
 };

@@ -18,7 +18,7 @@ import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
 } from '../../common/utils/attachments';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import type {
   CaseStatuses,
   CommentRequest,
@@ -46,7 +46,7 @@ import {
   assertUnreachable,
 } from '../common/utils';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
-import type { ConstructQueryParams } from './types';
+import type { CasesFindQueryParams } from './types';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
@@ -322,6 +322,43 @@ export const buildRangeFilter = ({
   }
 };
 
+export const buildAssigneesFilter = ({
+  assignees,
+}: {
+  assignees: CasesFindQueryParams['assignees'];
+}): KueryNode | undefined => {
+  if (assignees === undefined) {
+    return;
+  }
+
+  const assigneesAsArray = Array.isArray(assignees) ? assignees : [assignees];
+
+  if (assigneesAsArray.length === 0) {
+    return;
+  }
+
+  const assigneesWithoutNone = assigneesAsArray.filter(
+    (assignee) => assignee !== NO_ASSIGNEES_FILTERING_KEYWORD
+  );
+  const hasNoneAssignee = assigneesAsArray.some(
+    (assignee) => assignee === NO_ASSIGNEES_FILTERING_KEYWORD
+  );
+
+  const assigneesFilter = assigneesWithoutNone.map((filter) =>
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, escapeKuery(filter))
+  );
+
+  if (!hasNoneAssignee) {
+    return nodeBuilder.or(assigneesFilter);
+  }
+
+  const filterCasesWithoutAssigneesKueryNode = fromKueryExpression(
+    `not ${CASE_SAVED_OBJECT}.attributes.assignees.uid: *`
+  );
+
+  return nodeBuilder.or([...assigneesFilter, filterCasesWithoutAssigneesKueryNode]);
+};
+
 export const constructQueryOptions = ({
   tags,
   reporters,
@@ -333,7 +370,7 @@ export const constructQueryOptions = ({
   from,
   to,
   assignees,
-}: ConstructQueryParams): SavedObjectFindOptionsKueryNode => {
+}: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
   const sortField = sortToSnake(sortByField);
@@ -342,11 +379,7 @@ export const constructQueryOptions = ({
   const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
   const severityFilter = severity != null ? addSeverityFilter({ severity }) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
-  const assigneesFilter = buildFilter({
-    filters: assignees,
-    field: 'assignees.uid',
-    operator: 'or',
-  });
+  const assigneesFilter = buildAssigneesFilter({ assignees });
 
   const filters = combineFilters([
     statusFilter,

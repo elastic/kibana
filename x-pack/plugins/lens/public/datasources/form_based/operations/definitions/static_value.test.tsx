@@ -32,6 +32,10 @@ jest.mock('lodash', () => {
 });
 
 const uiSettingsMock = {} as IUiSettingsClient;
+const dateRange = {
+  fromDate: '2022-03-17T08:25:00.000Z',
+  toDate: '2022-04-17T08:25:00.000Z',
+};
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
@@ -52,14 +56,6 @@ const defaultProps = {
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
   layerId: '1',
-  existingFields: {
-    my_index_pattern: {
-      timestamp: true,
-      bytes: true,
-      memory: true,
-      source: true,
-    },
-  },
 };
 
 describe('static_value', () => {
@@ -160,7 +156,8 @@ describe('static_value', () => {
         staticValueOperation.getErrorMessage!(
           getLayerWithStaticValue('23'),
           'col2',
-          createMockedIndexPattern()
+          createMockedIndexPattern(),
+          dateRange
         )
       ).toBeUndefined();
       // test for potential falsy value
@@ -168,7 +165,8 @@ describe('static_value', () => {
         staticValueOperation.getErrorMessage!(
           getLayerWithStaticValue('0'),
           'col2',
-          createMockedIndexPattern()
+          createMockedIndexPattern(),
+          dateRange
         )
       ).toBeUndefined();
     });
@@ -180,7 +178,8 @@ describe('static_value', () => {
           staticValueOperation.getErrorMessage!(
             getLayerWithStaticValue(value),
             'col2',
-            createMockedIndexPattern()
+            createMockedIndexPattern(),
+            dateRange
           )
         ).toEqual(expect.arrayContaining([expect.stringMatching('is not a valid number')]));
       }
@@ -191,7 +190,8 @@ describe('static_value', () => {
         staticValueOperation.getErrorMessage!(
           getLayerWithStaticValue(value),
           'col2',
-          createMockedIndexPattern()
+          createMockedIndexPattern(),
+          dateRange
         )
       ).toBe(undefined);
     });

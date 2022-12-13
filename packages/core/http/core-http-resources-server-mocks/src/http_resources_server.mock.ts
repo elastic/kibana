@@ -47,6 +47,7 @@ function createHttpResourcesResponseFactory() {
     renderAnonymousCoreApp: jest.fn(),
     renderHtml: jest.fn(),
     renderJs: jest.fn(),
+    renderCss: jest.fn(),
   };
 
   return {

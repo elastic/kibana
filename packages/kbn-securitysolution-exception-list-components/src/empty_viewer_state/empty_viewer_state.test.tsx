@@ -9,8 +9,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { EmptyViewerState } from './empty_viewer_state';
+import { EmptyViewerState } from '.';
 import { ListTypeText, ViewerStatus } from '../types';
+import * as i18n from '../translations';
 
 describe('EmptyViewerState', () => {
   it('it should render "error" with the default title and body', () => {
@@ -23,10 +24,10 @@ describe('EmptyViewerState', () => {
     );
 
     expect(wrapper.getByTestId('errorViewerState')).toBeTruthy();
-    expect(wrapper.getByTestId('errorTitle')).toHaveTextContent('Unable to load exception items');
-    expect(wrapper.getByTestId('errorBody')).toHaveTextContent(
-      'There was an error loading the exception items. Contact your administrator for help.'
+    expect(wrapper.getByTestId('errorTitle')).toHaveTextContent(
+      i18n.EMPTY_VIEWER_STATE_ERROR_TITLE
     );
+    expect(wrapper.getByTestId('errorBody')).toHaveTextContent(i18n.EMPTY_VIEWER_STATE_ERROR_BODY);
   });
   it('it should render "error" when sending the title and body props', () => {
     const wrapper = render(
@@ -65,9 +66,11 @@ describe('EmptyViewerState', () => {
 
     expect(wrapper.getByTestId('emptySearchViewerState')).toBeTruthy();
     expect(wrapper.getByTestId('emptySearchTitle')).toHaveTextContent(
-      'No results match your search criteria'
+      i18n.EMPTY_VIEWER_STATE_EMPTY_SEARCH_TITLE
     );
-    expect(wrapper.getByTestId('emptySearchBody')).toHaveTextContent('Try modifying your search');
+    expect(wrapper.getByTestId('emptySearchBody')).toHaveTextContent(
+      i18n.EMPTY_VIEWER_STATE_EMPTY_SEARCH_BODY
+    );
   });
   it('it should render empty search when sending title and body props', () => {
     const wrapper = render(
@@ -111,11 +114,11 @@ describe('EmptyViewerState', () => {
 
     const { getByTestId } = wrapper;
     expect(getByTestId('emptyViewerState')).toBeTruthy();
-    expect(getByTestId('emptyTitle')).toHaveTextContent('Add exceptions to this rule');
-    expect(getByTestId('emptyBody')).toHaveTextContent(
-      'There is no exception in your rule. Create your first rule exception.'
+    expect(getByTestId('emptyTitle')).toHaveTextContent(i18n.EMPTY_VIEWER_STATE_EMPTY_TITLE);
+    expect(getByTestId('emptyBody')).toHaveTextContent(i18n.EMPTY_VIEWER_STATE_EMPTY_BODY);
+    expect(getByTestId('emptyStateButton')).toHaveTextContent(
+      i18n.EMPTY_VIEWER_STATE_EMPTY_VIEWER_BUTTON('rule')
     );
-    expect(getByTestId('emptyStateButton')).toHaveTextContent('Create rule exception');
   });
   it('it should render no items screen with default title and body props and listType endPoint', () => {
     const wrapper = render(
@@ -129,10 +132,29 @@ describe('EmptyViewerState', () => {
 
     const { getByTestId } = wrapper;
     expect(getByTestId('emptyViewerState')).toBeTruthy();
-    expect(getByTestId('emptyTitle')).toHaveTextContent('Add exceptions to this rule');
-    expect(getByTestId('emptyBody')).toHaveTextContent(
-      'There is no exception in your rule. Create your first rule exception.'
+    expect(getByTestId('emptyTitle')).toHaveTextContent(i18n.EMPTY_VIEWER_STATE_EMPTY_TITLE);
+    expect(getByTestId('emptyBody')).toHaveTextContent(i18n.EMPTY_VIEWER_STATE_EMPTY_BODY);
+    expect(getByTestId('emptyStateButton')).toHaveTextContent(
+      i18n.EMPTY_VIEWER_STATE_EMPTY_VIEWER_BUTTON(ListTypeText.ENDPOINT)
     );
-    expect(getByTestId('emptyStateButton')).toHaveTextContent('Create endpoint exception');
+  });
+  it('it should render no items screen and disable the Create exception button if isReadOnly true', () => {
+    const wrapper = render(
+      <EmptyViewerState
+        isReadOnly={true}
+        viewerStatus={ViewerStatus.EMPTY}
+        onCreateExceptionListItem={jest.fn()}
+        listType={ListTypeText.ENDPOINT}
+      />
+    );
+
+    const { getByTestId } = wrapper;
+    expect(getByTestId('emptyViewerState')).toBeTruthy();
+    expect(getByTestId('emptyTitle')).toHaveTextContent(i18n.EMPTY_VIEWER_STATE_EMPTY_TITLE);
+    expect(getByTestId('emptyBody')).toHaveTextContent(i18n.EMPTY_VIEWER_STATE_EMPTY_BODY);
+    expect(getByTestId('emptyStateButton')).toHaveTextContent(
+      i18n.EMPTY_VIEWER_STATE_EMPTY_VIEWER_BUTTON(ListTypeText.ENDPOINT)
+    );
+    expect(getByTestId('emptyStateButton')).toBeDisabled();
   });
 });

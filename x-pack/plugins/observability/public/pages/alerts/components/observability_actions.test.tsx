@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ObservabilityActions, ObservabilityActionsProps } from './observability_actions';
 import { inventoryThresholdAlert } from '../../../rules/fixtures/example_alerts';
-import { RULE_DETAILS_PAGE_ID } from '../../rule_details/types';
+import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import { createObservabilityRuleTypeRegistryMock } from '../../../rules/observability_rule_type_registry_mock';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import * as pluginContext from '../../../hooks/use_plugin_context';
@@ -60,7 +60,6 @@ describe('ObservabilityActions component', () => {
       },
       data: inventoryThresholdAlert as unknown as TimelineNonEcsData[],
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      setEventsDeleted: jest.fn(),
       setFlyoutAlert: jest.fn(),
       id: pageId,
     };

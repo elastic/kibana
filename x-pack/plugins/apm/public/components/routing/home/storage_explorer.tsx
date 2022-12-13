@@ -18,6 +18,7 @@ import {
   indexLifecyclePhaseRt,
   IndexLifecyclePhaseSelectOption,
 } from '../../../../common/storage_explorer_types';
+import { getStorageExplorerFeedbackHref } from '../../app/storage_explorer/get_storage_explorer_links';
 
 export const storageExplorer = {
   '/storage-explorer': {
@@ -39,11 +40,11 @@ export const storageExplorer = {
               >
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="l">
-                    <h2>
+                    <h1>
                       {i18n.translate('xpack.apm.views.storageExplorer.title', {
                         defaultMessage: 'Storage explorer',
                       })}
-                    </h2>
+                    </h1>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -52,10 +53,7 @@ export const storageExplorer = {
               </EuiFlexGroup>
             ),
             rightSideItems: [
-              <EuiLink
-                href="https://ela.st/feedback-storage-explorer"
-                target="_blank"
-              >
+              <EuiLink href={getStorageExplorerFeedbackHref()} target="_blank">
                 {i18n.translate(
                   'xpack.apm.views.storageExplorer.giveFeedback',
                   {
