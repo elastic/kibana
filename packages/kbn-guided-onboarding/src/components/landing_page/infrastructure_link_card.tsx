@@ -60,7 +60,6 @@ export const InfrastructureLinkCard = ({
       <EuiFlexItem grow={false}>
         <EuiButton
           // Used for FS tracking
-          // TODO should be change this
           data-test-subj={`onboarding--linkCard--observability`}
           fill
           onClick={navigateToIntegrations}
