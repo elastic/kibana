@@ -79,53 +79,37 @@ $ curl "https://localhost:3000/"
 ```
 
 ## Local Testing
+
 ### Load up the local cluster with rules, alerts and connectors
+
 ```sh
 $ pushd MACHINE-LEARNING-QA-REPO
-$ ./gradlew :env-bootstrap:runSuite -Dsuite=rac100 -Dstack.es_port=9205 -Dstack.kibana_port=5605 -Dstack.username=elastic -Dstack.password=changeme 
+$ ./gradlew :env-bootstrap:runSuite -Dsuite=rac100 -Dstack.es_port=9205 -Dstack.kibana_port=5605 -Dstack.username=elastic -Dstack.password=changeme
 ```
+
 > In my case, this was using docker compose locally
 
 ## Cloud Testing
 
 per https://github.com/elastic/kibana/issues/147017
 
-### tre-1-gb-8.6 w/ Stack Monitoring
+### trez-8gb
 
-AWS us-east n. virginia
+elastic / PH5sRsuSsieD0sVDBXznC3hn
 
-elastic / AElnYXrxGNnZkzavNB8jdIpx
+> https://trez-8gb.kb.eastus2.staging.azure.foundit.no:9243/api/task_manager/_health
 
-cluster id:
-44859b6634fc4b86b16498bd22793446
-
-deployment id:
-95c359
-
-### tre-8-gb-8.6 w/ Stack Monitoring
-
-AWS europe central 1 Frankfurt
-
-elastic / WHkRXcj5kEqTHBN06pFoGFwC
-
-cluster id:
-76f3e1c2de9d4010940224e1aea0cd67
-
-### 1gb-az-us-east-2
-
-elastic / llgX7JNSc7lzy98dE6B7A6yG
-
-> https://trez-1gb.kb.eastus2.staging.azure.foundit.no:9243/api/task_manager/_health
+It does NOT have the `stats.runtime` stanza.
 
 ```json
 {
-  "id": "13517338-a7ce-4615-81e0-1702d130fa55",
-  "timestamp": "2022-12-13T11:07:48.954Z",
+  "id": "8c3c18ad-fb90-4ecc-bf65-abfd0f8ab146",
+  "timestamp": "2022-12-13T14:44:23.748Z",
   "status": "OK",
-  "last_update": "2022-12-13T11:07:47.051Z",
+  "last_update": "2022-12-13T14:44:15.556Z",
   "stats": {
     "configuration": {
-      "timestamp": "2022-12-13T11:05:12.966Z",
+      "timestamp": "2022-12-13T14:42:13.175Z",
       "value": {
         "request_capacity": 1000,
         "max_poll_inactivity_cycles": 10,
@@ -140,132 +124,8 @@ elastic / llgX7JNSc7lzy98dE6B7A6yG
       },
       "status": "OK"
     },
-    "runtime": {
-      "timestamp": "2022-12-13T11:07:47.051Z",
-      "value": {
-        "polling": {
-          "last_successful_poll": "2022-12-13T11:07:46.982Z",
-          "last_polling_delay": "2022-12-13T11:05:13.849Z",
-          "claim_duration": { "p50": 10, "p90": 49.5, "p95": 53, "p99": 55 },
-          "duration": { "p50": 114.5, "p90": 164, "p95": 209, "p99": 1217 },
-          "claim_conflicts": { "p50": 0, "p90": 0, "p95": 0, "p99": 0 },
-          "claim_mismatches": { "p50": 0, "p90": 0, "p95": 0, "p99": 0 },
-          "result_frequency_percent_as_number": {
-            "Failed": 0,
-            "NoAvailableWorkers": 0,
-            "NoTasksClaimed": 96,
-            "RanOutOfCapacity": 0,
-            "RunningAtCapacity": 0,
-            "PoolFilled": 4
-          },
-          "persistence": { "recurring": 97, "non_recurring": 3 }
-        },
-        "drift": { "p50": 3069, "p90": 160752.8, "p95": 165629.39999999997, "p99": 199820 },
-        "drift_by_type": {
-          "endpoint:user-artifact-packager": {
-            "p50": 2980,
-            "p90": 160745,
-            "p95": 160745,
-            "p99": 160745
-          },
-          "reports:monitor": { "p50": 3068, "p90": 3153, "p95": 42563.999999999854, "p99": 199820 },
-          "alerts_invalidate_api_keys": {
-            "p50": 166831,
-            "p90": 166831,
-            "p95": 166831,
-            "p99": 166831
-          },
-          "security:endpoint-diagnostics": {
-            "p50": 160823,
-            "p90": 160823,
-            "p95": 160823,
-            "p99": 160823
-          },
-          "dashboard_telemetry": { "p50": 5362, "p90": 5362, "p95": 5362, "p99": 5362 },
-          "ML:saved-objects-sync": { "p50": 4166, "p90": 4166, "p95": 4166, "p99": 4166 },
-          "UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects": {
-            "p50": 5170,
-            "p90": 5170,
-            "p95": 5170,
-            "p99": 5170
-          }
-        },
-        "load": { "p50": 10, "p90": 16.999999999999993, "p95": 30.99999999999998, "p99": 40 },
-        "execution": {
-          "duration": {
-            "endpoint:user-artifact-packager": { "p50": 8, "p90": 16, "p95": 16, "p99": 16 },
-            "reports:monitor": {
-              "p50": 6,
-              "p90": 7.900000000000002,
-              "p95": 14.79999999999999,
-              "p99": 26
-            },
-            "alerts_invalidate_api_keys": { "p50": 33, "p90": 33, "p95": 33, "p99": 33 },
-            "security:endpoint-diagnostics": { "p50": 535, "p90": 535, "p95": 535, "p99": 535 },
-            "dashboard_telemetry": { "p50": 604, "p90": 604, "p95": 604, "p99": 604 },
-            "ML:saved-objects-sync": { "p50": 996, "p90": 996, "p95": 996, "p99": 996 },
-            "UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects": {
-              "p50": 1195,
-              "p90": 1195,
-              "p95": 1195,
-              "p99": 1195
-            }
-          },
-          "duration_by_persistence": {
-            "recurring": {
-              "p50": 6,
-              "p90": 133.39999999999964,
-              "p95": 926.849999999999,
-              "p99": 1195
-            },
-            "non_recurring": { "p50": 604, "p90": 604, "p95": 604, "p99": 604 }
-          },
-          "persistence": { "recurring": 97, "non_recurring": 3, "ephemeral": 0 },
-          "result_frequency_percent_as_number": {
-            "endpoint:user-artifact-packager": {
-              "Success": 100,
-              "RetryScheduled": 0,
-              "Failed": 0,
-              "status": "OK"
-            },
-            "reports:monitor": { "Success": 100, "RetryScheduled": 0, "Failed": 0, "status": "OK" },
-            "alerts_invalidate_api_keys": {
-              "Success": 100,
-              "RetryScheduled": 0,
-              "Failed": 0,
-              "status": "OK"
-            },
-            "security:endpoint-diagnostics": {
-              "Success": 100,
-              "RetryScheduled": 0,
-              "Failed": 0,
-              "status": "OK"
-            },
-            "dashboard_telemetry": {
-              "Success": 100,
-              "RetryScheduled": 0,
-              "Failed": 0,
-              "status": "OK"
-            },
-            "ML:saved-objects-sync": {
-              "Success": 100,
-              "RetryScheduled": 0,
-              "Failed": 0,
-              "status": "OK"
-            },
-            "UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects": {
-              "Success": 100,
-              "RetryScheduled": 0,
-              "Failed": 0,
-              "status": "OK"
-            }
-          }
-        }
-      },
-      "status": "OK"
-    },
     "workload": {
-      "timestamp": "2022-12-13T11:07:13.867Z",
+      "timestamp": "2022-12-13T14:44:15.556Z",
       "value": {
         "count": 28,
         "task_types": {
@@ -321,272 +181,12 @@ elastic / llgX7JNSc7lzy98dE6B7A6yG
         "overdue": 0,
         "overdue_non_recurring": 0,
         "estimated_schedule_density": [
-          1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1,
           1, 1, 1, 1, 1, 1, 1, 1, 1, 1
         ],
         "capacity_requirements": { "per_minute": 21, "per_hour": 48, "per_day": 31 }
       },
       "status": "OK"
-    },
-    "capacity_estimation": {
-      "status": "OK",
-      "timestamp": "2022-12-13T11:07:48.954Z",
-      "value": {
-        "observed": {
-          "observed_kibana_instances": 1,
-          "max_throughput_per_minute_per_kibana": 200,
-          "max_throughput_per_minute": 200,
-          "minutes_to_drain_overdue": 0,
-          "avg_recurring_required_throughput_per_minute": 22,
-          "avg_recurring_required_throughput_per_minute_per_kibana": 22,
-          "avg_required_throughput_per_minute": 24,
-          "avg_required_throughput_per_minute_per_kibana": 24
-        },
-        "proposed": {
-          "provisioned_kibana": 1,
-          "min_required_kibana": 1,
-          "avg_recurring_required_throughput_per_minute_per_kibana": 22,
-          "avg_required_throughput_per_minute_per_kibana": 24
-        }
-      }
-    }
-  }
-}
-```
-
-### 8gb-az-us-east-2
-
-elastic / AtRD310pcvA95MwztZJcNH7L
-
-> https://trez-8-gb.kb.eastus2.staging.azure.foundit.no:9243/api/task_manager/_health
-
-```json
-{
-  "id": "0932ba54-722f-4b55-8d4f-6758654735ee",
-  "timestamp": "2022-12-13T11:10:24.385Z",
-  "status": "OK",
-  "last_update": "2022-12-13T11:10:21.639Z",
-  "stats": {
-    "configuration": {
-      "timestamp": "2022-12-13T11:04:59.584Z",
-      "value": {
-        "request_capacity": 1000,
-        "max_poll_inactivity_cycles": 10,
-        "monitored_aggregated_stats_refresh_rate": 60000,
-        "monitored_stats_running_average_window": 50,
-        "monitored_task_execution_thresholds": {
-          "default": { "error_threshold": 90, "warn_threshold": 80 },
-          "custom": {}
-        },
-        "poll_interval": 3000,
-        "max_workers": 10
-      },
-      "status": "OK"
-    },
-    "runtime": {
-      "timestamp": "2022-12-13T11:10:21.639Z",
-      "value": {
-        "polling": {
-          "last_successful_poll": "2022-12-13T11:10:21.639Z",
-          "last_polling_delay": "2022-12-13T11:05:00.588Z",
-          "claim_duration": { "p50": 12, "p90": 48, "p95": 52, "p99": 114 },
-          "duration": { "p50": 114.5, "p90": 138, "p95": 145, "p99": 199 },
-          "claim_conflicts": { "p50": 0, "p90": 0, "p95": 0, "p99": 0 },
-          "claim_mismatches": { "p50": 0, "p90": 0, "p95": 0, "p99": 0 },
-          "result_frequency_percent_as_number": {
-            "Failed": 0,
-            "NoAvailableWorkers": 0,
-            "NoTasksClaimed": 50,
-            "RanOutOfCapacity": 0,
-            "RunningAtCapacity": 0,
-            "PoolFilled": 50
-          },
-          "persistence": { "recurring": 100, "non_recurring": 0 }
-        },
-        "drift": { "p50": 3066, "p90": 3084.5, "p95": 3103, "p99": 3132 },
-        "drift_by_type": {
-          "reports:monitor": { "p50": 3067, "p90": 3087.5, "p95": 3121, "p99": 3132 },
-          "endpoint:user-artifact-packager": {
-            "p50": 2996,
-            "p90": 154831.20000000007,
-            "p95": 171699,
-            "p99": 171699
-          },
-          "alerts_invalidate_api_keys": {
-            "p50": 28883.5,
-            "p90": 54792,
-            "p95": 54792,
-            "p99": 54792
-          },
-          "security:endpoint-diagnostics": {
-            "p50": 27377.5,
-            "p90": 51780,
-            "p95": 51780,
-            "p99": 51780
-          },
-          "dashboard_telemetry": { "p50": 5465, "p90": 5465, "p95": 5465, "p99": 5465 },
-          "ML:saved-objects-sync": { "p50": 5679, "p90": 5679, "p95": 5679, "p99": 5679 },
-          "UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects": {
-            "p50": 3671.5,
-            "p90": 5679,
-            "p95": 5679,
-            "p99": 5679
-          }
-        },
-        "load": { "p50": 10, "p90": 10, "p95": 20, "p99": 30 },
-        "execution": {
-          "duration": {
-            "reports:monitor": { "p50": 6, "p90": 7, "p95": 8, "p99": 15 },
-            "endpoint:user-artifact-packager": {
-              "p50": 6.5,
-              "p90": 28.70000000000001,
-              "p95": 31,
-              "p99": 31
-            },
-            "alerts_invalidate_api_keys": { "p50": 24, "p90": 31, "p95": 31, "p99": 31 },
-            "security:endpoint-diagnostics": { "p50": 436, "p90": 436, "p95": 436, "p99": 436 },
-            "dashboard_telemetry": { "p50": 598, "p90": 598, "p95": 598, "p99": 598 },
-            "ML:saved-objects-sync": { "p50": 992, "p90": 992, "p95": 992, "p99": 992 },
-            "UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects": {
-              "p50": 587,
-              "p90": 993,
-              "p95": 993,
-              "p99": 993
-            }
-          },
-          "duration_by_persistence": {
-            "recurring": { "p50": 6, "p90": 9, "p95": 17, "p99": 436 },
-            "non_recurring": { "p50": 598, "p90": 598, "p95": 598, "p99": 598 }
-          },
-          "persistence": { "recurring": 100, "non_recurring": 0, "ephemeral": 0 },
-          "result_frequency_percent_as_number": {
-            "reports:monitor": { "Success": 100, "RetryScheduled": 0, "Failed": 0, "status": "OK" },
-            "endpoint:user-artifact-packager": {
-              "Success": 100,
-              "RetryScheduled": 0,
-              "Failed": 0,
-              "status": "OK"
-            },
-            "alerts_invalidate_api_keys": {
-              "Success": 100,
-              "RetryScheduled": 0,
-              "Failed": 0,
-              "status": "OK"
-            },
-            "security:endpoint-diagnostics": {
-              "Success": 100,
-              "RetryScheduled": 0,
-              "Failed": 0,
-              "status": "OK"
-            },
-            "dashboard_telemetry": {
-              "Success": 100,
-              "RetryScheduled": 0,
-              "Failed": 0,
-              "status": "OK"
-            },
-            "ML:saved-objects-sync": {
-              "Success": 100,
-              "RetryScheduled": 0,
-              "Failed": 0,
-              "status": "OK"
-            },
-            "UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects": {
-              "Success": 100,
-              "RetryScheduled": 0,
-              "Failed": 0,
-              "status": "OK"
-            }
-          }
-        }
-      },
-      "status": "OK"
-    },
-    "workload": {
-      "timestamp": "2022-12-13T11:10:00.608Z",
-      "value": {
-        "count": 28,
-        "task_types": {
-          "Fleet-Usage-Logger": { "count": 1, "status": { "idle": 1 } },
-          "Fleet-Usage-Sender": { "count": 1, "status": { "idle": 1 } },
-          "ML:saved-objects-sync": { "count": 1, "status": { "idle": 1 } },
-          "UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects": {
-            "count": 1,
-            "status": { "idle": 1 }
-          },
-          "actions_telemetry": { "count": 1, "status": { "idle": 1 } },
-          "alerting_health_check": { "count": 1, "status": { "idle": 1 } },
-          "alerting_telemetry": { "count": 1, "status": { "idle": 1 } },
-          "alerts_invalidate_api_keys": { "count": 1, "status": { "idle": 1 } },
-          "apm-telemetry-task": { "count": 1, "status": { "idle": 1 } },
-          "cases-telemetry-task": { "count": 1, "status": { "idle": 1 } },
-          "cleanup_failed_action_executions": { "count": 1, "status": { "idle": 1 } },
-          "dashboard_telemetry": { "count": 1, "status": { "idle": 1 } },
-          "endpoint:metadata-check-transforms-task": { "count": 1, "status": { "idle": 1 } },
-          "endpoint:user-artifact-packager": { "count": 1, "status": { "idle": 1 } },
-          "fleet:check-deleted-files-task": { "count": 1, "status": { "idle": 1 } },
-          "osquery:telemetry-configs": { "count": 1, "status": { "idle": 1 } },
-          "osquery:telemetry-packs": { "count": 1, "status": { "idle": 1 } },
-          "osquery:telemetry-saved-queries": { "count": 1, "status": { "idle": 1 } },
-          "reports:monitor": { "count": 1, "status": { "idle": 1 } },
-          "security:endpoint-diagnostics": { "count": 1, "status": { "idle": 1 } },
-          "security:endpoint-meta-telemetry": { "count": 1, "status": { "idle": 1 } },
-          "security:telemetry-configuration": { "count": 1, "status": { "idle": 1 } },
-          "security:telemetry-detection-rules": { "count": 1, "status": { "idle": 1 } },
-          "security:telemetry-filterlist-artifact": { "count": 1, "status": { "idle": 1 } },
-          "security:telemetry-lists": { "count": 1, "status": { "idle": 1 } },
-          "security:telemetry-prebuilt-rule-alerts": { "count": 1, "status": { "idle": 1 } },
-          "security:telemetry-timelines": { "count": 1, "status": { "idle": 1 } },
-          "session_cleanup": { "count": 1, "status": { "idle": 1 } }
-        },
-        "non_recurring": 28,
-        "owner_ids": 0,
-        "schedule": [
-          ["3s", 1],
-          ["60s", 1],
-          ["5m", 3],
-          ["15m", 1],
-          ["45m", 1],
-          ["1h", 4],
-          ["60m", 2],
-          ["3600s", 1],
-          ["2h", 1],
-          ["3h", 1],
-          ["720m", 2],
-          ["24h", 6],
-          ["1d", 1]
-        ],
-        "overdue": 1,
-        "overdue_non_recurring": 1,
-        "estimated_schedule_density": [
-          2, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        ],
-        "capacity_requirements": { "per_minute": 21, "per_hour": 48, "per_day": 31 }
-      },
-      "status": "OK"
-    },
-    "capacity_estimation": {
-      "status": "OK",
-      "timestamp": "2022-12-13T11:10:24.385Z",
-      "value": {
-        "observed": {
-          "observed_kibana_instances": 1,
-          "max_throughput_per_minute_per_kibana": 200,
-          "max_throughput_per_minute": 200,
-          "minutes_to_drain_overdue": 1,
-          "avg_recurring_required_throughput_per_minute": 22,
-          "avg_recurring_required_throughput_per_minute_per_kibana": 22,
-          "avg_required_throughput_per_minute": 22,
-          "avg_required_throughput_per_minute_per_kibana": 22
-        },
-        "proposed": {
-          "provisioned_kibana": 1,
-          "min_required_kibana": 1,
-          "avg_recurring_required_throughput_per_minute_per_kibana": 22,
-          "avg_required_throughput_per_minute_per_kibana": 22
-        }
-      }
     }
   }
 }
