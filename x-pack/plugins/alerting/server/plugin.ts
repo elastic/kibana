@@ -243,7 +243,9 @@ export class AlertingPlugin {
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
     });
-    this.alertsService!.initialize();
+    this.alertsService!.initialize().catch((err) => {
+      this.logger.error(`Error initializing alert resources! - ${err.message}`);
+    });
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {

@@ -75,25 +75,22 @@ export class AlertsService implements IAlertsService {
     this.initialized = false;
   }
 
-  public initialize() {
+  public async initialize() {
     // Only initialize once
     if (this.initialized) return;
     this.initialized = true;
 
     this.options.logger.debug(`Initializing resources for AlertsService`);
 
-    // Using setImmediate to call async function but run it immediately
-    setImmediate(async () => {
-      const esClient = await this.options.elasticsearchClientPromise;
+    const esClient = await this.options.elasticsearchClientPromise;
 
-      await this.installWithTimeoutAndRetry(esClient, this.createOrUpdateIlmPolicy.bind(this));
-      await this.installWithTimeoutAndRetry(
-        esClient,
-        this.createOrUpdateComponentTemplates.bind(this)
-      );
-      await this.installWithTimeoutAndRetry(esClient, this.createOrUpdateIndexTemplate.bind(this));
-      await this.installWithTimeoutAndRetry(esClient, this.createConcreteWriteIndex.bind(this));
-    });
+    await this.installWithTimeoutAndRetry(esClient, this.createOrUpdateIlmPolicy.bind(this));
+    await this.installWithTimeoutAndRetry(
+      esClient,
+      this.createOrUpdateComponentTemplates.bind(this)
+    );
+    await this.installWithTimeoutAndRetry(esClient, this.createOrUpdateIndexTemplate.bind(this));
+    await this.installWithTimeoutAndRetry(esClient, this.createConcreteWriteIndex.bind(this));
   }
 
   /**
@@ -184,19 +181,30 @@ export class AlertsService implements IAlertsService {
       },
     };
 
-    // Simulate the index template to proactively identify any issues with the mapping
-    const simulateResponse = await esClient.indices.simulateTemplate(indexTemplate);
-    const mappings: MappingTypeMapping = simulateResponse.template.mappings;
+    let mappings: MappingTypeMapping = {};
+    try {
+      // Simulate the index template to proactively identify any issues with the mapping
+      const simulateResponse = await esClient.indices.simulateTemplate(indexTemplate);
+      mappings = simulateResponse.template.mappings;
+    } catch (err) {
+      this.options.logger.error(
+        `Failed to simulate index template mappings for ${INDEX_TEMPLATE_NAME}; not applying mappings - ${err.message}`
+      );
+      return;
+    }
 
     if (isEmpty(mappings)) {
       throw new Error(
-        'No mappings would be generated for this index, possibly due to failed/misconfigured bootstrapping'
+        `No mappings would be generated for ${INDEX_TEMPLATE_NAME}, possibly due to failed/misconfigured bootstrapping`
       );
     }
+
     try {
       await esClient.indices.putIndexTemplate(indexTemplate);
     } catch (err) {
-      this.options.logger.error(`Error installing index template - ${err.message}`);
+      this.options.logger.error(
+        `Error installing index template ${INDEX_TEMPLATE_NAME} - ${err.message}`
+      );
       throw err;
     }
   }
