@@ -7,7 +7,7 @@
 
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
-import { NetworkDetailsRouteType } from '../../../network/pages/details/types';
+import { NetworkDetailsRouteType } from '../../../explore/network/pages/details/types';
 
 import { appendSearch } from './helpers';
 
