@@ -37,7 +37,7 @@ export function SlosPage() {
       pageHeader={{
         pageTitle: SLOS_PAGE_TITLE,
         rightSideItems: [],
-        bottomBorder: true,
+        bottomBorder: false,
       }}
       data-test-subj="slosPage"
     >

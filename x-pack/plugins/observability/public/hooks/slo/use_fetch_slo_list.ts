@@ -21,6 +21,7 @@ const EMPTY_LIST: SLOList = {
 
 interface SLOListParams {
   name?: string;
+  page?: number;
 }
 
 export interface UseFetchSloListResponse {
@@ -31,14 +32,18 @@ export interface UseFetchSloListResponse {
 export function useFetchSloList({
   name,
   refetch,
+  page,
 }: {
   refetch: boolean;
   name?: string;
+  page?: number;
 }): UseFetchSloListResponse {
   const [sloList, setSloList] = useState(EMPTY_LIST);
-  const params: SLOListParams = useMemo(() => ({ name }), [name]);
+
+  const params: SLOListParams = useMemo(() => ({ name, page }), [name, page]);
   const shouldExecuteApiCall = useCallback(
-    (apiCallParams: SLOListParams) => apiCallParams.name === params.name || refetch,
+    (apiCallParams: SLOListParams) =>
+      apiCallParams.name === params.name || apiCallParams.page === params.page || refetch,
     [params, refetch]
   );
 
@@ -64,6 +69,7 @@ const fetchSloList = async (
   try {
     const response = await http.get<Record<string, unknown>>(`/api/observability/slos`, {
       query: {
+        ...(params.page && { page: params.page }),
         ...(params.name && { name: params.name }),
       },
       signal: abortController.signal,
@@ -84,7 +90,7 @@ function toSLOList(response: Record<string, unknown>): SLOList {
   }
 
   return {
-    results: response.results.map((result) => toSLO(result)),
+    results: response.results.map(toSLO),
     page: Number(response.page),
     perPage: Number(response.per_page),
     total: Number(response.total),
