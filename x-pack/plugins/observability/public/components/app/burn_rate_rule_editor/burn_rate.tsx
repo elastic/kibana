@@ -10,12 +10,13 @@ import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 
 interface Props {
+  initialBurnRate?: number;
   maxBurnRate: number;
   onChange: (burnRate: number) => void;
 }
 
-export function BurnRate({ onChange, maxBurnRate }: Props) {
-  const [burnRate, setBurnRate] = useState<number>(1);
+export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate }: Props) {
+  const [burnRate, setBurnRate] = useState<number>(initialBurnRate);
   const [burnRateError, setBurnRateError] = useState<string | undefined>(undefined);
 
   useEffect(() => {

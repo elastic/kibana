@@ -14,7 +14,7 @@ import { BurnRate } from './burn_rate';
 
 describe('BurnRate', () => {
   it('shows error when entered burn rate exceed max burn rate', () => {
-    render(<BurnRate onChange={() => {}} maxBurnRate={20} />);
+    render(<BurnRate initialBurnRate={1} onChange={() => {}} maxBurnRate={20} />);
 
     userEvent.type(screen.getByTestId('burnRate'), '1441', { delay: 0 });
 
