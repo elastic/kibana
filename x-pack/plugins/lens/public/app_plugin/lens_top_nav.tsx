@@ -58,6 +58,7 @@ function getLensTopNavConfig(options: {
   isSaveable: boolean;
   showReplaceInDashboard: boolean;
   showReplaceInCanvas: boolean;
+  contextFromEmbeddable?: boolean;
 }): TopNavMenuData[] {
   const {
     actions,
@@ -73,6 +74,7 @@ function getLensTopNavConfig(options: {
     isSaveable,
     showReplaceInDashboard,
     showReplaceInCanvas,
+    contextFromEmbeddable,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -196,11 +198,15 @@ function getLensTopNavConfig(options: {
 
   if (showSaveAndReturn) {
     topNavMenu.push({
-      label: i18n.translate('xpack.lens.app.saveAndReturn', {
-        defaultMessage: 'Save and return',
-      }),
+      label: contextFromEmbeddable
+        ? i18n.translate('xpack.lens.app.saveAndReplace', {
+            defaultMessage: 'Save and replace',
+          })
+        : i18n.translate('xpack.lens.app.saveAndReturn', {
+            defaultMessage: 'Save and return',
+          }),
       emphasize: true,
-      iconType: 'checkInCircleFilled',
+      iconType: contextFromEmbeddable ? 'save' : 'checkInCircleFilled',
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
       disableButton: !isSaveable,
@@ -501,6 +507,8 @@ export const LensTopNavMenu = ({
     const showReplaceInCanvas =
       initialContext?.originatingApp === 'canvas' &&
       !(initialInput as LensByReferenceInput)?.savedObjectId;
+    const contextFromEmbeddable =
+      initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
     const baseMenuEntries = getLensTopNavConfig({
       showSaveAndReturn:
         !(showReplaceInDashboard || showReplaceInCanvas) &&
@@ -521,6 +529,7 @@ export const LensTopNavMenu = ({
       contextOriginatingApp,
       showReplaceInDashboard,
       showReplaceInCanvas,
+      contextFromEmbeddable,
       tooltips: {
         showExportWarning: () => {
           if (activeData) {

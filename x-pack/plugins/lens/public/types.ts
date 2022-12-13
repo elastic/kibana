@@ -251,6 +251,7 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   searchQuery?: Query;
   searchFilters?: Filter[];
   title?: string;
+  visTypeTitle?: string;
   isEmbeddable?: boolean;
 } & NavigateToLensContext<T>;
 

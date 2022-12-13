@@ -250,10 +250,17 @@ export function App({
         ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'Edit visualization' })
         : persistedDoc.title;
     }
-    if (!persistedDoc?.title && initialContext && 'title' in initialContext) {
+    if (
+      !persistedDoc?.title &&
+      initialContext &&
+      'isEmbeddable' in initialContext &&
+      initialContext.isEmbeddable
+    ) {
       currentDocTitle = i18n.translate('xpack.lens.breadcrumbsEditInLensFromDashboard', {
-        defaultMessage: 'Converting {title}',
-        values: { title: initialContext.title },
+        defaultMessage: 'Converting {title} visualization',
+        values: {
+          title: initialContext.title ? `"${initialContext.title}"` : initialContext.visTypeTitle,
+        },
       });
     }
     breadcrumbs.push({ text: currentDocTitle });

@@ -77,17 +77,11 @@ export class EditInLensAction implements Action<EditInLensContext> {
       const parentSearchSource = vis.data.searchSource?.getParent();
       const searchFilters = parentSearchSource?.getField('filter');
       const searchQuery = parentSearchSource?.getField('query');
+      const title = vis.title || embeddable.getOutput().title;
       const updatedWithMeta = {
         ...navigateToLensConfig,
-        title:
-          vis.title ||
-          embeddable.getOutput().title ||
-          i18n.translate('visualizations.actions.editInLens.visulizationTitle', {
-            defaultMessage: '{type} visualization',
-            values: {
-              type: vis.type.title,
-            },
-          }),
+        title,
+        visTypeTitle: vis.type.title,
         embeddableId: embeddable.id,
         originatingApp: this.currentAppId,
         searchFilters,
