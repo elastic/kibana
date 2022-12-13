@@ -117,7 +117,7 @@ export const EmailParamsFields = ({
             if (!to) {
               editAction('to', [], index);
             }
-            onBlur?.('to');
+            onBlur('to');
           }}
         />
       </EuiFormRow>
