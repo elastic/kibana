@@ -20,6 +20,8 @@ import type { SavedObjectsUpdateObjectsSpacesObject } from '@kbn/core-saved-obje
 import {
   SavedObjectsErrorHelpers,
   ALL_NAMESPACES_STRING,
+  setsAreEqual,
+  enforceMapsAreEqual,
 } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
@@ -29,11 +31,9 @@ import { AuditAction, type ISavedObjectsSecurityExtension } from '@kbn/core-save
 import {
   checkAuthError,
   enforceError,
-  setsAreEqual,
   setupPerformAuthFullyAuthorized,
   setupPerformAuthEnforceFailure,
   setupRedactPassthrough,
-  enforceMapsAreEqual,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 

@@ -17,7 +17,12 @@ import type {
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import {
+  enforceMapsAreEqual,
+  SavedObjectsErrorHelpers,
+  setsAreEqual,
+  typeMapsAreEqual,
+} from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import {
@@ -31,12 +36,9 @@ import { AuditAction, type ISavedObjectsSecurityExtension } from '@kbn/core-save
 import {
   authMap,
   enforceError,
-  typeMapsAreEqual,
-  setsAreEqual,
   setupPerformAuthFullyAuthorized,
   setupPerformAuthEnforceFailure,
   setupRedactPassthrough,
-  enforceMapsAreEqual,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 

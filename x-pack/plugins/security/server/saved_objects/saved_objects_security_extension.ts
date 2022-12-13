@@ -46,7 +46,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.checkPrivilegesFunc = checkPrivileges;
   }
 
-  async checkAuthorization<A extends string>(
+  private async checkAuthorization<A extends string>(
     params: CheckAuthorizationParams<A>
   ): Promise<CheckAuthorizationResult<A>> {
     const { types, spaces, actions, options = { allowGlobalResource: false } } = params;

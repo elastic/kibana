@@ -18,7 +18,12 @@ import type {
   SavedObjectsBulkResolveObject,
   SavedObjectsBaseOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import {
+  enforceMapsAreEqual,
+  SavedObjectsErrorHelpers,
+  SavedObjectsUtils,
+  setsAreEqual,
+} from '@kbn/core-saved-objects-utils-server';
 import {
   SavedObjectsSerializer,
   LEGACY_URL_ALIAS_TYPE,
@@ -35,11 +40,9 @@ import {
 import {
   authMap,
   enforceError,
-  setsAreEqual,
   setupPerformAuthFullyAuthorized,
   setupPerformAuthEnforceFailure,
   setupRedactPassthrough,
-  enforceMapsAreEqual,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 

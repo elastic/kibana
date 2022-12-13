@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-
 import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { AuditAction } from '@kbn/core-saved-objects-server';
+import { enforceMapsAreEqual, setsAreEqual } from '@kbn/core-saved-objects-utils-server';
 import type { EcsEventOutcome, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -757,20 +756,10 @@ describe('SecureSpacesClientWrapper', () => {
         options: actualOptions,
       } = securityExtension!.performAuthorization.mock.calls[0][0];
 
-      expect(Array.from(expectedActions).sort()).toEqual(Array.from(actualActions).sort());
-      expect(Array.from(expectedSpaces).sort()).toEqual(Array.from(actualSpaces).sort());
-      expect(Array.from(expectedTypes).sort()).toEqual(Array.from(actualTypes).sort());
-      expect(Array.from(expectedEnforceMap!.keys()).sort()).toEqual(
-        Array.from(actualEnforceMap!.keys()).sort()
-      );
-      expect(
-        Array.from(expectedEnforceMap!.keys()).every((key) =>
-          isEqual(
-            Array.from(expectedEnforceMap!.get(key)!),
-            Array.from(actualEnforceMap!.get(key)!)
-          )
-        )
-      ).toBeTruthy();
+      expect(setsAreEqual(expectedActions, actualActions)).toBeTruthy();
+      expect(setsAreEqual(expectedSpaces, actualSpaces)).toBeTruthy();
+      expect(setsAreEqual(expectedTypes, actualTypes)).toBeTruthy();
+      expect(enforceMapsAreEqual(expectedEnforceMap, actualEnforceMap)).toBeTruthy();
       expect(actualOptions).toBeUndefined();
     }
 

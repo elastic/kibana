@@ -15,3 +15,10 @@ export {
   FIND_DEFAULT_PAGE,
   FIND_DEFAULT_PER_PAGE,
 } from './src/saved_objects_utils';
+
+export {
+  setsAreEqual,
+  typeMapsAreEqual,
+  namespaceMapsAreEqual,
+  enforceMapsAreEqual,
+} from './src/saved_objects_test_utils';

@@ -27,6 +27,11 @@ import {
   SavedObjectsRawDocSource,
   AuthorizationTypeEntry,
 } from '@kbn/core-saved-objects-server';
+import {
+  enforceMapsAreEqual,
+  namespaceMapsAreEqual,
+  setsAreEqual,
+} from '@kbn/core-saved-objects-utils-server';
 import { kibanaMigratorMock } from '../mocks';
 import {
   createRegistry,
@@ -39,7 +44,6 @@ import {
   enforceError,
   setupRedactPassthrough,
   MULTI_NAMESPACE_CUSTOM_INDEX_TYPE,
-  setsAreEqual,
   authMap,
   updateSuccess,
   deleteSuccess,
@@ -59,12 +63,10 @@ import {
   expectUpdateResult,
   bulkDeleteSuccess,
   createBulkDeleteSuccessStatus,
-  namespaceMapsAreEqual,
   setupPerformAuthFullyAuthorized,
   setupPerformAuthPartiallyAuthorized,
   setupPerformAuthUnauthorized,
   setupPerformAuthEnforceFailure,
-  enforceMapsAreEqual,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
