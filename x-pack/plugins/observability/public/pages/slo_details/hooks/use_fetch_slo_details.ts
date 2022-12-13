@@ -16,14 +16,14 @@ interface UseFetchSloDetailsResponse {
   slo: SLO | undefined;
 }
 
-function useFetchSloDetails(sloId: string): UseFetchSloDetailsResponse {
+function useFetchSloDetails(sloId?: string): UseFetchSloDetailsResponse {
   const params = useMemo(() => ({ sloId }), [sloId]);
   const shouldExecuteApiCall = useCallback(
-    (apiCallParams: { sloId: string }) => params.sloId === apiCallParams.sloId,
+    (apiCallParams: { sloId?: string }) => params.sloId === apiCallParams.sloId,
     [params]
   );
 
-  const { loading, data: slo } = useDataFetcher<{ sloId: string }, SLO | undefined>({
+  const { loading, data: slo } = useDataFetcher<{ sloId?: string }, SLO | undefined>({
     paramsForApiCall: params,
     initialDataState: undefined,
     executeApiCall: fetchSlo,
@@ -34,10 +34,14 @@ function useFetchSloDetails(sloId: string): UseFetchSloDetailsResponse {
 }
 
 const fetchSlo = async (
-  params: { sloId: string },
+  params: { sloId?: string },
   abortController: AbortController,
   http: HttpSetup
 ): Promise<SLO | undefined> => {
+  if (params.sloId === undefined) {
+    return undefined;
+  }
+
   try {
     const response = await http.get<Record<string, unknown>>(
       `/api/observability/slos/${params.sloId}`,
