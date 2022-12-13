@@ -7,13 +7,32 @@
  */
 
 import { MODEL_TYPES } from '../../../../common/enums';
+import { Metric } from '../../../../common/types';
 
 export const MODEL_SCRIPTS = {
   [MODEL_TYPES.UNWEIGHTED]: () => 'MovingFunctions.unweightedAvg(values)',
-  [MODEL_TYPES.WEIGHTED_EXPONENTIAL]: ({ alpha }) => `MovingFunctions.ewma(values, ${alpha})`,
-  [MODEL_TYPES.WEIGHTED_EXPONENTIAL_DOUBLE]: ({ alpha, beta }) =>
-    `MovingFunctions.holt(values, ${alpha}, ${beta})`,
-  [MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE]: ({ alpha, beta, gamma, period, multiplicative }) =>
+  [MODEL_TYPES.WEIGHTED_EXPONENTIAL]: ({ alpha }: { alpha?: Metric['alpha'] }) =>
+    `MovingFunctions.ewma(values, ${alpha})`,
+  [MODEL_TYPES.WEIGHTED_EXPONENTIAL_DOUBLE]: ({
+    alpha,
+    beta,
+  }: {
+    alpha?: Metric['alpha'];
+    beta?: Metric['beta'];
+  }) => `MovingFunctions.holt(values, ${alpha}, ${beta})`,
+  [MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE]: ({
+    alpha,
+    beta,
+    gamma,
+    period,
+    multiplicative,
+  }: {
+    alpha?: Metric['alpha'];
+    beta?: Metric['beta'];
+    gamma?: Metric['gamma'];
+    period?: Metric['period'];
+    multiplicative?: Metric['multiplicative'];
+  }) =>
     `if (values.length > ${period}*2) {MovingFunctions.holtWinters(values, ${alpha}, ${beta}, ${gamma}, ${period}, ${multiplicative})}`,
   [MODEL_TYPES.WEIGHTED_LINEAR]: () => 'MovingFunctions.linearWeightedAvg(values)',
 };
