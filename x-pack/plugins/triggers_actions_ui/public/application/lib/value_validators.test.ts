@@ -275,6 +275,7 @@ describe('getRuleWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors: IErrorObject[] = [];
@@ -313,6 +314,7 @@ describe('getRuleWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors: IErrorObject[] = [];
@@ -362,6 +364,7 @@ describe('getRuleWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors = [{ 'incident.field.name': ['Name is required.'] }];
@@ -419,6 +422,7 @@ describe('getRuleWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors = [

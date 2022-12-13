@@ -28,6 +28,7 @@ describe('updateRule', () => {
       apiKey: null,
       apiKeyOwner: null,
       notifyWhen: 'onThrottleInterval' as RuleNotifyWhenType,
+      revision: 0,
     };
     const resolvedValue: Rule = {
       ...ruleToUpdate,
@@ -42,6 +43,7 @@ describe('updateRule', () => {
         status: 'unknown',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
       },
+      revision: 1,
     };
     http.put.mockResolvedValueOnce(resolvedValue);
 

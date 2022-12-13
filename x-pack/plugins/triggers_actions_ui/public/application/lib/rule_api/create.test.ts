@@ -87,6 +87,7 @@ describe('createRule', () => {
       createdAt: new Date('2021-04-01T21:33:13.247Z'),
       updatedAt: new Date('2021-04-01T21:33:13.247Z'),
       apiKeyOwner: '',
+      revision: 0,
     };
     http.post.mockResolvedValueOnce(resolvedValue);
 

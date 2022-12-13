@@ -215,6 +215,7 @@ function mockRule(overwrite = {}): Rule {
     updatedAt: new Date(),
     consumer: 'alerts',
     notifyWhen: 'onActiveAlert',
+    revision: 0,
     executionStatus: {
       status: 'active',
       lastDuration: 500,
