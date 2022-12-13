@@ -47,6 +47,7 @@ export const ruleOutput = (): RuleResponse => ({
   throttle: 'no_actions',
   threat: getThreatMock(),
   version: 1,
+  revision: 0,
   filters: [
     {
       query: {

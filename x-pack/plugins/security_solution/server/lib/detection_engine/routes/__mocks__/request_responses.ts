@@ -367,6 +367,7 @@ export const getRuleMock = <T extends RuleParams>(params: T): SanitizedRule<T> =
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  revision: 0,
 });
 
 export const resolveRuleMock = <T extends RuleParams>(params: T): ResolvedSanitizedRule<T> => ({
@@ -544,6 +545,7 @@ export const legacyGetNotificationResult = ({
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  revision: 0,
 });
 
 /**
@@ -592,6 +594,7 @@ export const legacyGetHourlyNotificationResult = (
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  revision: 0,
 });
 
 /**
@@ -640,6 +643,7 @@ export const legacyGetDailyNotificationResult = (
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  revision: 0,
 });
 
 /**
@@ -688,6 +692,7 @@ export const legacyGetWeeklyNotificationResult = (
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  revision: 0,
 });
 
 /**

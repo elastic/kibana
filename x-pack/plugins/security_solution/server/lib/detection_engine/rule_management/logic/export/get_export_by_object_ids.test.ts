@@ -212,6 +212,7 @@ describe('get_export_by_object_ids', () => {
             throttle: 'no_actions',
             note: '# Investigative notes',
             version: 1,
+            revision: 0,
             exceptions_list: getListArrayMock(),
             execution_summary: undefined,
             outcome: undefined,
