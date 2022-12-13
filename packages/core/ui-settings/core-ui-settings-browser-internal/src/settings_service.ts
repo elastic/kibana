@@ -43,8 +43,8 @@ export class SettingsService {
 
     this.uiSettingsGlobalClient = new UiSettingsGlobalClient({
       api: this.uiSettingsApi,
-      defaults: {},
-      initialSettings: {},
+      defaults: legacyMetadata.globalUiSettings.defaults,
+      initialSettings: legacyMetadata.globalUiSettings.user,
       done$: this.done$,
     });
 

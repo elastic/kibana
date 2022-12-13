@@ -12,7 +12,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
-import type { IUiSettingsClient, SettingsSetup } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import type { ApplicationSetup } from '@kbn/core-application-browser';
 import type { CoreStart } from './core_start';
@@ -45,8 +45,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   /** {@link IUiSettingsClient} */
   /** @Deprecated Use {@link CoreSetup.settings} instead */
   uiSettings: IUiSettingsClient;
-  /** {@link SettingsSetup} */
-  settings: SettingsSetup;
+  /** {@link SettingsStart} */
+  settings: SettingsStart;
   /** {@link ExecutionContextSetup} */
   executionContext: ExecutionContextSetup;
   /** {@link InjectedMetadataSetup} */

@@ -58,11 +58,17 @@ function renderTestCases(
   >
 ) {
   describe('render()', () => {
-    let uiSettings: ReturnType<typeof uiSettingsServiceMock.createClient>;
+    let uiSettings: {
+      client: ReturnType<typeof uiSettingsServiceMock.createClient>;
+      globalClient: ReturnType<typeof uiSettingsServiceMock.createClient>;
+    };
 
     beforeEach(async () => {
-      uiSettings = uiSettingsServiceMock.createClient();
-      uiSettings.getRegistered.mockReturnValue({
+      uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+      uiSettings.client.getRegistered.mockReturnValue({
         registered: { name: 'title' },
       });
     });
@@ -106,7 +112,7 @@ function renderTestCases(
 
     it('renders "core" page driven by settings', async () => {
       const userSettings = { 'theme:darkMode': { userValue: true } };
-      uiSettings.getUserProvided.mockResolvedValue(userSettings);
+      uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
       const content = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
@@ -116,9 +122,21 @@ function renderTestCases(
       expect(data.legacyMetadata.uiSettings.user).toEqual(userSettings); // user settings are injected
     });
 
+    it('renders "core" page with global settings', async () => {
+      const userSettings = { 'foo:bar': { userValue: true } };
+      uiSettings.globalClient.getUserProvided.mockResolvedValue(userSettings);
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+      expect(data.legacyMetadata.globalUiSettings.user).toEqual(userSettings); // user settings are injected
+    });
+
     it('renders "core" with excluded user settings', async () => {
       const userSettings = { 'theme:darkMode': { userValue: true } };
-      uiSettings.getUserProvided.mockResolvedValue(userSettings);
+      uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
       const content = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: true,
@@ -128,6 +146,20 @@ function renderTestCases(
 
       expect(data).toMatchSnapshot(INJECTED_METADATA);
       expect(data.legacyMetadata.uiSettings.user).toEqual({}); // user settings are not injected
+    });
+
+    it('renders "core" with excluded global user settings', async () => {
+      const userSettings = { 'foo:bar': { userValue: true } };
+      uiSettings.globalClient.getUserProvided.mockResolvedValue(userSettings);
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: true,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+      expect(data.legacyMetadata.globalUiSettings.user).toEqual({}); // user settings are not injected
     });
 
     it('calls `getStylesheetPaths` with the correct parameters', async () => {
