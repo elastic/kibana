@@ -1,0 +1,321 @@
+////
+This content is generated from the open API specification.
+Any modifications made to this file will be overwritten.
+////
+
+++++
+<div class="openapi">
+  <h2>Access</h2>
+    <ol>
+      <li>APIKey KeyParamName:ApiKey KeyInQuery:false KeyInHeader:true</li>
+      <li>HTTP Basic Authentication</li>
+    </ol>
+
+  <h2><a name="__Methods">Methods</a></h2>
+  [ Jump to <a href="#__Models">Models</a> ]
+
+  <h3>Table of Contents </h3>
+  <div class="method-summary"></div>
+  <h4><a href="#Alerting">Alerting</a></h4>
+  <ul>
+  <li><a href="#findRules"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rules/_find</code></a></li>
+  </ul>
+
+  <h1><a name="Alerting">Alerting</a></h1>
+  <div class="method"><a name="findRules"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/alerting/rules/_find</code></pre></div>
+    <div class="method-summary">Retrieves information about rules. (<span class="nickname">findRules</span>)</div>
+    <div class="method-notes">You must have <code>read</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rules you're seeking. For example, you must have privileges for the <strong>Management &gt; Stack rules</strong> feature, <strong>Analytics &gt; Discover</strong> and <strong>Machine Learning</strong> features, <strong>Observability</strong> features, or <strong>Security</strong> features. To find rules associated with the <strong>Stack Monitoring</strong> feature, use the <code>monitoring_user</code> built-in role.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">default_search_operator (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The default operator to use for the simple_query_string. default: OR </div><div class="param">fields (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The fields to return in the <code>attributes</code> key of the response. default: null </div><div class="param">filter (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; A KQL string that you filter with an attribute from your saved object. It should look like <code>savedObjectType.attributes.title: &quot;myTitle&quot;</code>. However, if you used a direct attribute of a saved object, such as <code>updatedAt</code>, you must define your filter, for example, <code>savedObjectType.updatedAt &gt; 2018-12-22</code>. default: null </div><div class="param">has_reference (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the rules that have a relation with the reference objects with a specific type and identifier. default: null </div><div class="param">page (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">per_page (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of rules to return per page. default: 20 </div><div class="param">search (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; An Elasticsearch simple_query_string query that filters the objects in the response. default: null </div><div class="param">search_fields (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The fields to perform the simple_query_string parsed query against. default: null </div><div class="param">sort_field (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines which field is used to sort the results. The field must exist in the <code>attributes</code> key of the response. default: null </div><div class="param">sort_order (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#findRules_200_response">findRules_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "per_page" : 2,
+  "total" : 7,
+  "data" : [ {
+    "throttle" : "10m",
+    "created_at" : "2022-12-05T23:36:58.284Z",
+    "last_run" : {
+      "alerts_count" : {
+        "new" : 0,
+        "ignored" : 6,
+        "recovered" : 1,
+        "active" : 5
+      },
+      "outcome_msg" : "outcome_msg",
+      "warning" : "warning",
+      "outcome" : "succeeded"
+    },
+    "params" : {
+      "key" : ""
+    },
+    "created_by" : "elastic",
+    "enabled" : true,
+    "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+    "rule_type_id" : "monitoring_alert_cluster_health",
+    "tags" : [ "tags", "tags" ],
+    "api_key_owner" : "elastic",
+    "schedule" : {
+      "interval" : "1m"
+    },
+    "notify_when" : "onActiveAlert",
+    "next_run" : "2022-12-06T00:14:43.818Z",
+    "updated_at" : "2022-12-05T23:36:58.284Z",
+    "execution_status" : {
+      "last_execution_date" : "2022-12-06T00:13:43.89Z",
+      "last_duration" : 55,
+      "status" : "ok"
+    },
+    "name" : "cluster_health_rule",
+    "updated_by" : "elastic",
+    "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "mute_all" : false,
+    "actions" : [ {
+      "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+      "params" : {
+        "key" : ""
+      },
+      "group" : "default"
+    }, {
+      "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+      "params" : {
+        "key" : ""
+      },
+      "group" : "default"
+    } ],
+    "consumer" : "alerts"
+  }, {
+    "throttle" : "10m",
+    "created_at" : "2022-12-05T23:36:58.284Z",
+    "last_run" : {
+      "alerts_count" : {
+        "new" : 0,
+        "ignored" : 6,
+        "recovered" : 1,
+        "active" : 5
+      },
+      "outcome_msg" : "outcome_msg",
+      "warning" : "warning",
+      "outcome" : "succeeded"
+    },
+    "params" : {
+      "key" : ""
+    },
+    "created_by" : "elastic",
+    "enabled" : true,
+    "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+    "rule_type_id" : "monitoring_alert_cluster_health",
+    "tags" : [ "tags", "tags" ],
+    "api_key_owner" : "elastic",
+    "schedule" : {
+      "interval" : "1m"
+    },
+    "notify_when" : "onActiveAlert",
+    "next_run" : "2022-12-06T00:14:43.818Z",
+    "updated_at" : "2022-12-05T23:36:58.284Z",
+    "execution_status" : {
+      "last_execution_date" : "2022-12-06T00:13:43.89Z",
+      "last_duration" : 55,
+      "status" : "ok"
+    },
+    "name" : "cluster_health_rule",
+    "updated_by" : "elastic",
+    "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "mute_all" : false,
+    "actions" : [ {
+      "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+      "params" : {
+        "key" : ""
+      },
+      "group" : "default"
+    }, {
+      "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
+      "params" : {
+        "key" : ""
+      },
+      "group" : "default"
+    } ],
+    "consumer" : "alerts"
+  } ],
+  "page" : 5
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#findRules_200_response">findRules_200_response</a>
+  </div> <!-- method -->
+  <hr/>
+
+  <h2><a name="__Models">Models</a></h2>
+  [ Jump to <a href="#__Methods">Methods</a> ]
+
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#findRules_200_response"><code>findRules_200_response</code> - </a></li>
+    <li><a href="#findRules_200_response_data_inner"><code>findRules_200_response_data_inner</code> - </a></li>
+    <li><a href="#findRules_200_response_data_inner_actions_inner"><code>findRules_200_response_data_inner_actions_inner</code> - </a></li>
+    <li><a href="#findRules_200_response_data_inner_execution_status"><code>findRules_200_response_data_inner_execution_status</code> - </a></li>
+    <li><a href="#findRules_200_response_data_inner_last_run"><code>findRules_200_response_data_inner_last_run</code> - </a></li>
+    <li><a href="#findRules_200_response_data_inner_last_run_alerts_count"><code>findRules_200_response_data_inner_last_run_alerts_count</code> - </a></li>
+    <li><a href="#findRules_200_response_data_inner_schedule"><code>findRules_200_response_data_inner_schedule</code> - </a></li>
+    <li><a href="#findRules_has_reference_parameter"><code>findRules_has_reference_parameter</code> - </a></li>
+    <li><a href="#findRules_search_fields_parameter"><code>findRules_search_fields_parameter</code> - </a></li>
+  </ol>
+
+  <div class="model">
+    <h3><a name="findRules_200_response"><code>findRules_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">data (optional)</div><div class="param-desc"><span class="param-type"><a href="#findRules_200_response_data_inner">array[findRules_200_response_data_inner]</a></span>  </div>
+<div class="param">page (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">per_page (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">total (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="findRules_200_response_data_inner"><code>findRules_200_response_data_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#findRules_200_response_data_inner_actions_inner">array[findRules_200_response_data_inner_actions_inner]</a></span>  </div>
+<div class="param">api_key_owner (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">consumer (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The application or feature that owns the rule. For example, <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
+<div class="param">created_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> The date and time that the rule as created. format: date-time</div>
+<div class="param">created_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the user that created the rule. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the rule is currently enabled. </div>
+<div class="param">execution_status (optional)</div><div class="param-desc"><span class="param-type"><a href="#findRules_200_response_data_inner_execution_status">findRules_200_response_data_inner_execution_status</a></span>  </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the rule. </div>
+<div class="param">last_run (optional)</div><div class="param-desc"><span class="param-type"><a href="#findRules_200_response_data_inner_last_run">findRules_200_response_data_inner_last_run</a></span>  </div>
+<div class="param">muted_alert_ids (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
+<div class="param">mute_all (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. </div>
+<div class="param">next_run (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Indicates how often alerts generate actions. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">onActionGroupChange</div><div class="param-enum">onActiveAlert</div><div class="param-enum">onThrottleInterval</div>
+<div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the rule. </div>
+<div class="param">rule_type_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the type of rule. For example, <code>.es-query</code>, <code>.index-threshold</code>, <code>logs.alert.document.count</code>, <code>monitoring_alert_cluster_health</code>, <code>siem.thresholdRule</code>, or <code>xpack.ml.anomaly_detection_alert</code>. </div>
+<div class="param">schedule (optional)</div><div class="param-desc"><span class="param-type"><a href="#findRules_200_response_data_inner_schedule">findRules_200_response_data_inner_schedule</a></span>  </div>
+<div class="param">scheduled_task_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+<div class="param">updated_at (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The date and time that the rule was updated most recently. </div>
+<div class="param">updated_by (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the user that updated this rule most recently. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="findRules_200_response_data_inner_actions_inner"><code>findRules_200_response_data_inner_actions_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The group name for the actions. </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector saved object. </div>
+<div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the action, which are sent to the connector. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="findRules_200_response_data_inner_execution_status"><code>findRules_200_response_data_inner_execution_status</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">last_execution_date (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">last_duration (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="findRules_200_response_data_inner_last_run"><code>findRules_200_response_data_inner_last_run</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">alerts_count (optional)</div><div class="param-desc"><span class="param-type"><a href="#findRules_200_response_data_inner_last_run_alerts_count">findRules_200_response_data_inner_last_run_alerts_count</a></span>  </div>
+<div class="param">outcome_msg (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">warning (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">outcome (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="findRules_200_response_data_inner_last_run_alerts_count"><code>findRules_200_response_data_inner_last_run_alerts_count</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">new (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">ignored (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">recovered (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">active (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="findRules_200_response_data_inner_schedule"><code>findRules_200_response_data_inner_schedule</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.</div>
+    <div class="field-items">
+      <div class="param">interval (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="findRules_has_reference_parameter"><code>findRules_has_reference_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="findRules_search_fields_parameter"><code>findRules_search_fields_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+          </div>  <!-- field-items -->
+  </div>
+</div>
+++++
