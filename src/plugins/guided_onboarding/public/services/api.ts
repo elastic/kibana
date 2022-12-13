@@ -65,7 +65,6 @@ export class ApiService implements GuidedOnboardingApi {
           observer.complete();
         })
         .catch((error) => {
-          console.log('error');
           this.isLoading$.next(false);
           // if the request fails, we initialize the state with error
           observer.next({ status: 'error', isActivePeriod: false });

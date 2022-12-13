@@ -79,7 +79,7 @@ describe('GuidedOnboarding ApiService', () => {
       httpClient.get.mockRejectedValueOnce(new Error('request failed'));
       subscription = apiService.fetchPluginState$().subscribe();
       // wait until the request fails
-      await new Promise((resolve) => process.nextTick(resolve));
+      jest.runAllTimers();
       anotherSubscription = apiService.fetchPluginState$().subscribe();
       expect(httpClient.get).toHaveBeenCalledTimes(1);
     });
