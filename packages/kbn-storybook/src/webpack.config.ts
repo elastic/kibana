@@ -151,6 +151,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
 
       // move the plugins to the top of the preset array so they will run after the typescript preset
       options.presets = [
+        require.resolve('@kbn/babel-preset/webpack_preset'),
         {
           plugins: [...plugins, require.resolve('@kbn/babel-plugin-package-imports')],
         },

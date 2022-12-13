@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-require('@kbn/babel-register').install();
 const webpackConfig = require('./src/webpack.config');
 
 module.exports = {
