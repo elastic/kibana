@@ -35,7 +35,7 @@ export function BurnRateRuleEditor(props: Props) {
     unit: (ruleParams?.shortWindow?.unit as DurationUnit) ?? 'm',
   });
   const [burnRate, setBurnRate] = useState<number>(ruleParams?.burnRateThreshold ?? 1);
-  const [maxBurnRate, setMaxBurnRate] = useState<number>(1);
+  const [maxBurnRate, setMaxBurnRate] = useState<number>(ruleParams?.maxBurnRateThreshold ?? 1);
 
   useEffect(() => {
     const hasInitialSlo = !loadingInitialSlo && initialSlo !== undefined;
@@ -57,7 +57,7 @@ export function BurnRateRuleEditor(props: Props) {
 
   const onBurnRateChange = (value: number) => {
     setBurnRate(value);
-    setRuleParams('burnRateThreshold', burnRate);
+    setRuleParams('burnRateThreshold', value);
   };
 
   const onSelectedSlo = (slo: SLO | undefined) => {
@@ -69,11 +69,11 @@ export function BurnRateRuleEditor(props: Props) {
     if (selectedSlo) {
       const sloDurationInMinutes = toMinutes(selectedSlo.timeWindow.duration);
       const longWindowDurationInMinutes = toMinutes(longWindowDuration);
-      setMaxBurnRate(Math.floor(sloDurationInMinutes / longWindowDurationInMinutes));
-    } else {
-      setMaxBurnRate(1);
+      const maxBurnRateThreshold = Math.floor(sloDurationInMinutes / longWindowDurationInMinutes);
+      setMaxBurnRate(maxBurnRateThreshold);
+      setRuleParams('maxBurnRateThreshold', maxBurnRateThreshold);
     }
-  }, [longWindowDuration, selectedSlo]);
+  }, [longWindowDuration, selectedSlo, setRuleParams]);
 
   return (
     <EuiFlexGroup direction="column">

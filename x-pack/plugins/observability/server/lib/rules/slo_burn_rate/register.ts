@@ -30,6 +30,7 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
       params: schema.object({
         sloId: schema.string(),
         burnRateThreshold: schema.number(),
+        maxBurnRateThreshold: schema.number(),
         longWindow: durationSchema,
         shortWindow: durationSchema,
       }),

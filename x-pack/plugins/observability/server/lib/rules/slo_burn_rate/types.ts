@@ -20,6 +20,7 @@ export enum AlertStates {
 export type BurnRateRuleParams = {
   sloId: string;
   burnRateThreshold: number;
+  maxBurnRateThreshold: number;
   longWindow: { value: number; unit: string };
   shortWindow: { value: number; unit: string };
 } & Record<string, any>;

@@ -41,6 +41,7 @@ interface SLOList {
 interface BurnRateRuleParams extends RuleTypeParams {
   sloId: string;
   burnRateThreshold: number;
+  maxBurnRateThreshold: number;
   longWindow: Duration;
   shortWindow: Duration;
 }
