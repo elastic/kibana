@@ -35,7 +35,7 @@ export function systemRoutes(
         body: schema.maybe(schema.any()),
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetMlInfo'],
       },
     },
     routeGuard.basicLicenseAPIGuard(async ({ mlClient, client, request, response }) => {
@@ -159,7 +159,7 @@ export function systemRoutes(
       path: '/api/ml/info',
       validate: false,
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetMlInfo'],
       },
     },
     routeGuard.basicLicenseAPIGuard(async ({ mlClient, response }) => {
@@ -220,7 +220,7 @@ export function systemRoutes(
         body: schema.object({ indices: schema.arrayOf(schema.string()) }),
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetFieldInfo'],
       },
     },
     routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
