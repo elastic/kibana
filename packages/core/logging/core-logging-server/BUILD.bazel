@@ -43,6 +43,7 @@ TYPES_DEPS = [
   "@npm//moment-timezone",
   "@npm//rxjs",
   "//packages/kbn-logging:npm_module_types",
+  "//packages/kbn-ecs:npm_module_types",
   "//packages/kbn-config-schema:npm_module_types"
 ]
 
