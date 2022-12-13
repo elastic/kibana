@@ -43,10 +43,16 @@ function FiltersBuilder({
   const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
   const [dropTarget, setDropTarget] = useState('');
   const sPaddingSize = useEuiPaddingSize('s');
-
   useEffect(() => {
-    if (!compareFilters(filters, filtersRef.current)) {
-      filtersRef.current = filters;
+    if (
+      !compareFilters(filters, filtersRef.current, {
+        index: true,
+        state: true,
+        negate: true,
+        disabled: true,
+        alias: true,
+      })
+    ) {
       dispatch({ type: 'updateFilters', payload: { filters } });
     }
   }, [filters]);
