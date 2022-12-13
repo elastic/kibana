@@ -100,3 +100,10 @@ elastic / WHkRXcj5kEqTHBN06pFoGFwC
 
 cluster id:
 76f3e1c2de9d4010940224e1aea0cd67
+
+
+### 1gb-az-us-east-2
+elastic / llgX7JNSc7lzy98dE6B7A6yG
+
+### 8gb-az-us-east-2
+elastic / AtRD310pcvA95MwztZJcNH7L
