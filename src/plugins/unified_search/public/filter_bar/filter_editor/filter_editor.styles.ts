@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/css';
 
-/** The default max-height of the Add/Edit Filter popover used to show "+n More" filters (e.g. `+4 More`) */
-const DEFAULT_MAX_HEIGHT = '233px';
-
-export const filtersBuilderMaxHeight = css`
-  max-height: ${DEFAULT_MAX_HEIGHT};
+export const filtersBuilderMaxHeightCss = (euiTheme: EuiThemeComputed) => css`
+  max-height: ${euiTheme.size.base} * 10;
 `;
 
 /** @todo: should be removed, no hardcoded sizes **/
