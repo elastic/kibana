@@ -29,7 +29,7 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
     validate: {
       params: schema.object({
         sloId: schema.string(),
-        threshold: schema.number(),
+        burnRateThreshold: schema.number(),
         longWindow: durationSchema,
         shortWindow: durationSchema,
       }),
@@ -45,7 +45,7 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
       context: [
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
-        { name: 'threshold', description: thresholdActionVariableDescription },
+        { name: 'burnRateThreshold', description: thresholdActionVariableDescription },
         { name: 'longWindow', description: windowActionVariableDescription },
         { name: 'shortWindow', description: windowActionVariableDescription },
       ],
@@ -56,7 +56,7 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
 const thresholdActionVariableDescription = i18n.translate(
   'xpack.observability.slo.alerting.thresholdDescription',
   {
-    defaultMessage: 'The threshold value of the burn rate.',
+    defaultMessage: 'The burn rate threshold value.',
   }
 );
 

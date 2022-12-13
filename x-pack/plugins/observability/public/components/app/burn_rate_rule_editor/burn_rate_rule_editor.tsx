@@ -34,7 +34,7 @@ export function BurnRateRuleEditor(props: Props) {
     value: ruleParams?.shortWindow?.value ?? 5,
     unit: (ruleParams?.shortWindow?.unit as DurationUnit) ?? 'm',
   });
-  const [burnRate, setBurnRate] = useState<number>(ruleParams?.threshold ?? 1);
+  const [burnRate, setBurnRate] = useState<number>(ruleParams?.burnRateThreshold ?? 1);
   const [maxBurnRate, setMaxBurnRate] = useState<number>(1);
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export function BurnRateRuleEditor(props: Props) {
 
   const onBurnRateChange = (value: number) => {
     setBurnRate(value);
-    setRuleParams('threshold', burnRate);
+    setRuleParams('burnRateThreshold', burnRate);
   };
 
   const onSelectedSlo = (slo: SLO | undefined) => {

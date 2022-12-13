@@ -66,7 +66,8 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
     const shortWindowBurnRate = computeBurnRate(slo, sliData[SHORT_WINDOW]);
 
     const shouldAlert =
-      longWindowBurnRate >= params.threshold && shortWindowBurnRate >= params.threshold;
+      longWindowBurnRate >= params.burnRateThreshold &&
+      shortWindowBurnRate >= params.burnRateThreshold;
 
     if (shouldAlert) {
       const reason = buildReason(
@@ -81,7 +82,7 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
         longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
         reason,
         shortWindow: { burnRate: shortWindowBurnRate, duration: shortWindowDuration.format() },
-        threshold: params.threshold,
+        burnRateThreshold: params.burnRateThreshold,
         timestamp: startedAt.toISOString(),
       };
 
@@ -89,7 +90,7 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
         id: `alert-${slo.id}-${slo.revision}`,
         fields: {
           [ALERT_REASON]: reason,
-          [ALERT_EVALUATION_THRESHOLD]: params.threshold,
+          [ALERT_EVALUATION_THRESHOLD]: params.burnRateThreshold,
           [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
         },
       });
@@ -104,7 +105,7 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
       const context = {
         longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
         shortWindow: { burnRate: shortWindowBurnRate, duration: shortWindowDuration.format() },
-        threshold: params.threshold,
+        burnRateThreshold: params.burnRateThreshold,
         timestamp: startedAt.toISOString(),
       };
 
@@ -129,13 +130,13 @@ function buildReason(
 ) {
   return i18n.translate('xpack.observability.slo.alerting.burnRate.reason', {
     defaultMessage:
-      'The burn rate for the past {longWindowDuration} is {longWindowBurnRate} and for the past {shortWindowDuration} is {shortWindowBurnRate}. Alert when above {threshold} for both windows',
+      'The burn rate for the past {longWindowDuration} is {longWindowBurnRate} and for the past {shortWindowDuration} is {shortWindowBurnRate}. Alert when above {burnRateThreshold} for both windows',
     values: {
       longWindowDuration: longWindowDuration.format(),
       longWindowBurnRate,
       shortWindowDuration: shortWindowDuration.format(),
       shortWindowBurnRate,
-      threshold: params.threshold,
+      burnRateThreshold: params.burnRateThreshold,
     },
   });
 }
