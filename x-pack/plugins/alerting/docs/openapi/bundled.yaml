@@ -1,0 +1,361 @@
+openapi: 3.0.1
+info:
+  title: Alerting
+  description: OpenAPI schema for alerting endpoints
+  version: '0.1'
+  contact:
+    name: Alerting Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: alerting
+    description: Alerting APIs enable you to create and manage rules and alerts.
+servers:
+  - url: http://localhost:5601
+    description: local
+paths:
+  /s/{spaceId}/api/alerting/rules/_find:
+    get:
+      summary: Retrieves information about rules.
+      operationId: findRules
+      description: |
+        You must have `read` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're seeking. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. To find rules associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+        - name: default_search_operator
+          in: query
+          description: The default operator to use for the simple_query_string.
+          schema:
+            type: string
+            default: OR
+          example: OR
+        - name: fields
+          in: query
+          description: The fields to return in the `attributes` key of the response.
+          schema:
+            type: array
+            items:
+              type: string
+        - name: filter
+          in: query
+          description: |
+            A KQL string that you filter with an attribute from your saved object. It should look like `savedObjectType.attributes.title: "myTitle"`. However, if you used a direct attribute of a saved object, such as `updatedAt`, you must define your filter, for example, `savedObjectType.updatedAt > 2018-12-22`.
+          schema:
+            type: string
+        - name: has_reference
+          in: query
+          description: Filters the rules that have a relation with the reference objects with a specific type and identifier.
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+        - name: page
+          in: query
+          description: The page number to return.
+          schema:
+            type: integer
+            default: 1
+          example: 1
+        - name: per_page
+          in: query
+          description: The number of rules to return per page.
+          schema:
+            type: integer
+            default: 20
+          example: 20
+        - name: search
+          in: query
+          description: An Elasticsearch simple_query_string query that filters the objects in the response.
+          schema:
+            type: string
+        - name: search_fields
+          in: query
+          description: The fields to perform the simple_query_string parsed query against.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+        - name: sort_field
+          in: query
+          description: |
+            Determines which field is used to sort the results. The field must exist in the `attributes` key of the response.
+          schema:
+            type: string
+        - name: sort_order
+          in: query
+          description: Determines the sort order.
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+          example: asc
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        actions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              group:
+                                type: string
+                                description: The group name for the actions.
+                                example: default
+                              id:
+                                type: string
+                                description: The identifier for the connector saved object.
+                                example: 9dca3e00-74f5-11ed-9801-35303b735aef
+                              params:
+                                type: object
+                                description: The parameters for the action, which are sent to the connector.
+                                additionalProperties: true
+                        api_key_owner:
+                          type: string
+                          nullable: true
+                          example: elastic
+                        consumer:
+                          type: string
+                          description: The application or feature that owns the rule. For example, `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
+                          example: alerts
+                        created_at:
+                          type: string
+                          description: The date and time that the rule as created.
+                          format: date-time
+                          example: '2022-12-05T23:36:58.284Z'
+                        created_by:
+                          type: string
+                          description: The identifier for the user that created the rule.
+                          nullable: true
+                          example: elastic
+                        enabled:
+                          type: boolean
+                          description: Indicates whether the rule is currently enabled.
+                          example: true
+                        execution_status:
+                          type: object
+                          properties:
+                            status:
+                              type: string
+                              example: ok
+                            last_execution_date:
+                              type: string
+                              format: date-time
+                              example: '2022-12-06T00:13:43.890Z'
+                            last_duration:
+                              type: integer
+                              example: 55
+                        id:
+                          type: string
+                          description: The identifier for the rule.
+                          example: b530fed0-74f5-11ed-9801-35303b735aef
+                        last_run:
+                          type: object
+                          properties:
+                            alerts_count:
+                              type: object
+                              properties:
+                                new:
+                                  type: integer
+                                  nullable: true
+                                ignored:
+                                  type: integer
+                                  nullable: true
+                                recovered:
+                                  type: integer
+                                  nullable: true
+                                active:
+                                  type: integer
+                                  nullable: true
+                            outcome_msg:
+                              type: string
+                              nullable: true
+                              example: null
+                            warning:
+                              type: string
+                              nullable: true
+                              example: null
+                            outcome:
+                              type: string
+                              example: succeeded
+                        muted_alert_ids:
+                          type: array
+                          items:
+                            type: string
+                        mute_all:
+                          type: boolean
+                          example: false
+                        name:
+                          type: string
+                          description: The name of the rule.
+                          example: cluster_health_rule
+                        next_run:
+                          type: string
+                          format: date-time
+                          nullable: true
+                          example: '2022-12-06T00:14:43.818Z'
+                        notify_when:
+                          type: string
+                          description: Indicates how often alerts generate actions.
+                          enum:
+                            - onActionGroupChange
+                            - onActiveAlert
+                            - onThrottleInterval
+                          example: onActiveAlert
+                        params:
+                          type: object
+                          description: The parameters for the rule.
+                          additionalProperties: true
+                        rule_type_id:
+                          type: string
+                          description: The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
+                          example: monitoring_alert_cluster_health
+                        schedule:
+                          type: object
+                          description: The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.
+                          properties:
+                            interval:
+                              type: string
+                              example: 1m
+                        scheduled_task_id:
+                          type: string
+                          example: b530fed0-74f5-11ed-9801-35303b735aef
+                        tags:
+                          type: array
+                          description: The tags for the rule.
+                          items:
+                            type: string
+                        throttle:
+                          type: string
+                          description: The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if `notify_when` is set to `onThrottleInterval`. It is specified in seconds, minutes, hours, or days.
+                          nullable: true
+                          example: 10m
+                        updated_at:
+                          type: string
+                          description: The date and time that the rule was updated most recently.
+                          example: '2022-12-05T23:36:58.284Z'
+                        updated_by:
+                          type: string
+                          description: The identifier for the user that updated this rule most recently.
+                          nullable: true
+                          example: elastic
+                  page:
+                    type: integer
+                  per_page:
+                    type: integer
+                  total:
+                    type: integer
+              examples:
+                findRulesResponse:
+                  $ref: '#/components/examples/find_rules_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: ApiKey
+  parameters:
+    space_id:
+      in: path
+      name: spaceId
+      description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
+      required: true
+      schema:
+        type: string
+        example: default
+  examples:
+    find_rules_response:
+      summary: Retrieve information about a rule.
+      value:
+        page: 1
+        total: 1
+        per_page: 10
+        data:
+          - id: 3583a470-74f6-11ed-9801-35303b735aef
+            consumer: alerts
+            tags:
+              - cpu
+            name: my alert
+            enabled: true
+            throttle: null
+            schedule:
+              interval: 1m
+            params:
+              aggType: avg
+              termSize: 6
+              thresholdComparator: '>'
+              timeWindowSize: 5
+              timeWindowUnit: m
+              groupBy: top
+              threshold:
+                - 1000
+              index:
+                - test-index
+              timeField: '@timestamp'
+              aggField: sheet.version
+              termField: name.keyword
+            rule_type_id: .index-threshold
+            created_by: elastic
+            updated_by: elastic
+            created_at: '2022-12-05T23:40:33.132Z'
+            updated_at: '2022-12-05T23:40:33.132Z'
+            api_key_owner: elastic
+            notify_when: onActionGroupChange
+            mute_all: false
+            muted_alert_ids: []
+            scheduled_task_id: 3583a470-74f6-11ed-9801-35303b735aef
+            execution_status:
+              status: ok
+              last_execution_date: '2022-12-06T01:44:23.983Z'
+              last_duration: 48
+            actions:
+              - id: 9dca3e00-74f5-11ed-9801-35303b735aef
+                group: threshold met
+                params:
+                  level: info
+                  message: |-
+                    alert {{alertName}} is active for group {{context.group}}:
+
+                    - Value: {{context.value}}
+                    - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+                    - Timestamp: {{context.date}}
+                  connector_type_id: .server-log
+            last_run:
+              alerts_count:
+                new: 0
+                ignored: 0
+                recovered: 0
+                active: 0
+              outcome_msg: null
+              warning: null
+              outcome: succeeded
+            next_run: '2022-12-06T01:45:23.912Z'
+security:
+  - basicAuth: []
+  - apiKeyAuth: []

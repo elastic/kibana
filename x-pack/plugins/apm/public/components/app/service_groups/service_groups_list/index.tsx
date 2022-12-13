@@ -16,12 +16,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, sortBy } from 'lodash';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { ServiceGroupsListItems } from './service_groups_list';
 import { Sort } from './sort';
 import { RefreshServiceGroupsSubscriber } from '../refresh_service_groups_subscriber';
-import { getDateRange } from '../../../../context/url_params_context/helpers';
 import { ServiceGroupSaveButton } from '../service_group_save';
 import { BetaBadge } from '../../../shared/beta_badge';
 
@@ -44,20 +43,13 @@ export function ServiceGroupsList() {
 
   const { serviceGroups } = data;
 
-  const { start, end } = useMemo(
-    () => getDateRange({ rangeFrom: 'now-24h', rangeTo: 'now' }),
-    []
-  );
-
-  const { data: servicesCountData = { servicesCounts: {} } } = useFetcher(
+  const { data: servicesGroupCounts = {} } = useFetcher(
     (callApmApi) => {
-      if (start && end && serviceGroups.length) {
-        return callApmApi('GET /internal/apm/service_groups/services_count', {
-          params: { query: { start, end } },
-        });
+      if (serviceGroups.length) {
+        return callApmApi('GET /internal/apm/service-group/counts');
       }
     },
-    [start, end, serviceGroups.length]
+    [serviceGroups.length]
   );
 
   const isLoading = isPending(status);
@@ -188,7 +180,7 @@ export function ServiceGroupsList() {
                   >
                     {i18n.translate(
                       'xpack.apm.serviceGroups.beta.feedback.link',
-                      { defaultMessage: 'Send feedback' }
+                      { defaultMessage: 'Give feedback' }
                     )}
                   </EuiLink>
                 </EuiFlexItem>
@@ -199,7 +191,7 @@ export function ServiceGroupsList() {
                 items.length ? (
                   <ServiceGroupsListItems
                     items={items}
-                    servicesCounts={servicesCountData.servicesCounts}
+                    serviceGroupCounts={servicesGroupCounts}
                     isLoading={isLoading}
                   />
                 ) : (
