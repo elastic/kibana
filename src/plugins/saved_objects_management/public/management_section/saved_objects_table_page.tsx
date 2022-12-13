@@ -79,7 +79,7 @@ const SavedObjectsTablePage = ({
     <ContextWrapper>
       <SavedObjectsTable
         initialQuery={initialQuery}
-        allowedTypes={allowedTypes}
+        allowedTypes={allowedTypes.filter((type) => type.name !== 'config-global')}
         actionRegistry={actionRegistry}
         columnRegistry={columnRegistry}
         taggingApi={taggingApi}
