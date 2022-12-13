@@ -12,12 +12,17 @@ import { useValues } from 'kea';
 import { EuiButton, EuiCode, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public'
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 
 
 import { DataPanel } from '../../../../../shared/data_panel/data_panel';
 import { CrawlerLogic } from '../crawler_logic';
 
 import { CrawlRequestsTable } from './crawl_requests_table';
+
+interface KibanaDeps {
+  discover: DiscoverStart;
+}
 
 const CRAWLER_LOGS_DISCOVER_RECORD = {
   dataViewSpec: {
@@ -32,7 +37,7 @@ const CRAWLER_LOGS_DISCOVER_RECORD = {
 
 export const CrawlRequestsPanel: React.FC = () => {
   const { data } = useValues(CrawlerLogic);
-  const { services: { discover } } = useKibana();
+  const { services: { discover } } = useKibana<KibanaDeps>();
 
   return (
     <DataPanel
@@ -47,7 +52,7 @@ export const CrawlRequestsPanel: React.FC = () => {
       titleSize="s"
       iconType="documents"
       action={
-        <EuiButton onClick={() => discover.locator.navigate(CRAWLER_LOGS_DISCOVER_RECORD)}>
+        <EuiButton onClick={() => discover.locator?.navigate(CRAWLER_LOGS_DISCOVER_RECORD)}>
           {i18n.translate('xpack.enterpriseSearch.crawler.crawlRequestsPanel.linkToDiscover', {
             defaultMessage: 'View in Discover',
           })}
