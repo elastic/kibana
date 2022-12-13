@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('bulkDisableRules', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    after(() => objectRemover.removeAll());
+    afterEach(() => objectRemover.removeAll());
 
     const getScheduledTask = async (id: string) => {
       return await es.get({
@@ -303,11 +303,9 @@ export default ({ getService }: FtrProviderContext) => {
                 .expect(200)
             )
           );
-          await Promise.all(
-            rules.map((rule) => {
-              objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
-            })
-          );
+          rules.map((rule) => {
+            objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
+          });
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_disable`)
@@ -355,11 +353,9 @@ export default ({ getService }: FtrProviderContext) => {
                 .expect(200)
             )
           );
-          await Promise.all(
-            rules.map((rule) => {
-              objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
-            })
-          );
+          rules.map((rule) => {
+            objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
+          });
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_disable`)
