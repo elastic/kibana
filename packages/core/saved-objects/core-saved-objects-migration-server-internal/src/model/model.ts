@@ -104,18 +104,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         aliases
       );
 
-      const mappingsHaveChanged = Boolean(
-        diffMappings(stateP.targetIndexMappings, stateP.desiredIndexMappings)
-      );
+      const source = aliases[stateP.currentAlias];
 
-      if (versionMigrationIsComplete || !mappingsHaveChanged) {
-        const source = aliases[stateP.currentAlias]!;
-
-        const targetIndex = mappingsHaveChanged
-          ? // We are going to reindex to a new index
-            `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`
-          : // Reuse the existing index
-            source;
+      if (versionMigrationIsComplete) {
+        const targetIndex = `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`;
 
         return {
           ...stateP,
@@ -123,22 +115,20 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // installed / enabled we can transform any old documents and update
           // the mappings for this plugin's types.
           controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-
           // Source is a none because we didn't do any migration from a source
           // index
           sourceIndex: Option.none,
           targetIndex,
-          sourceIndexMappings: indices[source].mappings,
-          ...(mappingsHaveChanged && {
-            targetIndexMappings: mergeMigrationMappingPropertyHashes(
-              stateP.targetIndexMappings,
-              indices[aliases[stateP.currentAlias]!].mappings
-            ),
-          }),
-          ...(!mappingsHaveChanged && { skipReindex: true }),
+          sourceIndexMappings: indices[source!].mappings,
+          targetIndexMappings: mergeMigrationMappingPropertyHashes(
+            stateP.targetIndexMappings,
+            indices[source!].mappings
+          ),
           versionIndexReadyActions: Option.none,
         };
-      } else if (
+      }
+
+      if (
         // `.kibana` is pointing to an index that belongs to a later
         // version of Kibana .e.g. a 7.11.0 instance found the `.kibana` alias
         // pointing to `.kibana_7.12.0_001`
@@ -153,7 +143,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             aliases[stateP.currentAlias]
           )}`,
         };
-      } else if (
+      }
+
+      if (
         // Don't actively participate in this migration but wait for another instance to complete it
         stateP.waitForMigrationCompletion === true
       ) {
@@ -170,19 +162,42 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             },
           ],
         };
-      } else if (
+      }
+
+      const mappingsAreTheSame =
+        // the source exists
+        Boolean(indices[source!]?.mappings?._meta?.migrationMappingPropertyHashes) &&
+        // ...and mappings are unchanged
+        !diffMappings(stateP.targetIndexMappings, indices[source!].mappings);
+
+      if (mappingsAreTheSame) {
+        const targetIndex = source!;
+
+        return {
+          ...stateP,
+          // We set a special flag that indicates we DO NOT need to reindex
+          skipReindex: true,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+          sourceIndex: Option.none,
+          targetIndex,
+          sourceIndexMappings: indices[source!].mappings,
+          versionIndexReadyActions: Option.none,
+        };
+      }
+
+      if (
         // If the `.kibana` alias exists
-        aliases[stateP.currentAlias] != null
+        source != null
       ) {
-        // The source index is the index the `.kibana` alias points to
-        const source = aliases[stateP.currentAlias]!;
         return {
           ...stateP,
           controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: Option.some(source) as Option.Some<string>,
-          sourceIndexMappings: indices[source].mappings,
+          sourceIndex: Option.some(source!) as Option.Some<string>,
+          sourceIndexMappings: indices[source!].mappings,
         };
-      } else if (indices[stateP.legacyIndex] != null) {
+      }
+
+      if (indices[stateP.legacyIndex] != null) {
         // Migrate from a legacy index
 
         // If the user used default index names we can narrow the version
@@ -235,21 +250,21 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             { remove_index: { index: stateP.tempIndex } },
           ]),
         };
-      } else {
-        // This cluster doesn't have an existing Saved Object index, create a
-        // new version specific index.
-        const target = stateP.versionIndex;
-        return {
-          ...stateP,
-          controlState: 'CREATE_NEW_TARGET',
-          sourceIndex: Option.none as Option.None,
-          targetIndex: target,
-          versionIndexReadyActions: Option.some([
-            { add: { index: target, alias: stateP.currentAlias } },
-            { add: { index: target, alias: stateP.versionAlias } },
-          ]) as Option.Some<AliasAction[]>,
-        };
       }
+
+      // This cluster doesn't have an existing Saved Object index, create a
+      // new version specific index.
+      const target = stateP.versionIndex;
+      return {
+        ...stateP,
+        controlState: 'CREATE_NEW_TARGET',
+        sourceIndex: Option.none as Option.None,
+        targetIndex: target,
+        versionIndexReadyActions: Option.some([
+          { add: { index: target, alias: stateP.currentAlias } },
+          { add: { index: target, alias: stateP.versionAlias } },
+        ]) as Option.Some<AliasAction[]>,
+      };
     } else {
       return throwBadResponse(stateP, res);
     }

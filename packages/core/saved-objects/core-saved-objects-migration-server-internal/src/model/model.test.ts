@@ -68,10 +68,6 @@ describe('migrations v2 model', () => {
       },
     },
   };
-  const desiredMapping: IndexMapping = {
-    properties: {},
-    _meta: { migrationMappingPropertyHashes: { new_saved_object_type: 'newhash' } },
-  };
   const baseState: BaseState = {
     controlState: '',
     legacyIndex: '.kibana',
@@ -87,7 +83,6 @@ describe('migrations v2 model', () => {
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
     targetIndexMappings: indexMapping,
-    desiredIndexMappings: desiredMapping, // desired mappings are not the same by default to trigger a migration
     tempIndexMappings: { properties: {} },
     preMigrationScript: Option.none,
     currentAlias: '.kibana',
@@ -2622,7 +2617,6 @@ describe('migrations v2 model', () => {
         currentAlias: '.kibana',
         versionAlias: '.kibana_7.12.0',
         versionIndex: '.kibana_7.11.0_001',
-        desiredIndexMappings: indexMapping,
       };
       it('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT when desired mappings match current mappings', () => {
         const res: ResponseType<'INIT'> = Either.right({

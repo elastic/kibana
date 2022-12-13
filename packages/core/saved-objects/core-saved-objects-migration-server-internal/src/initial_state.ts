@@ -24,7 +24,6 @@ import { excludeUnusedTypesQuery } from './core';
 export const createInitialState = ({
   kibanaVersion,
   waitForMigrationCompletion,
-  desiredMappings,
   targetMappings,
   preMigrationScript,
   migrationVersionPerType,
@@ -36,7 +35,6 @@ export const createInitialState = ({
 }: {
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
-  desiredMappings: IndexMapping;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
   migrationVersionPerType: SavedObjectsMigrationVersion;
@@ -108,7 +106,6 @@ export const createInitialState = ({
     tempIndex: `${indexPrefix}_${kibanaVersion}_reindex_temp`,
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
-    desiredIndexMappings: desiredMappings,
     targetIndexMappings: targetMappings,
     tempIndexMappings: reindexTargetMappings,
     outdatedDocumentsQuery,
