@@ -27,6 +27,7 @@ import {
   lastRunFromError,
   getNextRun,
   determineAlertsToReturn,
+  trimRecoveredAlerts,
 } from '../lib';
 import {
   RuleExecutionStatus,
@@ -423,12 +424,18 @@ export class TaskRunner<
           processedAlertsRecovered
         );
 
+        const { trimmedAlertsRecovered, trimmedAlertsRecoveredCurrent } = trimRecoveredAlerts<
+          State,
+          Context,
+          RecoveryActionGroupId
+        >(this.logger, processedAlertsRecovered, processedAlertsRecoveredCurrent, this.maxAlerts);
+
         logAlerts({
           logger: this.logger,
           alertingEventLogger: this.alertingEventLogger,
           newAlerts: processedAlertsNew,
           activeAlerts: processedAlertsActive,
-          recoveredAlerts: processedAlertsRecoveredCurrent,
+          recoveredAlerts: trimmedAlertsRecoveredCurrent,
           ruleLogPrefix: ruleLabel,
           ruleRunMetricsStore,
           canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
@@ -438,8 +445,8 @@ export class TaskRunner<
         return {
           newAlerts: processedAlertsNew,
           activeAlerts: processedAlertsActive,
-          recoveredAlerts: processedAlertsRecovered,
-          currentRecoveredAlerts: processedAlertsRecoveredCurrent,
+          recoveredAlerts: trimmedAlertsRecovered,
+          currentRecoveredAlerts: trimmedAlertsRecoveredCurrent,
         };
       }
     );
