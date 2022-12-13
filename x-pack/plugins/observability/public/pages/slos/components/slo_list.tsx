@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { SloListItem } from './slo_list_item';
+import { SloListEmpty } from './slo_list_empty';
 
 export function SloList() {
   const [activePage, setActivePage] = useState(0);
@@ -60,13 +61,15 @@ export function SloList() {
 
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="s">
-          {slos.length
-            ? slos.map((slo) => (
-                <EuiFlexItem key={slo.id}>
-                  <SloListItem slo={slo} onDelete={handleDelete} />
-                </EuiFlexItem>
-              ))
-            : null}
+          {slos.length ? (
+            slos.map((slo) => (
+              <EuiFlexItem key={slo.id}>
+                <SloListItem slo={slo} onDelete={handleDelete} />
+              </EuiFlexItem>
+            ))
+          ) : !loading ? (
+            <SloListEmpty />
+          ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
 
