@@ -25,8 +25,7 @@ import type {
   getLazyOsqueryAction,
   getLazyOsqueryResponseActionTypeForm,
 } from './shared_components';
-import type { UseAllLiveQueries } from './actions/use_all_live_queries';
-import type { useAllLiveQueries } from './actions/use_all_live_queries';
+import type { useAllLiveQueries, UseAllLiveQueriesConfig } from './actions/use_all_live_queries';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
@@ -38,7 +37,7 @@ export interface OsqueryPluginStart {
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
   fetchInstallationStatus: () => { loading: boolean; disabled: boolean; permissionDenied: boolean };
   OsqueryResponseActionTypeForm: ReturnType<typeof getLazyOsqueryResponseActionTypeForm>;
-  fetchAllLiveQueries: (config: UseAllLiveQueries) => ReturnType<typeof useAllLiveQueries>;
+  fetchAllLiveQueries: (config: UseAllLiveQueriesConfig) => ReturnType<typeof useAllLiveQueries>;
 }
 
 export interface AppPluginStartDependencies {

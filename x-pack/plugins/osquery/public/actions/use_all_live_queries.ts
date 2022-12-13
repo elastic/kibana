@@ -16,7 +16,7 @@ import type { ESTermQuery, ESExistsQuery } from '../../common/typed_json';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { Direction } from '../../common/search_strategy';
 
-export interface UseAllLiveQueries {
+export interface UseAllLiveQueriesConfig {
   activePage: number;
   direction?: Direction;
   limit: number;
@@ -32,7 +32,7 @@ export const useAllLiveQueries = ({
   sortField,
   filterQuery,
   skip = false,
-}: UseAllLiveQueries) => {
+}: UseAllLiveQueriesConfig) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
