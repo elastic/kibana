@@ -13341,10 +13341,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/index_or_search/preconfigured_job_redirect.ts"
               },
               {
@@ -21044,10 +21040,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
               },
               {
                 "plugin": "ml",

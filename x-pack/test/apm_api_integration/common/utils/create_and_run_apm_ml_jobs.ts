@@ -63,5 +63,5 @@ async function createAndRunApmMlJob({
     }
   );
 
-  await es.cluster.health({ index: '.ml-state-*', wait_for_status: 'yellow' });
+  await es.cluster.health({ index: '.ml-*', wait_for_status: 'yellow' });
 }
