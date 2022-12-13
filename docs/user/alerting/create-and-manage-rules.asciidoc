@@ -196,11 +196,9 @@ this state.
 
 A rule can have one of the following statuses:
 
-`active`:: The conditions for the rule have been met, and the associated actions should be invoked.
-`ok`:: The conditions for the rule have not been met, and the associated actions are not invoked.
-`error`:: An error was encountered by the rule.
-`pending`:: The rule has not yet run.  The rule was either just created, or enabled after being disabled.
-`unknown`:: A problem occurred when calculating the status. Most likely, something went wrong with the alerting code.
+`failed`:: The rule ran with errors.
+`succeeded`:: The rule ran without errors.
+`warning`:: The rule ran with some non-critical errors.
 
 [float]
 [[importing-and-exporting-rules]]
