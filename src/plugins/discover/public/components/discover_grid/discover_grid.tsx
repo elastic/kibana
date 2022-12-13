@@ -27,6 +27,7 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
+import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { DiscoverGridContext } from './discover_grid_context';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { DiscoverGridSettings } from './types';
@@ -36,7 +37,7 @@ import {
   getVisibleColumns,
 } from './discover_grid_columns';
 import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
-
+import { getDisplayedColumns } from '../../utils/columns';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
@@ -69,10 +70,6 @@ export interface DiscoverGridProps {
    * Determines which columns are displayed
    */
   columns: string[];
-  displayedColumns: string[];
-  displayedRows: DataTableRecord[];
-  defaultColumns: boolean;
-  setSelectedDocs: (docs: string[]) => void; // React.Dispatch<React.SetStateAction<string[]>>;
   /**
    * If set, the given document is displayed in a flyout
    */
@@ -190,10 +187,10 @@ export interface DiscoverGridProps {
    * Saved search id used for links to single doc and surrounding docs in the flyout
    */
   savedSearchId?: string;
-  usedSelectedDocs: string[];
-  isFilterActive: boolean;
-  setIsFilterActive: (isFilterActive: boolean) => void;
-  docDetail?: JSX.Element;
+  /**
+   * Document detail view component
+   */
+  DocumentView?: typeof DiscoverGridFlyout;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -202,13 +199,15 @@ const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
 
 export const DiscoverGrid = ({
   ariaLabelledBy,
-  defaultColumns,
+  columns,
   dataView,
-  displayedColumns = [], // todo why is this needed?
-  displayedRows = [], // todo why is this needed?
   isLoading,
   expandedDoc,
+  onAddColumn,
+  filters,
+  savedSearchId,
   onFilter,
+  onRemoveColumn,
   onResize,
   onSetColumns,
   onSort,
@@ -231,15 +230,41 @@ export const DiscoverGrid = ({
   rowsPerPageState,
   onUpdateRowsPerPage,
   onFieldEdited,
-  setSelectedDocs,
-  usedSelectedDocs = [],
-  isFilterActive,
-  setIsFilterActive,
-  docDetail,
+  DocumentView,
 }: DiscoverGridProps) => {
-  console.log('DiscoverGrid render');
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const services = useDiscoverServices();
+  const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
+  const [isFilterActive, setIsFilterActive] = useState(false);
+  const displayedColumns = getDisplayedColumns(columns, dataView);
+  const defaultColumns = displayedColumns.includes('_source');
+  const usedSelectedDocs = useMemo(() => {
+    if (!selectedDocs.length || !rows?.length) {
+      return [];
+    }
+    const idMap = rows.reduce((map, row) => map.set(row.id, true), new Map());
+    // filter out selected docs that are no longer part of the current data
+    const result = selectedDocs.filter((docId) => idMap.get(docId));
+    if (result.length === 0 && isFilterActive) {
+      setIsFilterActive(false);
+    }
+    return result;
+  }, [selectedDocs, rows, isFilterActive]);
+
+  const displayedRows = useMemo(() => {
+    if (!rows) {
+      return [];
+    }
+    if (!isFilterActive || usedSelectedDocs.length === 0) {
+      return rows;
+    }
+    const rowsFiltered = rows.filter((row) => usedSelectedDocs.includes(row.id));
+    if (!rowsFiltered.length) {
+      // in case the selected docs are no longer part of the sample of 500, show all docs
+      return rows;
+    }
+    return rowsFiltered;
+  }, [rows, usedSelectedDocs, isFilterActive]);
 
   const valueToStringConverter: ValueToStringConverter = useCallback(
     (rowIndex, columnId, options) => {
@@ -426,8 +451,11 @@ export const DiscoverGrid = ({
     return { columns: sortingColumns, onSort: () => {} };
   }, [sortingColumns, onTableSort, isSortEnabled]);
   const lead = useMemo(
-    () => getLeadControlColumns(setExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
-    [controlColumnIds, setExpandedDoc]
+    () =>
+      getLeadControlColumns(!!(setExpandedDoc && DocumentView)).filter(({ id }) =>
+        controlColumnIds.includes(id)
+      ),
+    [controlColumnIds, setExpandedDoc, DocumentView]
   );
 
   const additionalControls = useMemo(
@@ -441,7 +469,7 @@ export const DiscoverGrid = ({
           setIsFilterActive={setIsFilterActive}
         />
       ) : null,
-    [usedSelectedDocs, isFilterActive, rows, setIsFilterActive, setSelectedDocs]
+    [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
   );
 
   const showDisplaySelector = useMemo(
@@ -605,7 +633,22 @@ export const DiscoverGrid = ({
             </p>
           </EuiScreenReaderOnly>
         )}
-        {setExpandedDoc && expandedDoc && docDetail}
+        {setExpandedDoc && expandedDoc && DocumentView && (
+          <DocumentView
+            dataView={dataView}
+            hit={expandedDoc}
+            hits={displayedRows}
+            // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+            columns={defaultColumns ? [] : displayedColumns}
+            filters={filters}
+            savedSearchId={savedSearchId}
+            onFilter={onFilter}
+            onRemoveColumn={onRemoveColumn}
+            onAddColumn={onAddColumn}
+            onClose={() => setExpandedDoc(undefined)}
+            setExpandedDoc={setExpandedDoc}
+          />
+        )}
       </span>
     </DiscoverGridContext.Provider>
   );
