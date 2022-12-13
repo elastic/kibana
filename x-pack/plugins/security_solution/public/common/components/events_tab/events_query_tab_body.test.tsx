@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TableId } from '../../../../common/types';
-import { HostsType } from '../../../hosts/store/model';
+import { HostsType } from '../../../explore/hosts/store/model';
 import { TestProviders } from '../../mock';
 import type { EventsQueryTabBodyComponentProps } from './events_query_tab_body';
 import { EventsQueryTabBody, ALERTS_EVENTS_HISTOGRAM_ID } from './events_query_tab_body';
