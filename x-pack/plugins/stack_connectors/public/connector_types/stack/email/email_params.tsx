@@ -204,7 +204,7 @@ export const EmailParamsFields = ({
               if (!bcc) {
                 editAction('bcc', [], index);
               }
-              onBlur?.('bcc');
+              onBlur('bcc');
             }}
           />
         </EuiFormRow>
