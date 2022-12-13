@@ -48,6 +48,7 @@ import { EcsVulnerability } from './vulnerability';
 export type {
   EcsAgent,
   EcsAutonomousSystem,
+  EcsBase,
   EcsClient,
   EcsCloud,
   EcsContainer,
