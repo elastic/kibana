@@ -37,6 +37,10 @@ describe('UserActionMarkdown ', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    sessionStorage.removeItem(draftStorageKey);
+  });
+
   it('Renders markdown correctly when not in edit mode', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -254,11 +258,11 @@ describe('UserActionMarkdown ', () => {
 
     afterEach(() => {
       jest.clearAllTimers();
-      sessionStorage.removeItem(draftStorageKey);
     });
 
     afterAll(() => {
       jest.useRealTimers();
+      sessionStorage.removeItem(draftStorageKey);
     });
 
     beforeEach(() => {

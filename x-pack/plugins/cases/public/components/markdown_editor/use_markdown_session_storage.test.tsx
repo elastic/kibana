@@ -33,6 +33,7 @@ describe('useMarkdownSessionStorage', () => {
 
   afterEach(() => {
     jest.clearAllTimers();
+    sessionStorage.removeItem(sessionKey);
   });
 
   afterAll(() => {

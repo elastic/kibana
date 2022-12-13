@@ -95,6 +95,10 @@ describe('Utils', () => {
     const sessionKey = 'testKey';
     const sessionValue = 'test value';
 
+    afterEach(() => {
+      sessionStorage.removeItem(sessionKey);
+    });
+
     it('successfully removes key from session storage', () => {
       sessionStorage.setItem(sessionKey, sessionValue);
 

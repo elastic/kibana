@@ -54,6 +54,7 @@ const casesFormProps: CreateCaseFormProps = {
 
 describe('CreateCaseForm', () => {
   let globalForm: FormHook;
+  const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
 
   const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
     children,
@@ -79,6 +80,10 @@ describe('CreateCaseForm', () => {
     useGetTagsMock.mockReturnValue({ data: ['test'] });
     useGetConnectorsMock.mockReturnValue({ isLoading: false, data: connectorsMock });
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem(draftStorageKey);
   });
 
   it('renders with steps', async () => {
@@ -224,7 +229,6 @@ describe('CreateCaseForm', () => {
           />
         </MockHookWrapperComponent>
       );
-      const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
 
       const cancelBtn = result.getByTestId('create-case-cancel');
 
@@ -245,7 +249,6 @@ describe('CreateCaseForm', () => {
           />
         </MockHookWrapperComponent>
       );
-      const draftStorageKey = `cases.kibana.createCase.description.markdownEditor`;
 
       const submitBtn = result.getByTestId('create-case-submit');
 

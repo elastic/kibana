@@ -29,6 +29,7 @@ import type { Case } from '../../containers/types';
 import type { EuiMarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
+import { removeItemFromSessionStorate } from '../utils';
 
 import * as i18n from './translations';
 import type { AddCommentFormSchema } from './schema';
@@ -118,9 +119,25 @@ export const AddComment = React.memo(
             data: [{ ...data, type: CommentType.user }],
             updateCase: onCommentPosted,
           });
-          reset();
+
+          removeItemFromSessionStorate(draftStorageKey);
+
+          /* had to add to this check that session key is removed to avaoid weird issue that on reset 
+            Markdown editor form adds session storage comment back if it is not removed immediately */
+          if (!sessionStorage.getItem(draftStorageKey)) {
+            reset();
+          }
         }
-      }, [submit, onCommentSaving, createAttachments, caseId, owner, onCommentPosted, reset]);
+      }, [
+        submit,
+        onCommentSaving,
+        createAttachments,
+        caseId,
+        owner,
+        onCommentPosted,
+        reset,
+        draftStorageKey,
+      ]);
 
       /**
        * Focus on the text area when a quote has been added.

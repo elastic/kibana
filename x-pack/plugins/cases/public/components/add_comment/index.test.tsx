@@ -48,11 +48,17 @@ const sampleData: CaseAttachmentWithoutOwner = {
   comment: 'what a cool comment',
   type: CommentType.user as const,
 };
+const appId = 'testAppId';
+const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
 
 describe('AddComment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useCreateAttachmentsMock.mockImplementation(() => defaultResponse);
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem(draftKey);
   });
 
   it('should post comment on submit click', async () => {
@@ -213,7 +219,6 @@ describe('AddComment ', () => {
 
 describe('draft comment ', () => {
   let appMockRenderer: AppMockRenderer;
-  const appId = 'testAppId';
 
   beforeEach(() => {
     appMockRenderer = createAppMockRenderer();
@@ -234,7 +239,6 @@ describe('draft comment ', () => {
 
   it('should clear session storage on submit', async () => {
     const result = appMockRenderer.render(<AddComment {...addCommentProps} />);
-    const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
 
     fireEvent.change(result.getByLabelText('caseComment'), {
       target: { value: sampleData.comment },
@@ -264,10 +268,12 @@ describe('draft comment ', () => {
   });
 
   describe('existing storage key', () => {
-    const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
-
     beforeEach(() => {
       sessionStorage.setItem(draftKey, 'value set in storage');
+    });
+
+    afterEach(() => {
+      sessionStorage.removeItem(draftKey);
     });
 
     it('should have draft comment same as existing session storage', async () => {

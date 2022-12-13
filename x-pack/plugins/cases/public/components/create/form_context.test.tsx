@@ -786,4 +786,58 @@ describe('Create case', () => {
       expect(screen.queryByTestId('createCaseAssigneesComboBox')).toBeNull();
     });
   });
+
+  describe('draft comment', () => {
+    describe('existing storage key', () => {
+      beforeEach(() => {
+        sessionStorage.setItem(defaultCreateCaseForm.draftStorageKey, 'value set in storage');
+      });
+
+      afterEach(() => {
+        sessionStorage.removeItem(defaultCreateCaseForm.draftStorageKey);
+      });
+
+      it('should have session storage value same as draft comment', async () => {
+        mockedContext.render(
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
+            <SubmitCaseButton />
+          </FormContext>
+        );
+
+        await waitForFormToRender(screen);
+        const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
+          'euiMarkdownEditorTextArea'
+        );
+
+        expect(descriptionInput).toHaveValue('value set in storage');
+      });
+    });
+
+    describe('set storage key', () => {
+      afterEach(() => {
+        sessionStorage.removeItem(defaultCreateCaseForm.draftStorageKey);
+      });
+
+      it('should have session storage value same as draft comment', async () => {
+        mockedContext.render(
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
+            <SubmitCaseButton />
+          </FormContext>
+        );
+
+        await waitForFormToRender(screen);
+        const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
+          'euiMarkdownEditorTextArea'
+        );
+
+        await waitFor(() => {
+          expect(descriptionInput).toHaveValue(
+            sessionStorage.getItem(defaultCreateCaseForm.draftStorageKey)
+          );
+        });
+      });
+    });
+  });
 });
