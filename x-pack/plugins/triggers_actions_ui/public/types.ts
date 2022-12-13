@@ -198,6 +198,7 @@ export interface ActionParamsProps<TParams> {
   isDisabled?: boolean;
   showEmailSubjectAndMessage?: boolean;
   executionMode?: ActionConnectorMode;
+  onBlur?: (field?: string) => void;
 }
 
 export interface Pagination {
