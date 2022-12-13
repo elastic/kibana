@@ -19,47 +19,68 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
-import { useKibana } from '../../../utils/kibana_react';
 
+import { useKibana } from '../../../utils/kibana_react';
+import { SloListItemSummaryStats } from './slo_list_item_summary_stats';
+import { DeleteConfirmationModal } from './slo_list_item_delete_confirmation_modal';
 import { paths } from '../../../config';
 import { SLO } from '../../../typings';
 import { isSloHealthy } from '../helpers/is_slo_healthy';
-import { SloListItemSummaryStats } from './slo_list_item_summary_stats';
 
 export interface SloListItemProps {
   slo: SLO;
+  onDelete: () => void;
 }
 
-export function SloListItem({ slo }: SloListItemProps) {
-  const { application, http } = useKibana().services;
+export function SloListItem({ slo, onDelete }: SloListItemProps) {
+  const {
+    application: { navigateToUrl },
+    http: { basePath },
+  } = useKibana().services;
 
-  const navigateToUrl = application?.navigateToUrl;
-  const basePath = http?.basePath;
-
-  const [isPopoverOpen, setPopoverOpen] = useState(false);
+  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
+  const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleClickActions = () => {
-    setPopoverOpen(!isPopoverOpen);
+    setIsActionsPopoverOpen(!isActionsPopoverOpen);
   };
 
   const handleEdit = () => {
-    setPopoverOpen(false);
+    setIsActionsPopoverOpen(false);
   };
 
   const handleDelete = () => {
-    setPopoverOpen(false);
+    setDeleteConfirmationModalOpen(true);
+    setIsDeleting(true);
+    setIsActionsPopoverOpen(false);
   };
 
   const handleClone = () => {
-    setPopoverOpen(false);
+    setIsActionsPopoverOpen(false);
   };
 
   const handleNavigate = () => {
     navigateToUrl(basePath.prepend(paths.observability.sloDetails(slo.id)));
   };
 
+  const handleDeleteCancel = () => {
+    setDeleteConfirmationModalOpen(false);
+    setIsDeleting(false);
+  };
+
+  const handleDeleteSuccess = () => {
+    setDeleteConfirmationModalOpen(false);
+    onDelete();
+  };
+
   return (
-    <EuiPanel hasBorder hasShadow={false}>
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      color={isDeleting ? 'subdued' : undefined}
+      style={{ opacity: isDeleting ? 0.3 : 1, transition: 'opacity 0.15s ease-in' }}
+    >
       <EuiFlexGroup responsive={false} alignItems="center">
         {/* CONTENT */}
         <EuiFlexItem grow>
@@ -111,7 +132,7 @@ export function SloListItem({ slo }: SloListItemProps) {
             }
             panelPaddingSize="none"
             closePopover={handleClickActions}
-            isOpen={isPopoverOpen}
+            isOpen={isActionsPopoverOpen}
           >
             <EuiContextMenuPanel
               size="s"
@@ -136,6 +157,14 @@ export function SloListItem({ slo }: SloListItemProps) {
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {isDeleteConfirmationModalOpen ? (
+        <DeleteConfirmationModal
+          slo={slo}
+          onCancel={handleDeleteCancel}
+          onDeleted={handleDeleteSuccess}
+        />
+      ) : null}
     </EuiPanel>
   );
 }
