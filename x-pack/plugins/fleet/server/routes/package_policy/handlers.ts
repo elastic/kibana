@@ -56,9 +56,9 @@ const getAllowedPackageNamesMessage = (allowedPackageNames: string[]): string =>
  */
 const validatePackagePolicyDataIsScopedToAllowedPackageNames = (
   data: PackagePolicy[],
-  allowedPackageNames: string[]
+  allowedPackageNames: string[] | undefined
 ): string | undefined => {
-  if (!data.length) {
+  if (!data.length || typeof allowedPackageNames === 'undefined') {
     return;
   }
 
@@ -96,18 +96,16 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
     );
 
     // specific to package-level RBAC
-    if (limitedToPackages && limitedToPackages.length) {
-      const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
-        items,
-        limitedToPackages
-      );
-      if (validationResult) {
-        return response.forbidden({
-          body: {
-            message: validationResult,
-          },
-        });
-      }
+    const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
+      items,
+      limitedToPackages
+    );
+    if (validationResult) {
+      return response.forbidden({
+        body: {
+          message: validationResult,
+        },
+      });
     }
 
     // agnostic to package-level RBAC
@@ -141,18 +139,16 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
 
     const body: BulkGetPackagePoliciesResponse = { items: items ?? [] };
 
-    if (limitedToPackages && limitedToPackages.length) {
-      const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
-        body.items,
-        limitedToPackages
-      );
-      if (validationResult) {
-        return response.forbidden({
-          body: {
-            message: validationResult,
-          },
-        });
-      }
+    const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
+      body.items,
+      limitedToPackages
+    );
+    if (validationResult) {
+      return response.forbidden({
+        body: {
+          message: validationResult,
+        },
+      });
     }
 
     return response.ok({
@@ -183,18 +179,16 @@ export const getOnePackagePolicyHandler: FleetRequestHandler<
     const packagePolicy = await packagePolicyService.get(soClient, packagePolicyId);
 
     if (packagePolicy) {
-      if (limitedToPackages && limitedToPackages.length) {
-        const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
-          [packagePolicy],
-          limitedToPackages
-        );
-        if (validationResult) {
-          return response.forbidden({
-            body: {
-              message: validationResult,
-            },
-          });
-        }
+      const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
+        [packagePolicy],
+        limitedToPackages
+      );
+      if (validationResult) {
+        return response.forbidden({
+          body: {
+            message: validationResult,
+          },
+        });
       }
 
       return response.ok({
