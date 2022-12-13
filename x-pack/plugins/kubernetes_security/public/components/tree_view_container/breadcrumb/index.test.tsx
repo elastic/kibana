@@ -19,7 +19,6 @@ const MOCK_TREE_SELECTION: KubernetesCollectionMap = {
   containerImage: 'selected image',
 };
 
-const RESPONSE_ACTION_TEST_BUTTON = 'kubernetesSecurity:kubernetesSecurityResponseAction';
 describe('Tree view Breadcrumb component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
@@ -130,17 +129,24 @@ describe('Tree view Breadcrumb component', () => {
     });
 
     it('clicking on breadcrumb item triggers onSelect', async () => {
+      const mockPodNavSelection = {
+        clusterId: 'selected cluster id',
+        clusterName: 'selected cluster name',
+        namespace: 'selected namespace',
+        node: 'selected node',
+        pod: 'selected pod',
+      };
       renderResult = mockedContext.render(
         <Breadcrumb
           responseActionClick={onResponseActionButtonClick}
           treeNavResponseActionDisabled={false}
-          treeNavSelection={{ ...MOCK_TREE_SELECTION, node: undefined }}
+          treeNavSelection={mockPodNavSelection}
           onSelect={onSelect}
           responseActionButtonProps={responseActionButtonProps}
         />
       );
-      expect(renderResult.queryByText(MOCK_TREE_SELECTION.pod)).toBeVisible();
-      renderResult.getByText(MOCK_TREE_SELECTION.pod).click();
+      expect(renderResult.queryByText(mockPodNavSelection.pod)).toBeVisible();
+      renderResult.getByText(mockPodNavSelection.pod).click();
       expect(onSelect).toHaveBeenCalledTimes(1);
     });
 
