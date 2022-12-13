@@ -12,6 +12,7 @@ export {
   userLoginEvent,
   userLogoutEvent,
   sessionCleanupEvent,
+  sessionConcurrentLimitEvent,
   accessAgreementAcknowledgedEvent,
   httpRequestEvent,
   savedObjectEvent,

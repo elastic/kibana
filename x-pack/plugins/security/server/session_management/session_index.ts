@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CreateRequest, IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  BulkResponse,
+  CreateRequest,
+  IndicesCreateRequest,
+  SearchHit,
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   BulkOperationContainer,
   SortResults,
@@ -16,7 +21,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { AuthenticationProvider } from '../../common/model';
 import type { AuditLogger } from '../audit';
-import { sessionCleanupEvent } from '../audit';
+import { sessionCleanupEvent, sessionConcurrentLimitEvent } from '../audit';
 import type { ConfigType } from '../config';
 
 export interface SessionIndexOptions {
@@ -247,6 +252,8 @@ export class SessionIndex {
       );
       await this.indexInitialization;
     }
+
+    await this.enforceConcurrentSessionsLimit(sessionValue);
 
     try {
       let { body, statusCode } = await this.writeNewSessionDocument(sessionValue, {
@@ -764,6 +771,100 @@ export class SessionIndex {
       await this.options.elasticsearchClient.closePointInTime({
         id: openPitResponse.id,
       });
+    }
+  }
+
+  /**
+   * Enforces that the provided new session won't exceed the concurrent sessions limit, if configured. If the limit is
+   * about to be exceeded, this method will invalidate enough oldest sessions to stay within the limit.
+   * @param sessionToCreate A value for the session that's about to be created.
+   */
+  private async enforceConcurrentSessionsLimit(
+    sessionToCreate: Readonly<Omit<SessionIndexValue, 'metadata'>>
+  ) {
+    // Concurrent sessions limit isn't enforced if it's not configured, or if the session is unauthenticated.
+    const maxConcurrentSessions = this.options.config.session.concurrentSessions?.maxSessions;
+    if (maxConcurrentSessions == null || !sessionToCreate.usernameHash) {
+      return;
+    }
+
+    this.options.logger.debug(
+      `Enforcing concurrent sessions limit (max ${maxConcurrentSessions} sessions).`
+    );
+
+    let sessionsToInvalidate: Array<SearchHit<SessionIndexValue>>;
+    try {
+      const searchResponse = await this.options.elasticsearchClient.search<SessionIndexValue>({
+        index: this.aliasName,
+        stored_fields: [],
+
+        // Find all sessions created for the same user by the same authentication provider.
+        query: {
+          bool: {
+            must: [
+              { term: { usernameHash: sessionToCreate.usernameHash } },
+              { term: { 'provider.type': sessionToCreate.provider.type } },
+              { term: { 'provider.name': sessionToCreate.provider.name } },
+            ],
+          },
+        },
+
+        // Sort sessions by creation date in descending order and skip sessions that are within the limit, properly
+        // adjusting `size` to account for non-zero `from`.
+        sort: [{ createdAt: { order: 'desc' } }],
+        from: maxConcurrentSessions - 1,
+        size: SESSION_INDEX_CLEANUP_BATCH_SIZE - maxConcurrentSessions + 1,
+
+        // Improve performance by not tracking total hits.
+        track_total_hits: false,
+      });
+      sessionsToInvalidate = searchResponse.hits.hits;
+    } catch (err) {
+      this.options.logger.error(
+        `Failed to enforce concurrent sessions limit, unable to fetch user sessions: ${err.message}.`
+      );
+      throw err;
+    }
+
+    if (sessionsToInvalidate.length === 0) {
+      this.options.logger.debug('Concurrent sessions limit is not exceeded.');
+      return;
+    }
+
+    const sessionDeleteOperations = sessionsToInvalidate.map(({ _id }) => {
+      sessionConcurrentLimitEvent({
+        sessionId: _id,
+        usernameHash: sessionToCreate.usernameHash,
+        provider: sessionToCreate.provider,
+      });
+      return { delete: { _id } };
+    });
+
+    let bulkDeleteResponse: BulkResponse;
+    try {
+      bulkDeleteResponse = await this.options.elasticsearchClient.bulk({
+        index: this.aliasName,
+        _source: false,
+        operations: sessionDeleteOperations,
+      });
+    } catch (err) {
+      this.options.logger.error(
+        `Failed to enforce concurrent sessions limit, unable to delete ${sessionDeleteOperations.length} user sessions: ${err.message}.`
+      );
+      throw err;
+    }
+
+    if (bulkDeleteResponse.errors) {
+      const errorReasons = bulkDeleteResponse.items
+        .flatMap((item) => (item.delete?.error ? [item.delete.error.reason] : []))
+        .join(', ');
+      this.options.logger.debug(
+        `Failed to enforce concurrent sessions limit, unable to delete ${sessionDeleteOperations.length} user sessions: ${errorReasons}.`
+      );
+    } else {
+      this.options.logger.debug(
+        `Concurrent sessions limit has been enforced (${sessionDeleteOperations.length} sessions were invalidated).`
+      );
     }
   }
 }

@@ -202,6 +202,29 @@ export function sessionCleanupEvent({
   };
 }
 
+export function sessionConcurrentLimitEvent({
+  usernameHash,
+  sessionId,
+  provider,
+}: SessionCleanupParams): AuditEvent {
+  return {
+    message: `Removing session for user [hash=${usernameHash}] due to exceeded concurrent sessions limit`,
+    event: {
+      action: 'session_concurrent_limit',
+      category: ['authentication'],
+      outcome: 'unknown',
+    },
+    user: {
+      hash: usernameHash,
+    },
+    kibana: {
+      session_id: sessionId,
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
 export interface AccessAgreementAcknowledgedParams {
   username: string;
   provider: AuthenticationProvider;

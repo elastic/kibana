@@ -226,6 +226,11 @@ export const ConfigSchema = schema.object({
         }
       },
     }),
+    concurrentSessions: schema.maybe(
+      schema.object({
+        maxSessions: schema.number({ min: 1, max: 1000 }),
+      })
+    ),
   }),
   secureCookies: schema.boolean({ defaultValue: false }),
   sameSiteCookies: schema.maybe(
@@ -420,6 +425,7 @@ export function createConfig(
 
 function getSessionConfig(session: RawConfigType['session'], providers: ProvidersConfigType) {
   return {
+    concurrentSessions: session.concurrentSessions,
     cleanupInterval: session.cleanupInterval,
     getExpirationTimeouts(provider: AuthenticationProvider | undefined) {
       // Both idle timeout and lifespan from the provider specific session config can have three

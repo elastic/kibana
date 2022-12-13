@@ -16,6 +16,7 @@ import {
   httpRequestEvent,
   savedObjectEvent,
   sessionCleanupEvent,
+  sessionConcurrentLimitEvent,
   SpaceAuditAction,
   spaceAuditEvent,
   userLoginEvent,
@@ -383,6 +384,37 @@ describe('#sessionCleanupEvent', () => {
           "session_id": "sid",
         },
         "message": "Removing invalid or expired session for user [hash=abcdef]",
+        "user": Object {
+          "hash": "abcdef",
+        },
+      }
+    `);
+  });
+});
+
+describe('#sessionConcurrentLimitEvent', () => {
+  test('creates event with `unknown` outcome', () => {
+    expect(
+      sessionConcurrentLimitEvent({
+        usernameHash: 'abcdef',
+        sessionId: 'sid',
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "session_concurrent_limit",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+          "session_id": "sid",
+        },
+        "message": "Removing session for user [hash=abcdef] due to exceeded concurrent sessions limit",
         "user": Object {
           "hash": "abcdef",
         },
