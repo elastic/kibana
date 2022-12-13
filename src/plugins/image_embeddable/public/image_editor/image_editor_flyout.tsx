@@ -208,7 +208,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                     >
                       <FormattedMessage
                         id="imageEmbeddable.imageEditor.selectImagePromptText"
-                        defaultMessage="or use a previously uploaded image"
+                        defaultMessage="Or use a previously uploaded image"
                       />
                     </EuiLink>
                   </p>
