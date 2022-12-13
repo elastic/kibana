@@ -122,7 +122,7 @@ export const useDataView = (): {
 
         if (needToBeInit) {
           const dataView = await getSourcererDataView(dataViewId, data.dataViews);
-          dispatch(sourcererActions.setDataView(dataViewToUpdate));
+          dispatch(sourcererActions.setDataView(dataView));
         }
 
         return new Promise<void>((resolve) => {

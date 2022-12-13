@@ -198,7 +198,7 @@ export const usePickIndexPatterns = ({
           const dataView = await getSourcererDataView(newSelectedDataViewId, dataViews);
 
           if (isHookAlive.current) {
-            dispatch(sourcererActions.setDataView(pickedDataViewData));
+            dispatch(sourcererActions.setDataView(dataView));
             setSelectedOptions(
               isOnlyDetectionAlerts ? alertsOptions : patternListToOptions(dataView.patternList)
             );
