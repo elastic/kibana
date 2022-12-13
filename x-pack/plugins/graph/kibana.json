@@ -7,15 +7,20 @@
   "requiredPlugins": [
     "licensing",
     "data",
+    "lens",
     "navigation",
     "savedObjects",
     "unifiedSearch",
-    "inspector"
+    "inspector",
+    "expressions",
+    "fieldFormats",
+    "visualizations"
   ],
   "optionalPlugins": [
     "home",
     "features",
-    "spaces"
+    "spaces",
+    "charts"
   ],
   "configPath": [
     "xpack",
@@ -24,7 +29,8 @@
   "requiredBundles": [
     "unifiedSearch",
     "kibanaUtils",
-    "kibanaReact"
+    "kibanaReact",
+    "charts"
   ],
   "owner": {
     "name": "Data Discovery",
