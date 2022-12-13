@@ -7,33 +7,38 @@
  */
 
 import React from 'react';
+import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldNameSearch, type FieldNameSearchProps } from './field_name_search';
 import { FieldTypeFilter, type FieldTypeFilterProps } from './field_type_filter';
+import { type FieldListItem } from '../../types';
 
-export interface FieldListFiltersProps {
-  selectedFieldTypes?: FieldTypeFilterProps['selectedFieldTypes'];
-  availableFieldTypes?: FieldTypeFilterProps['availableFieldTypes'];
-  onChangeFieldTypes?: FieldTypeFilterProps['onChange'];
+export interface FieldListFiltersProps<T extends FieldListItem> {
+  selectedFieldTypes?: FieldTypeFilterProps<T>['selectedFieldTypes'];
+  allFields?: FieldTypeFilterProps<T>['allFields'];
+  getCustomFieldType?: FieldTypeFilterProps<T>['getCustomFieldType'];
+  onChangeFieldTypes?: FieldTypeFilterProps<T>['onChange'];
   nameFilter: FieldNameSearchProps['nameFilter'];
   fieldSearchDescriptionId?: FieldNameSearchProps['fieldSearchDescriptionId'];
   onChangeNameFilter: FieldNameSearchProps['onChange'];
 }
 
-export const FieldListFilters: React.FC<FieldListFiltersProps> = ({
+export function FieldListFilters<T extends FieldListItem = DataViewField>({
   selectedFieldTypes,
-  availableFieldTypes,
+  allFields,
+  getCustomFieldType,
   onChangeFieldTypes,
   nameFilter,
   fieldSearchDescriptionId,
   onChangeNameFilter,
-}) => {
+}: FieldListFiltersProps<T>) {
   return (
     <FieldNameSearch
       append={
-        availableFieldTypes?.length && selectedFieldTypes && onChangeFieldTypes ? (
+        allFields && selectedFieldTypes && onChangeFieldTypes ? (
           <FieldTypeFilter
             selectedFieldTypes={selectedFieldTypes}
-            availableFieldTypes={availableFieldTypes}
+            allFields={allFields}
+            getCustomFieldType={getCustomFieldType}
             onChange={onChangeFieldTypes}
           />
         ) : undefined
@@ -43,4 +48,4 @@ export const FieldListFilters: React.FC<FieldListFiltersProps> = ({
       onChange={onChangeNameFilter}
     />
   );
-};
+}

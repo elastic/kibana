@@ -20,6 +20,7 @@ import {
   FieldListFilters,
   FieldIcon,
   useFieldFilters,
+  GetCustomFieldType,
   wrapFieldNameOnDot,
   FieldListGrouped,
   FieldListGroupedProps,
@@ -31,6 +32,8 @@ import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
 import { ChildDragDropProvider, DragDrop } from '../../drag_drop';
+
+const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 
 export type TextBasedDataPanelProps = DatasourceDataPanelProps<TextBasedPrivateState> & {
   data: DataPublicPluginStart;
@@ -95,8 +98,9 @@ export function TextBasedDataPanel({
   }, []);
 
   const visibleAllFields = dataHasLoaded ? fieldList : null;
-  const fieldListFilters = useFieldFilters({
+  const fieldListFilters = useFieldFilters<DatatableColumn>({
     allFields: visibleAllFields,
+    getCustomFieldType,
   });
   const fieldListGroupedProps = useGroupedFields<DatatableColumn>({
     dataViewId: null,
@@ -127,7 +131,7 @@ export function TextBasedDataPanel({
             className={`lnsFieldItem lnsFieldItem--${field?.meta?.type}`}
             isActive={false}
             onClick={() => {}}
-            fieldIcon={<FieldIcon type={field?.meta.type} />}
+            fieldIcon={<FieldIcon type={getCustomFieldType(field)} />}
             fieldName={
               <EuiHighlight search={wrapFieldNameOnDot(fieldNameHighlight)}>
                 {wrapFieldNameOnDot(field.name)}

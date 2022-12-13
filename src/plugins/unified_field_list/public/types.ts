@@ -27,7 +27,7 @@ export enum ExistenceFetchStatus {
 
 export interface FieldListItem {
   name: DataViewField['name'];
-  type: DataViewField['type'];
+  type?: DataViewField['type'];
   displayName?: DataViewField['displayName'];
   count?: DataViewField['count'];
   timeSeriesMetric?: DataViewField['timeSeriesMetric'];
@@ -70,3 +70,5 @@ export type FieldTypeKnown = Exclude<
   DataViewField['timeSeriesMetric'] | DataViewField['type'],
   undefined
 >;
+
+export type GetCustomFieldType<T extends FieldListItem> = (field: T) => FieldTypeKnown;

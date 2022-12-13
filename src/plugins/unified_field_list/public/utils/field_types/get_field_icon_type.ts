@@ -7,11 +7,14 @@
  */
 
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldListItem } from '../../types';
+import type { FieldListItem, GetCustomFieldType } from '../../types';
 import { getFieldType } from './get_field_type';
 
-export function getFieldIconType<T extends FieldListItem = DataViewField>(field: T): string {
-  const type = getFieldType<T>(field);
+export function getFieldIconType<T extends FieldListItem = DataViewField>(
+  field: T,
+  getCustomFieldType?: GetCustomFieldType<T>
+): string {
+  const type = getCustomFieldType ? getCustomFieldType(field) : getFieldType<T>(field);
   const esType = field.esTypes?.[0] || null;
   if (esType && ['_id', '_index'].includes(esType)) {
     return type;

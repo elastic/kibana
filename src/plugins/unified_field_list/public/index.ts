@@ -58,6 +58,7 @@ export type {
   FieldListGroups,
   FieldsGroupDetails,
   FieldTypeKnown,
+  GetCustomFieldType,
 } from './types';
 export { ExistenceFetchStatus, FieldsGroupNames } from './types';
 

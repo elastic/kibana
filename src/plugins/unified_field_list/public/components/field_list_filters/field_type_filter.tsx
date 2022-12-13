@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -14,28 +14,64 @@ import {
   EuiFlexItem,
   EuiFilterButton,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPopover,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon } from '../field_icon';
-import { getFieldTypeName } from '../../utils/field_types';
-import { type FieldTypeKnown } from '../../types';
+import {
+  getFieldIconType,
+  getFieldTypeName,
+  isKnownFieldType,
+  KNOWN_FIELD_TYPE_LIST,
+} from '../../utils/field_types';
+import type { FieldListItem, FieldTypeKnown, GetCustomFieldType } from '../../types';
 
-export interface FieldTypeFilterProps {
+export interface FieldTypeFilterProps<T extends FieldListItem> {
+  allFields: T[] | null;
+  getCustomFieldType?: GetCustomFieldType<T>;
   selectedFieldTypes: FieldTypeKnown[];
-  availableFieldTypes: FieldTypeKnown[];
   onChange: (fieldTypes: FieldTypeKnown[]) => unknown;
 }
 
 // TODO: refactor test-subj and className
 // TODO: add icon and type name components
 
-export const FieldTypeFilter: React.FC<FieldTypeFilterProps> = ({
+export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
+  allFields,
+  getCustomFieldType,
   selectedFieldTypes,
-  availableFieldTypes,
   onChange,
-}) => {
+}: FieldTypeFilterProps<T>) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [typeCounts, setTypeCounts] = useState<Map<string, number>>();
+
+  useEffect(() => {
+    // calculate counts only if user opened the popover
+    if (!isOpen || !allFields?.length) {
+      setTypeCounts(undefined);
+      return;
+    }
+    const counts = new Map();
+    allFields.forEach((field) => {
+      const type = getFieldIconType(field, getCustomFieldType);
+      if (isKnownFieldType(type)) {
+        counts.set(type, (counts.get(type) || 0) + 1);
+      }
+    });
+    setTypeCounts(counts);
+  }, [isOpen, allFields, setTypeCounts, getCustomFieldType]);
+
+  const availableFieldTypes = useMemo(() => {
+    // sorting is defined by items in KNOWN_FIELD_TYPE_LIST
+    return KNOWN_FIELD_TYPE_LIST.filter((type) => {
+      const knownTypeCount = typeCounts?.get(type) ?? 0;
+      // always include current field type filters - there may not be any fields of the type of an existing type filter on data view switch, but we still need to include the existing filter in the list so that the user can remove it
+      return knownTypeCount > 0 || selectedFieldTypes.includes(type);
+    });
+  }, [typeCounts, selectedFieldTypes]);
 
   return (
     <EuiPopover
@@ -64,31 +100,41 @@ export const FieldTypeFilter: React.FC<FieldTypeFilterProps> = ({
         </EuiFilterButton>
       }
     >
-      <EuiContextMenuPanel
-        data-test-subj="lnsIndexPatternTypeFilterOptions"
-        items={availableFieldTypes.map((type) => (
-          <EuiContextMenuItem
-            className="lnsInnerIndexPatternDataPanel__filterType"
-            key={type}
-            icon={selectedFieldTypes.includes(type) ? 'check' : 'empty'}
-            data-test-subj={`typeFilter-${type}`}
-            onClick={() => {
-              onChange(
-                selectedFieldTypes.includes(type)
-                  ? selectedFieldTypes.filter((t) => t !== type)
-                  : [...selectedFieldTypes, type]
-              );
-            }}
-          >
-            <EuiFlexGroup responsive={false} gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <FieldIcon type={type} />
-              </EuiFlexItem>
-              <EuiFlexItem>{getFieldTypeName(type)}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiContextMenuItem>
-        ))}
-      />
+      {availableFieldTypes.length > 0 ? (
+        <EuiContextMenuPanel
+          data-test-subj="lnsIndexPatternTypeFilterOptions"
+          items={availableFieldTypes.map((type) => (
+            <EuiContextMenuItem
+              className="lnsInnerIndexPatternDataPanel__filterType"
+              key={type}
+              icon={selectedFieldTypes.includes(type) ? 'check' : 'empty'}
+              data-test-subj={`typeFilter-${type}`}
+              onClick={() => {
+                onChange(
+                  selectedFieldTypes.includes(type)
+                    ? selectedFieldTypes.filter((t) => t !== type)
+                    : [...selectedFieldTypes, type]
+                );
+              }}
+            >
+              <EuiFlexGroup responsive={false} gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <FieldIcon type={type} />
+                </EuiFlexItem>
+                <EuiFlexItem>{getFieldTypeName(type)}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiContextMenuItem>
+          ))}
+        />
+      ) : (
+        <EuiFlexGroup responsive={false} alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="l" />
+            <EuiLoadingSpinner />
+            <EuiSpacer size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </EuiPopover>
   );
-};
+}
