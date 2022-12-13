@@ -386,7 +386,7 @@ export const RuleForm = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule size="full" margin="xs" />
-        <EuiListGroup flush={true} gutterSize="m" size="l" maxWidth={false}>
+        <EuiListGroup flush={true} gutterSize="m" size="m" maxWidth={false}>
           {items
             .sort((a, b) => ruleTypeCompare(a, b))
             .map((item, index) => {

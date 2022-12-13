@@ -31,6 +31,10 @@ import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
 import {
+  securityGuideId,
+  securityGuideConfig,
+} from '../common/guided_onboarding/security_guide_config';
+import {
   createEqlAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
@@ -103,7 +107,8 @@ import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
-import { eventFiltersFieldsProvider } from './search_strategy/event_filters_fields';
+import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
+import { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../common/endpoint/constants';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -357,11 +362,14 @@ export class Plugin implements ISecuritySolutionPlugin {
         config,
       });
 
-      const eventFiltersFieldsStrategy = eventFiltersFieldsProvider(
+      const endpointFieldsStrategy = endpointFieldsProvider(
         this.endpointAppContextService,
         depsStart.data.indexPatterns
       );
-      plugins.data.search.registerSearchStrategy('eventFiltersFields', eventFiltersFieldsStrategy);
+      plugins.data.search.registerSearchStrategy(
+        ENDPOINT_FIELDS_SEARCH_STRATEGY,
+        endpointFieldsStrategy
+      );
 
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
@@ -393,6 +401,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     featureUsageService.setup(plugins.licensing);
+
+    /**
+     * Register a config for the security guide
+     */
+    plugins.guidedOnboarding.registerGuideConfig(securityGuideId, securityGuideConfig);
 
     return {};
   }

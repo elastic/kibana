@@ -33,6 +33,8 @@ export interface RequestHandlerParams {
   disableShardWarnings?: boolean;
   getNow?: () => Date;
   executionContext?: KibanaExecutionContext;
+  title?: string;
+  description?: string;
 }
 
 export const handleRequest = ({
@@ -49,6 +51,8 @@ export const handleRequest = ({
   disableShardWarnings,
   getNow,
   executionContext,
+  title,
+  description,
 }: RequestHandlerParams) => {
   return defer(async () => {
     const forceNow = getNow?.();
@@ -117,13 +121,17 @@ export const handleRequest = ({
           sessionId: searchSessionId,
           inspector: {
             adapter: inspectorAdapters.requests,
-            title: i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
-              defaultMessage: 'Data',
-            }),
-            description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
-              defaultMessage:
-                'This request queries Elasticsearch to fetch the data for the visualization.',
-            }),
+            title:
+              title ??
+              i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
+                defaultMessage: 'Data',
+              }),
+            description:
+              description ??
+              i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
+                defaultMessage:
+                  'This request queries Elasticsearch to fetch the data for the visualization.',
+              }),
           },
           executionContext,
         })

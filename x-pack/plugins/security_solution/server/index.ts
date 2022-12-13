@@ -50,6 +50,8 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
       { level: 'critical' }
     ),
     unused('ruleExecutionLog.underlyingClient', { level: 'warning' }),
+    unused('prebuiltRulesFromFileSystem', { level: 'warning' }),
+    unused('prebuiltRulesFromSavedObjects', { level: 'warning' }),
   ],
 };
 
