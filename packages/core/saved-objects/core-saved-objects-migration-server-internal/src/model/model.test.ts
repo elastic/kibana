@@ -9,6 +9,7 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type {
   FatalState,
   State,
@@ -45,6 +46,7 @@ import type {
   CheckVersionIndexReadyActions,
   UpdateTargetMappingsMeta,
   CheckTargetMappingsState,
+  InitState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
@@ -53,6 +55,24 @@ import { createInitialProgress } from './progress';
 import { model } from './model';
 
 describe('migrations v2 model', () => {
+  const indexMapping: IndexMapping = {
+    properties: {
+      new_saved_object_type: {
+        properties: {
+          value: { type: 'text' },
+        },
+      },
+    },
+    _meta: {
+      migrationMappingPropertyHashes: {
+        new_saved_object_type: '4a11183eee21e6fbad864f7a30b39ad0',
+      },
+    },
+  };
+  const desiredMapping: IndexMapping = {
+    properties: {},
+    _meta: { migrationMappingPropertyHashes: { new_saved_object_type: 'newhash' } },
+  };
   const baseState: BaseState = {
     controlState: '',
     legacyIndex: '.kibana',
@@ -67,20 +87,8 @@ describe('migrations v2 model', () => {
     discardCorruptObjects: false,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
-    targetIndexMappings: {
-      properties: {
-        new_saved_object_type: {
-          properties: {
-            value: { type: 'text' },
-          },
-        },
-      },
-      _meta: {
-        migrationMappingPropertyHashes: {
-          new_saved_object_type: '4a11183eee21e6fbad864f7a30b39ad0',
-        },
-      },
-    },
+    targetIndexMappings: indexMapping,
+    desiredIndexMappings: desiredMapping, // desired mappings are not the same by default to trigger a migration
     tempIndexMappings: { properties: {} },
     preMigrationScript: Option.none,
     currentAlias: '.kibana',
@@ -2605,6 +2613,31 @@ describe('migrations v2 model', () => {
         );
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+    });
+    describe('skipping reindex if not necessary', () => {
+      const unchangedMappingsState: State = {
+        ...baseState,
+        controlState: 'INIT',
+        currentAlias: '.kibana',
+        versionAlias: '.kibana_7.11.0',
+        versionIndex: '.kibana_7.11.0_001',
+        desiredIndexMappings: indexMapping,
+      };
+      it('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT when desired mappings match current mappings', () => {
+        const res: ResponseType<'INIT'> = Either.right({
+          '.kibana_7.11.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.11.0': {},
+            },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+        });
+        const newState = model(unchangedMappingsState, res) as PostInitState;
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(newState.skipReindex).toBe(true);
       });
     });
   });
