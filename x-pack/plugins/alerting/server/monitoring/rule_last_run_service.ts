@@ -7,11 +7,11 @@
 
 import { PublicLastRunSetters } from '../types';
 
-export type RuleLastRunResults = {
+export interface RuleLastRunResults {
   errors: string[];
   warnings: string[];
   outcomeMessages: string[];
-};
+}
 
 export class RuleLastRunService {
   private errors: string[] = [];
@@ -47,15 +47,14 @@ export class RuleLastRunService {
   }
 
   private addLastRunError(error: string) {
-    this.errors.push(error)
+    this.errors.push(error);
   }
 
   private addLastRunWarning(warning: string) {
-    this.warnings.push(warning)
+    this.warnings.push(warning);
   }
 
   private addLastRunOutcomeMessage(outcomeMessage: string) {
-    this.outcomeMessages.push(outcomeMessage)
+    this.outcomeMessages.push(outcomeMessage);
   }
-
 }
