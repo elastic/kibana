@@ -55,12 +55,6 @@ import type {
   CreateRuleOptions,
   CreateSecurityRuleTypeWrapperProps,
 } from '../lib/detection_engine/rule_types/types';
-<<<<<<< HEAD
-// eslint-disable-next-line no-restricted-imports
-import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
-=======
-import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
->>>>>>> upstream/main
 import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
