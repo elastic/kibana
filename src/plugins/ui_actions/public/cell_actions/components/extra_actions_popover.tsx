@@ -16,6 +16,7 @@ import {
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type { Action } from '../../actions';
 import { YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 import { CellActionExecutionContext } from './cell_actions';
@@ -23,6 +24,10 @@ import { CellActionExecutionContext } from './cell_actions';
 const euiContextMenuItemCSS = css`
   color: ${euiThemeVars.euiColorPrimaryText};
 `;
+
+const EXTRA_ACTIONS_ARIA_LABEL = i18n.translate('uiActions.cellActions.extraActionsAriaLabel', {
+  defaultMessage: 'Extra actions',
+});
 
 interface ActionsPopOverProps {
   actionContext: CellActionExecutionContext;
@@ -49,6 +54,7 @@ export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
     repositionOnScroll
     ownFocus
     data-test-subj="extraActionsPopOver"
+    aria-label={EXTRA_ACTIONS_ARIA_LABEL}
   >
     <ExtraActionsPopOverContent
       actions={actions}
@@ -72,6 +78,7 @@ export const ExtraActionsPopOverWithAnchor = ({
 }: ExtraActionsPopOverWithAnchorProps) => {
   return anchorRef.current ? (
     <EuiWrappingPopover
+      aria-label={EXTRA_ACTIONS_ARIA_LABEL}
       button={anchorRef.current}
       isOpen={isOpen}
       closePopover={closePopOver}

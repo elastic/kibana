@@ -11,6 +11,7 @@ import { EuiPopover, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type { Action } from '../../actions';
 import { ActionItem } from './cell_action_item';
 import { ExtraActionsButton } from './extra_actions_button';
@@ -124,6 +125,9 @@ export const HoverActionsPopover = React.memo<Props>(
             repositionOnScroll
             ownFocus={false}
             data-test-subj={'hoverActionsPopover'}
+            aria-label={i18n.translate('uiActions.cellActions.actionsAriaLabel', {
+              defaultMessage: 'Actions',
+            })}
           >
             {showHoverContent ? (
               <div css={hoverContentWrapperCSS}>
