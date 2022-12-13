@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { defineConfig } from 'cypress';
+import { defineCypressConfig } from '@kbn/cypress-config';
 
 // eslint-disable-next-line import/no-default-export
-export default defineConfig({
+export default defineCypressConfig({
   defaultCommandTimeout: 150000,
   execTimeout: 150000,
   pageLoadTimeout: 150000,
