@@ -35,6 +35,7 @@ describe('tagKibanaAssets', () => {
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
+      importedAssets: [],
     });
 
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
@@ -72,6 +73,7 @@ describe('tagKibanaAssets', () => {
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
+      importedAssets: [],
     });
 
     expect(savedObjectTagClient.create).not.toHaveBeenCalled();
@@ -104,6 +106,7 @@ describe('tagKibanaAssets', () => {
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
+      importedAssets: [],
     });
 
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
@@ -130,6 +133,7 @@ describe('tagKibanaAssets', () => {
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
+      importedAssets: [],
     });
 
     expect(savedObjectTagAssignmentService.updateTagAssignments).not.toHaveBeenCalled();
@@ -154,6 +158,7 @@ describe('tagKibanaAssets', () => {
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
+      importedAssets: [],
     });
 
     expect(savedObjectTagClient.create).not.toHaveBeenCalledWith(
@@ -200,6 +205,7 @@ describe('tagKibanaAssets', () => {
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
+      importedAssets: [],
     });
 
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
@@ -247,6 +253,7 @@ describe('tagKibanaAssets', () => {
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
+      importedAssets: [],
     });
 
     expect(savedObjectTagClient.create).not.toHaveBeenCalled();
