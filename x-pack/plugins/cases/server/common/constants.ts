@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { CaseSeverity } from '../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../common/constants';
-import { SeverityLabels } from '../../common/ui';
+import { ESCaseSeverity } from '../services/cases/types';
 
 /**
  * The name of the saved object reference indicating the action connector ID. This is stored in the Saved Object reference
@@ -39,9 +40,16 @@ export const EXTERNAL_REFERENCE_REF_NAME = 'externalReferenceId';
  */
 export const LICENSING_CASE_ASSIGNMENT_FEATURE = 'Cases user assignment';
 
-export const SEVERITY_CONVERTION_DICT: Record<string, number> = {
-  [SeverityLabels.low]: 0,
-  [SeverityLabels.medium]: 1,
-  [SeverityLabels.high]: 2,
-  [SeverityLabels.critical]: 3,
+export const SEVERITY_EXTERNAL_TO_ESMODEL: Record<CaseSeverity, ESCaseSeverity> = {
+  [CaseSeverity.LOW]: ESCaseSeverity.LOW,
+  [CaseSeverity.MEDIUM]: ESCaseSeverity.MEDIUM,
+  [CaseSeverity.HIGH]: ESCaseSeverity.HIGH,
+  [CaseSeverity.CRITICAL]: ESCaseSeverity.CRITICAL,
+};
+
+export const SEVERITY_ESMODEL_TO_EXTERNAL: Record<ESCaseSeverity, CaseSeverity> = {
+  [ESCaseSeverity.LOW]: CaseSeverity.LOW,
+  [ESCaseSeverity.MEDIUM]: CaseSeverity.MEDIUM,
+  [ESCaseSeverity.HIGH]: CaseSeverity.HIGH,
+  [ESCaseSeverity.CRITICAL]: CaseSeverity.CRITICAL,
 };

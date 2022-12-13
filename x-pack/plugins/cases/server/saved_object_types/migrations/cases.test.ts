@@ -9,8 +9,9 @@ import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/co
 import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
 import { CaseSeverity, ConnectorTypes, NONE_CONNECTOR_ID } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { SEVERITY_CONVERTION_DICT } from '../../common/constants';
+import { SEVERITY_EXTERNAL_TO_ESMODEL } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
+import { ESCaseSeverity } from '../../services/cases/types';
 import type { ESCaseConnectorWithId } from '../../services/test_utils';
 import { createExternalService } from '../../services/test_utils';
 import {
@@ -596,7 +597,7 @@ describe('case migrations', () => {
           ...doc,
           attributes: {
             ...doc.attributes,
-            severity: SEVERITY_CONVERTION_DICT[oldSeverityValue],
+            severity: SEVERITY_EXTERNAL_TO_ESMODEL[oldSeverityValue],
           },
           references: [],
         });
@@ -615,7 +616,7 @@ describe('case migrations', () => {
         ...doc,
         attributes: {
           ...doc.attributes,
-          severity: CaseSeverity.LOW,
+          severity: ESCaseSeverity.LOW,
         },
         references: [],
       });

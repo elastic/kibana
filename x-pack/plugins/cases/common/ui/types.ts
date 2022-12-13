@@ -131,13 +131,6 @@ export enum SortFieldCase {
   closedAt = 'closedAt',
 }
 
-export enum SeverityLabels {
-  low = 'low',
-  medium = 'medium',
-  high = 'high',
-  critical = 'critical',
-}
-
 export type ElasticUser = SnakeToCamelCase<User>;
 
 export interface FetchCasesProps extends ApiProps {

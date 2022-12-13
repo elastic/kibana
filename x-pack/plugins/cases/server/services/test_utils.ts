@@ -8,7 +8,11 @@
 import type { SavedObject, SavedObjectReference, SavedObjectsFindResult } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { ESConnectorFields } from '.';
-import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
+import {
+  CONNECTOR_ID_REFERENCE_NAME,
+  PUSH_CONNECTOR_ID_REFERENCE_NAME,
+  SEVERITY_EXTERNAL_TO_ESMODEL,
+} from '../common/constants';
 import type {
   CaseAttributes,
   CaseConnector,
@@ -163,12 +167,15 @@ export const createCaseSavedObjectResponse = ({
     restExternalService = rest;
   }
 
+  const severity = SEVERITY_EXTERNAL_TO_ESMODEL[basicCaseFields.severity];
+
   return {
     type: CASE_SAVED_OBJECT,
     id: '1',
     attributes: {
       ...basicCaseFields,
       ...overrides,
+      severity,
       // if connector is null we'll default this to an incomplete jira value because the service
       // should switch it to a none connector when the id can't be found in the references array
       connector: formattedConnector,

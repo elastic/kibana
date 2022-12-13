@@ -18,7 +18,7 @@ import { CaseSeverity, ConnectorTypes } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
-  SEVERITY_CONVERTION_DICT,
+  SEVERITY_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
 import {
   transformConnectorIdToReference,
@@ -26,6 +26,7 @@ import {
 } from './user_actions/connector_id';
 import { CASE_TYPE_INDIVIDUAL } from './constants';
 import { pipeMigrations } from './utils';
+import { ESCaseSeverity } from '../../services/cases/types';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -135,11 +136,11 @@ export const addAssignees = (
 
 export const convertSeverity = (
   doc: SavedObjectUnsanitizedDoc<CaseAttributes>
-): SavedObjectSanitizedDoc<Omit<CaseAttributes, 'severity'> & { severity: number }> => {
-  const convertedSeverity = SEVERITY_CONVERTION_DICT[doc.attributes.severity] ?? CaseSeverity.LOW;
+): SavedObjectSanitizedDoc<Omit<CaseAttributes, 'severity'> & { severity: ESCaseSeverity }> => {
+  const severity = SEVERITY_EXTERNAL_TO_ESMODEL[doc.attributes.severity] ?? ESCaseSeverity.LOW;
   return {
     ...doc,
-    attributes: { ...doc.attributes, severity: convertedSeverity },
+    attributes: { ...doc.attributes, severity },
     references: doc.references ?? [],
   };
 };
