@@ -28,7 +28,7 @@ import type { Case } from '../../containers/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
-import { removeItemFromSessionStorate } from '../utils';
+import { removeItemFromSessionStorage } from '../utils';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import { SubmitCaseButton } from './submit_button';
@@ -200,7 +200,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
 
     const handleOnConfirmationCallback = (): void => {
       onCancel();
-      removeItemFromSessionStorate(draftStorageKey);
+      removeItemFromSessionStorage(draftStorageKey);
     };
 
     const { showConfirmationModal, onOpenModal, onConfirmModal, onCancelModal } =
@@ -209,7 +209,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
       });
 
     const handleOnSuccess = (theCase: Case): Promise<void> => {
-      removeItemFromSessionStorate(draftStorageKey);
+      removeItemFromSessionStorage(draftStorageKey);
       return onSuccess(theCase);
     };
 

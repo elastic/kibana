@@ -10,7 +10,7 @@ export const getMarkdownEditorStorageKey = (
   caseId: string,
   commentId: string
 ): string => {
-  const appIdKey = appId !== '' ? appId : 'kibana';
+  const appIdKey = appId !== '' ? appId : 'cases';
   const caseIdKey = caseId !== '' ? caseId : 'case';
   const commentIdKey = commentId !== '' ? commentId : 'comment';
 

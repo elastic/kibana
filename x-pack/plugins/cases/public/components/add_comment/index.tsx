@@ -29,7 +29,7 @@ import type { Case } from '../../containers/types';
 import type { EuiMarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
-import { removeItemFromSessionStorate } from '../utils';
+import { removeItemFromSessionStorage } from '../utils';
 
 import * as i18n from './translations';
 import type { AddCommentFormSchema } from './schema';
@@ -120,9 +120,9 @@ export const AddComment = React.memo(
             updateCase: onCommentPosted,
           });
 
-          removeItemFromSessionStorate(draftStorageKey);
+          removeItemFromSessionStorage(draftStorageKey);
 
-          /* had to add to this check that session key is removed to avaoid weird issue that on reset 
+          /* had to add to this check that session key is removed to avoid weird issue that on reset 
             Markdown editor form adds session storage comment back if it is not removed immediately */
           if (!sessionStorage.getItem(draftStorageKey)) {
             reset();

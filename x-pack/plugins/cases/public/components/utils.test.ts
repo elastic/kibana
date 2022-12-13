@@ -11,7 +11,7 @@ import {
   connectorDeprecationValidator,
   getConnectorIcon,
   isDeprecatedConnector,
-  removeItemFromSessionStorate,
+  removeItemFromSessionStorage,
 } from './utils';
 
 describe('Utils', () => {
@@ -91,7 +91,7 @@ describe('Utils', () => {
     });
   });
 
-  describe('removeItemFromSessionStorate', () => {
+  describe('removeItemFromSessionStorage', () => {
     const sessionKey = 'testKey';
     const sessionValue = 'test value';
 
@@ -104,13 +104,13 @@ describe('Utils', () => {
 
       expect(sessionStorage.getItem(sessionKey)).toBe(sessionValue);
 
-      removeItemFromSessionStorate(sessionKey);
+      removeItemFromSessionStorage(sessionKey);
 
       expect(sessionStorage.getItem(sessionKey)).toBe(null);
     });
 
     it('is null if key is not in session storage', () => {
-      removeItemFromSessionStorate(sessionKey);
+      removeItemFromSessionStorage(sessionKey);
 
       expect(sessionStorage.getItem(sessionKey)).toBe(null);
     });

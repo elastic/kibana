@@ -69,7 +69,7 @@ describe('useMarkdownSessionStorage', () => {
     });
   });
 
-  it('should set seeion storage when field has value and session key is not created yet', async () => {
+  it('should set session storage when field has value and session key is not created yet', async () => {
     const specialCharsValue = '!{tooltip[Hello again](This is tooltip!)}';
     const { waitFor, result } = renderHook<SessionStorageType, { hasConflicts: boolean }>(
       (props) => {
@@ -139,14 +139,14 @@ describe('useMarkdownSessionStorage', () => {
 
   describe('existing session key', () => {
     beforeEach(() => {
-      sessionStorage.setItem(sessionKey, 'exisitng session storage value');
+      sessionStorage.setItem(sessionKey, 'existing session storage value');
     });
 
     afterEach(() => {
       sessionStorage.removeItem(sessionKey);
     });
 
-    it('should set field value if seesion already exists and it is a first render', async () => {
+    it('should set field value if session already exists and it is a first render', async () => {
       const { waitFor, result } = renderHook<SessionStorageType, { hasConflicts: boolean }>(
         (props) => {
           return useMarkdownSessionStorage(props);

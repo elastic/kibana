@@ -94,6 +94,6 @@ export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean 
   return connector?.isDeprecated ?? false;
 };
 
-export const removeItemFromSessionStorate = (key: string) => {
+export const removeItemFromSessionStorage = (key: string) => {
   window.sessionStorage.removeItem(key);
 };

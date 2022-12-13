@@ -37,6 +37,6 @@ describe('getMarkdownEditorStorageKey', () => {
     const caseId = 'case-id';
     const commentId = 'comment-id';
     const sessionKey = getMarkdownEditorStorageKey(appId, caseId, commentId);
-    expect(sessionKey).toEqual(`cases.kibana.${caseId}.${commentId}.markdownEditor`);
+    expect(sessionKey).toEqual(`cases.cases.${caseId}.${commentId}.markdownEditor`);
   });
 });
