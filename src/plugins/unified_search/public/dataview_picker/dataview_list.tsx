@@ -70,9 +70,14 @@ export function DataViewsList({
   selectableProps,
   searchListInputId,
 }: DataViewsListProps) {
-  const sort = DEFAULT_SORT;
-
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
+
+  const hadnleAlphabeticalSorting = (dataViews: DataViewListItemEnhanced[]) => {
+    return dataViews.sort((a, b) => (a.name ?? a.title).localeCompare(b.name ?? b.title));
+  };
+  const [sortedDataViewsList, setSortedDataViewsList] = useState(
+    hadnleAlphabeticalSorting(dataViewsList)
+  );
 
   const editorAndPopover = {
     getSortDirectionLegend: () =>
@@ -89,7 +94,7 @@ export function DataViewsList({
       _count: {
         getSortByLabel: () =>
           i18n.translate('controls.optionsList.popover.sortBy.docCount', {
-            defaultMessage: 'Document count',
+            defaultMessage: 'Last created',
           }),
       },
     },
@@ -114,7 +119,7 @@ export function DataViewsList({
       return {
         onFocusBadge: false,
         data: { sortBy: key },
-        checked: key === sort.by ? 'on' : undefined,
+        checked: key === DEFAULT_SORT.by ? 'on' : undefined,
         label: editorAndPopover.sortBy[key].getSortByLabel(),
       } as SortByItem;
     });
@@ -125,7 +130,7 @@ export function DataViewsList({
       return {
         onFocusBadge: false,
         data: { sortBy: key },
-        checked: key === sort.direction ? 'on' : undefined,
+        checked: key === DEFAULT_SORT.direction ? 'on' : undefined,
         label: editorAndPopover.sortOrder[key].getSortOrderLabel(),
       } as SortOrderItem;
     });
@@ -139,11 +144,18 @@ export function DataViewsList({
     }
   };
 
+  const handleOrderChangesDataViewList = (selectedOption?: SortOrderItem) => {
+    const sortedDataViews = sortedDataViewsList.sort((a, b) =>
+      (a.title || '').localeCompare(b.title)
+    );
+    setSortedDataViewsList(sortedDataViews);
+  };
+
   const onSortByOrder = (updatedOptions: SortOrderItem[]) => {
     setSortOrderOptions(updatedOptions);
     const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
     if (selectedOption) {
-      // setSort({ by: selectedOption.data.sortBy });
+      handleOrderChangesDataViewList(selectedOption);
     }
   };
 
@@ -158,7 +170,7 @@ export function DataViewsList({
       data-test-subj="indexPattern-switcher"
       searchable
       singleSelection="always"
-      options={dataViewsList?.map(({ title, id, name, isAdhoc }) => ({
+      options={sortedDataViewsList?.map(({ title, id, name, isAdhoc }) => ({
         key: id,
         label: name ? name : title,
         value: id,
@@ -211,7 +223,6 @@ export function DataViewsList({
                     button={
                       <EuiButtonIcon
                         iconType="sortable"
-                        data-test-subj="optionsListControl__sortingOptionsButton"
                         onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
                         aria-label={i18n.translate('controls.optionsList.popover.sortDescription', {
                           defaultMessage: 'Define the sort order',
@@ -224,12 +235,12 @@ export function DataViewsList({
                     closePopover={() => setIsSortingPopoverOpen(false)}
                     panelClassName={'optionsList--sortPopover'}
                   >
-                    <div style={{ width: '180px' }}>
-                      <EuiPopoverTitle paddingSize="s">
-                        {i18n.translate('controls.optionsList.popover.sortTitle', {
-                          defaultMessage: 'Sort by',
-                        })}
-                      </EuiPopoverTitle>
+                    <EuiPopoverTitle paddingSize="s">
+                      {i18n.translate('controls.optionsList.popover.sortTitle', {
+                        defaultMessage: 'Sort by',
+                      })}
+                    </EuiPopoverTitle>
+                    <div style={{ width: 180 }}>
                       <EuiSelectable
                         options={sortByOptions}
                         singleSelection="always"
@@ -241,7 +252,9 @@ export function DataViewsList({
                       >
                         {(sortByOptionList) => sortByOptionList}
                       </EuiSelectable>
-                      <EuiHorizontalRule margin="none" />
+                    </div>
+                    <EuiHorizontalRule margin="none" />
+                    <div style={{ width: 180 }}>
                       <EuiPopoverTitle paddingSize="s">
                         {i18n.translate('controls.optionsList.popover.sortTitle', {
                           defaultMessage: 'Order',
