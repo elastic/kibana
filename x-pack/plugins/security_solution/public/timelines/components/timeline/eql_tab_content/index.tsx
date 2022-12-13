@@ -22,6 +22,7 @@ import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
+import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import type { CellValueElementProps } from '../cell_rendering';
@@ -32,11 +33,7 @@ import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { calculateTotalPages } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
-import type {
-  ControlColumnProps,
-  RowRenderer,
-  ToggleDetailPanel,
-} from '../../../../../common/types/timeline';
+import type { RowRenderer, ToggleDetailPanel } from '../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
@@ -54,11 +51,11 @@ import { useTimelineFullScreen } from '../../../../common/containers/use_full_sc
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { EqlQueryBarTimeline } from '../query_bar/eql';
-import { HeaderActions } from '../body/actions/header_actions';
 import { getDefaultControlColumn } from '../body/control_columns';
 import type { Sort } from '../body/sort';
 import { Sourcerer } from '../../../../common/components/sourcerer';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;

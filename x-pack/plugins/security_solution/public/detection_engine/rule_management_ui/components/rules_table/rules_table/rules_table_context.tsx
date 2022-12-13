@@ -23,6 +23,12 @@ import type {
   Rule,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
+import {
+  DEFAULT_PAGE,
+  DEFAULT_RULES_PER_PAGE,
+  DEFAULT_FILTER_OPTIONS,
+  DEFAULT_SORTING_OPTIONS,
+} from './rules_table_defaults';
 import { useFindRulesInMemory } from './use_find_rules_in_memory';
 import { getRulesComparator } from './utils';
 
@@ -60,6 +66,10 @@ export interface RulesTableState {
    */
   isLoading: boolean;
   /**
+   * Is true when a preflight request (dry-run) is in progress.
+   */
+  isPreflightInProgress: boolean;
+  /**
    * Is true whenever a background refetch is in-flight, which does not include initial loading
    */
   isRefetching: boolean;
@@ -93,18 +103,6 @@ export interface RulesTableState {
   sortingOptions: SortingOptions;
 }
 
-const initialFilterOptions: FilterOptions = {
-  filter: '',
-  tags: [],
-  showCustomRules: false,
-  showElasticRules: false,
-};
-
-const initialSortingOptions: SortingOptions = {
-  field: 'enabled',
-  order: 'desc',
-};
-
 export type LoadingRuleAction =
   | 'delete'
   | 'disable'
@@ -125,6 +123,7 @@ export interface RulesTableActions {
   setFilterOptions: (newFilter: Partial<FilterOptions>) => void;
   setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>;
   setIsInMemorySorting: (value: boolean) => void;
+  setIsPreflightInProgress: React.Dispatch<React.SetStateAction<boolean>>;
   /**
    * enable/disable rules table auto refresh
    *
@@ -158,8 +157,6 @@ interface RulesTableContextProviderProps {
 
 const IN_MEMORY_STORAGE_KEY = 'detection-rules-table-in-memory';
 
-const DEFAULT_RULES_PER_PAGE = 20;
-
 export const RulesTableContextProvider = ({ children }: RulesTableContextProviderProps) => {
   const [autoRefreshSettings] = useUiSetting$<{
     on: boolean;
@@ -171,12 +168,16 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const [isInMemorySorting, setIsInMemorySorting] = useState<boolean>(
     storage.get(IN_MEMORY_STORAGE_KEY) ?? false
   );
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>(initialFilterOptions);
-  const [sortingOptions, setSortingOptions] = useState<SortingOptions>(initialSortingOptions);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
+  const [sortingOptions, setSortingOptions] = useState<SortingOptions>(DEFAULT_SORTING_OPTIONS);
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [isRefreshOn, setIsRefreshOn] = useState(autoRefreshSettings.on);
-  const [loadingRules, setLoadingRules] = useState<LoadingRules>({ ids: [], action: null });
-  const [page, setPage] = useState(1);
+  const [loadingRules, setLoadingRules] = useState<LoadingRules>({
+    ids: [],
+    action: null,
+  });
+  const [isPreflightInProgress, setIsPreflightInProgress] = useState(false);
+  const [page, setPage] = useState(DEFAULT_PAGE);
   const [perPage, setPerPage] = useState(DEFAULT_RULES_PER_PAGE);
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
   const autoRefreshBeforePause = useRef<boolean | null>(null);
@@ -188,18 +189,13 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
       // Reset sorting options when switching to server-side implementation as currently selected sorting might not be supported
       if (value === false) {
-        setSortingOptions(initialSortingOptions);
+        setSortingOptions(DEFAULT_SORTING_OPTIONS);
       }
     },
     [storage]
   );
 
-  const isActionInProgress = useMemo(() => {
-    if (loadingRules.ids.length > 0) {
-      return !['disable', 'enable', 'edit'].includes(loadingRules.action ?? '');
-    }
-    return false;
-  }, [loadingRules.action, loadingRules.ids.length]);
+  const isActionInProgress = loadingRules.ids.length > 0;
 
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
@@ -252,6 +248,37 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     ? rules.sort(getRulesComparator(sortingOptions)).slice((page - 1) * perPage, page * perPage)
     : rules;
 
+  const actions = useMemo(
+    () => ({
+      reFetchRules: refetch,
+      setFilterOptions: handleFilterOptionsChange,
+      setIsAllSelected,
+      setIsInMemorySorting: toggleInMemorySorting,
+      setIsRefreshOn,
+      setLoadingRules,
+      setPage,
+      setPerPage,
+      setSelectedRuleIds,
+      setSortingOptions,
+      clearRulesSelection,
+      setIsPreflightInProgress,
+    }),
+    [
+      refetch,
+      handleFilterOptionsChange,
+      setIsAllSelected,
+      toggleInMemorySorting,
+      setIsRefreshOn,
+      setLoadingRules,
+      setPage,
+      setPerPage,
+      setSelectedRuleIds,
+      setSortingOptions,
+      clearRulesSelection,
+      setIsPreflightInProgress,
+    ]
+  );
+
   const providerValue = useMemo(
     () => ({
       state: {
@@ -262,6 +289,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
           total: isInMemorySorting ? rules.length : total,
         },
         filterOptions,
+        isPreflightInProgress,
         isActionInProgress,
         isAllSelected,
         isFetched,
@@ -276,45 +304,30 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         selectedRuleIds,
         sortingOptions,
       },
-      actions: {
-        reFetchRules: refetch,
-        setFilterOptions: handleFilterOptionsChange,
-        setIsAllSelected,
-        setIsInMemorySorting: toggleInMemorySorting,
-        setIsRefreshOn,
-        setLoadingRules,
-        setPage,
-        setPerPage,
-        setSelectedRuleIds,
-        setSortingOptions,
-        clearRulesSelection,
-      },
+      actions,
     }),
     [
-      dataUpdatedAt,
+      rulesToDisplay,
+      page,
+      perPage,
+      isInMemorySorting,
+      rules.length,
+      total,
       filterOptions,
-      handleFilterOptionsChange,
+      isPreflightInProgress,
       isActionInProgress,
       isAllSelected,
       isFetched,
       isFetching,
-      isInMemorySorting,
       isLoading,
       isRefetching,
       isRefreshOn,
-      loadingRules.action,
+      dataUpdatedAt,
       loadingRules.ids,
-      page,
-      perPage,
-      refetch,
-      rules.length,
-      rulesToDisplay,
+      loadingRules.action,
       selectedRuleIds,
       sortingOptions,
-      toggleInMemorySorting,
-      setSelectedRuleIds,
-      total,
-      clearRulesSelection,
+      actions,
     ]
   );
 

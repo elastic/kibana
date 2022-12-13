@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -43,6 +43,19 @@ export const FleetProxiesTable: React.FunctionComponent<FleetProxiesTableProps> 
                 {fleetProxy.name}
               </p>
             </NameFlexItemWithMaxWidth>
+            {fleetProxy.is_preconfigured && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={i18n.translate('xpack.fleet.settings.fleetProxiesTable.managedTooltip', {
+                    defaultMessage:
+                      'This proxy is managed outside of Fleet. Please refer to your kibana config file for more info.',
+                  })}
+                  type="lock"
+                  size="m"
+                  color="subdued"
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         ),
         width: '288px',
@@ -60,7 +73,7 @@ export const FleetProxiesTable: React.FunctionComponent<FleetProxiesTableProps> 
       {
         width: '68px',
         render: (fleetProxy: FleetProxy) => {
-          const isDeleteVisible = true;
+          const isDeleteVisible = !fleetProxy.is_preconfigured;
 
           return (
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">

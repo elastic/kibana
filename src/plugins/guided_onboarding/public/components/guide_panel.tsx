@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -32,10 +32,9 @@ import { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
 import { GuideId } from '@kbn/guided-onboarding';
-import type { GuideConfig, GuidedOnboardingApi, StepConfig } from '../types';
+import type { GuidedOnboardingApi } from '../types';
 
-import type { PluginState } from '../../common/types';
-import { getGuideConfig } from '../services/helpers';
+import type { GuideConfig, PluginState, StepConfig } from '../../common';
 
 import { GuideStep } from './guide_panel_step';
 import { QuitGuideModal } from './quit_guide_modal';
@@ -79,6 +78,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isQuitGuideModalOpen, setIsQuitGuideModalOpen] = useState(false);
   const [pluginState, setPluginState] = useState<PluginState | undefined>(undefined);
+  const [guideConfig, setGuideConfig] = useState<GuideConfig | undefined>(undefined);
 
   const styles = getGuidePanelStyles(euiTheme);
 
@@ -170,7 +170,16 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
     return () => subscription.unsubscribe();
   }, [api]);
 
-  const guideConfig = getGuideConfig(pluginState?.activeGuide?.guideId)!;
+  const fetchGuideConfig = useCallback(async () => {
+    if (pluginState?.activeGuide?.guideId) {
+      const config = await api.getGuideConfig(pluginState.activeGuide.guideId);
+      if (config) setGuideConfig(config);
+    }
+  }, [api, pluginState]);
+
+  useEffect(() => {
+    fetchGuideConfig();
+  }, [fetchGuideConfig]);
 
   // TODO handle loading state
   // https://github.com/elastic/kibana/issues/139799
@@ -181,14 +190,17 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
 
   return (
     <>
-      <GuideButton
-        pluginState={pluginState}
-        toggleGuidePanel={toggleGuide}
-        isGuidePanelOpen={isGuideOpen}
-        navigateToLandingPage={navigateToLandingPage}
-      />
+      <div css={styles.setupButton}>
+        <GuideButton
+          pluginState={pluginState}
+          guideConfig={guideConfig}
+          toggleGuidePanel={toggleGuide}
+          isGuidePanelOpen={isGuideOpen}
+          navigateToLandingPage={navigateToLandingPage}
+        />
+      </div>
 
-      {isGuideOpen && (
+      {isGuideOpen && guideConfig && (
         <EuiFlyout
           ownFocus
           onClose={toggleGuide}
@@ -196,6 +208,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
           css={styles.flyoutOverrides.flyoutContainer}
           maskProps={{ headerZindexLocation: 'above' }}
           data-test-subj="guidePanel"
+          maxWidth={480}
         >
           <EuiFlyoutHeader>
             <EuiButtonEmpty

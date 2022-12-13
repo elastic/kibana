@@ -104,9 +104,15 @@ export const getSyntheticsMonitorSavedObjectType = (
                 },
               },
             },
+            label: {
+              type: 'text',
+            },
           },
         },
         custom_heartbeat_id: {
+          type: 'keyword',
+        },
+        id: {
           type: 'keyword',
         },
         tags: {

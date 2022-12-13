@@ -43,7 +43,7 @@ const constants: UseCaseConstants = {
     betaBadgeLabel: i18n.translate(
       'guidedOnboardingPackage.gettingStarted.security.betaBadgeLabel',
       {
-        defaultMessage: 'security',
+        defaultMessage: 'protect',
       }
     ),
   },
@@ -86,7 +86,6 @@ export const UseCaseCard = ({
 
   return (
     <EuiCard
-      display="subdued"
       image={<EuiImage src={getImageUrl(useCase)} alt={constants[useCase].logAltText} />}
       title={titleElement}
       description={description}

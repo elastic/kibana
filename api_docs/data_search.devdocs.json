@@ -826,6 +826,9 @@
             "tags": [],
             "label": "reason",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/data/public/search/errors/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -15520,7 +15523,7 @@
         "label": "handleRequest",
         "description": [],
         "signature": [
-          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, disableShardWarnings, getNow, executionContext, }: ",
+          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, disableShardWarnings, getNow, executionContext, title, description, }: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -15549,7 +15552,7 @@
             "id": "def-common.handleRequest.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  disableShardWarnings,\n  getNow,\n  executionContext,\n}",
+            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  disableShardWarnings,\n  getNow,\n  executionContext,\n  title,\n  description,\n}",
             "description": [],
             "signature": [
               {
@@ -15855,6 +15858,45 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.isAbsoluteTimeShift",
+        "type": "Function",
+        "tags": [],
+        "label": "isAbsoluteTimeShift",
+        "description": [
+          "\nCheck function to detect an absolute time shift.\nThe check is performed only on the string format and the timestamp is not validated:\nuse the validateAbsoluteTimeShift fucntion to perform more in depth checks"
+        ],
+        "signature": [
+          "(val?: string | undefined) => boolean"
+        ],
+        "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.isAbsoluteTimeShift.$1",
+            "type": "string",
+            "tags": [],
+            "label": "val",
+            "description": [
+              "the string to parse (it assumes it has been trimmed already)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "true if an absolute time shift"
+        ],
         "initialIsOpen": false
       },
       {
@@ -16487,6 +16529,75 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.parseAbsoluteTimeShift",
+        "type": "Function",
+        "tags": [],
+        "label": "parseAbsoluteTimeShift",
+        "description": [
+          "\nParses an absolute time shift string and returns its equivalent duration"
+        ],
+        "signature": [
+          "(val: string, timeRange: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined) => { value: moment.Duration; reason: null; } | { value: \"invalid\"; reason: \"missingTimerange\" | \"notAbsoluteTimeShift\" | \"invalidDate\" | \"shiftAfterTimeRange\"; }"
+        ],
+        "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.parseAbsoluteTimeShift.$1",
+            "type": "string",
+            "tags": [],
+            "label": "val",
+            "description": [
+              "the string to parse"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.parseAbsoluteTimeShift.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [
+              "the current date histogram interval"
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -17268,6 +17379,73 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.validateAbsoluteTimeShift",
+        "type": "Function",
+        "tags": [],
+        "label": "validateAbsoluteTimeShift",
+        "description": [
+          "\nRelaxed version of the parsing validation\nThis version of the validation applies the timeRange validation only when passed"
+        ],
+        "signature": [
+          "(val: string, timeRange: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined) => \"missingTimerange\" | \"notAbsoluteTimeShift\" | \"invalidDate\" | \"shiftAfterTimeRange\" | undefined"
+        ],
+        "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.validateAbsoluteTimeShift.$1",
+            "type": "string",
+            "tags": [],
+            "label": "val",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.validateAbsoluteTimeShift.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "the reason id if the absolute shift is not valid, undefined otherwise"
+        ],
         "initialIsOpen": false
       }
     ],
@@ -24630,7 +24808,7 @@
             "label": "fieldFormats",
             "description": [],
             "signature": [
-              "{ deserialize: ",
+              "{ has: (id: string) => boolean; deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -24870,7 +25048,7 @@
                 "section": "def-common.FieldFormatConfig",
                 "text": "FieldFormatConfig"
               },
-              ">) => void; has: (id: string) => boolean; }"
+              ">) => void; }"
             ],
             "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
             "deprecated": false,
@@ -29407,6 +29585,34 @@
                 "text": "KibanaExecutionContext"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
             "deprecated": false,
@@ -34905,6 +35111,21 @@
           }
         ],
         "path": "src/plugins/data/common/search/expressions/query_filter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.REASON_ID_TYPES",
+        "type": "Type",
+        "tags": [],
+        "label": "REASON_ID_TYPES",
+        "description": [],
+        "signature": [
+          "\"missingTimerange\" | \"notAbsoluteTimeShift\" | \"invalidDate\" | \"shiftAfterTimeRange\""
+        ],
+        "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -40779,6 +41000,21 @@
             "returnComment": []
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.REASON_IDS",
+        "type": "Object",
+        "tags": [],
+        "label": "REASON_IDS",
+        "description": [],
+        "signature": [
+          "{ readonly missingTimerange: \"missingTimerange\"; readonly notAbsoluteTimeShift: \"notAbsoluteTimeShift\"; readonly invalidDate: \"invalidDate\"; readonly shiftAfterTimeRange: \"shiftAfterTimeRange\"; }"
+        ],
+        "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

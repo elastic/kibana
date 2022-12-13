@@ -174,10 +174,10 @@ describe('Add Integration - Real API', () => {
     setupIntegrations();
     cy.getBySel(getIntegrationCategories('aws')).click();
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).contains('AWS').should('exist');
-    cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length', 28);
+    cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length.greaterThan', 29);
 
     cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Cloud');
-    cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length', 3);
+    cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length.greaterThan', 3);
     cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
   });
