@@ -9,10 +9,10 @@ PASS_FROM_VAULT="$(retry 5 5 vault read -field=password secret/kibana-issues/dev
 ES_SERVER_URL="https://kibana-ops-e2e-perf.es.us-central1.gcp.cloud.es.io:9243"
 BUILD_ID="${BUILDKITE_BUILD_ID}"
 KIBANA_PERFORMANCE_GCS_BUCKET="gs://kibana-performance/scalability-tests"
-ES_RALLY_GCS_BUCKET="gs://rally-tracks/scalability-traces"
-OUTPUT_REL="target/scalability_tests/${BUILD_ID}"
+ES_RALLY_GCS_BUCKET="gs://rally-tracks"
+OUTPUT_REL="target/scalability-tests/${BUILD_ID}"
 OUTPUT_DIR="${KIBANA_DIR}/${OUTPUT_REL}"
-ES_OUTPUT_REL="target/performance/es/scalability_traces"
+ES_OUTPUT_REL="target/scalability-tests/scalability-traces"
 ES_OUTPUT_DIR="${KIBANA_DIR}/${ES_OUTPUT_REL}"
 
 .buildkite/scripts/bootstrap.sh
@@ -32,9 +32,12 @@ done
 
 echo "--- Creating scalability dataset in ${OUTPUT_REL}"
 mkdir -p "${OUTPUT_DIR}"
+echo "--- Copying ES traces to ${ES_OUTPUT_REL}"
+mkdir -p "${ES_OUTPUT_DIR}"
+mv "${KIBANA_DIR}/target/scalability-traces/es/" "${ES_OUTPUT_DIR}"
 
-echo "--- Archiving scalability trace and uploading as build artifact"
-tar -czf "${OUTPUT_DIR}/scalability_traces.tar.gz" -C "target/performance/kibana" "scalability_traces"
+echo "--- Archiving kibana scalability trace and uploading as build artifact"
+tar -czf "${OUTPUT_DIR}/scalability_traces.tar.gz" -C target "scalability-traces/kibana"
 buildkite-agent artifact upload "${OUTPUT_DIR}/scalability_traces.tar.gz"
 
 echo "--- Downloading Kibana artifacts used in tests"
@@ -51,14 +54,14 @@ cd -
 
 echo "--- Uploading ${ES_OUTPUT_REL} dir to ${KIBANA_PERFORMANCE_GCS_BUCKET}"
 cd "${ES_OUTPUT_DIR}/.."
-gsutil -m cp -r "scalability_traces" "${KIBANA_PERFORMANCE_GCS_BUCKET}"
+gsutil -m cp -r "scalability-traces" "${KIBANA_PERFORMANCE_GCS_BUCKET}"
 cd -
 
 if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; then
   echo "--- Promoting '${BUILD_ID}' dataset to LATEST"
   cd "${OUTPUT_DIR}/.."
   echo "${BUILD_ID}" > latest
-  gsutil cp latest "${GCS_BUCKET}"
+  gsutil cp latest "${KIBANA_PERFORMANCE_GCS_BUCKET}"
   cd -
 else
   echo "--- Skipping promotion of dataset to LATEST"
