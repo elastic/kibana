@@ -11,7 +11,7 @@
  */
 
 import Handlebars from '.';
-import { expectTemplate } from './src/__jest__/test_bench';
+import { expectTemplate, forEachCompileFunctionName } from './src/__jest__/test_bench';
 
 it('Handlebars.create', () => {
   expect(Handlebars.create()).toMatchSnapshot();
@@ -108,35 +108,27 @@ describe('blocks', () => {
       expect(calls).toEqual(callsExpected);
     });
 
-    it('should call decorator again if render function is called again', () => {
-      const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+    forEachCompileFunctionName((compileName) => {
+      it(`should call decorator again if render function is called again for #${compileName}`, () => {
+        global.kbnHandlebarsEnv = Handlebars.create();
 
-      global.kbnHandlebarsEnv = Handlebars.create();
+        kbnHandlebarsEnv!.registerDecorator('decorator', () => {
+          calls++;
+        });
 
-      kbnHandlebarsEnv!.registerDecorator('decorator', () => {
-        calls++;
+        const compile = kbnHandlebarsEnv![compileName].bind(kbnHandlebarsEnv);
+        const render = compile('{{*decorator}}');
+
+        let calls = 0;
+        expect(render({})).toEqual('');
+        expect(calls).toEqual(1);
+
+        calls = 0;
+        expect(render({})).toEqual('');
+        expect(calls).toEqual(1);
+
+        global.kbnHandlebarsEnv = null;
       });
-
-      let renderAST;
-      let renderEval;
-      if (process.env.AST || !process.env.EVAL) {
-        renderAST = kbnHandlebarsEnv!.compileAST('{{*decorator}}');
-      }
-      if (process.env.EVAL || !process.env.AST) {
-        renderEval = kbnHandlebarsEnv!.compile('{{*decorator}}');
-      }
-
-      let calls = 0;
-      if (renderAST) expect(renderAST({})).toEqual('');
-      if (renderEval) expect(renderEval({})).toEqual('');
-      expect(calls).toEqual(callsExpected);
-
-      calls = 0;
-      if (renderAST) expect(renderAST({})).toEqual('');
-      if (renderEval) expect(renderEval({})).toEqual('');
-      expect(calls).toEqual(callsExpected);
-
-      global.kbnHandlebarsEnv = null;
     });
 
     it('should pass expected options to nested decorator', () => {

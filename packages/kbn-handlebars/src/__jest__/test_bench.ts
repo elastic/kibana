@@ -10,6 +10,11 @@ import Handlebars, {
   type ExtendedRuntimeOptions,
 } from '../..';
 
+type CompileFns = 'compile' | 'compileAST';
+const compileFns: CompileFns[] = ['compile', 'compileAST'];
+if (process.env.AST) compileFns.splice(0, 1);
+else if (process.env.EVAL) compileFns.splice(1, 1);
+
 declare global {
   var kbnHandlebarsEnv: typeof Handlebars | null; // eslint-disable-line no-var
 }
@@ -22,6 +27,12 @@ interface TestOptions {
 
 export function expectTemplate(template: string, options?: TestOptions) {
   return new HandlebarsTestBench(template, options);
+}
+
+export function forEachCompileFunctionName(
+  cb: (compileName: CompileFns, index: number, array: CompileFns[]) => void
+) {
+  compileFns.forEach(cb);
 }
 
 class HandlebarsTestBench {
