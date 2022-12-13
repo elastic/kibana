@@ -7,33 +7,62 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
 
-import { Duration, SLO } from '../../../typings';
+import { useFetchSloDetails } from '../../../pages/slo_details/hooks/use_fetch_slo_details';
+import { BurnRateRuleParams, Duration, DurationUnit, SLO } from '../../../typings';
 import { SloSelector } from '../../shared/slo/slo_selector/slo_selector';
 import { BurnRate } from './burn_rate';
 import { LongWindowDuration } from './long_window_duration';
 
-export function BurnRateRuleEditor() {
+type Props = Pick<
+  RuleTypeParamsExpressionProps<BurnRateRuleParams>,
+  'ruleParams' | 'setRuleParams'
+>;
+
+export function BurnRateRuleEditor(props: Props) {
+  const { setRuleParams, ruleParams } = props;
+  const { loading: loadingInitialSlo, slo: initialSlo } = useFetchSloDetails(ruleParams?.sloId);
+
   const [selectedSlo, setSelectedSlo] = useState<SLO | undefined>(undefined);
-  const [longWindowDuration, setLongWindowDuration] = useState<Duration>({ value: 1, unit: 'h' });
-  const [, setShortWindowDuration] = useState<Duration>({ value: 5, unit: 'm' });
-  const [, setBurnRate] = useState<number>(1);
+  const [longWindowDuration, setLongWindowDuration] = useState<Duration>({
+    value: ruleParams?.longWindow?.value ?? 1,
+    unit: (ruleParams?.longWindow?.unit as DurationUnit) ?? 'h',
+  });
+  const [, setShortWindowDuration] = useState<Duration>({
+    value: ruleParams?.shortWindow?.value ?? 5,
+    unit: (ruleParams?.shortWindow?.unit as DurationUnit) ?? 'm',
+  });
+  const [burnRate, setBurnRate] = useState<number>(ruleParams?.threshold ?? 1);
   const [maxBurnRate, setMaxBurnRate] = useState<number>(1);
+
+  useEffect(() => {
+    const hasInitialSlo = !loadingInitialSlo && initialSlo !== undefined;
+    setSelectedSlo(hasInitialSlo ? initialSlo : undefined);
+  }, [loadingInitialSlo, initialSlo]);
 
   const onLongWindowDurationChange = (duration: Duration) => {
     setLongWindowDuration(duration);
-    const longWindowdurationInMinutes = toMinutes(duration);
-    const shortWindowDurationValue = Math.floor(longWindowdurationInMinutes / 12);
+    const longWindowDurationInMinutes = toMinutes(duration);
+    const shortWindowDurationValue = Math.floor(longWindowDurationInMinutes / 12);
     setShortWindowDuration({ value: shortWindowDurationValue, unit: 'm' });
+
+    setRuleParams('longWindow', { value: duration.value, unit: duration.unit });
+    setRuleParams('shortWindow', {
+      value: shortWindowDurationValue,
+      unit: 'm',
+    });
   };
 
   const onBurnRateChange = (value: number) => {
     setBurnRate(value);
+    setRuleParams('threshold', burnRate);
   };
 
   const onSelectedSlo = (slo: SLO | undefined) => {
     setSelectedSlo(slo);
+    setRuleParams('sloId', slo?.id);
   };
 
   useEffect(() => {
@@ -51,7 +80,7 @@ export function BurnRateRuleEditor() {
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
           <EuiFormRow label="Select SLO" fullWidth>
-            <SloSelector onSelected={onSelectedSlo} />
+            <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -64,7 +93,11 @@ export function BurnRateRuleEditor() {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <BurnRate maxBurnRate={maxBurnRate} onChange={onBurnRateChange} />
+          <BurnRate
+            initialBurnRate={burnRate}
+            maxBurnRate={maxBurnRate}
+            onChange={onBurnRateChange}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

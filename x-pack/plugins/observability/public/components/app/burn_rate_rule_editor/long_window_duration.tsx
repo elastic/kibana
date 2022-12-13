@@ -45,8 +45,8 @@ export function LongWindowDuration({ initialDuration, onChange }: Props) {
   const [error, setError] = useState<string | undefined>(undefined);
 
   const onDurationValueChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    setDurationValue(!isNaN(value) ? value : 1);
+    const value = Number(e.target.value);
+    setDurationValue(value);
     onChange({ value, unit: durationUnit });
   };
 
