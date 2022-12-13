@@ -187,7 +187,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('list source maps', async () => {
       before(async () => {
-        const totalCount = 15;
+        const totalCount = 6;
         const sourcemapCount = times(totalCount);
         for (const i of sourcemapCount) {
           await uploadSourcemap({
@@ -210,34 +210,34 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('pagination', () => {
         it('can retrieve the first page', async () => {
-          const firstPageItems = await listSourcemaps({ page: 1, perPage: 5 });
-          expect(first(firstPageItems.artifacts)?.identifier).to.eql('list-test-1.0.14');
-          expect(last(firstPageItems.artifacts)?.identifier).to.eql('list-test-1.0.10');
-          expect(firstPageItems.artifacts.length).to.be(5);
-          expect(firstPageItems.total).to.be(15);
+          const res = await listSourcemaps({ page: 1, perPage: 2 });
+          expect(first(res.artifacts)?.identifier).to.eql('list-test-1.0.5');
+          expect(last(res.artifacts)?.identifier).to.eql('list-test-1.0.4');
+          expect(res.artifacts.length).to.be(2);
+          expect(res.total).to.be(6);
         });
 
         it('can retrieve the second page', async () => {
-          const secondPageItems = await listSourcemaps({ page: 2, perPage: 5 });
-          expect(first(secondPageItems.artifacts)?.identifier).to.eql('list-test-1.0.9');
-          expect(last(secondPageItems.artifacts)?.identifier).to.eql('list-test-1.0.5');
-          expect(secondPageItems.artifacts.length).to.be(5);
-          expect(secondPageItems.total).to.be(15);
+          const res = await listSourcemaps({ page: 2, perPage: 2 });
+          expect(first(res.artifacts)?.identifier).to.eql('list-test-1.0.3');
+          expect(last(res.artifacts)?.identifier).to.eql('list-test-1.0.2');
+          expect(res.artifacts.length).to.be(2);
+          expect(res.total).to.be(6);
         });
 
         it('can retrieve the third page', async () => {
-          const thirdPageItems = await listSourcemaps({ page: 3, perPage: 5 });
-          expect(first(thirdPageItems.artifacts)?.identifier).to.eql('list-test-1.0.4');
-          expect(last(thirdPageItems.artifacts)?.identifier).to.eql('list-test-1.0.0');
-          expect(thirdPageItems.artifacts.length).to.be(5);
-          expect(thirdPageItems.total).to.be(15);
+          const res = await listSourcemaps({ page: 3, perPage: 2 });
+          expect(first(res.artifacts)?.identifier).to.eql('list-test-1.0.1');
+          expect(last(res.artifacts)?.identifier).to.eql('list-test-1.0.0');
+          expect(res.artifacts.length).to.be(2);
+          expect(res.total).to.be(6);
         });
       });
 
-      it('can list source maps', async () => {
+      it('can list source maps without specifying pagination options', async () => {
         const sourcemaps = await listSourcemaps();
-        expect(sourcemaps.artifacts.length).to.be(15);
-        expect(sourcemaps.total).to.be(15);
+        expect(sourcemaps.artifacts.length).to.be(6);
+        expect(sourcemaps.total).to.be(6);
       });
 
       it('returns newest source maps first', async () => {

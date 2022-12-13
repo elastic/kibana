@@ -10,56 +10,56 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createOrUpdateIndexTemplate } from '@kbn/observability-plugin/server';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
 
-export async function createApmSourceMapTemplate({
+const indexTemplate: IndicesPutIndexTemplateRequest = {
+  name: 'apm-source-map',
+  body: {
+    version: 1,
+    index_patterns: [APM_SOURCE_MAP_INDEX],
+    template: {
+      settings: {
+        number_of_shards: 1,
+        index: {
+          hidden: true,
+        },
+      },
+      mappings: {
+        dynamic: 'strict',
+        properties: {
+          fleet_id: {
+            type: 'keyword',
+          },
+          created: {
+            type: 'date',
+          },
+          content: {
+            type: 'binary',
+          },
+          content_sha256: {
+            type: 'keyword',
+          },
+          'file.path': {
+            type: 'keyword',
+          },
+          'service.name': {
+            type: 'keyword',
+          },
+          'service.version': {
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  },
+};
+
+export async function createApmSourceMapIndexTemplate({
   client,
   logger,
 }: {
   client: ElasticsearchClient;
   logger: Logger;
 }) {
-  const indexTemplate: IndicesPutIndexTemplateRequest = {
-    name: 'apm-source-map',
-    body: {
-      version: 1,
-      index_patterns: [APM_SOURCE_MAP_INDEX],
-      template: {
-        settings: {
-          number_of_shards: 1,
-          index: {
-            hidden: true,
-          },
-        },
-        mappings: {
-          dynamic: 'strict',
-          properties: {
-            fleet_id: {
-              type: 'keyword',
-            },
-            created: {
-              type: 'date',
-            },
-            content: {
-              type: 'binary',
-            },
-            content_sha256: {
-              type: 'keyword',
-            },
-            'file.path': {
-              type: 'keyword',
-            },
-            'service.name': {
-              type: 'keyword',
-            },
-            'service.version': {
-              type: 'keyword',
-            },
-          },
-        },
-      },
-    },
-  };
-
-  // create template
+  // create index template
   await createOrUpdateIndexTemplate({ indexTemplate, client, logger });
 
   // create index if it doesn't exist

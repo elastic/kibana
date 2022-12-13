@@ -15,7 +15,7 @@ import { bulkCreateApmSourceMaps } from './bulk_create_apm_source_maps';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
 import { ApmSourceMap } from './create_apm_source_map_index_template';
 import { APMPluginStartDependencies } from '../../types';
-import { createApmSourceMapTemplate } from './create_apm_source_map_index_template';
+import { createApmSourceMapIndexTemplate } from './create_apm_source_map_index_template';
 
 const PER_PAGE = 10;
 const TASK_ID = 'apm-source-map-migration-task-id';
@@ -53,27 +53,32 @@ export async function scheduleSourceMapMigration({
         // logger.debug({ state });
         return {
           async run() {
-            logger.debug(`Run task: "${TASK_TYPE}"`);
-            const coreStart = await coreStartPromise;
-            const internalESClient =
-              coreStart.elasticsearch.client.asInternalUser;
+            try {
+              logger.debug(`Run task: "${TASK_TYPE}"`);
+              const coreStart = await coreStartPromise;
+              const internalESClient =
+                coreStart.elasticsearch.client.asInternalUser;
 
-            // ensure that the index template has been created before running migration
-            await createApmSourceMapTemplate({
-              client: internalESClient,
-              logger,
-            });
-
-            const fleet = await fleetStartPromise;
-            if (fleet) {
-              await runFleetSourcemapArtifactsMigration({
-                fleet,
-                internalESClient,
+              // ensure that the index template has been created before running migration
+              await createApmSourceMapIndexTemplate({
+                client: internalESClient,
                 logger,
               });
-            }
 
-            logger.debug(`Task completed: "${TASK_TYPE}"`);
+              const fleet = await fleetStartPromise;
+              if (fleet) {
+                await runFleetSourcemapArtifactsMigration({
+                  fleet,
+                  internalESClient,
+                  logger,
+                });
+              }
+
+              logger.debug(`Task completed: "${TASK_TYPE}"`);
+            } catch (e) {
+              logger.error(`Task failed: "${TASK_TYPE}"`);
+              logger.error(e);
+            }
           },
 
           async cancel() {
@@ -172,12 +177,12 @@ async function paginateArtifacts({
   });
 
   if (artifacts.length === 0) {
-    logger.info('Source map migration: Nothing to migrate');
+    logger.debug('No source maps need to be migrated');
     return;
   }
 
   const migratedCount = (page - 1) * PER_PAGE + artifacts.length;
-  logger.info(`Source map migration: Migrating ${migratedCount} of ${total}`);
+  logger.info(`Migrating ${migratedCount} of ${total} source maps`);
 
   await bulkCreateApmSourceMaps({ artifacts, internalESClient });
 
@@ -191,9 +196,7 @@ async function paginateArtifacts({
       internalESClient,
     });
   } else {
-    logger.info(
-      `Source map migration: Successfully migrated ${total} sourcemaps`
-    );
+    logger.info(`Successfully migrated ${total} source maps`);
   }
 }
 

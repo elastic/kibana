@@ -46,7 +46,7 @@ export async function createApmSourceMap({
 
   try {
     const id = getSourceMapId({ serviceName, serviceVersion, bundleFilepath });
-    logger.debug(`Create APM source map ${id}`);
+    logger.debug(`Create APM source map: "${id}"`);
     return await internalESClient.create<ApmSourceMap>({
       index: APM_SOURCE_MAP_INDEX,
       id,

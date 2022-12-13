@@ -57,7 +57,7 @@ import {
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source_map_migration';
-import { createApmSourceMapTemplate } from './routes/source_maps/create_apm_source_map_index_template';
+import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm_source_map_index_template';
 
 export class APMPlugin
   implements
@@ -235,6 +235,9 @@ export class APMPlugin
       fleetStartPromise,
       taskManager,
       logger: this.logger,
+    }).catch((e) => {
+      this.logger?.error('Failed to schedule APM source map migration');
+      this.logger?.error(e);
     });
 
     return {
@@ -280,16 +283,30 @@ export class APMPlugin
     const client = core.elasticsearch.client.asInternalUser;
 
     // create .apm-agent-configuration index without blocking start lifecycle
-    createApmAgentConfigurationIndex({ client, logger });
+    createApmAgentConfigurationIndex({ client, logger }).catch((e) => {
+      logger.error('Failed to create .apm-agent-configuration index');
+      logger.error(e);
+    });
 
     // create .apm-custom-link index without blocking start lifecycle
-    createApmCustomLinkIndex({ client, logger });
+    createApmCustomLinkIndex({ client, logger }).catch((e) => {
+      logger.error('Failed to create .apm-custom-link index');
+      logger.error(e);
+    });
 
     // create .apm-source-map index without blocking start lifecycle
-    createApmSourceMapTemplate({ client, logger });
+    createApmSourceMapIndexTemplate({ client, logger }).catch((e) => {
+      logger.error('Failed to create apm-source-map index template');
+      logger.error(e);
+    });
 
     // TODO: remove in 9.0
-    migrateLegacyAPMIndicesToSpaceAware({ coreStart: core, logger });
+    migrateLegacyAPMIndicesToSpaceAware({ coreStart: core, logger }).catch(
+      (e) => {
+        logger.error('Failed to run migration making APM indices space aware');
+        logger.error(e);
+      }
+    );
   }
 
   public stop() {}
