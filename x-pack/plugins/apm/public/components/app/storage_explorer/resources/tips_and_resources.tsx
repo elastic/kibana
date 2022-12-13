@@ -134,7 +134,7 @@ export function TipsAndResources() {
       label: i18n.translate(
         'xpack.apm.storageExplorer.resources.sendFeedback',
         {
-          defaultMessage: 'Send feedback',
+          defaultMessage: 'Give feedback',
         }
       ),
       href: getStorageExplorerFeedbackHref(),
