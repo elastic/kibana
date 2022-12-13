@@ -33,12 +33,13 @@ describe('APIKeysGridPage', () => {
   // since we are using EuiErrorBoundary and react will console.error any errors
   const consoleWarnMock = jest.spyOn(console, 'error').mockImplementation();
 
-  const coreStart = coreMock.createStart();
+  let coreStart: ReturnType<typeof coreMock.createStart>;
   const theme$ = themeServiceMock.createTheme$();
   const apiClientMock = apiKeysAPIClientMock.create();
   const { authc } = securityMock.createSetup();
 
   beforeEach(() => {
+    coreStart = coreMock.createStart();
     apiClientMock.checkPrivileges.mockClear();
     apiClientMock.getApiKeys.mockClear();
     coreStart.http.get.mockClear();
@@ -50,6 +51,7 @@ describe('APIKeysGridPage', () => {
       canManage: true,
       isAdmin: true,
     });
+
     apiClientMock.getApiKeys.mockResolvedValue({
       apiKeys: [
         {
@@ -83,19 +85,29 @@ describe('APIKeysGridPage', () => {
       })
     );
   });
+
   it('loads and displays API keys', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
-    const { findByText } = render(
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      api_keys: {
+        save: true,
+      },
+    };
+
+    const { findByText, queryByTestId } = render(
       <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <APIKeysGridPage
           apiKeysAPIClient={apiClientMock}
           notifications={coreStart.notifications}
           history={history}
+          readOnly={false}
         />
       </Providers>
     );
 
+    expect(await queryByTestId('apiKeysCreateTableButton')).toBeNull();
     expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
     await findByText(/first-api-key/);
     await findByText(/second-api-key/);
@@ -114,12 +126,20 @@ describe('APIKeysGridPage', () => {
       isAdmin: true,
     });
 
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      api_keys: {
+        save: true,
+      },
+    };
+
     const { findByText } = render(
       <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <APIKeysGridPage
           apiKeysAPIClient={apiClientMock}
           notifications={coreStart.notifications}
           history={history}
+          readOnly={false}
         />
       </Providers>
     );
@@ -136,12 +156,20 @@ describe('APIKeysGridPage', () => {
       isAdmin: false,
     });
 
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      api_keys: {
+        save: true,
+      },
+    };
+
     const { findByText } = render(
       <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <APIKeysGridPage
           apiKeysAPIClient={apiClientMock}
           notifications={coreStart.notifications}
           history={history}
+          readOnly={false}
         />
       </Providers>
     );
@@ -160,17 +188,96 @@ describe('APIKeysGridPage', () => {
     });
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      api_keys: {
+        save: true,
+      },
+    };
+
     const { findByText } = render(
       <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <APIKeysGridPage
           apiKeysAPIClient={apiClientMock}
           notifications={coreStart.notifications}
           history={history}
+          readOnly={false}
         />
       </Providers>
     );
 
     expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
     await findByText(/Could not load API keys/);
+  });
+
+  describe('Read Only View', () => {
+    beforeEach(() => {
+      apiClientMock.checkPrivileges.mockResolvedValueOnce({
+        areApiKeysEnabled: true,
+        canManage: false,
+        isAdmin: false,
+      });
+    });
+
+    it('should not display prompt `Create Button` when no API keys are shown', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+
+      apiClientMock.getApiKeys.mockResolvedValue({
+        apiKeys: [],
+      });
+
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        api_keys: {
+          save: false,
+        },
+      };
+
+      const { findByText, queryByText } = render(
+        <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+          <APIKeysGridPage
+            apiKeysAPIClient={apiClientMock}
+            notifications={coreStart.notifications}
+            history={history}
+            readOnly={true}
+          />
+        </Providers>
+      );
+      expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
+      expect(await findByText('You do not have permission to create API keys')).toBeInTheDocument();
+      expect(queryByText('Create API key')).toBeNull();
+    });
+
+    it('should not display table `Create Button` nor `Delete` icons column', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        api_keys: {
+          save: false,
+        },
+      };
+
+      const { findByText, queryByText, queryAllByText } = await render(
+        <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+          <APIKeysGridPage
+            apiKeysAPIClient={apiClientMock}
+            notifications={coreStart.notifications}
+            history={history}
+            readOnly={true}
+          />
+        </Providers>
+      );
+
+      expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
+      expect(
+        await findByText('You only have permission to view your own API keys.')
+      ).toBeInTheDocument();
+      expect(
+        await findByText('View your API keys. An API key sends requests on your behalf.')
+      ).toBeInTheDocument();
+      expect(queryByText('Create API key')).toBeNull();
+      expect(queryAllByText('Delete').length).toBe(0);
+    });
   });
 });

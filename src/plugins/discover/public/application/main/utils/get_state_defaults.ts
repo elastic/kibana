@@ -19,7 +19,7 @@ import {
 } from '../../../../common';
 
 import { AppState } from '../services/discover_state';
-import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
+import { CHART_HIDDEN_KEY } from '../components/layout/use_discover_histogram';
 
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -70,6 +70,7 @@ export function getStateDefaults({
     rowHeight: undefined,
     rowsPerPage: undefined,
     grid: undefined,
+    breakdownField: undefined,
   };
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
@@ -88,6 +89,10 @@ export function getStateDefaults({
   }
   if (savedSearch.rowsPerPage) {
     defaultState.rowsPerPage = savedSearch.rowsPerPage;
+  }
+
+  if (savedSearch.breakdownField) {
+    defaultState.breakdownField = savedSearch.breakdownField;
   }
 
   return defaultState;

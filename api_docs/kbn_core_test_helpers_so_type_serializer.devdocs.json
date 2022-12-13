@@ -22,7 +22,13 @@
         ],
         "signature": [
           "(soType: ",
-          "SavedObjectsType",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsType",
+            "text": "SavedObjectsType"
+          },
           "<any>) => ",
           {
             "pluginId": "@kbn/core-test-helpers-so-type-serializer",
@@ -44,7 +50,13 @@
             "label": "soType",
             "description": [],
             "signature": [
-              "SavedObjectsType",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
               "<any>"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts",
@@ -65,7 +77,13 @@
         "description": [],
         "signature": [
           "(soType: ",
-          "SavedObjectsType",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsType",
+            "text": "SavedObjectsType"
+          },
           "<any>) => string"
         ],
         "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.ts",
@@ -80,7 +98,13 @@
             "label": "soType",
             "description": [],
             "signature": [
-              "SavedObjectsType",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
               "<any>"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/get_migration_hash.ts",

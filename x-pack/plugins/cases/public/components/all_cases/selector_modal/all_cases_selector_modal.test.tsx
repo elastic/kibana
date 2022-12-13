@@ -8,7 +8,8 @@
 import React from 'react';
 
 import { AllCasesSelectorModal } from '.';
-import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 import userEvent from '@testing-library/user-event';
 import { act, waitFor } from '@testing-library/react';
 

@@ -441,6 +441,44 @@
           },
           {
             "parentPluginId": "@kbn/logging",
+            "id": "def-server.Logger.isLevelEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isLevelEnabled",
+            "description": [
+              "\nChecks if given level is currently enabled for this logger.\nCan be used to wrap expensive logging operations into conditional blocks\n"
+            ],
+            "signature": [
+              "(level: ",
+              "LogLevelId",
+              ") => boolean"
+            ],
+            "path": "packages/kbn-logging/src/logger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/logging",
+                "id": "def-server.Logger.isLevelEnabled.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "level",
+                "description": [
+                  "The log level to check for."
+                ],
+                "signature": [
+                  "LogLevelId"
+                ],
+                "path": "packages/kbn-logging/src/logger.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/logging",
             "id": "def-server.Logger.get",
             "type": "Function",
             "tags": [],

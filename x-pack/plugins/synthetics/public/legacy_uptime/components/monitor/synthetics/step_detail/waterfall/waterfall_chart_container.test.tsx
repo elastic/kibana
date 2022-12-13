@@ -135,7 +135,7 @@ const defaultState = {
 
 describe('WaterfallChartContainer', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   it('does not display waterfall chart unavailable when isWaterfallSupported is true', () => {

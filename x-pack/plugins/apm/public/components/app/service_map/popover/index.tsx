@@ -22,10 +22,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {
-  SERVICE_NAME,
-  SPAN_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import { Environment } from '../../../../../common/environment_rt';
 import { useTheme } from '../../../../hooks/use_theme';
 import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';

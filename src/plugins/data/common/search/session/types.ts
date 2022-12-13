@@ -91,6 +91,8 @@ export interface SearchSessionRequestStatus {
  */
 export interface SearchSessionStatusResponse {
   status: SearchSessionStatus;
+
+  errors?: string[];
 }
 
 /**

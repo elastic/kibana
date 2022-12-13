@@ -6,16 +6,14 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
+import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
-  EuiPopover,
   EuiTableComputedColumnType,
 } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Case } from '../../containers/types';
+import type { Case } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useStatusAction } from '../actions/status/use_status_action';
@@ -25,6 +23,8 @@ import { statuses } from '../status';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useSeverityAction } from '../actions/severity/use_severity_action';
 import { severities } from '../severity/config';
+import { useTagsAction } from '../actions/tags/use_tags_action';
+import { EditTagsFlyout } from '../actions/tags/edit_tags_flyout';
 
 const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }> = ({
   theCase,
@@ -53,6 +53,12 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
     onAction: closePopover,
     onActionSuccess: refreshCases,
     selectedSeverity: theCase.severity,
+  });
+
+  const tagsAction = useTagsAction({
+    isDisabled: false,
+    onAction: closePopover,
+    onActionSuccess: refreshCases,
   });
 
   const canDelete = deleteAction.canDelete;
@@ -107,6 +113,10 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
       });
     }
 
+    if (canUpdate) {
+      mainPanelItems.push(tagsAction.getAction([theCase]));
+    }
+
     if (canDelete) {
       mainPanelItems.push(deleteAction.getAction([theCase]));
     }
@@ -126,7 +136,7 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
     }
 
     return panelsToBuild;
-  }, [canDelete, canUpdate, deleteAction, severityAction, statusAction, theCase]);
+  }, [canDelete, canUpdate, deleteAction, severityAction, statusAction, tagsAction, theCase]);
 
   return (
     <>
@@ -157,6 +167,13 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
           totalCasesToBeDeleted={1}
           onCancel={deleteAction.onCloseModal}
           onConfirm={deleteAction.onConfirmDeletion}
+        />
+      ) : null}
+      {tagsAction.isFlyoutOpen ? (
+        <EditTagsFlyout
+          onClose={tagsAction.onFlyoutClosed}
+          selectedCases={[theCase]}
+          onSaveTags={tagsAction.onSaveTags}
         />
       ) : null}
     </>

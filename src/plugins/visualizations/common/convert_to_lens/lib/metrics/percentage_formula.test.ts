@@ -24,6 +24,7 @@ jest.mock('../convert', () => ({
 }));
 
 describe('getPercentageColumnFormulaColumn', () => {
+  const visType = 'heatmap';
   const dataView = stubLogstashDataView;
   const field = stubLogstashDataView.fields[0].name;
   const aggs: Array<SchemaConfig<METRIC_TYPES>> = [
@@ -52,7 +53,7 @@ describe('getPercentageColumnFormulaColumn', () => {
   >([
     [
       'null if cannot build formula for provided agg',
-      [{ agg: aggs[0], aggs, dataView }],
+      [{ agg: aggs[0], aggs, dataView, visType }],
       () => {
         mockGetFormulaForAgg.mockReturnValue(null);
       },
@@ -60,7 +61,7 @@ describe('getPercentageColumnFormulaColumn', () => {
     ],
     [
       'null if cannot create formula column for provided arguments',
-      [{ agg: aggs[0], aggs, dataView }],
+      [{ agg: aggs[0], aggs, dataView, visType }],
       () => {
         mockGetFormulaForAgg.mockReturnValue('test-formula');
         mockCreateFormulaColumn.mockReturnValue(null);
@@ -69,7 +70,7 @@ describe('getPercentageColumnFormulaColumn', () => {
     ],
     [
       'formula column if provided arguments are valid',
-      [{ agg: aggs[0], aggs, dataView }],
+      [{ agg: aggs[0], aggs, dataView, visType }],
       () => {
         mockGetFormulaForAgg.mockReturnValue('test-formula');
         mockCreateFormulaColumn.mockImplementation((formula) => ({

@@ -7,27 +7,38 @@
  */
 
 import { get, isEmpty } from 'lodash';
-
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
+import { DEFAULT_SORT, SortingType } from '../../common/options_list/suggestions_sorting';
 import { OptionsListRequestBody } from '../../common/options_list/types';
-
+import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 export interface OptionsListAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
   parse: (response: SearchResponse) => string[];
 }
+
+interface EsBucket {
+  key: string;
+  doc_count: number;
+}
+
+const getSortType = (sort?: SortingType) => {
+  return sort ? { [sort.by]: sort.direction } : { [DEFAULT_SORT.by]: DEFAULT_SORT.direction };
+};
 
 /**
  * Validation aggregations
  */
 export const getValidationAggregationBuilder: () => OptionsListAggregationBuilder = () => ({
   buildAggregation: ({ selectedOptions, fieldName }: OptionsListRequestBody) => {
-    const selectedOptionsFilters = selectedOptions?.reduce((acc, currentOption) => {
-      acc[currentOption] = { match: { [fieldName]: currentOption } };
-      return acc;
-    }, {} as { [key: string]: { match: { [key: string]: string } } });
-
+    let selectedOptionsFilters;
+    if (selectedOptions) {
+      selectedOptionsFilters = selectedOptions.reduce((acc, currentOption) => {
+        acc[currentOption] = { match: { [fieldName]: currentOption } };
+        return acc;
+      }, {} as { [key: string]: { match: { [key: string]: string } } });
+    }
     return selectedOptionsFilters && !isEmpty(selectedOptionsFilters)
       ? {
           filters: {
@@ -40,6 +51,7 @@ export const getValidationAggregationBuilder: () => OptionsListAggregationBuilde
     const rawInvalidSuggestions = get(rawEsResult, 'aggregations.validation.buckets') as {
       [key: string]: { doc_count: number };
     };
+
     return rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
       ? Object.entries(rawInvalidSuggestions)
           ?.filter(([, value]) => value?.doc_count === 0)
@@ -62,6 +74,9 @@ export const getSuggestionAggregationBuilder = ({
   if (fieldSpec?.type === 'boolean') {
     return suggestionAggSubtypes.boolean;
   }
+  if (fieldSpec?.type === 'ip') {
+    return suggestionAggSubtypes.ip;
+  }
   if (fieldSpec && getFieldSubtypeNested(fieldSpec)) {
     return suggestionAggSubtypes.subtypeNested;
   }
@@ -71,17 +86,28 @@ export const getSuggestionAggregationBuilder = ({
 const getEscapedQuery = (q: string = '') =>
   q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 
+const getIpBuckets = (rawEsResult: any, combinedBuckets: EsBucket[], type: 'ipv4' | 'ipv6') => {
+  const results = get(
+    rawEsResult,
+    `aggregations.suggestions.buckets.${type}.filteredSuggestions.buckets`
+  );
+  if (results) {
+    results.forEach((suggestion: EsBucket) => combinedBuckets.push(suggestion));
+  }
+};
+
 const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = {
   /**
    * the "Keyword only" query / parser should be used when the options list is built on a field which has only keyword mappings.
    */
   keywordOnly: {
-    buildAggregation: ({ fieldName, searchString }: OptionsListRequestBody) => ({
+    buildAggregation: ({ fieldName, searchString, sort }: OptionsListRequestBody) => ({
       terms: {
         field: fieldName,
         include: `${getEscapedQuery(searchString)}.*`,
         execution_hint: 'map',
         shard_size: 10,
+        order: getSortType(sort),
       },
     }),
     parse: (rawEsResult) =>
@@ -99,11 +125,11 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         // if there is no textFieldName specified, or if there is no search string yet fall back to keywordOnly
         return suggestionAggSubtypes.keywordOnly.buildAggregation(req);
       }
-      const { fieldName, searchString, textFieldName } = req;
+      const { fieldName, searchString, textFieldName, sort } = req;
       return {
         filter: {
           match_phrase_prefix: {
-            [textFieldName]: getEscapedQuery(searchString),
+            [textFieldName]: searchString,
           },
         },
         aggs: {
@@ -111,6 +137,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
             terms: {
               field: fieldName,
               shard_size: 10,
+              order: getSortType(sort),
             },
           },
         },
@@ -126,11 +153,12 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
    * the "Boolean" query / parser should be used when the options list is built on a field of type boolean. The query is slightly different than a keyword query.
    */
   boolean: {
-    buildAggregation: ({ fieldName }: OptionsListRequestBody) => ({
+    buildAggregation: ({ fieldName, sort }: OptionsListRequestBody) => ({
       terms: {
         field: fieldName,
         execution_hint: 'map',
         shard_size: 10,
+        order: getSortType(sort),
       },
     }),
     parse: (rawEsResult) =>
@@ -140,11 +168,71 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
   },
 
   /**
+   * the "IP" query / parser should be used when the options list is built on a field of type IP.
+   */
+  ip: {
+    buildAggregation: ({ fieldName, searchString, sort }: OptionsListRequestBody) => {
+      let ipRangeQuery: IpRangeQuery = {
+        validSearch: true,
+        rangeQuery: [
+          {
+            key: 'ipv6',
+            from: '::',
+            to: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
+          },
+        ],
+      };
+
+      if (searchString) {
+        ipRangeQuery = getIpRangeQuery(searchString);
+        if (!ipRangeQuery.validSearch) {
+          // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
+          // simply don't return an aggregation query for the ES search request
+          return undefined;
+        }
+      }
+
+      return {
+        ip_range: {
+          field: fieldName,
+          ranges: ipRangeQuery.rangeQuery,
+          keyed: true,
+        },
+        aggs: {
+          filteredSuggestions: {
+            terms: {
+              field: fieldName,
+              execution_hint: 'map',
+              shard_size: 10,
+              order: getSortType(sort),
+            },
+          },
+        },
+      };
+    },
+    parse: (rawEsResult) => {
+      if (!Boolean(rawEsResult.aggregations?.suggestions)) {
+        // if this is happens, that means there is an invalid search that snuck through to the server side code;
+        // so, might as well early return with no suggestions
+        return [];
+      }
+
+      const buckets: EsBucket[] = [];
+      getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
+      getIpBuckets(rawEsResult, buckets, 'ipv6');
+      return buckets
+        .sort((bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count)
+        .slice(0, 10) // only return top 10 results
+        .map((bucket: EsBucket) => bucket.key);
+    },
+  },
+
+  /**
    * the "Subtype Nested" query / parser should be used when the options list is built on a field with subtype nested.
    */
   subtypeNested: {
     buildAggregation: (req: OptionsListRequestBody) => {
-      const { fieldSpec, fieldName, searchString } = req;
+      const { fieldSpec, fieldName, searchString, sort } = req;
       const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
       if (!subTypeNested) {
         // if this field is not subtype nested, fall back to keywordOnly
@@ -161,6 +249,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
               include: `${getEscapedQuery(searchString)}.*`,
               execution_hint: 'map',
               shard_size: 10,
+              order: getSortType(sort),
             },
           },
         },

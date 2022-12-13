@@ -31,6 +31,7 @@ import {
 import type { Query } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
 import { createPanelState } from './panel';
@@ -68,6 +69,7 @@ export interface InheritedChildInput extends IndexSignature {
   id: string;
   searchSessionId?: string;
   syncColors?: boolean;
+  syncCursor?: boolean;
   syncTooltips?: boolean;
   executionContext?: KibanaExecutionContext;
 }
@@ -85,6 +87,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   /** Services that are used in the Dashboard container code */
   private analyticsService;
+  private chrome;
   private theme$;
 
   /**
@@ -145,6 +148,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       settings: {
         theme: { theme$: this.theme$ },
       },
+      chrome: this.chrome,
     } = pluginServices.getServices());
 
     if (
@@ -322,11 +326,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaThemeProvider theme$={this.theme$}>
-          <DashboardViewport
-            container={this}
-            controlGroup={this.controlGroup}
-            onDataLoaded={this.onDataLoaded.bind(this)}
-          />
+          <ExitFullScreenButtonKibanaProvider coreStart={{ chrome: this.chrome }}>
+            <DashboardViewport
+              container={this}
+              controlGroup={this.controlGroup}
+              onDataLoaded={this.onDataLoaded.bind(this)}
+            />
+          </ExitFullScreenButtonKibanaProvider>
         </KibanaThemeProvider>
       </I18nProvider>,
       dom
@@ -351,6 +357,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       filters,
       searchSessionId,
       syncColors,
+      syncCursor,
       syncTooltips,
       executionContext,
     } = this.input;
@@ -371,6 +378,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       searchSessionId,
       syncColors,
       syncTooltips,
+      syncCursor,
       executionContext,
     };
   }

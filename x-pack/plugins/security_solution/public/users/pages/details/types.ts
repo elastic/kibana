@@ -45,7 +45,7 @@ export type UsersDetailsNavTab = Partial<Record<KeyUsersDetailsNavTab, NavTab>>;
 export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
   UsersQueryProps & {
     indexNames: string[];
-    pageFilters?: Filter[];
+    userDetailFilter: Filter[];
     filterQuery?: string;
     indexPattern: DataViewBase;
     type: usersModel.UsersType;

@@ -7,7 +7,7 @@
 
 import {
   addChangePointsAction,
-  resetAction,
+  resetAllAction,
   updateLoadingStateAction,
 } from './explain_log_rate_spikes';
 import { initialState, streamReducer } from './stream_reducer';
@@ -49,7 +49,7 @@ describe('streamReducer', () => {
 
     expect(state1.changePoints).toHaveLength(1);
 
-    const state2 = streamReducer(state1, resetAction());
+    const state2 = streamReducer(state1, resetAllAction());
 
     expect(state2.changePoints).toHaveLength(0);
   });

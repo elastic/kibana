@@ -34,8 +34,10 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   linkValues,
   rowRenderers,
   setCellProps,
-  timelineId,
+  scopeId,
   truncate,
+  closeCellPopover,
+  enableActions = true,
 }) => {
   const asPlainText = useMemo(() => {
     return getLinkColumnDefinition(header.id, header.type, undefined) !== undefined && !isTimeline;
@@ -61,17 +63,18 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           isDraggable,
           linkValues,
           rowRenderers,
-          timelineId,
+          scopeId,
           truncate,
           values,
         })}
       </StyledContent>
-      {isDetails && hasCellActions(header.id) && (
+      {enableActions && isDetails && hasCellActions(header.id) && (
         <ExpandedCellValueActions
           field={header}
           globalFilters={globalFilters}
-          timelineId={timelineId}
+          scopeId={scopeId}
           value={values}
+          closeCellPopover={closeCellPopover}
         />
       )}
     </>

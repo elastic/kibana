@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { CaseAttributes, CaseExternalServiceBasicRt } from '../../../common/api';
-import { ESCaseConnector } from '..';
+import type * as rt from 'io-ts';
+import type { CaseAttributes, CaseExternalServiceBasicRt } from '../../../common/api';
+import type { ESCaseConnector } from '..';
 
 /**
  * This type should only be used within the cases service and its helper functions (e.g. the transforms).

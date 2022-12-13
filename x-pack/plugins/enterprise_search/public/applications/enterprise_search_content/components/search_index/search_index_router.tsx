@@ -39,7 +39,6 @@ export const SearchIndexRouter: React.FC = () => {
       unmountView();
     };
   }, []);
-  useEffect(() => {}, []);
 
   useEffect(() => {
     setIndexName(indexName);

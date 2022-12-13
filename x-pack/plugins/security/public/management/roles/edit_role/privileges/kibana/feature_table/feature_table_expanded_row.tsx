@@ -21,6 +21,7 @@ interface Props {
   privilegeCalculator: PrivilegeFormCalculator;
   privilegeIndex: number;
   selectedFeaturePrivileges: string[];
+  allSpacesSelected: boolean;
   disabled?: boolean;
   licenseAllowsSubFeatPrivCustomization: boolean;
   onChange: (featureId: string, featurePrivileges: string[]) => void;
@@ -32,6 +33,7 @@ export const FeatureTableExpandedRow = ({
   privilegeIndex,
   privilegeCalculator,
   selectedFeaturePrivileges,
+  allSpacesSelected,
   disabled,
   licenseAllowsSubFeatPrivCustomization,
 }: Props) => {
@@ -110,6 +112,8 @@ export const FeatureTableExpandedRow = ({
         </div>
       </EuiFlexItem>
       {feature.getSubFeatures().map((subFeature) => {
+        const isDisabledDueToSpaceSelection = subFeature.requireAllSpaces && !allSpacesSelected;
+
         return (
           <EuiFlexItem key={subFeature.name}>
             <SubFeatureForm
@@ -119,7 +123,7 @@ export const FeatureTableExpandedRow = ({
               subFeature={subFeature}
               onChange={(updatedPrivileges) => onChange(feature.id, updatedPrivileges)}
               selectedFeaturePrivileges={selectedFeaturePrivileges}
-              disabled={disabled || !isCustomizing}
+              disabled={disabled || !isCustomizing || isDisabledDueToSpaceSelection}
             />
           </EuiFlexItem>
         );

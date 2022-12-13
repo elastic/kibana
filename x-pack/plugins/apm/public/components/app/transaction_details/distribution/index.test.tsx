@@ -87,8 +87,11 @@ describe('transaction_details/distribution', () => {
         <TransactionDistribution
           onChartSelection={jest.fn()}
           onClearSelection={jest.fn()}
-          traceSamples={[]}
-          traceSamplesStatus={useFetcherModule.FETCH_STATUS.LOADING}
+          traceSamplesFetchResult={{
+            data: { traceSamples: [] },
+            status: useFetcherModule.FETCH_STATUS.LOADING,
+            error: undefined,
+          }}
         />,
 
         { wrapper: Wrapper }
@@ -112,8 +115,11 @@ describe('transaction_details/distribution', () => {
           <TransactionDistribution
             onChartSelection={jest.fn()}
             onClearSelection={jest.fn()}
-            traceSamples={[]}
-            traceSamplesStatus={useFetcherModule.FETCH_STATUS.SUCCESS}
+            traceSamplesFetchResult={{
+              data: { traceSamples: [] },
+              status: useFetcherModule.FETCH_STATUS.LOADING,
+              error: undefined,
+            }}
           />
         </Wrapper>
       );

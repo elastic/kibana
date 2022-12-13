@@ -11,7 +11,7 @@ import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { basicCase, basicPush, getUserAction } from '../../containers/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
-import { UserActionBuilderArgs } from './types';
+import type { UserActionBuilderArgs } from './types';
 
 export const getMockBuilderArgs = (): UserActionBuilderArgs => {
   const userAction = getUserAction('title', Actions.update);

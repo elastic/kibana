@@ -20,19 +20,17 @@ import {
   isIntegrationPolicyTemplate,
 } from '../../../../../../../common/services';
 
-import { useStartServices } from '../../../../hooks';
+import { useCategories, usePackages, useStartServices } from '../../../../hooks';
 
 import { pagePathGetters } from '../../../../constants';
 import {
-  useGetCategories,
-  useGetPackages,
   useBreadcrumbs,
   useGetAppendCustomIntegrations,
   useGetReplacementCustomIntegrations,
   useLink,
 } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
-import type { GetPackagesResponse, PackageList } from '../../../../types';
+import type { PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import type { PackageListItem } from '../../../../types';
@@ -183,11 +181,11 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
 
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
-export const AvailablePackages: React.FC<{
-  allPackages?: GetPackagesResponse | null;
-  isLoading: boolean;
-}> = ({ allPackages, isLoading }) => {
+export const AvailablePackages: React.FC<{}> = ({}) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
+  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
+    boolean | undefined
+  >(undefined);
 
   useBreadcrumbs('integrations_all');
 
@@ -222,10 +220,7 @@ export const AvailablePackages: React.FC<{
     data: eprPackages,
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
-  } = useGetPackages({
-    category: '',
-    excludeInstallStatus: true,
-  });
+  } = usePackages(prereleaseIntegrationsEnabled);
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
@@ -276,9 +271,7 @@ export const AvailablePackages: React.FC<{
     data: eprCategories,
     isLoading: isLoadingCategories,
     error: eprCategoryLoadingError,
-  } = useGetCategories({
-    include_policy_templates: true,
-  });
+  } = useCategories(prereleaseIntegrationsEnabled);
 
   const categories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
@@ -306,7 +299,13 @@ export const AvailablePackages: React.FC<{
   let controls = [
     <EuiFlexItem grow={false}>
       <EuiHorizontalRule margin="m" />
-      <IntegrationPreference initialType={preference} onChange={setPreference} />
+      <IntegrationPreference
+        initialType={preference}
+        onChange={setPreference}
+        onPrereleaseEnabledChange={(isEnabled) => {
+          setPrereleaseIntegrationsEnabled(isEnabled);
+        }}
+      />
     </EuiFlexItem>,
   ];
 

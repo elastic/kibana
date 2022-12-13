@@ -33,7 +33,8 @@ export default function ({ getService }) {
     clearCache,
   } = registerHelpers({ supertest });
 
-  describe('indices', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/145022
+  describe.skip('indices', () => {
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('clear cache', () => {

@@ -18,7 +18,13 @@
             "text": "ConsoleUIPlugin"
           },
           " implements ",
-          "Plugin",
+          {
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
+            "text": "Plugin"
+          },
           "<void, void, ",
           "AppSetupUIPluginDependencies",
           ", object>"
@@ -49,7 +55,13 @@
                 "label": "ctx",
                 "description": [],
                 "signature": [
-                  "PluginInitializerContext",
+                  {
+                    "pluginId": "@kbn/core-plugins-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsBrowserPluginApi",
+                    "section": "def-common.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
                   "<object>"
                 ],
                 "path": "src/plugins/console/public/plugin.ts",
@@ -69,7 +81,13 @@
             "description": [],
             "signature": [
               "({ notifications, getStartServices, http }: ",
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<object, unknown>, { devTools, home, share, usageCollection }: ",
               "AppSetupUIPluginDependencies",
               ") => ",
@@ -93,7 +111,13 @@
                 "label": "{ notifications, getStartServices, http }",
                 "description": [],
                 "signature": [
-                  "CoreSetup",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/console/public/plugin.ts",
@@ -200,7 +224,13 @@
             "text": "ConsoleUILocatorParams"
           },
           " extends ",
-          "SerializableRecord"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "src/plugins/console/public/types/locator.ts",
         "deprecated": false,

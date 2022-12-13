@@ -98,7 +98,13 @@
               "({ pluginPaths, http }: ",
               "SetupDeps",
               ") => Promise<",
-              "I18nServiceSetup",
+              {
+                "pluginId": "@kbn/core-i18n-server",
+                "scope": "common",
+                "docId": "kibKbnCoreI18nServerPluginApi",
+                "section": "def-common.I18nServiceSetup",
+                "text": "I18nServiceSetup"
+              },
               ">"
             ],
             "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",

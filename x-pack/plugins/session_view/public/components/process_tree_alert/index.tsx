@@ -5,13 +5,28 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiIcon, EuiText, EuiButtonIcon } from '@elastic/eui';
-import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
+import React, { useEffect, useCallback, useMemo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiIcon,
+  EuiText,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiPanel,
+} from '@elastic/eui';
+import { ALERT_ICONS } from '../../../common/constants';
+import {
+  ProcessEvent,
+  ProcessEventAlert,
+  ProcessEventAlertCategory,
+} from '../../../common/types/process_tree';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { getBadgeColorFromAlertStatus } from './helpers';
 import { useStyles } from './styles';
-
+import { getAlertCategoryDisplayText } from '../../utils/alert_category_display_text';
+import { getAlertIconTooltipContent } from '../../../common/utils/alert_icon_tooltip_content';
 export interface ProcessTreeAlertDeps {
   alert: ProcessEvent;
   isInvestigated: boolean;
@@ -32,7 +47,13 @@ export const ProcessTreeAlert = ({
   const styles = useStyles({ isInvestigated, isSelected });
 
   const { event } = alert;
+
   const { uuid, rule, workflow_status: status } = alert.kibana?.alert || {};
+  const category = event?.category?.[0];
+  const alertIconType = useMemo(() => {
+    if (category && category in ALERT_ICONS) return ALERT_ICONS[category];
+    return ALERT_ICONS.process;
+  }, [category]);
 
   useEffect(() => {
     if (isInvestigated && uuid) {
@@ -55,8 +76,10 @@ export const ProcessTreeAlert = ({
   if (!(alert.kibana && rule)) {
     return null;
   }
-
   const { name } = rule;
+  const processEventAlertCategory = category ?? ProcessEventAlertCategory.process;
+  const alertCategoryDetailDisplayText = getAlertCategoryDisplayText(alert, category);
+  const alertIconTooltipContent = getAlertIconTooltipContent(processEventAlertCategory);
 
   return (
     <div key={uuid} css={styles.alert} data-id={uuid}>
@@ -76,12 +99,37 @@ export const ProcessTreeAlert = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="alert" color="danger" />
+          <EuiToolTip position="top" content={alertIconTooltipContent}>
+            <EuiIcon type={alertIconType} color="danger" />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText css={styles.alertName} size="s">
-            {dataOrDash(name)}
-          </EuiText>
+          <div css={styles.processAlertDisplayContainer}>
+            <EuiText
+              data-test-subj={`sessionView:sessionViewAlertDetailRuleName-${uuid}-text`}
+              css={styles.alertName}
+              size="s"
+            >
+              {dataOrDash(name)}
+            </EuiText>
+            {alertCategoryDetailDisplayText && (
+              <EuiPanel
+                css={styles.processPanel}
+                color="subdued"
+                hasBorder
+                hasShadow={false}
+                borderRadius="m"
+              >
+                <EuiText
+                  data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}-text`}
+                  css={styles.alertName}
+                  size="s"
+                >
+                  <span className="alertCategoryDetailText">{alertCategoryDetailDisplayText}</span>
+                </EuiText>
+              </EuiPanel>
+            )}
+          </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiBadge color={getBadgeColorFromAlertStatus(status)} css={styles.alertStatus}>

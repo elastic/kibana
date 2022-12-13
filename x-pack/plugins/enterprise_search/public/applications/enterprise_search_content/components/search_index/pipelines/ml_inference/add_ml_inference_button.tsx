@@ -25,7 +25,7 @@ export const AddMLInferencePipelineButton: React.FC<AddMLInferencePipelineButton
   const { capabilities } = useValues(KibanaLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { canUseMlInferencePipeline, hasIndexIngestionPipeline } = useValues(PipelinesLogic);
-  const hasMLPermissions = capabilities?.ml?.canAccessML ?? false;
+  const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ?? false;
   if (!hasMLPermissions) {
     return (
       <EuiToolTip
@@ -84,7 +84,7 @@ const AddButton: React.FC<{
     onClick={onClick}
   >
     {i18n.translate('xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButtonLabel', {
-      defaultMessage: 'Add inference pipeline',
+      defaultMessage: 'Add Inference Pipeline',
     })}
   </EuiButton>
 );

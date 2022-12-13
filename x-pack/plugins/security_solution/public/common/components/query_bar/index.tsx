@@ -125,7 +125,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
         showAutoRefreshOnly={false}
         showFilterBar={!hideSavedQuery}
         showDatePicker={false}
-        showQueryBar={true}
         showQueryInput={true}
         showSaveQuery={true}
         timeHistory={timeHistory}

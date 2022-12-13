@@ -191,7 +191,7 @@ export const dashboardReplacePanelAction = {
     }),
 };
 
-export const dashboardFilterNotificationBadge = {
+export const dashboardFilterNotificationAction = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.filters', {
       defaultMessage: 'Panel filters',
@@ -277,6 +277,11 @@ export const shareModalStrings = {
   getCheckboxLegend: () =>
     i18n.translate('dashboard.embedUrlParamExtension.include', {
       defaultMessage: 'Include',
+    }),
+  getSnapshotShareWarning: () =>
+    i18n.translate('dashboard.snapshotShare.longUrlWarning', {
+      defaultMessage:
+        'One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard.',
     }),
 };
 

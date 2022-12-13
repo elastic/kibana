@@ -22,6 +22,7 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
+import useMount from 'react-use/lib/useMount';
 import { EntityFilter } from './entity_filter';
 import { useMlNotifications } from '../../contexts/ml/ml_notifications_context';
 import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../../../../common/constants/notifications';
@@ -32,7 +33,7 @@ import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { ListingPageUrlState } from '../../../../common/types/common';
-import { usePageUrlState, useUrlState } from '../../util/url_state';
+import { usePageUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import type {
   MlNotificationMessageLevel,
@@ -66,17 +67,12 @@ export const NotificationsList: FC = () => {
   const timeFilter = useTimefilter();
   const timeRange = useTimeRangeUpdates();
 
-  const [globalState] = useUrlState('_g');
-
-  useEffect(function setTimeRangeOnMount() {
-    if (globalState?.time || !lastCheckedAt) return;
-
+  useMount(function setTimeRangeOnMount() {
     timeFilter.setTime({
-      from: moment(lastCheckedAt).toISOString(),
+      from: moment(latestRequestedAt).toISOString(),
       to: 'now',
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -161,55 +157,61 @@ export const NotificationsList: FC = () => {
     [sorting, queryInstance, refresh]
   );
 
-  const columns: Array<EuiBasicTableColumn<NotificationItem>> = [
-    {
-      id: 'timestamp',
-      field: 'timestamp',
-      name: <FormattedMessage id="xpack.ml.notifications.timeLabel" defaultMessage="Time" />,
-      sortable: true,
-      truncateText: false,
-      'data-test-subj': 'mlNotificationTime',
-      width: '250px',
-      render: (v: number) => dateFormatter(v),
-    },
-    {
-      field: 'level',
-      name: <FormattedMessage id="xpack.ml.notifications.levelLabel" defaultMessage="Level" />,
-      sortable: true,
-      truncateText: false,
-      'data-test-subj': 'mlNotificationLevel',
-      render: (value: MlNotificationMessageLevel) => {
-        return <EuiBadge color={levelBadgeMap[value]}>{value}</EuiBadge>;
+  const columns = useMemo<Array<EuiBasicTableColumn<NotificationItem>>>(() => {
+    return [
+      {
+        id: 'timestamp',
+        field: 'timestamp',
+        name: <FormattedMessage id="xpack.ml.notifications.timeLabel" defaultMessage="Time" />,
+        sortable: true,
+        truncateText: false,
+        'data-test-subj': 'mlNotificationTime',
+        width: '250px',
+        render: (v: number) => dateFormatter(v),
       },
-      width: '100px',
-    },
-    {
-      field: 'job_type',
-      name: <FormattedMessage id="xpack.ml.notifications.typeLabel" defaultMessage="Type" />,
-      sortable: true,
-      truncateText: false,
-      'data-test-subj': 'mlNotificationType',
-      render: (value: string) => {
-        return <EuiBadge color={'hollow'}>{value}</EuiBadge>;
+      {
+        field: 'level',
+        name: <FormattedMessage id="xpack.ml.notifications.levelLabel" defaultMessage="Level" />,
+        sortable: true,
+        truncateText: false,
+        'data-test-subj': 'mlNotificationLevel',
+        render: (value: MlNotificationMessageLevel) => {
+          return <EuiBadge color={levelBadgeMap[value]}>{value}</EuiBadge>;
+        },
+        width: '100px',
       },
-      width: '200px',
-    },
-    {
-      field: 'job_id',
-      name: <FormattedMessage id="xpack.ml.notifications.entityLabel" defaultMessage="Entity ID" />,
-      sortable: true,
-      truncateText: false,
-      'data-test-subj': 'mlNotificationEntity',
-      width: '200px',
-    },
-    {
-      field: 'message',
-      name: <FormattedMessage id="xpack.ml.notifications.messageLabel" defaultMessage="Message" />,
-      sortable: false,
-      truncateText: false,
-      'data-test-subj': 'mlNotificationMessage',
-    },
-  ];
+      {
+        field: 'job_type',
+        name: <FormattedMessage id="xpack.ml.notifications.typeLabel" defaultMessage="Type" />,
+        sortable: true,
+        truncateText: false,
+        'data-test-subj': 'mlNotificationType',
+        render: (value: string) => {
+          return <EuiBadge color={'hollow'}>{value}</EuiBadge>;
+        },
+        width: '200px',
+      },
+      {
+        field: 'job_id',
+        name: (
+          <FormattedMessage id="xpack.ml.notifications.entityLabel" defaultMessage="Entity ID" />
+        ),
+        sortable: true,
+        truncateText: false,
+        'data-test-subj': 'mlNotificationEntity',
+        width: '200px',
+      },
+      {
+        field: 'message',
+        name: (
+          <FormattedMessage id="xpack.ml.notifications.messageLabel" defaultMessage="Message" />
+        ),
+        sortable: false,
+        truncateText: false,
+        'data-test-subj': 'mlNotificationMessage',
+      },
+    ];
+  }, [dateFormatter]);
 
   const filters: SearchFilterConfig[] = useMemo<SearchFilterConfig[]>(() => {
     return [

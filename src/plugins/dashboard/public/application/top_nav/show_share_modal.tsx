@@ -8,11 +8,14 @@
 
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
+import { omit } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { EuiCheckboxGroup } from '@elastic/eui';
+import { QueryState } from '@kbn/data-plugin/common';
 import type { Capabilities } from '@kbn/core/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { getStateFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 
@@ -21,8 +24,8 @@ import { dashboardUrlParams } from '../dashboard_router';
 import { shareModalStrings } from '../../dashboard_strings';
 import { convertPanelMapToSavedPanels } from '../../../common';
 import { pluginServices } from '../../services/plugin_services';
-import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
+import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -55,8 +58,8 @@ export function ShowShareModal({
         },
       },
     },
-    share: { toggleShareContextMenu },
     initializerContext: { kibanaVersion },
+    share: { toggleShareContextMenu },
   } = pluginServices.getServices();
 
   if (!toggleShareContextMenu) return; // TODO: Make this logic cleaner once share is an optional service
@@ -151,19 +154,25 @@ export function ShowShareModal({
     ...unsavedStateForLocator,
   };
 
+  let _g = getStateFromKbnUrl<QueryState>('_g', window.location.href);
+  if (_g?.filters && _g.filters.length === 0) {
+    _g = omit(_g, 'filters');
+  }
+  const baseUrl = setStateToKbnUrl('_g', _g);
+
+  const shareableUrl = setStateToKbnUrl(
+    '_a',
+    stateToRawDashboardState({ state: unsavedDashboardState ?? {} }),
+    { useHash: false, storeInHashQuery: true },
+    unhashUrl(baseUrl)
+  );
+
   toggleShareContextMenu({
     isDirty,
     anchorElement,
     allowEmbed: true,
     allowShortUrl,
-    shareableUrl: setStateToKbnUrl(
-      '_a',
-      stateToRawDashboardState({
-        state: currentDashboardState,
-      }),
-      { useHash: false, storeInHashQuery: true },
-      unhashUrl(window.location.href)
-    ),
+    shareableUrl,
     objectId: savedObjectId,
     objectType: 'dashboard',
     sharingData: {
@@ -185,5 +194,8 @@ export function ShowShareModal({
       },
     ],
     showPublicUrlSwitch,
+    snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
+      ? shareModalStrings.getSnapshotShareWarning()
+      : undefined,
   });
 }

@@ -11,9 +11,9 @@ import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import type { AppMockRenderer } from '../../common/mock';
 import {
   allCasesPermissions,
-  AppMockRenderer,
   createAppMockRenderer,
   noDeleteCasesPermissions,
   onlyDeleteCasesPermission,
@@ -68,6 +68,17 @@ describe('useBulkActions', () => {
                   "data-test-subj": "bulk-actions-separator",
                   "isSeparator": true,
                   "key": "bulk-actions-separator",
+                },
+                Object {
+                  "data-test-subj": "cases-bulk-action-tags",
+                  "disabled": false,
+                  "icon": <EuiIcon
+                    size="m"
+                    type="tag"
+                  />,
+                  "key": "cases-bulk-action-tags",
+                  "name": "Edit tags",
+                  "onClick": [Function],
                 },
                 Object {
                   "data-test-subj": "cases-bulk-action-delete",

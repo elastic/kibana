@@ -9,7 +9,8 @@ import { renderHook, act } from '@testing-library/react-hooks';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { connector as actionConnector, issues } from '../mock';
-import { useGetIssues, UseGetIssues } from './use_get_issues';
+import type { UseGetIssues } from './use_get_issues';
+import { useGetIssues } from './use_get_issues';
 import * as api from './api';
 
 jest.mock('../../../common/lib/kibana');

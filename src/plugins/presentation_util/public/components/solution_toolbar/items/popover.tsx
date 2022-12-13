@@ -7,8 +7,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover } from '@elastic/eui';
-import { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
+import { EuiPopover, EuiPopoverProps } from '@elastic/eui';
 
 import { SolutionToolbarButton, Props as ButtonProps } from './button';
 

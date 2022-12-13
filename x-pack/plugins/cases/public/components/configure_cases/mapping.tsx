@@ -9,12 +9,12 @@ import React, { useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 
-import { TextColor } from '@elastic/eui/src/components/text/text_color';
+import type { TextColor } from '@elastic/eui/src/components/text/text_color';
 import { ConnectorTypes } from '../../../common/api';
 import * as i18n from './translations';
 
 import { FieldMapping } from './field_mapping';
-import { CaseConnectorMapping } from '../../containers/configure/types';
+import type { CaseConnectorMapping } from '../../containers/configure/types';
 
 export interface MappingProps {
   actionTypeName: string;

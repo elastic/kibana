@@ -16,10 +16,18 @@ import {
   ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  SEARCH_EXPERIENCES_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-import { enableBehavioralAnalyticsSection } from '../../../../common/ui_settings_keys';
-import { SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../enterprise_search_content/routes';
+import {
+  enableBehavioralAnalyticsSection,
+  enableEnginesSection,
+} from '../../../../common/ui_settings_keys';
+import {
+  ENGINES_PATH,
+  SEARCH_INDICES_PATH,
+  SETTINGS_PATH,
+} from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
@@ -28,6 +36,7 @@ export const useEnterpriseSearchNav = () => {
   const { productAccess, uiSettings } = useValues(KibanaLogic);
 
   const analyticsSectionEnabled = uiSettings?.get<boolean>(enableBehavioralAnalyticsSection, false);
+  const enginesSectionEnabled = uiSettings?.get<boolean>(enableEnginesSection, false);
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
@@ -70,6 +79,21 @@ export const useEnterpriseSearchNav = () => {
         defaultMessage: 'Content',
       }),
     },
+    ...(enginesSectionEnabled
+      ? [
+          {
+            id: 'enterpiseSearchEngines',
+            name: i18n.translate('xpack.enterpriseSearch.nav.enginesTitle', {
+              defaultMessage: 'Engines',
+            }),
+            ...generateNavLink({
+              shouldNotCreateHref: true,
+              shouldShowActiveForSubroutes: true,
+              to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
+            }),
+          },
+        ]
+      : []),
     ...(analyticsSectionEnabled
       ? [
           {
@@ -106,6 +130,16 @@ export const useEnterpriseSearchNav = () => {
             to: ELASTICSEARCH_PLUGIN.URL,
           }),
         },
+        {
+          id: 'searchExperiences',
+          name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+            defaultMessage: 'Search Experiences',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: SEARCH_EXPERIENCES_PLUGIN.URL,
+          }),
+        },
         ...(productAccess.hasAppSearchAccess
           ? [
               {
@@ -135,7 +169,7 @@ export const useEnterpriseSearchNav = () => {
             ]
           : []),
       ],
-      name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.nav.searchTitle', {
         defaultMessage: 'Search',
       }),
     },

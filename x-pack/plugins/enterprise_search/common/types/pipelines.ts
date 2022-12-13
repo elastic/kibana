@@ -8,9 +8,11 @@
 import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 export interface InferencePipeline {
+  modelId: string | undefined;
   modelState: TrainedModelState;
   modelStateReason?: string;
   pipelineName: string;
+  pipelineReferences: string[];
   types: string[];
 }
 
@@ -36,7 +38,36 @@ export interface MlInferenceHistoryResponse {
 }
 
 export interface MlInferenceError {
-  message: string;
   doc_count: number;
+  message: string;
   timestamp: string | undefined; // Date string
+}
+
+export interface CreateMlInferencePipelineResponse {
+  addedToParentPipeline?: boolean;
+  created?: boolean;
+  id: string;
+}
+
+export interface AttachMlInferencePipelineResponse {
+  addedToParentPipeline?: boolean;
+  created?: boolean;
+  id: string;
+}
+
+/**
+ * Response for deleting sub-pipeline from @ml-inference pipeline.
+ * If sub-pipeline was deleted successfully, 'deleted' field contains its name.
+ * If parent pipeline was updated successfully, 'updated' field contains its name.
+ */
+export interface DeleteMlInferencePipelineResponse {
+  deleted?: string;
+  updated?: string;
+}
+
+export interface CreateMlInferencePipelineParameters {
+  destination_field?: string;
+  model_id: string;
+  pipeline_name: string;
+  source_field: string;
 }

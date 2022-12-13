@@ -110,7 +110,9 @@ const createSecuritySolutionRequestContextMock = (
 
   return {
     core,
-    endpointAuthz: getEndpointAuthzInitialStateMock(overrides.endpointAuthz),
+    getEndpointAuthz: jest.fn(async () =>
+      getEndpointAuthzInitialStateMock(overrides.endpointAuthz)
+    ),
     getConfig: jest.fn(() => clients.config),
     getFrameworkRequest: jest.fn(() => {
       return {

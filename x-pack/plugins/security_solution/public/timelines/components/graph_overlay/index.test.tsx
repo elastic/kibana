@@ -26,11 +26,17 @@ import { GraphOverlay } from '.';
 import { createStore } from '../../../common/store';
 import { useStateSyncingActions } from '../../../resolver/view/use_state_syncing_actions';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { TableId } from '../../../../common/types';
 
 jest.mock('../../../common/containers/use_full_screen', () => ({
   useGlobalFullScreen: jest.fn(),
   useTimelineFullScreen: jest.fn(),
 }));
+
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+});
 
 jest.mock('../../../resolver/view/use_resolver_query_params_cleaner');
 jest.mock('../../../resolver/view/use_state_syncing_actions');
@@ -68,7 +74,6 @@ jest.mock('react-redux', () => {
 
 describe('GraphOverlay', () => {
   const { storage } = createSecuritySolutionStorageMock();
-
   beforeEach(() => {
     jest.clearAllMocks();
     (useGlobalFullScreen as jest.Mock).mockReturnValue({
@@ -85,7 +90,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={TableId.test} />
         </TestProviders>
       );
 
@@ -105,7 +110,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={TableId.test} />
         </TestProviders>
       );
 
@@ -122,8 +127,8 @@ describe('GraphOverlay', () => {
               timeline: {
                 ...mockGlobalState.timeline,
                 timelineById: {
-                  test: {
-                    ...mockGlobalState.timeline.timelineById.test,
+                  [TimelineId.test]: {
+                    ...mockGlobalState.timeline.timelineById[TimelineId.test],
                     graphEventId: 'definitely-not-null',
                   },
                 },
@@ -134,7 +139,7 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={TableId.test} />
         </TestProviders>
       );
 
@@ -153,7 +158,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
 
@@ -173,7 +178,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
 
@@ -182,6 +187,7 @@ describe('GraphOverlay', () => {
     });
 
     test('it gets index pattern from Timeline data view', () => {
+      const mockedDefaultDataViewPattern = 'default-dataview-pattern';
       render(
         <TestProviders
           store={createStore(
@@ -198,6 +204,10 @@ describe('GraphOverlay', () => {
               },
               sourcerer: {
                 ...mockGlobalState.sourcerer,
+                defaultDataView: {
+                  ...mockGlobalState.sourcerer.defaultDataView,
+                  patternList: [mockedDefaultDataViewPattern],
+                },
                 sourcererScopes: {
                   ...mockGlobalState.sourcerer.sourcererScopes,
                   [SourcererScopeName.timeline]: {
@@ -212,11 +222,14 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
 
-      expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual(mockIndexNames.sort());
+      expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual([
+        ...mockIndexNames.sort(),
+        mockedDefaultDataViewPattern,
+      ]);
     });
 
     test('it renders session view controls', () => {
@@ -252,9 +265,9 @@ describe('GraphOverlay', () => {
           )}
         >
           <GraphOverlay
-            timelineId={timelineId}
             SessionView={<div />}
             Navigation={<div>{'Close Session'}</div>}
+            scopeId={timelineId}
           />
         </TestProviders>
       );
@@ -292,11 +305,7 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay
-            timelineId={timelineId}
-            SessionView={<div />}
-            Navigation={<div>{'Close Session'}</div>}
-          />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
       wrapper.unmount();

@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import { useMemo } from 'react';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
-import { TemporaryProcessingPluginsType } from './types';
+import type { TemporaryProcessingPluginsType } from './types';
 import { KibanaServices, useApplicationCapabilities } from '../../common/lib/kibana';
 import * as lensMarkdownPlugin from './plugins/lens';
 import { ID as LensPluginId } from './plugins/lens/constants';

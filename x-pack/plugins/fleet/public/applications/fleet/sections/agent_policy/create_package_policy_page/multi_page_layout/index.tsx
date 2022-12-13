@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { splitPkgKey } from '../../../../../../../common/services';
 
-import { useGetPackageInfoByKey, useGetSettings, useLink } from '../../../../hooks';
+import { useGetPackageInfoByKey, useLink, useFleetServerHostsForPolicy } from '../../../../hooks';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
 
@@ -52,6 +52,7 @@ const standaloneSteps = [addIntegrationStep, installAgentStep, confirmDataStep];
 export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   from,
   queryParamsPolicyId,
+  prerelease,
 }) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
   const { pkgkey, policyId, integration } = params;
@@ -66,13 +67,11 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     setCurrentStep(0);
   };
 
-  const { isLoading: isSettingsLoading, data: settingsData } = useGetSettings();
-
   const {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion);
+  } = useGetPackageInfoByKey(pkgName, pkgVersion, { prerelease, full: true });
 
   const {
     agentPolicy,
@@ -82,7 +81,6 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   } = useGetAgentPolicyOrDefault(queryParamsPolicyId);
 
   const packageInfo = useMemo(() => packageInfoData?.item, [packageInfoData]);
-  const settings = useMemo(() => settingsData?.item, [settingsData]);
 
   const integrationInfo = useMemo(() => {
     if (!integration) return;
@@ -95,6 +93,9 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     setOnSplash(false);
   };
 
+  const { fleetServerHosts, fleetProxy, isLoadingInitialRequest } =
+    useFleetServerHostsForPolicy(agentPolicy);
+
   const cancelUrl = getHref('add_integration_to_policy', {
     pkgkey,
     useMultiPageLayout: false,
@@ -105,7 +106,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   if (onSplash || !packageInfo) {
     return (
       <AddFirstIntegrationSplashScreen
-        isLoading={isPackageInfoLoading || isSettingsLoading || isAgentPolicyLoading}
+        isLoading={isPackageInfoLoading || isLoadingInitialRequest || isAgentPolicyLoading}
         error={packageInfoError || agentPolicyError}
         integrationInfo={integrationInfo}
         packageInfo={packageInfo}
@@ -134,7 +135,8 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
 
   return (
     <MultiPageStepsLayout
-      settings={settings}
+      fleetServerHosts={fleetServerHosts}
+      fleetProxy={fleetProxy}
       agentPolicy={agentPolicy}
       enrollmentAPIKey={enrollmentAPIKey}
       currentStep={currentStep}

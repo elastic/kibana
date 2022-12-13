@@ -43,8 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
         expect(await testSubjects.exists('addFilter')).to.be(true);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(true);
-        expect(await testSubjects.exists('discoverChart')).to.be(true);
-        expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
+        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
+        expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
@@ -64,8 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
-        expect(await testSubjects.exists('discoverChart')).to.be(false);
-        expect(await testSubjects.exists('discoverQueryHits')).to.be(false);
+        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
+        expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(false);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(false);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(false);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(false);

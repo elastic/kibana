@@ -8,34 +8,46 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
-import { useParams } from 'react-router-dom';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
-import { KpiWrapper } from './kpi_wrapper';
+interface AvailabilityPanelprops {
+  from: string;
+  to: string;
+}
 
-export const AvailabilityPanel = () => {
+export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
   const {
     services: {
       observability: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const selectedLocation = useSelectedLocation();
+
+  const monitorId = useMonitorQueryId();
+
+  if (!selectedLocation || !monitorId) {
+    return null;
+  }
 
   return (
-    <KpiWrapper>
-      <ExploratoryViewEmbeddable
-        align="left"
-        reportType={ReportTypes.SINGLE_METRIC}
-        attributes={[
-          {
-            time: { from: 'now-30d', to: 'now' },
-            name: 'Monitor availability',
-            dataType: 'synthetics',
-            selectedMetricField: 'monitor_availability',
-            reportDefinitions: { config_id: [monitorId] },
+    <ExploratoryViewEmbeddable
+      align="left"
+      customHeight="70px"
+      reportType={ReportTypes.SINGLE_METRIC}
+      attributes={[
+        {
+          time: props,
+          name: 'Monitor availability',
+          dataType: 'synthetics',
+          selectedMetricField: 'monitor_availability',
+          reportDefinitions: {
+            'monitor.id': [monitorId],
+            'observer.geo.name': [selectedLocation?.label],
           },
-        ]}
-      />
-    </KpiWrapper>
+        },
+      ]}
+    />
   );
 };

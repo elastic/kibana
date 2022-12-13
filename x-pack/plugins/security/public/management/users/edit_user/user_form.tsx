@@ -56,6 +56,7 @@ export interface UserFormProps {
   defaultValues?: UserFormValues;
   onCancel(): void;
   onSuccess?(): void;
+  disabled?: boolean;
 }
 
 const defaultDefaultValues: UserFormValues = {
@@ -73,6 +74,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
   defaultValues = defaultDefaultValues,
   onSuccess,
   onCancel,
+  disabled = false,
 }) => {
   const { services } = useKibana();
 
@@ -269,7 +271,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             value={form.values.username}
             isLoading={form.isValidating}
             isInvalid={form.touched.username && !!form.errors.username}
-            disabled={!isNewUser}
+            disabled={disabled || !isNewUser}
             onChange={eventHandlers.onChange}
             onBlur={eventHandlers.onBlur}
           />
@@ -291,6 +293,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                 isInvalid={form.touched.full_name && !!form.errors.full_name}
                 onChange={eventHandlers.onChange}
                 onBlur={eventHandlers.onBlur}
+                disabled={disabled}
               />
             </EuiFormRow>
             <EuiFormRow
@@ -307,6 +310,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                 isInvalid={form.touched.email && !!form.errors.email}
                 onChange={eventHandlers.onChange}
                 onBlur={eventHandlers.onBlur}
+                disabled={disabled}
               />
             </EuiFormRow>
           </>
@@ -349,6 +353,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
               autoComplete="new-password"
               onChange={eventHandlers.onChange}
               onBlur={eventHandlers.onBlur}
+              disabled={disabled}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -367,6 +372,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
               autoComplete="new-password"
               onChange={eventHandlers.onChange}
               onBlur={eventHandlers.onBlur}
+              disabled={disabled}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -423,12 +429,12 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             selectedRoleNames={selectedRoleNames}
             onChange={(value) => form.setValue('roles', value)}
             isLoading={rolesState.loading}
-            isDisabled={isReservedUser}
+            isDisabled={disabled || isReservedUser}
           />
         </EuiFormRow>
 
         <EuiSpacer size="xxl" />
-        {isReservedUser ? (
+        {disabled || isReservedUser ? (
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButton iconType="arrowLeft" onClick={onCancel}>

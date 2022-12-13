@@ -1111,7 +1111,10 @@ module.exports = {
       },
       overrides: [
         {
-          files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
+          files: [
+            'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+          ],
           rules: {
             '@typescript-eslint/consistent-type-imports': 'error',
           },

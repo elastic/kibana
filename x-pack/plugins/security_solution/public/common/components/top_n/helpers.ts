@@ -52,6 +52,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_USER,
 } from '@kbn/rule-data-utils';
+import { TableId } from '../../../../common/types';
 
 import type { TimelineEventsType } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -64,6 +65,13 @@ export interface TopNOption {
   value: TimelineEventsType;
   'data-test-subj': string;
 }
+
+/** the following scopes are detection alert tables */
+export const detectionAlertsTables: string[] = [
+  TableId.alertsOnAlertsPage,
+  TableId.alertsOnRuleDetailsPage,
+  TimelineId.casePage,
+];
 
 /** A (stable) array containing only the 'All events' option */
 export const allEvents: TopNOption[] = [
@@ -117,8 +125,8 @@ export const getOptions = (activeTimelineEventsType?: TimelineEventsType): TopNO
 };
 
 /** returns true if the specified timelineId is a detections alert table */
-export const isDetectionsAlertsTable = (timelineId: string | undefined): boolean =>
-  timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage;
+export const isDetectionsAlertsTable = (scopeId: string | undefined): boolean =>
+  scopeId ? detectionAlertsTables.includes(scopeId) : false;
 
 /**
  * The following fields are used to filter alerts tables, (i.e. tables in the
@@ -185,12 +193,12 @@ export const IGNORED_ALERT_FILTERS = [
  * @see IGNORED_ALERT_FILTERS
  */
 export const shouldIgnoreAlertFilters = ({
-  timelineId,
+  tableId,
   view,
 }: {
-  timelineId: string | undefined;
+  tableId: string | undefined;
   view: TimelineEventsType;
-}): boolean => view === 'raw' && isDetectionsAlertsTable(timelineId);
+}): boolean => view === 'raw' && isDetectionsAlertsTable(tableId);
 
 /**
  * returns a new set of `filters` that don't contain the fields specified in
@@ -200,14 +208,14 @@ export const shouldIgnoreAlertFilters = ({
  */
 export const removeIgnoredAlertFilters = ({
   filters,
-  timelineId,
+  tableId,
   view,
 }: {
   filters: Filter[];
-  timelineId: string | undefined;
+  tableId: string | undefined;
   view: TimelineEventsType;
 }): Filter[] => {
-  if (!shouldIgnoreAlertFilters({ timelineId, view })) {
+  if (!shouldIgnoreAlertFilters({ tableId, view })) {
     return filters; // unmodified filters
   }
 
@@ -216,23 +224,23 @@ export const removeIgnoredAlertFilters = ({
 
 /** returns the SourcererScopeName applicable to the specified timelineId and view */
 export const getSourcererScopeName = ({
-  timelineId,
+  scopeId,
   view,
 }: {
-  timelineId: string | undefined;
+  scopeId: string | undefined;
   view: TimelineEventsType;
 }): SourcererScopeName => {
   // When alerts should be ignored, use the `default` Sourcerer scope,
   // because it does NOT include alert indexes:
-  if (shouldIgnoreAlertFilters({ timelineId, view })) {
+  if (shouldIgnoreAlertFilters({ tableId: scopeId, view })) {
     return SourcererScopeName.default; // no alerts in this scope
   }
 
-  if (isDetectionsAlertsTable(timelineId)) {
+  if (isDetectionsAlertsTable(scopeId)) {
     return SourcererScopeName.detections;
   }
 
-  if (timelineId === TimelineId.active) {
+  if (scopeId === TimelineId.active) {
     return SourcererScopeName.timeline;
   }
 

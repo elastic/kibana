@@ -74,6 +74,15 @@ jest.mock('../../../common/containers/use_global_time', () => ({
   }),
 }));
 
+const useAddToTimeline = () => ({
+  beginDrag: jest.fn(),
+  cancelDrag: jest.fn(),
+  dragToLocation: jest.fn(),
+  endDrag: jest.fn(),
+  hasDraggableLock: jest.fn(),
+  startDragToTimeline: jest.fn(),
+});
+
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
   return {
@@ -85,10 +94,7 @@ jest.mock('../../../common/lib/kibana', () => {
       services: {
         ...original.useKibana().services,
         timelines: {
-          getUseDraggableKeyboardWrapper: () => () => ({
-            onBlur: jest.fn,
-            onKeyDown: jest.fn,
-          }),
+          getUseAddToTimeline: () => useAddToTimeline,
         },
       },
     }),

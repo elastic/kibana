@@ -6,8 +6,7 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useSecurityContext } from '../../../../hooks/use_security_context';
+import { useKibana, useSecurityContext } from '../../../../hooks';
 import { IndicatorsFiltersContext, IndicatorsFiltersContextValue } from '.';
 
 /**

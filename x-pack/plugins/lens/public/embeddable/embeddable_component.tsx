@@ -62,6 +62,7 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
 export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceInput) & {
   withDefaultActions?: boolean;
   extraActions?: Action[];
+  showInspector?: boolean;
 };
 
 interface PluginsStartDependencies {
@@ -89,6 +90,7 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
           input={input}
           theme={theme}
           extraActions={input.extraActions}
+          showInspector={input.showInspector}
           withDefaultActions={input.withDefaultActions}
         />
       );
@@ -119,6 +121,7 @@ interface EmbeddablePanelWrapperProps {
   input: EmbeddableComponentProps;
   theme: ThemeServiceStart;
   extraActions?: Action[];
+  showInspector?: boolean;
   withDefaultActions?: boolean;
 }
 
@@ -130,6 +133,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   input,
   theme,
   extraActions,
+  showInspector = true,
   withDefaultActions,
 }) => {
   const [embeddable, loading] = useEmbeddableFactory({ factory, input });
@@ -154,7 +158,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
 
         return [...(extraActions ?? []), ...actions];
       }}
-      inspector={inspector}
+      inspector={showInspector ? inspector : undefined}
       actionPredicate={actionPredicate}
       showShadow={false}
       showBadges={false}

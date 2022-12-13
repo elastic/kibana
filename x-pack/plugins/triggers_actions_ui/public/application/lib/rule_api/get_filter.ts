@@ -19,11 +19,14 @@ export const getFilter = ({
 
   if (message) {
     const escapedMessage = message.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&');
-    filter.push(`message: "${escapedMessage}" OR error.message: "${escapedMessage}"`);
+    filter.push(`(message: "${escapedMessage}" OR error.message: "${escapedMessage}")`);
   }
 
   if (outcomeFilter && outcomeFilter.length) {
-    filter.push(getOutcomeFilter(outcomeFilter));
+    const outcomeFilterKQL = getOutcomeFilter(outcomeFilter);
+    if (outcomeFilterKQL) {
+      filter.push(`(${outcomeFilterKQL})`);
+    }
   }
 
   if (runId) {
@@ -39,6 +42,7 @@ function getOutcomeFilter(outcomeFilter: string[]) {
     warning: 'kibana.alerting.outcome: warning',
     success:
       'kibana.alerting.outcome:success OR (event.outcome: success AND NOT kibana.alerting.outcome:*)',
+    unknown: 'event.outcome: unknown',
   };
   return `${outcomeFilter.map((f) => filterMapping[f]).join(' OR ')}`;
 }

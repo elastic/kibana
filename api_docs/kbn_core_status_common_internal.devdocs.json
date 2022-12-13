@@ -180,7 +180,13 @@
             "text": "StatusInfoServiceStatus"
           },
           " extends Omit<",
-          "ServiceStatus",
+          {
+            "pluginId": "@kbn/core-status-common",
+            "scope": "common",
+            "docId": "kibKbnCoreStatusCommonPluginApi",
+            "section": "def-common.ServiceStatus",
+            "text": "ServiceStatus"
+          },
           "<unknown>, \"level\">"
         ],
         "path": "packages/core/status/core-status-common-internal/src/status.ts",
@@ -286,7 +292,13 @@
             "description": [],
             "signature": [
               "Omit<",
-              "OpsMetrics",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.OpsMetrics",
+                "text": "OpsMetrics"
+              },
               ", \"collected_at\"> & { last_updated: string; collection_interval_in_millis: number; requests: { status_codes: Record<number, number>; }; }"
             ],
             "path": "packages/core/status/core-status-common-internal/src/status.ts",
@@ -308,7 +320,13 @@
         "description": [],
         "signature": [
           "Omit<",
-          "OpsMetrics",
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.OpsMetrics",
+            "text": "OpsMetrics"
+          },
           ", \"collected_at\"> & { last_updated: string; collection_interval_in_millis: number; requests: { status_codes: Record<number, number>; }; }"
         ],
         "path": "packages/core/status/core-status-common-internal/src/status.ts",

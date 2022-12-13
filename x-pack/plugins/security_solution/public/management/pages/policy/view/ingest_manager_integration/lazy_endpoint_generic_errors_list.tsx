@@ -19,7 +19,7 @@ export const getLazyEndpointGenericErrorsListExtension = (
 ) => {
   return lazy<PackageGenericErrorsListComponent>(async () => {
     const [{ withSecurityContext }, { EndpointGenericErrorsList }] = await Promise.all([
-      import('./with_security_context/with_security_context'),
+      import('./components/with_security_context/with_security_context'),
       import('./endpoint_generic_errors_list'),
     ]);
 

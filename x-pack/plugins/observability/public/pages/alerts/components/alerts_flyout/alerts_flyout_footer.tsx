@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { isAlertDetailsEnabledPerApp } from '../../../../utils/is_alert_details_enabled';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { FlyoutProps } from './types';
 import { translations, paths } from '../../../../config';
@@ -18,7 +19,7 @@ export default function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { i
   const { http } = services;
   const prepend = http?.basePath.prepend;
   const getAlertDetailsButton = () => {
-    if (!config?.unsafe?.alertDetails.enabled || !alert) return <></>;
+    if (!isAlertDetailsEnabledPerApp(alert, config)) return <></>;
     return (
       <EuiFlexItem grow={false}>
         <EuiButton

@@ -45,6 +45,7 @@ export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity
 export interface UseRiskScoreParams {
   filterQuery?: ESQuery | string;
   onlyLatest?: boolean;
+  includeAlertsCount?: boolean;
   pagination?:
     | {
         cursorStart: number;
@@ -76,6 +77,7 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   skip = false,
   pagination,
   riskEntity,
+  includeAlertsCount = false,
 }: UseRiskScore<T>): RiskScoreState<T> => {
   const spaceId = useSpaceId();
   const defaultIndex = spaceId
@@ -158,6 +160,8 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
         ? {
             defaultIndex: [defaultIndex],
             factoryQueryType,
+            riskScoreEntity: riskEntity,
+            includeAlertsCount,
             filterQuery: createFilter(filterQuery),
             pagination:
               cursorStart !== undefined && querySize !== undefined
@@ -179,6 +183,8 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
       sort,
       requestTimerange,
       onlyLatest,
+      riskEntity,
+      includeAlertsCount,
     ]
   );
 

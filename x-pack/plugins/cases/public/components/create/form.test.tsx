@@ -7,14 +7,17 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, render } from '@testing-library/react';
+import { act, render, within } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { NONE_CONNECTOR_ID } from '../../../common/api';
-import { useForm, Form, FormHook } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { connectorsMock } from '../../containers/mock';
-import { schema, FormProps } from './schema';
-import { CreateCaseForm, CreateCaseFormProps } from './form';
+import type { FormProps } from './schema';
+import { schema } from './schema';
+import type { CreateCaseFormProps } from './form';
+import { CreateCaseForm } from './form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { TestProviders } from '../../common/mock';
@@ -178,5 +181,35 @@ describe('CreateCaseForm', () => {
     );
 
     expect(result.getByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
+  });
+
+  it('should not prefill the form when no initialValue provided', () => {
+    const { getByTestId } = render(
+      <MockHookWrapperComponent>
+        <CreateCaseForm {...casesFormProps} />
+      </MockHookWrapperComponent>
+    );
+
+    const titleInput = within(getByTestId('caseTitle')).getByTestId('input');
+    const descriptionInput = within(getByTestId('caseDescription')).getByRole('textbox');
+    expect(titleInput).toHaveValue('');
+    expect(descriptionInput).toHaveValue('');
+  });
+
+  it('should prefill the form when provided with initialValue', () => {
+    const { getByTestId } = render(
+      <MockHookWrapperComponent>
+        <CreateCaseForm
+          {...casesFormProps}
+          initialValue={{ title: 'title', description: 'description' }}
+        />
+      </MockHookWrapperComponent>
+    );
+
+    const titleInput = within(getByTestId('caseTitle')).getByTestId('input');
+    const descriptionInput = within(getByTestId('caseDescription')).getByRole('textbox');
+
+    expect(titleInput).toHaveValue('title');
+    expect(descriptionInput).toHaveValue('description');
   });
 });

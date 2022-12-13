@@ -36,11 +36,7 @@ interface Props<T> {
   showPerPageOptions?: boolean;
   noItemsMessage?: React.ReactNode;
   sortItems?: boolean;
-  sortFn?: (
-    items: T[],
-    sortField: string,
-    sortDirection: 'asc' | 'desc'
-  ) => T[];
+  sortFn?: SortFunction<T>;
   pagination?: boolean;
   isLoading?: boolean;
   error?: boolean;
@@ -56,6 +52,12 @@ function defaultSortFn<T extends any>(
 ) {
   return orderBy(items, sortField, sortDirection);
 }
+
+export type SortFunction<T> = (
+  items: T[],
+  sortField: string,
+  sortDirection: 'asc' | 'desc'
+) => T[];
 
 function UnoptimizedManagedTable<T>(props: Props<T>) {
   const history = useHistory();

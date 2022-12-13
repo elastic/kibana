@@ -6,15 +6,11 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type {
-  ColumnHeaderOptions,
-  ColumnId,
-  RowRendererId,
-  TimelineExpandedDetail,
-  TimelineTypeLiteral,
-} from '.';
+import type { RowRendererId, TimelineTypeLiteral } from '.';
 
 import type { Direction } from '../../search_strategy';
+import type { ExpandedDetailTimeline } from '../detail_panel';
+import type { ColumnHeaderOptions, ColumnId } from '../header_actions';
 import type { DataProvider } from './data_provider';
 
 export type KueryFilterQueryKind = 'kuery' | 'lucene' | 'eql';
@@ -47,7 +43,7 @@ export interface TimelinePersistInput {
   };
   defaultColumns?: ColumnHeaderOptions[];
   excludedRowRendererIds?: RowRendererId[];
-  expandedDetail?: TimelineExpandedDetail;
+  expandedDetail?: ExpandedDetailTimeline;
   filters?: Filter[];
   id: string;
   indexNames: string[];
@@ -61,6 +57,7 @@ export interface TimelinePersistInput {
   timelineType?: TimelineTypeLiteral;
   templateTimelineId?: string | null;
   templateTimelineVersion?: number | null;
+  title?: string;
 }
 
 /** Invoked when a column is sorted */

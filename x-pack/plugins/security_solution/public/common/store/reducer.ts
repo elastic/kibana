@@ -27,6 +27,8 @@ import { initDataView, SourcererScopeName } from './sourcerer/model';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
+import type { DataTableState } from './data_table/types';
+import { dataTableReducer } from './data_table/reducer';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   UsersPluginReducer &
@@ -51,7 +53,8 @@ export const createInitialState = (
     kibanaDataViews: SourcererModel['kibanaDataViews'];
     signalIndexName: SourcererModel['signalIndexName'];
     enableExperimental: ExperimentalFeatures;
-  }
+  },
+  dataTableState: DataTableState
 ): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
@@ -104,6 +107,7 @@ export const createInitialState = (
       signalIndexName,
     },
     globalUrlParam: initialGlobalUrlParam,
+    dataTable: dataTableState.dataTable,
   };
 
   return preloadedState;
@@ -121,5 +125,6 @@ export const createReducer: (
     inputs: inputsReducer,
     sourcerer: sourcererReducer,
     globalUrlParam: globalUrlParamReducer,
+    dataTable: dataTableReducer,
     ...pluginsReducer,
   });
