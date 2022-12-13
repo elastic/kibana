@@ -160,7 +160,7 @@ export const EmailParamsFields = ({
               if (!cc) {
                 editAction('cc', [], index);
               }
-              onBlur?.('cc');
+              onBlur('cc');
             }}
           />
         </EuiFormRow>
