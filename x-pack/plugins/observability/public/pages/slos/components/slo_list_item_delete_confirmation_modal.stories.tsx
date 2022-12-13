@@ -13,7 +13,7 @@ import {
   DeleteConfirmationModal as Component,
   DeleteConfirmationPropsModal,
 } from './slo_list_item_delete_confirmation_modal';
-import { slo } from '../../../../common/data/sli_list';
+import { anSLO } from '../../../../common/data/slo';
 
 export default {
   component: Component,
@@ -26,7 +26,7 @@ const Template: ComponentStory<typeof Component> = (props: DeleteConfirmationPro
 );
 
 const defaultProps = {
-  slo,
+  slo: anSLO,
 };
 
 export const SloList = Template.bind({});

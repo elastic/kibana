@@ -8,11 +8,11 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
+import { anSLO } from '../../../../common/data/slo';
 import {
   SloListItemSummaryStats as Component,
   SloListItemSummaryStatsProps,
 } from './slo_list_item_summary_stats';
-import { slo } from '../../../../common/data/sli_list';
 
 export default {
   component: Component,
@@ -25,7 +25,7 @@ const Template: ComponentStory<typeof Component> = (props: SloListItemSummarySta
 );
 
 const defaultProps = {
-  slo,
+  slo: anSLO,
 };
 
 export const SloList = Template.bind({});

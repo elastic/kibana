@@ -8,9 +8,9 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
+import { anSLO } from '../../../../common/data/slo';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloListItem as Component, SloListItemProps } from './slo_list_item';
-import { slo } from '../../../../common/data/sli_list';
 
 export default {
   component: Component,
@@ -23,7 +23,7 @@ const Template: ComponentStory<typeof Component> = (props: SloListItemProps) => 
 );
 
 const defaultProps = {
-  slo,
+  slo: anSLO,
 };
 
 export const SloList = Template.bind({});
