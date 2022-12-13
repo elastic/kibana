@@ -63,11 +63,16 @@ export function SaveModalContainer({
     savedObjectId = lastKnownDoc.savedObjectId;
   }
 
-  if (!lastKnownDoc?.title && initialContext && 'title' in initialContext && initialContext.title) {
+  if (
+    !lastKnownDoc?.title &&
+    initialContext &&
+    'isEmbeddable' in initialContext &&
+    initialContext.isEmbeddable
+  ) {
     title = i18n.translate('xpack.lens.app.convertedLabel', {
       defaultMessage: '{title} (converted)',
       values: {
-        title: initialContext.title,
+        title: initialContext.title || `${initialContext.visTypeTitle} visualization`,
       },
     });
   }
