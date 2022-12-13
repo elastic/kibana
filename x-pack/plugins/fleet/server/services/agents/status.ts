@@ -85,14 +85,16 @@ export async function getAgentStatusForAgentPolicyExperimental(
   const clauses: QueryDslQueryContainer[] = [];
 
   if (filterKuery) {
-    const kueryAsElasticsearchQuery = toElasticsearchQuery(fromKueryExpression(filterKuery));
+    const kueryAsElasticsearchQuery = toElasticsearchQuery(
+      fromKueryExpression(removeSOAttributes(filterKuery))
+    );
     clauses.push(kueryAsElasticsearchQuery);
   }
 
   if (agentPolicyId) {
     clauses.push({
       term: {
-        [`${AGENTS_PREFIX}.policy_id`]: agentPolicyId,
+        policy_id: agentPolicyId,
       },
     });
   }
