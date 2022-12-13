@@ -117,7 +117,7 @@ export const EmailParamsFields = ({
             if (!to) {
               editAction('to', [], index);
             }
-            onBlur?.('to');
+            onBlur('to');
           }}
         />
       </EuiFormRow>
@@ -160,7 +160,7 @@ export const EmailParamsFields = ({
               if (!cc) {
                 editAction('cc', [], index);
               }
-              onBlur?.('cc');
+              onBlur('cc');
             }}
           />
         </EuiFormRow>
@@ -204,7 +204,7 @@ export const EmailParamsFields = ({
               if (!bcc) {
                 editAction('bcc', [], index);
               }
-              onBlur?.('bcc');
+              onBlur('bcc');
             }}
           />
         </EuiFormRow>
