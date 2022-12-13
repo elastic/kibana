@@ -112,7 +112,8 @@ properties:
     additionalProperties: true
   rule_type_id:
     type: string
-    description: The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
+    description: >
+      The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
     example: monitoring_alert_cluster_health
   schedule:
     $ref: 'schedule.yaml'
