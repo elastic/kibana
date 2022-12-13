@@ -27,7 +27,6 @@ const keywords = [
   'where',
   'having',
   'group',
-  'timefilter',
   'by',
   'order',
   'asc',
