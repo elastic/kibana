@@ -35,7 +35,7 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
         metaFields,
         type,
         rollupIndex,
-        filter: indexFilter,
+        indexFilter,
       })
       .catch((err) => {
         if (

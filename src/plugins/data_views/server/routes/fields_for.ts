@@ -85,7 +85,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
         allow_no_indices: allowNoIndex || false,
         includeUnmapped,
       },
-      filter,
+      indexFilter: filter,
     });
 
     return response.ok({
