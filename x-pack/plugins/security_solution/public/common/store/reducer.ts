@@ -13,9 +13,9 @@ import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
 import { sourcererReducer, sourcererModel } from './sourcerer';
 
-import type { HostsPluginReducer } from '../../hosts/store';
-import type { NetworkPluginReducer } from '../../network/store';
-import type { UsersPluginReducer } from '../../users/store';
+import type { HostsPluginReducer } from '../../explore/hosts/store';
+import type { NetworkPluginReducer } from '../../explore/network/store';
+import type { UsersPluginReducer } from '../../explore/users/store';
 import type { TimelinePluginReducer } from '../../timelines/store/timeline';
 
 import type { SecuritySubPlugins } from '../../app/types';
