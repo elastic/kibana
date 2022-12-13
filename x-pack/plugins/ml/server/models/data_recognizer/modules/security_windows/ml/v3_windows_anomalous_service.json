@@ -39,7 +39,7 @@
       "version": "3",
       "updated_date": "5/16/2022"
     },
-    "created_by": "ml-module-security-windows",
+    "created_by": "ml-module-security-windows-v3",
     "custom_urls": [
       {
         "url_name": "Host Details",
