@@ -16,6 +16,64 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const esClient = getService('es');
 
+  function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function waitFor(
+    cb: () => Promise<boolean>,
+    { retries = 50, delay = 100 }: { retries?: number; delay?: number } = {}
+  ): Promise<void> {
+    if (retries === 0) {
+      throw new Error(`Maximum number of retries reached`);
+    }
+
+    const res = await cb();
+    if (!res) {
+      await sleep(delay);
+      return waitFor(cb, { retries: retries - 1, delay });
+    }
+  }
+
+  async function waitForSourceMapCount(
+    count: number,
+    { retries, delay }: { retries?: number; delay?: number } = {}
+  ) {
+    await waitFor(
+      async () => {
+        const res = await esClient.search({
+          index: '.apm-source-map',
+          size: 0,
+          track_total_hits: true,
+        });
+        // @ts-expect-error
+        return res.hits.total.value === count;
+      },
+      { retries, delay }
+    );
+    return count;
+  }
+
+  async function deleteAllApmSourceMaps() {
+    await esClient.deleteByQuery({
+      index: '.apm-source-map*',
+      refresh: true,
+      query: { match_all: {} },
+    });
+  }
+
+  async function deleteAllFleetSourceMaps() {
+    return esClient.deleteByQuery({
+      index: '.fleet-artifacts*',
+      refresh: true,
+      query: {
+        bool: {
+          filter: [{ term: { type: 'sourcemap' } }, { term: { package_name: 'apm' } }],
+        },
+      },
+    });
+  }
+
   async function uploadSourcemap({
     bundleFilePath,
     serviceName,
@@ -42,6 +100,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response.body;
   }
 
+  async function runSourceMapMigration() {
+    await apmApiClient.writeUser({
+      endpoint: 'POST /internal/apm/sourcemaps/migrate_fleet_artifacts',
+    });
+  }
+
   async function deleteSourcemap(id: string) {
     await apmApiClient.writeUser({
       endpoint: 'DELETE /api/apm/sourcemaps/{id}',
@@ -60,6 +124,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('source maps', { config: 'basic', archives: [] }, () => {
+    before(async () => {
+      await Promise.all([deleteAllFleetSourceMaps(), deleteAllApmSourceMaps()]);
+    });
+
     let resp: APIReturnType<'POST /api/apm/sourcemaps'>;
     describe('upload source map', () => {
       after(async () => {
@@ -71,7 +139,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       before(async () => {
         resp = await uploadSourcemap({
-          serviceName: 'my_service',
+          serviceName: 'uploading-test',
           serviceVersion: '1.0.0',
           bundleFilePath: 'bar',
           sourcemap: {
@@ -80,6 +148,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             mappings: '',
           },
         });
+
+        await waitForSourceMapCount(1);
       });
 
       it('is uploaded as a fleet artifact', async () => {
@@ -94,7 +164,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         // @ts-expect-error
-        expect(res.hits.hits[0]._source.identifier).to.be('my_service-1.0.0');
+        expect(res.hits.hits[0]._source.identifier).to.be('uploading-test-1.0.0');
       });
 
       it('is added to .apm-source-map index', async () => {
@@ -110,18 +180,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           '02dd950aa88a66183d312a7a5f44d72fc9e3914cdbbe5e3a04f1509a8a3d7d83'
         );
         expect(doc.file.path).to.be('bar');
-        expect(doc.service.name).to.be('my_service');
+        expect(doc.service.name).to.be('uploading-test');
         expect(doc.service.version).to.be('1.0.0');
       });
     });
 
     describe('list source maps', async () => {
-      const uploadedSourcemapIds: string[] = [];
       before(async () => {
-        const sourcemapCount = times(15);
+        const totalCount = 15;
+        const sourcemapCount = times(totalCount);
         for (const i of sourcemapCount) {
-          const sourcemap = await uploadSourcemap({
-            serviceName: 'my_service',
+          await uploadSourcemap({
+            serviceName: 'list-test',
             serviceVersion: `1.0.${i}`,
             bundleFilePath: 'bar',
             sourcemap: {
@@ -130,35 +200,35 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               mappings: '',
             },
           });
-          uploadedSourcemapIds.push(sourcemap.id);
         }
+        await waitForSourceMapCount(totalCount);
       });
 
       after(async () => {
-        await Promise.all(uploadedSourcemapIds.map((id) => deleteSourcemap(id)));
+        await Promise.all([deleteAllFleetSourceMaps(), deleteAllApmSourceMaps()]);
       });
 
       describe('pagination', () => {
         it('can retrieve the first page', async () => {
           const firstPageItems = await listSourcemaps({ page: 1, perPage: 5 });
-          expect(first(firstPageItems.artifacts)?.identifier).to.eql('my_service-1.0.14');
-          expect(last(firstPageItems.artifacts)?.identifier).to.eql('my_service-1.0.10');
+          expect(first(firstPageItems.artifacts)?.identifier).to.eql('list-test-1.0.14');
+          expect(last(firstPageItems.artifacts)?.identifier).to.eql('list-test-1.0.10');
           expect(firstPageItems.artifacts.length).to.be(5);
           expect(firstPageItems.total).to.be(15);
         });
 
         it('can retrieve the second page', async () => {
           const secondPageItems = await listSourcemaps({ page: 2, perPage: 5 });
-          expect(first(secondPageItems.artifacts)?.identifier).to.eql('my_service-1.0.9');
-          expect(last(secondPageItems.artifacts)?.identifier).to.eql('my_service-1.0.5');
+          expect(first(secondPageItems.artifacts)?.identifier).to.eql('list-test-1.0.9');
+          expect(last(secondPageItems.artifacts)?.identifier).to.eql('list-test-1.0.5');
           expect(secondPageItems.artifacts.length).to.be(5);
           expect(secondPageItems.total).to.be(15);
         });
 
         it('can retrieve the third page', async () => {
           const thirdPageItems = await listSourcemaps({ page: 3, perPage: 5 });
-          expect(first(thirdPageItems.artifacts)?.identifier).to.eql('my_service-1.0.4');
-          expect(last(thirdPageItems.artifacts)?.identifier).to.eql('my_service-1.0.0');
+          expect(first(thirdPageItems.artifacts)?.identifier).to.eql('list-test-1.0.4');
+          expect(last(thirdPageItems.artifacts)?.identifier).to.eql('list-test-1.0.0');
           expect(thirdPageItems.artifacts.length).to.be(5);
           expect(thirdPageItems.total).to.be(15);
         });
@@ -181,10 +251,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       return Math.random().toString(36).substring(7);
     }
 
-    describe.only('delete source maps', () => {
+    describe('delete source maps', () => {
       before(async () => {
         const sourcemap = await uploadSourcemap({
-          serviceName: `my_service_${getRandomString()}`,
+          serviceName: `delete-test_${getRandomString()}`,
           serviceVersion: '1.0.0',
           bundleFilePath: 'bar',
           sourcemap: {
@@ -194,13 +264,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
-        // wait for the sourcemap to be indexed in .apm-source-map index before deleting it
-        await waitFor(async () => {
-          const res = await esClient.search({ index: '.apm-source-map' });
-          return res.hits.hits.length === 1;
-        });
+        // wait for the sourcemap to be indexed in .apm-source-map index
+        await waitForSourceMapCount(1);
 
+        // delete sourcemap
         await deleteSourcemap(sourcemap.id);
+
+        // wait for the sourcemap to be deleted from .apm-source-map index
+        await waitForSourceMapCount(0);
       });
 
       it('can delete a fleet source map artifact', async () => {
@@ -210,38 +281,46 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('can delete an apm source map', async () => {
-        // wait for the sourcemap to be deleted from .apm-source-map index before checking
-        await waitFor(async () => {
-          const res = await esClient.search({ index: '.apm-source-map' });
-          return res.hits.hits.length === 0;
-        });
-
         // check that the sourcemap is deleted from .apm-source-map index
         const res = await esClient.search({ index: '.apm-source-map' });
-        expect(res.hits.hits.length).to.eql(0);
+        // @ts-expect-error
+        expect(res.hits.total.value).to.be(0);
       });
     });
 
-    // describe('migrate fleet artifacts', () => {
-    //   it('it will migrate fleet artifacts to `.apm-source-map`', async () => {
-    //     migrateFleetSourceMapArtifacts({ internalESClient: es });
-    //   });
-    // });
+    describe('source map migration from fleet artifacts to `.apm-source-map`', () => {
+      const totalCount = 100;
+
+      before(async () => {
+        await Promise.all(
+          times(totalCount).map(async (i) => {
+            await uploadSourcemap({
+              serviceName: `migration-test`,
+              serviceVersion: `1.0.${i}`,
+              bundleFilePath: 'bar',
+              sourcemap: {
+                version: 123,
+                sources: [''],
+                mappings: '',
+              },
+            });
+          })
+        );
+
+        // wait for sourcemaps to be indexed in .apm-source-map index
+        await waitForSourceMapCount(totalCount);
+      });
+
+      it('it will migrate fleet artifacts to `.apm-source-map`', async () => {
+        await deleteAllApmSourceMaps();
+
+        // wait for source maps to be deleted before running migration
+        await waitForSourceMapCount(0);
+
+        await runSourceMapMigration();
+
+        expect(await waitForSourceMapCount(totalCount)).to.be(totalCount);
+      });
+    });
   });
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function waitFor(cb: () => Promise<boolean>, retries = 50): Promise<void> {
-  if (retries === 0) {
-    throw new Error(`Maximum number of retries reached`);
-  }
-
-  const res = await cb();
-  if (!res) {
-    await sleep(100);
-    return waitFor(cb, retries - 1);
-  }
 }
