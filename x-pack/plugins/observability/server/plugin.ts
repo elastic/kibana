@@ -26,7 +26,7 @@ import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/
 import {
   kubernetesGuideId,
   kubernetesGuideConfig,
-} from '../common/guided_onboarding/observability_guide_config';
+} from '../common/guided_onboarding/kubernetes_guide_config';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,

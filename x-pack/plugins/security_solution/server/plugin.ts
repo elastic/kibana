@@ -30,7 +30,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
-import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/security_guide_config';
+import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
   createIndicatorMatchAlertType,
