@@ -148,7 +148,7 @@ function createAgentWithStatus({
     user_provided_metadata: {},
     enrolled_at: new Date().toISOString(),
     last_checkin: new Date().toISOString(),
-    tags: ['script_create_agents'],
+    tags: ['script_create_agents', status],
   };
 
   return setAgentStatus(baseAgent, status);

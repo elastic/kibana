@@ -23,7 +23,7 @@ export type AgentStatus =
   | 'online'
   | 'inactive'
   | 'enrolling'
-  | 'unenrolling'
+  | 'unenrolling' // TODO clean up?
   | 'unenrolled'
   | 'updating'
   | 'degraded';

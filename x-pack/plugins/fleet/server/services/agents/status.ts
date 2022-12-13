@@ -11,12 +11,19 @@ import pMap from 'p-map';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 
-import { AGENTS_PREFIX } from '../../constants';
+import type {
+  AggregationsTermsAggregateBase,
+  AggregationsTermsBucketBase,
+} from '@elastic/elasticsearch/lib/api/types';
+
+import { AGENTS_INDEX, AGENTS_PREFIX } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
 import { FleetUnauthorizedError } from '../../errors';
 
 import { appContextService } from '../app_context';
+
+import { agentPolicyService } from '../agent_policy';
 
 import {
   closePointInTime,
@@ -25,6 +32,11 @@ import {
   openPointInTime,
   removeSOAttributes,
 } from './crud';
+import { buildStatusRuntimeQuery } from './build_status_query';
+
+interface AggregationsStatusTermsBucketKeys extends AggregationsTermsBucketBase {
+  key: AgentStatus;
+}
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 const MAX_AGENT_DATA_PREVIEW_SIZE = 20;
@@ -108,7 +120,55 @@ export async function getAgentStatusForAgentPolicy(
   if (pitId) {
     await closePointInTime(esClient, pitId);
   }
+
+  const unenrollTimeouts = await agentPolicyService.getUnenrollTimeouts(soClient);
+  const runtimeFields = buildStatusRuntimeQuery(unenrollTimeouts);
+  const aggResult = await esClient.search<
+    null,
+    { status: AggregationsTermsAggregateBase<AggregationsStatusTermsBucketKeys> }
+  >({
+    index: AGENTS_INDEX,
+    size: 0,
+    // post_filter: {}, TODO: add post_filter / query
+    fields: Object.keys(runtimeFields),
+    runtime_mappings: runtimeFields,
+    aggregations: {
+      status: {
+        terms: {
+          field: 'calculated_status',
+          size: 10,
+        },
+      },
+    },
+  });
+
+  const statuses: Partial<Record<AgentStatus, number>> = {
+    online: 0,
+    error: 0,
+    inactive: 0,
+    offline: 0,
+    updating: 0,
+    unenrolled: 0,
+  };
+
+  const buckets = aggResult?.aggregations?.status?.buckets || [];
+
+  if (!Array.isArray(buckets)) {
+    throw new Error('buckets is not an array');
+  }
+
+  buckets.forEach((bucket) => {
+    if (statuses[bucket.key] !== undefined) {
+      statuses[bucket.key] = bucket.doc_count;
+    }
+  });
+
   const result = {
+    __aggResult: {
+      ...statuses,
+      other: 0,
+      total: Object.values(statuses).reduce((acc, val) => acc + val, 0),
+    },
     total: allActive.total,
     inactive: all.total - allActive.total - unenrolled.total,
     online: online.total,
