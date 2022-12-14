@@ -212,6 +212,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       SAVED_OBJECT_TYPE,
       {
         ...packagePolicy,
+        ...(packagePolicy.package
+          ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
+          : {}),
         inputs,
         elasticsearch,
         revision: 1,
@@ -286,6 +289,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           id: packagePolicyId,
           attributes: {
             ...pkgPolicyWithoutId,
+            ...(packagePolicy.package
+              ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
+              : {}),
             inputs,
             elasticsearch,
             policy_id: agentPolicyId,
@@ -527,6 +533,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       id,
       {
         ...restOfPackagePolicy,
+        ...(restOfPackagePolicy.package
+          ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
+          : {}),
         inputs,
         elasticsearch,
         revision: oldPackagePolicy.revision + 1,
@@ -621,6 +630,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           id,
           attributes: {
             ...restOfPackagePolicy,
+            ...(restOfPackagePolicy.package
+              ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
+              : {}),
             inputs,
             elasticsearch,
             revision: oldPackagePolicy.revision + 1,
