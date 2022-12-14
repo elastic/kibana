@@ -8,16 +8,15 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
-import { TransactionCharts } from '../../shared/charts/transaction_charts';
-import { replace } from '../../shared/links/url_helpers';
-import { TransactionsTable } from '../../shared/transactions_table';
-import { isServerlessAgent } from '../../../../common/agent_name';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
+import { MobileTransactionCharts } from '../../../shared/charts/transaction_charts/mobile_transaction_charts';
+import { TransactionsTable } from '../../../shared/transactions_table';
+import { replace } from '../../../shared/links/url_helpers';
 
-export function TransactionOverview() {
+export function MobileTransactionOverview() {
   const {
     query: {
       environment,
@@ -25,15 +24,12 @@ export function TransactionOverview() {
       rangeFrom,
       rangeTo,
       transactionType: transactionTypeFromUrl,
-      comparisonEnabled,
-      offset,
     },
-  } = useApmParams('/services/{serviceName}/transactions');
+  } = useApmParams('/mobile-services/{serviceName}/transactions');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType, fallbackToTransactions, runtimeName } =
-    useApmServiceContext();
+  const { transactionType, fallbackToTransactions } = useApmServiceContext();
 
   const history = useHistory();
 
@@ -41,8 +37,6 @@ export function TransactionOverview() {
   if (!transactionTypeFromUrl && transactionType) {
     replace(history, { query: { transactionType } });
   }
-
-  const isServerless = isServerlessAgent(runtimeName);
 
   return (
     <>
@@ -56,14 +50,11 @@ export function TransactionOverview() {
           <EuiSpacer size="s" />
         </>
       )}
-      <TransactionCharts
+      <MobileTransactionCharts
         kuery={kuery}
         environment={environment}
         start={start}
         end={end}
-        isServerlessContext={isServerless}
-        comparisonEnabled={comparisonEnabled}
-        offset={offset}
       />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
