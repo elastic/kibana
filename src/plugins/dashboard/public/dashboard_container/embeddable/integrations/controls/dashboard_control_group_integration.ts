@@ -92,7 +92,6 @@ async function startSyncingDashboardControlGroup(this: DashboardContainer) {
     chainingSystem: deepEqual,
     ignoreParentSettings: deepEqual,
   };
-
   subscriptions.add(
     this.controlGroup
       .getInput$()
@@ -189,6 +188,24 @@ async function startSyncingDashboardControlGroup(this: DashboardContainer) {
       .subscribe(({ timeslice }) => {
         this.updateInput({ timeslice });
       })
+  );
+
+  // the Control Group needs to know when any dashboard children are loading in order to know when to move on to the next time slice when playing.
+  subscriptions.add(
+    this.getAnyChildOutputChange$().subscribe(() => {
+      if (!this.controlGroup) {
+        return;
+      }
+
+      for (const child of Object.values(this.children)) {
+        const isLoading = child.getOutput().loading;
+        if (isLoading) {
+          this.controlGroup.anyControlOutputConsumerLoading$.next(true);
+          return;
+        }
+      }
+      this.controlGroup.anyControlOutputConsumerLoading$.next(false);
+    })
   );
 
   return {
