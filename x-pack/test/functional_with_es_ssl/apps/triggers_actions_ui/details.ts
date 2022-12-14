@@ -634,9 +634,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // verify content
         await testSubjects.existOrFail('rulesList');
 
-        // Wait to ensure the table is finished loading
-        await pageObjects.triggersActionsUI.tableFinishedLoading();
-
         // click on first alert
         await pageObjects.common.navigateToApp('triggersActions');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
