@@ -56,6 +56,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const { useActionsColumn = () => ({ renderCustomActionsRow: undefined, width: undefined }) } =
     props.alertsTableConfiguration;
+
   const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
     useActionsColumn();
 
@@ -66,6 +67,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     bulkActions,
   } = useBulkActions({
     alerts,
+    query: props.query,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
   });
 
@@ -115,8 +117,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       onToggleColumn,
       onResetColumns,
       browserFields,
+      additionalControls: props.additionalControls,
     });
   }, [
+    props.additionalControls,
     bulkActionsState,
     bulkActions,
     alertsCount,
@@ -172,7 +176,14 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                 )}
                 {renderCustomActionsRow &&
                   alerts[visibleRowIndex] &&
-                  renderCustomActionsRow(alerts[visibleRowIndex], handleFlyoutAlert, props.id)}
+                  renderCustomActionsRow({
+                    alert: alerts[visibleRowIndex],
+                    nonEcsData: oldAlertsData[visibleRowIndex],
+                    rowIndex: visibleRowIndex,
+                    setFlyoutAlert: handleFlyoutAlert,
+                    id: props.id,
+                    cveProps,
+                  })}
               </EuiFlexGroup>
             );
           },
@@ -188,6 +199,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     return controlColumns;
   }, [
     actionsColumnWidth,
+    oldAlertsData,
     alerts,
     getBulkActionsLeadingControlColumn,
     handleFlyoutAlert,

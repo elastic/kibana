@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { EuiDataGridToolBarVisibilityOptions } from '@elastic/eui';
+import {
+  EuiDataGridToolBarAdditionalControlsOptions,
+  EuiDataGridToolBarVisibilityOptions,
+} from '@elastic/eui';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import React, { lazy, Suspense } from 'react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
@@ -23,6 +26,7 @@ const getDefaultVisibility = ({
   onToggleColumn,
   onResetColumns,
   browserFields,
+  additionalControls,
 }: {
   alertsCount: number;
   updatedAt: number;
@@ -30,10 +34,16 @@ const getDefaultVisibility = ({
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   browserFields: BrowserFields;
+  additionalControls?: EuiDataGridToolBarAdditionalControlsOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
   const hasBrowserFields = Object.keys(browserFields).length > 0;
-  const additionalControls = {
-    right: <LastUpdatedAt updatedAt={updatedAt} />,
+  const localAdditionalControls = {
+    right: (
+      <>
+        <LastUpdatedAt updatedAt={updatedAt} />,
+        {additionalControls?.right ? additionalControls.right : null}
+      </>
+    ),
     left: {
       append: (
         <>
@@ -46,13 +56,14 @@ const getDefaultVisibility = ({
               onToggleColumn={onToggleColumn}
             />
           ) : undefined}
+          {additionalControls?.left ? additionalControls.left : null}
         </>
       ),
     },
   };
 
   return {
-    additionalControls,
+    additionalControls: localAdditionalControls,
     showColumnSelector: {
       allowHide: false,
     },
@@ -71,6 +82,7 @@ export const getToolbarVisibility = ({
   onToggleColumn,
   onResetColumns,
   browserFields,
+  additionalControls,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
@@ -82,6 +94,7 @@ export const getToolbarVisibility = ({
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   browserFields: any;
+  additionalControls?: EuiDataGridToolBarAdditionalControlsOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   const defaultVisibility = getDefaultVisibility({
@@ -91,9 +104,12 @@ export const getToolbarVisibility = ({
     onToggleColumn,
     onResetColumns,
     browserFields,
+    additionalControls,
   });
   const isBulkActionsActive =
     selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0;
+
+  console.warn({ additionalControls });
 
   if (isBulkActionsActive) return defaultVisibility;
 
@@ -101,7 +117,12 @@ export const getToolbarVisibility = ({
     showColumnSelector: false,
     showSortSelector: false,
     additionalControls: {
-      right: <LastUpdatedAt updatedAt={updatedAt} />,
+      right: (
+        <>
+          <LastUpdatedAt updatedAt={updatedAt} />
+          {additionalControls?.right ? additionalControls.right : null}
+        </>
+      ),
       left: {
         append: (
           <>
@@ -109,6 +130,7 @@ export const getToolbarVisibility = ({
             <Suspense fallback={null}>
               <BulkActionsToolbar totalItems={alertsCount} items={bulkActions} alerts={alerts} />
             </Suspense>
+            {additionalControls?.left ? additionalControls.left : null}
           </>
         ),
       },

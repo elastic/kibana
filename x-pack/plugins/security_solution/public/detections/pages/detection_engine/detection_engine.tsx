@@ -41,7 +41,6 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
 import { useUserData } from '../../components/user_info';
 import { DetectionEngineNoIndex } from './detection_engine_no_index';
@@ -76,6 +75,7 @@ import { EmptyPage } from '../../../common/components/empty_page';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { DetectionEngineAlertTable } from './trigger_alert_table';
+import { AlertsTable } from '../../components/alerts_table';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -216,10 +216,12 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   // AlertsTable manages global filters itself, so not including `filters`
   const alertsTableDefaultFilters = useMemo(
     () => [
+      ...filters,
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+      ...buildAlertStatusFilter(filterGroup),
     ],
-    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup, filters]
   );
 
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
@@ -380,7 +382,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             <DetectionEngineAlertTable
               configId="securitySolution"
               flyoutSize="m"
-              filters={alertsTableDefaultFilters}
+              inputFilters={alertsTableDefaultFilters}
+              tableId={TableId.alertsOnAlertsPage}
             />
             <EuiHorizontalRule />
 

@@ -13,7 +13,13 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IconType, EuiFlyoutSize, RecursivePartial } from '@elastic/eui';
+import type {
+  IconType,
+  EuiFlyoutSize,
+  RecursivePartial,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridToolBarAdditionalControlsOptions,
+} from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
   ActionType,
@@ -45,7 +51,10 @@ import {
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { TypeRegistry } from './application/type_registry';
@@ -479,6 +488,8 @@ export interface AlertsTableProps {
   onResetColumns: () => void;
   onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  additionalControls?: EuiDataGridToolBarAdditionalControlsOptions;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -508,7 +519,9 @@ export interface BulkActionsConfig {
   onClick: (selectedIds: TimelineItem[], isAllSelected: boolean) => void;
 }
 
-export type UseBulkActionsRegistry = () => BulkActionsConfig[];
+export type UseBulkActionsRegistry = (
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>
+) => BulkActionsConfig[];
 
 export type UseCellActions = (props: {
   columns: EuiDataGridColumn[];
@@ -521,6 +534,16 @@ export type UseCellActions = (props: {
   visibleCellActions?: number;
   disabledCellActions?: string[];
 };
+
+export interface RenderCustomActionsRowProps {
+  alert: EcsFieldsResponse;
+  nonEcsData: FetchAlertData['oldAlertsData'][number];
+  rowIndex: number;
+  cveProps: EuiDataGridCellValueElementProps;
+  setFlyoutAlert: (data: unknown) => void;
+  id?: string;
+}
+
 export interface AlertsTableConfigurationRegistry {
   id: string;
   casesFeatureId: string;
@@ -533,11 +556,7 @@ export interface AlertsTableConfigurationRegistry {
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
   useActionsColumn?: () => {
-    renderCustomActionsRow: (
-      alert: EcsFieldsResponse,
-      setFlyoutAlert: (data: unknown) => void,
-      id?: string
-    ) => JSX.Element;
+    renderCustomActionsRow: (args: RenderCustomActionsRowProps) => JSX.Element;
     width?: number;
   };
   useBulkActions?: UseBulkActionsRegistry;

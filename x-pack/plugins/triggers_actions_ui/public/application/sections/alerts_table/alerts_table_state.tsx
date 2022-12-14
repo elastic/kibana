@@ -14,6 +14,7 @@ import {
   EuiEmptyPrompt,
   EuiFlyoutSize,
   EuiDataGridProps,
+  EuiDataGridToolBarAdditionalControlsOptions,
 } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -59,6 +60,7 @@ export type AlertsTableStateProps = {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
+  additionalControls: EuiDataGridToolBarAdditionalControlsOptions;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -107,6 +109,7 @@ const AlertsTableState = ({
   pageSize,
   showExpandToDetails,
   leadingControlColumns,
+  additionalControls,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
 
@@ -217,6 +220,8 @@ const AlertsTableState = ({
     [id]
   );
 
+  console.warn({ inspectQuery: getInspectQuery() });
+
   const useFetchAlertsData = useCallback(() => {
     return {
       activePage: pagination.pageIndex,
@@ -272,6 +277,8 @@ const AlertsTableState = ({
       onResetColumns,
       onColumnsChange,
       onChangeVisibleColumns,
+      query,
+      additionalControls,
     }),
     [
       alertsTableConfiguration,
@@ -289,6 +296,8 @@ const AlertsTableState = ({
       onColumnsChange,
       onChangeVisibleColumns,
       leadingControlColumns,
+      query,
+      additionalControls,
     ]
   );
 

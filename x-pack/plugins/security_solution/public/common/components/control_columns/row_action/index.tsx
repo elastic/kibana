@@ -23,7 +23,7 @@ import { dataTableActions } from '../../../store/data_table';
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
   controlColumn: ControlColumnProps;
-  data: TimelineItem[];
+  data: TimelineItem;
   disabled: boolean;
   index: number;
   isEventViewer: boolean;
@@ -60,12 +60,9 @@ const RowActionComponent = ({
   setEventsDeleted,
   width,
 }: Props) => {
-  const {
-    data: timelineNonEcsData,
-    ecs: ecsData,
-    _id: eventId,
-    _index: indexName,
-  } = useMemo(() => {
+  const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data;
+
+  useMemo(() => {
     const rowData: Partial<TimelineItem> = data[pageRowIndex];
     return rowData ?? {};
   }, [data, pageRowIndex]);

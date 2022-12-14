@@ -73,8 +73,29 @@ export const transformControlColumns = ({
   theme,
   setEventsLoading,
   setEventsDeleted,
-}: TransformColumnsProps): EuiDataGridControlColumn[] =>
-  controlColumns.map(
+}: TransformColumnsProps): EuiDataGridControlColumn[] => {
+  console.warn({
+    columnHeaders,
+    controlColumns,
+    data,
+    fieldBrowserOptions,
+    loadingEventIds,
+    onRowSelected,
+    onRuleChange,
+    selectedEventIds,
+    showCheckboxes,
+    tabType,
+    timelineId,
+    isSelectAllChecked,
+    onSelectPage,
+    browserFields,
+    pageSize,
+    sort,
+    theme,
+    setEventsLoading,
+    setEventsDeleted,
+  });
+  return controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
       id: `${columnId}`,
       headerCellRender: () => {
@@ -118,12 +139,14 @@ export const transformControlColumns = ({
           setCellProps({ style: { display: 'none' } });
         }
 
+        console.warn({ origData: data[pageRowIndex] });
+
         return (
           <RowAction
             columnId={columnId ?? ''}
             columnHeaders={columnHeaders}
             controlColumn={controlColumns[i]}
-            data={data}
+            data={data[pageRowIndex]}
             disabled={false}
             index={i}
             isDetails={isDetails}
@@ -150,3 +173,4 @@ export const transformControlColumns = ({
       width,
     })
   );
+};

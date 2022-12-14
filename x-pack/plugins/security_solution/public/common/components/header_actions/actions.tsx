@@ -114,6 +114,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
     );
   }, [ecsData, eventType]);
 
+  console.warn({ isContextMenuDisabled, eventType, ecsData });
+
   const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
   const { setGlobalFullScreen } = useGlobalFullScreen();
   const { setTimelineFullScreen } = useTimelineFullScreen();

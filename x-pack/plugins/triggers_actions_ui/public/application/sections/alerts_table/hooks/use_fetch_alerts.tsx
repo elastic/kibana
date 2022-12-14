@@ -207,9 +207,10 @@ const useFetchAlerts = ({
               next: (response) => {
                 if (isCompleteResponse(response)) {
                   const { rawResponse } = response;
+                  console.warn({ rawResponse });
                   inspectQuery.current = {
-                    request: [],
-                    response: [],
+                    request: [request],
+                    response: [rawResponse],
                   };
                   let totalAlerts = 0;
                   if (rawResponse.hits.total && typeof rawResponse.hits.total === 'number') {
@@ -291,6 +292,7 @@ const useFetchAlerts = ({
       pagination,
       query,
       sort,
+      _source: true,
     };
     if (
       newAlertRequest.fields.length > 0 &&

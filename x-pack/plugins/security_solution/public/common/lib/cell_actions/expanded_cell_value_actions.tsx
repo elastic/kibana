@@ -90,7 +90,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
           />
         ) : null}
       </StyledContent>
-      {timelineId !== TimelineId.casePage && (
+      {scopeId !== TimelineId.casePage && (
         <StyledFlexGroup gutterSize="s">
           <EuiFlexItem>
             {timelines.getHoverActions().getFilterForValueButton({

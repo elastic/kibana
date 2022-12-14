@@ -6,6 +6,7 @@
  */
 import { useContext, useEffect } from 'react';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   BulkActionsConfig,
   BulkActionsState,
@@ -20,6 +21,7 @@ import {
 
 interface BulkActionsProps {
   alerts: EcsFieldsResponse[];
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   useBulkActionsConfig?: UseBulkActionsRegistry;
 }
 
@@ -32,10 +34,11 @@ export interface UseBulkActions {
 
 export function useBulkActions({
   alerts,
+  query,
   useBulkActionsConfig = () => [],
 }: BulkActionsProps): UseBulkActions {
   const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
-  const bulkActions = useBulkActionsConfig();
+  const bulkActions = useBulkActionsConfig(query);
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 
