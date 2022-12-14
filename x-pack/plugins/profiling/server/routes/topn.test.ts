@@ -42,9 +42,16 @@ describe('TopN data from Elasticsearch', () => {
       (operationName, request) =>
         context.elasticsearch.client.asCurrentUser.search(request) as Promise<any>
     ),
-    transport: jest.fn(
-      (operationName, request) =>
-        context.elasticsearch.client.asCurrentUser.search(request) as Promise<any>
+    profilingStacktraces: jest.fn(
+      (request) =>
+        context.elasticsearch.client.asCurrentUser.transport.request({
+          method: 'POST',
+          path: encodeURI('_profiling/stacktraces'),
+          body: {
+            query: request.query,
+            sample_size: request.sampleSize,
+          },
+        }) as Promise<any>
     ),
   };
   const logger = loggerMock.create();
