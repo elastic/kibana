@@ -6,7 +6,8 @@
  */
 
 import uuid from 'uuid';
-import { CoreSetup, Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/logging';
+import { CoreSetup } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { curry, range, times } from 'lodash';
 import {
@@ -16,7 +17,8 @@ import {
   RuleTypeState,
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
-import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { Dataset } from '@kbn/rule-registry-plugin/server';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import { ES_TEST_INDEX_NAME } from '../../../../lib';
 
@@ -640,13 +642,28 @@ function getCancellableRuleType() {
   return result;
 }
 
-function getAlwaysFiringAlertAsDataRuleType(logger: Logger, ruleDataClient: IRuleDataClient) {
+function getAlwaysFiringAlertAsDataRuleType(
+  logger: Logger,
+  { ruleRegistry }: Pick<FixtureSetupDeps, 'ruleRegistry'>
+) {
   const paramsSchema = schema.object({
     index: schema.string(),
     reference: schema.string(),
   });
 
-  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
+  const ruleDataClient = ruleRegistry.ruleDataService.initializeIndex({
+    feature: AlertConsumers.OBSERVABILITY,
+    registrationContext: 'observability.test.alerts',
+    dataset: Dataset.alerts,
+    componentTemplateRefs: [],
+    componentTemplates: [
+      {
+        name: 'mappings',
+      },
+    ],
+  });
+
+  const createLifecycleRuleType = ruleRegistry.createLifecycleRuleTypeFactory({
     logger,
     ruleDataClient,
   });
@@ -697,9 +714,8 @@ function getAlwaysFiringAlertAsDataRuleType(logger: Logger, ruleDataClient: IRul
 
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
-  { alerting }: Pick<FixtureSetupDeps, 'alerting'>,
-  logger: Logger,
-  ruleDataClient: IRuleDataClient
+  { alerting, ruleRegistry }: Pick<FixtureSetupDeps, 'alerting' | 'ruleRegistry'>,
+  logger: Logger
 ) {
   const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.noop',
@@ -876,5 +892,5 @@ export function defineAlertTypes(
   alerting.registerType(getCancellableRuleType());
   alerting.registerType(getPatternSuccessOrFailureAlertType());
   alerting.registerType(getExceedsAlertLimitRuleType());
-  alerting.registerType(getAlwaysFiringAlertAsDataRuleType(logger, ruleDataClient));
+  alerting.registerType(getAlwaysFiringAlertAsDataRuleType(logger, { ruleRegistry }));
 }
