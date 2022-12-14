@@ -42,7 +42,7 @@ const INDEX_BULK_OP = '{ "index":{ } }\n';
 
 const {
   delete: deleteAgentsFirst = false,
-  unenrollTimeout: unenrollTimeoutArg,
+  inactivityTimeout: inactivityTimeoutArg,
   status: statusArg = 'online',
   count: countArg,
   kibana: kibanaUrl = DEFAULT_KIBANA_URL,
@@ -56,8 +56,8 @@ const {
 } = yargs(process.argv.slice(2)).argv;
 
 const statusesArg = (statusArg as string).split(',') as AgentStatus[];
-const unenrollTimeout = unenrollTimeoutArg
-  ? Number(unenrollTimeoutArg).valueOf()
+const inactivityTimeout = inactivityTimeoutArg
+  ? Number(inactivityTimeoutArg).valueOf()
   : DEFAULT_UNENROLL_TIMEOUT;
 const count = countArg ? Number(countArg).valueOf() : DEFAULT_AGENT_COUNT;
 const kbnAuth = 'Basic ' + Buffer.from(kbnUsername + ':' + kbnPassword).toString('base64');
@@ -70,7 +70,7 @@ const logger = new ToolingLog({
 function setAgentStatus(agent: any, status: AgentStatus) {
   switch (status) {
     case 'inactive':
-      agent.last_checkin = new Date(new Date().getTime() - unenrollTimeout * 1000).toISOString();
+      agent.last_checkin = new Date(new Date().getTime() - inactivityTimeout * 1000).toISOString();
       break;
     case 'enrolling':
       agent.last_checkin = null;
@@ -258,7 +258,7 @@ async function createAgentPolicy(id: string) {
       namespace: 'default',
       description: '',
       monitoring_enabled: ['logs'],
-      unenroll_timeout: unenrollTimeout,
+      inactivity_timeout: inactivityTimeout,
     }),
     headers: {
       Authorization: kbnAuth,

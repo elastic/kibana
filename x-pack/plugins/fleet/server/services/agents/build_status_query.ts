@@ -8,22 +8,22 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { AGENT_POLLING_THRESHOLD_MS } from '../../constants';
-
+import type { agentPolicyService } from '../agent_policy';
 const DEFAULT_MS_BEFORE_INACTIVE = 10 * 60 * 1000; // 10 minutes
 const MISSED_INTERVALS_BEFORE_OFFLINE = 10;
 const MS_BEFORE_OFFLINE = MISSED_INTERVALS_BEFORE_OFFLINE * AGENT_POLLING_THRESHOLD_MS;
-const _buildInactiveClause = (
-  now: number,
-  unenrollTimeouts: Array<{ policy_ids: string[]; unenroll_timeout: number }>
-) => {
-  const policyClauses = unenrollTimeouts
-    .map((unenrollTimeout) => {
-      const unenrollTimeoutMs = unenrollTimeout.unenroll_timeout * 1000;
-      const policyOrs = unenrollTimeout.policy_ids
+
+type InactivityTimeouts = Awaited<ReturnType<typeof agentPolicyService['getInactivityTimeouts']>>;
+
+const _buildInactiveClause = (now: number, inactivityTimeouts: InactivityTimeouts) => {
+  const policyClauses = inactivityTimeouts
+    .map(({ inactivityTimeout, policyIds }) => {
+      const inactivityTimeoutMs = inactivityTimeout * 1000;
+      const policyOrs = policyIds
         .map((policyId) => `doc['policy_id'].value == '${policyId}'`)
         .join(' || ');
 
-      return `(${policyOrs}) && lastCheckinMillis < ${now - unenrollTimeoutMs}L`;
+      return `(${policyOrs}) && lastCheckinMillis < ${now - inactivityTimeoutMs}L`;
     })
     .join(' || ');
 
@@ -33,13 +33,13 @@ const _buildInactiveClause = (
   return `lastCheckinMillis > 0 && (${agentIsInactive})`;
 };
 
-function _buildSource(unenrollTimeouts: Array<{ policy_ids: string[]; unenroll_timeout: number }>) {
+function _buildSource(inactivityTimeouts: InactivityTimeouts) {
   const now = Date.now();
   return `
     long lastCheckinMillis = doc['last_checkin'].size() > 0 ? doc['last_checkin'].value.toInstant().toEpochMilli() : -1;
     if (doc['unenrolled_at'].size() > 0) { 
         emit('unenrolled'); 
-    } else if (${_buildInactiveClause(now, unenrollTimeouts)}) {
+    } else if (${_buildInactiveClause(now, inactivityTimeouts)}) {
         emit('inactive');
     } else if (
         lastCheckinMillis > 0 
@@ -75,9 +75,9 @@ function _buildSource(unenrollTimeouts: Array<{ policy_ids: string[]; unenroll_t
 }
 
 export function buildStatusRuntimeQuery(
-  unenrollTimeouts: Array<{ policy_ids: string[]; unenroll_timeout: number }>
+  inactivityTimeouts: InactivityTimeouts
 ): NonNullable<estypes.SearchRequest['runtime_mappings']> {
-  const source = _buildSource(unenrollTimeouts);
+  const source = _buildSource(inactivityTimeouts);
   return {
     calculated_status: {
       type: 'keyword',

@@ -85,16 +85,6 @@ const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
 
-interface UnenrollTimeoutAggResult {
-  unenroll_timeout: {
-    buckets?: Array<{
-      key: number;
-      doc_count: number;
-      policy_ids: { hits: { hits: Array<{ _id: string }> } };
-    }>;
-  };
-}
-
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
     soClient: SavedObjectsClientContract,
@@ -1038,38 +1028,30 @@ class AgentPolicyService {
     return res;
   }
 
-  public async getUnenrollTimeouts(
+  public async getInactivityTimeouts(
     soClient: SavedObjectsClientContract
-  ): Promise<Array<{ policy_ids: string[]; unenroll_timeout: number }>> {
-    const res = await soClient.find<AgentPolicySOAttributes, UnenrollTimeoutAggResult>({
+  ): Promise<Array<{ policyIds: string[]; inactivityTimeout: number }>> {
+    const res = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
-      page: 0,
-      perPage: 0,
-      filter: `${SAVED_OBJECT_TYPE}.attributes.unenroll_timeout: *`,
-      aggs: {
-        unenroll_timeout: {
-          terms: {
-            field: `${SAVED_OBJECT_TYPE}.attributes.unenroll_timeout`,
-            size: SO_SEARCH_LIMIT,
-          },
-          // we can't use another terms aggregation here as the id and _id fields are not accessible
-          aggregations: {
-            policy_ids: {
-              top_hits: {
-                size: 100, // TODO: fix this
-                _source: ['_id'],
-              },
-            },
-          },
-        },
-      },
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      filter: `${SAVED_OBJECT_TYPE}.attributes.inactivity_timeout: *`,
+      fields: [`inactivity_timeout`],
     });
 
-    const buckets = res?.aggregations?.unenroll_timeout?.buckets ?? [];
+    const results = res.saved_objects.reduce((acc, policy) => {
+      const inactivityTimeout = policy.attributes.inactivity_timeout;
+      if (inactivityTimeout) {
+        const existing = acc[inactivityTimeout] || [];
 
-    return buckets.map((bucket) => ({
-      policy_ids: bucket.policy_ids.hits.hits.map((hit) => hit._id.split(':')[1]),
-      unenroll_timeout: bucket.key,
+        acc[inactivityTimeout] = [...existing, policy.id];
+      }
+      return acc;
+    }, {} as Record<number, string[]>);
+
+    return Object.entries(results).map(([inactivityTimeout, policyIds]) => ({
+      inactivityTimeout: inactivityTimeout as unknown as number,
+      policyIds,
     }));
   }
 }

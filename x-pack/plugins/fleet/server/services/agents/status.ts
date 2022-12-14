@@ -51,8 +51,8 @@ export async function getAgentStatusForAgentPolicy(
   filterKuery?: string
 ) {
   const logger = appContextService.getLogger();
-  const unenrollTimeouts = await agentPolicyService.getUnenrollTimeouts(soClient);
-  const runtimeFields = buildStatusRuntimeQuery(unenrollTimeouts);
+  const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts(soClient);
+  const runtimeFields = buildStatusRuntimeQuery(inactivityTimeouts);
 
   const clauses: QueryDslQueryContainer[] = [];
 

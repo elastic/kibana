@@ -224,8 +224,8 @@ export async function getAgentsByKuery(
 
   let runtimeFields: estypes.MappingRuntimeFields = {};
   if (useRuntimeAgentStatus) {
-    const unenrollTimeouts = await agentPolicyService.getUnenrollTimeouts(soClient);
-    runtimeFields = buildStatusRuntimeQuery(unenrollTimeouts);
+    const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts(soClient);
+    runtimeFields = buildStatusRuntimeQuery(inactivityTimeouts);
   }
 
   const isDefaultSort = sortField === 'enrolled_at' && sortOrder === 'desc';
