@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiText,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -41,6 +42,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
   const [jobIds, setJobIds] = useState<string[]>([]);
   const [jobs, setJobs] = useState<MlSummaryJob[]>([]);
   const [hasManagedJob, setHasManagedJob] = useState(false);
+  const [deleteUserAnnotations, setDeleteUserAnnotations] = useState(false);
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -69,13 +71,12 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
 
   const resetJob = useCallback(async () => {
     setResetting(true);
-    await resetJobs(jobIds);
+    await resetJobs(jobIds, deleteUserAnnotations);
     closeModal();
     setTimeout(() => {
       refreshJobs();
     }, RESETTING_JOBS_REFRESH_INTERVAL_MS);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobIds, refreshJobs]);
+  }, [closeModal, deleteUserAnnotations, jobIds, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;
@@ -123,6 +124,14 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
               values={{
                 jobsCount: jobIds.length,
               }}
+            />
+            <EuiSpacer />
+            <EuiSwitch
+              label={i18n.translate('xpack.ml.jobsList.resetJobModal.deleteUserAnnotations', {
+                defaultMessage: 'Also delete annotations.',
+              })}
+              checked={deleteUserAnnotations}
+              onChange={(e) => setDeleteUserAnnotations(e.target.checked)}
             />
           </EuiText>
         </>

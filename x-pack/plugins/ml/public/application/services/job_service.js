@@ -379,16 +379,16 @@ class JobService {
     return ml.jobs.stopDatafeeds(dIds);
   }
 
-  deleteJobs(jIds) {
-    return ml.jobs.deleteJobs(jIds);
+  deleteJobs(jIds, deleteUserAnnotations) {
+    return ml.jobs.deleteJobs(jIds, deleteUserAnnotations);
   }
 
   closeJobs(jIds) {
     return ml.jobs.closeJobs(jIds);
   }
 
-  resetJobs(jIds) {
-    return ml.jobs.resetJobs(jIds);
+  resetJobs(jIds, deleteUserAnnotations) {
+    return ml.jobs.resetJobs(jIds, deleteUserAnnotations);
   }
 
   validateDetector(detector) {

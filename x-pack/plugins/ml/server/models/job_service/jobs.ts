@@ -75,11 +75,17 @@ export function jobsProvider(
   const { getLatestBucketTimestampByJob } = resultsServiceProvider(mlClient);
   const calMngr = new CalendarManager(mlClient);
 
-  async function forceDeleteJob(jobId: string) {
-    await mlClient.deleteJob({ job_id: jobId, force: true, wait_for_completion: false });
+  async function forceDeleteJob(jobId: string, deleteUserAnnotations = false) {
+    await mlClient.deleteJob({
+      job_id: jobId,
+      force: true,
+      wait_for_completion: false,
+      // @ts-expect-error delete_user_annotations is not in types yet
+      delete_user_annotations: deleteUserAnnotations,
+    });
   }
 
-  async function deleteJobs(jobIds: string[]) {
+  async function deleteJobs(jobIds: string[], deleteUserAnnotations = false) {
     const results: Results = {};
     const datafeedIds = await getDatafeedIdsByJobId();
 
@@ -92,7 +98,7 @@ export function jobsProvider(
 
         if (datafeedResp.acknowledged) {
           try {
-            await forceDeleteJob(jobId);
+            await forceDeleteJob(jobId, deleteUserAnnotations);
             results[jobId] = { deleted: true };
           } catch (error) {
             if (isRequestTimeout(error)) {
@@ -152,7 +158,7 @@ export function jobsProvider(
     return results;
   }
 
-  async function resetJobs(jobIds: string[]) {
+  async function resetJobs(jobIds: string[], deleteUserAnnotations = false) {
     const results: ResetJobsResponse = {};
     for (const jobId of jobIds) {
       try {
@@ -160,6 +166,8 @@ export function jobsProvider(
         const { task } = await mlClient.resetJob({
           job_id: jobId,
           wait_for_completion: false,
+          // @ts-expect-error delete_user_annotations is not in types yet
+          delete_user_annotations: deleteUserAnnotations,
         });
         results[jobId] = { reset: true, task };
       } catch (error) {

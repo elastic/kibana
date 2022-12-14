@@ -320,9 +320,9 @@ export function closeJobs(jobs, finish = () => {}) {
     });
 }
 
-export function resetJobs(jobIds, finish = () => {}) {
+export function resetJobs(jobIds, deleteUserAnnotations, finish = () => {}) {
   mlJobService
-    .resetJobs(jobIds)
+    .resetJobs(jobIds, deleteUserAnnotations)
     .then((resp) => {
       showResults(resp, JOB_ACTION.RESET);
       finish();
@@ -338,10 +338,10 @@ export function resetJobs(jobIds, finish = () => {}) {
     });
 }
 
-export function deleteJobs(jobs, finish = () => {}) {
+export function deleteJobs(jobs, deleteUserAnnotations, finish = () => {}) {
   const jobIds = jobs.map((j) => j.id);
   mlJobService
-    .deleteJobs(jobIds)
+    .deleteJobs(jobIds, deleteUserAnnotations)
     .then((resp) => {
       showResults(resp, JOB_STATE.DELETED);
       finish();
