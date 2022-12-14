@@ -10,21 +10,18 @@ import type {
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
-import type { PostureInput, PosturePolicyTemplate } from '../../../common/constants';
+import type { PostureInput } from '../../../common/constants';
 import {
   getPolicyWithUpdatedInputs,
   getPolicyWithHiddenVars,
   getPolicyWithInputVars,
   inputsWithVars,
-  usePostureInput,
+  getPostureInput,
   type NewPackagePolicyPostureInput,
 } from './utils';
 import { AwsCredentialsForm } from './aws_credentials_form';
 import { PolicyInputSelector } from './policy_template_input_selector';
 
-/**
- * Every posture policy template type has a corresponding default input type
- */
 const DEFAULT_INPUT_TYPE = {
   kspm: 'cloudbeat/cis_k8s',
   cspm: 'cloudbeat/cis_aws',
@@ -53,7 +50,7 @@ const PolicyVarsForm = ({ input, ...props }: PolicyVarsFormProps) => {
 };
 
 export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit }) => {
-  const config = usePostureInput({ newPolicy });
+  const input = getPostureInput(newPolicy);
 
   const updatePolicy = (updatedPolicy: NewPackagePolicy) =>
     onChange({
@@ -75,16 +72,15 @@ export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit })
     }
 
     // Define 'posture' and 'deployment'
-    policy = getPolicyWithHiddenVars(policy, inputType, config.input.policy_template);
+    policy = getPolicyWithHiddenVars(policy, inputType, input.policy_template);
 
     updatePolicy(policy);
   };
 
-  // // Update policy inputs on mount
   useEffect(() => {
-    if (!config.input.policy_template) return;
-
-    if (!edit) updatePolicyInput(DEFAULT_INPUT_TYPE[config.input.policy_template]);
+    // Pick default input type for policy template.
+    // Only 1 input is supported when all inputs are initially enabled.
+    if (!edit) updatePolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
 
     // Required for mount only to ensure a single input type is selected
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,12 +88,8 @@ export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit })
 
   return (
     <div>
-      <PolicyInputSelector
-        input={config.input}
-        updatePolicyInput={updatePolicyInput}
-        disabled={edit}
-      />
-      <PolicyVarsForm input={config.input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
+      <PolicyInputSelector input={input} updatePolicyInput={updatePolicyInput} disabled={edit} />
+      <PolicyVarsForm input={input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
       <EuiSpacer />
     </div>
   );

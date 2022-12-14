@@ -99,13 +99,12 @@ const getUpdatedStreamVars = (item: NewPackagePolicyInput, key: string, value: s
   };
 };
 
-export const usePostureInput = ({ newPolicy }: { newPolicy: NewPackagePolicy }) => {
-  const input = newPolicy.inputs.find((i) => i.enabled);
+export const getPostureInput = (policy: NewPackagePolicy) => {
+  // Take first enabled input
+  const input = policy.inputs.find((i) => i.enabled);
 
-  // We can't select a default input without knowing the policy template
-  // Fleet selects the first policy template input by default
-  assert(input, 'No enabled input');
+  assert(input, 'Missing enabled input'); // We can't provide a default input without knowing the policy template
   assert(isPostureInput(input), 'Invalid enabled input');
 
-  return { input };
+  return input;
 };

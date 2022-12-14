@@ -59,10 +59,8 @@ describe('<CspCreatePolicyExtension />', () => {
     const span = getByText('EKS (Elastic Kubernetes Service)', { selector: 'button span' });
     userEvent.click(span);
 
-    // we listen to the second call triggered by the test
-    // the 1st call happens on mount to ensure initial state is valid.
-    // required because fleet auto-selects the first input for each policy template
-    // which leads to initial render with a policy that includes 2 inputs enabled, which we do not support
+    // Listen to the 2nd triggered by the test.
+    // The 1st is done on mount to ensure initial state is valid.
     expect(onChange).toHaveBeenNthCalledWith(2, {
       isValid: true,
       updatedPolicy: eksPolicy,
@@ -113,7 +111,7 @@ describe('<CspCreatePolicyExtension />', () => {
       userEvent.type(getByLabelText('Role ARN'), 'a');
       policy = getPolicyWithInputVars(policy, 'role_arn', 'a');
 
-      // Ignore 1st call triggered intentionally by mount to ensure initial state is valid
+      // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenNthCalledWith(2, {
         isValid: true,
         updatedPolicy: policy,
@@ -140,7 +138,7 @@ describe('<CspCreatePolicyExtension />', () => {
       userEvent.type(getByLabelText('Access Key ID'), 'a');
       policy = getPolicyWithInputVars(policy, 'access_key_id', 'a');
 
-      // Ignore 1st call triggered intentionally by mount to ensure initial state is valid
+      // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenNthCalledWith(2, {
         isValid: true,
         updatedPolicy: policy,
@@ -178,7 +176,7 @@ describe('<CspCreatePolicyExtension />', () => {
       userEvent.type(getByLabelText('Access Key ID'), 'a');
       policy = getPolicyWithInputVars(policy, 'access_key_id', 'a');
 
-      // Ignore 1st call triggered intentionally by mount to ensure initial state is valid
+      // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenNthCalledWith(2, {
         isValid: true,
         updatedPolicy: policy,
@@ -225,7 +223,7 @@ describe('<CspCreatePolicyExtension />', () => {
       userEvent.type(getByLabelText('Shared Credential File'), 'a');
       policy = getPolicyWithInputVars(policy, 'shared_credential_file', 'a');
 
-      // Ignore 1st call triggered intentionally by mount to ensure initial state is valid
+      // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenNthCalledWith(2, {
         isValid: true,
         updatedPolicy: policy,

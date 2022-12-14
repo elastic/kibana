@@ -99,7 +99,7 @@ const SharedCredentialsDescription = (
 /**
  * The fields for each AWS Credentials group type
  */
-export const AWS_FIELDS = {
+const AWS_FIELDS = {
   assume_role: ['role_arn'],
   direct_access_keys: ['access_key_id', 'secret_access_key'],
   temporary_keys: ['access_key_id', 'secret_access_key', 'session_token'],
@@ -123,7 +123,7 @@ const AWS_VARS_INFO: Record<keyof Fields, JSX.Element> = {
 /**
  * The labels for each AWS Credentials field
  */
-export const AWS_FIELD_LABEL: Record<Fields[keyof Fields][number], string> = {
+const AWS_FIELD_LABEL: Record<Fields[keyof Fields][number], string> = {
   role_arn: i18n.translate('xpack.csp.awsIntegration.roleArnLabel', {
     defaultMessage: 'Role ARN',
   }),
@@ -147,7 +147,7 @@ export const AWS_FIELD_LABEL: Record<Fields[keyof Fields][number], string> = {
 /**
  * The options for the AWS credentials group type
  */
-export const AWS_CREDENTIALS_OPTIONS: ReadonlyArray<{
+const AWS_CREDENTIALS_OPTIONS: ReadonlyArray<{
   id: keyof Fields;
   label: string;
 }> = [
