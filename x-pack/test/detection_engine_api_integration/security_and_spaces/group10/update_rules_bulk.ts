@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule2 = getSimpleRuleOutput('rule-2');
         outputRule2.name = 'some other name';
         outputRule2.version = 2;
-        outputRule1.revision = 1;
+        outputRule2.revision = 1;
 
         const bodyToCompare1 = removeServerGeneratedProperties(body[0]);
         const bodyToCompare2 = removeServerGeneratedProperties(body[1]);
@@ -295,7 +295,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule2 = getSimpleRuleOutput('rule-2');
         outputRule2.name = 'some other name';
         outputRule2.version = 2;
-        outputRule1.revision = 1;
+        outputRule2.revision = 1;
 
         const bodyToCompare1 = removeServerGeneratedProperties(body[0]);
         const bodyToCompare2 = removeServerGeneratedProperties(body[1]);
