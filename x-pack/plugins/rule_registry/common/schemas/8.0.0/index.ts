@@ -36,7 +36,7 @@ const commonAlertIdFieldNames = [ALERT_INSTANCE_ID, ALERT_UUID];
 export type CommonAlertIdFieldName800 = Values<typeof commonAlertIdFieldNames>;
 
 export interface CommonAlertFields800 {
-  [ALERT_RULE_PARAMETERS]: unknown;
+  [ALERT_RULE_PARAMETERS]: Record<string, unknown>;
   [ALERT_RULE_CATEGORY]: string;
   [ALERT_RULE_CONSUMER]: string;
   [ALERT_RULE_EXECUTION_UUID]: string;
