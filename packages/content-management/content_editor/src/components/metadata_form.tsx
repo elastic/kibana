@@ -11,7 +11,7 @@ import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiFieldText, EuiTextArea, EuiSpacer } from '@elastic/eui';
 
-import { ContentEditorFlyoutWarningsCallOut } from './inspector_flyout_warnings';
+import { ContentEditorFlyoutWarningsCallOut } from './editor_flyout_warnings';
 import type { MetadataFormState, Field } from './use_metadata_form';
 import type { SavedObjectsReference, Services } from '../services';
 
@@ -52,7 +52,7 @@ export const MetadataForm: FC<Props> = ({
       <ContentEditorFlyoutWarningsCallOut warningMessages={getWarnings()} />
 
       <EuiFormRow
-        label={i18n.translate('contentManagement.inspector.metadataForm.nameInputLabel', {
+        label={i18n.translate('contentManagement.contentEditor.metadataForm.nameInputLabel', {
           defaultMessage: 'Name',
         })}
         error={title.errors}
@@ -74,9 +74,12 @@ export const MetadataForm: FC<Props> = ({
       <EuiSpacer />
 
       <EuiFormRow
-        label={i18n.translate('contentManagement.inspector.metadataForm.descriptionInputLabel', {
-          defaultMessage: 'Description',
-        })}
+        label={i18n.translate(
+          'contentManagement.contentEditor.metadataForm.descriptionInputLabel',
+          {
+            defaultMessage: 'Description',
+          }
+        )}
         error={description.errors}
         isInvalid={!isFormFieldValid(description)}
         fullWidth
@@ -97,7 +100,7 @@ export const MetadataForm: FC<Props> = ({
         <>
           <EuiSpacer />
           <EuiFormRow
-            label={i18n.translate('contentManagement.inspector.metadataForm.tagsLabel', {
+            label={i18n.translate('contentManagement.contentEditor.metadataForm.tagsLabel', {
               defaultMessage: 'Tags',
             })}
             fullWidth

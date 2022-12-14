@@ -47,7 +47,7 @@ const basicValidators: BasicValidators = {
       type: 'error',
       fn: (value) => {
         if (!value || !value.trim()) {
-          return i18n.translate('contentManagement.inspector.metadataForm.nameIsEmptyError', {
+          return i18n.translate('contentManagement.contentEditor.metadataForm.nameIsEmptyError', {
             defaultMessage: 'A name is required.',
           });
         }

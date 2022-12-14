@@ -30,16 +30,16 @@ import { useMetadataForm } from './use_metadata_form';
 import type { CustomValidators } from './use_metadata_form';
 
 const getI18nTexts = ({ entityName }: { entityName: string }) => ({
-  title: i18n.translate('contentManagement.inspector.flyoutTitle', {
+  title: i18n.translate('contentManagement.contentEditor.flyoutTitle', {
     defaultMessage: 'ContentEditor',
   }),
-  saveButtonLabel: i18n.translate('contentManagement.inspector.saveButtonLabel', {
+  saveButtonLabel: i18n.translate('contentManagement.contentEditor.saveButtonLabel', {
     defaultMessage: 'Update {entityName}',
     values: {
       entityName,
     },
   }),
-  cancelButtonLabel: i18n.translate('contentManagement.inspector.cancelButtonLabel', {
+  cancelButtonLabel: i18n.translate('contentManagement.contentEditor.cancelButtonLabel', {
     defaultMessage: 'Cancel',
   }),
 });

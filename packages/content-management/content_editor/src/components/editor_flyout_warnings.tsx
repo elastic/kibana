@@ -11,7 +11,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const getI18nTexts = () => ({
-  title: i18n.translate('contentManagement.inspector.flyoutWarningsTitle', {
+  title: i18n.translate('contentManagement.contentEditor.flyoutWarningsTitle', {
     defaultMessage: 'Proceed with caution!',
   }),
 });
