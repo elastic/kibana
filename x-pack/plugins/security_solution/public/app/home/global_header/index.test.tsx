@@ -32,16 +32,7 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: { theme: { theme$: {} }, http: { basePath: { prepend: jest.fn((href) => href) } } },
-    }),
-    useUiSetting$: jest.fn().mockReturnValue([]),
-  };
-});
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
