@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { AttributesTypeUser, CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
+import { ESCaseSeverity } from '@kbn/cases-plugin/server/services/cases/types';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
@@ -493,27 +494,19 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       describe('severity', () => {
         it('severity string labels are converted to matching number', async () => {
-          const caseSeverityLow = await getCase({
-            supertest,
-            caseId: '063d5820-1284-11ed-81af-63a2bdfb2bf6',
-          });
-          const caseSeverityMedium = await getCase({
-            supertest,
-            caseId: '063d5820-1284-11ed-81af-63a2bdfb2bf7',
-          });
-          const caseSeverityHigh = await getCase({
-            supertest,
-            caseId: '063d5820-1284-11ed-81af-63a2bdfb2bf8',
-          });
-          const caseSeverityCritical = await getCase({
-            supertest,
-            caseId: '063d5820-1284-11ed-81af-63a2bdfb2bf9',
-          });
+          const expectedSeverityValues: Record<string, ESCaseSeverity> = {
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': ESCaseSeverity.LOW,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': ESCaseSeverity.MEDIUM,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': ESCaseSeverity.HIGH,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': ESCaseSeverity.CRITICAL,
+          };
 
-          expect(caseSeverityLow.severity).to.eql(CaseSeverity.LOW);
-          expect(caseSeverityMedium.severity).to.eql(CaseSeverity.MEDIUM);
-          expect(caseSeverityHigh.severity).to.eql(CaseSeverity.HIGH);
-          expect(caseSeverityCritical.severity).to.eql(CaseSeverity.CRITICAL);
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+
+          for (const hit of casesFromES.body.hits.hits) {
+            const caseID = hit._id;
+            expect(hit._source?.cases.severity).to.eql(expectedSeverityValues[caseID]);
+          }
         });
       });
     });

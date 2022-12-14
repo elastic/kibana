@@ -42,10 +42,6 @@ describe('utils', () => {
       expect(convertSortField('title')).toBe('title.keyword');
     });
 
-    it('transforms title correctly', () => {
-      expect(sortToSnake('title')).toBe('title.keyword');
-    });
-
     it('transforms default correctly', () => {
       expect(convertSortField('not-exist')).toBe('created_at');
     });
@@ -423,7 +419,7 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "critical",
+              "value": "3",
             },
           ],
           "function": "is",

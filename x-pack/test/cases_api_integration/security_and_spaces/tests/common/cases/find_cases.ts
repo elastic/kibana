@@ -310,6 +310,48 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
 
+      it('sorts by severity', async () => {
+        const case4 = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.CRITICAL,
+        });
+        const case3 = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.HIGH,
+        });
+        const case2 = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.MEDIUM,
+        });
+        const case1 = await createCase(supertest, { ...postCaseReq, severity: CaseSeverity.LOW });
+
+        const cases = await findCases({
+          supertest,
+          query: { sortField: 'severity', sortOrder: 'asc' },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 4,
+          cases: [case1, case2, case3, case4],
+          count_open_cases: 4,
+        });
+      });
+
+      it('unhappy path - 400s when bad query supplied', async () => {
+        await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
+      });
+
+      for (const field of ['owner', 'tags', 'severity', 'status']) {
+        it(`should return a 400 when attempting to query a keyword field [${field}] when using a wildcard query`, async () => {
+          await findCases({
+            supertest,
+            query: { searchFields: [field], search: 'some search string*' },
+            expectedHttpCode: 400,
+          });
+        });
+      }
+
       describe('search and searchField', () => {
         beforeEach(async () => {
           await createCase(supertest, postCaseReq);
