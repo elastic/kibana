@@ -5,18 +5,35 @@
  * 2.0.
  */
 
+import { pickBy, isEmpty } from 'lodash';
 import type { Plugin } from 'unified';
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useMemo, useCallback } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
-import { EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
+import {
+  EuiLoadingSpinner,
+  EuiIcon,
+  EuiSpacer,
+  EuiCodeBlock,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiButton,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useForm, FormProvider } from 'react-hook-form';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
+import { useKibana } from '../../../../lib/kibana';
 import { useInsightQuery } from './use_insight_query';
 import { useInsightDataProviders } from './use_insight_data_providers';
 import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
 import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
 import { getTimeRangeSettings } from '../../../../utils/default_date_settings';
 import type { TimeRange } from '../../../../store/inputs/model';
+import { InsightBuilderForm } from './builder_form';
 
 interface InsightComponentProps {
   label?: string;
@@ -156,3 +173,116 @@ const InsightComponent = ({ label, description, providers }: InsightComponentPro
 };
 
 export { InsightComponent as renderer };
+
+const InsightEditorComponent = ({
+  node,
+  onSave,
+  onCancel,
+}: EuiMarkdownEditorUiPluginEditorProps<{
+  configuration: {
+    label?: string;
+    query: string;
+    ecs_mapping: { [key: string]: {} };
+  };
+}>) => {
+  const isEditMode = node != null;
+  const { osquery } = useKibana().services;
+  const formMethods = useForm<{
+    label: string;
+    query: string;
+    ecs_mapping: Record<string, unknown>;
+  }>({
+    defaultValues: {
+      label: node?.configuration?.label,
+      query: node?.configuration?.query,
+      ecs_mapping: node?.configuration?.ecs_mapping,
+    },
+  });
+
+  const onSubmit = useCallback(
+    (data) => {
+      onSave(
+        `!{insight${JSON.stringify(
+          pickBy(
+            {
+              query: data.query,
+              label: data.label,
+              ecs_mapping: data.ecs_mapping,
+            },
+            (value) => !isEmpty(value)
+          )
+        )}}`,
+        {
+          block: true,
+        }
+      );
+    },
+    [onSave]
+  );
+
+  return (
+    <>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          {isEditMode ? (
+            <FormattedMessage
+              id="xpack.securitySolution.markdown.osquery.editModalTitle"
+              defaultMessage="Edit query"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.securitySolution.markdown.osquery.addModalTitle"
+              defaultMessage="Add query"
+            />
+          )}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+
+      <EuiModalBody>
+        <FormProvider {...formMethods}>
+          <InsightBuilderForm fields={['idk']} formMethods={formMethods} />
+        </FormProvider>
+      </EuiModalBody>
+
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={onCancel}>
+          {i18n.translate('xpack.securitySolution.markdown.osquery.modalCancelButtonLabel', {
+            defaultMessage: 'Cancel',
+          })}
+        </EuiButtonEmpty>
+        <EuiButton onClick={formMethods.handleSubmit(onSubmit)} fill>
+          {isEditMode ? (
+            <FormattedMessage
+              id="xpack.securitySolution.markdown.osquery.addModalConfirmButtonLabel"
+              defaultMessage="Add query"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.securitySolution.markdown.osquery.editModalConfirmButtonLabel"
+              defaultMessage="Save changes"
+            />
+          )}
+        </EuiButton>
+      </EuiModalFooter>
+    </>
+  );
+};
+
+const InsightEditor = React.memo(InsightEditorComponent);
+
+export const plugin = {
+  name: 'insights',
+  button: {
+    label: 'Insights',
+    iconType: 'aggregate',
+  },
+  helpText: (
+    <div>
+      <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
+        {'!{insight{#TODO}}'}
+      </EuiCodeBlock>
+      <EuiSpacer size="s" />
+    </div>
+  ),
+  editor: InsightEditor,
+};
