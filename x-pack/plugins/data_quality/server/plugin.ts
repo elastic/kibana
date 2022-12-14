@@ -8,7 +8,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
 import { DataQualityPluginSetup, DataQualityPluginStart } from './types';
-import { getIndexMappingsRoute, getIndexStatsRoute } from './routes';
+import { getIndexMappingsRoute, getIndexStatsRoute, getUnallowedFieldValuesRoute } from './routes';
 
 export class DataQualityPlugin implements Plugin<DataQualityPluginSetup, DataQualityPluginStart> {
   private readonly logger: Logger;
@@ -24,6 +24,7 @@ export class DataQualityPlugin implements Plugin<DataQualityPluginSetup, DataQua
     // Register server side APIs
     getIndexMappingsRoute(router);
     getIndexStatsRoute(router);
+    getUnallowedFieldValuesRoute(router);
     return {};
   }
 

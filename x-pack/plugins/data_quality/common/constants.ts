@@ -11,3 +11,4 @@ export const PLUGIN_NAME = 'dataQuality';
 export const BASE_PATH = '/internal/data_quality';
 export const GET_INDEX_STATS = `${BASE_PATH}/stats/{pattern}`;
 export const GET_INDEX_MAPPINGS = `${BASE_PATH}/mappings/{pattern}`;
+export const GET_UNALLOWED_FIELD_VALUES = `${BASE_PATH}/unallowed_field_values`;
