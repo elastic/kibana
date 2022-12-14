@@ -600,7 +600,7 @@
     "prop-types": "^15.8.1",
     "proxy-from-env": "1.0.0",
     "puid": "1.0.7",
-    "puppeteer": "18.1.0",
+    "puppeteer": "18.2.1",
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.1.1",
@@ -687,7 +687,7 @@
     "vinyl": "^2.2.0",
     "whatwg-fetch": "^3.0.0",
     "xml2js": "^0.4.22",
-    "xstate": "^4.34.0",
+    "xstate": "^4.35.0",
     "xterm": "^5.0.0",
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1"
