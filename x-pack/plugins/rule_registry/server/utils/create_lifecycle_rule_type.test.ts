@@ -98,7 +98,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
         logger: loggerMock.create(),
         namespace: 'namespace',
-        params: {},
+        params: { threshold: 1, operator: '>' },
         previousStartedAt,
         rule: {
           id: 'alertId',
@@ -241,6 +241,10 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.consumer": "consumer",
               "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
+              "kibana.alert.rule.parameters": Object {
+                "operator": ">",
+                "threshold": 1,
+              },
               "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [
@@ -273,6 +277,10 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.consumer": "consumer",
               "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
+              "kibana.alert.rule.parameters": Object {
+                "operator": ">",
+                "threshold": 1,
+              },
               "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [
