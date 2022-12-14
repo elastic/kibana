@@ -191,3 +191,29 @@ It does NOT have the `stats.runtime` stanza.
   }
 }
 ```
+
+
+## QA Env
+
+### trez-8gb-8.6.0 
+
+> https://trez-8gb-8-6-0.kb.eu-west-1.aws.qa.cld.elstc.co:9243/api/task_manager/_health
+
+Deployment ID
+33fbdb
+
+elastic / H6dnMBSWYfRnXZu5sREtJ5aL
+
+### trez-qa-monitoring-8-6-0
+
+Deployment ID
+a00ca0
+
+elastic / l4hwHttEX7TwH0YXmOJ6Uw2Q
+
+### trez-8gb-8-5-0
+
+Deployment ID
+e6b70b
+
+elastic / Yfze4V92VBY9s4DRNLnPZu0q
