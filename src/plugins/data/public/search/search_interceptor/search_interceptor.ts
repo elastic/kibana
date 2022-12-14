@@ -31,7 +31,7 @@ import {
 } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-import { BfetchRequestError } from '@kbn/bfetch-plugin/common';
+import { BfetchRequestError } from '@kbn/bfetch-plugin/public';
 
 import {
   ApplicationStart,
