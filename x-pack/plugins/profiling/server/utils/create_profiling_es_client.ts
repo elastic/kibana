@@ -10,8 +10,10 @@ import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { MgetRequest, MgetResponse } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProfilingESEvent } from '../../common/elasticsearch';
 import { withProfilingSpan } from './with_profiling_span';
+import { StackTraceResponse } from '../../common/stack_traces';
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,
@@ -34,7 +36,10 @@ export interface ProfilingESClient {
     operationName: string,
     mgetRequest: MgetRequest
   ): Promise<MgetResponse<TDocument>>;
-  transport<TResponse = unknown>(operationName: string, transportRequest: any): Promise<TResponse>;
+  profilingStacktraces({}: {
+    query: QueryDslQueryContainer;
+    sampleSize: number;
+  }): Promise<StackTraceResponse>;
 }
 
 export function createProfilingEsClient({
@@ -85,26 +90,31 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise);
     },
-    transport<TResponse = unknown>(
-      operationName: string,
-      transportRequest: any
-    ): Promise<TResponse> {
+    profilingStacktraces({ query, sampleSize }) {
       const controller = new AbortController();
 
-      const promise = withProfilingSpan(operationName, () => {
+      const promise = withProfilingSpan('_profiling/stacktraces', () => {
         return cancelEsRequestOnAbort(
-          esClient.transport.request(transportRequest, {
-            signal: controller.signal,
-            meta: true,
-          }) as unknown as Promise<{
-            body: TResponse;
-          }>,
+          esClient.transport.request(
+            {
+              method: 'POST',
+              path: encodeURI('/_profiling/stacktraces'),
+              body: {
+                query,
+                sample_size: sampleSize,
+              },
+            },
+            {
+              signal: controller.signal,
+              meta: true,
+            }
+          ),
           request,
           controller
         );
       });
 
-      return unwrapEsResponse(promise);
+      return unwrapEsResponse(promise) as Promise<StackTraceResponse>;
     },
   };
 }

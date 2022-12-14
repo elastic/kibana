@@ -33,7 +33,6 @@ export async function getStackTraces({
 
   if (useElasticsearchPlugin) {
     return await searchStackTraces({
-      logger,
       client,
       filter,
       sampleSize,

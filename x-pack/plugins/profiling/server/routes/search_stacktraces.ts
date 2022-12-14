@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import { ProfilingESClient } from '../utils/create_profiling_es_client';
-import { withProfilingSpan } from '../utils/with_profiling_span';
 import {
   Executable,
   FileID,
@@ -16,46 +13,9 @@ import {
   StackTrace,
   StackTraceID,
 } from '../../common/profiling';
+import { StackTraceResponse } from '../../common/stack_traces';
+import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { ProjectTimeQuery } from './query';
-
-interface ProfilingEvents {
-  [key: string]: number;
-}
-
-interface ProfilingStackTrace {
-  ['file_ids']: string[];
-  ['frame_ids']: string[];
-  ['address_or_lines']: number[];
-  ['type_ids']: number[];
-}
-
-interface ProfilingStackTraces {
-  [key: string]: ProfilingStackTrace;
-}
-
-interface ProfilingStackFrame {
-  ['file_name']: string | undefined;
-  ['function_name']: string;
-  ['function_offset']: number | undefined;
-  ['line_number']: number | undefined;
-  ['source_type']: number | undefined;
-}
-
-interface ProfilingStackFrames {
-  [key: string]: ProfilingStackFrame;
-}
-
-interface ProfilingExecutables {
-  [key: string]: string;
-}
-
-export interface StackTraceResponse {
-  ['stack_trace_events']?: ProfilingEvents;
-  ['stack_traces']?: ProfilingStackTraces;
-  ['stack_frames']?: ProfilingStackFrames;
-  ['executables']?: ProfilingExecutables;
-  ['total_frames']: number;
-}
 
 export function decodeStackTraceResponse(response: StackTraceResponse) {
   const stackTraceEvents: Map<StackTraceID, number> = new Map();
@@ -101,26 +61,13 @@ export function decodeStackTraceResponse(response: StackTraceResponse) {
 }
 
 export async function searchStackTraces({
-  logger,
   client,
   filter,
   sampleSize,
 }: {
-  logger: Logger;
   client: ProfilingESClient;
   filter: ProjectTimeQuery;
   sampleSize: number;
 }) {
-  return withProfilingSpan('search_stack_traces', async () => {
-    const response = await client.transport<StackTraceResponse>('transport_stacktraces', {
-      method: 'POST',
-      path: encodeURI('/_profiling/stacktraces'),
-      body: {
-        sample_size: sampleSize,
-        query: filter,
-      },
-    });
-
-    return decodeStackTraceResponse(response);
-  });
+  return client.profilingStacktraces({ query: filter, sampleSize });
 }
