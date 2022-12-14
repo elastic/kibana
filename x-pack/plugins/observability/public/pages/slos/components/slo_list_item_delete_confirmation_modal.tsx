@@ -9,7 +9,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../utils/kibana_react';
-import { deleteSlos } from '../../../hooks/slo/delete_slo';
+import { deleteSlos } from '../../../hooks/slo/delete_slos';
 import { SLO } from '../../../typings';
 
 export interface DeleteConfirmationPropsModal {
