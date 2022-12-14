@@ -160,7 +160,7 @@ export const FieldStatsFlyout = () => {
         </EuiFlyoutHeader>
         <EuiFlyoutBody
           css={css`
-            width: 250px;
+            width: 300px;
           `}
         >
           <b>{fieldName}</b>
