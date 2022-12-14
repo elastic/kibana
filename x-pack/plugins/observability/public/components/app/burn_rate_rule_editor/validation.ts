@@ -10,14 +10,18 @@ import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { BurnRateRuleParams, DurationUnit } from '../../../typings';
 
 export type ValidationBurnRateRuleResult = ValidationResult & {
-  errors: Record<keyof BurnRateRuleParams, string[]>;
+  errors: { sloId: string[]; longWindow: string[]; burnRateThreshold: string[] };
 };
 
 const MIN_DURATION_IN_MINUTES = 30;
 const MAX_DURATION_IN_MINUTES = 1440;
 const MAX_DURATION_IN_HOURS = 24;
 
-export function validateBurnRateRule(ruleParams: BurnRateRuleParams): ValidationBurnRateRuleResult {
+type Optional<T> = { [P in keyof T]?: T[P] };
+
+export function validateBurnRateRule(
+  ruleParams: Optional<BurnRateRuleParams>
+): ValidationBurnRateRuleResult {
   const validationResult: ValidationBurnRateRuleResult = {
     errors: {
       sloId: new Array<string>(),
@@ -31,7 +35,9 @@ export function validateBurnRateRule(ruleParams: BurnRateRuleParams): Validation
     validationResult.errors.sloId.push(SLO_REQUIRED);
   }
 
-  if (burnRateThreshold < 1 || burnRateThreshold > maxBurnRateThreshold) {
+  if (burnRateThreshold === undefined || maxBurnRateThreshold === undefined) {
+    validationResult.errors.burnRateThreshold.push(BURN_RATE_THRESHOLD_REQUIRED);
+  } else if (burnRateThreshold < 1 || burnRateThreshold > maxBurnRateThreshold) {
     validationResult.errors.burnRateThreshold.push(
       getInvalidThresholdValueError(maxBurnRateThreshold)
     );
@@ -67,6 +73,11 @@ const LONG_WINDOW_DURATION_INVALID = i18n.translate(
   {
     defaultMessage: 'The long window must be between 30 minutes and 24 hours or 1440 minutes.',
   }
+);
+
+const BURN_RATE_THRESHOLD_REQUIRED = i18n.translate(
+  'xpack.observability.slo.rules.burnRate.errors.burnRateThresholdRequired',
+  { defaultMessage: 'Burn rate threshold is required.' }
 );
 
 const getInvalidThresholdValueError = (maxBurnRate: number) =>
