@@ -53,31 +53,24 @@ export async function scheduleSourceMapMigration({
         // logger.debug({ state });
         return {
           async run() {
-            try {
-              logger.debug(`Run task: "${TASK_TYPE}"`);
-              const coreStart = await coreStartPromise;
-              const internalESClient =
-                coreStart.elasticsearch.client.asInternalUser;
+            logger.debug(`Run task: "${TASK_TYPE}"`);
+            const coreStart = await coreStartPromise;
+            const internalESClient =
+              coreStart.elasticsearch.client.asInternalUser;
 
-              // ensure that the index template has been created before running migration
-              await createApmSourceMapIndexTemplate({
-                client: internalESClient,
+            // ensure that the index template has been created before running migration
+            await createApmSourceMapIndexTemplate({
+              client: internalESClient,
+              logger,
+            });
+
+            const fleet = await fleetStartPromise;
+            if (fleet) {
+              await runFleetSourcemapArtifactsMigration({
+                fleet,
+                internalESClient,
                 logger,
               });
-
-              const fleet = await fleetStartPromise;
-              if (fleet) {
-                await runFleetSourcemapArtifactsMigration({
-                  fleet,
-                  internalESClient,
-                  logger,
-                });
-              }
-
-              logger.debug(`Task completed: "${TASK_TYPE}"`);
-            } catch (e) {
-              logger.error(`Task failed: "${TASK_TYPE}"`);
-              logger.error(e);
             }
           },
 
