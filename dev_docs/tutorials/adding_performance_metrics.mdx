@@ -7,17 +7,17 @@ date: 2022-07-07
 tags: ['kibana', 'onboarding', 'setup', 'performance', 'development', 'telemetry']
 ---
 
-## Build and track Kibana performance metrics
+# Build and track Kibana performance metrics
 Having access to performance metrics allows us to better understand user experience across Kibana, identify issues and fix it.
 
-# What can be defined as metric?
+What kind of metrics we consider? Currently we collect timing metrics for actions like starting Kibana server, creating saved objects or rendering dashboard with visualizations.
 
-What kind of metrics we consider? How much time it takes to start Kibana server, create saved objects or render dashboard with multiple visualizations
-just to name a few.
+In order to collect and report a new metric following actions required: 
+- instrument the code to collect action time and report metric to the telemetry cluster
+- create single user performance journey that runs your instrumented code
 
-
-#How do we collect metrics?
-We use event-based telemetry (EBT) to report metrics to Elastic 'stack-telemetry' Staging cluster.
+## Instrument code to report event with metric.
+We use event-based telemetry (EBT) to report metrics as events.
 
 Let's assume we intend to report the performance of a specific action called `APP_ACTION`.
 In order to do so, we need to first measure the timing of that action.
@@ -30,32 +30,11 @@ reportPerformanceMetricEvent(analytics, {
 });
 ```
 
-
-
-
-
-In order to better understand the performance of Kibana features, e.g. how much  monitor performance of Kibana The process can be divided into 2 part
-
-### Simple performance events
-
-Let's assume we intend to report the performance of a specific action called `APP_ACTION`.
-In order to do so, we need to first measure the timing of that action.
-Once we have the time measurement, we can use the `reportPerformanceMetricEvent` API to report it.
-
-The most basic form of reporting would be:
-
-```typescript
-reportPerformanceMetricEvent(analytics, {
-  eventName: APP_ACTION,     
-  duration,                  // Duration in milliseconds
-});
-```
-
-Once executed, the metric would be delivered to the `stack-telemetry` cluster, alongside with the event's context.
+Once executed, the metric will be delivered to the `telemetry-v2-staging` cluster, alongside with the event's context.
 The data is updated periodically, so you might have to wait up to 30 minutes to see your data in the index.
 
 Once indexed, this metric will appear in `ebt-kibana` index. It is also mapped into an additional index, dedicated to performance metrics.
-We recommend using the `Kibana Peformance` space on the telemetry cluster, where you get an `index patten` to easily access this data.
+We recommend using the `Kibana Performance` space on the telemetry cluster, where you get an `index patten` to easily access this data.
 Each document in the index has the following structure:
 
 ```typescript
@@ -91,7 +70,7 @@ Lets assume we are interested in benchmarking the performance of a more complex 
     - If data needs to be refreshed, it proceeds with a flow `load-data-from-api`.
  - `PROCESS_DATA` loads and processes the data depending on the flow chosen in the previous step.
 
-We could utilise the additional options supported by the `reportPerformanceMetricEvent` API:
+We could utilize the additional options supported by the `reportPerformanceMetricEvent` API:
 
 ```typescript
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -186,15 +165,54 @@ to follow if it's important for you to look inside of a specific event e.g. `pag
 - **Keep performance in mind**. Reporting the performance of Kibana should never harm its own performance. 
   Avoid sending events too frequently (`onMouseMove`) or adding serialized JSON objects (whole `SavedObjects`) into the meta object.
 
+## Create single user performance journey
+If you would like to keep track on your performance metrics, you need to define a journey that mimics end-user experience with Kibana.
+The idea behind journeys is to simulate user interactions with Kibana in a browser and report performance metrics via EBT to a cluster where it can then be analyzed.
+Each journey is a test powered by [Playwright](https://playwright.dev/) end-to-end testing tool.
+Let's assume we instrumented dashboard with load time metrics and want to track it for sample data flights dashboard.
+The flight dashboard journey should be created in `x-pack/performance/journeys`:
+
+```
+export const journey = new Journey({
+  esArchives: ['x-pack/performance/es_archives/sample_data_flights'],
+  kbnArchives: ['x-pack/performance/kbn_archives/flights_no_map_dashboard'],
+})
+
+  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`/app/dashboards`));
+    await page.waitForSelector('#dashboardListingHeading');
+  })
+
+  .step('Go to Flights Dashboard', async ({ page, log }) => {
+    await page.click(subj('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'));
+    await waitForVisualizations(page, log, 14);
+  });
+```
+
+The telemetry collected during the execution of the journey will be reported to the `telemetry-v2-staging` cluster
+alongside with execution context. Use the `context.labels.ciBuildName` label to filter down events to only those originating
+from performance runs and visualize the duration of events (or their breakdowns).
+
+### Best practices
+Since journey is a playwright scenario, it is important to make it stable and consistent in reporting metrics.
+the best practices for end-to-end automated testing are relevant here. 
+- use archives to generate test data
+- decouple complex scenarios into multiple simple journeys
+- use waiting for page loading / UI component rendering
+- test locally and check if journey is stable.
+- make sure performance metrics are collected on every run.
+
+### How performance script works
+Currently we run each journey in isolation.
+`node scripts/run_performance.js --journey-path [journey-path]` does the following:
+- start Elasticsearch
+- start Kibana and run journey first time (warmup)
+- start Kibana and run journey second time (test): both performance metrics APM traces been reported
+- stop Elasticsearch
+
 ### Benchmarking performance on CI
-
-One of the use cases for event based telemetry is benchmarking the performance of features over time.
-In order to keep track of their stability, the #kibana-performance team has developed a special set of
-functional tests called `Journeys`. These journeys execute a UI workflow and allow the telemetry to be
-reported to a cluster where it can then be analysed.
-
-Those journeys run on the key branches (main, release versions) on dedicated machines to produce results 
-as stable and reproducible as possible.
+In order to keep track on performance metrics stability journeys are run on main branch with scheduled interval.
+Bare metal machine is used to produce results as stable and reproducible as possible.
 
 #### Machine specifications
 
@@ -202,7 +220,7 @@ All benchmarks are run on bare-metal machines with the [following specifications
 
 CPU: Intel® Core™ i9-12900K
 RAM: 128 GB
-SSD: 1.92 TB Datacenter Gen4 NVMe 
+SSD: 1.92 TB Data center Gen4 NVMe 
 
 Since the tests are run on a local machine, there is also realistic throttling applied to the network to 
 simulate real life internet connection. This means that all requests have a [fixed latency and limited bandwidth](https://github.com/elastic/kibana/blob/main/x-pack/test/performance/services/performance.ts#L157).
