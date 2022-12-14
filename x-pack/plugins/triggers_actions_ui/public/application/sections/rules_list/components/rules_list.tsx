@@ -12,7 +12,16 @@ import moment from 'moment';
 import { capitalize, isEmpty, sortBy } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState, ReactNode, useCallback, useMemo, useRef } from 'react';
+import React, {
+  lazy,
+  useEffect,
+  useState,
+  ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+  Suspense,
+} from 'react';
 import {
   EuiButton,
   EuiFieldSearch,
@@ -21,7 +30,7 @@ import {
   EuiFilterGroup,
   EuiSpacer,
   EuiLink,
-  EuiEmptyPrompt,
+  EuiPageTemplate,
   EuiTableSortingType,
   EuiButtonIcon,
   EuiSelectableOption,
@@ -50,7 +59,6 @@ import {
   TriggersActionsUiConfig,
   SnoozeSchedule,
 } from '../../../../types';
-import { RuleAdd, RuleEdit } from '../../rule_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
@@ -62,8 +70,6 @@ import { RuleLastRunOutcomeFilter } from './rule_last_run_outcome_filter';
 import { RulesListErrorBanner } from './rules_list_error_banner';
 import {
   loadRuleTypes,
-  disableRule,
-  enableRule,
   snoozeRule,
   unsnoozeRule,
   bulkUpdateAPIKey,
@@ -75,11 +81,11 @@ import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
-import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
+import { RulesListPrompts } from './rules_list_prompts';
 import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import './rules_list.scss';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { CreateRuleButton } from './create_rule_button';
 import { ManageLicenseModal } from './manage_license_modal';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 import { RuleTagFilter } from './rule_tag_filter';
@@ -90,6 +96,7 @@ import { useLoadTags } from '../../../hooks/use_load_tags';
 import { useLoadRuleAggregations } from '../../../hooks/use_load_rule_aggregations';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
+import { RulesListDocLink } from './rules_list_doc_link';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { RulesListVisibleColumns } from './rules_list_column_selector';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
@@ -105,6 +112,11 @@ import {
 } from '../translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 
+// Directly lazy import the flyouts because the suspendedComponentWithProps component
+// cause a visual hitch due to the loading spinner
+const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
+const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
+
 const ENTER_KEY = 13;
 
 interface RulesPageContainerState {
@@ -117,6 +129,8 @@ export interface RulesListProps {
   showActionFilter?: boolean;
   ruleDetailsRoute?: string;
   showCreateRuleButton?: boolean;
+  showCreateRuleButtonInPrompt?: boolean;
+  setHeaderActions?: (components?: React.ReactNode[]) => void;
   statusFilter?: RuleStatus[];
   onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
   lastResponseFilter?: string[];
@@ -151,12 +165,14 @@ export const RulesList = ({
   showActionFilter = true,
   ruleDetailsRoute,
   showCreateRuleButton = true,
+  showCreateRuleButtonInPrompt = false,
   statusFilter,
   onStatusFilterChange,
   lastResponseFilter,
   onLastResponseFilterChange,
   lastRunOutcomeFilter,
   onLastRunOutcomeFilterChange,
+  setHeaderActions,
   refresh,
   rulesListKey,
   visibleColumns,
@@ -608,13 +624,19 @@ export const RulesList = ({
     ];
   };
 
-  const onDisableRule = (rule: RuleTableItem) => {
-    return disableRule({ http, id: rule.id });
-  };
+  const onDisableRule = useCallback(
+    async (rule: RuleTableItem) => {
+      await bulkDisableRules({ http, ids: [rule.id] });
+    },
+    [bulkDisableRules]
+  );
 
-  const onEnableRule = (rule: RuleTableItem) => {
-    return enableRule({ http, id: rule.id });
-  };
+  const onEnableRule = useCallback(
+    async (rule: RuleTableItem) => {
+      await bulkEnableRules({ http, ids: [rule.id] });
+    },
+    [bulkEnableRules]
+  );
 
   const onSnoozeRule = (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => {
     return snoozeRule({ http, id: rule.id, snoozeSchedule });
@@ -767,6 +789,10 @@ export const RulesList = ({
     }
   };
 
+  const openFlyout = useCallback(() => {
+    setRuleFlyoutVisibility(true);
+  }, []);
+
   const table = (
     <>
       <RulesListErrorBanner
@@ -777,17 +803,7 @@ export const RulesList = ({
       <EuiFlexGroup gutterSize="s">
         {authorizedToCreateAnyRules && showCreateRuleButton ? (
           <EuiFlexItem grow={false}>
-            <EuiButton
-              key="create-rule"
-              data-test-subj="createRuleButton"
-              fill
-              onClick={() => setRuleFlyoutVisibility(true)}
-            >
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.rulesList.addRuleButtonLabel"
-                defaultMessage="Create rule"
-              />
-            </EuiButton>
+            <CreateRuleButton openFlyout={openFlyout} />
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>
@@ -1007,24 +1023,33 @@ export const RulesList = ({
       )}
     </>
   );
-  // if initial load, show spinner
-  const getRulesList = () => {
-    if (noData && !rulesState.isLoading && !ruleTypesState.isLoading) {
-      return authorizedToCreateAnyRules ? (
-        <EmptyPrompt
-          showCreateRuleButton={showCreateRuleButton}
-          onCTAClicked={() => setRuleFlyoutVisibility(true)}
-        />
-      ) : (
-        noPermissionPrompt
-      );
-    }
 
+  const showPrompt = noData && !rulesState.isLoading && !ruleTypesState.isLoading;
+
+  useEffect(() => {
     if (initialLoad) {
-      return <CenterJustifiedSpinner />;
+      return;
     }
+    if (showPrompt && !authorizedToCreateAnyRules) {
+      setHeaderActions?.([<RulesListDocLink />]);
+      return;
+    }
+    if (!showPrompt && authorizedToCreateAnyRules) {
+      setHeaderActions?.([<CreateRuleButton openFlyout={openFlyout} />, <RulesListDocLink />]);
+      return;
+    }
+    setHeaderActions?.();
+  }, [initialLoad, showPrompt, authorizedToCreateAnyRules]);
 
-    return table;
+  useEffect(() => {
+    return () => setHeaderActions?.();
+  }, []);
+
+  const renderTable = () => {
+    if (!showPrompt && !initialLoad) {
+      return table;
+    }
+    return null;
   };
 
   const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
@@ -1038,11 +1063,9 @@ export const RulesList = ({
   const onEnable = useCallback(async () => {
     setIsEnablingRules(true);
 
-    const { errors, total } = await bulkEnableRules({
-      ...(isAllSelected ? { filter: getFilter() } : {}),
-      ...(isAllSelected ? {} : { ids: selectedIds }),
-      http,
-    });
+    const { errors, total } = isAllSelected
+      ? await bulkEnableRules({ http, filter: getFilter() })
+      : await bulkEnableRules({ http, ids: selectedIds });
 
     setIsEnablingRules(false);
     showToast({ action: 'ENABLE', errors, total });
@@ -1053,11 +1076,9 @@ export const RulesList = ({
   const onDisable = useCallback(async () => {
     setIsDisablingRules(true);
 
-    const { errors, total } = await bulkDisableRules({
-      ...(isAllSelected ? { filter: getFilter() } : {}),
-      ...(isAllSelected ? {} : { ids: selectedIds }),
-      http,
-    });
+    const { errors, total } = isAllSelected
+      ? await bulkDisableRules({ http, filter: getFilter() })
+      : await bulkDisableRules({ http, ids: selectedIds });
 
     setIsDisablingRules(false);
     showToast({ action: 'DISABLE', errors, total });
@@ -1089,139 +1110,129 @@ export const RulesList = ({
   const numberRulesToDelete = rulesToDelete.length || numberOfSelectedItems;
 
   return (
-    <section data-test-subj="rulesList">
-      {isDeleteModalFlyoutVisible && (
-        <RulesDeleteModalConfirmation
-          onConfirm={onDeleteConfirm}
-          onCancel={onDeleteCancel}
-          confirmButtonText={getConfirmDeletionButtonText(
-            numberRulesToDelete,
-            SINGLE_RULE_TITLE,
-            MULTIPLE_RULE_TITLE
-          )}
-          confirmModalText={getConfirmDeletionModalText(
-            numberRulesToDelete,
-            SINGLE_RULE_TITLE,
-            MULTIPLE_RULE_TITLE
-          )}
-        />
-      )}
-      <BulkSnoozeModal
-        rulesToSnooze={rulesToSnooze}
-        rulesToUnsnooze={rulesToUnsnooze}
-        rulesToSnoozeFilter={rulesToSnoozeFilter}
-        rulesToUnsnoozeFilter={rulesToUnsnoozeFilter}
-        numberOfSelectedRules={numberOfSelectedItems}
-        setIsSnoozingRule={setIsSnoozingRules}
-        setIsUnsnoozingRule={setIsUnsnoozingRules}
-        onClose={() => {
-          clearRulesToSnooze();
-          clearRulesToUnsnooze();
-        }}
-        onSave={async () => {
-          clearRulesToSnooze();
-          clearRulesToUnsnooze();
-          onClearSelection();
-          await refreshRules();
-        }}
-        onSearchPopulate={onSearchPopulate}
+    <>
+      <RulesListPrompts
+        showPrompt={showPrompt}
+        showCreateRule={showCreateRuleButtonInPrompt}
+        showSpinner={initialLoad}
+        authorizedToCreateRules={authorizedToCreateAnyRules}
+        onCreateRulesClick={openFlyout}
       />
-      <BulkSnoozeScheduleModal
-        rulesToSchedule={rulesToSchedule}
-        rulesToUnschedule={rulesToUnschedule}
-        rulesToScheduleFilter={rulesToScheduleFilter}
-        rulesToUnscheduleFilter={rulesToUnscheduleFilter}
-        numberOfSelectedRules={numberOfSelectedItems}
-        setIsSchedulingRule={setIsSchedulingRules}
-        setIsUnschedulingRule={setIsUnschedulingRules}
-        onClose={() => {
-          clearRulesToSchedule();
-          clearRulesToUnschedule();
-        }}
-        onSave={async () => {
-          clearRulesToSchedule();
-          clearRulesToUnschedule();
-          onClearSelection();
-          await refreshRules();
-        }}
-        onSearchPopulate={onSearchPopulate}
-      />
-      <UpdateApiKeyModalConfirmation
-        onCancel={() => {
-          clearRulesToUpdateAPIKey();
-        }}
-        idsToUpdate={rulesToUpdateAPIKey}
-        idsToUpdateFilter={rulesToUpdateAPIKeyFilter}
-        numberOfSelectedRules={numberOfSelectedItems}
-        apiUpdateApiKeyCall={bulkUpdateAPIKey}
-        setIsLoadingState={(isLoading: boolean) => {
-          setIsUpdatingRuleAPIKeys(isLoading);
-          setRulesState({ ...rulesState, isLoading });
-        }}
-        onUpdated={async () => {
-          clearRulesToUpdateAPIKey();
-          onClearSelection();
-          await refreshRules();
-        }}
-        onSearchPopulate={onSearchPopulate}
-      />
-      <EuiSpacer size="xs" />
-      {getRulesList()}
-      {ruleFlyoutVisible && (
-        <RuleAdd
-          consumer={ALERTS_FEATURE_ID}
+      <EuiPageTemplate.Section data-test-subj="rulesList" grow={false} paddingSize="none">
+        {isDeleteModalFlyoutVisible && (
+          <RulesDeleteModalConfirmation
+            onConfirm={onDeleteConfirm}
+            onCancel={onDeleteCancel}
+            confirmButtonText={getConfirmDeletionButtonText(
+              numberRulesToDelete,
+              SINGLE_RULE_TITLE,
+              MULTIPLE_RULE_TITLE
+            )}
+            confirmModalText={getConfirmDeletionModalText(
+              numberRulesToDelete,
+              SINGLE_RULE_TITLE,
+              MULTIPLE_RULE_TITLE
+            )}
+          />
+        )}
+        <BulkSnoozeModal
+          rulesToSnooze={rulesToSnooze}
+          rulesToUnsnooze={rulesToUnsnooze}
+          rulesToSnoozeFilter={rulesToSnoozeFilter}
+          rulesToUnsnoozeFilter={rulesToUnsnoozeFilter}
+          numberOfSelectedRules={numberOfSelectedItems}
+          setIsSnoozingRule={setIsSnoozingRules}
+          setIsUnsnoozingRule={setIsUnsnoozingRules}
           onClose={() => {
-            setRuleFlyoutVisibility(false);
+            clearRulesToSnooze();
+            clearRulesToUnsnooze();
           }}
-          actionTypeRegistry={actionTypeRegistry}
-          ruleTypeRegistry={ruleTypeRegistry}
-          ruleTypeIndex={ruleTypesState.data}
-          onSave={refreshRules}
+          onSave={async () => {
+            clearRulesToSnooze();
+            clearRulesToUnsnooze();
+            onClearSelection();
+            await refreshRules();
+          }}
+          onSearchPopulate={onSearchPopulate}
         />
-      )}
-      {editFlyoutVisible && currentRuleToEdit && (
-        <RuleEdit
-          initialRule={currentRuleToEdit}
+        <BulkSnoozeScheduleModal
+          rulesToSchedule={rulesToSchedule}
+          rulesToUnschedule={rulesToUnschedule}
+          rulesToScheduleFilter={rulesToScheduleFilter}
+          rulesToUnscheduleFilter={rulesToUnscheduleFilter}
+          numberOfSelectedRules={numberOfSelectedItems}
+          setIsSchedulingRule={setIsSchedulingRules}
+          setIsUnschedulingRule={setIsUnschedulingRules}
           onClose={() => {
-            setEditFlyoutVisibility(false);
+            clearRulesToSchedule();
+            clearRulesToUnschedule();
           }}
-          actionTypeRegistry={actionTypeRegistry}
-          ruleTypeRegistry={ruleTypeRegistry}
-          ruleType={
-            ruleTypesState.data.get(currentRuleToEdit.ruleTypeId) as RuleType<string, string>
-          }
-          onSave={refreshRules}
+          onSave={async () => {
+            clearRulesToSchedule();
+            clearRulesToUnschedule();
+            onClearSelection();
+            await refreshRules();
+          }}
+          onSearchPopulate={onSearchPopulate}
         />
-      )}
-    </section>
+        <UpdateApiKeyModalConfirmation
+          onCancel={() => {
+            clearRulesToUpdateAPIKey();
+          }}
+          idsToUpdate={rulesToUpdateAPIKey}
+          idsToUpdateFilter={rulesToUpdateAPIKeyFilter}
+          numberOfSelectedRules={numberOfSelectedItems}
+          apiUpdateApiKeyCall={bulkUpdateAPIKey}
+          setIsLoadingState={(isLoading: boolean) => {
+            setIsUpdatingRuleAPIKeys(isLoading);
+            setRulesState({ ...rulesState, isLoading });
+          }}
+          onUpdated={async () => {
+            clearRulesToUpdateAPIKey();
+            onClearSelection();
+            await refreshRules();
+          }}
+          onSearchPopulate={onSearchPopulate}
+        />
+        <EuiSpacer size="xs" />
+        {renderTable()}
+        {ruleFlyoutVisible && (
+          <Suspense fallback={<div />}>
+            <RuleAdd
+              consumer={ALERTS_FEATURE_ID}
+              onClose={() => {
+                setRuleFlyoutVisibility(false);
+              }}
+              actionTypeRegistry={actionTypeRegistry}
+              ruleTypeRegistry={ruleTypeRegistry}
+              ruleTypeIndex={ruleTypesState.data}
+              onSave={refreshRules}
+            />
+          </Suspense>
+        )}
+        {editFlyoutVisible && currentRuleToEdit && (
+          <Suspense fallback={<div />}>
+            <RuleEdit
+              initialRule={currentRuleToEdit}
+              onClose={() => {
+                setEditFlyoutVisibility(false);
+              }}
+              actionTypeRegistry={actionTypeRegistry}
+              ruleTypeRegistry={ruleTypeRegistry}
+              ruleType={
+                ruleTypesState.data.get(currentRuleToEdit.ruleTypeId) as RuleType<string, string>
+              }
+              onSave={refreshRules}
+            />
+          </Suspense>
+        )}
+      </EuiPageTemplate.Section>
+    </>
   );
 };
 
 // eslint-disable-next-line import/no-default-export
 export { RulesList as default };
-
-const noPermissionPrompt = (
-  <EuiEmptyPrompt
-    data-test-subj="noPermissionPrompt"
-    iconType="securityApp"
-    title={
-      <h1>
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.rulesList.noPermissionToCreateTitle"
-          defaultMessage="No permissions to create rules"
-        />
-      </h1>
-    }
-    body={
-      <p data-test-subj="permissionDeniedMessage">
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.rulesList.noPermissionToCreateDescription"
-          defaultMessage="Contact your system administrator."
-        />
-      </p>
-    }
-  />
-);
 
 function filterRulesById(rules: Rule[], ids: string[]): Rule[] {
   return rules.filter((rule) => ids.includes(rule.id));

@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addAnalyticsCollection } from '../../lib/analytics/add_analytics_collection';
+import { analyticsEventsIndexExists } from '../../lib/analytics/analytics_events_index_exists';
 import { deleteAnalyticsCollectionById } from '../../lib/analytics/delete_analytics_collection';
 import {
   fetchAnalyticsCollectionById,
@@ -155,6 +156,28 @@ export function registerAnalyticsRoutes({
         }
         throw error;
       }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/analytics/events/{id}/exists',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+
+      const eventsIndexExists = await analyticsEventsIndexExists(client, request.params.id);
+
+      if (!eventsIndexExists) {
+        return response.ok({ body: { exists: false } });
+      }
+
+      return response.ok({ body: { exists: true } });
     })
   );
 }

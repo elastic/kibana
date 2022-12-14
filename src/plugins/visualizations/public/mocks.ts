@@ -77,6 +77,9 @@ const createInstance = async () => {
       screenshotMode: screenshotModePluginMock.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      usageCollection: {
+        reportUiCounter: jest.fn(),
+      },
     });
 
   return {
