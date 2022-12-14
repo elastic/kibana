@@ -56,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('creating a rule', () => {
-        it('When creating a new action and attaching it to a rule, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to null', async () => {
+        it('When creating a new action and attaching it to a rule, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to "onActiveAlert"', async () => {
           // create a new action
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
@@ -69,10 +69,10 @@ export default ({ getService }: FtrProviderContext) => {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
           expect(muteAll).to.eql(false);
-          expect(notifyWhen).to.eql(null);
+          expect(notifyWhen).to.eql('onActiveAlert');
         });
 
-        it('When creating throttle with "NOTIFICATION_THROTTLE_NO_ACTIONS" set and no actions, the rule should have its kibana alerting "mute_all" set to "true"', async () => {
+        it('When creating throttle with "NOTIFICATION_THROTTLE_NO_ACTIONS" set and no actions, the rule should have its kibana alerting "mute_all" set to "true" and notify_when set to null', async () => {
           const ruleWithThrottle: RuleCreateProps = {
             ...getSimpleRule(),
             throttle: NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -105,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(notifyWhen).to.eql(null);
         });
 
-        it('When creating throttle with "NOTIFICATION_THROTTLE_RULE" set and no actions, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to null', async () => {
+        it('When creating throttle with "NOTIFICATION_THROTTLE_RULE" set and no actions, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to "onActiveAlert"', async () => {
           const ruleWithThrottle: RuleCreateProps = {
             ...getSimpleRule(),
             throttle: NOTIFICATION_THROTTLE_RULE,
@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
           expect(muteAll).to.eql(false);
-          expect(notifyWhen).to.eql(null);
+          expect(notifyWhen).to.eql('onActiveAlert');
         });
 
         // NOTE: This shows A side effect of how we do not set data on side cars anymore where the user is told they have no actions since the array is empty.
@@ -128,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(rule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
         });
 
-        it('When creating throttle with "NOTIFICATION_THROTTLE_RULE" set and actions set, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to null', async () => {
+        it('When creating throttle with "NOTIFICATION_THROTTLE_RULE" set and actions set, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to "onActiveAlert"', async () => {
           // create a new action
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
@@ -145,10 +145,10 @@ export default ({ getService }: FtrProviderContext) => {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
           expect(muteAll).to.eql(false);
-          expect(notifyWhen).to.eql(null);
+          expect(notifyWhen).to.eql('onActiveAlert');
         });
 
-        it('When creating throttle with "1h" set and no actions, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to null', async () => {
+        it('When creating throttle with "1h" set and no actions, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to "onThrottleInterval"', async () => {
           const ruleWithThrottle: RuleCreateProps = {
             ...getSimpleRule(),
             throttle: '1h',
@@ -158,10 +158,10 @@ export default ({ getService }: FtrProviderContext) => {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
           expect(muteAll).to.eql(false);
-          expect(notifyWhen).to.eql(null);
+          expect(notifyWhen).to.eql('onThrottleInterval');
         });
 
-        it('When creating throttle with "1h" set and actions set, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to null', async () => {
+        it('When creating throttle with "1h" set and actions set, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to "onThrottleInterval"', async () => {
           // create a new action
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
@@ -178,7 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
           expect(muteAll).to.eql(false);
-          expect(notifyWhen).to.eql(null);
+          expect(notifyWhen).to.eql('onThrottleInterval');
         });
       });
 
@@ -268,7 +268,7 @@ export default ({ getService }: FtrProviderContext) => {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${updated.id}`);
           expect(muteAll).to.eql(false);
-          expect(notifyWhen).to.eql(null);
+          expect(notifyWhen).to.eql('onActiveAlert');
         });
 
         // NOTE: This shows A side effect of how we do not set data on side cars anymore where the user is told they have no actions since the array is empty.
@@ -329,7 +329,7 @@ export default ({ getService }: FtrProviderContext) => {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
           expect(muteAll).to.eql(false);
-          expect(notifyWhen).to.eql(null);
+          expect(notifyWhen).to.eql('onActiveAlert');
         });
 
         // NOTE: This shows A side effect of how we do not set data on side cars anymore where the user is told they have no actions since the array is empty.

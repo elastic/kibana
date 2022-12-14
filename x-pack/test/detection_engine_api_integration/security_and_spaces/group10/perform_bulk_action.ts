@@ -1730,7 +1730,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   // Check that the updates have been persisted
                   const { body: rule } = await fetchRule(ruleId).expect(200);
 
-                  expect(rule.throttle).to.be(undefined);
+                  expect(rule.throttle).to.be(expectedThrottle);
                   expect(rule.actions[0].frequency.throttle).to.be(expectedThrottle);
                 });
               });
