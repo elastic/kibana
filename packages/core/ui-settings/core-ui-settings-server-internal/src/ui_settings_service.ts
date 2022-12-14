@@ -109,7 +109,7 @@ export class UiSettingsService
       const isNamespaceScope = scope === 'namespace';
       const options = {
         type: (isNamespaceScope ? 'config' : 'config-global') as 'config' | 'config-global',
-        id: isNamespaceScope ? version : `global-in-${version}`,
+        id: version,
         buildNum,
         savedObjectsClient,
         defaults: isNamespaceScope
