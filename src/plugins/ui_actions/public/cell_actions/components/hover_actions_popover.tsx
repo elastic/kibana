@@ -75,7 +75,8 @@ export const HoverActionsPopover = React.memo<Props>(
     }, [closePopover, setIsExtraActionsPopoverOpen]);
 
     const onMouseEnter = useCallback(async () => {
-      closeExtraActions(); // Closed extra actions when opening hover actions
+      // Do not open actions with extra action popover is open
+      if (isExtraActionsPopoverOpen) return;
 
       // memoize actions after the first call
       if (actions === null) {
@@ -94,7 +95,7 @@ export const HoverActionsPopover = React.memo<Props>(
           }, HOVER_INTENT_DELAY)
         )
       );
-    }, [closeExtraActions, getActions, actions]);
+    }, [isExtraActionsPopoverOpen, actions, getActions]);
 
     const onMouseLeave = useCallback(() => {
       closePopover();

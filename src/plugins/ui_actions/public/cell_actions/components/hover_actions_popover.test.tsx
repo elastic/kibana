@@ -134,6 +134,46 @@ describe('HoverActionsPopover', () => {
 
     expect(getByLabelText('test-action-2')).toBeInTheDocument();
   });
+
+  it('does not render visible actions if extra actions are already rendered', async () => {
+    const actions = [
+      makeAction('test-action-1'),
+      // extra actions
+      makeAction('test-action-2'),
+      makeAction('test-action-3'),
+    ];
+    const getActionsPromise = Promise.resolve(actions);
+    const getActions = () => getActionsPromise;
+
+    const { getByTestId, queryByLabelText } = render(
+      <HoverActionsPopover
+        getActions={getActions}
+        showMoreActionsFrom={2}
+        actionContext={{} as CellActionExecutionContext}
+        showTooltip={false}
+      >
+        <TestComponent />
+      </HoverActionsPopover>
+    );
+
+    await hoverElement(getByTestId('test-component'), async () => {
+      await getActionsPromise;
+      jest.runAllTimers();
+    });
+
+    act(() => {
+      fireEvent.click(getByTestId('showExtraActionsButton'));
+    });
+
+    await hoverElement(getByTestId('test-component'), async () => {
+      await getActionsPromise;
+      jest.runAllTimers();
+    });
+
+    expect(queryByLabelText('test-action-1')).not.toBeInTheDocument();
+    expect(queryByLabelText('test-action-2')).toBeInTheDocument();
+    expect(queryByLabelText('test-action-3')).toBeInTheDocument();
+  });
 });
 
 const hoverElement = async (element: Element, waitForChange: () => Promise<unknown>) => {
