@@ -158,7 +158,9 @@ describe('#fromCombinedFilter', function () {
             "negate": false,
             "params": Array [
               Object {
-                "meta": Object {},
+                "meta": Object {
+                  "index": "logstash-*",
+                },
                 "query": Object {
                   "match_phrase": Object {
                     "extension": "value",
@@ -168,6 +170,7 @@ describe('#fromCombinedFilter', function () {
               Object {
                 "meta": Object {
                   "field": "bytes",
+                  "index": "logstash-*",
                   "params": Object {},
                 },
                 "query": Object {
@@ -179,7 +182,9 @@ describe('#fromCombinedFilter', function () {
                 },
               },
               Object {
-                "meta": Object {},
+                "meta": Object {
+                  "index": "logstash-*",
+                },
                 "query": Object {
                   "exists": Object {
                     "field": "machine.os",
@@ -369,7 +374,9 @@ describe('#fromCombinedFilter', function () {
             "negate": false,
             "params": Array [
               Object {
-                "meta": Object {},
+                "meta": Object {
+                  "index": "logstash-*",
+                },
                 "query": Object {
                   "match_phrase": Object {
                     "extension": "value",
@@ -379,6 +386,7 @@ describe('#fromCombinedFilter', function () {
               Object {
                 "meta": Object {
                   "field": "bytes",
+                  "index": "logstash-*",
                   "params": Object {},
                 },
                 "query": Object {
@@ -390,7 +398,9 @@ describe('#fromCombinedFilter', function () {
                 },
               },
               Object {
-                "meta": Object {},
+                "meta": Object {
+                  "index": "logstash-*",
+                },
                 "query": Object {
                   "exists": Object {
                     "field": "machine.os",

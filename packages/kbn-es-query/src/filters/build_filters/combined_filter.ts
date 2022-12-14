@@ -42,7 +42,7 @@ export function isCombinedFilter(filter: Filter): filter is CombinedFilter {
 
 const cleanUpFilter = (filter: Filter) => {
   const { $state, meta, ...cleanedUpFilter } = filter;
-  const { index, alias, disabled, ...cleanedUpMeta } = meta;
+  const { alias, disabled, ...cleanedUpMeta } = meta;
   return { ...cleanedUpFilter, meta: cleanedUpMeta };
 };
 
