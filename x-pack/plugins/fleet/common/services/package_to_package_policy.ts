@@ -210,8 +210,6 @@ export const packageToPackagePolicy = (
       ? packageInfo.savedObject?.attributes?.experimental_data_stream_features
       : undefined;
 
-  console.log('experimentalDataStreamFeatures', experimentalDataStreamFeatures);
-
   const packagePolicy: NewPackagePolicy = {
     name: packagePolicyName || `${packageInfo.name}-1`,
     namespace,

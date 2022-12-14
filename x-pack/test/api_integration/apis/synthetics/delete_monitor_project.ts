@@ -49,7 +49,6 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
-      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
 
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
@@ -393,10 +392,8 @@ export default function ({ getService }: FtrProviderContext) {
         const { total } = savedObjectsResponse.body;
         expect(total).to.eql(monitors.length);
         const apiResponsePolicy = await supertest.get(
-          '/api/fleet/package_policies?page=1&perPage=2000'
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
-        // TMP debgging tests
-        console.log('apiResponsePolicy.body', apiResponsePolicy.body);
 
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
