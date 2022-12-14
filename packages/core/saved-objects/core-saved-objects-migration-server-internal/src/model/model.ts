@@ -34,7 +34,6 @@ import {
   getAliases,
   indexBelongsToLaterVersion,
   indexVersion,
-  mergeMigrationMappingPropertyHashes,
   throwBadControlState,
   throwBadResponse,
   versionMigrationCompleted,
