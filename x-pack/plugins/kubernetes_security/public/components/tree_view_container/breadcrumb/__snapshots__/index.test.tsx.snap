@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Breadcrumb correctly 1`] = `
+exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Breadcrumb button content correctly 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -8,106 +8,135 @@ Object {
       <div
         css="[object Object]"
       >
-        <span
-          data-euiicon-type="cluster"
-          style="color: rgb(84, 179, 153);"
-        />
-        <span
-          class="euiToolTipAnchor"
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
         >
-          <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-            type="button"
+          <div
+            class="euiFlexItem emotion-EuiFlexItem"
           >
             <span
-              class="euiButtonContent euiButtonEmpty__content"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
-              <span
-                class="euiButtonEmpty__text"
+              <button
+                aria-label="Click Cluster breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
+                type="button"
               >
-                selected cluster name
-              </span>
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="cluster"
+                />
+              </button>
             </span>
-          </button>
-        </span>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          data-euiicon-type="namespace"
-          style="color: rgb(96, 146, 192);"
-        />
-        <span
-          class="euiToolTipAnchor"
-        >
-          <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-            type="button"
+            <span
+              class="emotion-EuiIcon"
+              data-euiicon-type="arrowRight"
+            />
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Click Namespace breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="namespace"
+                />
+              </button>
+            </span>
+            <span
+              class="emotion-EuiIcon"
+              data-euiicon-type="arrowRight"
+            />
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Click Pod breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="kubernetesPod"
+                />
+              </button>
+            </span>
+            <span
+              class="emotion-EuiIcon"
+              data-euiicon-type="arrowRight"
+            />
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Click Container Image breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="container"
+                />
+              </button>
+            </span>
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                class="euiButtonEmpty emotion-EuiButtonEmpty"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButtonEmpty__content"
+                >
+                  <span
+                    class="euiButtonEmpty__text"
+                  >
+                    selected image
+                  </span>
+                </span>
+              </button>
+            </span>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <span
-              class="euiButtonContent euiButtonEmpty__content"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
-              <span
-                class="euiButtonEmpty__text"
+              <button
+                class="euiButtonEmpty css-9t7nyf-empty-primary"
+                data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
+                type="button"
               >
-                selected namespace
-              </span>
+                <span
+                  class="euiButtonContent euiButtonEmpty__content"
+                >
+                  <span
+                    class="euiButtonEmpty__text"
+                  >
+                    Respond
+                  </span>
+                </span>
+              </button>
             </span>
-          </button>
-        </span>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          data-euiicon-type="kubernetesPod"
-          style="color: rgb(231, 102, 76);"
-        />
-        <span
-          class="euiToolTipAnchor"
-        >
-          <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-            type="button"
-          >
-            <span
-              class="euiButtonContent euiButtonEmpty__content"
-            >
-              <span
-                class="euiButtonEmpty__text"
-              >
-                selected pod
-              </span>
-            </span>
-          </button>
-        </span>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          data-euiicon-type="container"
-          style="color: rgb(170, 101, 86);"
-        />
-        <span
-          class="euiToolTipAnchor"
-        >
-          <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-            type="button"
-          >
-            <span
-              class="euiButtonContent euiButtonEmpty__content"
-            >
-              <span
-                class="euiButtonEmpty__text"
-              >
-                selected image
-              </span>
-            </span>
-          </button>
-        </span>
+          </div>
+        </div>
       </div>
     </div>
   </body>,
@@ -115,106 +144,135 @@ Object {
     <div
       css="[object Object]"
     >
-      <span
-        data-euiicon-type="cluster"
-        style="color: rgb(84, 179, 153);"
-      />
-      <span
-        class="euiToolTipAnchor"
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
       >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-          type="button"
+        <div
+          class="euiFlexItem emotion-EuiFlexItem"
         >
           <span
-            class="euiButtonContent euiButtonEmpty__content"
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
-            <span
-              class="euiButtonEmpty__text"
+            <button
+              aria-label="Click Cluster breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
+              type="button"
             >
-              selected cluster name
-            </span>
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="cluster"
+              />
+            </button>
           </span>
-        </button>
-      </span>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        data-euiicon-type="namespace"
-        style="color: rgb(96, 146, 192);"
-      />
-      <span
-        class="euiToolTipAnchor"
-      >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-          type="button"
+          <span
+            class="emotion-EuiIcon"
+            data-euiicon-type="arrowRight"
+          />
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              aria-label="Click Namespace breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="namespace"
+              />
+            </button>
+          </span>
+          <span
+            class="emotion-EuiIcon"
+            data-euiicon-type="arrowRight"
+          />
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              aria-label="Click Pod breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="kubernetesPod"
+              />
+            </button>
+          </span>
+          <span
+            class="emotion-EuiIcon"
+            data-euiicon-type="arrowRight"
+          />
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              aria-label="Click Container Image breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="container"
+              />
+            </button>
+          </span>
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              class="euiButtonEmpty emotion-EuiButtonEmpty"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  selected image
+                </span>
+              </span>
+            </button>
+          </span>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
-            class="euiButtonContent euiButtonEmpty__content"
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
-            <span
-              class="euiButtonEmpty__text"
+            <button
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
+              type="button"
             >
-              selected namespace
-            </span>
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Respond
+                </span>
+              </span>
+            </button>
           </span>
-        </button>
-      </span>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        data-euiicon-type="kubernetesPod"
-        style="color: rgb(231, 102, 76);"
-      />
-      <span
-        class="euiToolTipAnchor"
-      >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-          type="button"
-        >
-          <span
-            class="euiButtonContent euiButtonEmpty__content"
-          >
-            <span
-              class="euiButtonEmpty__text"
-            >
-              selected pod
-            </span>
-          </span>
-        </button>
-      </span>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        data-euiicon-type="container"
-        style="color: rgb(170, 101, 86);"
-      />
-      <span
-        class="euiToolTipAnchor"
-      >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-          type="button"
-        >
-          <span
-            class="euiButtonContent euiButtonEmpty__content"
-          >
-            <span
-              class="euiButtonEmpty__text"
-            >
-              selected image
-            </span>
-          </span>
-        </button>
-      </span>
+        </div>
+      </div>
     </div>
   </div>,
   "debug": [Function],
@@ -271,7 +329,7 @@ Object {
 }
 `;
 
-exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders provided collections only 1`] = `
+exports[`Tree view Breadcrumb component When Breadcrumb is mounted should display cluster icon button when no cluster name is provided 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -279,80 +337,135 @@ Object {
       <div
         css="[object Object]"
       >
-        <span
-          data-euiicon-type="cluster"
-          style="color: rgb(84, 179, 153);"
-        />
-        <span
-          class="euiToolTipAnchor"
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
         >
-          <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-            type="button"
+          <div
+            class="euiFlexItem emotion-EuiFlexItem"
           >
             <span
-              class="euiButtonContent euiButtonEmpty__content"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
-              <span
-                class="euiButtonEmpty__text"
+              <button
+                aria-label="Click Cluster breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
+                type="button"
               >
-                selected cluster name
-              </span>
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="cluster"
+                />
+              </button>
             </span>
-          </button>
-        </span>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          data-euiicon-type="kubernetesNode"
-          style="color: rgb(145, 112, 184);"
-        />
-        <span
-          class="euiToolTipAnchor"
-        >
-          <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-            type="button"
+            <span
+              class="emotion-EuiIcon"
+              data-euiicon-type="arrowRight"
+            />
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Click Namespace breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="namespace"
+                />
+              </button>
+            </span>
+            <span
+              class="emotion-EuiIcon"
+              data-euiicon-type="arrowRight"
+            />
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Click Pod breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="kubernetesPod"
+                />
+              </button>
+            </span>
+            <span
+              class="emotion-EuiIcon"
+              data-euiicon-type="arrowRight"
+            />
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Click Container Image breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="container"
+                />
+              </button>
+            </span>
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                class="euiButtonEmpty emotion-EuiButtonEmpty"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButtonEmpty__content"
+                >
+                  <span
+                    class="euiButtonEmpty__text"
+                  >
+                    selected image
+                  </span>
+                </span>
+              </button>
+            </span>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <span
-              class="euiButtonContent euiButtonEmpty__content"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
-              <span
-                class="euiButtonEmpty__text"
+              <button
+                class="euiButtonEmpty css-9t7nyf-empty-primary"
+                data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
+                type="button"
               >
-                selected node
-              </span>
+                <span
+                  class="euiButtonContent euiButtonEmpty__content"
+                >
+                  <span
+                    class="euiButtonEmpty__text"
+                  >
+                    Respond
+                  </span>
+                </span>
+              </button>
             </span>
-          </button>
-        </span>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          data-euiicon-type="container"
-          style="color: rgb(170, 101, 86);"
-        />
-        <span
-          class="euiToolTipAnchor"
-        >
-          <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-            type="button"
-          >
-            <span
-              class="euiButtonContent euiButtonEmpty__content"
-            >
-              <span
-                class="euiButtonEmpty__text"
-              >
-                selected image
-              </span>
-            </span>
-          </button>
-        </span>
+          </div>
+        </div>
       </div>
     </div>
   </body>,
@@ -360,80 +473,135 @@ Object {
     <div
       css="[object Object]"
     >
-      <span
-        data-euiicon-type="cluster"
-        style="color: rgb(84, 179, 153);"
-      />
-      <span
-        class="euiToolTipAnchor"
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
       >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-          type="button"
+        <div
+          class="euiFlexItem emotion-EuiFlexItem"
         >
           <span
-            class="euiButtonContent euiButtonEmpty__content"
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
-            <span
-              class="euiButtonEmpty__text"
+            <button
+              aria-label="Click Cluster breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
+              type="button"
             >
-              selected cluster name
-            </span>
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="cluster"
+              />
+            </button>
           </span>
-        </button>
-      </span>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        data-euiicon-type="kubernetesNode"
-        style="color: rgb(145, 112, 184);"
-      />
-      <span
-        class="euiToolTipAnchor"
-      >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-          type="button"
+          <span
+            class="emotion-EuiIcon"
+            data-euiicon-type="arrowRight"
+          />
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              aria-label="Click Namespace breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="namespace"
+              />
+            </button>
+          </span>
+          <span
+            class="emotion-EuiIcon"
+            data-euiicon-type="arrowRight"
+          />
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              aria-label="Click Pod breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="kubernetesPod"
+              />
+            </button>
+          </span>
+          <span
+            class="emotion-EuiIcon"
+            data-euiicon-type="arrowRight"
+          />
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              aria-label="Click Container Image breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="container"
+              />
+            </button>
+          </span>
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              class="euiButtonEmpty emotion-EuiButtonEmpty"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  selected image
+                </span>
+              </span>
+            </button>
+          </span>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
-            class="euiButtonContent euiButtonEmpty__content"
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
-            <span
-              class="euiButtonEmpty__text"
+            <button
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
+              type="button"
             >
-              selected node
-            </span>
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Respond
+                </span>
+              </span>
+            </button>
           </span>
-        </button>
-      </span>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        data-euiicon-type="container"
-        style="color: rgb(170, 101, 86);"
-      />
-      <span
-        class="euiToolTipAnchor"
-      >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-          type="button"
-        >
-          <span
-            class="euiButtonContent euiButtonEmpty__content"
-          >
-            <span
-              class="euiButtonEmpty__text"
-            >
-              selected image
-            </span>
-          </span>
-        </button>
-      </span>
+        </div>
+      </div>
     </div>
   </div>,
   "debug": [Function],
@@ -490,7 +658,7 @@ Object {
 }
 `;
 
-exports[`Tree view Breadcrumb component When Breadcrumb is mounted returns cluster id when no cluster name is provided 1`] = `
+exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render breadcrumb icons 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -498,106 +666,156 @@ Object {
       <div
         css="[object Object]"
       >
-        <span
-          data-euiicon-type="cluster"
-          style="color: rgb(84, 179, 153);"
-        />
-        <span
-          class="euiToolTipAnchor"
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
         >
-          <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-            type="button"
+          <div
+            class="euiFlexItem emotion-EuiFlexItem"
           >
             <span
-              class="euiButtonContent euiButtonEmpty__content"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
-              <span
-                class="euiButtonEmpty__text"
+              <button
+                aria-label="Click Cluster breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
+                type="button"
               >
-                selected cluster id
-              </span>
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="cluster"
+                />
+              </button>
             </span>
-          </button>
-        </span>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          data-euiicon-type="namespace"
-          style="color: rgb(96, 146, 192);"
-        />
-        <span
-          class="euiToolTipAnchor"
-        >
-          <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-            type="button"
+            <span
+              class="emotion-EuiIcon"
+              data-euiicon-type="arrowRight"
+            />
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Click Namespace breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="namespace"
+                />
+              </button>
+            </span>
+            <span
+              class="emotion-EuiIcon"
+              data-euiicon-type="arrowRight"
+            />
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Click Node breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-node"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="kubernetesNode"
+                />
+              </button>
+            </span>
+            <span
+              class="emotion-EuiIcon"
+              data-euiicon-type="arrowRight"
+            />
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Click Pod breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="kubernetesPod"
+                />
+              </button>
+            </span>
+            <span
+              class="emotion-EuiIcon"
+              data-euiicon-type="arrowRight"
+            />
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Click Container Image breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="container"
+                />
+              </button>
+            </span>
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                class="euiButtonEmpty emotion-EuiButtonEmpty"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButtonEmpty__content"
+                >
+                  <span
+                    class="euiButtonEmpty__text"
+                  >
+                    selected image
+                  </span>
+                </span>
+              </button>
+            </span>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <span
-              class="euiButtonContent euiButtonEmpty__content"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
-              <span
-                class="euiButtonEmpty__text"
+              <button
+                class="euiButtonEmpty css-9t7nyf-empty-primary"
+                data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
+                type="button"
               >
-                selected namespace
-              </span>
+                <span
+                  class="euiButtonContent euiButtonEmpty__content"
+                >
+                  <span
+                    class="euiButtonEmpty__text"
+                  >
+                    Respond
+                  </span>
+                </span>
+              </button>
             </span>
-          </button>
-        </span>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          data-euiicon-type="kubernetesPod"
-          style="color: rgb(231, 102, 76);"
-        />
-        <span
-          class="euiToolTipAnchor"
-        >
-          <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-            type="button"
-          >
-            <span
-              class="euiButtonContent euiButtonEmpty__content"
-            >
-              <span
-                class="euiButtonEmpty__text"
-              >
-                selected pod
-              </span>
-            </span>
-          </button>
-        </span>
-        <span
-          class="emotion-EuiIcon"
-          data-euiicon-type="arrowRight"
-        />
-        <span
-          data-euiicon-type="container"
-          style="color: rgb(170, 101, 86);"
-        />
-        <span
-          class="euiToolTipAnchor"
-        >
-          <button
-            class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-            type="button"
-          >
-            <span
-              class="euiButtonContent euiButtonEmpty__content"
-            >
-              <span
-                class="euiButtonEmpty__text"
-              >
-                selected image
-              </span>
-            </span>
-          </button>
-        </span>
+          </div>
+        </div>
       </div>
     </div>
   </body>,
@@ -605,106 +823,445 @@ Object {
     <div
       css="[object Object]"
     >
-      <span
-        data-euiicon-type="cluster"
-        style="color: rgb(84, 179, 153);"
-      />
-      <span
-        class="euiToolTipAnchor"
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
       >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-          type="button"
+        <div
+          class="euiFlexItem emotion-EuiFlexItem"
         >
           <span
-            class="euiButtonContent euiButtonEmpty__content"
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
-            <span
-              class="euiButtonEmpty__text"
+            <button
+              aria-label="Click Cluster breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
+              type="button"
             >
-              selected cluster id
-            </span>
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="cluster"
+              />
+            </button>
           </span>
-        </button>
-      </span>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        data-euiicon-type="namespace"
-        style="color: rgb(96, 146, 192);"
-      />
-      <span
-        class="euiToolTipAnchor"
-      >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-          type="button"
+          <span
+            class="emotion-EuiIcon"
+            data-euiicon-type="arrowRight"
+          />
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              aria-label="Click Namespace breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="namespace"
+              />
+            </button>
+          </span>
+          <span
+            class="emotion-EuiIcon"
+            data-euiicon-type="arrowRight"
+          />
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              aria-label="Click Node breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-node"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="kubernetesNode"
+              />
+            </button>
+          </span>
+          <span
+            class="emotion-EuiIcon"
+            data-euiicon-type="arrowRight"
+          />
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              aria-label="Click Pod breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="kubernetesPod"
+              />
+            </button>
+          </span>
+          <span
+            class="emotion-EuiIcon"
+            data-euiicon-type="arrowRight"
+          />
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              aria-label="Click Container Image breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="container"
+              />
+            </button>
+          </span>
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              class="euiButtonEmpty emotion-EuiButtonEmpty"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  selected image
+                </span>
+              </span>
+            </button>
+          </span>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
-            class="euiButtonContent euiButtonEmpty__content"
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Respond
+                </span>
+              </span>
+            </button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render last  breadcrumb content only 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        css="[object Object]"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+        >
+          <div
+            class="euiFlexItem emotion-EuiFlexItem"
           >
             <span
-              class="euiButtonEmpty__text"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
-              selected namespace
+              <button
+                aria-label="Click Cluster breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="cluster"
+                />
+              </button>
             </span>
-          </span>
-        </button>
-      </span>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        data-euiicon-type="kubernetesPod"
-        style="color: rgb(231, 102, 76);"
-      />
-      <span
-        class="euiToolTipAnchor"
+            <span
+              class="emotion-EuiIcon"
+              data-euiicon-type="arrowRight"
+            />
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Click Node breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-node"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="kubernetesNode"
+                />
+              </button>
+            </span>
+            <span
+              class="emotion-EuiIcon"
+              data-euiicon-type="arrowRight"
+            />
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                aria-label="Click Container Image breadcrumb"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="container"
+                />
+              </button>
+            </span>
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                class="euiButtonEmpty emotion-EuiButtonEmpty"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButtonEmpty__content"
+                >
+                  <span
+                    class="euiButtonEmpty__text"
+                  >
+                    selected image
+                  </span>
+                </span>
+              </button>
+            </span>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                class="euiButtonEmpty css-1at5a38-empty-disabled"
+                data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
+                disabled=""
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButtonEmpty__content"
+                >
+                  <span
+                    class="euiButtonEmpty__text"
+                  >
+                    Respond
+                  </span>
+                </span>
+              </button>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      css="[object Object]"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
       >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-          type="button"
+        <div
+          class="euiFlexItem emotion-EuiFlexItem"
         >
           <span
-            class="euiButtonContent euiButtonEmpty__content"
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
-            <span
-              class="euiButtonEmpty__text"
+            <button
+              aria-label="Click Cluster breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
+              type="button"
             >
-              selected pod
-            </span>
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="cluster"
+              />
+            </button>
           </span>
-        </button>
-      </span>
-      <span
-        class="emotion-EuiIcon"
-        data-euiicon-type="arrowRight"
-      />
-      <span
-        data-euiicon-type="container"
-        style="color: rgb(170, 101, 86);"
-      />
-      <span
-        class="euiToolTipAnchor"
-      >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--text emotion-EuiButtonEmpty"
-          type="button"
+          <span
+            class="emotion-EuiIcon"
+            data-euiicon-type="arrowRight"
+          />
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              aria-label="Click Node breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-node"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="kubernetesNode"
+              />
+            </button>
+          </span>
+          <span
+            class="emotion-EuiIcon"
+            data-euiicon-type="arrowRight"
+          />
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              aria-label="Click Container Image breadcrumb"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="container"
+              />
+            </button>
+          </span>
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <button
+              class="euiButtonEmpty emotion-EuiButtonEmpty"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  selected image
+                </span>
+              </span>
+            </button>
+          </span>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
-            class="euiButtonContent euiButtonEmpty__content"
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
-            <span
-              class="euiButtonEmpty__text"
+            <button
+              class="euiButtonEmpty css-1at5a38-empty-disabled"
+              data-test-subj="kubernetesSecurity:kubernetesSecurityResponseAction"
+              disabled=""
+              type="button"
             >
-              selected image
-            </span>
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Respond
+                </span>
+              </span>
+            </button>
           </span>
-        </button>
-      </span>
+        </div>
+      </div>
     </div>
   </div>,
   "debug": [Function],

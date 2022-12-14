@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { CASE_TAGS_CACHE_KEY, CASE_VIEW_CACHE_KEY } from '../../containers/constants';
+import { casesQueriesKeys } from '../../containers/constants';
 
 /**
  * Using react-query queryClient to invalidate all the
@@ -17,10 +17,11 @@ import { CASE_TAGS_CACHE_KEY, CASE_VIEW_CACHE_KEY } from '../../containers/const
  * forces the page to fetch all the data again. Including
  * metrics, actions, comments, etc.
  */
+
 export const useRefreshCaseViewPage = () => {
   const queryClient = useQueryClient();
   return useCallback(() => {
-    queryClient.invalidateQueries([CASE_VIEW_CACHE_KEY]);
-    queryClient.invalidateQueries([CASE_TAGS_CACHE_KEY]);
+    queryClient.invalidateQueries(casesQueriesKeys.caseView());
+    queryClient.invalidateQueries(casesQueriesKeys.tags());
   }, [queryClient]);
 };

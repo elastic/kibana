@@ -822,6 +822,46 @@ export function getCoreUsageCollector(
             'How many times this API has been called by a non-Kibana client in a custom space.',
         },
       },
+      'apiCalls.savedObjectsBulkDelete.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called.' },
+      },
+      'apiCalls.savedObjectsBulkDelete.namespace.default.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called in the Default space.' },
+      },
+      'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by the Kibana client in the Default space.',
+        },
+      },
+      'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by a non-Kibana client in the Default space.',
+        },
+      },
+      'apiCalls.savedObjectsBulkDelete.namespace.custom.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called in a custom space.' },
+      },
+      'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by the Kibana client in a custom space.',
+        },
+      },
+      'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by a non-Kibana client in a custom space.',
+        },
+      },
       // Saved Objects Management APIs
       'apiCalls.savedObjectsImport.total': {
         type: 'long',

@@ -9,10 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type {
-  ExceptionListItemSchema,
-  ExceptionListTypeEnum,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ExceptionItemCard } from '../exception_item_card';
 import type { ExceptionListItemIdentifiers } from '../../utils/types';
@@ -31,7 +28,7 @@ interface ExceptionItemsViewerProps {
   isReadOnly: boolean;
   disableActions: boolean;
   exceptions: ExceptionListItemSchema[];
-  listType: ExceptionListTypeEnum;
+  isEndpoint: boolean;
   ruleReferences: RuleReferences | null;
   viewerState: ViewerState;
   onCreateExceptionListItem: () => void;
@@ -42,7 +39,7 @@ interface ExceptionItemsViewerProps {
 const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
   isReadOnly,
   exceptions,
-  listType,
+  isEndpoint,
   disableActions,
   ruleReferences,
   viewerState,
@@ -55,7 +52,7 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
       {viewerState != null && viewerState !== 'deleting' ? (
         <ExeptionItemsViewerEmptyPrompts
           isReadOnly={isReadOnly}
-          listType={listType}
+          isEndpoint={isEndpoint}
           currentState={viewerState}
           onCreateExceptionListItem={onCreateExceptionListItem}
         />
@@ -68,8 +65,10 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
                   <ExceptionItemCard
                     disableActions={disableActions}
                     exceptionItem={exception}
-                    listType={listType}
-                    ruleReferences={ruleReferences != null ? ruleReferences[exception.list_id] : []}
+                    isEndpoint={isEndpoint}
+                    listAndReferences={
+                      ruleReferences != null ? ruleReferences[exception.list_id] : null
+                    }
                     onDeleteException={onDeleteException}
                     onEditException={onEditExceptionItem}
                     dataTestSubj="exceptionItemsViewerItem"

@@ -18,7 +18,10 @@ import { ObservabilityExploratoryView } from '../components/shared/exploratory_v
 import { RulesPage } from '../pages/rules';
 import { RuleDetailsPage } from '../pages/rule_details';
 import { AlertingPages } from '../config';
-import { AlertDetailsPage } from '../pages/alert_details';
+import { AlertDetails } from '../pages/alert_details';
+import { DatePickerContextProvider } from '../context/date_picker_context';
+import { SlosPage } from '../pages/slos';
+import { SloDetailsPage } from '../pages/slo_details';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -56,7 +59,11 @@ export const routes = {
   },
   '/overview': {
     handler: ({ query }: any) => {
-      return <OverviewPage />;
+      return (
+        <DatePickerContextProvider>
+          <OverviewPage />
+        </DatePickerContextProvider>
+      );
     },
     params: {},
     exact: true,
@@ -117,9 +124,23 @@ export const routes = {
     params: {},
     exact: true,
   },
-  '/alerts/rules/:ruleId/alerts/:alertId': {
+  '/alerts/:alertId': {
     handler: () => {
-      return <AlertDetailsPage />;
+      return <AlertDetails />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos': {
+    handler: () => {
+      return <SlosPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos/:sloId': {
+    handler: () => {
+      return <SloDetailsPage />;
     },
     params: {},
     exact: true,

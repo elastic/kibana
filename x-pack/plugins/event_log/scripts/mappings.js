@@ -50,10 +50,17 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          outcome: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
         },
       },
       alert: {
         properties: {
+          flapping: {
+            type: 'boolean',
+          },
           rule: {
             properties: {
               consumer: {
@@ -128,6 +135,9 @@ exports.EcsCustomPropertyMappings = {
                         type: 'long',
                       },
                       total_run_duration_ms: {
+                        type: 'long',
+                      },
+                      total_enrichment_duration_ms: {
                         type: 'long',
                       },
                     },

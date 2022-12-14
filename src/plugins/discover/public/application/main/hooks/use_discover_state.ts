@@ -8,7 +8,7 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { DataViewListItem, DataViewType } from '@kbn/data-views-plugin/public';
+import { type DataViewListItem, type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
@@ -16,7 +16,7 @@ import { useUrlTracking } from './use_url_tracking';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
-import { loadDataView } from '../utils/resolve_data_view';
+import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
@@ -36,7 +36,7 @@ export function useDiscoverState({
   history,
   savedSearch,
   setExpandedDoc,
-  dataViewList,
+  dataViewList: initialDataViewList,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
@@ -44,7 +44,8 @@ export function useDiscoverState({
   setExpandedDoc: (doc?: DataTableRecord) => void;
   dataViewList: DataViewListItem[];
 }) {
-  const { uiSettings, data, filterManager, dataViews } = services;
+  const { uiSettings, data, filterManager, dataViews, toastNotifications, trackUiMetric } =
+    services;
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const { timefilter } = data.query.timefilter;
 
@@ -67,7 +68,7 @@ export function useDiscoverState({
     [history, savedSearch, services]
   );
 
-  const { appStateContainer } = stateContainer;
+  const { appStateContainer, replaceUrlAppState } = stateContainer;
 
   const [state, setState] = useState(appStateContainer.getState());
 
@@ -124,13 +125,30 @@ export function useDiscoverState({
   /**
    * Adhoc data views functionality
    */
-  const { adHocDataViewList, persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
-    dataView,
-    dataViews,
-    stateContainer,
-    savedSearch,
-    onChangeDataView,
-  });
+  const { adHocDataViewList, persistDataView, updateAdHocDataViewId, onAddAdHocDataViews } =
+    useAdHocDataViews({
+      dataView,
+      dataViews,
+      stateContainer,
+      savedSearch,
+      setUrlTracking,
+      filterManager,
+      toastNotifications,
+      trackUiMetric,
+    });
+
+  const [savedDataViewList, setSavedDataViewList] = useState(initialDataViewList);
+
+  /**
+   * Updates data views selector state
+   */
+  const updateDataViewList = useCallback(
+    async (newAdHocDataViews: DataView[]) => {
+      setSavedDataViewList(await data.dataViews.getIdsWithTitle());
+      onAddAdHocDataViews(newAdHocDataViews);
+    },
+    [data.dataViews, onAddAdHocDataViews]
+  );
 
   /**
    * Data fetching logic
@@ -151,7 +169,7 @@ export function useDiscoverState({
     documents$: data$.documents$,
     dataViews,
     stateContainer,
-    dataViewList,
+    dataViewList: savedDataViewList,
     savedSearch,
   });
 
@@ -176,10 +194,12 @@ export function useDiscoverState({
    */
   useEffect(() => {
     const unsubscribe = appStateContainer.subscribe(async (nextState) => {
-      const { hideChart, interval, sort, index } = state;
-      // chart was hidden, now it should be displayed, so data is needed
-      const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
+      const { hideChart, interval, breakdownField, sort, index } = state;
+      // Cast to boolean to avoid false positives when comparing
+      // undefined and false, which would trigger a refetch
+      const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
       const chartIntervalChanged = nextState.interval !== interval;
+      const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
       const docTableSortChanged = !isEqual(nextState.sort, sort);
       const dataViewChanged = !isEqual(nextState.index, index);
       // NOTE: this is also called when navigating from discover app to context app
@@ -190,23 +210,50 @@ export function useDiscoverState({
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextDataView = await loadDataView(
+        const nextDataViewData = await loadDataView(
           services.dataViews,
           services.uiSettings,
           nextState.index
         );
-        savedSearch.searchSource.setField('index', nextDataView.loaded);
+        const nextDataView = resolveDataView(
+          nextDataViewData,
+          savedSearch.searchSource,
+          services.toastNotifications
+        );
 
+        // If the requested data view is not found, don't try to load it,
+        // and instead reset the app state to the fallback data view
+        if (!nextDataViewData.stateValFound) {
+          replaceUrlAppState({ index: nextDataView.id });
+          return;
+        }
+
+        savedSearch.searchSource.setField('index', nextDataView);
         reset();
       }
 
-      if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
+      if (
+        chartDisplayChanged ||
+        chartIntervalChanged ||
+        breakdownFieldChanged ||
+        docTableSortChanged
+      ) {
         refetch$.next(undefined);
       }
+
       setState(nextState);
     });
     return () => unsubscribe();
-  }, [services, appStateContainer, state, refetch$, data$, reset, savedSearch.searchSource]);
+  }, [
+    services,
+    appStateContainer,
+    state,
+    refetch$,
+    data$,
+    reset,
+    savedSearch.searchSource,
+    replaceUrlAppState,
+  ]);
 
   /**
    * function to revert any changes to a given saved search
@@ -283,7 +330,10 @@ export function useDiscoverState({
     state,
     stateContainer,
     adHocDataViewList,
+    savedDataViewList,
     persistDataView,
     updateAdHocDataViewId,
+    updateDataViewList,
+    searchSessionManager,
   };
 }

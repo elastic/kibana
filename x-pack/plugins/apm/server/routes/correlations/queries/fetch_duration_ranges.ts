@@ -8,14 +8,14 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { sumBy } from 'lodash';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { Environment } from '../../../../common/environment_rt';
 import { getDurationField, getEventType } from '../utils';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchDurationRanges = async ({
   rangeSteps,
-  setup,
+  apmEventClient,
   start,
   end,
   environment,
@@ -25,7 +25,7 @@ export const fetchDurationRanges = async ({
   searchMetrics,
 }: {
   rangeSteps: number[];
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   environment: Environment;
@@ -37,7 +37,6 @@ export const fetchDurationRanges = async ({
   totalDocCount: number;
   durationRanges: Array<{ key: number; doc_count: number }>;
 }> => {
-  const { apmEventClient } = setup;
   const durationField = getDurationField(chartType, searchMetrics);
 
   // when using metrics data, ensure we filter by docs with the appropriate duration field
@@ -62,6 +61,7 @@ export const fetchDurationRanges = async ({
       events: [getEventType(chartType, searchMetrics)],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: getCommonCorrelationsQuery({
         start,

@@ -12,6 +12,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiFormControlLayout,
+  transparentize,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -29,6 +30,7 @@ interface ScheduleItemProps {
   isDisabled: boolean;
   minimumValue?: number;
   timeTypes?: string[];
+  fullWidth?: boolean;
 }
 
 const timeTypeOptions = [
@@ -40,7 +42,7 @@ const timeTypeOptions = [
 
 // move optional label to the end of input
 const StyledLabelAppend = styled(EuiFlexItem)`
-  &.euiFlexItem.euiFlexItem--flexGrowZero {
+  &.euiFlexItem {
     margin-left: 31px;
   }
 `;
@@ -49,12 +51,27 @@ const StyledEuiFormRow = styled(EuiFormRow)`
   max-width: none;
 
   .euiFormControlLayout {
-    max-width: 200px !important;
+    max-width: auto;
+    width: auto;
   }
 
   .euiFormControlLayout__childrenWrapper > *:first-child {
     box-shadow: none;
     height: 38px;
+    width: 100%;
+  }
+
+  .euiFormControlLayout__childrenWrapper > select {
+    background-color: ${({ theme }) => transparentize(theme.eui.euiColorPrimary, 0.1)};
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
+
+  .euiFormControlLayout--group .euiFormControlLayout {
+    min-width: 100px;
+  }
+
+  .euiFormControlLayoutIcons {
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
   }
 
   .euiFormControlLayout:not(:first-child) {
@@ -66,12 +83,12 @@ const MyEuiSelect = styled(EuiSelect)`
   width: auto;
 `;
 
-const getNumberFromUserInput = (input: string, defaultValue = 0): number => {
+const getNumberFromUserInput = (input: string, minimumValue = 0): number => {
   const number = parseInt(input, 10);
   if (Number.isNaN(number)) {
-    return defaultValue;
+    return minimumValue;
   } else {
-    return Math.min(number, Number.MAX_SAFE_INTEGER);
+    return Math.max(minimumValue, Math.min(number, Number.MAX_SAFE_INTEGER));
   }
 };
 
@@ -82,6 +99,7 @@ export const ScheduleItem = ({
   isDisabled,
   minimumValue = 0,
   timeTypes = ['s', 'm', 'h'],
+  fullWidth = false,
 }: ScheduleItemProps) => {
   const [timeType, setTimeType] = useState(timeTypes[0]);
   const [timeVal, setTimeVal] = useState<number>(0);
@@ -150,7 +168,7 @@ export const ScheduleItem = ({
       helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
-      fullWidth={false}
+      fullWidth={fullWidth}
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >

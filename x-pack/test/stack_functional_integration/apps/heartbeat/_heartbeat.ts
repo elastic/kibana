@@ -10,11 +10,13 @@ import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'uptime']);
+  const PageObjects = getPageObjects(['common', 'uptime', 'timePicker']);
 
   describe('check heartbeat overview page', function () {
     it('Uptime app should show 1 UP monitor', async function () {
       await PageObjects.common.navigateToApp('uptime', { insertTimestamp: false });
+      await PageObjects.uptime.dismissTour();
+      await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
 
       await retry.try(async function () {
         const upCount = parseInt((await PageObjects.uptime.getSnapshotCount()).up, 10);

@@ -405,6 +405,41 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.TimeDuration",
+        "type": "Function",
+        "tags": [],
+        "label": "TimeDuration",
+        "description": [],
+        "signature": [
+          "({ allowedUnits, allowedDurations }: TimeDurationType) => ",
+          "Type",
+          "<string, string, unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-types",
+            "id": "def-common.TimeDuration.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ allowedUnits, allowedDurations }",
+            "description": [],
+            "signature": [
+              "TimeDurationType"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
@@ -479,7 +514,7 @@
         "label": "ImportQuerySchema",
         "description": [],
         "signature": [
-          "{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; }"
+          "{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; as_new_list?: boolean | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
         "deprecated": false,
@@ -494,7 +529,7 @@
         "label": "ImportQuerySchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; }, \"overwrite\" | \"overwrite_exceptions\"> & { overwrite: boolean; overwrite_exceptions: boolean; }"
+          "Omit<{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; as_new_list?: boolean | undefined; }, \"overwrite\" | \"overwrite_exceptions\" | \"as_new_list\"> & { overwrite: boolean; overwrite_exceptions: boolean; as_new_list: boolean; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
         "deprecated": false,
@@ -634,6 +669,40 @@
         "path": "packages/kbn-securitysolution-io-ts-types/src/string_to_positive_number/index.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.TimeDurationC",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeDurationC",
+        "description": [],
+        "signature": [
+          "({ allowedUnits, allowedDurations }: TimeDurationType) => ",
+          "Type",
+          "<string, string, unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-types",
+            "id": "def-common.TimeDurationC.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "TimeDurationWithAllowedDurations | TimeDurationWithAllowedUnits"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -842,6 +911,8 @@
           "<{ overwrite: ",
           "Type",
           "<boolean, string | boolean | undefined, unknown>; overwrite_exceptions: ",
+          "Type",
+          "<boolean, string | boolean | undefined, unknown>; as_new_list: ",
           "Type",
           "<boolean, string | boolean | undefined, unknown>; }>>"
         ],

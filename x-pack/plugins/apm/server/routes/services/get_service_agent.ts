@@ -11,8 +11,8 @@ import {
   AGENT_NAME,
   SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../lib/helpers/setup_request';
+} from '../../../common/es_fields/apm';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface ServiceAgent {
   agent?: {
@@ -27,17 +27,15 @@ interface ServiceAgent {
 
 export async function getServiceAgent({
   serviceName,
-  setup,
+  apmEventClient,
   start,
   end,
 }: {
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
-
   const params = {
     terminate_after: 1,
     apm: {
@@ -48,6 +46,7 @@ export async function getServiceAgent({
       ],
     },
     body: {
+      track_total_hits: 1,
       size: 1,
       _source: [AGENT_NAME, SERVICE_RUNTIME_NAME],
       query: {

@@ -6,12 +6,12 @@
  */
 
 import { IconChartMetric } from '@kbn/chart-icons';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { TableSuggestion, Visualization } from '../../types';
-import { layerTypes } from '../../../common';
 import { metricLabel, MetricVisualizationState, supportedDataTypes } from './visualization';
 
 const MAX_BUCKETED_COLUMNS = 1;
-const MAX_METRIC_COLUMNS = 1;
+const MAX_METRIC_COLUMNS = 2; // primary and secondary metric
 
 const hasLayerMismatch = (keptLayerIds: string[], table: TableSuggestion) =>
   keptLayerIds.length > 1 || (keptLayerIds.length && table.layerId !== keptLayerIds[0]);
@@ -56,7 +56,7 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
     state: {
       ...state,
       layerId: table.layerId,
-      layerType: layerTypes.DATA,
+      layerType: LayerTypes.DATA,
     },
     title: metricLabel,
     previewIcon: IconChartMetric,

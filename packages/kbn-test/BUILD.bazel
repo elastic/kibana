@@ -3,12 +3,13 @@ load("@npm//@babel/cli:index.bzl", "babel")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-test"
+PKG_DIRNAME = "kbn-test"
 PKG_REQUIRE_NAME = "@kbn/test"
 
 SOURCE_FILES = glob(
   [
     "src/failed_tests_reporter/es_config",
+    "src/jest/jest_flags.json",
     "**/*.html",
     "**/*.js",
     "**/*.ts",
@@ -99,6 +100,8 @@ TYPES_DEPS = [
   "//packages/kbn-tooling-log:npm_module_types",
   "//packages/kbn-bazel-packages:npm_module_types",
   "//packages/kbn-get-repo-files:npm_module_types",
+  "//packages/kbn-ftr-screenshot-filename:npm_module_types",
+  "//packages/kbn-peggy:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//@jest/console",
   "@npm//@jest/reporters",
@@ -116,7 +119,9 @@ TYPES_DEPS = [
   "@npm//jest-snapshot",
   "@npm//redux",
   "@npm//rxjs",
+  "@npm//playwright",
   "@npm//xmlbuilder",
+  "@npm//@jest/transform",
   "@npm//@types/archiver",
   "@npm//@types/chance",
   "@npm//@types/dedent",
@@ -125,7 +130,7 @@ TYPES_DEPS = [
   "@npm//@types/history",
   "@npm//@types/jest",
   "@npm//@types/js-yaml",
-  "@npm//@types/joi",
+  "@npm//joi",
   "@npm//@types/lodash",
   "@npm//@types/minimatch",
   "@npm//@types/mustache",
@@ -144,6 +149,10 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ]
 )
 
 ts_config(
@@ -161,25 +170,30 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   tsconfig = ":tsconfig",
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 
+js_library(
+  name = "npm_module_types",
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(
@@ -190,19 +204,8 @@ filegroup(
   visibility = ["//visibility:public"],
 )
 
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
+pkg_npm(
   name = "build_types",
-  srcs = [
-    ":npm_module_types",
-  ],
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

@@ -14,6 +14,7 @@ export type ESQuery =
   | ESMatchQuery
   | ESTermQuery
   | ESBoolQuery
+  | ESExistsQuery
   | JsonObject;
 
 export interface ESRangeQuery {
@@ -45,6 +46,10 @@ export interface ESQueryStringQuery {
 
 export interface ESTermQuery {
   term: Record<string, string>;
+}
+
+export interface ESExistsQuery {
+  exists: Record<string, string>;
 }
 
 export interface ESBoolQuery {

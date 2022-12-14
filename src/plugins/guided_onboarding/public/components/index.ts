@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { GuidedOnboardingButton } from './onboarding_button';
+export { GuidePanel } from './guide_panel';

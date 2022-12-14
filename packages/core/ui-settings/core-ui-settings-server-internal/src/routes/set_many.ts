@@ -7,10 +7,12 @@
  */
 
 import { schema, ValidationError } from '@kbn/config-schema';
-
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { InternalUiSettingsRouter } from '../internal_types';
 import { CannotOverrideError } from '../ui_settings_errors';
+import { InternalUiSettingsRequestHandlerContext } from '../internal_types';
 
 const validate = {
   body: schema.object({
@@ -19,10 +21,13 @@ const validate = {
 };
 
 export function registerSetManyRoute(router: InternalUiSettingsRouter) {
-  router.post({ path: '/api/kibana/settings', validate }, async (context, request, response) => {
+  const setManyFromRequest = async (
+    uiSettingsClient: IUiSettingsClient,
+    context: InternalUiSettingsRequestHandlerContext,
+    request: KibanaRequest<unknown, unknown, Readonly<{} & { changes?: any & {} }>, 'post'>,
+    response: KibanaResponseFactory
+  ) => {
     try {
-      const uiSettingsClient = (await context.core).uiSettings.client;
-
       const { changes } = request.body;
 
       await uiSettingsClient.setMany(changes);
@@ -46,5 +51,17 @@ export function registerSetManyRoute(router: InternalUiSettingsRouter) {
 
       throw error;
     }
+  };
+  router.post({ path: '/api/kibana/settings', validate }, async (context, request, response) => {
+    const uiSettingsClient = (await context.core).uiSettings.client;
+    return await setManyFromRequest(uiSettingsClient, context, request, response);
   });
+
+  router.post(
+    { path: '/api/kibana/global_settings', validate },
+    async (context, request, response) => {
+      const uiSettingsClient = (await context.core).uiSettings.globalClient;
+      return await setManyFromRequest(uiSettingsClient, context, request, response);
+    }
+  );
 }

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
-import { buildHostNamesFilter } from '../../../../common/search_strategy';
+import { buildHostNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
@@ -36,8 +36,9 @@ import { DescriptionListStyled, OverviewWrapper } from '../../../common/componen
 import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { useHostRiskScore } from '../../../risk_score/containers';
-import { RiskScore } from '../../../common/components/severity/common';
+import { useRiskScore } from '../../../explore/containers/risk_score';
+import { RiskScore } from '../../../explore/components/risk_score/severity/common';
+import { RiskScoreHeaderTitle } from '../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -57,7 +58,7 @@ interface HostSummaryProps {
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup)`
   padding-top: ${({ theme }) => theme.eui.euiSizeM};
-  width: 50%;
+  width: ${({ $width }: { $width: string }) => $width};
 `;
 
 export const HostOverview = React.memo<HostSummaryProps>(
@@ -85,10 +86,18 @@ export const HostOverview = React.memo<HostSummaryProps>(
     );
     const { from, to } = useGlobalTime();
 
-    const [_, { data: hostRisk, isLicenseValid }] = useHostRiskScore({
+    const timerange = useMemo(
+      () => ({
+        from,
+        to,
+      }),
+      [from, to]
+    );
+    const { data: hostRisk, isLicenseValid } = useRiskScore({
       filterQuery,
+      riskEntity: RiskScoreEntity.host,
       skip: hostName == null,
-      timerange: { to, from },
+      timerange,
     });
 
     const getDefaultRenderer = useCallback(
@@ -107,7 +116,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
       const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
       return [
         {
-          title: i18n.HOST_RISK_SCORE,
+          title: (
+            <RiskScoreHeaderTitle
+              title={i18n.HOST_RISK_SCORE}
+              riskScoreEntity={RiskScoreEntity.host}
+            />
+          ),
           description: (
             <>
               {hostRiskData
@@ -117,7 +131,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
           ),
         },
         {
-          title: i18n.HOST_RISK_CLASSIFICATION,
+          title: (
+            <RiskScoreHeaderTitle
+              title={i18n.HOST_RISK_CLASSIFICATION}
+              riskScoreEntity={RiskScoreEntity.host}
+            />
+          ),
           description: (
             <>
               {hostRiskData ? (
@@ -274,6 +293,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}
             data-test-subj="host-risk-overview"
+            $width={isInDetailsSidePanel ? '100%' : '50%'}
           >
             <EuiFlexItem>
               <DescriptionListStyled listItems={[hostRiskScore]} />

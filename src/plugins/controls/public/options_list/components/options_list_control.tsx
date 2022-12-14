@@ -40,8 +40,10 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   const validSelections = select((state) => state.componentState.validSelections);
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
+  const existsSelected = select((state) => state.explicitInput.existsSelected);
   const controlStyle = select((state) => state.explicitInput.controlStyle);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
+  const exclude = select((state) => state.explicitInput.exclude);
   const id = select((state) => state.explicitInput.id);
 
   const loading = select((state) => state.output.loading);
@@ -75,18 +77,35 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
       validSelectionsCount: validSelections?.length,
       selectionDisplayNode: (
         <>
-          {validSelections && (
-            <span>{validSelections?.join(OptionsListStrings.control.getSeparator())}</span>
+          {exclude && (
+            <>
+              <span className="optionsList__negateLabel">
+                {existsSelected
+                  ? OptionsListStrings.control.getExcludeExists()
+                  : OptionsListStrings.control.getNegate()}
+              </span>{' '}
+            </>
           )}
-          {invalidSelections && (
-            <span className="optionsList__filterInvalid">
-              {invalidSelections.join(OptionsListStrings.control.getSeparator())}
+          {existsSelected ? (
+            <span className={`optionsList__existsFilter`}>
+              {OptionsListStrings.controlAndPopover.getExists(+Boolean(exclude))}
             </span>
+          ) : (
+            <>
+              {validSelections && (
+                <span>{validSelections?.join(OptionsListStrings.control.getSeparator())}</span>
+              )}
+              {invalidSelections && (
+                <span className="optionsList__filterInvalid">
+                  {invalidSelections.join(OptionsListStrings.control.getSeparator())}
+                </span>
+              )}
+            </>
           )}
         </>
       ),
     };
-  }, [validSelections, invalidSelections]);
+  }, [exclude, existsSelected, validSelections, invalidSelections]);
 
   const button = (
     <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
@@ -103,7 +122,9 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         numActiveFilters={validSelectionsCount}
         hasActiveFilters={Boolean(validSelectionsCount)}
       >
-        {hasSelections ? selectionDisplayNode : OptionsListStrings.control.getPlaceholder()}
+        {hasSelections || existsSelected
+          ? selectionDisplayNode
+          : OptionsListStrings.control.getPlaceholder()}
       </EuiFilterButton>
     </div>
   );
@@ -124,6 +145,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         className="optionsList__popoverOverride"
         closePopover={() => setIsPopoverOpen(false)}
         anchorClassName="optionsList__anchorOverride"
+        aria-labelledby={`control-popover-${id}`}
       >
         <OptionsListPopover width={dimensions.width} updateSearchString={updateSearchString} />
       </EuiPopover>

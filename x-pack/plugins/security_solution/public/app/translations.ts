@@ -54,7 +54,7 @@ export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
 });
 
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
-  defaultMessage: 'Exception lists',
+  defaultMessage: 'Rule Exceptions',
 });
 
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
@@ -120,30 +120,15 @@ export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.block
   defaultMessage: 'Blocklist',
 });
 
-export const ACTION_HISTORY = i18n.translate('xpack.securitySolution.navigation.actionHistory', {
-  defaultMessage: 'Action history',
-});
-
-export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
-  defaultMessage: 'Create new rule',
-});
-
-export const GO_TO_DOCUMENTATION = i18n.translate(
-  'xpack.securitySolution.goToDocumentationButton',
+export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
+  'xpack.securitySolution.navigation.responseActionsHistory',
   {
-    defaultMessage: 'View documentation',
+    defaultMessage: 'Response actions history',
   }
 );
 
-export const NO_PERMISSIONS_MSG = (subPluginKey: string) =>
-  i18n.translate('xpack.securitySolution.noPermissionsMessage', {
-    values: { subPluginKey },
-    defaultMessage:
-      'To view {subPluginKey}, you must update privileges. For more information, contact your Kibana administrator.',
-  });
-
-export const NO_PERMISSIONS_TITLE = i18n.translate('xpack.securitySolution.noPermissionsTitle', {
-  defaultMessage: 'Privileges required',
+export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
+  defaultMessage: 'Create new rule',
 });
 
 export const THREAT_INTELLIGENCE = i18n.translate(

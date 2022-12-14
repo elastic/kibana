@@ -10,11 +10,17 @@ import { AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import { useKibana } from '../../common/lib/kibana';
-import { AlertChartData } from '../sections/rule_details/components/alert_summary';
+
+export interface AlertSummaryTimeRange {
+  utcFrom: string;
+  utcTo: string;
+  title: JSX.Element | string;
+}
 
 interface UseLoadRuleAlertsAggs {
   features: string;
   ruleId: string;
+  timeRange: AlertSummaryTimeRange;
 }
 interface RuleAlertsAggs {
   active: number;
@@ -29,18 +35,17 @@ interface LoadRuleAlertsAggs {
     recovered: number;
   };
   errorRuleAlertsAggs?: string;
-  alertsChartData: AlertChartData[];
 }
+
 interface IndexName {
   index: string;
 }
 
-export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAggs) {
+export function useLoadRuleAlertsAggs({ features, ruleId, timeRange }: UseLoadRuleAlertsAggs) {
   const { http } = useKibana().services;
   const [ruleAlertsAggs, setRuleAlertsAggs] = useState<LoadRuleAlertsAggs>({
     isLoadingRuleAlertsAggs: true,
     ruleAlertsAggs: { active: 0, recovered: 0 },
-    alertsChartData: [],
   });
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
@@ -54,11 +59,12 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
         http,
         features,
       });
-      const { active, recovered, error, alertsChartData } = await fetchRuleAlertsAggByTimeRange({
+      const { active, recovered, error } = await fetchRuleAlertsAggByTimeRange({
         http,
         index,
         ruleId,
         signal: abortCtrlRef.current.signal,
+        timeRange,
       });
       if (error) throw error;
       if (!isCancelledRef.current) {
@@ -68,7 +74,6 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
             active,
             recovered,
           },
-          alertsChartData,
           isLoadingRuleAlertsAggs: false,
         }));
       }
@@ -79,12 +84,11 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
             ...oldState,
             isLoadingRuleAlertsAggs: false,
             errorRuleAlertsAggs: error,
-            alertsChartData: [],
           }));
         }
       }
     }
-  }, [http, features, ruleId]);
+  }, [features, http, ruleId, timeRange]);
   useEffect(() => {
     loadRuleAlertsAgg();
   }, [loadRuleAlertsAgg]);
@@ -92,7 +96,7 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
   return ruleAlertsAggs;
 }
 
-export async function fetchIndexNameAPI({
+async function fetchIndexNameAPI({
   http,
   features,
 }: {
@@ -107,23 +111,18 @@ export async function fetchIndexNameAPI({
   };
 }
 
-interface RuleAlertsAggs {
-  active: number;
-  recovered: number;
-  error?: string;
-  alertsChartData: AlertChartData[];
-}
-
-export async function fetchRuleAlertsAggByTimeRange({
+async function fetchRuleAlertsAggByTimeRange({
   http,
   index,
   ruleId,
   signal,
+  timeRange: { utcFrom, utcTo },
 }: {
   http: HttpSetup;
   index: string;
   ruleId: string;
   signal: AbortSignal;
+  timeRange: AlertSummaryTimeRange;
 }): Promise<RuleAlertsAggs> {
   try {
     const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
@@ -142,8 +141,8 @@ export async function fetchRuleAlertsAggByTimeRange({
               {
                 range: {
                   '@timestamp': {
-                    gte: 'now-30d',
-                    lt: 'now',
+                    gte: utcFrom,
+                    lt: utcTo,
                   },
                 },
               },
@@ -183,109 +182,22 @@ export async function fetchRuleAlertsAggByTimeRange({
               },
             },
           },
-          statusPerDay: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: '1d',
-              extended_bounds: {
-                min: 'now-30d',
-                max: 'now',
-              },
-            },
-            aggs: {
-              alertStatus: {
-                terms: {
-                  field: 'kibana.alert.status',
-                },
-              },
-            },
-          },
         },
       }),
     });
 
     const active = res?.aggregations?.total.buckets.totalActiveAlerts?.doc_count ?? 0;
     const recovered = res?.aggregations?.total.buckets.totalRecoveredAlerts?.doc_count ?? 0;
-    let maxTotalAlertPerDay = 0;
-    res?.aggregations?.statusPerDay.buckets.forEach(
-      (dayAlerts: {
-        key: number;
-        doc_count: number;
-        alertStatus: {
-          buckets: Array<{
-            key: 'active' | 'recovered';
-            doc_count: number;
-          }>;
-        };
-      }) => {
-        if (dayAlerts.doc_count > maxTotalAlertPerDay) {
-          maxTotalAlertPerDay = dayAlerts.doc_count;
-        }
-      }
-    );
 
-    const alertsChartData = [
-      ...res?.aggregations?.statusPerDay.buckets.reduce(
-        (
-          acc: AlertChartData[],
-          dayAlerts: {
-            key: number;
-            doc_count: number;
-            alertStatus: {
-              buckets: Array<{
-                key: 'active' | 'recovered';
-                doc_count: number;
-              }>;
-            };
-          }
-        ) => {
-          // We are adding this to each day to construct the 30 days bars (background bar) when there is no data for a given day or to show the delta today alerts/total alerts.
-          const totalDayAlerts = {
-            date: dayAlerts.key,
-            count: maxTotalAlertPerDay === 0 ? 1 : maxTotalAlertPerDay,
-            status: 'total',
-          };
-
-          if (dayAlerts.doc_count > 0) {
-            const localAlertChartData = acc;
-            // If there are alerts in this day, we construct the chart data
-            dayAlerts.alertStatus.buckets.forEach((alert) => {
-              localAlertChartData.push({
-                date: dayAlerts.key,
-                count: alert.doc_count,
-                status: alert.key,
-              });
-            });
-            const deltaAlertsCount = maxTotalAlertPerDay - dayAlerts.doc_count;
-            if (deltaAlertsCount > 0) {
-              localAlertChartData.push({
-                date: dayAlerts.key,
-                count: deltaAlertsCount,
-                status: 'total',
-              });
-            }
-            return localAlertChartData;
-          }
-          return [...acc, totalDayAlerts];
-        },
-        []
-      ),
-    ];
     return {
       active,
       recovered,
-      alertsChartData: [
-        ...alertsChartData.filter((acd) => acd.status === 'recovered'),
-        ...alertsChartData.filter((acd) => acd.status === 'active'),
-        ...alertsChartData.filter((acd) => acd.status === 'total'),
-      ],
     };
   } catch (error) {
     return {
       error,
       active: 0,
       recovered: 0,
-      alertsChartData: [],
     } as RuleAlertsAggs;
   }
 }

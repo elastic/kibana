@@ -20,7 +20,7 @@ import { PolicyArtifactsDeleteModal } from './policy_artifacts_delete_modal';
 import { exceptionsListAllHttpMocks } from '../../../../../mocks/exceptions_list_http_mocks';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
-import { getDeferred } from '../../../../../components/mocks';
+import { getDeferred } from '../../../../../mocks/utils';
 
 const listType: Array<CreateExceptionListSchema['type']> = [
   'endpoint_events',

@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IInspectorInfo, isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { FETCH_STATUS, useFetcher } from './use_fetcher';

@@ -20,11 +20,13 @@ export function createMockDatasource(id: string): DatasourceMock {
     getSourceId: jest.fn(),
     getFilters: jest.fn(),
     getMaxPossibleNumValues: jest.fn(),
+    isTextBasedLanguage: jest.fn(() => false),
+    hasDefaultTimeField: jest.fn(() => true),
   };
 
   return {
     id: 'testDatasource',
-    clearLayer: jest.fn((state, _layerId) => state),
+    clearLayer: jest.fn((state, _layerId) => ({ newState: state, removedLayerIds: [] })),
     getDatasourceSuggestionsForField: jest.fn((_state, _item, filterFn, _indexPatterns) => []),
     getDatasourceSuggestionsForVisualizeField: jest.fn(
       (_state, _indexpatternId, _fieldName, _indexPatterns) => []
@@ -40,10 +42,10 @@ export function createMockDatasource(id: string): DatasourceMock {
     initialize: jest.fn((_state?) => {}),
     renderDataPanel: jest.fn(),
     renderLayerPanel: jest.fn(),
-    getCurrentIndexPatternId: jest.fn(),
-    toExpression: jest.fn((_frame, _state, _indexPatterns) => null),
+    toExpression: jest.fn((_frame, _state, _indexPatterns, dateRange) => null),
     insertLayer: jest.fn((_state, _newLayerId) => ({})),
-    removeLayer: jest.fn((_state, _layerId) => {}),
+    removeLayer: jest.fn((state, layerId) => ({ newState: state, removedLayerIds: [layerId] })),
+    cloneLayer: jest.fn((_state, _layerId, _newLayerId, getNewId) => {}),
     removeColumn: jest.fn((props) => {}),
     getLayers: jest.fn((_state) => []),
     uniqueLabels: jest.fn((_state) => ({})),
@@ -51,6 +53,8 @@ export function createMockDatasource(id: string): DatasourceMock {
     renderDimensionEditor: jest.fn(),
     getDropProps: jest.fn(),
     onDrop: jest.fn(),
+    createEmptyLayer: jest.fn(),
+    syncColumns: jest.fn(),
 
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
@@ -60,9 +64,10 @@ export function createMockDatasource(id: string): DatasourceMock {
     isTimeBased: jest.fn(),
     isValidColumn: jest.fn(),
     isEqual: jest.fn(),
-    getUsedDataView: jest.fn(),
+    getUsedDataView: jest.fn((state, layer) => 'mockip'),
     getUsedDataViews: jest.fn(),
     onRefreshIndexPattern: jest.fn(),
+    getDatasourceInfo: jest.fn(),
   };
 }
 

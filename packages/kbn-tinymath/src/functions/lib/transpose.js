@@ -8,6 +8,7 @@
 
 /**
  * Transposes a 2D array, i.e. turns the rows into columns and vice versa. Scalar values are also included in the transpose.
+ * @private
  * @param {any[][]} args an array or an array that contains arrays
  * @param {number} index index of the first array element in args
  * @return {any[][]} transpose of args

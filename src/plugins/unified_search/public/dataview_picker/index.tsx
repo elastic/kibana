@@ -8,7 +8,7 @@
 
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ChangeDataView } from './change_dataview';
 
@@ -42,6 +42,11 @@ export interface DataViewPickerProps {
    */
   onChangeDataView: (newId: string) => void;
   /**
+   * Callback that is called when the user edits the current data view via flyout.
+   * The first parameter is the updated data view stub without fetched fields
+   */
+  onEditDataView?: (updatedDataViewStub: DataView) => void;
+  /**
    * The id of the selected dataview.
    */
   currentDataViewId?: string;
@@ -49,6 +54,10 @@ export interface DataViewPickerProps {
    * The adHocDataviews.
    */
   adHocDataViews?: DataView[];
+  /**
+   * Saved data views
+   */
+  savedDataViews?: DataViewListItem[];
   /**
    * EuiSelectable properties.
    */
@@ -63,6 +72,8 @@ export interface DataViewPickerProps {
    * Also works as a flag to show the create dataview button.
    */
   onDataViewCreated?: () => void;
+
+  onCreateDefaultAdHocDataView?: (pattern: string) => void;
   /**
    * List of the supported text based languages (SQL, ESQL) etc.
    * Defined per application, if not provided, no text based languages
@@ -95,7 +106,9 @@ export const DataViewPicker = ({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
+  savedDataViews,
   onChangeDataView,
+  onEditDataView,
   onAddField,
   onDataViewCreated,
   trigger,
@@ -104,6 +117,7 @@ export const DataViewPicker = ({
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
+  onCreateDefaultAdHocDataView,
   isDisabled,
 }: DataViewPickerPropsExtended) => {
   return (
@@ -111,10 +125,13 @@ export const DataViewPicker = ({
       isMissingCurrent={isMissingCurrent}
       currentDataViewId={currentDataViewId}
       onChangeDataView={onChangeDataView}
+      onEditDataView={onEditDataView}
       onAddField={onAddField}
       onDataViewCreated={onDataViewCreated}
+      onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
       trigger={trigger}
       adHocDataViews={adHocDataViews}
+      savedDataViews={savedDataViews}
       selectableProps={selectableProps}
       textBasedLanguages={textBasedLanguages}
       onSaveTextLanguageQuery={onSaveTextLanguageQuery}

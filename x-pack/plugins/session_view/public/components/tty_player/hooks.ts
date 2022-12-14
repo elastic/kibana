@@ -12,6 +12,7 @@ import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SearchAddon } from './xterm_search';
 import { useEuiTheme } from '../../hooks';
+import { renderTruncatedMsg } from './ansi_helpers';
 
 import {
   IOLine,
@@ -29,7 +30,6 @@ import {
   DEFAULT_TTY_ROWS,
   DEFAULT_TTY_COLS,
   TTY_LINE_SPLITTER_REGEX,
-  TTY_LINES_PER_FRAME,
   TTY_LINES_PRE_SEEK,
 } from '../../../common/constants';
 
@@ -81,49 +81,58 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
       return { lines: processedLines, processStartMarkers: processedMarkers };
     }
 
-    const pagesToProcess = pages.slice(cursor);
+    const events = pages.reduce(
+      (previous, current) => previous.concat(current.events || []),
+      [] as ProcessEvent[]
+    );
+    const eventsToProcess = events.slice(cursor);
     const newMarkers: ProcessStartMarker[] = [];
     let newLines: IOLine[] = [];
 
-    newLines = pagesToProcess.reduce((previous, current) => {
-      if (current.events) {
-        current.events.forEach((event) => {
-          const { process } = event;
-          if (process?.io?.text !== undefined && process.entity_id !== undefined) {
-            const splitLines = process.io.text.split(TTY_LINE_SPLITTER_REGEX);
-            const combinedLines = [splitLines[0]];
-            const previousProcessId =
-              previous[previous.length - 1]?.event.process?.entity_id ||
-              processedLines[processedLines.length - 1]?.event.process?.entity_id;
+    eventsToProcess.forEach((event, index) => {
+      const { process } = event;
+      if (process?.io?.text !== undefined && process.entity_id !== undefined) {
+        const previousProcessId =
+          newLines[newLines.length - 1]?.event?.process?.entity_id ||
+          processedLines[processedLines.length - 1]?.event.process?.entity_id;
 
-            if (previousProcessId !== process.entity_id) {
-              const processLineInfo: ProcessStartMarker = {
-                line: processedLines.length + previous.length,
-                event,
-              };
-              newMarkers.push(processLineInfo);
-            }
+        if (previousProcessId !== process.entity_id) {
+          const processLineInfo: ProcessStartMarker = {
+            line: processedLines.length + newLines.length,
+            event,
+          };
+          newMarkers.push(processLineInfo);
+        }
 
-            // delimiters e.g \r\n or cursor movements are merged with their line text
-            // we start on an odd number so that cursor movements happen at the start of each line
-            // this is needed for the search to work accurately
-            for (let i = 1; i < splitLines.length - 1; i = i + 2) {
-              combinedLines.push(splitLines[i] + splitLines[i + 1]);
-            }
-
-            const data: IOLine[] = combinedLines.map((line) => {
-              return {
-                event, // pointer to the event so it's easy to look up other details for the line
-                value: line,
-              };
-            });
-
-            previous = previous.concat(data);
+        if (process.io.max_bytes_per_process_exceeded) {
+          const marker = newMarkers.find(
+            (item) => item.event.process?.entity_id === process.entity_id
+          );
+          if (marker) {
+            marker.maxBytesExceeded = true;
           }
+        }
+
+        const splitLines = process.io.text.split(TTY_LINE_SPLITTER_REGEX);
+        const combinedLines = [splitLines[0]];
+
+        // delimiters e.g \r\n or cursor movements are merged with their line text
+        // we start on an odd number so that cursor movements happen at the start of each line
+        // this is needed for the search to work accurately
+        for (let i = 1; i < splitLines.length - 1; i = i + 2) {
+          combinedLines.push(splitLines[i] + splitLines[i + 1]);
+        }
+
+        const data: IOLine[] = combinedLines.map((line) => {
+          return {
+            event, // pointer to the event so it's easy to look up other details for the line
+            value: line,
+          };
         });
+
+        newLines = newLines.concat(data);
       }
-      return previous;
-    }, newLines);
+    });
 
     const lines = processedLines.concat(newLines);
     const processStartMarkers = processedMarkers.concat(newMarkers);
@@ -136,8 +145,10 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
       setProcessedMarkers(processStartMarkers);
     }
 
-    if (pages.length > cursor) {
-      setCursor(pages.length);
+    const newCursor = cursor + eventsToProcess.length;
+
+    if (newCursor > cursor) {
+      setCursor(newCursor);
     }
 
     return {
@@ -157,6 +168,7 @@ export interface XtermPlayerDeps {
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
   isFetching?: boolean;
+  policiesUrl?: string;
 }
 
 export const useXtermPlayer = ({
@@ -168,17 +180,20 @@ export const useXtermPlayer = ({
   hasNextPage,
   fetchNextPage,
   isFetching,
+  policiesUrl,
 }: XtermPlayerDeps) => {
   const { euiTheme } = useEuiTheme();
   const { font, colors } = euiTheme;
   const [currentLine, setCurrentLine] = useState(0);
   const [playSpeed] = useState(DEFAULT_TTY_PLAYSPEED_MS); // potentially configurable
   const tty = lines?.[currentLine]?.event.process?.tty;
-
+  const processName = lines?.[currentLine]?.event.process?.name;
   const [terminal, searchAddon] = useMemo(() => {
     const term = new Terminal({
       theme: {
-        selection: colors.warning,
+        selectionBackground: colors.warning,
+        selectionForeground: colors.ink,
+        yellow: colors.warning,
       },
       fontFamily: font.familyCode,
       fontSize: DEFAULT_TTY_FONT_SIZE,
@@ -186,6 +201,8 @@ export const useXtermPlayer = ({
       convertEol: true,
       rows: DEFAULT_TTY_ROWS,
       cols: DEFAULT_TTY_COLS,
+      allowProposedApi: true,
+      allowTransparency: true,
     });
 
     const searchInstance = new SearchAddon();
@@ -202,7 +219,7 @@ export const useXtermPlayer = ({
     // even though we set scrollback: 0 above, xterm steals the wheel events and prevents the outer container from scrolling
     // this handler fixes that
     const onScroll = (event: WheelEvent) => {
-      if ((event?.target as HTMLDivElement)?.className === 'xterm-cursor-layer') {
+      if ((event?.target as HTMLDivElement)?.offsetParent?.classList.contains('xterm-screen')) {
         event.stopImmediatePropagation();
       }
     };
@@ -211,6 +228,7 @@ export const useXtermPlayer = ({
 
     return () => {
       window.removeEventListener('wheel', onScroll, true);
+      terminal.dispose();
     };
   }, [terminal, ref]);
 
@@ -224,6 +242,7 @@ export const useXtermPlayer = ({
 
       if (clear) {
         linesToPrint = lines.slice(Math.max(0, lineNumber - TTY_LINES_PRE_SEEK), lineNumber + 1);
+
         try {
           terminal.reset();
           terminal.clear();
@@ -232,24 +251,37 @@ export const useXtermPlayer = ({
           // there is some random race condition with the jump to feature that causes these calls to error out.
         }
       } else {
-        linesToPrint = lines.slice(lineNumber, lineNumber + TTY_LINES_PER_FRAME);
+        linesToPrint = lines.slice(lineNumber, lineNumber + 1);
       }
 
       linesToPrint.forEach((line, index) => {
         if (line?.value !== undefined) {
           terminal.write(line.value);
         }
+
+        const nextLine = lines[lineNumber + index + 1];
+        const maxBytesExceeded = line.event.process?.io?.max_bytes_per_process_exceeded;
+
+        // if next line is start of next event
+        // and process has exceeded max bytes
+        // render msg
+        if (!clear && (!nextLine || nextLine.event !== line.event) && maxBytesExceeded) {
+          const msg = renderTruncatedMsg(tty, policiesUrl, processName);
+          if (msg) {
+            terminal.write(msg);
+          }
+        }
       });
     },
-    [terminal, lines]
+    [lines, policiesUrl, processName, terminal, tty]
   );
 
   useEffect(() => {
-    const fontChanged = terminal.getOption('fontSize') !== fontSize;
+    const fontChanged = terminal.options.fontSize !== fontSize;
     const ttyChanged = tty && (terminal.rows !== tty?.rows || terminal.cols !== tty?.columns);
 
     if (fontChanged) {
-      terminal.setOption('fontSize', fontSize);
+      terminal.options.fontSize = fontSize;
     }
 
     if (tty?.rows && tty?.columns && ttyChanged) {
@@ -279,13 +311,13 @@ export const useXtermPlayer = ({
   useEffect(() => {
     if (isPlaying) {
       const timer = setTimeout(() => {
-        if (currentLine < lines.length - 1) {
-          setCurrentLine(Math.min(lines.length - 1, currentLine + TTY_LINES_PER_FRAME));
-        } else {
+        if (!hasNextPage && currentLine === lines.length - 1) {
           setIsPlaying(false);
+        } else {
+          const nextLine = Math.min(lines.length - 1, currentLine + 1);
+          render(nextLine, false);
+          setCurrentLine(nextLine);
         }
-
-        render(currentLine, false);
       }, playSpeed);
 
       return () => {

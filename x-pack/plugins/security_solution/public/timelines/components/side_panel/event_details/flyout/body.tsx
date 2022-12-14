@@ -9,6 +9,7 @@ import { EuiFlyoutBody } from '@elastic/eui';
 import styled from 'styled-components';
 import React from 'react';
 import { EndpointIsolateSuccess } from '../../../../../common/components/endpoint/host_isolation';
+import type { Ecs } from '../../../../../../common/ecs';
 import { HostIsolationPanel } from '../../../../../detections/components/host_isolation';
 import type {
   BrowserFields,
@@ -35,6 +36,7 @@ interface FlyoutBodyComponentProps {
   alertId: string;
   browserFields: BrowserFields;
   detailsData: TimelineEventsDetailsItem[] | null;
+  detailsEcsData: Ecs | null;
   event: { eventId: string; indexName: string };
   handleIsolationActionSuccess: () => void;
   handleOnEventClosed: HandleOnEventClosed;
@@ -48,13 +50,14 @@ interface FlyoutBodyComponentProps {
   loading: boolean;
   rawEventData: object | undefined;
   showAlertDetails: () => void;
-  timelineId: string;
+  scopeId: string;
 }
 
 const FlyoutBodyComponent = ({
   alertId,
   browserFields,
   detailsData,
+  detailsEcsData,
   event,
   handleIsolationActionSuccess,
   handleOnEventClosed,
@@ -68,7 +71,7 @@ const FlyoutBodyComponent = ({
   loading,
   rawEventData,
   showAlertDetails,
-  timelineId,
+  scopeId,
 }: FlyoutBodyComponentProps) => {
   return (
     <StyledEuiFlyoutBody>
@@ -90,12 +93,13 @@ const FlyoutBodyComponent = ({
         <ExpandableEvent
           browserFields={browserFields}
           detailsData={detailsData}
+          detailsEcsData={detailsEcsData}
           event={event}
           isAlert={isAlert}
           isDraggable={isDraggable}
           loading={loading}
           rawEventData={rawEventData}
-          timelineId={timelineId}
+          scopeId={scopeId}
           timelineTabType="flyout"
           handleOnEventClosed={handleOnEventClosed}
           isReadOnly={isReadOnly}

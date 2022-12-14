@@ -10,10 +10,9 @@ import { Capabilities } from '@kbn/core/public';
 
 import { DashboardState } from '../../types';
 import { DashboardAppLocatorParams } from '../..';
-import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
-import { getSavedDashboardMock } from '../test_helpers';
-import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 import { pluginServices } from '../../services/plugin_services';
+import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
+import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard" app is not available', () => {
@@ -75,9 +74,8 @@ describe('ShowShareModal', () => {
       .mockReturnValue(unsavedState);
     return {
       isDirty: true,
-      savedDashboard: getSavedDashboardMock(),
       anchorElement: document.createElement('div'),
-      currentDashboardState: { panels: {} } as unknown as DashboardState,
+      currentDashboardState: { panels: {} } as DashboardState,
     };
   };
 
@@ -111,6 +109,7 @@ describe('ShowShareModal', () => {
         hidePanelTitles: true,
         useMargins: true,
         syncColors: true,
+        syncCursor: true,
         syncTooltips: true,
       },
       filters: [
@@ -139,7 +138,7 @@ describe('ShowShareModal', () => {
     });
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(
-        (rawDashboardState as Partial<DashboardAppLocatorParams>)[key]
+        (rawDashboardState as unknown as Partial<DashboardAppLocatorParams>)[key]
       );
     });
   });

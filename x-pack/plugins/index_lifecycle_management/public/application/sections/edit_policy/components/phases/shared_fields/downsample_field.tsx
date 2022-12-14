@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextColor } from '@elastic/eui';
 import { UnitField } from './unit_field';
-import { fixedIntervalUnits } from '../../../constants';
+import { timeUnits } from '../../../constants';
 import { UseField } from '../../../form';
 import { NumericField } from '../../../../../../shared_imports';
 import { ToggleFieldWithDescribedFormRow } from '../../described_form_row';
@@ -67,7 +67,7 @@ export const DownsampleField: React.FunctionComponent<Props> = ({ phase }) => {
             append: (
               <UnitField
                 path={downsampleIntervalUnitsPath}
-                options={fixedIntervalUnits}
+                options={timeUnits}
                 euiFieldProps={{
                   'data-test-subj': `${phase}-downsampleFixedIntervalUnits`,
                   'aria-label': i18nTexts.editPolicy.downsampleIntervalFieldUnitsLabel,

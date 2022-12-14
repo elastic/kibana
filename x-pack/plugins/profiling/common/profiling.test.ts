@@ -6,11 +6,22 @@
  */
 
 import {
+  createStackFrameID,
   createStackFrameMetadata,
   FrameType,
+  getAddressFromStackFrameID,
   getCalleeFunction,
   getCalleeSource,
+  getFileIDFromStackFrameID,
 } from './profiling';
+
+describe('Stack frame operations', () => {
+  test('decode stack frame ID', () => {
+    const frameID = createStackFrameID('ABCDEFGHIJKLMNOPQRSTUw', 123456789);
+    expect(getAddressFromStackFrameID(frameID)).toEqual(123456789);
+    expect(getFileIDFromStackFrameID(frameID)).toEqual('ABCDEFGHIJKLMNOPQRSTUw');
+  });
+});
 
 describe('Stack frame metadata operations', () => {
   test('metadata has executable and function names', () => {
@@ -50,7 +61,7 @@ describe('Stack frame metadata operations', () => {
       SourceFilename: 'dockerd',
       FunctionOffset: 0x183a5b0,
     });
-    expect(getCalleeSource(metadata)).toEqual('dockerd+0x0');
+    expect(getCalleeSource(metadata)).toEqual('dockerd');
   });
 
   test('metadata has source name and function offset', () => {

@@ -224,12 +224,13 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
       }
     );
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['1'], false);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
@@ -250,7 +251,6 @@ describe('disable()', () => {
             meta: {
               lastScheduledActions: {
                 group: 'default',
-                subgroup: 'newSubgroup',
                 date: new Date().toISOString(),
               },
             },
@@ -295,12 +295,13 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
       }
     );
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['1'], false);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -319,7 +320,6 @@ describe('disable()', () => {
         },
         alerting: {
           action_group_id: 'default',
-          action_subgroup: 'newSubgroup',
           instance_id: '1',
         },
         saved_objects: [
@@ -377,12 +377,13 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
       }
     );
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['1'], false);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(0);
@@ -420,12 +421,13 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
       }
     );
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['1'], false);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
@@ -441,7 +443,7 @@ describe('disable()', () => {
 
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
-    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.bulkDisable).not.toHaveBeenCalled();
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
@@ -450,7 +452,7 @@ describe('disable()', () => {
 
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalled();
+    expect(taskManager.bulkDisable).toHaveBeenCalled();
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'disable(): Failed to load API key of alert 1: Fail'
@@ -463,12 +465,12 @@ describe('disable()', () => {
     await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to update"`
     );
-    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.bulkDisable).not.toHaveBeenCalled();
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
   test('throws when failing to disable task', async () => {
-    taskManager.bulkEnableDisable.mockRejectedValueOnce(new Error('Failed to disable task'));
+    taskManager.bulkDisable.mockRejectedValueOnce(new Error('Failed to disable task'));
 
     await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to disable task"`
@@ -511,12 +513,13 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
       }
     );
-    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.bulkDisable).not.toHaveBeenCalled();
     expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
   });
 
@@ -558,11 +561,12 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
       }
     );
-    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.bulkDisable).not.toHaveBeenCalled();
   });
 });

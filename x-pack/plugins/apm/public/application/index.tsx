@@ -53,6 +53,7 @@ export const renderApp = ({
     observabilityRuleTypeRegistry,
     dataViews: pluginsStart.dataViews,
     unifiedSearch: pluginsStart.unifiedSearch,
+    lens: pluginsStart.lens,
   };
 
   // render APM feedback link in global help menu
@@ -64,7 +65,15 @@ export const renderApp = ({
   element.classList.add(APP_WRAPPER_CLASS);
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme$}>
+    <KibanaThemeProvider
+      theme$={theme$}
+      modify={{
+        breakpoint: {
+          xxl: 1600,
+          xxxl: 2000,
+        },
+      }}
+    >
       <ApmAppRoot
         apmPluginContextValue={apmPluginContextValue}
         pluginsStart={pluginsStart}

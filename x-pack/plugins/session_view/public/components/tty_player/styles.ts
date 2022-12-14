@@ -19,7 +19,9 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
     const container: CSSObject = {
       position: 'absolute',
       top: 0,
-      display: show ? 'block' : 'none',
+      opacity: show ? 1 : 0,
+      transition: 'opacity .2s',
+      pointerEvents: show ? 'auto' : 'none',
       width: '100%',
       height: '100%',
       overflow: 'hidden',
@@ -36,6 +38,7 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
     };
 
     const header: CSSObject = {
+      visibility: show ? 'visible' : 'hidden',
       backgroundColor: `${euiVars.euiFormBackgroundDisabledColor}`,
       padding: `${size.m} ${size.base}`,
     };
@@ -69,10 +72,17 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
     }
 
     const scrollPane: CSSObject = {
+      position: 'relative',
+      transform: `translateY(${show ? 0 : '100%'})`,
+      transition: 'transform .2s ease-in-out',
       width: '100%',
-      height: 'calc(100% - 120px)',
+      height: 'calc(100% - 112px)',
       overflow: 'auto',
       backgroundColor: colors.ink,
+    };
+
+    const betaBadge: CSSObject = {
+      backgroundColor: `${colors.emptyShade}`,
     };
 
     return {
@@ -80,6 +90,7 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
       header,
       terminal,
       scrollPane,
+      betaBadge,
     };
   }, [euiTheme, show, euiVars.euiFormBackgroundDisabledColor, tty?.rows, tty?.columns]);
 

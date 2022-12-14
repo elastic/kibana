@@ -13,7 +13,7 @@ import {
   EmbeddableInput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { PlaceholderEmbeddable, PLACEHOLDER_EMBEDDABLE } from './placeholder_embeddable';
+import { PLACEHOLDER_EMBEDDABLE } from '.';
 
 export class PlaceholderEmbeddableFactory implements EmbeddableFactoryDefinition {
   public readonly type = PLACEHOLDER_EMBEDDABLE;
@@ -29,6 +29,7 @@ export class PlaceholderEmbeddableFactory implements EmbeddableFactoryDefinition
   }
 
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
+    const { PlaceholderEmbeddable } = await import('./placeholder_embeddable');
     return new PlaceholderEmbeddable(initialInput, parent);
   }
 

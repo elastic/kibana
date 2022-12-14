@@ -16,8 +16,7 @@ import {
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 
-import { DashboardSavedObject } from '../../saved_dashboards';
-import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
+import { DashboardContainer } from '../embeddable';
 import { DashboardBuildContext, DashboardState, DashboardContainerInput } from '../../types';
 import {
   enableDashboardSearchSessions,
@@ -25,9 +24,9 @@ import {
   stateToDashboardContainerInput,
 } from '.';
 import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
 
 type BuildDashboardContainerProps = DashboardBuildContext & {
-  savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
   incomingEmbeddable?: EmbeddablePackageState;
   executionContext?: KibanaExecutionContext;
@@ -41,7 +40,6 @@ export const buildDashboardContainer = async ({
   initialDashboardState,
   isEmbeddedExternally,
   incomingEmbeddable,
-  savedDashboard,
   history,
   executionContext,
 }: BuildDashboardContainerProps) => {
@@ -55,7 +53,6 @@ export const buildDashboardContainer = async ({
 
   // set up search session
   enableDashboardSearchSessions({
-    savedDashboard,
     initialDashboardState,
     getLatestDashboardState,
     canStoreSearchSession,
@@ -95,7 +92,6 @@ export const buildDashboardContainer = async ({
     dashboardState: initialDashboardState,
     incomingEmbeddable,
     searchSessionId,
-    savedDashboard,
     executionContext,
   });
 
@@ -113,9 +109,14 @@ export const buildDashboardContainer = async ({
         gridData: originalPanelState.gridData,
         type: incomingEmbeddable.type,
         explicitInput: {
-          ...(incomingEmbeddable.type === originalPanelState.type && {
-            ...originalPanelState.explicitInput,
-          }),
+          // even when we change embeddable type we should keep hidePanelTitles state
+          // this is temporary, and only required because the key is stored in explicitInput
+          // when it should be stored outside of it instead.
+          ...(incomingEmbeddable.type === originalPanelState.type
+            ? {
+                ...originalPanelState.explicitInput,
+              }
+            : { hidePanelTitles: originalPanelState.explicitInput.hidePanelTitles }),
           ...incomingEmbeddable.input,
           id: incomingEmbeddable.embeddableId,
         },

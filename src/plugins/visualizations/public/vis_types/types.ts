@@ -9,8 +9,12 @@
 import type { IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import type { Adapters } from '@kbn/inspector-plugin/common';
-import { TimeRange } from '@kbn/data-plugin/common';
-import type { AggGroupNames, AggParam, AggGroupName } from '@kbn/data-plugin/public';
+import type {
+  AggGroupNames,
+  AggParam,
+  AggGroupName,
+  TimefilterContract,
+} from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import { VisGroups } from './vis_groups_enum';
@@ -18,7 +22,6 @@ import { NavigateToLensContext } from '../../common';
 
 export interface VisTypeOptions {
   showTimePicker: boolean;
-  showQueryBar: boolean;
   showFilterBar: boolean;
   showIndexSelection: boolean;
   showQueryInput: boolean;
@@ -104,9 +107,18 @@ export interface VisTypeDefinition<TVisParams> {
    * in order to be displayed in the Lens editor.
    */
   readonly navigateToLens?: (
-    params?: VisParams,
-    timeRange?: TimeRange
+    vis?: Vis<TVisParams>,
+    timeFilter?: TimefilterContract
   ) => Promise<NavigateToLensContext | null> | undefined;
+
+  /**
+   * If given, it will provide variables for expression params.
+   * Every visualization that wants to add variables for expression params should have this method.
+   */
+  readonly getExpressionVariables?: (
+    vis?: Vis<TVisParams>,
+    timeFilter?: TimefilterContract
+  ) => Promise<Record<string, unknown>>;
 
   /**
    * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.

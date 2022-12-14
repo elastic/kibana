@@ -10,31 +10,29 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../lib/helpers/setup_request';
+import { TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTransactionsPerMinute({
-  setup,
+  apmEventClient,
   bucketSize,
   searchAggregatedTransactions,
   start,
   end,
   intervalString,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   bucketSize: number;
   intervalString: string;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
-
   const { aggregations } = await apmEventClient.search(
     'observability_overview_get_transactions_per_minute',
     {
@@ -44,6 +42,7 @@ export async function getTransactionsPerMinute({
         ],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

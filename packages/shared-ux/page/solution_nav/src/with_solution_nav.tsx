@@ -8,21 +8,24 @@
 
 import React, { ComponentType, ReactNode, useState } from 'react';
 import classNames from 'classnames';
-import { useIsWithinBreakpoints, useEuiTheme, EuiPageSidebarProps } from '@elastic/eui';
+import {
+  useIsWithinBreakpoints,
+  useEuiTheme,
+  useIsWithinMinBreakpoint,
+  EuiPageSidebarProps,
+} from '@elastic/eui';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
-
-import './with_solution_nav.scss';
+import { WithSolutionNavStyles } from './with_solution_nav.styles';
 
 // https://reactjs.org/docs/higher-order-components.html#convention-wrap-the-display-name-for-easy-debugging
 function getDisplayName(Component: ComponentType<any>) {
   return Component.displayName || Component.name || 'UnnamedComponent';
 }
 
-// TODO: Would be nice to grab these from KibanaPageTemplate or vice-versa
-interface TemplateProps {
-  pageSideBar?: ReactNode;
-  pageSideBarProps?: Partial<EuiPageSidebarProps>;
+export interface TemplateProps {
   children?: ReactNode;
+  pageSideBar?: ReactNode;
+  pageSideBarProps?: EuiPageSidebarProps;
 }
 
 type Props<P> = P &
@@ -35,11 +38,10 @@ const SOLUTION_NAV_COLLAPSED_KEY = 'solutionNavIsCollapsed';
 export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: ComponentType<P>) => {
   const WithSolutionNav = (props: Props<P>) => {
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
-    const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
+    const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
     const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
       !JSON.parse(String(localStorage.getItem(SOLUTION_NAV_COLLAPSED_KEY)))
     );
-
     const { solutionNav, children, ...propagatedProps } = props;
     const { euiTheme } = useEuiTheme();
 
@@ -53,13 +55,13 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
     const { canBeCollapsed = true } = solutionNav;
     const isSidebarShrunk =
       isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop);
+    const withSolutionNavStyles = WithSolutionNavStyles(euiTheme);
     const sideBarClasses = classNames(
-      'kbnSolutionNav__sidebar',
-      'kbnStickyMenu',
       {
         'kbnSolutionNav__sidebar--shrink': isSidebarShrunk,
       },
-      props.pageSideBarProps?.className
+      props.pageSideBarProps?.className,
+      withSolutionNavStyles
     );
 
     const pageSideBar = (

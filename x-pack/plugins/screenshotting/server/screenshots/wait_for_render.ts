@@ -21,7 +21,7 @@ export const waitForRenderComplete = async (
     'wait'
   );
 
-  await browser.evaluate(
+  await browser.evaluate<string[]>(
     {
       fn: async (selector) => {
         const visualizations: NodeListOf<Element> = document.querySelectorAll(selector);

@@ -14,7 +14,6 @@ import { CreateDocsResponse, ImportResults } from '../types';
 import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';
 import { MB } from '../../../common/constants';
 import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common/types';
-// @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 import { createChunks } from './create_chunks';
 
@@ -58,6 +57,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
     await this._readUntil(rowLimit, sizeLimit);
     return {
       features: [...this._features],
+      invalidFeatures: [...this._invalidFeatures],
       previewCoverage: this._hasNext
         ? Math.round(this._getProgress(this._features.length, this._blockSizeInBytes))
         : 100,

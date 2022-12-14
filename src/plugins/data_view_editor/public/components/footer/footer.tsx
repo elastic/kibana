@@ -22,7 +22,9 @@ interface FooterProps {
   onSubmit: (isAdHoc?: boolean) => void;
   submitDisabled: boolean;
   isEdit: boolean;
+  isPersisted: boolean;
   allowAdHoc: boolean;
+  canSave: boolean;
 }
 
 const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
@@ -37,11 +39,26 @@ const editButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutEditButt
   defaultMessage: 'Save',
 });
 
+const editUnpersistedButtonLabel = i18n.translate(
+  'indexPatternEditor.editor.flyoutEditUnpersistedButtonLabel',
+  {
+    defaultMessage: 'Continue to use without saving',
+  }
+);
+
 const exploreButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutExploreButtonLabel', {
   defaultMessage: 'Use without saving',
 });
 
-export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit, allowAdHoc }: FooterProps) => {
+export const Footer = ({
+  onCancel,
+  onSubmit,
+  submitDisabled,
+  isEdit,
+  allowAdHoc,
+  isPersisted,
+  canSave,
+}: FooterProps) => {
   const submitPersisted = () => {
     onSubmit(false);
   };
@@ -81,17 +98,23 @@ export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit, allowAdHoc 
               </EuiFlexItem>
             )}
 
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="primary"
-                onClick={submitPersisted}
-                data-test-subj="saveIndexPatternButton"
-                fill
-                disabled={submitDisabled}
-              >
-                {isEdit ? editButtonLabel : saveButtonLabel}
-              </EuiButton>
-            </EuiFlexItem>
+            {(canSave || (isEdit && !isPersisted)) && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  onClick={submitPersisted}
+                  data-test-subj="saveIndexPatternButton"
+                  fill
+                  disabled={submitDisabled}
+                >
+                  {isEdit
+                    ? isPersisted
+                      ? editButtonLabel
+                      : editUnpersistedButtonLabel
+                    : saveButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

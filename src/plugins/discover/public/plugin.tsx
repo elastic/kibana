@@ -32,12 +32,15 @@ import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { PLUGIN_ID } from '../common';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
@@ -59,6 +62,14 @@ import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
 import { useDiscoverServices } from './hooks/use_discover_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
+import {
+  DiscoverContextAppLocator,
+  DiscoverContextAppLocatorDefinition,
+} from './application/context/services/locator';
+import {
+  DiscoverSingleDocLocator,
+  DiscoverSingleDocLocatorDefinition,
+} from './application/doc/locator';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -162,6 +173,7 @@ export interface DiscoverSetupPlugins {
  * @internal
  */
 export interface DiscoverStartPlugins {
+  dataViews: DataViewsServicePublic;
   dataViewEditor: DataViewEditorStart;
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
@@ -180,6 +192,8 @@ export interface DiscoverStartPlugins {
   expressions: ExpressionsStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  lens: LensPublicStart;
 }
 
 /**
@@ -195,15 +209,23 @@ export class DiscoverPlugin
   private docViewsRegistry: DocViewsRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
   private locator?: DiscoverAppLocator;
+  private contextLocator?: DiscoverContextAppLocator;
+  private singleDocLocator?: DiscoverSingleDocLocator;
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
     const isDev = this.initializerContext.env.mode.dev;
     if (plugins.share) {
+      const useHash = core.uiSettings.get('state:storeInSessionStorage');
       this.locator = plugins.share.url.locators.create(
-        new DiscoverAppLocatorDefinition({
-          useHash: core.uiSettings.get('state:storeInSessionStorage'),
-        })
+        new DiscoverAppLocatorDefinition({ useHash })
+      );
+
+      this.contextLocator = plugins.share.url.locators.create(
+        new DiscoverContextAppLocatorDefinition({ useHash })
+      );
+      this.singleDocLocator = plugins.share.url.locators.create(
+        new DiscoverSingleDocLocatorDefinition()
       );
     }
 
@@ -284,6 +306,7 @@ export class DiscoverPlugin
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
+
         // dispatch synthetic hash change event to update hash history objects
         // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
         const unlistenParentHistory = params.history.listen(() => {
@@ -294,11 +317,13 @@ export class DiscoverPlugin
           coreStart,
           discoverStartPlugins,
           this.initializerContext,
-          this.locator!
+          this.locator!,
+          this.contextLocator!,
+          this.singleDocLocator!
         );
 
         // make sure the data view list is up to date
-        await discoverStartPlugins.data.indexPatterns.clearCache();
+        await discoverStartPlugins.dataViews.clearCache();
 
         const { renderApp } = await import('./application');
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
@@ -385,7 +410,14 @@ export class DiscoverPlugin
 
     const getDiscoverServices = async () => {
       const [coreStart, discoverStartPlugins] = await core.getStartServices();
-      return buildServices(coreStart, discoverStartPlugins, this.initializerContext, this.locator!);
+      return buildServices(
+        coreStart,
+        discoverStartPlugins,
+        this.initializerContext,
+        this.locator!,
+        this.contextLocator!,
+        this.singleDocLocator!
+      );
     };
 
     const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServices);

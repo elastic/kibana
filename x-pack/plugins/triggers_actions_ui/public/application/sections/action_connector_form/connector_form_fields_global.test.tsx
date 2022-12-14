@@ -8,7 +8,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, act } from '@testing-library/react';
-import { FormTestProvider } from '../../components/builtin_action_types/test_utils';
+import { FormTestProvider } from '../../components/test_utils';
 import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
 
 describe('ConnectorFormFieldsGlobal', () => {

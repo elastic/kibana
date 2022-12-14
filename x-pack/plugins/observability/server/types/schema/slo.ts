@@ -6,82 +6,55 @@
  */
 
 import * as t from 'io-ts';
+import { dateType, summarySchema } from './common';
+import { durationType } from './duration';
+import { indicatorSchema } from './indicators';
+import { timeWindowSchema } from './time_window';
 
-export const ALL_VALUE = 'ALL';
-const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
+const occurrencesBudgetingMethodSchema = t.literal<string>('occurrences');
+const timeslicesBudgetingMethodSchema = t.literal<string>('timeslices');
 
-const apmTransactionDurationIndicatorTypeSchema = t.literal('slo.apm.transaction_duration');
-export const apmTransactionDurationIndicatorSchema = t.type({
-  type: apmTransactionDurationIndicatorTypeSchema,
-  params: t.type({
-    environment: allOrAnyString,
-    service: allOrAnyString,
-    transaction_type: allOrAnyString,
-    transaction_name: allOrAnyString,
-    'threshold.us': t.number,
-  }),
-});
-
-const apmTransactionErrorRateIndicatorTypeSchema = t.literal('slo.apm.transaction_error_rate');
-export const apmTransactionErrorRateIndicatorSchema = t.type({
-  type: apmTransactionErrorRateIndicatorTypeSchema,
-  params: t.intersection([
-    t.type({
-      environment: allOrAnyString,
-      service: allOrAnyString,
-      transaction_type: allOrAnyString,
-      transaction_name: allOrAnyString,
-    }),
-    t.partial({
-      good_status_codes: t.array(
-        t.union([t.literal('2xx'), t.literal('3xx'), t.literal('4xx'), t.literal('5xx')])
-      ),
-    }),
-  ]),
-});
-
-export const rollingTimeWindowSchema = t.type({
-  duration: t.string,
-  is_rolling: t.literal(true),
-});
-
-export const indicatorTypesSchema = t.union([
-  apmTransactionDurationIndicatorTypeSchema,
-  apmTransactionErrorRateIndicatorTypeSchema,
+const budgetingMethodSchema = t.union([
+  occurrencesBudgetingMethodSchema,
+  timeslicesBudgetingMethodSchema,
 ]);
 
-export const indicatorSchema = t.union([
-  apmTransactionDurationIndicatorSchema,
-  apmTransactionErrorRateIndicatorSchema,
+const objectiveSchema = t.intersection([
+  t.type({ target: t.number }),
+  t.partial({ timeslice_target: t.number, timeslice_window: durationType }),
 ]);
 
-const sloOptionalSettingsSchema = t.partial({
-  settings: t.partial({
-    destination_index: t.string,
-  }),
+const settingsSchema = t.type({
+  timestamp_field: t.string,
+  sync_delay: durationType,
+  frequency: durationType,
 });
 
-const createSLOBodySchema = t.intersection([
-  t.type({
-    name: t.string,
-    description: t.string,
-    indicator: indicatorSchema,
-    time_window: rollingTimeWindowSchema,
-    budgeting_method: t.literal('occurrences'),
-    objective: t.type({
-      target: t.number,
-    }),
-  }),
-  sloOptionalSettingsSchema,
-]);
+const optionalSettingsSchema = t.partial({ ...settingsSchema.props });
 
-const createSLOResponseSchema = t.type({
+const sloSchema = t.type({
   id: t.string,
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  time_window: timeWindowSchema,
+  budgeting_method: budgetingMethodSchema,
+  objective: objectiveSchema,
+  settings: settingsSchema,
+  revision: t.number,
+  created_at: dateType,
+  updated_at: dateType,
 });
 
-export type CreateSLOParams = t.TypeOf<typeof createSLOBodySchema>;
-export type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
+const sloWithSummarySchema = t.intersection([sloSchema, t.type({ summary: summarySchema })]);
 
-export const createSLOParamsSchema = t.type({
-  body: createSLOBodySchema,
-});
+export {
+  budgetingMethodSchema,
+  objectiveSchema,
+  occurrencesBudgetingMethodSchema,
+  optionalSettingsSchema,
+  settingsSchema,
+  sloSchema,
+  sloWithSummarySchema,
+  timeslicesBudgetingMethodSchema,
+};

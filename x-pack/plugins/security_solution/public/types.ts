@@ -40,14 +40,16 @@ import type {
   SavedObjectTaggingOssPluginStart,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plugin/public';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
-import type { Hosts } from './hosts';
-import type { Users } from './users';
-import type { Network } from './network';
+import type { Hosts } from './explore/hosts';
+import type { Users } from './explore/users';
+import type { Network } from './explore/network';
 import type { Kubernetes } from './kubernetes';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
@@ -75,6 +77,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
   kubernetesSecurity: KubernetesSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
@@ -91,6 +94,7 @@ export interface StartPlugins {
   security: SecurityPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   threatIntelligence: ThreatIntelligencePluginStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -100,6 +104,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 export type StartServices = CoreStart &
   StartPlugins & {
     storage: Storage;
+    sessionStorage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
     onAppLeave: (handler: AppLeaveHandler) => void;

@@ -13,6 +13,6 @@ describe('NoMatches', () => {
   it('renders the no matches messages', () => {
     render(<NoMatches />);
 
-    expect(screen.getByText('No matching users with required access.'));
+    expect(screen.getByText("User doesn't exist or is unavailable"));
   });
 });

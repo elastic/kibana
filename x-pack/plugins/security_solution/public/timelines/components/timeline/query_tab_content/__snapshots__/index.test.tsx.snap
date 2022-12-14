@@ -305,6 +305,7 @@ In other use cases the message field can be used to concatenate different values
   }
   kqlMode="search"
   kqlQueryExpression=" "
+  kqlQueryLanguage="kuery"
   onEventClosed={[MockFunction]}
   renderCellValue={[Function]}
   rowRenderers={
@@ -1308,7 +1309,7 @@ In other use cases the message field can be used to concatenate different values
   }
   start="2018-03-23T18:49:23.132Z"
   status="active"
-  timelineId="test"
+  timelineId="timeline-test"
   timerangeKind="absolute"
 />
 `;

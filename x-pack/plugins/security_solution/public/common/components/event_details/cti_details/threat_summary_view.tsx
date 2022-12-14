@@ -24,11 +24,12 @@ import type { CtiEnrichment } from '../../../../../common/search_strategy/securi
 import type {
   BrowserFields,
   TimelineEventsDetailsItem,
+  RiskSeverity,
 } from '../../../../../common/search_strategy';
-import { HostRiskSummary } from './host_risk_summary';
-import { UserRiskSummary } from './user_risk_summary';
+import { RiskSummary } from './risk_summary';
 import { EnrichmentSummary } from './enrichment_summary';
-import type { HostRisk, UserRisk } from '../../../../risk_score/containers';
+import type { HostRisk, UserRisk } from '../../../../explore/containers/risk_score';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 
 const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;
@@ -45,7 +46,7 @@ const StyledEnrichmentFieldTitle = styled(EuiTitle)`
 `;
 
 const EnrichmentFieldTitle: React.FC<{
-  title: string | undefined;
+  title: string | React.ReactNode | undefined;
 }> = ({ title }) => (
   <StyledEnrichmentFieldTitle size="xxxs">
     <h6>{title}</h6>
@@ -57,10 +58,10 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const EnrichedDataRow: React.FC<{ field: string | undefined; value: React.ReactNode }> = ({
-  field,
-  value,
-}) => (
+export const EnrichedDataRow: React.FC<{
+  field: string | React.ReactNode | undefined;
+  value: React.ReactNode;
+}> = ({ field, value }) => (
   <StyledEuiFlexGroup
     direction="row"
     gutterSize="none"
@@ -76,7 +77,7 @@ export const EnrichedDataRow: React.FC<{ field: string | undefined; value: React
 );
 
 export const ThreatSummaryPanelHeader: React.FC<{
-  title: string;
+  title: string | React.ReactNode;
   toolTipContent: React.ReactNode;
 }> = ({ title, toolTipContent }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -125,7 +126,7 @@ const ThreatSummaryViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
   enrichments: CtiEnrichment[];
   eventId: string;
-  timelineId: string;
+  scopeId: string;
   hostRisk: HostRisk;
   userRisk: UserRisk;
   isDraggable?: boolean;
@@ -135,12 +136,20 @@ const ThreatSummaryViewComponent: React.FC<{
   data,
   enrichments,
   eventId,
-  timelineId,
+  scopeId,
   hostRisk,
   userRisk,
   isDraggable,
   isReadOnly,
 }) => {
+  const originalHostRisk = data?.find(
+    (eventDetail) => eventDetail?.field === 'host.risk.calculated_level'
+  )?.values?.[0] as RiskSeverity | undefined;
+
+  const originalUserRisk = data?.find(
+    (eventDetail) => eventDetail?.field === 'user.risk.calculated_level'
+  )?.values?.[0] as RiskSeverity | undefined;
+
   return (
     <>
       <EuiHorizontalRule />
@@ -152,18 +161,26 @@ const ThreatSummaryViewComponent: React.FC<{
 
       <EuiFlexGroup direction="column" gutterSize="m" style={{ flexGrow: 0 }}>
         <EuiFlexItem grow={false}>
-          <HostRiskSummary hostRisk={hostRisk} />
+          <RiskSummary
+            riskEntity={RiskScoreEntity.host}
+            risk={hostRisk}
+            originalRisk={originalHostRisk}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <UserRiskSummary userRisk={userRisk} />
+          <RiskSummary
+            riskEntity={RiskScoreEntity.user}
+            risk={userRisk}
+            originalRisk={originalUserRisk}
+          />
         </EuiFlexItem>
 
         <EnrichmentSummary
           browserFields={browserFields}
           data={data}
           enrichments={enrichments}
-          timelineId={timelineId}
+          scopeId={scopeId}
           eventId={eventId}
           isDraggable={isDraggable}
           isReadOnly={isReadOnly}

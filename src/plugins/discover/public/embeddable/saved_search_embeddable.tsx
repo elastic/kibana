@@ -15,7 +15,7 @@ import {
   FilterStateStore,
 } from '@kbn/es-query';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -34,6 +34,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { RecordRawType } from '../application/main/hooks/use_saved_search';
 import { buildDataTableRecord } from '../utils/build_data_record';
@@ -60,9 +61,12 @@ import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
 import { getRawRecordType } from '../application/main/utils/get_raw_record_type';
 import { fetchSql } from '../application/main/utils/fetch_sql';
+import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
+    savedSearchId?: string;
+    filters?: Filter[];
     settings?: DiscoverGridSettings;
     description?: string;
     sharedItemTitle?: string;
@@ -76,7 +80,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
   };
 
-interface SearchEmbeddableConfig {
+export interface SearchEmbeddableConfig {
   savedSearch: SavedSearch;
   editUrl: string;
   editPath: string;
@@ -149,13 +153,13 @@ export class SavedSearchEmbeddable
       if (titleChanged) {
         this.panelTitle = this.output.title || '';
       }
-      if (
-        this.searchProps &&
-        (titleChanged ||
-          this.isFetchRequired(this.searchProps) ||
-          this.isInputChangedAndRerenderRequired(this.searchProps))
-      ) {
-        this.pushContainerStateParamsToProps(this.searchProps);
+      if (!this.searchProps) {
+        return;
+      }
+      const isFetchRequired = this.isFetchRequired(this.searchProps);
+      const isRerenderRequired = this.isRerenderRequired(this.searchProps);
+      if (titleChanged || isFetchRequired || isRerenderRequired) {
+        this.reload(isFetchRequired);
       }
     });
   }
@@ -300,8 +304,15 @@ export class SavedSearchEmbeddable
     }
     const sort = this.getSort(this.savedSearch.sort, dataView);
 
+    if (!dataView.isPersisted()) {
+      // one used adhoc data view
+      this.services.trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
+    }
+
     const props: SearchProps = {
       columns: this.savedSearch.columns,
+      savedSearchId: this.savedSearch.id,
+      filters: this.savedSearch.searchSource.getField('filter') as Filter[],
       dataView,
       isLoading: false,
       sort,
@@ -387,7 +398,7 @@ export class SavedSearchEmbeddable
 
     searchSource.setParent(this.filtersSearchSource);
 
-    this.pushContainerStateParamsToProps(props);
+    this.load(props);
 
     props.isLoading = true;
 
@@ -420,11 +431,14 @@ export class SavedSearchEmbeddable
     );
   }
 
-  private isInputChangedAndRerenderRequired(searchProps?: SearchProps) {
+  private isRerenderRequired(searchProps?: SearchProps) {
     if (!searchProps) {
       return false;
     }
-    return this.input.rowsPerPage !== searchProps.rowsPerPageState;
+    return (
+      this.input.rowsPerPage !== searchProps.rowsPerPageState ||
+      (this.input.columns && !isEqual(this.input.columns, searchProps.columns))
+    );
   }
 
   private async pushContainerStateParamsToProps(
@@ -447,6 +461,8 @@ export class SavedSearchEmbeddable
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
+    searchProps.filters = this.savedSearch.searchSource.getField('filter') as Filter[];
+    searchProps.savedSearchId = this.savedSearch.id;
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);
@@ -466,10 +482,6 @@ export class SavedSearchEmbeddable
     } else if (this.searchProps && this.node) {
       this.searchProps = searchProps;
     }
-
-    if (this.node) {
-      this.renderReactComponent(this.node, this.searchProps!);
-    }
   }
 
   /**
@@ -480,9 +492,8 @@ export class SavedSearchEmbeddable
     if (!this.searchProps) {
       throw new Error('Search props not defined');
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
-    }
+    super.render(domNode as HTMLElement);
+
     this.node = domNode;
 
     this.renderReactComponent(this.node, this.searchProps!);
@@ -518,6 +529,10 @@ export class SavedSearchEmbeddable
         </I18nProvider>,
         domNode
       );
+      this.updateOutput({
+        ...this.getOutput(),
+        rendered: true,
+      });
       return;
     }
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
@@ -537,17 +552,36 @@ export class SavedSearchEmbeddable
         </I18nProvider>,
         domNode
       );
-    }
 
-    this.updateOutput({
-      ...this.getOutput(),
-      rendered: true,
-    });
+      const hasError = this.getOutput().error !== undefined;
+
+      if (this.searchProps!.isLoading === false && props.searchProps.rows !== undefined) {
+        this.renderComplete.dispatchComplete();
+        this.updateOutput({
+          ...this.getOutput(),
+          rendered: true,
+        });
+      } else if (hasError) {
+        this.renderComplete.dispatchError();
+        this.updateOutput({
+          ...this.getOutput(),
+          rendered: true,
+        });
+      }
+    }
   }
 
-  public reload() {
+  private async load(searchProps: SearchProps, forceFetch = false) {
+    await this.pushContainerStateParamsToProps(searchProps, { forceFetch });
+
+    if (this.node) {
+      this.render(this.node);
+    }
+  }
+
+  public reload(forceFetch = true) {
     if (this.searchProps) {
-      this.pushContainerStateParamsToProps(this.searchProps, { forceFetch: true });
+      this.load(this.searchProps, forceFetch);
     }
   }
 
@@ -583,6 +617,9 @@ export class SavedSearchEmbeddable
     super.destroy();
     if (this.searchProps) {
       delete this.searchProps;
+    }
+    if (this.node) {
+      unmountComponentAtNode(this.node);
     }
     this.subscription?.unsubscribe();
 

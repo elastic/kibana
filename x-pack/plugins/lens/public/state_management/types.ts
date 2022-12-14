@@ -7,7 +7,7 @@
 
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { SavedQuery } from '@kbn/data-plugin/public';
 import { Document } from '../persistence';
 
@@ -30,10 +30,6 @@ export interface VisualizationState {
 export interface DataViewsState {
   indexPatternRefs: IndexPatternRef[];
   indexPatterns: Record<string, IndexPattern>;
-  existingFields: Record<string, Record<string, boolean>>;
-  isFirstExistenceFetch: boolean;
-  existenceFetchFailed?: boolean;
-  existenceFetchTimeout?: boolean;
 }
 
 export type DatasourceStates = Record<string, { isLoading: boolean; state: unknown }>;

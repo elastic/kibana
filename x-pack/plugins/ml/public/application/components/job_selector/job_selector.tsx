@@ -20,7 +20,6 @@ import './_index.scss';
 
 import { Dictionary } from '../../../../common/types/common';
 import { useUrlState } from '../../util/url_state';
-// @ts-ignore
 import { IdBadges } from './id_badges';
 import {
   BADGE_LIMIT,
@@ -28,7 +27,7 @@ import {
   JobSelectorFlyoutProps,
 } from './job_selector_flyout';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-import { useStorage } from '../../contexts/ml/use_storage';
+import { useStorage } from '../../contexts/storage';
 import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 
 interface GroupObj {

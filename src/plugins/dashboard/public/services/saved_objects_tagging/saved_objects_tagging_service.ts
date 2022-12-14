@@ -27,19 +27,25 @@ export const savedObjectsTaggingServiceFactory: SavedObjectsTaggingServiceFactor
   const {
     ui: {
       components,
-      getSearchBarFilter,
-      getTableColumnDefinition,
-      hasTagDecoration,
       parseSearchQuery,
+      hasTagDecoration,
+      getSearchBarFilter,
+      updateTagsReferences,
+      getTagIdsFromReferences,
+      getTableColumnDefinition,
+      getTagList,
     },
   } = taggingApi;
 
   return {
     hasApi: true,
     components,
-    getSearchBarFilter,
-    getTableColumnDefinition,
     hasTagDecoration,
     parseSearchQuery,
+    getSearchBarFilter,
+    updateTagsReferences,
+    getTagIdsFromReferences,
+    getTableColumnDefinition,
+    getTagList,
   };
 };

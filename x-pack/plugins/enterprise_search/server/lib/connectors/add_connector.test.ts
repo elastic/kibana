@@ -86,6 +86,60 @@ describe('addConnector lib function', () => {
       document: {
         api_key_id: null,
         configuration: {},
+        description: null,
+        error: null,
+        features: null,
+        filtering: [
+          {
+            active: {
+              advanced_snippet: {
+                created_at: expect.any(String),
+                updated_at: expect.any(String),
+                value: {},
+              },
+              rules: [
+                {
+                  created_at: expect.any(String),
+                  field: '_',
+                  id: 'DEFAULT',
+                  order: 0,
+                  policy: 'include',
+                  rule: 'regex',
+                  updated_at: expect.any(String),
+                  value: '.*',
+                },
+              ],
+              validation: {
+                errors: [],
+                state: 'valid',
+              },
+            },
+            domain: 'DEFAULT',
+            draft: {
+              advanced_snippet: {
+                created_at: expect.any(String),
+                updated_at: expect.any(String),
+                value: {},
+              },
+              rules: [
+                {
+                  created_at: expect.any(String),
+                  field: '_',
+                  id: 'DEFAULT',
+                  order: 0,
+                  policy: 'include',
+                  rule: 'regex',
+                  updated_at: expect.any(String),
+                  value: '.*',
+                },
+              ],
+              validation: {
+                errors: [],
+                state: 'valid',
+              },
+            },
+          },
+        ],
         index_name: 'index_name',
         is_native: false,
         language: 'fr',
@@ -215,6 +269,60 @@ describe('addConnector lib function', () => {
       document: {
         api_key_id: null,
         configuration: {},
+        description: null,
+        error: null,
+        features: null,
+        filtering: [
+          {
+            active: {
+              advanced_snippet: {
+                created_at: expect.any(String),
+                updated_at: expect.any(String),
+                value: {},
+              },
+              rules: [
+                {
+                  created_at: expect.any(String),
+                  field: '_',
+                  id: 'DEFAULT',
+                  order: 0,
+                  policy: 'include',
+                  rule: 'regex',
+                  updated_at: expect.any(String),
+                  value: '.*',
+                },
+              ],
+              validation: {
+                errors: [],
+                state: 'valid',
+              },
+            },
+            domain: 'DEFAULT',
+            draft: {
+              advanced_snippet: {
+                created_at: expect.any(String),
+                updated_at: expect.any(String),
+                value: {},
+              },
+              rules: [
+                {
+                  created_at: expect.any(String),
+                  field: '_',
+                  id: 'DEFAULT',
+                  order: 0,
+                  policy: 'include',
+                  rule: 'regex',
+                  updated_at: expect.any(String),
+                  value: '.*',
+                },
+              ],
+              validation: {
+                errors: [],
+                state: 'valid',
+              },
+            },
+          },
+        ],
         index_name: 'index_name',
         is_native: true,
         language: null,
@@ -266,6 +374,60 @@ describe('addConnector lib function', () => {
       document: {
         api_key_id: null,
         configuration: {},
+        description: null,
+        error: null,
+        features: null,
+        filtering: [
+          {
+            active: {
+              advanced_snippet: {
+                created_at: expect.any(String),
+                updated_at: expect.any(String),
+                value: {},
+              },
+              rules: [
+                {
+                  created_at: expect.any(String),
+                  field: '_',
+                  id: 'DEFAULT',
+                  order: 0,
+                  policy: 'include',
+                  rule: 'regex',
+                  updated_at: expect.any(String),
+                  value: '.*',
+                },
+              ],
+              validation: {
+                errors: [],
+                state: 'valid',
+              },
+            },
+            domain: 'DEFAULT',
+            draft: {
+              advanced_snippet: {
+                created_at: expect.any(String),
+                updated_at: expect.any(String),
+                value: {},
+              },
+              rules: [
+                {
+                  created_at: expect.any(String),
+                  field: '_',
+                  id: 'DEFAULT',
+                  order: 0,
+                  policy: 'include',
+                  rule: 'regex',
+                  updated_at: expect.any(String),
+                  value: '.*',
+                },
+              ],
+              validation: {
+                errors: [],
+                state: 'valid',
+              },
+            },
+          },
+        ],
         index_name: 'search-index_name',
         is_native: false,
         language: 'en',

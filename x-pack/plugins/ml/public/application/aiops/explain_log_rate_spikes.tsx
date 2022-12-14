@@ -57,6 +57,8 @@ export const ExplainLogRateSpikesPage: FC = () => {
             'storage',
             'uiSettings',
             'unifiedSearch',
+            'theme',
+            'lens',
           ])}
         />
       )}

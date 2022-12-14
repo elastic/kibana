@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, FC } from 'react';
+import React, { useCallback, useEffect, useState, FC } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -19,6 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
@@ -37,9 +38,21 @@ import { SearchPanel } from '../search_panel';
 
 import { restorableDefaults } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
+import type { GroupTableItem } from '../spike_analysis_table/spike_analysis_table_groups';
+import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
 
 // TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
 import './explain_log_rate_spikes_page.scss';
+
+function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: GroupTableItem) {
+  if (changePoint) {
+    return `${changePoint?.fieldName}:${changePoint?.fieldValue}`;
+  } else if (group) {
+    return i18n.translate('xpack.aiops.spikeAnalysisPage.documentCountStatsSplitGroupLabel', {
+      defaultMessage: 'Selected group',
+    });
+  }
+}
 
 /**
  * ExplainLogRateSpikes props require a data view.
@@ -56,6 +69,15 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   savedSearch,
 }) => {
   const { data: dataService } = useAiopsAppContext();
+
+  const {
+    currentSelectedChangePoint,
+    currentSelectedGroup,
+    setPinnedChangePoint,
+    setPinnedGroup,
+    setSelectedChangePoint,
+    setSelectedGroup,
+  } = useSpikeAnalysisTableRowContext();
 
   const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -75,7 +97,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
     }) => {
-      // When the user loads saved search and then clear or modify the query
+      // When the user loads a saved search and then clears or modifies the query
       // we should remove the saved search and replace it with the index pattern id
       if (currentSavedSearch !== null) {
         setCurrentSavedSearch(null);
@@ -92,18 +114,6 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     [currentSavedSearch, aiopsListState, setAiopsListState]
   );
 
-  const [pinnedChangePoint, setPinnedChangePoint] = useState<ChangePoint | null>(null);
-  const [selectedChangePoint, setSelectedChangePoint] = useState<ChangePoint | null>(null);
-
-  // If a row is pinned, still overrule with a potentially hovered row.
-  const currentSelectedChangePoint = useMemo(() => {
-    if (selectedChangePoint) {
-      return selectedChangePoint;
-    } else if (pinnedChangePoint) {
-      return pinnedChangePoint;
-    }
-  }, [pinnedChangePoint, selectedChangePoint]);
-
   const {
     documentStats,
     timefilter,
@@ -116,7 +126,8 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     { currentDataView: dataView, currentSavedSearch },
     aiopsListState,
     setGlobalState,
-    currentSelectedChangePoint
+    currentSelectedChangePoint,
+    currentSelectedGroup
   );
 
   const { totalCount, documentCountStats, documentCountStatsCompare } = documentStats;
@@ -166,7 +177,9 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   function clearSelection() {
     setWindowParameters(undefined);
     setPinnedChangePoint(null);
+    setPinnedGroup(null);
     setSelectedChangePoint(null);
+    setSelectedGroup(null);
   }
 
   return (
@@ -224,11 +237,12 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                   brushSelectionUpdateHandler={setWindowParameters}
                   clearSelectionHandler={clearSelection}
                   documentCountStats={documentCountStats}
-                  documentCountStatsSplit={
-                    currentSelectedChangePoint ? documentCountStatsCompare : undefined
-                  }
+                  documentCountStatsSplit={documentCountStatsCompare}
+                  documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
+                    currentSelectedChangePoint,
+                    currentSelectedGroup
+                  )}
                   totalCount={totalCount}
-                  changePoint={currentSelectedChangePoint}
                   windowParameters={windowParameters}
                 />
               </EuiPanel>
@@ -243,9 +257,6 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                   latest={latest}
                   windowParameters={windowParameters}
                   searchQuery={searchQuery}
-                  onPinnedChangePoint={setPinnedChangePoint}
-                  onSelectedChangePoint={setSelectedChangePoint}
-                  selectedChangePoint={currentSelectedChangePoint}
                 />
               )}
               {windowParameters === undefined && (

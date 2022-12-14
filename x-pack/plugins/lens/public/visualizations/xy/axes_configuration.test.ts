@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { layerTypes } from '../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
 import { XYDataLayerConfig } from './types';
@@ -221,7 +221,7 @@ describe('axes_configuration', () => {
 
   const sampleLayer: XYDataLayerConfig = {
     layerId: 'first',
-    layerType: layerTypes.DATA,
+    layerType: LayerTypes.DATA,
     seriesType: 'line',
     xAccessor: 'c',
     accessors: ['yAccessorId'],

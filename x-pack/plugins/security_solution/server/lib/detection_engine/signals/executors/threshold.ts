@@ -15,8 +15,8 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
-import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
-import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { Filter } from '@kbn/es-query';
+import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import { getFilter } from '../get_filter';
 import {
   bulkCreateThresholdSignals,
@@ -31,7 +31,11 @@ import type {
   ThresholdAlertState,
   WrapHits,
 } from '../types';
-import { addToSearchAfterReturn, createSearchAfterReturnType } from '../utils';
+import {
+  addToSearchAfterReturn,
+  createSearchAfterReturnType,
+  getUnprocessedExceptionsWarnings,
+} from '../utils';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
@@ -41,7 +45,6 @@ export const thresholdExecutor = async ({
   runtimeMappings,
   completeRule,
   tuple,
-  exceptionItems,
   ruleExecutionLogger,
   services,
   version,
@@ -53,12 +56,13 @@ export const thresholdExecutor = async ({
   primaryTimestamp,
   secondaryTimestamp,
   aggregatableTimestampField,
+  exceptionFilter,
+  unprocessedExceptions,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<ThresholdRuleParams>;
   tuple: RuleRangeTuple;
-  exceptionItems: ExceptionListItemSchema[];
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   version: string;
@@ -70,18 +74,25 @@ export const thresholdExecutor = async ({
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   aggregatableTimestampField: string;
+  exceptionFilter: Filter | undefined;
+  unprocessedExceptions: ExceptionListItemSchema[];
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('thresholdExecutor', async () => {
+    const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+    if (exceptionsWarning) {
+      result.warningMessages.push(exceptionsWarning);
+    }
+
     // Get state or build initial state (on upgrade)
     const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
       ? { signalHistory: state.signalHistory, searchErrors: [] }
       : await getThresholdSignalHistory({
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
-          ruleId: ruleParams.ruleId,
+          frameworkRuleId: completeRule.alertId,
           bucketByFields: ruleParams.threshold.field,
           ruleDataReader,
         });
@@ -99,13 +110,6 @@ export const thresholdExecutor = async ({
       }
     }
 
-    if (hasLargeValueItem(exceptionItems)) {
-      result.warningMessages.push(
-        'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
-      );
-      result.warning = true;
-    }
-
     // Eliminate dupes
     const bucketFilters = await getThresholdBucketFilters({
       signalHistory,
@@ -121,7 +125,7 @@ export const thresholdExecutor = async ({
       savedId: ruleParams.savedId,
       services,
       index: inputIndex,
-      lists: exceptionItems,
+      exceptionFilter,
     });
 
     // Look for new events over threshold
@@ -141,6 +145,7 @@ export const thresholdExecutor = async ({
     });
 
     // Build and index new alerts
+
     const createResult = await bulkCreateThresholdSignals({
       buckets,
       completeRule,
@@ -153,6 +158,7 @@ export const thresholdExecutor = async ({
       signalHistory,
       bulkCreate,
       wrapHits,
+      ruleExecutionLogger,
     });
 
     addToSearchAfterReturn({ current: result, next: createResult });

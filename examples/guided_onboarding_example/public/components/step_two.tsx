@@ -6,38 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-import { EuiButton, EuiSpacer, EuiText, EuiTitle, EuiTourStep } from '@elastic/eui';
+import { EuiText, EuiTitle } from '@elastic/eui';
 
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
-import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
 
-interface StepTwoProps {
-  guidedOnboarding: GuidedOnboardingPluginStart;
-}
-
-export const StepTwo = (props: StepTwoProps) => {
-  const {
-    guidedOnboarding: { guidedOnboardingApi },
-  } = props;
-  const { search } = useLocation();
-  const history = useHistory();
-
-  const query = React.useMemo(() => new URLSearchParams(search), [search]);
-  useEffect(() => {
-    if (query.get('showTour') === 'true') {
-      setIsTourStepOpen(true);
-    }
-  }, [query]);
-
-  const [isTourStepOpen, setIsTourStepOpen] = useState<boolean>(false);
-
+export const StepTwo = () => {
   return (
     <>
       <EuiPageContentHeader>
@@ -55,40 +34,11 @@ export const StepTwo = (props: StepTwoProps) => {
           <p>
             <FormattedMessage
               id="guidedOnboardingExample.guidesSelection.stepTwo.explanation"
-              defaultMessage="The EUI tour on this page is displayed, when a url param 'showTour' is set to 'true'."
+              defaultMessage="This page is used for the manual completion of Test guide, step 2. The manual completion popover
+              should appear on the header button 'Setup guide' to open the panel and mark the step done."
             />
           </p>
         </EuiText>
-        <EuiSpacer />
-        <EuiTourStep
-          content={
-            <EuiText>
-              <p>Click this button to complete step 2.</p>
-            </EuiText>
-          }
-          isStepOpen={isTourStepOpen}
-          minWidth={300}
-          onFinish={() => {
-            history.push('/stepTwo');
-            query.set('showTour', 'false');
-            setIsTourStepOpen(false);
-          }}
-          step={1}
-          stepsTotal={1}
-          title="Step Add data"
-          anchorPosition="rightUp"
-        >
-          <EuiButton
-            onClick={async () => {
-              await guidedOnboardingApi?.updateGuideState({
-                activeGuide: 'search',
-                activeStep: 'optimize',
-              });
-            }}
-          >
-            Complete step 2
-          </EuiButton>
-        </EuiTourStep>
       </EuiPageContentBody>
     </>
   );

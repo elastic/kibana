@@ -77,6 +77,7 @@ Object {
       "xAccessor": "col-1-2",
       "yAccessor": undefined,
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -101,6 +102,8 @@ Object {
       ],
       "type": "datatable",
     },
+    "syncCursor": true,
+    "syncTooltips": false,
   },
 }
 `;

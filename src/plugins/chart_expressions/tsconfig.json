@@ -10,7 +10,7 @@
   "include": [
     "common/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
   ]
 }

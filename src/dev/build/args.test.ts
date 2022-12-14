@@ -28,13 +28,13 @@ it('build default and oss dist for current platform, without packages, by defaul
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
         "createDockerUbuntu": false,
-        "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
@@ -62,13 +62,13 @@ it('builds packages if --all-platforms is passed', () => {
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerCloud": true,
         "createDockerContexts": true,
         "createDockerUBI": true,
         "createDockerUbuntu": true,
-        "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
@@ -96,13 +96,13 @@ it('limits packages if --rpm passed with --all-platforms', () => {
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
         "createDockerUbuntu": false,
-        "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
@@ -130,13 +130,13 @@ it('limits packages if --deb passed with --all-platforms', () => {
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
         "createDockerUbuntu": false,
-        "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
@@ -165,13 +165,13 @@ it('limits packages if --docker passed with --all-platforms', () => {
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCloud": true,
         "createDockerContexts": true,
         "createDockerUBI": true,
         "createDockerUbuntu": true,
-        "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
@@ -207,13 +207,13 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCloud": true,
         "createDockerContexts": true,
         "createDockerUBI": false,
         "createDockerUbuntu": true,
-        "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
@@ -242,13 +242,13 @@ it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => 
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerCloud": true,
         "createDockerContexts": true,
         "createDockerUBI": true,
         "createDockerUbuntu": false,
-        "createExamplePlugins": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,

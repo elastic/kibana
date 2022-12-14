@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { map, mergeMap, catchError } from 'rxjs/operators';
-import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import { from, of } from 'rxjs';
@@ -25,7 +24,6 @@ import { Dataset } from '../rule_data_plugin_service/index_options';
 import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '..';
 import { getSpacesFilter, getAuthzFilter } from '../lib';
-import { getIsKibanaRequest } from '../lib/get_is_kibana_request';
 
 export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
   rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
@@ -47,13 +45,6 @@ export const ruleRegistrySearchStrategyProvider = (
   const requestUserEs = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
   return {
     search: (request, options, deps) => {
-      // We want to ensure this request came from our UI. We can't really do this
-      // but we have a best effort we can try
-      if (!getIsKibanaRequest(deps.request.headers)) {
-        throw Boom.notFound(
-          `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is currently only available for internal use.`
-        );
-      }
       // SIEM uses RBAC fields in their alerts but also utilizes ES DLS which
       // is different than every other solution so we need to special case
       // those requests.
@@ -133,7 +124,9 @@ export const ruleRegistrySearchStrategyProvider = (
           };
           const size = request.pagination ? request.pagination.pageSize : MAX_ALERT_SEARCH_SIZE;
           const params = {
+            allow_no_indices: true,
             index: indices,
+            ignore_unavailable: true,
             body: {
               _source: false,
               // TODO the fields need to come from the request
@@ -144,7 +137,11 @@ export const ruleRegistrySearchStrategyProvider = (
               query,
             },
           };
-          return (siemRequest ? requestUserEs : internalUserEs).search({ params }, options, deps);
+          return (siemRequest ? requestUserEs : internalUserEs).search(
+            { id: request.id, params },
+            options,
+            deps
+          );
         }),
         map((response) => {
           // Do we have to loop over each hit? Yes.

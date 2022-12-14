@@ -8,18 +8,36 @@
 /* eslint-disable no-console */
 
 import { argv } from 'yargs';
-import { AbortError, isAxiosError } from './helpers/call_kibana';
-import { createApmUsers } from './create_apm_users';
-import { getKibanaVersion } from './helpers/get_version';
+import {
+  AbortError,
+  isAxiosError,
+} from '../../server/test_helpers/create_apm_users/helpers/call_kibana';
+import { createApmUsers } from '../../server/test_helpers/create_apm_users/create_apm_users';
+import { getKibanaVersion } from '../../server/test_helpers/create_apm_users/helpers/get_version';
 
 async function init() {
   const esUserName = (argv.username as string) || 'elastic';
   const esPassword = argv.password as string | undefined;
+  const esUrl = argv.esUrl as string | undefined;
   const kibanaBaseUrl = argv.kibanaUrl as string | undefined;
 
   if (!esPassword) {
     console.error(
       'Please specify credentials for elasticsearch: `--username elastic --password abcd` '
+    );
+    process.exit();
+  }
+
+  if (!esUrl) {
+    console.error(
+      'Please specify the url for elasticsearch: `--es-url http://localhost:9200` '
+    );
+    process.exit();
+  }
+
+  if (!esUrl.startsWith('https://') && !esUrl.startsWith('http://')) {
+    console.error(
+      'Elasticsearch url must be prefixed with http(s):// `--es-url http://localhost:9200`'
     );
     process.exit();
   }
@@ -42,7 +60,11 @@ async function init() {
   }
 
   const kibana = { hostname: kibanaBaseUrl };
-  const elasticsearch = { username: esUserName, password: esPassword };
+  const elasticsearch = {
+    node: esUrl,
+    username: esUserName,
+    password: esPassword,
+  };
 
   console.log({ kibana, elasticsearch });
 
@@ -50,9 +72,7 @@ async function init() {
   console.log(`Connected to Kibana ${version}`);
 
   const users = await createApmUsers({ elasticsearch, kibana });
-  const credentials = users
-    .map((u) => ` - ${u.username} / ${esPassword}`)
-    .join('\n');
+  const credentials = users.map((u) => ` - ${u} / ${esPassword}`).join('\n');
 
   console.log(
     `\nYou can now login to ${kibana.hostname} with:\n${credentials}`

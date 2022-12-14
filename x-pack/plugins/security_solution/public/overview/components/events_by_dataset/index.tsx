@@ -22,13 +22,13 @@ import type {
   MatrixHistogramConfigs,
   MatrixHistogramOption,
 } from '../../../common/components/matrix_histogram/types';
-import { convertToBuildEsQuery } from '../../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import {
   eventsStackByOptions,
   eventsHistogramConfig,
 } from '../../../common/components/events_tab/histogram_configurations';
-import { HostsTableType } from '../../../hosts/store/model';
+import { HostsTableType } from '../../../explore/hosts/store/model';
 import type { InputsModelId } from '../../../common/store/inputs/constants';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
@@ -56,7 +56,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showLegend?: boolean;
   showSpacer?: boolean;
-  timelineId?: string;
+  scopeId?: string;
   toggleTopN?: () => void;
 }
 
@@ -89,7 +89,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   setQuery,
   showLegend,
   showSpacer = true,
-  timelineId,
+  scopeId,
   to,
   toggleTopN,
 }) => {
@@ -199,7 +199,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       showLegend={showLegend}
       skip={filterQuery === undefined}
       startDate={from}
-      timelineId={timelineId}
+      scopeId={scopeId}
       {...eventsByDatasetHistogramConfigs}
       title={onlyField != null ? i18n.TOP(onlyField) : eventsByDatasetHistogramConfigs.title}
     />

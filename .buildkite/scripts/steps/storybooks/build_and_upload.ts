@@ -15,7 +15,7 @@ const STORYBOOKS = [
   'apm',
   'canvas',
   'ci_composite',
-  'cloud',
+  'cloud_chat',
   'coloring',
   'chart_icons',
   'controls',
@@ -31,7 +31,6 @@ const STORYBOOKS = [
   'expression_reveal_image',
   'expression_shape',
   'expression_tagcloud',
-  'files',
   'fleet',
   'home',
   'infra',
@@ -41,7 +40,9 @@ const STORYBOOKS = [
   'presentation',
   'security_solution',
   'shared_ux',
+  'triggers_actions_ui',
   'ui_actions_enhanced',
+  'language_documentation_popover',
   'unified_search',
 ];
 

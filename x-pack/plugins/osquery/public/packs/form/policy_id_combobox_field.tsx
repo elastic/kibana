@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { reduce } from 'lodash';
+import { castArray, reduce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
+import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-
-import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
-import type { FieldHook } from '../../shared_imports';
-import { ComboBoxField } from '../../shared_imports';
+import deepEqual from 'fast-deep-equal';
+import { i18n } from '@kbn/i18n';
+import { useController } from 'react-hook-form';
+import { useAgentPolicies } from '../../agent_policies';
 
 // Custom styling for drop down list items due to:
 //  1) the max-width and overflow properties is added to prevent long agent policy
@@ -30,43 +30,42 @@ const AgentPolicyDescriptionColumn = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
-type ComboBoxFieldProps = Parameters<typeof ComboBoxField>[0];
-
-type PolicyIdComboBoxFieldProps = Pick<ComboBoxFieldProps, 'euiFieldProps'> & {
-  field: FieldHook<string[]>;
-  agentPoliciesById: Record<string, GetAgentPoliciesResponseItem>;
-};
+interface PolicyIdComboBoxFieldProps {
+  euiFieldProps?: EuiComboBoxProps<string>;
+  options: Array<EuiComboBoxOptionOption<string>>;
+}
 
 const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
   euiFieldProps,
-  field,
-  agentPoliciesById,
+  options,
 }) => {
-  const { value, setValue } = field;
+  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
-  const options = useMemo(
-    () =>
-      Object.entries(agentPoliciesById).map(([agentPolicyId, agentPolicy]) => ({
-        key: agentPolicyId,
-        label: agentPolicy.name,
-      })),
-    [agentPoliciesById]
-  );
+  const {
+    field: { onChange, value },
+    fieldState: { error },
+  } = useController<{ policy_ids: string[] }>({
+    name: 'policy_ids',
+    defaultValue: [],
+    rules: {},
+  });
 
-  const selectedOptions = useMemo(
-    () =>
-      value.map((policyId) => ({
+  const selectedOptions = useMemo(() => {
+    if (agentPoliciesById) {
+      return castArray(value).map((policyId) => ({
         key: policyId,
         label: agentPoliciesById[policyId]?.name ?? policyId,
-      })),
-    [agentPoliciesById, value]
-  );
+      }));
+    }
 
-  const onChange = useCallback(
+    return [];
+  }, [agentPoliciesById, value]);
+
+  const handleChange = useCallback(
     (newOptions: EuiComboBoxOptionOption[]) => {
-      setValue(newOptions.map((option) => option.key || option.label));
+      onChange(newOptions.map((option) => option.key || option.label));
     },
-    [setValue]
+    [onChange]
   );
 
   const renderOption = useCallback(
@@ -74,12 +73,12 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
       <EuiFlexGroup>
         <AgentPolicyNameColumn grow={2}>
           <span className="eui-textTruncate">
-            {(option.key && agentPoliciesById[option.key]?.name) ?? option.label}
+            {(option.key && agentPoliciesById?.[option.key]?.name) ?? option.label}
           </span>
         </AgentPolicyNameColumn>
         <AgentPolicyDescriptionColumn grow={5}>
           <EuiTextColor className="eui-textTruncate" color="subdued">
-            {(option.key && agentPoliciesById[option.key].description) ?? ''}
+            {(option.key && agentPoliciesById?.[option.key].description) ?? ''}
           </EuiTextColor>
         </AgentPolicyDescriptionColumn>
         <EuiFlexItem grow={2} className="eui-textRight">
@@ -89,7 +88,7 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
               defaultMessage="{count, plural, one {# agent} other {# agents}} enrolled"
               // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
               values={{
-                count: (option.key && agentPoliciesById[option.key]?.agents) ?? 0,
+                count: (option.key && agentPoliciesById?.[option.key]?.agents) ?? 0,
               }}
             />
           </EuiTextColor>
@@ -101,7 +100,12 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
 
   const helpText = useMemo(() => {
     if (!value?.length || !value[0].length || !agentPoliciesById) {
-      return;
+      return (
+        <FormattedMessage
+          id="xpack.osquery.pack.form.agentPoliciesFieldHelpText"
+          defaultMessage="Queries in this pack are scheduled for agents in the selected policies."
+        />
+      );
     }
 
     const agentCount = reduce(
@@ -126,28 +130,31 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
     );
   }, [agentPoliciesById, value]);
 
-  const mergedEuiFieldProps = useMemo(
-    () => ({
-      onCreateOption: null,
-      noSuggestions: false,
-      isClearable: true,
-      selectedOptions,
-      options,
-      renderOption,
-      onChange,
-      ...euiFieldProps,
-    }),
-    [euiFieldProps, onChange, options, renderOption, selectedOptions]
-  );
+  const hasError = useMemo(() => !!error?.message, [error?.message]);
 
   return (
-    <ComboBoxField
-      field={field as FieldHook}
-      fullWidth={true}
+    <EuiFormRow
+      label={i18n.translate('xpack.osquery.pack.form.agentPoliciesFieldLabel', {
+        defaultMessage: 'Scheduled agent policies (optional)',
+      })}
       helpText={helpText}
-      euiFieldProps={mergedEuiFieldProps}
-    />
+      error={error?.message}
+      isInvalid={hasError}
+      fullWidth
+    >
+      <EuiComboBox
+        isInvalid={hasError}
+        selectedOptions={selectedOptions}
+        fullWidth
+        data-test-subj="policyIdsComboBox"
+        isClearable
+        options={options}
+        renderOption={renderOption}
+        onChange={handleChange}
+        {...euiFieldProps}
+      />
+    </EuiFormRow>
   );
 };
 
-export const PolicyIdComboBoxField = React.memo(PolicyIdComboBoxFieldComponent);
+export const PolicyIdComboBoxField = React.memo(PolicyIdComboBoxFieldComponent, deepEqual);

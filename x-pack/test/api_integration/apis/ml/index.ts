@@ -67,5 +67,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./saved_objects'));
     loadTestFile(require.resolve('./system'));
     loadTestFile(require.resolve('./trained_models'));
+    loadTestFile(require.resolve('./notifications'));
   });
 }

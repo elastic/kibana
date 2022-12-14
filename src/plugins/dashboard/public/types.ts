@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { ReactElement } from 'react';
 
 import { History } from 'history';
 import { AnyAction, Dispatch } from 'redux';
@@ -20,21 +21,13 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
 
-import type { DashboardContainer, DashboardSavedObject } from '.';
+import type { DashboardContainer } from './application';
 import type { DashboardAppLocatorParams } from './locator';
-import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
-import { SavedObjectLoader } from './services/saved_object_loader';
+import type { DashboardPanelMap, DashboardPanelState, SavedDashboardPanel } from '../common';
 
 export type { SavedDashboardPanel };
 
 export type NavAction = (anchorElement?: any) => void;
-export interface SavedDashboardPanelMap {
-  [key: string]: SavedDashboardPanel;
-}
-
-export interface DashboardPanelMap {
-  [key: string]: DashboardPanelState;
-}
 
 /**
  * DashboardState contains all pieces of tracked state for an individual dashboard
@@ -48,11 +41,13 @@ export interface DashboardState {
   description: string;
   savedQuery?: string;
   timeRestore: boolean;
+  timeRange?: TimeRange;
+  savedObjectId?: string;
   fullScreenMode: boolean;
   expandedPanelId?: string;
   options: DashboardOptions;
   panels: DashboardPanelMap;
-  timeRange?: TimeRange;
+  refreshInterval?: RefreshInterval;
   timeslice?: [number, number];
 
   controlGroupInput?: PersistableControlGroupInput;
@@ -76,6 +71,7 @@ export interface DashboardContainerInput extends ContainerInput {
   useMargins: boolean;
   syncColors?: boolean;
   syncTooltips?: boolean;
+  syncCursor?: boolean;
   viewMode: ViewMode;
   filters: Filter[];
   title: string;
@@ -95,19 +91,17 @@ export interface DashboardAppState {
   dataViews?: DataView[];
   updateLastSavedState?: () => void;
   resetToLastSavedState?: () => void;
-  savedDashboard?: DashboardSavedObject;
   dashboardContainer?: DashboardContainer;
+  createConflictWarning?: () => ReactElement | undefined;
   getLatestDashboardState?: () => DashboardState;
   $triggerDashboardRefresh: Subject<{ force?: boolean }>;
   $onDashboardStateChange: BehaviorSubject<DashboardState>;
-  applyFilters?: (query: Query, filters: Filter[]) => void;
 }
 
 /**
  * The shared services and tools used to build a dashboard from a saved object ID.
  */
-// TODO: Remove reference to DashboardAppServices as part of https://github.com/elastic/kibana/pull/138774
-export type DashboardBuildContext = Pick<DashboardAppServices, 'savedDashboards'> & {
+export interface DashboardBuildContext {
   locatorState?: DashboardAppLocatorParams;
   history: History;
   isEmbeddedExternally: boolean;
@@ -118,13 +112,14 @@ export type DashboardBuildContext = Pick<DashboardAppServices, 'savedDashboards'
   $triggerDashboardRefresh: Subject<{ force?: boolean }>;
   $onDashboardStateChange: BehaviorSubject<DashboardState>;
   executionContext?: KibanaExecutionContext;
-};
+}
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type DashboardOptions = {
   hidePanelTitles: boolean;
   useMargins: boolean;
   syncColors: boolean;
+  syncCursor: boolean;
   syncTooltips: boolean;
 };
 
@@ -155,9 +150,4 @@ export interface DashboardMountContextProps {
   scopedHistory: () => ScopedHistory;
   onAppLeave: AppMountParameters['onAppLeave'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-}
-
-// TODO: Remove DashboardAppServices as part of https://github.com/elastic/kibana/pull/138774
-export interface DashboardAppServices {
-  savedDashboards: SavedObjectLoader;
 }

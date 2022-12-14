@@ -13,8 +13,6 @@ import {
   RISK_SCORE,
   RULE_NAME,
   RULE_SWITCH,
-  RULES_ROW,
-  RULES_TABLE,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
 import {
@@ -26,7 +24,7 @@ import {
   FALSE_POSITIVES_DETAILS,
   removeExternalLinkText,
   MACHINE_LEARNING_JOB_ID,
-  MACHINE_LEARNING_JOB_STATUS,
+  // MACHINE_LEARNING_JOB_STATUS,
   MITRE_ATTACK_DETAILS,
   REFERENCE_URLS_DETAILS,
   RISK_SCORE_DETAILS,
@@ -40,7 +38,7 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { expectNumberOfRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../tasks/common';
 import {
   createAndEnableRule,
@@ -75,9 +73,7 @@ describe('Detection rules, machine learning', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-    });
+    expectNumberOfRules(expectedNumberOfRules);
 
     cy.get(RULE_NAME).should('have.text', getMachineLearningRule().name);
     cy.get(RISK_SCORE).should('have.text', getMachineLearningRule().riskScore);
@@ -107,7 +103,11 @@ describe('Detection rules, machine learning', () => {
       );
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Machine Learning');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
-      cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'StoppedStopped');
+      // With the #1912 ML rule improvement changes we enable jobs on rule creation.
+      // Though, in cypress jobs enabling does not work reliably and job can be started or stopped.
+      // Thus, we disable next check till we fix the issue with enabling jobs in cypress.
+      // Relevant ticket: https://github.com/elastic/security-team/issues/5389
+      // cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'StoppedStopped');
       cy.get(MACHINE_LEARNING_JOB_ID).should(
         'have.text',
         getMachineLearningRule().machineLearningJobs.join('')

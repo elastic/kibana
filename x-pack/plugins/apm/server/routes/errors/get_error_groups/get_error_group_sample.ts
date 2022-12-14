@@ -12,17 +12,17 @@ import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getTransaction } from '../../transactions/get_transaction';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getErrorGroupSample({
   environment,
   kuery,
   serviceName,
   groupId,
-  setup,
+  apmEventClient,
   start,
   end,
 }: {
@@ -30,17 +30,16 @@ export async function getErrorGroupSample({
   kuery: string;
   serviceName: string;
   groupId: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
-
   const params = {
     apm: {
       events: [ProcessorEvent.error as const],
     },
     body: {
+      track_total_hits: true,
       size: 1,
       query: {
         bool: {
@@ -71,7 +70,7 @@ export async function getErrorGroupSample({
     transaction = await getTransaction({
       transactionId,
       traceId,
-      setup,
+      apmEventClient,
       start,
       end,
     });

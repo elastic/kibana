@@ -15,6 +15,7 @@ import { IndexPatternRef } from '../../types';
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
   label: string;
   title?: string;
+  isDisabled?: boolean;
 };
 
 export function ChangeIndexPattern({

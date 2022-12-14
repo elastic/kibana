@@ -46,6 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can resolve errors and submit', async function () {
         await PageObjects.settings.setIndexPatternField('log*');
+        await new Promise((e) => setTimeout(e, 500));
         await (await PageObjects.settings.getSaveDataViewButtonActive()).click();
         await PageObjects.settings.removeIndexPattern();
       });
@@ -121,6 +122,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('edit index pattern', () => {
       it('on edit click', async () => {
         await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', 'Logstash Star');
+
+        await retry.try(async () => {
+          expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(
+            `Logstash Star`
+          );
+        });
+      });
+      it('can save with same name', async () => {
+        await PageObjects.settings.editIndexPattern(
+          'logstash-*,hello_world*',
+          '@timestamp',
+          'Logstash Star',
+          true
+        );
 
         await retry.try(async () => {
           expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(

@@ -28,7 +28,7 @@ describe('ALL - Add Integration', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
   });
 
-  it('should add the old integration and be able to upgrade it', () => {
+  it.skip('should add the old integration and be able to upgrade it', () => {
     const oldVersion = '0.7.4';
 
     cy.visit(OLD_OSQUERY_MANAGER);
@@ -78,7 +78,7 @@ describe('ALL - Add Integration', () => {
     cy.contains('osquery_manager-');
   });
 
-  it('should have integration and packs copied when upgrading integration', () => {
+  it.skip('should have integration and packs copied when upgrading integration', () => {
     const packageName = 'osquery_manager';
     const oldVersion = '1.2.0';
 

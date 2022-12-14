@@ -17,8 +17,7 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { context } from '@kbn/kibana-react-plugin/public';
-import { ExitFullScreenButton as ExitFullScreenButtonUi } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DashboardContainer, DashboardLoadedInfo } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
@@ -33,7 +32,6 @@ export interface DashboardViewportProps {
 
 interface State {
   isFullScreenMode: boolean;
-  controlGroupReady: boolean;
   useMargins: boolean;
   title: string;
   description?: string;
@@ -57,7 +55,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     this.controlsRoot = React.createRef();
 
     this.state = {
-      controlGroupReady: !this.props.controlGroup,
       isFullScreenMode,
       panelCount: Object.values(panels).length,
       useMargins,
@@ -85,9 +82,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     if (this.props.controlGroup && this.controlsRoot.current) {
       this.props.controlGroup.render(this.controlsRoot.current);
     }
-    if (this.props.controlGroup) {
-      this.props.controlGroup?.untilReady().then(() => this.setState({ controlGroupReady: true }));
-    }
   }
 
   public componentWillUnmount() {
@@ -111,7 +105,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
 
     const {
       settings: { isProjectEnabledInLabs, uiSettings },
-      chrome,
     } = pluginServices.getServices();
     const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
 
@@ -152,10 +145,8 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
         >
           {isFullScreenMode && (
-            // TODO: Replace with Shared UX ExitFullScreenButton once https://github.com/elastic/kibana/issues/140311 is resolved
-            <ExitFullScreenButtonUi
-              chrome={chrome as CoreStart['chrome']}
-              onExitFullScreenMode={this.onExitFullScreenMode}
+            <ExitFullScreenButton
+              onExit={this.onExitFullScreenMode}
               toggleChrome={!isEmbeddedExternally}
             />
           )}
@@ -164,9 +155,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
               <DashboardEmptyScreen isEditMode={isEditMode} />
             </div>
           )}
-          {this.state.controlGroupReady && (
-            <DashboardGrid container={container} onDataLoaded={this.props.onDataLoaded} />
-          )}
+          <DashboardGrid container={container} onDataLoaded={this.props.onDataLoaded} />
         </div>
       </>
     );

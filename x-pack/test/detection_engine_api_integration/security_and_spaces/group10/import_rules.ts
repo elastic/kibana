@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
@@ -230,7 +230,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', ruleToNdjson(rule as CreateRulesSchema), 'rules.ndjson')
+          .attach('file', ruleToNdjson(rule as RuleCreateProps), 'rules.ndjson')
           .expect(200);
 
         expect(body.errors[0]).to.eql({
@@ -973,7 +973,7 @@ export default ({ getService }: FtrProviderContext): void => {
             errors: [],
             exceptions_errors: [],
             exceptions_success: true,
-            exceptions_success_count: 2,
+            exceptions_success_count: 1,
           });
         });
 
@@ -1143,7 +1143,7 @@ export default ({ getService }: FtrProviderContext): void => {
             errors: [],
             exceptions_errors: [],
             exceptions_success: true,
-            exceptions_success_count: 2,
+            exceptions_success_count: 1,
           });
         });
 
@@ -1273,7 +1273,7 @@ export default ({ getService }: FtrProviderContext): void => {
             errors: [],
             exceptions_errors: [],
             exceptions_success: true,
-            exceptions_success_count: 2,
+            exceptions_success_count: 1,
           });
         });
       });

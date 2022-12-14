@@ -13,6 +13,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { IStorage } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
+import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
+
 import { setHttpClient } from '../hooks/use_request';
 
 import type { FleetAuthz } from '../../common';
@@ -90,6 +92,7 @@ export const createStartServices = (basePath: string = '/mock'): MockedFleetStar
     },
     storage: new Storage(createMockStore()) as jest.Mocked<Storage>,
     authz: fleetAuthzMock,
+    guidedOnboarding: guidedOnboardingMock.createStart(),
   };
 
   configureStartServices(startServices);

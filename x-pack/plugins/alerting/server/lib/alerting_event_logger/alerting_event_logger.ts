@@ -47,8 +47,8 @@ interface AlertOpts {
   id: string;
   message: string;
   group?: string;
-  subgroup?: string;
   state?: AlertInstanceState;
+  flapping: boolean;
 }
 
 interface ActionOpts {
@@ -56,7 +56,6 @@ interface ActionOpts {
   typeId: string;
   alertId: string;
   alertGroup?: string;
-  alertSubgroup?: string;
 }
 
 export class AlertingEventLogger {
@@ -129,7 +128,7 @@ export class AlertingEventLogger {
       throw new Error('AlertingEventLogger not initialized');
     }
 
-    updateEvent(this.event, { message, outcome: 'success' });
+    updateEvent(this.event, { message, outcome: 'success', alertingOutcome: 'success' });
   }
 
   public setExecutionFailed(message: string, errorMessage: string) {
@@ -137,7 +136,12 @@ export class AlertingEventLogger {
       throw new Error('AlertingEventLogger not initialized');
     }
 
-    updateEvent(this.event, { message, outcome: 'failure', error: errorMessage });
+    updateEvent(this.event, {
+      message,
+      outcome: 'failure',
+      alertingOutcome: 'failure',
+      error: errorMessage,
+    });
   }
 
   public logTimeout() {
@@ -177,6 +181,7 @@ export class AlertingEventLogger {
       if (status.error) {
         updateEvent(this.event, {
           outcome: 'failure',
+          alertingOutcome: 'failure',
           reason: status.error?.reason || 'unknown',
           error: this.event?.error?.message || status.error.message,
           ...(this.event.message
@@ -188,6 +193,7 @@ export class AlertingEventLogger {
       } else {
         if (status.warning) {
           updateEvent(this.event, {
+            alertingOutcome: 'warning',
             reason: status.warning?.reason || 'unknown',
             message: status.warning?.message || this.event?.message,
           });
@@ -232,7 +238,6 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
     state: alert.state,
     instanceId: alert.id,
     group: alert.group,
-    subgroup: alert.subgroup,
     message: alert.message,
     savedObjects: [
       {
@@ -243,6 +248,7 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
       },
     ],
     ruleName: context.ruleName,
+    flapping: alert.flapping,
   });
 }
 
@@ -257,14 +263,7 @@ export function createActionExecuteRecord(context: RuleContextOpts, action: Acti
     action: EVENT_LOG_ACTIONS.executeAction,
     instanceId: action.alertId,
     group: action.alertGroup,
-    subgroup: action.alertSubgroup,
-    message: `alert: ${context.ruleType.id}:${context.ruleId}: '${context.ruleName}' instanceId: '${
-      action.alertId
-    }' scheduled ${
-      action.alertSubgroup
-        ? `actionGroup(subgroup): '${action.alertGroup}(${action.alertSubgroup})'`
-        : `actionGroup: '${action.alertGroup}'`
-    } action: ${action.typeId}:${action.id}`,
+    message: `alert: ${context.ruleType.id}:${context.ruleId}: '${context.ruleName}' instanceId: '${action.alertId}' scheduled actionGroup: '${action.alertGroup}' action: ${action.typeId}:${action.id}`,
     savedObjects: [
       {
         id: context.ruleId,
@@ -335,6 +334,7 @@ export function initializeExecuteRecord(context: RuleContext) {
 interface UpdateEventOpts {
   message?: string;
   outcome?: string;
+  alertingOutcome?: string;
   error?: string;
   ruleName?: string;
   status?: string;
@@ -342,8 +342,10 @@ interface UpdateEventOpts {
   metrics?: RuleRunMetrics;
   timings?: TaskRunnerTimings;
 }
+
 export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
-  const { message, outcome, error, ruleName, status, reason, metrics, timings } = opts;
+  const { message, outcome, error, ruleName, status, reason, metrics, timings, alertingOutcome } =
+    opts;
   if (!event) {
     throw new Error('Cannot update event because it is not initialized.');
   }
@@ -354,6 +356,12 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
   if (outcome) {
     event.event = event.event || {};
     event.event.outcome = outcome;
+  }
+
+  if (alertingOutcome) {
+    event.kibana = event.kibana || {};
+    event.kibana.alerting = event.kibana.alerting || {};
+    event.kibana.alerting.outcome = alertingOutcome;
   }
 
   if (error) {

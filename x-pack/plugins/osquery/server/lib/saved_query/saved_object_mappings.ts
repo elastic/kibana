@@ -33,6 +33,7 @@ export const usageMetricType: SavedObjectsType = {
 };
 
 export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
   properties: {
     description: {
       type: 'text',
@@ -122,10 +123,15 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     enabled: {
       type: 'boolean',
     },
+    shards: {
+      type: 'object',
+      enabled: false,
+    },
     version: {
       type: 'long',
     },
     queries: {
+      dynamic: false,
       properties: {
         id: {
           type: 'keyword',
@@ -193,7 +199,12 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
     version: {
       type: 'long',
     },
+    shards: {
+      type: 'object',
+      enabled: false,
+    },
     queries: {
+      dynamic: false,
       properties: {
         id: {
           type: 'keyword',

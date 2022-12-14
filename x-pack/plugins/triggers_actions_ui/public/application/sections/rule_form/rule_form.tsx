@@ -68,7 +68,6 @@ import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage } from '../../constants';
-import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
 import { RuleNotifyWhen } from './rule_notify_when';
 import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
@@ -100,6 +99,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   metadata?: MetaData;
   filteredRuleTypes?: string[];
   connectorFeatureId?: string;
+  onChangeMetaData: (metadata: MetaData) => void;
 }
 
 export const RuleForm = ({
@@ -116,6 +116,7 @@ export const RuleForm = ({
   metadata,
   filteredRuleTypes: ruleTypeToFilter,
   connectorFeatureId = AlertingConnectorFeatureId,
+  onChangeMetaData,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -168,6 +169,7 @@ export const RuleForm = ({
     ruleTypes,
     error: loadRuleTypesError,
     ruleTypeIndex,
+    ruleTypesIsLoading,
   } = useLoadRuleTypes({ filteredRuleTypes: ruleTypeToFilter });
 
   // load rule types
@@ -309,15 +311,6 @@ export const RuleForm = ({
 
   const selectedRuleType = rule?.ruleTypeId ? ruleTypeIndex?.get(rule?.ruleTypeId) : undefined;
   const recoveryActionGroup = selectedRuleType?.recoveryActionGroup?.id;
-  const getDefaultActionParams = useCallback(
-    (actionTypeId: string, actionGroupId: string): Record<string, RuleActionParam> | undefined =>
-      getDefaultsForActionParams(
-        actionTypeId,
-        actionGroupId,
-        actionGroupId === recoveryActionGroup
-      ),
-    [recoveryActionGroup]
-  );
 
   const tagsOptions = rule.tags ? rule.tags.map((label: string) => ({ label })) : [];
 
@@ -393,7 +386,7 @@ export const RuleForm = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule size="full" margin="xs" />
-        <EuiListGroup flush={true} gutterSize="m" size="l" maxWidth={false}>
+        <EuiListGroup flush={true} gutterSize="m" size="m" maxWidth={false}>
           {items
             .sort((a, b) => ruleTypeCompare(a, b))
             .map((item, index) => {
@@ -532,6 +525,7 @@ export const RuleForm = ({
               data={data}
               dataViews={dataViews}
               unifiedSearch={unifiedSearch}
+              onChangeMetaData={onChangeMetaData}
             />
           </Suspense>
         </EuiErrorBoundary>
@@ -571,7 +565,7 @@ export const RuleForm = ({
                   }
                 : { ...actionGroup, defaultActionMessage: ruleTypeModel?.defaultActionMessage }
             )}
-            getDefaultActionParams={getDefaultActionParams}
+            recoveryActionGroup={recoveryActionGroup}
             setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
             setActionGroupIdByIndex={(group: string, index: number) =>
               setActionProperty('group', group, index)
@@ -855,7 +849,7 @@ export const RuleForm = ({
           ) : null}
           {ruleTypeNodes}
         </>
-      ) : ruleTypeIndex ? (
+      ) : ruleTypeIndex && !ruleTypesIsLoading ? (
         <NoAuthorizedRuleTypes operation={operation} />
       ) : (
         <SectionLoading>
@@ -878,7 +872,7 @@ const NoAuthorizedRuleTypes = ({ operation }: { operation: string }) => (
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.ruleForm.error.noAuthorizedRuleTypesTitle"
-          defaultMessage="You have not been authorized to {operation} any Rule types"
+          defaultMessage="You have not been authorized to {operation} any rule types"
           values={{ operation }}
         />
       </h2>

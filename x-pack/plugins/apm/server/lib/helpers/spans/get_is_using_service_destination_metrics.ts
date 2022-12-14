@@ -18,8 +18,8 @@ import {
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
   SPAN_DURATION,
   SPAN_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../setup_request';
+} from '../../../../common/es_fields/apm';
+import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 export function getProcessorEventForServiceDestinationStatistics(
   searchServiceDestinationMetrics: boolean
@@ -54,20 +54,18 @@ export function getDocCountFieldForServiceDestinationStatistics(
 }
 
 export async function getIsUsingServiceDestinationMetrics({
-  setup,
+  apmEventClient,
   useSpanName,
   kuery,
   start,
   end,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   useSpanName: boolean;
   kuery: string;
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
-
   async function getServiceDestinationMetricsCount(
     query?: QueryDslQueryContainer
   ) {
@@ -78,7 +76,8 @@ export async function getIsUsingServiceDestinationMetrics({
           events: [getProcessorEventForServiceDestinationStatistics(true)],
         },
         body: {
-          size: 1,
+          track_total_hits: 1,
+          size: 0,
           terminate_after: 1,
           query: {
             bool: {

@@ -24,6 +24,24 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { GetStateReturn } from '../../services/discover_state';
 import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../hooks/use_saved_search';
+export interface RandomSamplingOption {
+  mode: 'random_sampling';
+  seed: string;
+  probability: number;
+}
+
+export interface NormalSamplingOption {
+  mode: 'normal_sampling';
+  seed: string;
+  shardSize: number;
+}
+
+export interface NoSamplingOption {
+  mode: 'no_sampling';
+  seed: string;
+}
+
+export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   dataView: DataView;
@@ -39,6 +57,7 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   sessionId?: string;
   fieldsToFetch?: string[];
   totalDocuments?: number;
+  samplingOption?: SamplingOption;
 }
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
@@ -163,6 +182,11 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         totalDocuments: savedSearchDataTotalHits$
           ? savedSearchDataTotalHits$.getValue()?.result
           : undefined,
+        samplingOption: {
+          mode: 'normal_sampling',
+          shardSize: 5000,
+          seed: searchSessionId,
+        } as NormalSamplingOption,
       });
       embeddable.reload();
     }

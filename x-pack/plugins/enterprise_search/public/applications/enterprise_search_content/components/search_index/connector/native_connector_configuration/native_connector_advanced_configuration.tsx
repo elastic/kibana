@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
-import { EuiLinkTo, EuiButtonTo } from '../../../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
 import { SEARCH_INDEX_TAB_PATH } from '../../../../routes';
 import { IndexNameLogic } from '../../index_name_logic';
@@ -31,19 +31,7 @@ export const NativeConnectorAdvancedConfiguration: React.FC = () => {
         <EuiText size="s">
           <FormattedMessage
             id="xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnectorAdvancedConfiguration.description"
-            defaultMessage="Finalize your connector by triggering a one time sync, or setting a {schedulingLink}."
-            values={{
-              schedulingLink: (
-                <EuiLinkTo to={'' /* TODO docLinks */}>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnectorAdvancedConfiguration.recurringScheduleLinkLabel',
-                    {
-                      defaultMessage: 'recurring sync schedule',
-                    }
-                  )}
-                </EuiLinkTo>
-              ),
-            }}
+            defaultMessage="Finalize your connector by triggering a one time sync, or setting a recurring sync schedule."
           />
         </EuiText>
       </EuiFlexItem>
@@ -51,6 +39,7 @@ export const NativeConnectorAdvancedConfiguration: React.FC = () => {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonTo
+              data-telemetry-id="entSearchContent-connector-configuration-setScheduleAndSync"
               to={`${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
                 indexName,
                 tabId: SearchIndexTabId.SCHEDULING,

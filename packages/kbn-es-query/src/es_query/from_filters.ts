@@ -13,6 +13,7 @@ import { filterMatchesIndex } from './filter_matches_index';
 import { Filter, cleanFilter, isFilterDisabled } from '../filters';
 import { BoolQuery, DataViewBase } from './types';
 import { handleNestedFilter } from './handle_nested_filter';
+import { handleCombinedFilter } from './handle_combined_filter';
 
 /**
  * Create a filter that can be reversed for filters with negate set
@@ -66,10 +67,11 @@ export interface EsQueryFiltersConfig {
 export const buildQueryFromFilters = (
   inputFilters: Filter[] = [],
   inputDataViews: DataViewBase | DataViewBase[] | undefined,
-  { ignoreFilterIfFieldNotInIndex = false, nestedIgnoreUnmapped }: EsQueryFiltersConfig = {
+  options: EsQueryFiltersConfig = {
     ignoreFilterIfFieldNotInIndex: false,
   }
 ): BoolQuery => {
+  const { ignoreFilterIfFieldNotInIndex = false, nestedIgnoreUnmapped } = options;
   const filters = inputFilters.filter((filter) => filter && !isFilterDisabled(filter));
   const indexPatterns = Array.isArray(inputDataViews) ? inputDataViews : [inputDataViews];
 
@@ -92,6 +94,7 @@ export const buildQueryFromFilters = (
           ignoreUnmapped: nestedIgnoreUnmapped,
         });
       })
+      .map((filter) => handleCombinedFilter(filter, inputDataViews, options))
       .map(cleanFilter)
       .map(translateToQuery);
   };

@@ -29,7 +29,7 @@ export interface Dimension {
 }
 
 export interface Dimensions {
-  metric?: ExpressionValueVisDimension | string;
+  metrics: Array<ExpressionValueVisDimension | string>;
   buckets?: Array<ExpressionValueVisDimension | string>;
   splitRow?: Array<ExpressionValueVisDimension | string>;
   splitColumn?: Array<ExpressionValueVisDimension | string>;
@@ -41,6 +41,7 @@ export interface LabelsParams {
   values: boolean;
   valuesFormat: ValueFormats;
   percentDecimals: number;
+  colorOverrides: Record<string, string>;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
   truncate?: number | null;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
@@ -58,7 +59,9 @@ interface VisCommonParams {
 }
 
 interface VisCommonConfig extends VisCommonParams {
-  metric: ExpressionValueVisDimension | string;
+  metrics: Array<ExpressionValueVisDimension | string>;
+  metricsToLabels?: string;
+  buckets?: Array<ExpressionValueVisDimension | string>;
   splitColumn?: Array<ExpressionValueVisDimension | string>;
   splitRow?: Array<ExpressionValueVisDimension | string>;
   labels: ExpressionValuePartitionLabels;
@@ -67,6 +70,7 @@ interface VisCommonConfig extends VisCommonParams {
 
 export interface PartitionVisParams extends VisCommonParams {
   dimensions: Dimensions;
+  metricsToLabels: Record<string, string>;
   labels: LabelsParams;
   palette: PaletteOutput;
   isDonut?: boolean;
@@ -79,7 +83,7 @@ export interface PartitionVisParams extends VisCommonParams {
 }
 
 export interface PieVisConfig extends VisCommonConfig {
-  buckets?: Array<ExpressionValueVisDimension | string>;
+  partitionByColumn?: boolean;
   isDonut: boolean;
   emptySizeRatio?: EmptySizeRatios;
   respectSourceOrder?: boolean;
@@ -89,16 +93,16 @@ export interface PieVisConfig extends VisCommonConfig {
 }
 
 export interface TreemapVisConfig extends VisCommonConfig {
-  buckets?: Array<ExpressionValueVisDimension | string>;
   nestedLegend: boolean;
 }
 
-export interface MosaicVisConfig extends VisCommonConfig {
-  buckets?: Array<ExpressionValueVisDimension | string>;
+export interface MosaicVisConfig
+  extends Omit<VisCommonConfig, 'metrics' | 'metricsToLabels' | 'colorOverrides'> {
+  metric: ExpressionValueVisDimension | string;
   nestedLegend: boolean;
 }
 
-export interface WaffleVisConfig extends VisCommonConfig {
+export interface WaffleVisConfig extends Omit<VisCommonConfig, 'buckets'> {
   bucket?: ExpressionValueVisDimension | string;
   showValuesInLegend: boolean;
 }
@@ -108,6 +112,7 @@ export interface RenderValue {
   visType: ChartTypes;
   visConfig: PartitionVisParams;
   syncColors: boolean;
+  canNavigateToLens?: boolean;
 }
 
 export enum LabelPositions {

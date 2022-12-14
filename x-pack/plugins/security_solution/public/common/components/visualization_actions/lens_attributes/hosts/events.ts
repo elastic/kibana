@@ -53,7 +53,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
       },
       filters: [],
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             '0039eb0c-9a1a-4687-ae54-0f4e239bec75': {
               columns: {

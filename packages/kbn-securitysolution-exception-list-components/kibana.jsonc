@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/securitysolution-exception-list-components",
+  "owner": "@elastic/security-solution-platform",
+  "runtimeDeps": [],
+  "typeDeps": [],
+}

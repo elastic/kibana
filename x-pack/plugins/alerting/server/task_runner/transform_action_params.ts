@@ -25,12 +25,13 @@ interface TransformActionParamsOptions {
   alertInstanceId: string;
   alertActionGroup: string;
   alertActionGroupName: string;
-  alertActionSubgroup?: string;
   actionParams: RuleActionParams;
   alertParams: RuleTypeParams;
   state: AlertInstanceState;
   kibanaBaseUrl?: string;
   context: AlertInstanceContext;
+  ruleUrl?: string;
+  flapping: boolean;
 }
 
 export function transformActionParams({
@@ -44,13 +45,14 @@ export function transformActionParams({
   tags,
   alertInstanceId,
   alertActionGroup,
-  alertActionSubgroup,
   alertActionGroupName,
   context,
   actionParams,
   state,
   kibanaBaseUrl,
   alertParams,
+  ruleUrl,
+  flapping,
 }: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
@@ -63,7 +65,6 @@ export function transformActionParams({
     alertInstanceId,
     alertActionGroup,
     alertActionGroupName,
-    alertActionSubgroup,
     context,
     date: new Date().toISOString(),
     state,
@@ -75,12 +76,13 @@ export function transformActionParams({
       type: alertType,
       spaceId,
       tags,
+      url: ruleUrl,
     },
     alert: {
       id: alertInstanceId,
       actionGroup: alertActionGroup,
       actionGroupName: alertActionGroupName,
-      actionSubgroup: alertActionSubgroup,
+      flapping,
     },
   };
   return actionsPlugin.renderActionParameterTemplates(

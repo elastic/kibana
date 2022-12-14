@@ -21,11 +21,15 @@ export function defineGetPrivilegesRoutes({ router, authz }: RouteDefinitionPara
           includeActions: schema.maybe(
             schema.oneOf([schema.literal('true'), schema.literal('false')])
           ),
+          respectLicenseLevel: schema.maybe(
+            schema.oneOf([schema.literal('true'), schema.literal('false')])
+          ),
         }),
       },
     },
     createLicensedRouteHandler((context, request, response) => {
-      const privileges = authz.privileges.get();
+      const respectLicenseLevel = request.query.respectLicenseLevel !== 'false'; // if undefined resolve to true by default
+      const privileges = authz.privileges.get(respectLicenseLevel);
       const includeActions = request.query.includeActions === 'true';
       const privilegesResponseBody = includeActions
         ? privileges

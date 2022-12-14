@@ -208,6 +208,23 @@ describe('QueryBarTopRowTopRow', () => {
     expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
   });
 
+  it('Should render update button as icon button', () => {
+    const component = mount(
+      wrapQueryBarTopRowInContext({
+        isDirty: false,
+        screenTitle: 'Another Screen',
+        showDatePicker: true,
+        showSubmitButton: true,
+        submitButtonStyle: 'iconOnly',
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+        timeHistory: mockTimeHistory,
+      })
+    );
+
+    expect(component.find(REFRESH_BUTTON_SELECTOR).prop('iconOnly')).toBe(true);
+  });
+
   it('Should render the timefilter duration container for sharing', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { act, render, RenderResult } from '@testing-library/react';
-import { FormTestProvider } from './builtin_action_types/test_utils';
+import { act, render, RenderResult, screen } from '@testing-library/react';
+import { FormTestProvider } from './test_utils';
 import {
   ConfigFieldSchema,
   SecretsFieldSchema,
@@ -76,6 +76,44 @@ describe('SimpleConnectorForm', () => {
     expect(getByText('Authentication')).toBeInTheDocument();
     expect(getByText('Username')).toBeInTheDocument();
     expect(getByText('Password')).toBeInTheDocument();
+  });
+
+  describe('help text and default values', () => {
+    const configFormSchemaWithDefault: ConfigFieldSchema[] = [
+      {
+        id: 'test-config-default-value',
+        label: 'Test config default',
+        helpText: <>{'Test help text in a component'}</>,
+        defaultValue: 'a default',
+      },
+    ];
+    const secretsFormSchemaWithHelpText: SecretsFieldSchema[] = [
+      { id: 'username', label: 'Username' },
+      { id: 'password', label: 'Password', isPasswordField: true },
+      {
+        id: 'password-with-help-text',
+        label: 'Password with help text',
+        isPasswordField: true,
+        helpText: 'Password help text',
+      },
+    ];
+
+    it('renders the help text and default values', async () => {
+      render(
+        <FormTestProvider onSubmit={onSubmit}>
+          <SimpleConnectorForm
+            isEdit={true}
+            readOnly={false}
+            configFormSchema={configFormSchemaWithDefault}
+            secretsFormSchema={secretsFormSchemaWithHelpText}
+          />
+        </FormTestProvider>
+      );
+
+      expect(screen.getByDisplayValue('a default')).toBeInTheDocument();
+      expect(screen.getByText('Test help text in a component')).toBeInTheDocument();
+      expect(screen.getByText('Password help text')).toBeInTheDocument();
+    });
   });
 
   it('submits correctly', async () => {

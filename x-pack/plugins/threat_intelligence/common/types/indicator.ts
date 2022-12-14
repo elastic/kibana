@@ -32,14 +32,15 @@ export enum RawIndicatorFieldId {
   FileSha3512 = 'threat.indicator.file.hash.sha3-512',
   FileSha512224 = 'threat.indicator.file.hash.sha512/224',
   FileSha512256 = 'threat.indicator.file.hash.sha512/256',
-  FileSSDeep = 'threat.indicator.file.ssdeep',
-  FileTlsh = 'threat.indicator.file.tlsh',
-  FileImpfuzzy = 'threat.indicator.file.impfuzzy',
-  FileImphash = 'threat.indicator.file.imphash',
-  FilePehash = 'threat.indicator.file.pehash',
-  FileVhash = 'threat.indicator.file.vhash',
+  FileSSDeep = 'threat.indicator.file.hash.ssdeep',
+  FileTlsh = 'threat.indicator.file.hash.tlsh',
+  FileImpfuzzy = 'threat.indicator.file.hash.impfuzzy',
+  FileImphash = 'threat.indicator.file.hash.imphash',
+  FilePehash = 'threat.indicator.file.hash.pehash',
+  FileVhash = 'threat.indicator.file.hash.vhash',
   X509Serial = 'threat.indicator.x509.serial_number',
   WindowsRegistryKey = 'threat.indicator.registry.key',
+  WindowsRegistryPath = 'threat.indicator.registry.path',
   AutonomousSystemNumber = 'threat.indicator.as.number',
   MacAddress = 'threat.indicator.mac',
   TimeStamp = '@timestamp',
@@ -48,6 +49,34 @@ export enum RawIndicatorFieldId {
   Description = 'threat.indicator.description',
   NameOrigin = 'threat.indicator.name_origin',
 }
+
+/**
+ * Threat indicator field map to Enriched Event.
+ * (reverse of https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/cti/constants.ts#L35)
+ */
+export const IndicatorFieldEventEnrichmentMap: { [id: string]: string[] } = {
+  [RawIndicatorFieldId.FileSha256]: ['file.hash.sha256'],
+  [RawIndicatorFieldId.FileMd5]: ['file.hash.md5'],
+  [RawIndicatorFieldId.FileSha1]: ['file.hash.sha1'],
+  [RawIndicatorFieldId.FileSha224]: ['file.hash.sha224'],
+  [RawIndicatorFieldId.FileSha3224]: ['file.hash.sha3-224'],
+  [RawIndicatorFieldId.FileSha3256]: ['file.hash.sha3-256'],
+  [RawIndicatorFieldId.FileSha384]: ['file.hash.sha384'],
+  [RawIndicatorFieldId.FileSha3384]: ['file.hash.sha3-384'],
+  [RawIndicatorFieldId.FileSha512]: ['file.hash.sha512'],
+  [RawIndicatorFieldId.FileSha3512]: ['file.hash.sha3-512'],
+  [RawIndicatorFieldId.FileSha512224]: ['file.hash.sha512/224'],
+  [RawIndicatorFieldId.FileSha512256]: ['file.hash.sha512/256'],
+  [RawIndicatorFieldId.FileSSDeep]: ['file.hash.ssdeep'],
+  [RawIndicatorFieldId.FileTlsh]: ['file.hash.tlsh'],
+  [RawIndicatorFieldId.FileImpfuzzy]: ['file.hash.impfuzzy'],
+  [RawIndicatorFieldId.FileImphash]: ['file.hash.imphash'],
+  [RawIndicatorFieldId.FilePehash]: ['file.hash.pehash'],
+  [RawIndicatorFieldId.FileVhash]: ['file.hash.vhash'],
+  [RawIndicatorFieldId.Ip]: ['source.ip', 'destination.ip'],
+  [RawIndicatorFieldId.UrlFull]: ['url.full'],
+  [RawIndicatorFieldId.WindowsRegistryPath]: ['registry.path'],
+};
 
 /**
  * Threat Intelligence Indicator interface.
@@ -83,6 +112,20 @@ export const generateMockIndicator = (): Indicator => {
 };
 
 /**
+ * Used to create an Indicator with tlp marking
+ */
+export const generateMockIndicatorWithTlp = (): Indicator => {
+  const indicator = generateMockBaseIndicator();
+
+  indicator.fields['threat.indicator.type'] = ['type'];
+  indicator.fields['threat.indicator.ip'] = ['0.0.0.0'];
+  indicator.fields['threat.indicator.name'] = ['0.0.0.0'];
+  indicator.fields['threat.indicator.marking.tlp'] = ['RED'];
+
+  return indicator;
+};
+
+/**
  * Used to create a Url Indicator.
  */
 export const generateMockUrlIndicator = (): Indicator => {
@@ -93,7 +136,7 @@ export const generateMockUrlIndicator = (): Indicator => {
   indicator.fields['threat.indicator.url.full'] = ['https://0.0.0.0/test'];
   indicator.fields['threat.indicator.url.original'] = ['https://0.0.0.0/test'];
   indicator.fields['threat.indicator.name'] = ['https://0.0.0.0/test'];
-  indicator.fields['threat.indicator.name_origin'] = ['threat.indicator.url.original'];
+  indicator.fields['threat.indicator.name_origin'] = ['threat.indicator.url.full'];
 
   return indicator;
 };

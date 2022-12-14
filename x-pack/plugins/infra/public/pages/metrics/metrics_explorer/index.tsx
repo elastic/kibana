@@ -11,7 +11,6 @@ import React, { useEffect } from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { DocumentTitle } from '../../../components/document_title';
 import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
@@ -74,16 +73,6 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
 
   return (
     <EuiErrorBoundary>
-      <DocumentTitle
-        title={(previousTitle: string) =>
-          i18n.translate('xpack.infra.infrastructureMetricsExplorerPage.documentTitle', {
-            defaultMessage: '{previousTitle} | Metrics Explorer',
-            values: {
-              previousTitle,
-            },
-          })
-        }
-      />
       <MetricsPageTemplate
         hasData={metricIndicesExist}
         pageHeader={{

@@ -16,6 +16,7 @@ const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const pageObjects = getPageObjects([
     'common',
     'infraHome',
@@ -41,6 +42,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+
+      it('should render the correct page title', async () => {
+        const documentTitle = await browser.getTitle();
+        expect(documentTitle).to.contain(
+          'Metrics Explorer - Infrastructure - Observability - Elastic'
+        );
+      });
 
       it('should have three metrics by default', async () => {
         const metrics = await pageObjects.infraMetricsExplorer.getMetrics();

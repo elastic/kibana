@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import styled from 'styled-components';
 import { pick } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
@@ -23,7 +24,7 @@ import type { BrowserFields } from '../../../../common/containers/source';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
-import { addContentToTimeline } from './helpers';
+import { addContentToTimeline, getDisplayValue } from './helpers';
 import { DataProviderType } from './data_provider';
 import { timelineSelectors } from '../../../store/timeline';
 import { ADD_FIELD_LABEL, ADD_TEMPLATE_FIELD_LABEL } from './translations';
@@ -32,6 +33,10 @@ interface AddDataProviderPopoverProps {
   browserFields: BrowserFields;
   timelineId: string;
 }
+
+const AddFieldPopoverContainer = styled.div`
+  min-width: 350px;
+`;
 
 const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = ({
   browserFields,
@@ -66,14 +71,14 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         onAddedToTimeline: handleClosePopover,
         providerToAdd: {
           id: providerId,
-          name: value,
+          name: field,
           enabled: true,
           excluded,
           kqlQuery: '',
           type,
           queryMatch: {
             displayField: undefined,
-            displayValue: undefined,
+            displayValue: getDisplayValue(value),
             field,
             value,
             operator,
@@ -205,7 +210,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
       panelPaddingSize="none"
       repositionOnScroll
     >
-      {content}
+      <AddFieldPopoverContainer>{content}</AddFieldPopoverContainer>
     </EuiPopover>
   );
 };

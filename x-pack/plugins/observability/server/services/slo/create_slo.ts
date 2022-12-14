@@ -7,44 +7,62 @@
 
 import uuid from 'uuid';
 
-import { SLO } from '../../types/models';
+import { Duration, DurationUnit, SLO } from '../../domain/models';
 import { ResourceInstaller } from './resource_installer';
 import { SLORepository } from './slo_repository';
-import { TransformInstaller } from './transform_installer';
-
-import { CreateSLOParams, CreateSLOResponse } from '../../types/schema';
+import { TransformManager } from './transform_manager';
+import { CreateSLOParams, CreateSLOResponse } from '../../types/rest_specs';
+import { validateSLO } from '../../domain/services';
 
 export class CreateSLO {
   constructor(
     private resourceInstaller: ResourceInstaller,
     private repository: SLORepository,
-    private transformInstaller: TransformInstaller,
-    private spaceId: string
+    private transformManager: TransformManager
   ) {}
 
-  public async execute(sloParams: CreateSLOParams): Promise<CreateSLOResponse> {
-    const slo = this.toSLO(sloParams);
+  public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
+    const slo = this.toSLO(params);
+    validateSLO(slo);
 
-    await this.resourceInstaller.ensureCommonResourcesInstalled(this.spaceId);
+    await this.resourceInstaller.ensureCommonResourcesInstalled();
     await this.repository.save(slo);
 
+    let sloTransformId;
     try {
-      await this.transformInstaller.installAndStartTransform(slo, this.spaceId);
+      sloTransformId = await this.transformManager.install(slo);
     } catch (err) {
       await this.repository.deleteById(slo.id);
+      throw err;
+    }
+
+    try {
+      await this.transformManager.start(sloTransformId);
+    } catch (err) {
+      await Promise.all([
+        this.transformManager.uninstall(sloTransformId),
+        this.repository.deleteById(slo.id),
+      ]);
+
       throw err;
     }
 
     return this.toResponse(slo);
   }
 
-  private toSLO(sloParams: CreateSLOParams): SLO {
+  private toSLO(params: CreateSLOParams): SLO {
+    const now = new Date();
     return {
-      ...sloParams,
+      ...params,
       id: uuid.v1(),
       settings: {
-        destination_index: sloParams.settings?.destination_index,
+        timestamp_field: params.settings?.timestamp_field ?? '@timestamp',
+        sync_delay: params.settings?.sync_delay ?? new Duration(1, DurationUnit.Minute),
+        frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
       },
+      revision: 1,
+      created_at: now,
+      updated_at: now,
     };
   }
 

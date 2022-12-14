@@ -12,19 +12,19 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
-import { Setup } from '../../lib/helpers/setup_request';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 import { getFailedTransactionRateTimeSeries } from '../../lib/helpers/transaction_error_rate';
 import { NodeStats } from '../../../common/service_map';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface Options {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   environment: string;
   dependencyName: string;
   start: number;
@@ -35,13 +35,12 @@ interface Options {
 export function getServiceMapDependencyNodeInfo({
   environment,
   dependencyName,
-  setup,
+  apmEventClient,
   start,
   end,
   offset,
 }: Options): Promise<NodeStats> {
   return withApmSpan('get_service_map_dependency_node_stats', async () => {
-    const { apmEventClient } = setup;
     const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
       start,
       end,
@@ -73,6 +72,7 @@ export function getServiceMapDependencyNodeInfo({
           events: [ProcessorEvent.metric],
         },
         body: {
+          track_total_hits: false,
           size: 0,
           query: {
             bool: {

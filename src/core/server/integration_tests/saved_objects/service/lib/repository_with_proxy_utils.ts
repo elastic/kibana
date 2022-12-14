@@ -122,7 +122,8 @@ export const declarePostMgetRoute = (hapiServer: Hapi.Server, hostname: string, 
         if (
           proxyInterrupt === 'bulkGetMyType' ||
           proxyInterrupt === 'checkConficts' ||
-          proxyInterrupt === 'internalBulkResolve'
+          proxyInterrupt === 'internalBulkResolve' ||
+          proxyInterrupt === 'bulkDeleteMyDocs'
         ) {
           return proxyResponseHandler(h, hostname, port);
         } else {

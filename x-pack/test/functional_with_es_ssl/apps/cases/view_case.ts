@@ -86,79 +86,189 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await find.byCssSelector('[data-test-subj*="tags-delete-action"]');
       });
 
-      it('changes a case status to in-progress via dropdown menu', async () => {
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
-        // validate user action
-        await find.byCssSelector(
-          '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-in-progress"]'
-        );
-        // validates dropdown tag
-        await testSubjects.existOrFail('case-view-status-dropdown > status-badge-in-progress');
-      });
-
-      it('changes a case status to closed via dropdown-menu', async () => {
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.closed);
-
-        // validate user action
-        await find.byCssSelector(
-          '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-closed"]'
-        );
-        // validates dropdown tag
-        await testSubjects.existOrFail('case-view-status-dropdown > status-badge-closed');
-      });
-
-      it("reopens a case from the 'reopen case' button", async () => {
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.closed);
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.click('case-view-status-action-button');
-        await header.waitUntilLoadingHasFinished();
-
-        await testSubjects.existOrFail('header-page-supplements > status-badge-open', {
-          timeout: 5000,
+      describe('status', () => {
+        it('changes a case status to in-progress via dropdown menu', async () => {
+          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+          // validate user action
+          await find.byCssSelector(
+            '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
+          );
+          // validates dropdown tag
+          await testSubjects.existOrFail(
+            'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
+          );
         });
 
-        // validate user action
-        await find.byCssSelector(
-          '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-open"]'
-        );
-        // validates dropdown tag
-        await testSubjects.existOrFail('case-view-status-dropdown > status-badge-open');
-      });
+        it('changes a case status to closed via dropdown-menu', async () => {
+          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.closed);
 
-      it("marks in progress a case from the 'mark in progress' button", async () => {
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.click('case-view-status-action-button');
-        await header.waitUntilLoadingHasFinished();
-
-        await testSubjects.existOrFail('header-page-supplements > status-badge-in-progress', {
-          timeout: 5000,
+          // validate user action
+          await find.byCssSelector(
+            '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-closed"]'
+          );
+          // validates dropdown tag
+          await testSubjects.existOrFail(
+            'case-view-status-dropdown > case-status-badge-popover-button-closed'
+          );
         });
 
-        // validate user action
-        await find.byCssSelector(
-          '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-in-progress"]'
-        );
-        // validates dropdown tag
-        await testSubjects.existOrFail('case-view-status-dropdown > status-badge-in-progress');
-      });
+        it("reopens a case from the 'reopen case' button", async () => {
+          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.closed);
+          await header.waitUntilLoadingHasFinished();
+          await testSubjects.click('case-view-status-action-button');
+          await header.waitUntilLoadingHasFinished();
 
-      it("closes a case from the 'close case' button", async () => {
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.click('case-view-status-action-button');
-        await header.waitUntilLoadingHasFinished();
+          await testSubjects.existOrFail(
+            'header-page-supplements > case-status-badge-popover-button-open',
+            {
+              timeout: 5000,
+            }
+          );
 
-        await testSubjects.existOrFail('header-page-supplements > status-badge-closed', {
-          timeout: 5000,
+          // validate user action
+          await find.byCssSelector(
+            '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-open"]'
+          );
+          // validates dropdown tag
+          await testSubjects.existOrFail(
+            'case-view-status-dropdown > case-status-badge-popover-button-open'
+          );
         });
 
-        // validate user action
-        await find.byCssSelector(
-          '[data-test-subj*="status-update-action"] [data-test-subj="status-badge-closed"]'
-        );
-        // validates dropdown tag
-        await testSubjects.existOrFail('case-view-status-dropdown > status-badge-closed');
+        it("marks in progress a case from the 'mark in progress' button", async () => {
+          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
+          await header.waitUntilLoadingHasFinished();
+          await testSubjects.click('case-view-status-action-button');
+          await header.waitUntilLoadingHasFinished();
+
+          await testSubjects.existOrFail(
+            'header-page-supplements > case-status-badge-popover-button-in-progress',
+            {
+              timeout: 5000,
+            }
+          );
+
+          // validate user action
+          await find.byCssSelector(
+            '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
+          );
+          // validates dropdown tag
+          await testSubjects.existOrFail(
+            'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
+          );
+        });
+
+        it("closes a case from the 'close case' button", async () => {
+          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+          await header.waitUntilLoadingHasFinished();
+          await testSubjects.click('case-view-status-action-button');
+          await header.waitUntilLoadingHasFinished();
+
+          await testSubjects.existOrFail(
+            'header-page-supplements > case-status-badge-popover-button-closed',
+            {
+              timeout: 5000,
+            }
+          );
+
+          // validate user action
+          await find.byCssSelector(
+            '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-closed"]'
+          );
+          // validates dropdown tag
+          await testSubjects.existOrFail(
+            'case-view-status-dropdown >case-status-badge-popover-button-closed'
+          );
+        });
+      });
+
+      describe('draft comments', () => {
+        createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+        it('persists new comment when status is updated in dropdown', async () => {
+          const commentArea = await find.byCssSelector(
+            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+          );
+          await commentArea.focus();
+          await commentArea.type('Test comment from automation');
+
+          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+          // validate user action
+          await find.byCssSelector(
+            '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
+          );
+          // validates dropdown tag
+          await testSubjects.existOrFail(
+            'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
+          );
+
+          await testSubjects.click('submit-comment');
+
+          // validate user action
+          const newComment = await find.byCssSelector(
+            '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          );
+          expect(await newComment.getVisibleText()).equal('Test comment from automation');
+        });
+
+        it('persists new comment when case is closed the close case button', async () => {
+          const commentArea = await find.byCssSelector(
+            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+          );
+          await commentArea.focus();
+          await commentArea.type('Test comment from automation');
+
+          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+          await header.waitUntilLoadingHasFinished();
+          await testSubjects.click('case-view-status-action-button');
+          await header.waitUntilLoadingHasFinished();
+
+          await testSubjects.existOrFail(
+            'header-page-supplements > case-status-badge-popover-button-closed',
+            {
+              timeout: 5000,
+            }
+          );
+
+          // validate user action
+          await find.byCssSelector(
+            '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-closed"]'
+          );
+          // validates dropdown tag
+          await testSubjects.existOrFail(
+            'case-view-status-dropdown >case-status-badge-popover-button-closed'
+          );
+
+          await testSubjects.click('submit-comment');
+
+          // validate user action
+          const newComment = await find.byCssSelector(
+            '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          );
+          expect(await newComment.getVisibleText()).equal('Test comment from automation');
+        });
+
+        it('persists new comment to the case when user goes to case list table and comes back to the case', async () => {
+          const commentArea = await find.byCssSelector(
+            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+          );
+          await commentArea.focus();
+          await commentArea.type('Test comment from automation');
+
+          await testSubjects.click('backToCases');
+
+          const caseLink = await find.byCssSelector('[data-test-subj="case-details-link"');
+
+          caseLink.click();
+
+          await testSubjects.click('submit-comment');
+
+          // validate user action
+          const newComment = await find.byCssSelector(
+            '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          );
+          expect(await newComment.getVisibleText()).equal('Test comment from automation');
+        });
       });
     });
 
@@ -167,6 +277,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('deletes the case successfully', async () => {
         await cases.singleCase.deleteCase();
+        await cases.casesTable.waitForTableToFinishLoading();
         await cases.casesTable.validateCasesTableHasNthRows(0);
       });
     });
@@ -255,27 +366,38 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       describe('logs in with default user', () => {
-        createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+        beforeEach(async () => {
+          await createAndNavigateToCase(getPageObject, getService);
+        });
 
         afterEach(async () => {
-          await cases.singleCase.closeAssigneesPopover();
+          await cases.api.deleteAllCases();
         });
 
         it('shows the assign users popover when clicked', async () => {
           await testSubjects.missingOrFail('euiSelectableList');
-
           await cases.singleCase.openAssigneesPopover();
+          await cases.singleCase.closeAssigneesPopover();
         });
 
         it('assigns a user from the popover', async () => {
           await cases.singleCase.openAssigneesPopover();
           await cases.common.setSearchTextInAssigneesPopover('case');
           await cases.common.selectFirstRowInAssigneesPopover();
-
-          // navigate out of the modal
           await cases.singleCase.closeAssigneesPopover();
           await header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+        });
+
+        it('assigns multiple users', async () => {
+          await cases.singleCase.openAssigneesPopover();
+          await cases.common.setSearchTextInAssigneesPopover('case');
+          await cases.common.selectAllRowsInAssigneesPopover();
+
+          await cases.singleCase.closeAssigneesPopover();
+          await header.waitUntilLoadingHasFinished();
+          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user2');
         });
       });
 

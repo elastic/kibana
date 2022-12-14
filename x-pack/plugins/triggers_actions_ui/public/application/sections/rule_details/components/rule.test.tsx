@@ -39,6 +39,7 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { waitFor } from '@testing-library/react';
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
@@ -72,11 +73,13 @@ describe('rules', () => {
           status: 'OK',
           muted: false,
           actionGroupId: 'default',
+          flapping: false,
         },
         second_rule: {
           status: 'Active',
           muted: false,
           actionGroupId: 'action group id unknown',
+          flapping: false,
         },
       },
     });
@@ -134,10 +137,12 @@ describe('rules', () => {
       ['us-central']: {
         status: 'OK',
         muted: false,
+        flapping: false,
       },
       ['us-east']: {
         status: 'OK',
         muted: false,
+        flapping: false,
       },
     };
 
@@ -169,8 +174,8 @@ describe('rules', () => {
       mutedInstanceIds: ['us-west', 'us-east'],
     });
     const ruleType = mockRuleType();
-    const ruleUsWest: AlertStatus = { status: 'OK', muted: false };
-    const ruleUsEast: AlertStatus = { status: 'OK', muted: false };
+    const ruleUsWest: AlertStatus = { status: 'OK', muted: false, flapping: false };
+    const ruleUsEast: AlertStatus = { status: 'OK', muted: false, flapping: false };
 
     const wrapper = mountWithIntl(
       <RuleComponent
@@ -183,10 +188,12 @@ describe('rules', () => {
             'us-west': {
               status: 'OK',
               muted: false,
+              flapping: false,
             },
             'us-east': {
               status: 'OK',
               muted: false,
+              flapping: false,
             },
           },
         })}
@@ -219,6 +226,7 @@ describe('alertToListItem', () => {
       muted: false,
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'testing',
+      flapping: false,
     };
 
     expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
@@ -238,6 +246,7 @@ describe('alertToListItem', () => {
       status: 'Active',
       muted: false,
       activeStartDate: fake2MinutesAgo.toISOString(),
+      flapping: false,
     };
 
     expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
@@ -258,6 +267,7 @@ describe('alertToListItem', () => {
       muted: true,
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'default',
+      flapping: false,
     };
 
     expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
@@ -276,6 +286,7 @@ describe('alertToListItem', () => {
       status: 'Active',
       muted: false,
       actionGroupId: 'default',
+      flapping: false,
     };
 
     expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
@@ -294,6 +305,7 @@ describe('alertToListItem', () => {
       status: 'OK',
       muted: true,
       actionGroupId: 'default',
+      flapping: false,
     };
     expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
       alert: 'id',
@@ -308,6 +320,8 @@ describe('alertToListItem', () => {
 
 describe('execution duration overview', () => {
   it('render last execution status', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+
     const rule = mockRule({
       executionStatus: { status: 'ok', lastExecutionDate: new Date('2020-08-20T19:23:38Z') },
     });
@@ -337,7 +351,7 @@ describe('execution duration overview', () => {
 });
 
 describe('disable/enable functionality', () => {
-  it('should show that the rule is enabled', () => {
+  it('should show that the rule is enabled', async () => {
     const rule = mockRule();
     const ruleType = mockRuleType();
     const ruleSummary = mockRuleSummary();
@@ -350,7 +364,9 @@ describe('disable/enable functionality', () => {
         readOnly={false}
       />
     );
-    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"]').first();
+    const actionsElem = await waitFor(() =>
+      wrapper.find('[data-test-subj="statusDropdown"]').first()
+    );
 
     expect(actionsElem.text()).toEqual('Enabled');
   });
@@ -370,7 +386,9 @@ describe('disable/enable functionality', () => {
         readOnly={false}
       />
     );
-    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"]').first();
+    const actionsElem = await waitFor(() =>
+      wrapper.find('[data-test-subj="statusDropdown"]').first()
+    );
 
     expect(actionsElem.text()).toEqual('Disabled');
   });
@@ -389,11 +407,13 @@ describe('tabbed content', () => {
           status: 'OK',
           muted: false,
           actionGroupId: 'default',
+          flapping: false,
         },
         second_rule: {
           status: 'Active',
           muted: false,
           actionGroupId: 'action group id unknown',
+          flapping: false,
         },
       },
     });
@@ -419,8 +439,8 @@ describe('tabbed content', () => {
       tabbedContent.update();
     });
 
-    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeTruthy();
-    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
+    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeFalsy();
+    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeTruthy();
 
     tabbedContent.find('[data-test-subj="eventLogListTab"]').simulate('click');
 
@@ -473,6 +493,7 @@ function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSummary {
         status: 'OK',
         muted: false,
         actionGroupId: 'testActionGroup',
+        flapping: false,
       },
     },
     executionDuration: {

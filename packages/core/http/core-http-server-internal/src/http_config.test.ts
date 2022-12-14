@@ -14,13 +14,19 @@ import { ExternalUrlConfig } from './external_url';
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
 const invalidHostnames = ['asdf$%^', '0'];
 
+let mockHostname = 'kibana-hostname';
+
 jest.mock('os', () => {
   const original = jest.requireActual('os');
 
   return {
     ...original,
-    hostname: () => 'kibana-hostname',
+    hostname: () => mockHostname,
   };
+});
+
+beforeEach(() => {
+  mockHostname = 'kibana-hostname';
 });
 
 test('has defaults for config', () => {
@@ -245,10 +251,19 @@ test('accepts only valid uuids for server.uuid', () => {
   );
 });
 
-test('uses os.hostname() as default for server.name', () => {
-  const httpSchema = config.schema;
-  const validated = httpSchema.validate({});
-  expect(validated.name).toEqual('kibana-hostname');
+describe('server.name', () => {
+  test('uses os.hostname() as default for server.name', () => {
+    const httpSchema = config.schema;
+    const validated = httpSchema.validate({});
+    expect(validated.name).toEqual('kibana-hostname');
+  });
+
+  test('removes non-ascii characters from os.hostname() when used as default', () => {
+    mockHostname = 'Apple’s amazing idea♥';
+    const httpSchema = config.schema;
+    const validated = httpSchema.validate({});
+    expect(validated.name).toEqual('Apples amazing idea');
+  });
 });
 
 test('throws if xsrf.allowlist element does not start with a slash', () => {
@@ -372,6 +387,33 @@ describe('with compression', () => {
       },
     };
     expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
+});
+
+describe('compression.brotli', () => {
+  describe('enabled', () => {
+    it('defaults to `false`', () => {
+      expect(config.schema.validate({}).compression.brotli.enabled).toEqual(false);
+    });
+  });
+  describe('quality', () => {
+    it('defaults to `3`', () => {
+      expect(config.schema.validate({}).compression.brotli.quality).toEqual(3);
+    });
+    it('does not accepts value superior to `11`', () => {
+      expect(() =>
+        config.schema.validate({ compression: { brotli: { quality: 12 } } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[compression.brotli.quality]: Value must be equal to or lower than [11]."`
+      );
+    });
+    it('does not accepts value inferior to `0`', () => {
+      expect(() =>
+        config.schema.validate({ compression: { brotli: { quality: -1 } } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[compression.brotli.quality]: Value must be equal to or greater than [0]."`
+      );
+    });
   });
 });
 

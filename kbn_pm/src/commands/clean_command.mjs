@@ -35,7 +35,7 @@ export const command = {
     await cleanPaths(log, await findPluginCleanPaths(log));
 
     // Runs Bazel soft clean
-    if (Bazel.isInstalled(log)) {
+    if (await Bazel.isInstalled(log)) {
       await Bazel.clean(log, {
         quiet: args.getBooleanValue('quiet'),
       });

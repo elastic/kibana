@@ -5,57 +5,33 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
-  CONTAINER,
   CONTAINER_ID,
   CONTAINER_IMAGE,
   KUBERNETES,
-  KUBERNETES_CONTAINER_NAME,
-  KUBERNETES_NAMESPACE,
   KUBERNETES_POD_NAME,
   KUBERNETES_POD_UID,
+} from '../../../common/es_fields/apm';
+import {
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_NAMESPACE,
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-
-type ServiceOverviewContainerMetadataDetails =
-  | {
-      kubernetes: {
-        deployments?: string[];
-        replicasets?: string[];
-        namespaces?: string[];
-        containerImages?: string[];
-      };
-    }
-  | undefined;
-
-interface ResponseAggregations {
-  [key: string]: {
-    buckets: Array<{
-      key: string;
-    }>;
-  };
-}
+} from '../../../common/es_fields/infra_metrics';
+import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 export const getServiceOverviewContainerMetadata = async ({
-  esClient,
-  indexName,
+  infraMetricsClient,
   containerIds,
   start,
   end,
 }: {
-  esClient: ElasticsearchClient;
-  indexName?: string;
+  infraMetricsClient: InfraMetricsClient;
   containerIds: string[];
   start: number;
   end: number;
-}): Promise<ServiceOverviewContainerMetadataDetails> => {
-  if (!indexName) {
-    return undefined;
-  }
-
+}) => {
   const should = [
     { exists: { field: KUBERNETES } },
     { exists: { field: CONTAINER_IMAGE } },
@@ -67,10 +43,9 @@ export const getServiceOverviewContainerMetadata = async ({
     { exists: { field: KUBERNETES_DEPLOYMENT_NAME } },
   ];
 
-  const response = await esClient.search<unknown, ResponseAggregations>({
-    index: [indexName],
-    _source: [KUBERNETES, CONTAINER],
+  const response = await infraMetricsClient.search({
     size: 0,
+    track_total_hits: false,
     query: {
       bool: {
         filter: [

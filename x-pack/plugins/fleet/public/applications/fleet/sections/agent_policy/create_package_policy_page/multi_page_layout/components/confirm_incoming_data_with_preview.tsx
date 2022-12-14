@@ -23,9 +23,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
 import omit from 'lodash/omit';
-import type { SearchHit } from '@kbn/core/types/elasticsearch';
+import type { SearchHit } from '@kbn/es-types';
 
 import styled from 'styled-components';
+
+import { useStartServices, useIsGuidedOnboardingActive } from '../../../../../../../hooks';
 
 import type { PackageInfo } from '../../../../../../../../common';
 
@@ -75,7 +77,8 @@ const HitPreview: React.FC<{ hit: SearchHit }> = ({ hit }) => {
   );
   const listItems = Object.entries(hitForDisplay).map(([key, value]) => ({
     title: `${key}:`,
-    description: value,
+    // Ensures arrays and collections of nested objects are displayed correctly
+    description: JSON.stringify(value),
   }));
 
   return (
@@ -135,8 +138,15 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
   );
   const { enrolledAgents, numAgentsWithData } = useGetAgentIncomingData(incomingData, packageInfo);
 
+  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(packageInfo?.name);
+  const { guidedOnboarding } = useStartServices();
   if (!isLoading && enrolledAgents > 0 && numAgentsWithData > 0) {
     setAgentDataConfirmed(true);
+    if (isGuidedOnboardingActive) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuidedOnboardingForIntegration(
+        packageInfo?.name
+      );
+    }
   }
   if (!agentDataConfirmed) {
     return (

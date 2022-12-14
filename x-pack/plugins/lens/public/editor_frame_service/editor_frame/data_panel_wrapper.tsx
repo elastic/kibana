@@ -7,9 +7,7 @@
 
 import './data_panel_wrapper.scss';
 
-import React, { useMemo, memo, useContext, useState, useEffect, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import React, { useMemo, memo, useContext, useEffect, useCallback } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -24,7 +22,6 @@ import {
   VisualizationMap,
 } from '../../types';
 import {
-  switchDatasource,
   useLensDispatch,
   updateDatasourceState,
   useLensSelector,
@@ -180,53 +177,9 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     ],
   };
 
-  const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);
-
   return (
     <>
       <Easteregg query={externalContext?.query} />
-      {Object.keys(props.datasourceMap).length > 1 && (
-        <EuiPopover
-          id="datasource-switch"
-          className="lnsDataPanelWrapper__switchSource"
-          button={
-            <EuiButtonIcon
-              aria-label={i18n.translate('xpack.lens.dataPanelWrapper.switchDatasource', {
-                defaultMessage: 'Switch to datasource',
-              })}
-              title={i18n.translate('xpack.lens.dataPanelWrapper.switchDatasource', {
-                defaultMessage: 'Switch to datasource',
-              })}
-              data-test-subj="datasource-switch"
-              onClick={() => setDatasourceSwitcher(true)}
-              iconType="gear"
-            />
-          }
-          isOpen={showDatasourceSwitcher}
-          closePopover={() => setDatasourceSwitcher(false)}
-          panelPaddingSize="none"
-          anchorPosition="rightUp"
-        >
-          <EuiContextMenuPanel
-            title={i18n.translate('xpack.lens.dataPanelWrapper.switchDatasource', {
-              defaultMessage: 'Switch to datasource',
-            })}
-            items={Object.keys(props.datasourceMap).map((datasourceId) => (
-              <EuiContextMenuItem
-                key={datasourceId}
-                data-test-subj={`datasource-switch-${datasourceId}`}
-                icon={activeDatasourceId === datasourceId ? 'check' : 'empty'}
-                onClick={() => {
-                  setDatasourceSwitcher(false);
-                  dispatchLens(switchDatasource({ newDatasourceId: datasourceId }));
-                }}
-              >
-                {datasourceId}
-              </EuiContextMenuItem>
-            ))}
-          />
-        </EuiPopover>
-      )}
       {activeDatasourceId && !datasourceIsLoading && (
         <NativeRenderer
           className="lnsDataPanelWrapper"

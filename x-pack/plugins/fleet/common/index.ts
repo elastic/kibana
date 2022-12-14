@@ -17,6 +17,7 @@ export {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_KUBERNETES_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
   FLEET_ENDPOINT_PACKAGE,
   // Saved object type
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -48,6 +49,8 @@ export {
   // Should probably be removed
   SO_SEARCH_LIMIT,
   // Statuses
+  // Authz
+  ENDPOINT_PRIVILEGES,
 } from './constants';
 export {
   // Route services
@@ -63,6 +66,8 @@ export {
   INVALID_NAMESPACE_CHARACTERS,
   // TODO Should probably not be exposed by Fleet
   decodeCloudId,
+  getFileMetadataIndexName,
+  getFileDataIndexName,
 } from './services';
 
 export type { FleetAuthz } from './authz';

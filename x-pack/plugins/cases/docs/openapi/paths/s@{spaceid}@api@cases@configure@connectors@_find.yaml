@@ -7,14 +7,13 @@ get:
     feature in the **Management** section of the Kibana feature privileges.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
             type: array
             items: 

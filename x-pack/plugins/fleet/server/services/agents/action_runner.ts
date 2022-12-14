@@ -14,7 +14,7 @@ import { isResponseError } from '@kbn/es-errors';
 
 import moment from 'moment';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 import { appContextService } from '..';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 
@@ -65,7 +65,7 @@ export abstract class ActionRunner {
 
   protected abstract getTaskType(): string;
 
-  protected abstract processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }>;
+  protected abstract processAgents(agents: Agent[]): Promise<{ actionId: string }>;
 
   /**
    * Common runner logic accross all agent bulk actions
@@ -73,7 +73,7 @@ export abstract class ActionRunner {
    * On errors, starts a task with Task Manager to retry max 3 times
    * If the last batch was stored in state, retry continues from there (searchAfter)
    */
-  public async runActionAsyncWithRetry(): Promise<{ items: BulkActionResult[]; actionId: string }> {
+  public async runActionAsyncWithRetry(): Promise<{ actionId: string }> {
     appContextService
       .getLogger()
       .info(
@@ -113,28 +113,44 @@ export abstract class ActionRunner {
             if (this.retryParams.retryCount === 3) {
               const errorMessage = 'Stopping after 3rd retry. Error: ' + error.message;
               appContextService.getLogger().warn(errorMessage);
+
+              // clean up tasks after 3rd retry reached
+              await Promise.all([
+                this.bulkActionsResolver!.removeIfExists(this.checkTaskId!),
+                this.bulkActionsResolver!.removeIfExists(this.retryParams.taskId!),
+              ]);
+
               return;
             }
           } else {
             appContextService.getLogger().error(`Action failed: ${error.message}`);
           }
-          const taskId = await this.bulkActionsResolver!.run(
+          const taskId = this.bulkActionsResolver!.getTaskId(
+            this.actionParams.actionId!,
+            this.getTaskType()
+          );
+          await this.bulkActionsResolver!.run(
             this.actionParams,
             {
               ...this.retryParams,
               retryCount: (this.retryParams.retryCount ?? 0) + 1,
             },
-            this.getTaskType()
+            this.getTaskType(),
+            taskId
           );
 
           appContextService.getLogger().info(`Retrying in task: ${taskId}`);
         })
     );
 
-    return { items: [], actionId: this.actionParams.actionId! };
+    return { actionId: this.actionParams.actionId! };
   }
 
   private async createCheckResultTask() {
+    const taskId = this.bulkActionsResolver!.getTaskId(
+      this.actionParams.actionId!,
+      this.getTaskType() + ':check'
+    );
     return await this.bulkActionsResolver!.run(
       this.actionParams,
       {
@@ -142,11 +158,12 @@ export abstract class ActionRunner {
         retryCount: 1,
       },
       this.getTaskType(),
+      taskId,
       moment(new Date()).add(5, 'm').toDate()
     );
   }
 
-  private async processBatch(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
+  private async processBatch(agents: Agent[]): Promise<{ actionId: string }> {
     if (this.retryParams.retryCount) {
       try {
         const actions = await getAgentActions(this.esClient, this.actionParams!.actionId!);
@@ -154,7 +171,7 @@ export abstract class ActionRunner {
         // skipping batch if there is already an action document present with last agent ids
         for (const action of actions) {
           if (action.agents?.[0] === agents[0].id) {
-            return { items: [] };
+            return { actionId: this.actionParams.actionId! };
           }
         }
       } catch (error) {
@@ -165,7 +182,7 @@ export abstract class ActionRunner {
     return await this.processAgents(agents);
   }
 
-  async processAgentsInBatches(): Promise<{ items: BulkActionResult[] }> {
+  async processAgentsInBatches(): Promise<{ actionId: string }> {
     const start = Date.now();
     const pitId = this.retryParams.pitId;
 
@@ -188,10 +205,10 @@ export abstract class ActionRunner {
       appContextService
         .getLogger()
         .debug('currentAgents returned 0 hits, returning from bulk action query');
-      return { items: [] }; // stop executing if there are no more results
+      return { actionId: this.actionParams.actionId! }; // stop executing if there are no more results
     }
 
-    let results = await this.processBatch(currentAgents);
+    await this.processBatch(currentAgents);
     let allAgentsProcessed = currentAgents.length;
 
     while (allAgentsProcessed < res.total) {
@@ -205,8 +222,7 @@ export abstract class ActionRunner {
           .debug('currentAgents returned 0 hits, returning from bulk action query');
         break; // stop executing if there are no more results
       }
-      const currentResults = await this.processBatch(currentAgents);
-      results = { items: results.items.concat(currentResults.items) };
+      await this.processBatch(currentAgents);
       allAgentsProcessed += currentAgents.length;
       if (this.checkTaskId) {
         // updating check task with latest checkpoint (this.retryParams.searchAfter)
@@ -220,6 +236,6 @@ export abstract class ActionRunner {
     appContextService
       .getLogger()
       .info(`processed ${allAgentsProcessed} agents, took ${Date.now() - start}ms`);
-    return { ...results };
+    return { actionId: this.actionParams.actionId! };
   }
 }

@@ -25,7 +25,19 @@ export type PersistenceAlertService = <T>(
     _source: T;
   }>,
   refresh: boolean | 'wait_for',
-  maxAlerts?: number
+  maxAlerts?: number,
+  enrichAlerts?: (
+    alerts: Array<{
+      _id: string;
+      _source: T;
+    }>,
+    params: { spaceId: string }
+  ) => Promise<
+    Array<{
+      _id: string;
+      _source: T;
+    }>
+  >
 ) => Promise<PersistenceAlertServiceResult<T>>;
 
 export interface PersistenceAlertServiceResult<T> {

@@ -11,7 +11,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
@@ -28,15 +28,15 @@ import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
-import { ServicesItemsSetup } from './get_services_items';
-import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
+import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface AggregationParams {
   environment: string;
   kuery: string;
-  setup: ServicesItemsSetup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   maxNumServices: number;
   start: number;
@@ -48,7 +48,7 @@ interface AggregationParams {
 export async function getServiceTransactionStats({
   environment,
   kuery,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   maxNumServices,
   start,
@@ -56,8 +56,6 @@ export async function getServiceTransactionStats({
   serviceGroup,
   randomSampler,
 }: AggregationParams) {
-  const { apmEventClient } = setup;
-
   const outcomes = getOutcomeAggregation();
 
   const metrics = {
@@ -78,6 +76,7 @@ export async function getServiceTransactionStats({
         ],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

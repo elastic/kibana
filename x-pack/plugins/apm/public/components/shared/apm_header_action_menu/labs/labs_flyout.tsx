@@ -17,6 +17,8 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLoadingContent,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
@@ -24,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmEditableSettings } from '../../../../hooks/use_apm_editable_settings';
-import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useFetcher, isPending } from '../../../../hooks/use_fetcher';
 
 interface Props {
   onClose: () => void;
@@ -54,7 +56,7 @@ export function LabsFlyout({ onClose }: Props) {
         return settingsEditableConfig[key].requiresPageReload;
       });
 
-      await saveAll();
+      await saveAll({ trackMetricName: 'labs_save' });
 
       if (reloadPage) {
         window.location.reload();
@@ -77,15 +79,14 @@ export function LabsFlyout({ onClose }: Props) {
     onClose();
   }
 
-  const isLoading =
-    status === FETCH_STATUS.NOT_INITIATED || status === FETCH_STATUS.LOADING;
+  const isLoading = isPending(status);
 
   return (
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup gutterSize="m">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="beaker" size="xl" />
+            <EuiIcon type="beaker" size="l" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle>
@@ -97,6 +98,13 @@ export function LabsFlyout({ onClose }: Props) {
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiText>
+          {i18n.translate('xpack.apm.labs.description', {
+            defaultMessage:
+              'Try out the APM features that are under technical preview and in progress.',
+          })}
+        </EuiText>
       </EuiFlyoutHeader>
 
       {isLoading ? (

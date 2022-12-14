@@ -15,6 +15,8 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart, CoreSetup, HttpStart, IUiSettingsClient } from '@kbn/core/public';
+import type { ThemeServiceStart } from '@kbn/core/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 export interface AiopsAppDependencies {
   application: CoreStart['application'];
@@ -24,9 +26,11 @@ export interface AiopsAppDependencies {
   http: HttpStart;
   notifications: CoreSetup['notifications'];
   storage: IStorageWrapper;
+  theme: ThemeServiceStart;
   uiSettings: IUiSettingsClient;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePluginStart;
+  lens: LensPublicStart;
 }
 
 export const AiopsAppContext = createContext<AiopsAppDependencies | undefined>(undefined);

@@ -34,7 +34,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
 
-  describe('alerts test me', () => {
+  describe('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
@@ -144,7 +144,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   reference,
                 },
                 alertInfo: {
-                  alertId,
+                  id: alertId,
                   consumer: 'alertsFixture',
                   spaceId: space.id,
                   namespace: space.id,
@@ -296,7 +296,7 @@ instanceStateValue: true
                   reference,
                 },
                 alertInfo: {
-                  alertId,
+                  id: alertId,
                   consumer: 'alertsFixture',
                   spaceId: space.id,
                   namespace: space.id,
@@ -428,7 +428,7 @@ instanceStateValue: true
             ['createdAt', 'updatedAt']
           );
           expect(alertSearchResultInfoWithoutDates).to.eql({
-            alertId,
+            id: alertId,
             consumer: 'alertsFixture',
             spaceId: space.id,
             namespace: space.id,
@@ -821,6 +821,65 @@ instanceStateValue: true
             overwrites: {
               schedule: { interval: '1s' },
             },
+            notifyWhen: 'onThrottleInterval',
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
+              // Wait until alerts scheduled actions 3 times before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForDisabled(response.body.id, testStart);
+
+              // Ensure actions only executed once
+              const searchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              // @ts-expect-error doesnt handle total: number
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should throttle alerts with throttled action when appropriate', async () => {
+          const testStart = new Date();
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              schedule: { interval: '1s' },
+            },
+            notifyWhen: 'onThrottleInterval',
+            throttle: '1m',
+            summary: false,
           });
 
           switch (scenario.id) {
@@ -947,82 +1006,6 @@ instanceStateValue: true
                 (hit: { _source: { params: { message: string } } }) => hit._source.params.message
               );
               expect(messages.sort()).to.eql(['from:default', 'from:other']);
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
-        });
-
-        it('should not throttle when changing subgroups', async () => {
-          const testStart = new Date();
-          const reference = alertUtils.generateReference();
-          const response = await alertUtils.createAlwaysFiringAction({
-            reference,
-            overwrites: {
-              schedule: { interval: '1s' },
-              params: {
-                index: ES_TEST_INDEX_NAME,
-                reference,
-                groupsToScheduleActionsInSeries: ['default:prev', 'default:next'],
-              },
-              actions: [
-                {
-                  group: 'default',
-                  id: indexRecordActionId,
-                  params: {
-                    index: ES_TEST_INDEX_NAME,
-                    reference,
-                    message: 'from:{{alertActionGroup}}:{{alertActionSubgroup}}',
-                  },
-                },
-              ],
-            },
-          });
-
-          switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'space_1_all at space2':
-            case 'global_read at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'create',
-                  'test.always-firing',
-                  'alertsFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
-            case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: `Unauthorized to get actions`,
-                statusCode: 403,
-              });
-              break;
-            case 'space_1_all at space1':
-            case 'space_1_all_with_restricted_fixture at space1':
-            case 'superuser at space1':
-              expect(response.statusCode).to.eql(200);
-              // Wait for actions to execute twice before disabling the alert and waiting for tasks to finish
-              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
-              await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForDisabled(response.body.id, testStart);
-
-              // Ensure only 2 actions with proper params exists
-              const searchResult = await esTestIndexTool.search(
-                'action:test.index-record',
-                reference
-              );
-              // @ts-expect-error doesnt handle total: number
-              expect(searchResult.body.hits.total.value).to.eql(2);
-              const messages: string[] = searchResult.body.hits.hits.map(
-                // @ts-expect-error _source: unknown
-                (hit: { _source: { params: { message: string } } }) => hit._source.params.message
-              );
-              expect(messages.sort()).to.eql(['from:default:next', 'from:default:prev']);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1313,6 +1296,7 @@ instanceStateValue: true
     expect(eventEnd <= dateNow).to.equal(true);
 
     expect(event?.event?.outcome).to.equal(outcome);
+    expect(event?.kibana?.alerting?.outcome).to.equal(outcome);
 
     expect(event?.kibana?.saved_objects).to.eql([
       {

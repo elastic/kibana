@@ -37,7 +37,7 @@ import {
   testTagsBadge,
   testMultipleSelectedRulesLabel,
   loadPrebuiltDetectionRulesFromHeaderBtn,
-  switchToElasticRules,
+  filterByElasticRules,
   clickErrorToastBtn,
   unselectRuleByName,
   cancelConfirmationModal,
@@ -64,6 +64,14 @@ import {
   openBulkEditDeleteIndexPatternsForm,
   selectTimelineTemplate,
   checkTagsInTagsFilter,
+  clickUpdateScheduleMenuItem,
+  typeScheduleInterval,
+  typeScheduleLookback,
+  setScheduleLookbackTimeUnit,
+  setScheduleIntervalTimeUnit,
+  assertRuleScheduleValues,
+  assertUpdateScheduleWarningExists,
+  assertDefaultValuesAreAppliedToScheduleFields,
 } from '../../tasks/rules_bulk_edit';
 
 import { hasIndexPatterns, getDetails } from '../../tasks/rule_details';
@@ -79,20 +87,20 @@ import {
   createNewTermsRule,
 } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 
 import {
   getEqlRule,
   getNewThreatIndicatorRule,
   getNewRule,
   getNewThresholdRule,
-  totalNumberOfPrebuiltRules,
   getMachineLearningRule,
   getNewTermsRule,
 } from '../../objects/rule';
 import { getIndicatorMatchTimelineTemplate } from '../../objects/timeline';
 
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
+import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 
@@ -124,6 +132,8 @@ describe('Detection rules, bulk edit', () => {
     login();
   });
   beforeEach(() => {
+    // Make sure persisted rules table state is cleared
+    resetRulesTableState();
     deleteAlertsAndRules();
     esArchiverResetKibana();
     createCustomRule(
@@ -161,7 +171,7 @@ describe('Detection rules, bulk edit', () => {
       loadPrebuiltDetectionRulesFromHeaderBtn();
 
       // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
-      switchToElasticRules();
+      filterByElasticRules();
       selectNumberOfRules(expectedNumberOfSelectedRules);
       clickApplyTimelineTemplatesMenuItem();
 
@@ -181,7 +191,9 @@ describe('Detection rules, bulk edit', () => {
       clickAddTagsMenuItem();
       waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
 
-      checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
+      getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+        checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
+      });
 
       // user can proceed with custom rule editing
       cy.get(MODAL_CONFIRMATION_BTN)
@@ -202,7 +214,9 @@ describe('Detection rules, bulk edit', () => {
       clickAddTagsMenuItem();
       waitForMixedRulesBulkEditModal(expectedNumberOfCustomRulesToBeEdited);
 
-      checkPrebuiltRulesCannotBeModified(totalNumberOfPrebuiltRules);
+      getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+        checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
+      });
 
       // user cancels action and modal disappears
       cancelConfirmationModal();
@@ -275,6 +289,32 @@ describe('Detection rules, bulk edit', () => {
       // tags in tags filter sorted alphabetically
       const resultingTagsInFilter = [...resultingTags].sort();
       checkTagsInTagsFilter(resultingTagsInFilter);
+    });
+
+    it('Display success toast after adding tags', () => {
+      const tagsToBeAdded = ['tag-to-add-1', 'tag-to-add-2'];
+
+      // check if only pre-populated tags exist in the tags filter
+      checkTagsInTagsFilter(prePopulatedTags);
+
+      cy.get(EUI_FILTER_SELECT_ITEM)
+        .should('have.length', prePopulatedTags.length)
+        .each(($el, index) => {
+          cy.wrap($el).should('have.text', prePopulatedTags[index]);
+        });
+
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+
+      // open add tags form and add 2 new tags
+      openBulkEditAddTagsForm();
+      typeTags(tagsToBeAdded);
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+
+      cy.get(TOASTER_BODY).should(
+        'have.text',
+        `You've successfully updated ${expectedNumberOfCustomRulesToBeEdited} rules`
+      );
     });
 
     it('Overwrite tags in custom rules', () => {
@@ -380,6 +420,25 @@ describe('Detection rules, bulk edit', () => {
       hasIndexPatterns(resultingIndexPatterns.join(''));
     });
 
+    it('Display success toast after editing the index pattern', () => {
+      const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
+
+      // select only rules that are not ML
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      unselectRuleByName(getMachineLearningRule().name);
+
+      openBulkEditAddIndexPatternsForm();
+      typeIndexPatterns(indexPattersToBeAdded);
+      submitBulkEditForm();
+
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+
+      cy.get(TOASTER_BODY).should(
+        'have.text',
+        `You've successfully updated ${expectedNumberOfNotMLRules} rules. If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.`
+      );
+    });
+
     it('Overwrite index patterns in custom rules', () => {
       const indexPattersToWrite = ['index-to-write-1-*', 'index-to-write-2-*'];
 
@@ -482,6 +541,65 @@ describe('Detection rules, bulk edit', () => {
       // check if timeline template has been updated to selected one, by opening rule that have had timeline prior to editing
       goToTheRuleDetailsOf(RULE_NAME);
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', noneTimelineTemplate);
+    });
+  });
+
+  describe('Schedule', () => {
+    it('Default values are applied to bulk edit schedule fields', () => {
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      clickUpdateScheduleMenuItem();
+
+      assertUpdateScheduleWarningExists(expectedNumberOfCustomRulesToBeEdited);
+
+      assertDefaultValuesAreAppliedToScheduleFields({
+        interval: 5,
+        lookback: 1,
+      });
+    });
+
+    it('Updates schedule for custom rules', () => {
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      clickUpdateScheduleMenuItem();
+
+      assertUpdateScheduleWarningExists(expectedNumberOfCustomRulesToBeEdited);
+
+      typeScheduleInterval('20');
+      setScheduleIntervalTimeUnit('Hours');
+
+      typeScheduleLookback('10');
+      setScheduleLookbackTimeUnit('Minutes');
+
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+
+      goToTheRuleDetailsOf(RULE_NAME);
+
+      assertRuleScheduleValues({
+        interval: '20h',
+        lookback: '10m',
+      });
+    });
+
+    it('Validates invalid inputs when scheduling for custom rules', () => {
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      clickUpdateScheduleMenuItem();
+
+      // Validate invalid values are corrected to minimumValue - for 0 and negative values
+      typeScheduleInterval('0');
+      setScheduleIntervalTimeUnit('Hours');
+
+      typeScheduleLookback('-5');
+      setScheduleLookbackTimeUnit('Seconds');
+
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+
+      goToTheRuleDetailsOf(RULE_NAME);
+
+      assertRuleScheduleValues({
+        interval: '1h',
+        lookback: '1s',
+      });
     });
   });
 });

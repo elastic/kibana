@@ -139,6 +139,8 @@ export type {
   ParsedInterval,
   // expressions
   ExecutionContextSearch,
+  ExpressionFunctionKql,
+  ExpressionFunctionLucene,
   ExpressionFunctionKibana,
   ExpressionFunctionKibanaContext,
   ExpressionValueSearchContext,
@@ -167,6 +169,7 @@ export type {
   IEsError,
   Reason,
   WaitUntilNextSessionCompletesOptions,
+  SearchResponseWarning,
 } from './search';
 
 export {
@@ -267,6 +270,9 @@ export type {
   TimefilterSetup,
   GlobalQueryStateFromUrl,
 } from './query';
+
+export type { ShardFailureRequest } from './shard_failure_modal';
+export { ShardFailureOpenModalButton } from './shard_failure_modal';
 
 export type { AggsStart } from './search/aggs';
 

@@ -16,7 +16,7 @@ Runs a connector by ID.
 [[execute-connector-api-prereq]]
 === {api-prereq-title}
 
-You must have `read` privileges for the *Actions and Connectors* feature in the
+You must have `read` privileges for the *{connectors-feature}* feature in the
 *Management* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
 
@@ -60,8 +60,7 @@ refer to <<action-types>>.
 `documents`::
 (Required, array of objects) The documents to index in JSON format.
 
-For more information, refer to
-{kibana-ref}/index-action-type.html[Index connector and action].
+For more information, refer to <<index-action-type>>.
 =====
 
 .Jira connectors
@@ -158,9 +157,123 @@ the knowledge base.
 =======
 ======
 
-For more information, refer to
-{kibana-ref}/jira-action-type.html[{jira} connector and action].
+For more information, refer to <<jira-action-type>>.
 =====
+
+.{opsgenie} connectors
+[%collapsible%open]
+=====
+`subAction`::
+(Required, string) The action to test. Valid values include: `createAlert` and
+`closeAlert`.
+
+`subActionParams`::
+(Required, object) The set of configuration properties, which vary depending on
+the `subAction` value.
++
+.Properties when `subAction` is `createAlert`
+[%collapsible%open]
+======
+`actions`::::
+(Optional, array of strings) The custom actions available to the alert.
+
+`alias`::::
+(Optional, string) The unique identifier used for alert de-duplication in {opsgenie}.
+
+`description`::::
+(Optional, string) A description that provides detailed information about the alert.
+
+`details`::::
+(Optional, object) The custom properties of the alert. For example:
+`{"key1":"value1","key2":"value2"}`.
+
+`entity`::::
+(Optional, string) The domain of the alert. For example, the application or server
+name.
+
+`message`::::
+(Required, string) The alert message.
+
+`note`::::
+(Optional, string) Additional information for the alert.
+
+`priority`::::
+(Optional, string) The priority level for the alert. Valid values are: `P1`,
+`P2`, `P3`, `P4`, and `P5`.
+
+`responders`::::
+(Optional, array of objects) The entities to receive notifications about the
+alert. If `type` is `user`, either `id` or `username` is required. If `type` is
+`team`, either `id` or `name` is required.
++
+.Properties of `responders` objects
+[%collapsible%open]
+=======
+`id`::::
+(Required^*^, string) The identifier for the entity. 
+
+`name`::::
+(Required^*^, string) The name of the entity.
+
+`type`::::
+(Required, string) Valid values are `escalation`, `schedule`, `team`, and `user`.
+
+`username`::::
+(Required^*^, string) A valid email address for the user.
+=======
+
+`source`::::
+(Optional, string) The display name for the source of the alert.
+
+`tags`::::
+(Optional, array of strings) The tags for the alert.
+
+`user`::::
+(Optional, string) The display name for the owner.
+
+`visibleTo`::::
+(Optional, array of objects) The teams and users that the alert will be visible
+to without sending a notification. Only one of `id`, `name`, or `username` is
+required.
++
+.Properties of `visibleTo` objects
+[%collapsible%open]
+=======
+`id`::::
+(Required^*^, string) The identifier for the entity.
+
+`name`::::
+(Required^*^, string) The name of the entity.
+
+`type`::::
+(Required, string) Valid values are `team` and `user`.
+
+`username`::::
+(Required^*^, string) The user name. This property is required only when the
+`type` is `user`.
+=======
+======
++
+.Properties when `subAction` is `closeAlert`
+[%collapsible%open]
+======
+`alias`::::
+(Required, string) The unique identifier used for alert de-duplication in {opsgenie}.
+The alias must match the value used when creating the alert.
+
+`note`::::
+(Optional, string) Additional information for the alert.
+
+`source`::::
+(Optional, string) The display name for the source of the alert.
+
+`user`::::
+(Optional, string) The display name for the owner.
+======
+
+For more information, refer to <<opsgenie-action-type>>.
+=====
+
 
 .{sn-itom} connectors
 [%collapsible%open]
@@ -437,6 +550,60 @@ the security incident. The IPs are added as observables to the security incident
 `message`::
 (Required, string) The message to log.
 =====
+
+.{swimlane} connectors
+[%collapsible%open]
+=====
+`subAction`::
+(Required, string) The action to test. It must be `pushToService`.
+
+`subActionParams`::
+(Required, object) The set of configuration properties.
++
+.Properties of `subActionParams`
+[%collapsible%open]
+======
+`comments`:::
+(Optional, array of objects) Additional information that is sent to {swimlane}.
++
+.Properties of `comments` objects
+[%collapsible%open]
+=======
+comment::::
+(string) A comment related to the incident. For example, describe how to
+troubleshoot the issue.
+
+commentId::::
+(integer) A unique identifier for the comment.
+
+=======
+
+`incident`:::
+(Required, object) Information necessary to create or update a {swimlane} incident.
++
+.Properties of `incident`
+[%collapsible%open]
+=======
+`alertId`::::
+(Optional, string) The alert identifier.
+
+`caseId`::::
+(Optional, string) The case identifier for the incident.
+
+`caseName`::::
+(Optional, string) The case name for the incident.
+
+`description`::::
+(Optional, string) The description of the incident.
+
+`ruleName`::::
+(Optional, string) The rule name.
+
+`severity`::::
+(Optional, string) The severity of the incident.
+=======
+======
+=====
 ====
 --
 
@@ -549,6 +716,41 @@ The API returns the following:
 }
 --------------------------------------------------
 
+Create then update a {swimlane} incident:
+[source,sh]
+--------------------------------------------------
+POST api/actions/connector/a4746470-2f94-11ed-b0e0-87533c532698/_execute
+{
+  "params":{
+    "subAction":"pushToService",
+    "subActionParams":{
+      "incident":{
+        "description":"Description of the incident",
+        "caseName":"Case name",
+        "caseId":"1000"
+      },
+      "comments":[
+        {"commentId":"1","comment":"A comment about the incident"}
+      ]
+    }
+  }
+}
+
+POST api/actions/connector/a4746470-2f94-11ed-b0e0-87533c532698/_execute
+{
+  "params":{
+    "subAction":"pushToService",
+    "subActionParams":{
+      "incident":{
+        "caseId":"1000",
+        "caseName":"A new case name"
+      }
+    }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
 Retrieve the list of choices for a {sn-itom} connector:
 
 [source,sh]
@@ -584,3 +786,4 @@ The API returns the severity and urgency choices, for example:
   "connector_id":"9d9be270-2fd2-11ed-b0e0-87533c532698"
 }
 --------------------------------------------------
+

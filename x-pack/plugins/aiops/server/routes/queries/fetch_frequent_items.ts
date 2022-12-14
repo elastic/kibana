@@ -10,7 +10,11 @@ import { uniq, uniqWith, pick, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { Logger } from '@kbn/logging';
+import { type ChangePoint, type FieldValuePair, RANDOM_SAMPLER_SEED } from '@kbn/ml-agg-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
+const FREQUENT_ITEMS_FIELDS_LIMIT = 15;
 
 interface FrequentItemsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {
@@ -18,8 +22,40 @@ interface FrequentItemsAggregation extends estypes.AggregationsSamplerAggregatio
   };
 }
 
-function dropDuplicates(cp: ChangePoint[], uniqueFields: string[]) {
-  return uniqWith(cp, (a, b) => isEqual(pick(a, uniqueFields), pick(b, uniqueFields)));
+interface RandomSamplerAggregation {
+  sample: FrequentItemsAggregation;
+}
+
+function isRandomSamplerAggregation(arg: unknown): arg is RandomSamplerAggregation {
+  return isPopulatedObject(arg, ['sample']);
+}
+
+export function dropDuplicates(cps: ChangePoint[], uniqueFields: Array<keyof ChangePoint>) {
+  return uniqWith(cps, (a, b) => isEqual(pick(a, uniqueFields), pick(b, uniqueFields)));
+}
+
+interface ChangePointDuplicateGroup {
+  keys: Pick<ChangePoint, keyof ChangePoint>;
+  group: ChangePoint[];
+}
+export function groupDuplicates(cps: ChangePoint[], uniqueFields: Array<keyof ChangePoint>) {
+  const groups: ChangePointDuplicateGroup[] = [];
+
+  for (const cp of cps) {
+    const compareAttributes = pick(cp, uniqueFields);
+
+    const groupIndex = groups.findIndex((g) => isEqual(g.keys, compareAttributes));
+    if (groupIndex === -1) {
+      groups.push({
+        keys: compareAttributes,
+        group: [cp],
+      });
+    } else {
+      groups[groupIndex].group.push(cp);
+    }
+  }
+
+  return groups;
 }
 
 export async function fetchFrequentItems(
@@ -29,21 +65,26 @@ export async function fetchFrequentItems(
   changePoints: ChangePoint[],
   timeFieldName: string,
   deviationMin: number,
-  deviationMax: number
+  deviationMax: number,
+  logger: Logger,
+  // The default value of 1 means no sampling will be used
+  sampleProbability: number = 1,
+  emitError: (m: string) => void,
+  abortSignal?: AbortSignal
 ) {
-  // first remove duplicates in sig terms - note this is not strictly perfect as there could
-  // be conincidentally equal counts, but in general is ok...
-  const terms = dropDuplicates(changePoints, [
-    'doc_count',
-    'bg_count',
-    'total_doc_count',
-    'total_bg_count',
-  ]);
+  // Sort change points by ascending p-value, necessary to apply the field limit correctly.
+  const sortedChangePoints = changePoints.slice().sort((a, b) => {
+    return (a.pValue ?? 0) - (b.pValue ?? 0);
+  });
 
-  // get unique fields that are left
-  const fields = [...new Set(terms.map((t) => t.fieldName))];
+  // Get up to 15 unique fields from change points with retained order
+  const fields = sortedChangePoints.reduce<string[]>((p, c) => {
+    if (p.length < FREQUENT_ITEMS_FIELDS_LIMIT && !p.some((d) => d === c.fieldName)) {
+      p.push(c.fieldName);
+    }
+    return p;
+  }, []);
 
-  // TODO add query params
   const query = {
     bool: {
       minimum_should_match: 2,
@@ -58,7 +99,7 @@ export async function fetchFrequentItems(
           },
         },
       ],
-      should: terms.map((t) => {
+      should: sortedChangePoints.map((t) => {
         return { term: { [t.fieldName]: t.fieldValue } };
       }),
     },
@@ -68,61 +109,72 @@ export async function fetchFrequentItems(
     field,
   }));
 
-  const totalDocCount = terms[0].total_doc_count;
-  const minDocCount = 50000;
-  let sampleProbability = 1;
-
-  if (totalDocCount > minDocCount) {
-    sampleProbability = Math.min(0.5, minDocCount / totalDocCount);
-  }
-
-  // frequent items can be slow, so sample and use 10% min_support
-  const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
-    sample: {
-      random_sampler: {
-        probability: sampleProbability,
-      },
-      aggs: {
-        fi: {
-          // @ts-expect-error `frequent_items` is not yet part of `AggregationsAggregationContainer`
-          frequent_items: {
-            minimum_set_size: 2,
-            size: 200,
-            minimum_support: 0.1,
-            fields: aggFields,
-          },
-        },
+  const frequentItemsAgg: Record<string, estypes.AggregationsAggregationContainer> = {
+    fi: {
+      // @ts-expect-error `frequent_items` is not yet part of `AggregationsAggregationContainer`
+      frequent_items: {
+        minimum_set_size: 2,
+        size: 200,
+        minimum_support: 0.1,
+        fields: aggFields,
       },
     },
   };
 
-  const body = await client.search<unknown, { sample: FrequentItemsAggregation }>(
+  // frequent items can be slow, so sample and use 10% min_support
+  const randomSamplerAgg: Record<string, estypes.AggregationsAggregationContainer> = {
+    sample: {
+      // @ts-expect-error `random_sampler` is not yet part of `AggregationsAggregationContainer`
+      random_sampler: {
+        probability: sampleProbability,
+        seed: RANDOM_SAMPLER_SEED,
+      },
+      aggs: frequentItemsAgg,
+    },
+  };
+
+  const esBody = {
+    query,
+    aggs: sampleProbability < 1 ? randomSamplerAgg : frequentItemsAgg,
+    size: 0,
+    track_total_hits: true,
+  };
+
+  const body = await client.search<
+    unknown,
+    { sample: FrequentItemsAggregation } | FrequentItemsAggregation
+  >(
     {
       index,
       size: 0,
-      body: {
-        query,
-        aggs,
-        size: 0,
-        track_total_hits: true,
-      },
+      body: esBody,
     },
-    { maxRetries: 0 }
+    { signal: abortSignal, maxRetries: 0 }
   );
+
+  if (body.aggregations === undefined) {
+    logger.error(`Failed to fetch frequent_items, got: \n${JSON.stringify(body, null, 2)}`);
+    emitError(`Failed to fetch frequent_items.`);
+    return {
+      fields: [],
+      df: [],
+      totalDocCount: 0,
+    };
+  }
 
   const totalDocCountFi = (body.hits.total as estypes.SearchTotalHits).value;
 
-  if (body.aggregations === undefined) {
-    throw new Error('fetchFrequentItems failed, did not return aggregations.');
-  }
+  const frequentItems = isRandomSamplerAggregation(body.aggregations)
+    ? body.aggregations.sample.fi
+    : body.aggregations.fi;
 
-  const shape = body.aggregations.sample.fi.buckets.length;
+  const shape = frequentItems.buckets.length;
   let maximum = shape;
   if (maximum > 50000) {
     maximum = 50000;
   }
 
-  const fiss = body.aggregations.sample.fi.buckets;
+  const fiss = frequentItems.buckets;
   fiss.length = maximum;
 
   const results: ItemsetResult[] = [];
@@ -140,7 +192,7 @@ export async function fetchFrequentItems(
     Object.entries(fis.key).forEach(([key, value]) => {
       result.set[key] = value[0];
 
-      const pValue = changePoints.find(
+      const pValue = sortedChangePoints.find(
         (t) => t.fieldName === key && t.fieldValue === value[0]
       )?.pValue;
 
@@ -153,7 +205,7 @@ export async function fetchFrequentItems(
       return;
     }
 
-    result.size = Object.keys(result).length;
+    result.size = Object.keys(result.set).length;
     result.maxPValue = maxPValue;
     result.doc_count = fis.doc_count;
     result.support = fis.support;
@@ -162,15 +214,21 @@ export async function fetchFrequentItems(
     results.push(result);
   });
 
+  results.sort((a, b) => {
+    return b.doc_count - a.doc_count;
+  });
+
+  const uniqueFields = uniq(results.flatMap((r) => Object.keys(r.set)));
+
   return {
-    fields: uniq(results.flatMap((r) => Object.keys(r.set))),
+    fields: uniqueFields,
     df: results,
     totalDocCount: totalDocCountFi,
   };
 }
 
 export interface ItemsetResult {
-  set: Record<string, string>;
+  set: Record<FieldValuePair['fieldName'], FieldValuePair['fieldValue']>;
   size: number;
   maxPValue: number;
   doc_count: number;

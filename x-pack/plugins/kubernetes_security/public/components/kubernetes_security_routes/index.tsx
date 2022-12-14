@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
@@ -35,10 +35,11 @@ import {
   COUNT_WIDGET_KEY_NAMESPACE,
   COUNT_WIDGET_KEY_NODES,
   COUNT_WIDGET_KEY_CONTAINER_IMAGES,
+  DEFAULT_KUBERNETES_FILTER_QUERY,
 } from '../../../common/constants';
 import { PercentWidget } from '../percent_widget';
 import { CountWidget } from '../count_widget';
-import { KubernetesSecurityDeps } from '../../types';
+import { GlobalFilter, KubernetesSecurityDeps } from '../../types';
 import { AggregateResult } from '../../../common/types/aggregate';
 import { useLastUpdated } from '../../hooks';
 import { useStyles } from './styles';
@@ -59,6 +60,9 @@ const KubernetesSecurityRoutesComponent = ({
   indexPattern,
   globalFilter,
   renderSessionsView,
+  responseActionClick,
+  handleTreeNavSelection,
+  responseActionButtonProps,
 }: KubernetesSecurityDeps) => {
   const [shouldHideCharts, setShouldHideCharts] = useLocalStorage(
     LOCAL_STORAGE_HIDE_WIDGETS_KEY,
@@ -66,6 +70,16 @@ const KubernetesSecurityRoutesComponent = ({
   );
   const styles = useStyles();
   const lastUpdated = useLastUpdated(globalFilter);
+
+  const globalFilterForKubernetes: GlobalFilter = useMemo(() => {
+    return {
+      ...globalFilter,
+      filterQuery: JSON.stringify({
+        ...JSON.parse(globalFilter?.filterQuery ?? ''),
+        ...JSON.parse(DEFAULT_KUBERNETES_FILTER_QUERY),
+      }),
+    };
+  }, [globalFilter]);
 
   const onReduceInteractiveAggs = useCallback(
     (result: AggregateResult): Record<string, number> =>
@@ -125,7 +139,7 @@ const KubernetesSecurityRoutesComponent = ({
                     <CountWidget
                       title={COUNT_WIDGET_CLUSTERS}
                       indexPattern={indexPattern}
-                      globalFilter={globalFilter}
+                      globalFilter={globalFilterForKubernetes}
                       widgetKey={COUNT_WIDGET_KEY_CLUSTERS}
                       groupedBy={ORCHESTRATOR_CLUSTER_ID}
                     />
@@ -134,7 +148,7 @@ const KubernetesSecurityRoutesComponent = ({
                     <CountWidget
                       title={COUNT_WIDGET_NAMESPACE}
                       indexPattern={indexPattern}
-                      globalFilter={globalFilter}
+                      globalFilter={globalFilterForKubernetes}
                       widgetKey={COUNT_WIDGET_KEY_NAMESPACE}
                       groupedBy={ORCHESTRATOR_NAMESPACE}
                     />
@@ -143,7 +157,7 @@ const KubernetesSecurityRoutesComponent = ({
                     <CountWidget
                       title={COUNT_WIDGET_NODES}
                       indexPattern={indexPattern}
-                      globalFilter={globalFilter}
+                      globalFilter={globalFilterForKubernetes}
                       widgetKey={COUNT_WIDGET_KEY_NODES}
                       groupedBy={CLOUD_INSTANCE_NAME}
                     />
@@ -152,7 +166,7 @@ const KubernetesSecurityRoutesComponent = ({
                     <CountWidget
                       title={COUNT_WIDGET_PODS}
                       indexPattern={indexPattern}
-                      globalFilter={globalFilter}
+                      globalFilter={globalFilterForKubernetes}
                       widgetKey={COUNT_WIDGET_KEY_NODES}
                       groupedBy={ORCHESTRATOR_RESOURCE_ID}
                     />
@@ -161,7 +175,7 @@ const KubernetesSecurityRoutesComponent = ({
                     <CountWidget
                       title={COUNT_WIDGET_CONTAINER_IMAGES}
                       indexPattern={indexPattern}
-                      globalFilter={globalFilter}
+                      globalFilter={globalFilterForKubernetes}
                       widgetKey={COUNT_WIDGET_KEY_CONTAINER_IMAGES}
                       groupedBy={CONTAINER_IMAGE_NAME}
                     />
@@ -191,7 +205,7 @@ const KubernetesSecurityRoutesComponent = ({
                       }
                       widgetKey="sessionsPercentage"
                       indexPattern={indexPattern}
-                      globalFilter={globalFilter}
+                      globalFilter={globalFilterForKubernetes}
                       dataValueMap={{
                         true: {
                           name: i18n.translate(
@@ -244,7 +258,7 @@ const KubernetesSecurityRoutesComponent = ({
                       }
                       widgetKey="rootLoginPercentage"
                       indexPattern={indexPattern}
-                      globalFilter={globalFilter}
+                      globalFilter={globalFilterForKubernetes}
                       dataValueMap={{
                         '0': {
                           name: i18n.translate('xpack.kubernetesSecurity.entryUserChart.root', {
@@ -273,7 +287,7 @@ const KubernetesSecurityRoutesComponent = ({
                 <ContainerNameWidget
                   widgetKey="containerNameSessions"
                   indexPattern={indexPattern}
-                  globalFilter={globalFilter}
+                  globalFilter={globalFilterForKubernetes}
                   groupedBy={CONTAINER_IMAGE_NAME}
                   countBy={ENTRY_LEADER_ENTITY_ID}
                 />
@@ -282,9 +296,12 @@ const KubernetesSecurityRoutesComponent = ({
           </>
         )}
         <TreeViewContainer
-          globalFilter={globalFilter}
+          globalFilter={globalFilterForKubernetes}
           renderSessionsView={renderSessionsView}
           indexPattern={indexPattern}
+          responseActionButtonProps={responseActionButtonProps}
+          responseActionClick={responseActionClick}
+          handleTreeNavSelection={handleTreeNavSelection}
         />
       </Route>
     </Switch>

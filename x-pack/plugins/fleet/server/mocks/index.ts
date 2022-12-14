@@ -90,10 +90,9 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
       asCurrentUser: createPackagePolicyServiceMock(),
       asInternalUser: createPackagePolicyServiceMock(),
     },
-    epm: {
-      internalSoClient: savedObjectsClientMock.create(),
-    },
+    internalSoClient: savedObjectsClientMock.create(),
     spaceId: 'default',
+    limitedToPackages: undefined,
   };
 };
 
@@ -120,6 +119,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     list: jest.fn(),
     listIds: jest.fn(),
     update: jest.fn(),
+    bulkUpdate: jest.fn(),
     runExternalCallbacks: jest.fn(),
     runDeleteExternalCallbacks: jest.fn(),
     upgrade: jest.fn(),

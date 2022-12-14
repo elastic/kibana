@@ -6,7 +6,7 @@
  */
 
 import type { Moment } from 'moment';
-import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import type { SignalSource } from '../../signals/types';
 
 export type RecentTermsAggResult = ESSearchResponse<
@@ -31,24 +31,24 @@ const PAGE_SIZE = 10000;
  * without regard to whether or not they're actually new.
  */
 export const buildRecentTermsAgg = ({
-  field,
+  fields,
   after,
 }: {
-  field: string;
+  fields: string[];
   after: Record<string, string | number | null> | undefined;
 }) => {
+  const sources = fields.map((field) => ({
+    [field]: {
+      terms: {
+        field,
+      },
+    },
+  }));
+
   return {
     new_terms: {
       composite: {
-        sources: [
-          {
-            [field]: {
-              terms: {
-                field,
-              },
-            },
-          },
-        ],
+        sources,
         size: PAGE_SIZE,
         after,
       },

@@ -10,24 +10,27 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_DURATION,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
   SPAN_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
+import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
-  calculateThroughputWithInterval,
-  calculateThroughputWithRange,
-} from '../../lib/helpers/calculate_throughput';
-import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
-import { Setup } from '../../lib/helpers/setup_request';
+  getDocumentTypeFilterForServiceDestinationStatistics,
+  getLatencyFieldForServiceDestinationStatistics,
+  getProcessorEventForServiceDestinationStatistics,
+} from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 import { calculateImpactBuilder } from '../traces/calculate_impact_builder';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 const MAX_NUM_OPERATIONS = 500;
 
@@ -44,34 +47,49 @@ export interface DependencyOperation {
 }
 
 export async function getTopDependencyOperations({
-  setup,
+  apmEventClient,
   dependencyName,
   start,
   end,
   offset,
   environment,
   kuery,
+  searchServiceDestinationMetrics,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   dependencyName: string;
   start: number;
   end: number;
   offset?: string;
   environment: Environment;
   kuery: string;
+  searchServiceDestinationMetrics: boolean;
 }) {
-  const { apmEventClient } = setup;
-
   const { startWithOffset, endWithOffset, offsetInMs } = getOffsetInMs({
     start,
     end,
     offset,
   });
 
+  const { intervalString } = getBucketSizeForAggregatedTransactions({
+    start: startWithOffset,
+    end: endWithOffset,
+    searchAggregatedServiceMetrics: searchServiceDestinationMetrics,
+  });
+
+  const field = getLatencyFieldForServiceDestinationStatistics(
+    searchServiceDestinationMetrics
+  );
+
   const aggs = {
-    duration: {
-      avg: {
-        field: SPAN_DURATION,
+    latency: {
+      ...(searchServiceDestinationMetrics
+        ? { sum: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM } }
+        : { avg: { field } }),
+    },
+    count: {
+      sum: {
+        field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
       },
     },
     successful: {
@@ -94,9 +112,14 @@ export async function getTopDependencyOperations({
     'get_top_dependency_operations',
     {
       apm: {
-        events: [ProcessorEvent.span],
+        events: [
+          getProcessorEventForServiceDestinationStatistics(
+            searchServiceDestinationMetrics
+          ),
+        ],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
@@ -105,6 +128,9 @@ export async function getTopDependencyOperations({
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
               ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
+              ...getDocumentTypeFilterForServiceDestinationStatistics(
+                searchServiceDestinationMetrics
+              ),
             ],
           },
         },
@@ -116,18 +142,20 @@ export async function getTopDependencyOperations({
             },
             aggs: {
               over_time: {
-                date_histogram: getMetricsDateHistogramParams({
-                  start: startWithOffset,
-                  end: endWithOffset,
-                  metricsInterval: 60,
-                }),
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: intervalString,
+                  min_doc_count: 0,
+                  extended_bounds: {
+                    min: startWithOffset,
+                    max: endWithOffset,
+                  },
+                },
                 aggs,
               },
               ...aggs,
               total_time: {
-                sum: {
-                  field: SPAN_DURATION,
-                },
+                sum: { field },
               },
             },
           },
@@ -153,14 +181,28 @@ export async function getTopDependencyOperations({
 
         bucket.over_time.buckets.forEach((dateBucket) => {
           const x = dateBucket.key + offsetInMs;
+          const latencyValue = isFiniteNumber(dateBucket.latency.value)
+            ? dateBucket.latency.value
+            : 0;
+          const count = isFiniteNumber(dateBucket.count.value)
+            ? dateBucket.count.value
+            : 1;
           timeseries.throughput.push({
             x,
-            y: calculateThroughputWithInterval({
-              value: dateBucket.doc_count,
-              bucketSize: 60,
+            y: calculateThroughputWithRange({
+              start: startWithOffset,
+              end: endWithOffset,
+              value: searchServiceDestinationMetrics
+                ? dateBucket.count.value || 0
+                : dateBucket.doc_count,
             }),
           });
-          timeseries.latency.push({ x, y: dateBucket.duration.value });
+          timeseries.latency.push({
+            x,
+            y: searchServiceDestinationMetrics
+              ? latencyValue / count
+              : dateBucket.latency.value,
+          });
           timeseries.failureRate.push({
             x,
             y:
@@ -173,13 +215,24 @@ export async function getTopDependencyOperations({
           });
         });
 
+        const latencyValue = isFiniteNumber(bucket.latency.value)
+          ? bucket.latency.value
+          : 0;
+        const count = isFiniteNumber(bucket.count.value)
+          ? bucket.count.value
+          : 1;
+
         return {
           spanName: bucket.key as string,
-          latency: bucket.duration.value,
+          latency: searchServiceDestinationMetrics
+            ? latencyValue / count
+            : bucket.latency.value,
           throughput: calculateThroughputWithRange({
             start: startWithOffset,
             end: endWithOffset,
-            value: bucket.doc_count,
+            value: searchServiceDestinationMetrics
+              ? bucket.count.value || 0
+              : bucket.doc_count,
           }),
           failureRate:
             bucket.failure.doc_count > 0 || bucket.successful.doc_count > 0

@@ -6,12 +6,8 @@
  */
 
 import { createStackFrameID, StackTrace } from '../../common/profiling';
-import {
-  decodeStackTrace,
-  EncodedStackTrace,
-  runLengthDecode,
-  runLengthEncode,
-} from './stacktrace';
+import { runLengthEncode } from '../../common/run_length_encoding';
+import { decodeStackTrace, EncodedStackTrace } from './stacktrace';
 
 enum fileID {
   A = 'aQpJmTLWydNvOapSFZOwKg',
@@ -87,54 +83,6 @@ describe('Stack trace operations', () => {
 
     for (const t of tests) {
       expect(decodeStackTrace(t.original)).toEqual(t.expected);
-    }
-  });
-
-  test('run length is fully reversible', () => {
-    const tests: number[][] = [[], [0], [0, 1, 2, 3], [0, 1, 1, 2, 2, 2, 3, 3, 3, 3]];
-
-    for (const t of tests) {
-      expect(runLengthDecode(runLengthEncode(t))).toEqual(t);
-    }
-  });
-
-  test('runLengthDecodeReverse with optional parameter', () => {
-    const tests: Array<{
-      bytes: Buffer;
-      expected: number[];
-    }> = [
-      {
-        bytes: Buffer.from([0x5, 0x0, 0x2, 0x2]),
-        expected: [0, 0, 0, 0, 0, 2, 2],
-      },
-      {
-        bytes: Buffer.from([0x1, 0x8]),
-        expected: [8],
-      },
-    ];
-
-    for (const t of tests) {
-      expect(runLengthDecode(t.bytes, t.expected.length)).toEqual(t.expected);
-    }
-  });
-
-  test('runLengthDecodeReverse without optional parameter', () => {
-    const tests: Array<{
-      bytes: Buffer;
-      expected: number[];
-    }> = [
-      {
-        bytes: Buffer.from([0x5, 0x0, 0x2, 0x2]),
-        expected: [0, 0, 0, 0, 0, 2, 2],
-      },
-      {
-        bytes: Buffer.from([0x1, 0x8]),
-        expected: [8],
-      },
-    ];
-
-    for (const t of tests) {
-      expect(runLengthDecode(t.bytes)).toEqual(t.expected);
     }
   });
 });

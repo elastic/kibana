@@ -10,16 +10,16 @@ import { FailedTransactionsCorrelation } from '../../../../common/correlations/f
 import {
   EVENT_OUTCOME,
   PROCESSOR_EVENT,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { fetchDurationRanges } from './fetch_duration_ranges';
 import { getEventType } from '../utils';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchFailedEventsCorrelationPValues = async ({
-  setup,
+  apmEventClient,
   start,
   end,
   environment,
@@ -28,12 +28,10 @@ export const fetchFailedEventsCorrelationPValues = async ({
   rangeSteps,
   fieldName,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   rangeSteps: number[];
   fieldName: string;
 }) => {
-  const { apmEventClient } = setup;
-
   const chartType = LatencyDistributionChartType.failedTransactionsCorrelations;
   const searchMetrics = false; // failed transactions correlations does not search metrics documents
   const eventType = getEventType(chartType, searchMetrics);
@@ -53,6 +51,7 @@ export const fetchFailedEventsCorrelationPValues = async ({
         events: [eventType],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
@@ -105,7 +104,7 @@ export const fetchFailedEventsCorrelationPValues = async ({
       0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
 
     const { durationRanges: histogram } = await fetchDurationRanges({
-      setup,
+      apmEventClient,
       chartType,
       start,
       end,

@@ -5,7 +5,13 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiButtonIconProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { Teletype } from '../../../common/types/process_tree';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
 import { ZOOM_IN, ZOOM_FIT, ZOOM_OUT } from './translations';
@@ -18,6 +24,12 @@ export interface TTYTextSizerDeps {
   isFullscreen: boolean;
   onFontSizeChanged(newSize: number): void;
 }
+
+const commonButtonProps: Partial<EuiButtonIconProps> = {
+  display: 'empty',
+  size: 's',
+  color: 'ghost',
+};
 
 const LINE_HEIGHT_SCALE_RATIO = 1.3;
 const MINIMUM_FONT_SIZE = 2;
@@ -53,13 +65,7 @@ export const TTYTextSizer = ({
         onFontSizeChanged(newSize);
       }
     }
-  }, [containerHeight, fit, fontSize, onFontSizeChanged, tty?.rows]);
-
-  useEffect(() => {
-    if (isFullscreen) {
-      setFit(true);
-    }
-  }, [isFullscreen]);
+  }, [isFullscreen, containerHeight, fit, fontSize, onFontSizeChanged, tty?.rows]);
 
   const onToggleFit = useCallback(() => {
     const newValue = !fit;
@@ -88,24 +94,13 @@ export const TTYTextSizer = ({
             display={fit ? 'fill' : 'empty'}
             iconType={fit ? 'expand' : 'minimize'}
             onClick={onToggleFit}
+            size="s"
+            color="ghost"
           />
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem>
         <div css={styles.separator} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiToolTip content={ZOOM_IN}>
-          <EuiButtonIcon
-            data-test-subj="sessionView:TTYZoomIn"
-            aria-label={ZOOM_IN}
-            iconType="plusInCircle"
-            onClick={onZoomIn}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem component="span" css={styles.ratio}>
-        {`${Math.round((fontSize / DEFAULT_TTY_FONT_SIZE) * 100)}%`}
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiToolTip content={ZOOM_OUT}>
@@ -114,6 +109,21 @@ export const TTYTextSizer = ({
             aria-label={ZOOM_OUT}
             iconType="minusInCircle"
             onClick={onZoomOut}
+            {...commonButtonProps}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem component="span" css={styles.ratio}>
+        {`${Math.round((fontSize / DEFAULT_TTY_FONT_SIZE) * 100)}%`}
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiToolTip content={ZOOM_IN}>
+          <EuiButtonIcon
+            data-test-subj="sessionView:TTYZoomIn"
+            aria-label={ZOOM_IN}
+            iconType="plusInCircle"
+            onClick={onZoomIn}
+            {...commonButtonProps}
           />
         </EuiToolTip>
       </EuiFlexItem>

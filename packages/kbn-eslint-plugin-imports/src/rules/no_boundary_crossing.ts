@@ -19,15 +19,17 @@ import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
 
-const IMPORTABLE_FROM: Record<ModuleType, ModuleType[] | '*'> = {
+const ANY_FILE_IN_BAZEL = Symbol();
+
+const IMPORTABLE_FROM: Record<ModuleType, ModuleType[] | typeof ANY_FILE_IN_BAZEL> = {
   'non-package': ['non-package', 'server package', 'browser package', 'common package', 'static'],
   'server package': ['common package', 'server package', 'static'],
   'browser package': ['common package', 'browser package', 'static'],
   'common package': ['common package', 'static'],
 
   static: [],
-  'tests or mocks': '*',
-  tooling: '*',
+  'tests or mocks': ANY_FILE_IN_BAZEL,
+  tooling: ANY_FILE_IN_BAZEL,
 };
 
 const toList = (strings: string[]) => {
@@ -87,6 +89,7 @@ export const NoBoundaryCrossingRule: Rule.RuleModule = {
     },
     messages: {
       TYPE_MISMATCH: `"{{importedType}}" code can not be imported from "{{ownType}}" code.{{suggestion}}`,
+      FILE_OUTSIDE_OF_PACKAGE: `"{{ownType}}" code can import any code already within packages, but not files outside of packages.`,
     },
   },
   create(context) {
@@ -98,12 +101,7 @@ export const NoBoundaryCrossingRule: Rule.RuleModule = {
     const self = classifier.classify(sourcePath);
     const importable = IMPORTABLE_FROM[self.type];
 
-    if (importable === '*') {
-      // don't check imports in files which can import anything
-      return {};
-    }
-
-    return visitAllImportStatements((req, { node, importer }) => {
+    return visitAllImportStatements((req, { node, importer, type }) => {
       if (
         req === null ||
         // we can ignore imports using the raw-loader, they will need to be resolved but can be managed on a case by case basis
@@ -120,6 +118,27 @@ export const NoBoundaryCrossingRule: Rule.RuleModule = {
       }
 
       const imported = classifier.classify(result.absolute);
+
+      if (importable === ANY_FILE_IN_BAZEL) {
+        if (type === 'jest' && imported.repoRel === 'package.json') {
+          // we allow jest.mock() calls to mock out the `package.json` file... it's a very
+          // specific exception for a very specific implementation
+          return;
+        }
+
+        if (self.pkgInfo?.isBazelPackage ? imported.pkgInfo?.isBazelPackage : true) {
+          return;
+        }
+
+        context.report({
+          node: node as ESTree.Node,
+          messageId: 'FILE_OUTSIDE_OF_PACKAGE',
+          data: {
+            ownType: self.type,
+          },
+        });
+        return;
+      }
 
       if (!importable.includes(imported.type)) {
         context.report({

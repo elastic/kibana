@@ -106,6 +106,17 @@
   &:focus {
     background-color: $euiFocusBackgroundColor;
   }
+
+}
+
+.embPanel__optionsMenuPopover-notification::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  content: '•';
+  transform: translate(50%, -50%);
+  color: $euiColorAccent;
+  font-size: $euiSizeL;
 }
 
 .embPanel .embPanel__optionsMenuButton {
@@ -158,11 +169,12 @@
 }
 
 .embPanel__error {
-  text-align: center;
-  justify-content: center;
-  flex-direction: column;
-  overflow: auto;
-  padding: $euiSizeS;
+  padding: $euiSizeL;
+
+  & > * {
+    max-height: 100%;
+    overflow: auto;
+  }
 }
 
 .embPanel__label {

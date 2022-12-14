@@ -7,22 +7,20 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
+import { TRACE_ID } from '../../../common/es_fields/apm';
 import {
   ConnectionNode,
   ExternalConnectionNode,
   ServiceConnectionNode,
 } from '../../../common/service_map';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function fetchServicePathsFromTraceIds(
-  setup: Setup,
+  apmEventClient: APMEventClient,
   traceIds: string[],
   start: number,
   end: number
 ) {
-  const { apmEventClient } = setup;
-
   // make sure there's a range so ES can skip shards
   const dayInMs = 24 * 60 * 60 * 1000;
   const startRange = start - dayInMs;
@@ -33,6 +31,7 @@ export async function fetchServicePathsFromTraceIds(
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

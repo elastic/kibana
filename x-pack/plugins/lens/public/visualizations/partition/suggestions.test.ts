@@ -16,7 +16,7 @@ import {
   PieLayerState,
   PieVisualizationState,
 } from '../../../common';
-import { layerTypes } from '../../../common';
+import { layerTypes } from '../../../common/layer_types';
 
 describe('suggestions', () => {
   describe('pie', () => {
@@ -66,7 +66,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 primaryGroups: [],
-                metric: 'a',
+                metrics: ['a'],
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
@@ -93,7 +93,7 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
-    it('should reject date operations', () => {
+    it('should hide date operations', () => {
       expect(
         suggestions({
           table: {
@@ -118,11 +118,17 @@ describe('suggestions', () => {
           },
           state: undefined,
           keptLayerIds: ['first'],
-        })
-      ).toHaveLength(0);
+        }).map((s) => [s.hide, s.score])
+      ).toEqual([
+        [true, 0],
+        [true, 0],
+        [true, 0],
+        [true, 0],
+        [true, 0],
+      ]);
     });
 
-    it('should reject histogram operations', () => {
+    it('should hide histogram operations', () => {
       expect(
         suggestions({
           table: {
@@ -147,8 +153,14 @@ describe('suggestions', () => {
           },
           state: undefined,
           keptLayerIds: ['first'],
-        })
-      ).toHaveLength(0);
+        }).map((s) => [s.hide, s.score])
+      ).toEqual([
+        [true, 0],
+        [true, 0],
+        [true, 0],
+        [true, 0],
+        [true, 0],
+      ]);
     });
 
     it('should not reject histogram operations in case of switching between partition charts', () => {
@@ -253,6 +265,88 @@ describe('suggestions', () => {
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
+    });
+
+    it('should accept multiple metrics when active and multi-metric', () => {
+      const chk = suggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'a',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'b',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'c',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'd',
+              operation: { label: 'Avg', dataType: 'number' as DataType, isBucketed: false },
+            },
+            {
+              columnId: 'e',
+              operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+            },
+          ],
+          changeType: 'initial',
+        },
+        state: {
+          shape: PieChartTypes.PIE,
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              primaryGroups: ['a'],
+              metrics: ['b'],
+              numberDisplay: NumberDisplay.HIDDEN,
+              categoryDisplay: CategoryDisplay.INSIDE,
+              legendDisplay: LegendDisplay.SHOW,
+              allowMultipleMetrics: true,
+            },
+          ],
+        },
+        keptLayerIds: ['first'],
+      });
+
+      expect(chk).toHaveLength(2);
+      chk.forEach(({ state }) => {
+        expect(state.layers[0].allowMultipleMetrics).toBeTruthy();
+        expect(state.layers[0].metrics).toEqual(['d', 'e']);
+      });
+    });
+
+    it('should reject multiple metrics when NOT currently active', () => {
+      const chk = suggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'a',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'b',
+              operation: { label: 'Avg', dataType: 'number' as DataType, isBucketed: false },
+            },
+            {
+              columnId: 'c',
+              operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+            },
+          ],
+          changeType: 'initial',
+        },
+        state: undefined,
+        keptLayerIds: ['first'],
+      });
+
+      expect(chk).toHaveLength(0);
     });
 
     it('should reject if there are no buckets and it is not a specific chart type switch', () => {
@@ -556,8 +650,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 primaryGroups: ['a'],
-                metric: 'b',
-
+                metrics: ['b'],
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
                 legendDisplay: LegendDisplay.SHOW,
@@ -580,7 +673,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 primaryGroups: ['a'],
-                metric: 'b',
+                metrics: ['b'],
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
                 legendDisplay: 'show',
@@ -613,7 +706,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 primaryGroups: [],
-                metric: 'a',
+                metrics: ['a'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT,
@@ -663,7 +756,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 primaryGroups: ['a', 'b'],
-                metric: 'e',
+                metrics: ['e'],
                 numberDisplay: NumberDisplay.VALUE,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
@@ -675,7 +768,7 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
-    it('should reject when there are too many metrics', () => {
+    it('should accept multiple metrics if active visualization', () => {
       expect(
         suggestions({
           table: {
@@ -712,13 +805,49 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 primaryGroups: ['a', 'b'],
-                metric: 'e',
+                metrics: ['e'],
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
               },
             ],
           },
+          keptLayerIds: ['first'],
+        })
+      ).toHaveLength(2);
+    });
+
+    it('should reject multiple metrics if not active visualization', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'a',
+                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+              },
+              {
+                columnId: 'b',
+                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+              },
+              {
+                columnId: 'c',
+                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+              },
+              {
+                columnId: 'd',
+                operation: { label: 'Avg', dataType: 'number' as DataType, isBucketed: false },
+              },
+              {
+                columnId: 'e',
+                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: undefined,
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
@@ -749,7 +878,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 primaryGroups: ['a'],
-                metric: 'b',
+                metrics: ['b'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
@@ -772,7 +901,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 primaryGroups: ['a'],
-                metric: 'b',
+                metrics: ['b'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT, // This is changed
@@ -806,7 +935,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 primaryGroups: [],
-                metric: 'a',
+                metrics: ['a'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT,
@@ -817,6 +946,50 @@ describe('suggestions', () => {
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
+    });
+
+    it('should turn off multiple metrics for mosaic when switching from other partition type', () => {
+      const suggs = suggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'a',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'b',
+              operation: { label: 'Avg', dataType: 'number' as DataType, isBucketed: false },
+            },
+            {
+              columnId: 'c',
+              operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+            },
+          ],
+          changeType: 'initial',
+        },
+        state: {
+          shape: PieChartTypes.PIE,
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              primaryGroups: ['a'],
+              metrics: ['b', 'c'],
+              numberDisplay: NumberDisplay.PERCENT,
+              categoryDisplay: CategoryDisplay.DEFAULT,
+              legendDisplay: LegendDisplay.DEFAULT,
+              allowMultipleMetrics: true,
+            },
+          ],
+        },
+        keptLayerIds: ['first'],
+        subVisualizationId: 'mosaic',
+      });
+
+      expect(suggs).toHaveLength(1);
+      expect(suggs[0].state.layers[0].allowMultipleMetrics).toBeFalsy();
     });
 
     it('mosaic type should be hidden from the suggestion list', () => {
@@ -848,7 +1021,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 primaryGroups: ['a', 'b'],
-                metric: 'c',
+                metrics: ['c'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
@@ -883,7 +1056,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 primaryGroups: [],
-                metric: 'a',
+                metrics: ['a'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT,
@@ -921,7 +1094,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 primaryGroups: ['a', 'b'],
-                metric: 'c',
+                metrics: ['c'],
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
                 legendDisplay: LegendDisplay.SHOW,

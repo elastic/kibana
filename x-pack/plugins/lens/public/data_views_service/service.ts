@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -14,14 +14,8 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import type { DateRange } from '../../common';
 import type { IndexPattern, IndexPatternMap, IndexPatternRef } from '../types';
-import {
-  ensureIndexPattern,
-  loadIndexPatternRefs,
-  loadIndexPatterns,
-  syncExistingFields,
-} from './loader';
+import { ensureIndexPattern, loadIndexPatternRefs, loadIndexPatterns } from './loader';
 import type { DataViewsState } from '../state_management';
 import { generateId } from '../id_generator';
 
@@ -30,6 +24,7 @@ export interface IndexPatternServiceProps {
   data: DataPublicPluginStart;
   dataViews: DataViewsContract;
   uiActions: UiActionsStart;
+  contextDataViewSpec?: DataViewSpec;
   updateIndexPatterns: (
     newState: Partial<DataViewsState>,
     options?: { applyImmediately: boolean }
@@ -70,18 +65,6 @@ export interface IndexPatternServiceAPI {
     id: string;
     cache: IndexPatternMap;
   }) => Promise<IndexPatternMap | undefined>;
-  /**
-   * Loads the existingFields map given the current context
-   */
-  refreshExistingFields: (args: {
-    dateRange: DateRange;
-    currentIndexPatternTitle: string;
-    dslQuery: object;
-    onNoData?: () => void;
-    existingFields: Record<string, Record<string, boolean>>;
-    indexPatternList: IndexPattern[];
-    isFirstExistenceFetch: boolean;
-  }) => Promise<void>;
 
   replaceDataViewId: (newDataView: DataView) => Promise<void>;
   /**
@@ -105,6 +88,7 @@ export function createIndexPatternService({
   updateIndexPatterns,
   replaceIndexPattern,
   uiActions,
+  contextDataViewSpec,
 }: IndexPatternServiceProps): IndexPatternServiceAPI {
   const onChangeError = (err: Error) =>
     core.notifications.toasts.addError(err, {
@@ -122,7 +106,12 @@ export function createIndexPatternService({
     },
     replaceDataViewId: async (dataView: DataView) => {
       const newDataView = await dataViews.create({ ...dataView.toSpec(), id: generateId() });
-      dataViews.clearInstanceCache(dataView.id);
+
+      // Do not clear initial data view instance from cache
+      // if adhoc data view id has been provided by the context.
+      if (contextDataViewSpec && contextDataViewSpec.id !== dataView.id) {
+        dataViews.clearInstanceCache(dataView.id);
+      }
       const loadedPatterns = await loadIndexPatterns({
         dataViews,
         patterns: [newDataView.id!],
@@ -143,14 +132,6 @@ export function createIndexPatternService({
     },
     ensureIndexPattern: (args) =>
       ensureIndexPattern({ onError: onChangeError, dataViews, ...args }),
-    refreshExistingFields: (args) =>
-      syncExistingFields({
-        updateIndexPatterns,
-        ...args,
-        data,
-        dataViews,
-        core,
-      }),
     loadIndexPatternRefs: async ({ isFullEditor }) =>
       isFullEditor ? loadIndexPatternRefs(dataViews) : [],
     getDefaultIndex: () => core.uiSettings.get('defaultIndex'),

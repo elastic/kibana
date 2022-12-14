@@ -43,35 +43,40 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
     services: { fetchElasticFlamechart },
   } = useProfilingDependencies();
 
-  const state = useTimeRangeAsync(() => {
-    return Promise.all([
-      fetchElasticFlamechart({
-        timeFrom: new Date(timeRange.start).getTime() / 1000,
-        timeTo: new Date(timeRange.end).getTime() / 1000,
-        kuery,
-      }),
-      comparisonTimeRange.start && comparisonTimeRange.end
-        ? fetchElasticFlamechart({
-            timeFrom: new Date(comparisonTimeRange.start).getTime() / 1000,
-            timeTo: new Date(comparisonTimeRange.end).getTime() / 1000,
-            kuery: comparisonKuery,
-          })
-        : Promise.resolve(undefined),
-    ]).then(([primaryFlamegraph, comparisonFlamegraph]) => {
-      return {
-        primaryFlamegraph,
-        comparisonFlamegraph,
-      };
-    });
-  }, [
-    timeRange.start,
-    timeRange.end,
-    kuery,
-    comparisonTimeRange.start,
-    comparisonTimeRange.end,
-    comparisonKuery,
-    fetchElasticFlamechart,
-  ]);
+  const state = useTimeRangeAsync(
+    ({ http }) => {
+      return Promise.all([
+        fetchElasticFlamechart({
+          http,
+          timeFrom: new Date(timeRange.start).getTime() / 1000,
+          timeTo: new Date(timeRange.end).getTime() / 1000,
+          kuery,
+        }),
+        comparisonTimeRange.start && comparisonTimeRange.end
+          ? fetchElasticFlamechart({
+              http,
+              timeFrom: new Date(comparisonTimeRange.start).getTime() / 1000,
+              timeTo: new Date(comparisonTimeRange.end).getTime() / 1000,
+              kuery: comparisonKuery,
+            })
+          : Promise.resolve(undefined),
+      ]).then(([primaryFlamegraph, comparisonFlamegraph]) => {
+        return {
+          primaryFlamegraph,
+          comparisonFlamegraph,
+        };
+      });
+    },
+    [
+      timeRange.start,
+      timeRange.end,
+      kuery,
+      comparisonTimeRange.start,
+      comparisonTimeRange.end,
+      comparisonKuery,
+      fetchElasticFlamechart,
+    ]
+  );
 
   const { data } = state;
 
@@ -173,7 +178,6 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
           <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
             <FlameGraph
               id="flamechart"
-              height={'100%'}
               primaryFlamegraph={data?.primaryFlamegraph}
               comparisonFlamegraph={data?.comparisonFlamegraph}
               comparisonMode={comparisonMode}

@@ -8,8 +8,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import { useQuery } from '@tanstack/react-query';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import type { ServerApiError } from '../../../../common/types';
-import { useIsMounted } from '../../../hooks/use_is_mounted';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { useUrlParams } from '../../../hooks/use_url_params';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
@@ -98,7 +98,7 @@ export const useWithArtifactListData = (
   // Once we know if data exists, update the page initializing state.
   // This should only ever happen at most once;
   useEffect(() => {
-    if (isMounted) {
+    if (isMounted()) {
       if (isPageInitializing && !isLoadingDataExists) {
         setIsPageInitializing(false);
       }
@@ -107,7 +107,7 @@ export const useWithArtifactListData = (
 
   // Update the uiPagination once the query succeeds
   useEffect(() => {
-    if (isMounted && listData && !isLoadingListData && isSuccessListData) {
+    if (isMounted() && listData && !isLoadingListData && isSuccessListData) {
       setUiPagination((prevState) => {
         return {
           ...prevState,
@@ -134,7 +134,7 @@ export const useWithArtifactListData = (
   //  >> Check if data exists again (which should return true
   useEffect(() => {
     if (
-      isMounted &&
+      isMounted() &&
       !isLoadingListData &&
       !isLoadingDataExists &&
       !listDataError &&

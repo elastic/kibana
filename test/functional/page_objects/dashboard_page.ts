@@ -12,6 +12,7 @@ export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
+import { CommonPageObject } from './common_page';
 
 interface SaveDashboardOptions {
   /**
@@ -74,7 +75,7 @@ export class DashboardPageObject extends FtrService {
   public async clickFullScreenMode() {
     this.log.debug(`clickFullScreenMode`);
     await this.testSubjects.click('dashboardFullScreenMode');
-    await this.testSubjects.exists('exitFullScreenModeLogo');
+    await this.testSubjects.exists('exitFullScreenModeButton');
     await this.waitForRenderComplete();
   }
 
@@ -98,17 +99,15 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async exitFullScreenLogoButtonExists() {
-    // TODO: Replace every instance of `exitFullScreenModeLogo` with `exitFullScreenModeButton` once the new Shared UX
-    // full screen button can be used (i.e. after https://github.com/elastic/kibana/issues/140311 is resolved)
-    return await this.testSubjects.exists('exitFullScreenModeLogo');
+    return await this.testSubjects.exists('exitFullScreenModeButton');
   }
 
   public async getExitFullScreenLogoButton() {
-    return await this.testSubjects.find('exitFullScreenModeLogo');
+    return await this.testSubjects.find('exitFullScreenModeButton');
   }
 
   public async clickExitFullScreenLogoButton() {
-    await this.testSubjects.click('exitFullScreenModeLogo');
+    await this.testSubjects.click('exitFullScreenModeButton');
     await this.waitForRenderComplete();
   }
 
@@ -428,6 +427,31 @@ export class DashboardPageObject extends FtrService {
   public async gotoDashboardEditMode(dashboardName: string) {
     await this.loadSavedDashboard(dashboardName);
     await this.switchToEditMode();
+  }
+
+  public async gotoDashboardURL({
+    id,
+    args,
+    editMode,
+  }: {
+    id?: string;
+    editMode?: boolean;
+    args?: Parameters<InstanceType<typeof CommonPageObject>['navigateToActualUrl']>[2];
+  } = {}) {
+    let dashboardLocation = `/create`;
+    if (id) {
+      const edit = editMode ? `?_a=(viewMode:edit)` : '';
+      dashboardLocation = `/view/${id}${edit}`;
+    }
+    this.common.navigateToActualUrl('dashboard', dashboardLocation, args);
+  }
+
+  public async gotoDashboardListingURL({
+    args,
+  }: {
+    args?: Parameters<InstanceType<typeof CommonPageObject>['navigateToActualUrl']>[2];
+  } = {}) {
+    await this.common.navigateToActualUrl('dashboard', '/list', args);
   }
 
   public async renameDashboard(dashboardName: string) {
@@ -764,5 +788,16 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelChartDebugState(panelIndex: number) {
     return await this.elasticChart.getChartDebugData(undefined, panelIndex);
+  }
+
+  public async isNotificationExists(panelIndex = 0) {
+    const panel = (await this.getDashboardPanels())[panelIndex];
+    try {
+      const notification = await panel.findByClassName('embPanel__optionsMenuPopover-notification');
+      return Boolean(notification);
+    } catch (e) {
+      // if not found then this is false
+      return false;
+    }
   }
 }

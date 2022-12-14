@@ -61,12 +61,18 @@ export const createVersionCheckPostAuthHandler = (kibanaVersion: string): OnPost
 };
 
 export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPreResponseHandler => {
-  const { name: serverName, securityResponseHeaders, customResponseHeaders } = config;
+  const {
+    name: serverName,
+    securityResponseHeaders,
+    customResponseHeaders,
+    csp: { header: cspHeader },
+  } = config;
 
   return (request, response, toolkit) => {
     const additionalHeaders = {
       ...securityResponseHeaders,
       ...customResponseHeaders,
+      'Content-Security-Policy': cspHeader,
       [KIBANA_NAME_HEADER]: serverName,
     };
 

@@ -168,7 +168,9 @@ export const FieldEditorFlyoutContentContainer = ({
 
       if (!editedField) {
         throw new Error(
-          `Unable to find field named '${updatedField.name}' on index pattern '${dataView.title}'`
+          `Unable to find field named '${
+            updatedField.name
+          }' on index pattern '${dataView.getIndexPattern()}'`
         );
       }
 

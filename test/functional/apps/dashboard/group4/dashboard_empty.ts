@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
 
       // create the new data view from the dashboards/create route in order to test that the dashboard is loaded properly as soon as the data view is created...
-      await PageObjects.common.navigateToUrl('dashboard', '/create');
+      await PageObjects.common.navigateToApp('dashboard', { hash: '/create' });
 
       const button = await testSubjects.find('createDataViewButton');
       button.click();

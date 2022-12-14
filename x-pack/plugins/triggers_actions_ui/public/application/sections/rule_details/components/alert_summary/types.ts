@@ -5,18 +5,13 @@
  * 2.0.
  */
 
+import { AlertStatus } from '@kbn/rule-data-utils';
+import { AlertSummaryTimeRange } from '../../../../hooks/use_load_rule_alerts_aggregations';
 import { Rule } from '../../../../../types';
 
 export interface RuleAlertsSummaryProps {
   rule: Rule;
   filteredRuleTypes: string[];
-}
-export interface AlertChartData {
-  status: 'active' | 'recovered' | 'total';
-  count: number;
-  date: number;
-}
-
-export interface AlertsChartProps {
-  data: AlertChartData[];
+  onClick: (status?: AlertStatus) => void;
+  timeRange: AlertSummaryTimeRange;
 }

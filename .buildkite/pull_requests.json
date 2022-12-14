@@ -37,12 +37,18 @@
       ],
       "always_require_ci_on_changed": [
         "^docs/developer/plugin-list.asciidoc$",
+        "^\\.github/CODEOWNERS$",
         "/plugins/[^/]+/readme\\.(md|asciidoc)$"
       ],
       "kibana_versions_check": true,
       "kibana_build_reuse": true,
       "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge"],
-      "kibana_build_reuse_regexes": ["^test/", "^x-pack/test/"]
+      "kibana_build_reuse_regexes": [
+        "^test/",
+        "^x-pack/test/",
+        "/__snapshots__/",
+        "\\.test\\.(ts|tsx|js|jsx)"
+      ]
     }
   ]
 }

@@ -32,7 +32,7 @@ export interface BuildOptions {
   createDockerContexts: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
-  createExamplePlugins: boolean;
+  buildExamplePlugins: boolean;
   eprRegistry: 'production' | 'snapshot';
 }
 
@@ -59,26 +59,23 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   }
 
   /**
-   * build example plugins
-   */
-  if (options.createExamplePlugins) {
-    await run(Tasks.BuildKibanaExamplePlugins);
-  }
-
-  /**
    * run platform-generic build tasks
    */
   if (options.createGenericFolders) {
     await run(Tasks.CopySource);
     await run(Tasks.CopyBinScripts);
-    await run(Tasks.ReplaceFavicon);
+
     await run(Tasks.CreateEmptyDirsAndFiles);
     await run(Tasks.CreateReadme);
     await run(Tasks.BuildBazelPackages);
+    await run(Tasks.ReplaceFavicon);
     if (options.buildCanvasShareableRuntime) {
       await run(Tasks.BuildCanvasShareableRuntime);
     }
     await run(Tasks.BuildKibanaPlatformPlugins);
+    if (options.buildExamplePlugins) {
+      await run(Tasks.BuildKibanaExamplePlugins);
+    }
     await run(Tasks.CreatePackageJson);
     await run(Tasks.InstallDependencies);
     await run(Tasks.GeneratePackagesOptimizedAssets);

@@ -16,7 +16,11 @@ import { useServices } from './services';
 /**
  * A page to display when Kibana has no data, prompting a person to add integrations or create a new data view.
  */
-export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: KibanaNoDataPageProps) => {
+export const KibanaNoDataPage = ({
+  onDataViewCreated,
+  noDataConfig,
+  allowAdHocDataView,
+}: KibanaNoDataPageProps) => {
   // These hooks are temporary, until this component is moved to a package.
   const services = useServices();
   const { hasESData, hasUserDataView } = services;
@@ -43,7 +47,12 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: KibanaNoDa
   }
 
   if (!hasUserDataViews && dataExists) {
-    return <NoDataViewsPrompt onDataViewCreated={onDataViewCreated} />;
+    return (
+      <NoDataViewsPrompt
+        onDataViewCreated={onDataViewCreated}
+        allowAdHocDataView={allowAdHocDataView}
+      />
+    );
   }
 
   if (!dataExists) {

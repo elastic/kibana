@@ -7,15 +7,40 @@
  */
 
 import { UnifiedFieldListPlugin } from './plugin';
-
 export type {
   FieldStatsResponse,
   BucketedAggregation,
   NumberStatsResult,
   TopValuesResult,
 } from '../common/types';
-export type { FieldStatsProps, FieldStatsServices } from './components/field_stats';
+export { FieldListGrouped, type FieldListGroupedProps } from './components/field_list';
+export type {
+  FieldTopValuesBucketProps,
+  FieldTopValuesBucketParams,
+} from './components/field_stats';
+export { FieldTopValuesBucket } from './components/field_stats';
+export type {
+  FieldStatsProps,
+  FieldStatsServices,
+  FieldStatsState,
+} from './components/field_stats';
 export { FieldStats } from './components/field_stats';
+export {
+  FieldPopover,
+  type FieldPopoverProps,
+  FieldPopoverHeader,
+  type FieldPopoverHeaderProps,
+  FieldPopoverVisualize,
+  type FieldPopoverVisualizeProps,
+} from './components/field_popover';
+export {
+  FieldVisualizeButton,
+  type FieldVisualizeButtonProps,
+  getVisualizeInformation,
+  triggerVisualizeActions,
+  triggerVisualizeActionsTextBasedLanguages,
+  type VisualizeInformation,
+} from './components/field_visualize_button';
 export { loadFieldStats } from './services/field_stats';
 export { loadFieldExisting } from './services/field_existing';
 
@@ -28,4 +53,30 @@ export type {
   UnifiedFieldListPluginSetup,
   UnifiedFieldListPluginStart,
   AddFieldFilterHandler,
+  FieldListGroups,
+  FieldsGroupDetails,
 } from './types';
+export { ExistenceFetchStatus, FieldsGroupNames } from './types';
+
+export {
+  useExistingFieldsFetcher,
+  useExistingFieldsReader,
+  resetExistingFieldsCache,
+  type ExistingFieldsInfo,
+  type ExistingFieldsFetcherParams,
+  type ExistingFieldsFetcher,
+  type ExistingFieldsReader,
+} from './hooks/use_existing_fields';
+
+export {
+  useGroupedFields,
+  type GroupedFieldsParams,
+  type GroupedFieldsResult,
+} from './hooks/use_grouped_fields';
+
+export {
+  useQuerySubscriber,
+  hasQuerySubscriberData,
+  type QuerySubscriberResult,
+  type QuerySubscriberParams,
+} from './hooks/use_query_subscriber';

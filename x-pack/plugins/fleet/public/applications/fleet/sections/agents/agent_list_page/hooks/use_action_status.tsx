@@ -5,27 +5,22 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { sendGetActionStatus, sendPostCancelAction, useStartServices } from '../../../../hooks';
 
 import type { ActionStatus } from '../../../../types';
 
-const POLL_INTERVAL = 30 * 1000;
-
-export function useActionStatus(onAbortSuccess: () => void) {
+export function useActionStatus(onAbortSuccess: () => void, refreshAgentActivity: boolean) {
   const [currentActions, setCurrentActions] = useState<ActionStatus[]>([]);
-  const currentTimeoutRef = useRef<NodeJS.Timeout>();
-  const isCancelledRef = useRef<boolean>(false);
+  const [isFirstLoading, setIsFirstLoading] = useState(true);
   const { notifications, overlays } = useStartServices();
 
   const refreshActions = useCallback(async () => {
     try {
       const res = await sendGetActionStatus();
-      if (isCancelledRef.current) {
-        return;
-      }
+      setIsFirstLoading(false);
       if (res.error) {
         throw res.error;
       }
@@ -44,35 +39,23 @@ export function useActionStatus(onAbortSuccess: () => void) {
     }
   }, [notifications.toasts]);
 
-  // Poll for upgrades
+  if (isFirstLoading) {
+    refreshActions();
+  }
+
   useEffect(() => {
-    isCancelledRef.current = false;
-
-    async function pollData() {
-      await refreshActions();
-      if (isCancelledRef.current) {
-        return;
-      }
-      currentTimeoutRef.current = setTimeout(() => pollData(), POLL_INTERVAL);
+    if (refreshAgentActivity) {
+      refreshActions();
     }
-
-    pollData();
-
-    return () => {
-      isCancelledRef.current = true;
-
-      if (currentTimeoutRef.current) {
-        clearTimeout(currentTimeoutRef.current);
-      }
-    };
-  }, [refreshActions]);
+  }, [refreshActions, refreshAgentActivity]);
 
   const abortUpgrade = useCallback(
     async (action: ActionStatus) => {
       try {
         const confirmRes = await overlays.openConfirm(
           i18n.translate('xpack.fleet.currentUpgrade.confirmDescription', {
-            defaultMessage: 'This action will abort upgrade of {nbAgents} agents',
+            defaultMessage:
+              'This action will abort upgrade of {nbAgents, plural, one {# agent} other {# agents}}',
             values: {
               nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
             },
@@ -104,5 +87,6 @@ export function useActionStatus(onAbortSuccess: () => void) {
     currentActions,
     refreshActions,
     abortUpgrade,
+    isFirstLoading,
   };
 }

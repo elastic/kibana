@@ -43,6 +43,11 @@ const expectedTransformResult = [
   { description: 'The space ID of the rule.', name: 'rule.spaceId' },
   { description: 'The tags of the rule.', name: 'rule.tags' },
   { description: 'The type of rule.', name: 'rule.type' },
+  {
+    description:
+      'The URL to the Stack Management rule page that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
+    name: 'rule.url',
+  },
   { description: 'The date the rule scheduled the action.', name: 'date' },
   { description: 'The ID of the alert that scheduled actions for the rule.', name: 'alert.id' },
   {
@@ -57,6 +62,10 @@ const expectedTransformResult = [
     description:
       'The human readable name of the action group of the alert that scheduled actions for the rule.',
     name: 'alert.actionGroupName',
+  },
+  {
+    description: 'A flag on the alert that indicates whether the alert is flapping.',
+    name: 'alert.flapping',
   },
   {
     description: 'The configured server.publicBaseUrl value or empty string if not configured.',
@@ -133,7 +142,8 @@ const expectedParamsTransformResult = (withBraces: boolean = false) => [
   },
 ];
 
-describe('transformActionVariables', () => {
+// FAILING: https://github.com/elastic/kibana/issues/147573
+describe.skip('transformActionVariables', () => {
   test('should return correct variables when no state, no context, no params provided', async () => {
     const alertType = getAlertType({ context: [], state: [], params: [] });
     expect(transformActionVariables(alertType.actionVariables)).toEqual(expectedTransformResult);

@@ -65,7 +65,15 @@ exports[`formulas escapes formula values in a header, doesn't warn the csv conta
 "
 `;
 
-exports[`uses the scrollId to page all the data 1`] = `
+exports[`keeps order of the columns during the scroll 1`] = `
+"\\"_id\\",\\"_index\\",\\"_score\\",a,b
+\\"'-\\",\\"'-\\",\\"'-\\",a1,b1
+\\"'-\\",\\"'-\\",\\"'-\\",\\"'-\\",b2
+\\"'-\\",\\"'-\\",\\"'-\\",a3,\\"'-\\",c3
+"
+`;
+
+exports[`uses the pit ID to page all the data 1`] = `
 "date,ip,message
 \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"
 \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"

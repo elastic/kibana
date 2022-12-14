@@ -29,10 +29,6 @@ export const DocumentViewModeToggle = ({
     background-color: ${euiThemeVars.euiPageBackgroundColor};
   `;
 
-  const badgeCellCss = css`
-    margin-left: ${useEuiPaddingSize('s')};
-  `;
-
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
   if (!showViewModeToggle) {

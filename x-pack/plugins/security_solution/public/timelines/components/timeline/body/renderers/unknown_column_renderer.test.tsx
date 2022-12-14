@@ -16,6 +16,7 @@ import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 import { getValues } from './helpers';
 import { getMockTheme } from '../../../../../common/lib/kibana/kibana_react.mock';
+import { TimelineId } from '../../../../../../common/types';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -36,7 +37,7 @@ describe('unknown_column_renderer', () => {
       eventId: _id,
       values: getValues('@timestamp', mockDatum),
       field: defaultHeaders.find((h) => h.id === '@timestamp')!,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = shallow(<span>{emptyColumn}</span>);
     expect(wrapper).toMatchSnapshot();
@@ -52,7 +53,7 @@ describe('unknown_column_renderer', () => {
       eventId: _id,
       values: getValues('a made up column name', mockDatum),
       field: defaultHeaders.find((h) => h.id === 'a made up column name')!,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
@@ -68,7 +69,7 @@ describe('unknown_column_renderer', () => {
       eventId: _id,
       values: getValues('@timestamp', mockDatum),
       field: defaultHeaders.find((h) => h.id === '@timestamp')!,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>

@@ -13,7 +13,6 @@ import {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { RuleExecutorOptions, RuleExecutorServices, RuleType } from '@kbn/alerting-plugin/server';
-import { FieldSpec } from '@kbn/data-plugin/common';
 import { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<
@@ -72,11 +71,3 @@ export interface RacApiRequestHandlerContext {
 export type RacRequestHandlerContext = CustomRequestHandlerContext<{
   rac: RacApiRequestHandlerContext;
 }>;
-
-export type BrowserField = FieldSpec & {
-  category: string;
-};
-
-export type BrowserFields = {
-  [category in string]: { fields: { [fieldName in string]: BrowserField } };
-};

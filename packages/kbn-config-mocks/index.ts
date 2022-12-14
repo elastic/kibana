@@ -18,4 +18,4 @@ export type { IConfigServiceMock } from './src/config_service.mock';
 export { configDeprecationsMock } from './src/deprecations.mock';
 export type { ConfigDeprecationContextMock } from './src/deprecations.mock';
 
-export { getEnvOptions } from './src/env.mock';
+export { createTestEnv, getEnvOptions, createTestPackageInfo } from './src/env.mock';

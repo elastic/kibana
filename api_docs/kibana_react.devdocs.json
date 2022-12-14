@@ -4,541 +4,6 @@
     "classes": [
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.TableListView",
-        "type": "Class",
-        "tags": [],
-        "label": "TableListView",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "kibanaReact",
-            "scope": "public",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-public.TableListView",
-            "text": "TableListView"
-          },
-          "<V> extends React.Component<",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "public",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-public.TableListViewProps",
-            "text": "TableListViewProps"
-          },
-          "<V>, ",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "public",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-public.TableListViewState",
-            "text": "TableListViewState"
-          },
-          "<V>, any>"
-        ],
-        "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.TableListView.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "kibanaReact",
-                    "scope": "public",
-                    "docId": "kibKibanaReactPluginApi",
-                    "section": "def-public.TableListViewProps",
-                    "text": "TableListViewProps"
-                  },
-                  "<V>"
-                ],
-                "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.UNSAFE_componentWillMount",
-            "type": "Function",
-            "tags": [],
-            "label": "UNSAFE_componentWillMount",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.componentWillUnmount",
-            "type": "Function",
-            "tags": [],
-            "label": "componentWillUnmount",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.componentDidMount",
-            "type": "Function",
-            "tags": [],
-            "label": "componentDidMount",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.componentDidUpdate",
-            "type": "Function",
-            "tags": [],
-            "label": "componentDidUpdate",
-            "description": [],
-            "signature": [
-              "(prevProps: ",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.TableListViewProps",
-                "text": "TableListViewProps"
-              },
-              "<V>, prevState: ",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.TableListViewState",
-                "text": "TableListViewState"
-              },
-              "<V>) => void"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.TableListView.componentDidUpdate.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "prevProps",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "kibanaReact",
-                    "scope": "public",
-                    "docId": "kibKibanaReactPluginApi",
-                    "section": "def-public.TableListViewProps",
-                    "text": "TableListViewProps"
-                  },
-                  "<V>"
-                ],
-                "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.TableListView.componentDidUpdate.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "prevState",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "kibanaReact",
-                    "scope": "public",
-                    "docId": "kibKibanaReactPluginApi",
-                    "section": "def-public.TableListViewState",
-                    "text": "TableListViewState"
-                  },
-                  "<V>"
-                ],
-                "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.debouncedFetch",
-            "type": "Function",
-            "tags": [],
-            "label": "debouncedFetch",
-            "description": [],
-            "signature": [
-              "((filter: string) => Promise<void>) & ",
-              "Cancelable"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.TableListView.debouncedFetch.$1",
-                "type": "string",
-                "tags": [],
-                "label": "filter",
-                "description": [],
-                "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.fetchItems",
-            "type": "Function",
-            "tags": [],
-            "label": "fetchItems",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.deleteSelectedItems",
-            "type": "Function",
-            "tags": [],
-            "label": "deleteSelectedItems",
-            "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.closeDeleteModal",
-            "type": "Function",
-            "tags": [],
-            "label": "closeDeleteModal",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.openDeleteModal",
-            "type": "Function",
-            "tags": [],
-            "label": "openDeleteModal",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.setFilter",
-            "type": "Function",
-            "tags": [],
-            "label": "setFilter",
-            "description": [],
-            "signature": [
-              "({ queryText }: { queryText: string; }) => void"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.TableListView.setFilter.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{ queryText }",
-                "description": [],
-                "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "kibanaReact",
-                    "id": "def-public.TableListView.setFilter.$1.queryText",
-                    "type": "string",
-                    "tags": [],
-                    "label": "queryText",
-                    "description": [],
-                    "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.hasNoItems",
-            "type": "Function",
-            "tags": [],
-            "label": "hasNoItems",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.renderConfirmDeleteModal",
-            "type": "Function",
-            "tags": [],
-            "label": "renderConfirmDeleteModal",
-            "description": [],
-            "signature": [
-              "() => JSX.Element"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.renderListingLimitWarning",
-            "type": "Function",
-            "tags": [],
-            "label": "renderListingLimitWarning",
-            "description": [],
-            "signature": [
-              "() => JSX.Element | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.renderFetchError",
-            "type": "Function",
-            "tags": [],
-            "label": "renderFetchError",
-            "description": [],
-            "signature": [
-              "() => JSX.Element | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.renderNoItemsMessage",
-            "type": "Function",
-            "tags": [],
-            "label": "renderNoItemsMessage",
-            "description": [],
-            "signature": [
-              "() => JSX.Element"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.renderToolsLeft",
-            "type": "Function",
-            "tags": [],
-            "label": "renderToolsLeft",
-            "description": [],
-            "signature": [
-              "() => JSX.Element | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.onTableChange",
-            "type": "Function",
-            "tags": [],
-            "label": "onTableChange",
-            "description": [],
-            "signature": [
-              "(criteria: ",
-              "CriteriaWithPagination",
-              "<V>) => void"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.TableListView.onTableChange.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "criteria",
-                "description": [],
-                "signature": [
-                  "CriteriaWithPagination",
-                  "<V>"
-                ],
-                "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.renderTable",
-            "type": "Function",
-            "tags": [],
-            "label": "renderTable",
-            "description": [],
-            "signature": [
-              "() => JSX.Element"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.getTableColumns",
-            "type": "Function",
-            "tags": [],
-            "label": "getTableColumns",
-            "description": [],
-            "signature": [
-              "() => ",
-              "EuiBasicTableColumn",
-              "<V>[]"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.renderCreateButton",
-            "type": "Function",
-            "tags": [],
-            "label": "renderCreateButton",
-            "description": [],
-            "signature": [
-              "() => JSX.Element | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.render",
-            "type": "Function",
-            "tags": [],
-            "label": "render",
-            "description": [],
-            "signature": [
-              "() => JSX.Element"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.ValidatedDualRange",
         "type": "Class",
         "tags": [],
@@ -815,10 +280,10 @@
         "signature": [
           "<Services extends Partial<",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreStart",
             "text": "CoreStart"
           },
           ">>(services: Services) => ",
@@ -864,10 +329,10 @@
         "signature": [
           "(services: Partial<",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreStart",
             "text": "CoreStart"
           },
           ">) => ",
@@ -893,10 +358,10 @@
             "signature": [
               "Partial<",
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ">"
@@ -920,10 +385,10 @@
         "signature": [
           "(services: Partial<",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreStart",
             "text": "CoreStart"
           },
           ">) => ",
@@ -949,10 +414,10 @@
             "signature": [
               "Partial<",
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ">"
@@ -1088,6 +553,34 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/tutorial_directory.js"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/tutorial_directory.js"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/tutorial_directory.js"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
+          },
+          {
             "plugin": "spaces",
             "path": "x-pack/plugins/spaces/public/space_selector/space_selector.tsx"
           },
@@ -1207,7 +700,7 @@
         "label": "KibanaThemeProvider",
         "description": [],
         "signature": [
-          "({ theme$, children }: React.PropsWithChildren<KibanaThemeProviderProps>) => JSX.Element"
+          "({ theme$, modify, children }: React.PropsWithChildren<KibanaThemeProviderProps>) => JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/theme/kibana_theme_provider.tsx",
         "deprecated": false,
@@ -1218,7 +711,7 @@
             "id": "def-public.KibanaThemeProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ theme$, children }",
+            "label": "{ theme$, modify, children }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<KibanaThemeProviderProps>"
@@ -1510,7 +1003,13 @@
         "description": [],
         "signature": [
           "(history: ",
-          "ScopedHistory",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.ScopedHistory",
+            "text": "ScopedHistory"
+          },
           "<unknown> | ",
           "History",
           "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => { href: string; onClick: (event: React.MouseEvent<Element, MouseEvent>) => void; }"
@@ -1527,7 +1026,13 @@
             "label": "history",
             "description": [],
             "signature": [
-              "ScopedHistory",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ScopedHistory",
+                "text": "ScopedHistory"
+              },
               "<unknown> | ",
               "History",
               "<unknown>"
@@ -1580,7 +1085,13 @@
         "description": [],
         "signature": [
           "(history: ",
-          "ScopedHistory",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.ScopedHistory",
+            "text": "ScopedHistory"
+          },
           "<unknown> | ",
           "History",
           "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => (event: React.MouseEvent<Element, MouseEvent>) => void"
@@ -1597,7 +1108,13 @@
             "label": "history",
             "description": [],
             "signature": [
-              "ScopedHistory",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ScopedHistory",
+                "text": "ScopedHistory"
+              },
               "<unknown> | ",
               "History",
               "<unknown>"
@@ -1704,6 +1221,38 @@
         "deprecated": true,
         "trackAdoption": false,
         "references": [
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/add_data/add_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/add_data/add_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/add_data/add_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
           {
             "plugin": "home",
             "path": "src/plugins/home/public/application/application.tsx"
@@ -1999,38 +1548,6 @@
           {
             "plugin": "kibanaOverview",
             "path": "src/plugins/kibana_overview/public/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
           }
         ],
         "children": [
@@ -2109,7 +1626,13 @@
             "text": "ToMountPointOptions"
           },
           ") => ",
-          "MountPoint",
+          {
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-common.MountPoint",
+            "text": "MountPoint"
+          },
           "<HTMLElement>"
         ],
         "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
@@ -2332,9 +1855,21 @@
         ],
         "signature": [
           "(executionContext: ",
-          "ExecutionContextSetup",
+          {
+            "pluginId": "@kbn/core-execution-context-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+            "section": "def-common.ExecutionContextSetup",
+            "text": "ExecutionContextSetup"
+          },
           " | undefined, context: ",
-          "KibanaExecutionContext",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          },
           ") => void"
         ],
         "path": "src/plugins/kibana_react/public/use_execution_context/use_execution_context.ts",
@@ -2349,7 +1884,13 @@
             "label": "executionContext",
             "description": [],
             "signature": [
-              "ExecutionContextSetup",
+              {
+                "pluginId": "@kbn/core-execution-context-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+                "section": "def-common.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              },
               " | undefined"
             ],
             "path": "src/plugins/kibana_react/public/use_execution_context/use_execution_context.ts",
@@ -2365,7 +1906,13 @@
             "label": "context",
             "description": [],
             "signature": [
-              "KibanaExecutionContext"
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              }
             ],
             "path": "src/plugins/kibana_react/public/use_execution_context/use_execution_context.ts",
             "deprecated": false,
@@ -2394,10 +1941,10 @@
           },
           "<Partial<",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreStart",
             "text": "CoreStart"
           },
           "> & Extra>"
@@ -2561,7 +2108,13 @@
           "(node: React.ReactNode, theme$: ",
           "Observable",
           "<",
-          "CoreTheme",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.CoreTheme",
+            "text": "CoreTheme"
+          },
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
         "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
@@ -2593,7 +2146,13 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
@@ -2642,7 +2201,13 @@
             "label": "chrome",
             "description": [],
             "signature": [
-              "ChromeStart"
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeStart",
+                "text": "ChromeStart"
+              }
             ],
             "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
             "deprecated": false,
@@ -2957,9 +2522,21 @@
             "description": [],
             "signature": [
               "(node: React.ReactNode, options?: ",
-              "OverlayFlyoutOpenOptions",
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-common.OverlayFlyoutOpenOptions",
+                "text": "OverlayFlyoutOpenOptions"
+              },
               " | undefined) => ",
-              "OverlayRef"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.OverlayRef",
+                "text": "OverlayRef"
+              }
             ],
             "path": "src/plugins/kibana_react/public/overlays/types.ts",
             "deprecated": false,
@@ -2988,7 +2565,13 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "OverlayFlyoutOpenOptions",
+                  {
+                    "pluginId": "@kbn/core-overlays-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                    "section": "def-common.OverlayFlyoutOpenOptions",
+                    "text": "OverlayFlyoutOpenOptions"
+                  },
                   " | undefined"
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
@@ -3008,9 +2591,21 @@
             "description": [],
             "signature": [
               "(node: React.ReactNode, options?: ",
-              "OverlayModalOpenOptions",
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-common.OverlayModalOpenOptions",
+                "text": "OverlayModalOpenOptions"
+              },
               " | undefined) => ",
-              "OverlayRef"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.OverlayRef",
+                "text": "OverlayRef"
+              }
             ],
             "path": "src/plugins/kibana_react/public/overlays/types.ts",
             "deprecated": false,
@@ -3039,7 +2634,13 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "OverlayModalOpenOptions",
+                  {
+                    "pluginId": "@kbn/core-overlays-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                    "section": "def-common.OverlayModalOpenOptions",
+                    "text": "OverlayModalOpenOptions"
+                  },
                   " | undefined"
                 ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
@@ -3154,526 +2755,6 @@
               "; }"
             ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.TableListViewProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "TableListViewProps",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "kibanaReact",
-            "scope": "public",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-public.TableListViewProps",
-            "text": "TableListViewProps"
-          },
-          "<V>"
-        ],
-        "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.createItem",
-            "type": "Function",
-            "tags": [],
-            "label": "createItem",
-            "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.deleteItems",
-            "type": "Function",
-            "tags": [],
-            "label": "deleteItems",
-            "description": [],
-            "signature": [
-              "((items: V[]) => Promise<void>) | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.TableListViewProps.deleteItems.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "items",
-                "description": [],
-                "signature": [
-                  "V[]"
-                ],
-                "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.editItem",
-            "type": "Function",
-            "tags": [],
-            "label": "editItem",
-            "description": [],
-            "signature": [
-              "((item: V) => void) | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.TableListViewProps.editItem.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "item",
-                "description": [],
-                "signature": [
-                  "V"
-                ],
-                "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.entityName",
-            "type": "string",
-            "tags": [],
-            "label": "entityName",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.entityNamePlural",
-            "type": "string",
-            "tags": [],
-            "label": "entityNamePlural",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.findItems",
-            "type": "Function",
-            "tags": [],
-            "label": "findItems",
-            "description": [],
-            "signature": [
-              "(query: string) => Promise<{ total: number; hits: V[]; }>"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.TableListViewProps.findItems.$1",
-                "type": "string",
-                "tags": [],
-                "label": "query",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.listingLimit",
-            "type": "number",
-            "tags": [],
-            "label": "listingLimit",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.initialFilter",
-            "type": "string",
-            "tags": [],
-            "label": "initialFilter",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.initialPageSize",
-            "type": "number",
-            "tags": [],
-            "label": "initialPageSize",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.emptyPrompt",
-            "type": "Object",
-            "tags": [],
-            "label": "emptyPrompt",
-            "description": [
-              "\nShould be an EuiEmptyPrompt (but TS doesn't support this typing)"
-            ],
-            "signature": [
-              "JSX.Element | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.tableColumns",
-            "type": "Array",
-            "tags": [],
-            "label": "tableColumns",
-            "description": [],
-            "signature": [
-              "EuiBasicTableColumn",
-              "<V>[]"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.tableListTitle",
-            "type": "string",
-            "tags": [],
-            "label": "tableListTitle",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.toastNotifications",
-            "type": "Object",
-            "tags": [],
-            "label": "toastNotifications",
-            "description": [],
-            "signature": [
-              "IToasts"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.headingId",
-            "type": "string",
-            "tags": [],
-            "label": "headingId",
-            "description": [
-              "\nId of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.\nIf the table is not empty, this component renders its own h1 element using the same id."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.rowHeader",
-            "type": "string",
-            "tags": [],
-            "label": "rowHeader",
-            "description": [
-              "\nIndicates which column should be used as the identifying cell in each row."
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.tableCaption",
-            "type": "string",
-            "tags": [],
-            "label": "tableCaption",
-            "description": [
-              "\nDescribes the content of the table. If not specified, the caption will be \"This table contains {itemCount} rows.\""
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.searchFilters",
-            "type": "Array",
-            "tags": [],
-            "label": "searchFilters",
-            "description": [],
-            "signature": [
-              "SearchFilterConfig",
-              "[] | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.theme",
-            "type": "Object",
-            "tags": [],
-            "label": "theme",
-            "description": [],
-            "signature": [
-              "ThemeServiceStart"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.application",
-            "type": "Object",
-            "tags": [],
-            "label": "application",
-            "description": [],
-            "signature": [
-              "ApplicationStart"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.TableListViewState",
-        "type": "Interface",
-        "tags": [],
-        "label": "TableListViewState",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "kibanaReact",
-            "scope": "public",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-public.TableListViewState",
-            "text": "TableListViewState"
-          },
-          "<V>"
-        ],
-        "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewState.items",
-            "type": "Array",
-            "tags": [],
-            "label": "items",
-            "description": [],
-            "signature": [
-              "V[]"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewState.hasInitialFetchReturned",
-            "type": "boolean",
-            "tags": [],
-            "label": "hasInitialFetchReturned",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewState.hasUpdatedAtMetadata",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hasUpdatedAtMetadata",
-            "description": [],
-            "signature": [
-              "boolean | null"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewState.isFetchingItems",
-            "type": "boolean",
-            "tags": [],
-            "label": "isFetchingItems",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewState.isDeletingItems",
-            "type": "boolean",
-            "tags": [],
-            "label": "isDeletingItems",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewState.showDeleteModal",
-            "type": "boolean",
-            "tags": [],
-            "label": "showDeleteModal",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewState.showLimitError",
-            "type": "boolean",
-            "tags": [],
-            "label": "showLimitError",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewState.fetchError",
-            "type": "Object",
-            "tags": [],
-            "label": "fetchError",
-            "description": [],
-            "signature": [
-              "IHttpFetchError",
-              "<Error> | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewState.filter",
-            "type": "string",
-            "tags": [],
-            "label": "filter",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewState.selectedIds",
-            "type": "Array",
-            "tags": [],
-            "label": "selectedIds",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewState.totalItems",
-            "type": "number",
-            "tags": [],
-            "label": "totalItems",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewState.pagination",
-            "type": "Object",
-            "tags": [],
-            "label": "pagination",
-            "description": [],
-            "signature": [
-              "Pagination"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewState.tableSort",
-            "type": "Object",
-            "tags": [],
-            "label": "tableSort",
-            "description": [],
-            "signature": [
-              "{ field: keyof V; direction: ",
-              "Direction",
-              "; } | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3800,7 +2881,13 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               "> | undefined"
             ],
             "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
@@ -4128,35 +3215,125 @@
         "description": [],
         "signature": [
           "{ analytics?: ",
-          "AnalyticsServiceStart",
+          {
+            "pluginId": "@kbn/core-analytics-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+            "section": "def-common.AnalyticsServiceStart",
+            "text": "AnalyticsServiceStart"
+          },
           " | undefined; application?: ",
-          "ApplicationStart",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.ApplicationStart",
+            "text": "ApplicationStart"
+          },
           " | undefined; chrome?: ",
-          "ChromeStart",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeStart",
+            "text": "ChromeStart"
+          },
           " | undefined; docLinks?: ",
-          "DocLinksStart",
+          {
+            "pluginId": "@kbn/core-doc-links-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreDocLinksBrowserPluginApi",
+            "section": "def-common.DocLinksStart",
+            "text": "DocLinksStart"
+          },
           " | undefined; executionContext?: ",
-          "ExecutionContextSetup",
+          {
+            "pluginId": "@kbn/core-execution-context-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+            "section": "def-common.ExecutionContextSetup",
+            "text": "ExecutionContextSetup"
+          },
           " | undefined; http?: ",
-          "HttpSetup",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
+          },
           " | undefined; savedObjects?: ",
-          "SavedObjectsStart",
+          {
+            "pluginId": "@kbn/core-saved-objects-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
+            "section": "def-common.SavedObjectsStart",
+            "text": "SavedObjectsStart"
+          },
           " | undefined; i18n?: ",
-          "I18nStart",
+          {
+            "pluginId": "@kbn/core-i18n-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreI18nBrowserPluginApi",
+            "section": "def-common.I18nStart",
+            "text": "I18nStart"
+          },
           " | undefined; notifications?: ",
-          "NotificationsStart",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-common.NotificationsStart",
+            "text": "NotificationsStart"
+          },
           " | undefined; overlays?: ",
-          "OverlayStart",
+          {
+            "pluginId": "@kbn/core-overlays-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+            "section": "def-common.OverlayStart",
+            "text": "OverlayStart"
+          },
           " | undefined; uiSettings?: ",
-          "IUiSettingsClient",
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-common.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          },
           " | undefined; fatalErrors?: ",
-          "FatalErrorsSetup",
+          {
+            "pluginId": "@kbn/core-fatal-errors-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
+            "section": "def-common.FatalErrorsSetup",
+            "text": "FatalErrorsSetup"
+          },
           " | undefined; deprecations?: ",
-          "DeprecationsServiceStart",
+          {
+            "pluginId": "@kbn/core-deprecations-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
+            "section": "def-common.DeprecationsServiceStart",
+            "text": "DeprecationsServiceStart"
+          },
           " | undefined; theme?: ",
-          "ThemeServiceStart",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.ThemeServiceStart",
+            "text": "ThemeServiceStart"
+          },
           " | undefined; injectedMetadata?: ",
-          "InjectedMetadataStart",
+          {
+            "pluginId": "@kbn/core-injected-metadata-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreInjectedMetadataBrowserPluginApi",
+            "section": "def-common.InjectedMetadataStart",
+            "text": "InjectedMetadataStart"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/kibana_react/public/context/types.ts",
@@ -4257,10 +3434,13 @@
       {
         "parentPluginId": "kibanaReact",
         "id": "def-public.NO_DATA_RECOMMENDED",
-        "type": "string",
+        "type": "Any",
         "tags": [],
         "label": "NO_DATA_RECOMMENDED",
         "description": [],
+        "signature": [
+          "any"
+        ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -4329,9 +3509,7 @@
         "label": "TOOLBAR_BUTTON_SIZES",
         "description": [],
         "signature": [
-          "(",
-          "ButtonSize",
-          " | undefined)[]"
+          "(\"m\" | \"s\" | undefined)[]"
         ],
         "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
@@ -4362,9 +3540,7 @@
           "EuiButtonPropsForAnchor",
           "> & ",
           "EuiButtonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })) & { fontWeight?: Weights | undefined; size?: ",
-          "ButtonSize",
-          " | undefined; hasArrow?: boolean | undefined; groupPosition?: \"none\" | \"left\" | \"right\" | \"center\" | undefined; dataTestSubj?: string | undefined; }"
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })) & { fontWeight?: Weights | undefined; size?: \"m\" | \"s\" | undefined; hasArrow?: boolean | undefined; groupPosition?: \"none\" | \"left\" | \"right\" | \"center\" | undefined; dataTestSubj?: string | undefined; }"
         ],
         "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
@@ -4421,10 +3597,10 @@
           },
           "<Partial<",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreStart",
             "text": "CoreStart"
           },
           ">>>"
@@ -4449,20 +3625,7 @@
         "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
         "deprecated": true,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/embeddable/viewport/dashboard_viewport.tsx"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -4948,7 +4111,7 @@
             "label": "eui",
             "description": [],
             "signature": [
-              "{ euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCheckableCardPadding: string; euiCodeBlockPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiZDataGrid: number; euiZHeaderBelowDataGrid: number; euiZDataGridCellPopover: number; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiEmptyPromptContentMaxWidth: string; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuMarginSize: string; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiMarkdownEditorMinHeight: string; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; euiSideNavEmphasizedBackgroundColor: string; euiSideNavRootTextcolor: string; euiSideNavBranchTextcolor: string; euiSideNavSelectedTextcolor: string; euiSideNavDisabledTextcolor: string; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiPopoverArrowSize: string; euiContrastRatioText: number; euiContrastRatioGraphic: number; euiContrastRatioDisabled: number; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; accent: string; success: string; warning: string; danger: string; ghost: string; text: string; }; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: string; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiScrollBarCornerThin: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusTransparencyPercent: string; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipBorderColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZToastList: number; euiZModal: number; euiZMask: number; euiZNavigation: number; euiZContentMenu: number; euiZHeader: number; euiZFlyout: number; euiZMaskBelowHeader: number; euiZContent: number; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSuccessText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiLinkColor: string; euiColorChartLines: string; euiColorChartBand: string; euiDatePickerCalendarWidth: string; euiDatePickerPadding: string; euiDatePickerGap: string; euiDatePickerCalendarColumns: number; euiDatePickerButtonSize: string; euiDatePickerMinControlWidth: string; euiDatePickerMaxControlWidth: string; euiButtonDefaultTransparency: number; euiButtonFontWeight: number; euiRangeHighlightColor: string; euiRangeThumbBackgroundColor: string; euiRangeTrackCompressedHeight: string; euiRangeHighlightCompressedHeight: string; euiRangeHeight: string; euiRangeCompressedHeight: string; euiStepStatusColors: { default: string; complete: string; warning: string; danger: string; }; }"
+              "{ euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiZDataGrid: number; euiZHeaderBelowDataGrid: number; euiZDataGridCellPopover: number; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiEmptyPromptContentMaxWidth: string; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuMarginSize: string; euiMarkdownEditorMinHeight: string; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; euiSideNavEmphasizedBackgroundColor: string; euiSideNavRootTextcolor: string; euiSideNavBranchTextcolor: string; euiSideNavSelectedTextcolor: string; euiSideNavDisabledTextcolor: string; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiContrastRatioText: number; euiContrastRatioGraphic: number; euiContrastRatioDisabled: number; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; accent: string; success: string; warning: string; danger: string; ghost: string; text: string; }; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: string; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeHighlightColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeThumbBackgroundColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackCompressedHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiRangeHighlightCompressedHeight: string; euiRangeHeight: string; euiRangeCompressedHeight: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiScrollBarCornerThin: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusTransparencyPercent: string; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipBorderColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZToastList: number; euiZModal: number; euiZMask: number; euiZNavigation: number; euiZContentMenu: number; euiZHeader: number; euiZFlyout: number; euiZMaskBelowHeader: number; euiZContent: number; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSuccessText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiLinkColor: string; euiColorChartLines: string; euiColorChartBand: string; euiDatePickerCalendarWidth: string; euiDatePickerPadding: string; euiDatePickerGap: string; euiDatePickerCalendarColumns: number; euiDatePickerButtonSize: string; euiDatePickerMinControlWidth: string; euiDatePickerMaxControlWidth: string; euiButtonDefaultTransparency: number; euiButtonFontWeight: number; euiStepStatusColors: { default: string; complete: string; warning: string; danger: string; }; }"
             ],
             "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
             "deprecated": false,

@@ -14,6 +14,7 @@ import {
   FilterStateStore,
   TimeRange,
   EsQueryConfig,
+  isOfQueryType,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -57,6 +58,27 @@ interface LayerMetaInfo {
     }
   >;
 }
+
+const sortByDateFieldsFirst = (
+  datasourceAPI: DatasourcePublicAPI,
+  fields: string[],
+  indexPatterns: IndexPatternMap
+) => {
+  const dataViewId = datasourceAPI.getSourceId();
+  if (!dataViewId) return;
+
+  // for usability reasons we want to order the date fields first
+  // the fields order responds to the columns order in Discover
+  const dateFieldsFirst = fields.reduce((acc: string[], fieldName) => {
+    const field = indexPatterns[dataViewId]?.getFieldByName(fieldName);
+    if (field?.type === 'date') {
+      return [fieldName, ...acc];
+    }
+    return [...acc, fieldName];
+  }, []);
+
+  return dateFieldsFirst;
+};
 
 export function getLayerMetaInfo(
   currentDatasource: Datasource | undefined,
@@ -109,16 +131,7 @@ export function getLayerMetaInfo(
       isVisible,
     };
   }
-  // maybe add also datasourceId validation here?
-  if (datasourceAPI.datasourceId !== 'indexpattern') {
-    return {
-      meta: undefined,
-      error: i18n.translate('xpack.lens.app.showUnderlyingDataUnsupportedDatasource', {
-        defaultMessage: 'Underlying data does not support the current datasource',
-      }),
-      isVisible,
-    };
-  }
+
   const tableSpec = datasourceAPI.getTableSpec();
 
   const columnsWithNoTimeShifts = tableSpec.filter(
@@ -145,10 +158,12 @@ export function getLayerMetaInfo(
   }
 
   const uniqueFields = [...new Set(columnsWithNoTimeShifts.map(({ fields }) => fields).flat())];
+  const dateFieldsFirst = sortByDateFieldsFirst(datasourceAPI, uniqueFields, indexPatterns);
+
   return {
     meta: {
       id: datasourceAPI.getSourceId()!,
-      columns: uniqueFields,
+      columns: dateFieldsFirst ?? uniqueFields,
       filters: filtersOrError,
     },
     error: undefined,
@@ -183,8 +198,10 @@ export function combineQueryAndFilters(
     lucene: [],
   };
 
-  const allQueries = Array.isArray(query) ? query : query ? [query] : [];
-  const nonEmptyQueries = allQueries.filter((q) => Boolean(q.query.trim()));
+  const allQueries = Array.isArray(query) ? query : query && isOfQueryType(query) ? [query] : [];
+  const nonEmptyQueries = allQueries.filter((q) =>
+    Boolean(typeof q.query === 'string' ? q.query.trim() : q.query)
+  );
 
   [queries.lucene, queries.kuery] = partition(nonEmptyQueries, (q) => q.language === 'lucene');
 

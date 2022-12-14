@@ -130,6 +130,7 @@ export function IndexLifecyclePhaseSelect() {
       }}
       hasDividers
       style={{ minWidth: 200 }}
+      data-test-subj="storageExplorerLifecyclePhaseSelect"
     />
   );
 }

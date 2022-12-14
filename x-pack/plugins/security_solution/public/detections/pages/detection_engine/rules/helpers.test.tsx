@@ -15,16 +15,18 @@ import {
   getActionsStepsData,
   getHumanizedDuration,
   getModifiedAboutDetailsData,
-  getPrePackagedRuleStatus,
-  getPrePackagedTimelineStatus,
+  getPrePackagedRuleInstallationStatus,
+  getPrePackagedTimelineInstallationStatus,
   determineDetailsValue,
-  userHasPermissions,
   fillEmptySeverityMappings,
 } from './helpers';
-import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
+import {
+  mockRuleWithEverything,
+  mockRule,
+} from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { FilterStateStore } from '@kbn/es-query';
 
-import type { Rule } from '../../../containers/detection_engine/rules';
+import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import type {
   AboutStepRule,
   AboutStepRuleDetails,
@@ -113,6 +115,7 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
+        groupByFields: ['host.name'],
         newTermsFields: ['host.name'],
         historyWindowSize: '7d',
       };
@@ -140,6 +143,7 @@ describe('rule helpers', () => {
         enabled: true,
         throttle: 'no_actions',
         actions: [],
+        responseActions: undefined,
       };
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
@@ -255,6 +259,7 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
+        groupByFields: [],
         newTermsFields: [],
         historyWindowSize: '7d',
         shouldLoadQueryDynamically: true,
@@ -309,6 +314,7 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
+        groupByFields: [],
         newTermsFields: [],
         historyWindowSize: '7d',
         shouldLoadQueryDynamically: false,
@@ -410,6 +416,7 @@ describe('rule helpers', () => {
             actionTypeId: 'action_type_id',
           },
         ],
+        responseActions: undefined,
         enabled: mockedRule.enabled,
         throttle: 'no_actions',
       };
@@ -446,35 +453,12 @@ describe('rule helpers', () => {
     });
   });
 
-  describe('userHasPermissions', () => {
-    test("returns true when user's CRUD operations are null", () => {
-      const result: boolean = userHasPermissions(null);
-      const userHasPermissionsExpectedResult = true;
-
-      expect(result).toEqual(userHasPermissionsExpectedResult);
-    });
-
-    test('returns false when user cannot CRUD', () => {
-      const result: boolean = userHasPermissions(false);
-      const userHasPermissionsExpectedResult = false;
-
-      expect(result).toEqual(userHasPermissionsExpectedResult);
-    });
-
-    test('returns true when user can CRUD', () => {
-      const result: boolean = userHasPermissions(true);
-      const userHasPermissionsExpectedResult = true;
-
-      expect(result).toEqual(userHasPermissionsExpectedResult);
-    });
-  });
-
   describe('getPrePackagedRuleStatus', () => {
     test('ruleNotInstalled', () => {
       const rulesInstalled = 0;
       const rulesNotInstalled = 1;
       const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -487,7 +471,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 0;
       const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -500,7 +484,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 1;
       const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -513,7 +497,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 0;
       const rulesNotUpdated = 1;
-      const result: string = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -526,7 +510,7 @@ describe('rule helpers', () => {
       const rulesInstalled = undefined;
       const rulesNotInstalled = undefined;
       const rulesNotUpdated = undefined;
-      const result: string = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -541,7 +525,7 @@ describe('rule helpers', () => {
       const timelinesInstalled = 0;
       const timelinesNotInstalled = 1;
       const timelinesNotUpdated = 0;
-      const result: string = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated
@@ -554,7 +538,7 @@ describe('rule helpers', () => {
       const timelinesInstalled = 1;
       const timelinesNotInstalled = 0;
       const timelinesNotUpdated = 0;
-      const result: string = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated
@@ -567,7 +551,7 @@ describe('rule helpers', () => {
       const timelinesInstalled = 1;
       const timelinesNotInstalled = 1;
       const timelinesNotUpdated = 0;
-      const result: string = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated
@@ -580,7 +564,7 @@ describe('rule helpers', () => {
       const timelinesInstalled = 1;
       const timelinesNotInstalled = 0;
       const timelinesNotUpdated = 1;
-      const result: string = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated
@@ -593,7 +577,7 @@ describe('rule helpers', () => {
       const timelinesInstalled = undefined;
       const timelinesNotInstalled = undefined;
       const timelinesNotUpdated = undefined;
-      const result: string = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated

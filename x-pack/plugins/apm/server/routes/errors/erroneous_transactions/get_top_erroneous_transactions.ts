@@ -24,18 +24,18 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 async function getTopErroneousTransactions({
   environment,
   kuery,
   serviceName,
   groupId,
-  setup,
+  apmEventClient,
   start,
   end,
   numBuckets,
@@ -45,14 +45,12 @@ async function getTopErroneousTransactions({
   kuery: string;
   serviceName: string;
   groupId: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   numBuckets: number;
   offset?: string;
 }) {
-  const { apmEventClient } = setup;
-
   const { startWithOffset, endWithOffset, offsetInMs } = getOffsetInMs({
     start,
     end,
@@ -70,6 +68,7 @@ async function getTopErroneousTransactions({
       events: [ProcessorEvent.error],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
@@ -131,7 +130,7 @@ async function getTopErroneousTransactions({
 export async function getTopErroneousTransactionsPeriods({
   kuery,
   serviceName,
-  setup,
+  apmEventClient,
   numBuckets,
   groupId,
   environment,
@@ -141,7 +140,7 @@ export async function getTopErroneousTransactionsPeriods({
 }: {
   kuery: string;
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   numBuckets: number;
   groupId: string;
   environment: string;
@@ -154,7 +153,7 @@ export async function getTopErroneousTransactionsPeriods({
       environment,
       kuery,
       serviceName,
-      setup,
+      apmEventClient,
       numBuckets,
       groupId,
       start,
@@ -165,7 +164,7 @@ export async function getTopErroneousTransactionsPeriods({
           environment,
           kuery,
           serviceName,
-          setup,
+          apmEventClient,
           numBuckets,
           groupId,
           start,

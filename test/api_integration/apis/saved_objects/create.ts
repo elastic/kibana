@@ -56,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
             migrationVersion: resp.body.migrationVersion,
             coreMigrationVersion: KIBANA_VERSION,
             updated_at: resp.body.updated_at,
+            created_at: resp.body.created_at,
             version: resp.body.version,
             attributes: {
               title: 'My favorite vis',

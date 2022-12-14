@@ -71,11 +71,7 @@ export const expectedCompleteUnitedIndexQuery = {
                                             must_not: {
                                               bool: {
                                                 should: [
-                                                  {
-                                                    match: {
-                                                      'united.agent.upgrade_status': 'completed',
-                                                    },
-                                                  },
+                                                  { exists: { field: 'united.agent.upgraded_at' } },
                                                 ],
                                                 minimum_should_match: 1,
                                               },
@@ -174,6 +170,32 @@ export const expectedCompleteUnitedIndexQuery = {
                                                       minimum_should_match: 1,
                                                     },
                                                   },
+                                                  {
+                                                    bool: {
+                                                      should: [
+                                                        {
+                                                          match: {
+                                                            'united.agent.last_checkin_status':
+                                                              'DEGRADED',
+                                                          },
+                                                        },
+                                                      ],
+                                                      minimum_should_match: 1,
+                                                    },
+                                                  },
+                                                  {
+                                                    bool: {
+                                                      should: [
+                                                        {
+                                                          match: {
+                                                            'united.agent.last_checkin_status':
+                                                              'ERROR',
+                                                          },
+                                                        },
+                                                      ],
+                                                      minimum_should_match: 1,
+                                                    },
+                                                  },
                                                 ],
                                                 minimum_should_match: 1,
                                               },
@@ -248,6 +270,24 @@ export const expectedCompleteUnitedIndexQuery = {
                                         {
                                           match: { 'united.agent.last_checkin_status': 'degraded' },
                                         },
+                                      ],
+                                      minimum_should_match: 1,
+                                    },
+                                  },
+                                  {
+                                    bool: {
+                                      should: [
+                                        {
+                                          match: { 'united.agent.last_checkin_status': 'DEGRADED' },
+                                        },
+                                      ],
+                                      minimum_should_match: 1,
+                                    },
+                                  },
+                                  {
+                                    bool: {
+                                      should: [
+                                        { match: { 'united.agent.last_checkin_status': 'ERROR' } },
                                       ],
                                       minimum_should_match: 1,
                                     },

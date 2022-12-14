@@ -13,19 +13,23 @@ import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
 import type {
+  Severity,
+  SeverityMapping,
   Threats,
   Type,
-  SeverityMapping,
-  Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ResponseAction } from '../../../../../common/detection_engine/rule_response_actions/schemas';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
-import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
-import type { Rule } from '../../../containers/detection_engine/rules';
+import {
+  transformRuleToAlertAction,
+  transformRuleToAlertResponseAction,
+} from '../../../../../common/detection_engine/transform_actions';
+import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import type {
   AboutStepRule,
   AboutStepRuleDetails,
@@ -67,12 +71,16 @@ export const getStepsData = ({
 };
 
 export const getActionsStepsData = (
-  rule: Omit<Rule, 'actions'> & { actions: RuleAlertAction[] }
+  rule: Omit<Rule, 'actions'> & {
+    actions: RuleAlertAction[];
+    response_actions?: ResponseAction[];
+  }
 ): ActionsStepRule => {
-  const { enabled, throttle, meta, actions = [] } = rule;
+  const { enabled, throttle, meta, actions = [], response_actions: responseActions } = rule;
 
   return {
     actions: actions?.map(transformRuleToAlertAction),
+    responseActions: responseActions?.map(transformRuleToAlertResponseAction),
     throttle,
     kibanaSiemAppUrl: meta?.kibana_siem_app_url,
     enabled,
@@ -127,6 +135,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     ? convertHistoryStartToSize(rule.history_window_start)
     : '7d',
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
+  groupByFields: rule.alert_suppression?.group_by ?? [],
 });
 
 const convertHistoryStartToSize = (relativeTime: string) => {
@@ -258,25 +267,25 @@ export const getModifiedAboutDetailsData = (rule: Rule): AboutStepRuleDetails =>
 
 export const useQuery = () => new URLSearchParams(useLocation().search);
 
-export type PrePackagedRuleStatus =
+export type PrePackagedRuleInstallationStatus =
   | 'ruleInstalled'
   | 'ruleNotInstalled'
   | 'ruleNeedUpdate'
   | 'someRuleUninstall'
   | 'unknown';
 
-export type PrePackagedTimelineStatus =
+export type PrePackagedTimelineInstallationStatus =
   | 'timelinesNotInstalled'
   | 'timelinesInstalled'
   | 'someTimelineUninstall'
   | 'timelineNeedUpdate'
   | 'unknown';
 
-export const getPrePackagedRuleStatus = (
+export const getPrePackagedRuleInstallationStatus = (
   rulesInstalled?: number,
   rulesNotInstalled?: number,
   rulesNotUpdated?: number
-): PrePackagedRuleStatus => {
+): PrePackagedRuleInstallationStatus => {
   if (
     rulesNotInstalled != null &&
     rulesInstalled === 0 &&
@@ -311,11 +320,11 @@ export const getPrePackagedRuleStatus = (
   }
   return 'unknown';
 };
-export const getPrePackagedTimelineStatus = (
+export const getPrePackagedTimelineInstallationStatus = (
   timelinesInstalled?: number,
   timelinesNotInstalled?: number,
   timelinesNotUpdated?: number
-): PrePackagedTimelineStatus => {
+): PrePackagedTimelineInstallationStatus => {
   if (
     timelinesNotInstalled != null &&
     timelinesInstalled === 0 &&
@@ -379,7 +388,7 @@ const commonRuleParamsKeys = [
   'type',
   'version',
 ];
-const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
+const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id', 'response_actions'];
 const machineLearningRuleParams = ['anomaly_threshold', 'machine_learning_job_id'];
 const thresholdRuleParams = ['threshold', ...queryRuleParams];
 
@@ -452,10 +461,6 @@ export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): A
  */
 export const getAllActionMessageParams = () =>
   transformRuleKeysToActionVariables(getAllRuleParamsKeys());
-
-// typed as null not undefined as the initial state for this value is null.
-export const userHasPermissions = (canUserCRUD: boolean | null): boolean =>
-  canUserCRUD != null ? canUserCRUD : true;
 
 export const MaxWidthEuiFlexItem = styled(EuiFlexItem)`
   max-width: 1000px;

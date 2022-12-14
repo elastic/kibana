@@ -31,7 +31,7 @@ export const getIsCloud = () => isCloudEnabled;
 
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
 export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
-export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
+export const getIndexPatternService = () => pluginsStart.data.dataViews;
 export const getAutocompleteService = () => pluginsStart.unifiedSearch.autocomplete;
 export const getInspector = () => pluginsStart.inspector;
 export const getFileUpload = () => pluginsStart.fileUpload;
@@ -66,6 +66,7 @@ export const getPresentationUtilContext = () => pluginsStart.presentationUtil.Co
 export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
+export const getApplication = () => coreStart.application;
 export const getUsageCollection = () => pluginsStart.usageCollection;
 export const isScreenshotMode = () => {
   return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;

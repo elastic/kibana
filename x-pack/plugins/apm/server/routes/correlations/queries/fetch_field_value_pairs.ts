@@ -13,11 +13,11 @@ import type {
 import { TERMS_SIZE } from '../../../../common/correlations/constants';
 
 import { splitAllSettledPromises } from '../utils';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchFieldValuePairs = async ({
-  setup,
+  apmEventClient,
   fieldCandidates,
   eventType,
   start,
@@ -26,12 +26,10 @@ export const fetchFieldValuePairs = async ({
   kuery,
   query,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   fieldCandidates: string[];
   eventType: ProcessorEvent;
 }): Promise<{ fieldValuePairs: FieldValuePair[]; errors: any[] }> => {
-  const { apmEventClient } = setup;
-
   const { fulfilled: responses, rejected: errors } = splitAllSettledPromises(
     await Promise.allSettled(
       fieldCandidates.map(async (fieldName) => {
@@ -42,6 +40,7 @@ export const fetchFieldValuePairs = async ({
               events: [eventType],
             },
             body: {
+              track_total_hits: false,
               size: 0,
               query: getCommonCorrelationsQuery({
                 start,

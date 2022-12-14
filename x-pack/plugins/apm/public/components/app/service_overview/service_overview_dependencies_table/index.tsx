@@ -140,7 +140,7 @@ export function ServiceOverviewDependenciesTable({
             'xpack.apm.serviceOverview.dependenciesTableTitleTip',
             {
               defaultMessage:
-                'Uninstrumented downstream services or external connections derived from the exit spans of instrumented services.',
+                'Downstream services and external connections to uninstrumented services',
             }
           )}
         >

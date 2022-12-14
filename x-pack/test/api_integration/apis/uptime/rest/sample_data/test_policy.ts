@@ -19,7 +19,7 @@ export const getTestSyntheticsPolicy = (
   version: 'WzE2MjYsMV0=',
   name: 'test-monitor-name-Test private location 0-default',
   namespace: namespace || 'testnamespace',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.10.2' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.10.3' },
   enabled: true,
   policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
   inputs: [
@@ -31,7 +31,6 @@ export const getTestSyntheticsPolicy = (
         {
           enabled: true,
           data_stream: { type: 'synthetics', dataset: 'http' },
-          release: 'experimental',
           vars: {
             __ui: {
               value:
@@ -73,6 +72,8 @@ export const getTestSyntheticsPolicy = (
             config_id: { value: id, type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { value: 'ui', type: 'text' },
+            'monitor.project.id': { type: 'text', value: null },
+            'monitor.project.name': { type: 'text', value: null },
           },
           id: 'synthetics/http-http-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
@@ -131,7 +132,6 @@ export const getTestSyntheticsPolicy = (
       streams: [
         {
           enabled: false,
-          release: 'experimental',
           data_stream: { type: 'synthetics', dataset: 'tcp' },
           vars: {
             __ui: { type: 'yaml' },
@@ -158,6 +158,8 @@ export const getTestSyntheticsPolicy = (
             config_id: { type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
+            'monitor.project.id': { type: 'text' },
+            'monitor.project.name': { type: 'text' },
           },
           id: 'synthetics/tcp-tcp-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         },
@@ -170,7 +172,6 @@ export const getTestSyntheticsPolicy = (
       streams: [
         {
           enabled: false,
-          release: 'experimental',
           data_stream: { type: 'synthetics', dataset: 'icmp' },
           vars: {
             __ui: { type: 'yaml' },
@@ -188,6 +189,8 @@ export const getTestSyntheticsPolicy = (
             config_id: { type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
+            'monitor.project.id': { type: 'text' },
+            'monitor.project.name': { type: 'text' },
           },
           id: 'synthetics/icmp-icmp-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
         },
@@ -200,7 +203,6 @@ export const getTestSyntheticsPolicy = (
       streams: [
         {
           enabled: true,
-          release: 'beta',
           data_stream: { type: 'synthetics', dataset: 'browser' },
           vars: {
             __ui: { type: 'yaml' },
@@ -258,7 +260,6 @@ export const getTestSyntheticsPolicy = (
         {
           enabled: true,
           data_stream: { type: 'synthetics', dataset: 'browser.network' },
-          release: 'beta',
           id: 'synthetics/browser-browser.network-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
             processors: [
@@ -270,7 +271,6 @@ export const getTestSyntheticsPolicy = (
         {
           enabled: true,
           data_stream: { type: 'synthetics', dataset: 'browser.screenshot' },
-          release: 'beta',
           id: 'synthetics/browser-browser.screenshot-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
             processors: [
@@ -296,11 +296,13 @@ export const getTestProjectSyntheticsPolicy = (
     inputs = {},
     configId,
     id,
+    projectId = 'test-suite',
   }: {
     name?: string;
     inputs: Record<string, { value: string | boolean; type: string }>;
     configId: string;
     id: string;
+    projectId?: string;
   } = {
     name: 'check if title is present-Test private location 0',
     inputs: {},
@@ -308,11 +310,11 @@ export const getTestProjectSyntheticsPolicy = (
     id: '',
   }
 ): PackagePolicy => ({
-  id: '4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
+  id: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
   version: 'WzEzMDksMV0=',
-  name: '4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-Test private location 0',
+  name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: 'default',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.10.2' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.10.3' },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   inputs: [
@@ -324,7 +326,6 @@ export const getTestProjectSyntheticsPolicy = (
         {
           enabled: false,
           data_stream: { type: 'synthetics', dataset: 'http' },
-          release: 'experimental',
           vars: {
             __ui: { type: 'yaml' },
             enabled: { value: true, type: 'bool' },
@@ -359,8 +360,10 @@ export const getTestProjectSyntheticsPolicy = (
             config_id: { type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
+            'monitor.project.id': { type: 'text' },
+            'monitor.project.name': { type: 'text' },
           },
-          id: 'synthetics/http-http-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
+          id: `synthetics/http-http-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
         },
       ],
     },
@@ -372,7 +375,6 @@ export const getTestProjectSyntheticsPolicy = (
         {
           enabled: false,
           data_stream: { type: 'synthetics', dataset: 'tcp' },
-          release: 'experimental',
           vars: {
             __ui: { type: 'yaml' },
             enabled: { value: true, type: 'bool' },
@@ -398,8 +400,10 @@ export const getTestProjectSyntheticsPolicy = (
             config_id: { type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
+            'monitor.project.id': { type: 'text' },
+            'monitor.project.name': { type: 'text' },
           },
-          id: 'synthetics/tcp-tcp-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
+          id: `synthetics/tcp-tcp-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
         },
       ],
     },
@@ -410,7 +414,6 @@ export const getTestProjectSyntheticsPolicy = (
       streams: [
         {
           enabled: false,
-          release: 'experimental',
           data_stream: { type: 'synthetics', dataset: 'icmp' },
           vars: {
             __ui: { type: 'yaml' },
@@ -428,8 +431,10 @@ export const getTestProjectSyntheticsPolicy = (
             config_id: { type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
+            'monitor.project.id': { type: 'text' },
+            'monitor.project.name': { type: 'text' },
           },
-          id: 'synthetics/icmp-icmp-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
+          id: `synthetics/icmp-icmp-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
         },
       ],
     },
@@ -441,7 +446,6 @@ export const getTestProjectSyntheticsPolicy = (
         {
           enabled: true,
           data_stream: { type: 'synthetics', dataset: 'browser' },
-          release: 'beta',
           vars: {
             __ui: {
               value:
@@ -488,11 +492,11 @@ export const getTestProjectSyntheticsPolicy = (
             config_id: { value: configId, type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { value: 'project', type: 'text' },
-            'monitor.project.id': { value: 'test-suite', type: 'text' },
-            'monitor.project.name': { value: 'test-suite', type: 'text' },
+            'monitor.project.id': { value: projectId, type: 'text' },
+            'monitor.project.name': { value: projectId, type: 'text' },
             ...inputs,
           },
-          id: 'synthetics/browser-browser-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
+          id: `synthetics/browser-browser-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
           compiled_stream: {
             __ui: {
               script_source: { is_generated_script: false, file_name: '' },
@@ -519,8 +523,8 @@ export const getTestProjectSyntheticsPolicy = (
                   fields: {
                     'monitor.fleet_managed': true,
                     config_id: configId,
-                    'monitor.project.name': 'test-suite',
-                    'monitor.project.id': 'test-suite',
+                    'monitor.project.name': projectId,
+                    'monitor.project.id': projectId,
                   },
                 },
               },
@@ -533,9 +537,8 @@ export const getTestProjectSyntheticsPolicy = (
         },
         {
           enabled: true,
-          release: 'beta',
           data_stream: { type: 'synthetics', dataset: 'browser.network' },
-          id: 'synthetics/browser-browser.network-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
+          id: `synthetics/browser-browser.network-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
           compiled_stream: {
             processors: [
               { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
@@ -545,9 +548,8 @@ export const getTestProjectSyntheticsPolicy = (
         },
         {
           enabled: true,
-          release: 'beta',
           data_stream: { type: 'synthetics', dataset: 'browser.screenshot' },
-          id: 'synthetics/browser-browser.screenshot-4b6abc6c-118b-4d93-a489-1135500d09f1-test-suite-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3',
+          id: `synthetics/browser-browser.screenshot-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
           compiled_stream: {
             processors: [
               { add_observer_metadata: { geo: { name: 'Fleet managed' } } },

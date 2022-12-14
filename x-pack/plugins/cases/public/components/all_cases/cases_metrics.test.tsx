@@ -5,46 +5,30 @@
  * 2.0.
  */
 
-import { within } from '@testing-library/dom';
+import { waitFor, within } from '@testing-library/react';
 import React from 'react';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
-import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
-import { useGetCasesStatus } from '../../containers/use_get_cases_status';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { CasesMetrics } from './cases_metrics';
 
-jest.mock('../../containers/use_get_cases_metrics');
-jest.mock('../../containers/use_get_cases_status');
-
-const useGetCasesMetricsMock = useGetCasesMetrics as jest.Mock;
-const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
+jest.mock('../../api');
 
 describe('Cases metrics', () => {
-  useGetCasesStatusMock.mockReturnValue({
-    countOpenCases: 2,
-    countInProgressCases: 3,
-    countClosedCases: 4,
-    isLoading: false,
-    fetchCasesStatus: jest.fn(),
-  });
-  useGetCasesMetricsMock.mockReturnValue({
-    //  600 seconds = 10m
-    mttr: 600,
-    isLoading: false,
-    fetchCasesMetrics: jest.fn(),
-  });
-
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
     appMockRenderer = createAppMockRenderer();
   });
 
-  it('renders the correct stats', () => {
-    const result = appMockRenderer.render(<CasesMetrics refresh={1} />);
-    expect(result.getByTestId('cases-metrics-stats')).toBeTruthy();
-    expect(within(result.getByTestId('openStatsHeader')).getByText(2)).toBeTruthy();
-    expect(within(result.getByTestId('inProgressStatsHeader')).getByText(3)).toBeTruthy();
-    expect(within(result.getByTestId('closedStatsHeader')).getByText(4)).toBeTruthy();
-    expect(within(result.getByTestId('mttrStatsHeader')).getByText('10m')).toBeTruthy();
+  it('renders the correct stats', async () => {
+    const result = appMockRenderer.render(<CasesMetrics />);
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-metrics-stats')).toBeTruthy();
+      expect(within(result.getByTestId('openStatsHeader')).getByText(20)).toBeTruthy();
+      expect(within(result.getByTestId('inProgressStatsHeader')).getByText(40)).toBeTruthy();
+      expect(within(result.getByTestId('closedStatsHeader')).getByText(130)).toBeTruthy();
+      expect(within(result.getByTestId('mttrStatsHeader')).getByText('12s')).toBeTruthy();
+    });
   });
 });

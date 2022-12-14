@@ -148,7 +148,11 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
               })}
             </EuiTabs>
           )}
-          <EuiPageContentBody>{renderContent()}</EuiPageContentBody>
+          <EuiPageContentBody>
+            <EuiPage paddingSize="m">
+              <EuiPageBody>{renderContent()}</EuiPageBody>
+            </EuiPage>
+          </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

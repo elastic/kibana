@@ -11,13 +11,10 @@ import type {
   FieldCapsResponse,
   TermsEnumRequest,
   TermsEnumResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ValuesType } from 'utility-types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import {
-  ESSearchRequest,
-  InferSearchResponseOf,
-} from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { omit } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
@@ -37,7 +34,6 @@ import {
   unpackProcessorEvents,
   processorEventsToIndex,
 } from './unpack_processor_events';
-import { fakeSyntheticSource } from './fake_synthetic_source';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
@@ -46,6 +42,7 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   };
   body: {
     size: number;
+    track_total_hits: boolean | number;
   };
 };
 
@@ -83,6 +80,7 @@ export interface APMEventClientConfig {
   indices: ApmIndicesConfig;
   options: {
     includeFrozen: boolean;
+    forceSyntheticSource: boolean;
   };
 }
 
@@ -90,8 +88,9 @@ export class APMEventClient {
   private readonly esClient: ElasticsearchClient;
   private readonly debug: boolean;
   private readonly request: KibanaRequest;
-  private readonly indices: ApmIndicesConfig;
+  public readonly indices: ApmIndicesConfig;
   private readonly includeFrozen: boolean;
+  private readonly forceSyntheticSource: boolean;
 
   constructor(config: APMEventClientConfig) {
     this.esClient = config.esClient;
@@ -99,6 +98,7 @@ export class APMEventClient {
     this.request = config.request;
     this.indices = config.indices;
     this.includeFrozen = config.options.includeFrozen;
+    this.forceSyntheticSource = config.options.forceSyntheticSource;
   }
 
   private callAsyncWithDebug<T extends { body: any }>({
@@ -152,57 +152,25 @@ export class APMEventClient {
       this.indices
     );
 
+    const forceSyntheticSourceForThisRequest =
+      this.forceSyntheticSource &&
+      params.apm.events.includes(ProcessorEvent.metric);
+
     const searchParams = {
       ...withProcessorEventFilter,
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
       ignore_unavailable: true,
       preference: 'any',
+      ...(forceSyntheticSourceForThisRequest
+        ? { force_synthetic_source: true }
+        : {}),
     };
 
     return this.callAsyncWithDebug({
       cb: (opts) =>
-        (
-          this.esClient.search(searchParams, opts) as unknown as Promise<{
-            body: TypedSearchResponse<TParams>;
-          }>
-        ).then((response) => {
-          // ensure metric data is compatible with synthetic source
-          // enabled
-          const metricEventsOnly = params.apm.events.every(
-            (event) => event === ProcessorEvent.metric
-          );
-
-          if (!response.body?.hits?.hits) {
-            return response;
-          }
-
-          const hits = response.body.hits.hits.map((hit) => {
-            if (
-              metricEventsOnly ||
-              // take filter_path etc into account
-              (hit._source &&
-                'processor' in hit._source &&
-                hit._source.processor?.event === ProcessorEvent.metric)
-            ) {
-              return {
-                ...hit,
-                _source: fakeSyntheticSource(hit._source),
-              };
-            }
-            return hit;
-          });
-
-          return {
-            ...response,
-            body: {
-              ...response.body,
-              hits: {
-                ...response.body.hits,
-                hits,
-              },
-            },
-          };
-        }),
+        this.esClient.search(searchParams, opts) as unknown as Promise<{
+          body: TypedSearchResponse<TParams>;
+        }>,
       operationName,
       params: searchParams,
       requestType: 'search',

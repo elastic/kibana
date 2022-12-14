@@ -27,7 +27,7 @@ import {
 import { Pager } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MatchedItem, Tag } from '../../../types';
+import { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
 
 interface IndicesListProps {
   indices: MatchedItem[];
@@ -144,18 +144,35 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
   }
 
   highlightIndexName(indexName: string, query: string) {
-    const queryIdx = indexName.indexOf(query);
-    if (!query || queryIdx === -1) {
+    if (!query) {
       return indexName;
     }
 
-    const preStr = indexName.substr(0, queryIdx);
-    const postStr = indexName.substr(queryIdx + query.length);
+    const queryAsArray = query.split(',').map((q) => q.trim());
+    let queryIdx = -1;
+    let queryWithoutWildcard = '';
+    for (let i = 0; i < queryAsArray.length; i++) {
+      const queryComponent = queryAsArray[i];
+      queryWithoutWildcard = queryComponent.endsWith('*')
+        ? queryComponent.substring(0, queryComponent.length - 1)
+        : queryComponent;
+      queryIdx = indexName.indexOf(queryWithoutWildcard);
+
+      if (queryIdx !== -1) {
+        break;
+      }
+    }
+    if (queryIdx === -1) {
+      return indexName;
+    }
+
+    const preStr = indexName.substring(0, queryIdx);
+    const postStr = indexName.substr(queryIdx + queryWithoutWildcard.length);
 
     return (
       <span>
         {preStr}
-        <strong>{query}</strong>
+        <strong>{queryWithoutWildcard}</strong>
         {postStr}
       </span>
     );
@@ -164,15 +181,11 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
   render() {
     const { indices, query, ...rest } = this.props;
 
-    const queryWithoutWildcard = query.endsWith('*') ? query.substr(0, query.length - 1) : query;
-
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {
       return (
         <EuiTableRow key={key}>
-          <EuiTableRowCell>
-            {this.highlightIndexName(index.name, queryWithoutWildcard)}
-          </EuiTableRowCell>
+          <EuiTableRowCell>{this.highlightIndexName(index.name, query)}</EuiTableRowCell>
           <EuiTableRowCell>
             {index.tags.map((tag: Tag) => {
               return (

@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext, useMemo } from 'react';
-import type { EuiTableFieldDataColumnType, SearchFilterConfig } from '@elastic/eui';
+import React, { FC, useContext, useMemo, useCallback } from 'react';
 import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
+import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
+import { InspectorKibanaProvider } from '@kbn/content-management-inspector';
 
-import { UserContentCommonSchema } from './table_list_view';
+import { TAG_MANAGEMENT_APP_URL } from './constants';
+import type { Tag } from './types';
 
-type UnmountCallback = () => void;
-type MountPoint = (element: HTMLElement) => UnmountCallback;
 type NotifyFn = (title: JSX.Element, text?: string) => void;
 
 export interface SavedObjectsReference {
@@ -31,6 +32,12 @@ export type DateFormatter = (props: {
   children: (formattedDate: string) => JSX.Element;
 }) => JSX.Element;
 
+export interface TagListProps {
+  references: SavedObjectsReference[];
+  onClick?: (tag: Tag) => void;
+  tagRender?: (tag: Tag) => JSX.Element;
+}
+
 /**
  * Abstract external services for this component.
  */
@@ -43,10 +50,17 @@ export interface Services {
   searchQueryParser?: (searchQuery: string) => {
     searchQuery: string;
     references?: SavedObjectsFindOptionsReference[];
+    referencesToExclude?: SavedObjectsFindOptionsReference[];
   };
-  getTagsColumnDefinition?: () => EuiTableFieldDataColumnType<UserContentCommonSchema> | undefined;
-  getSearchBarFilters?: () => SearchFilterConfig[];
   DateFormatterComp?: DateFormatter;
+  /** Handler to retrieve the list of available tags */
+  getTagList: () => Tag[];
+  TagList: FC<TagListProps>;
+  /** Predicate function to indicate if some of the saved object references are tags */
+  itemHasTags: (references: SavedObjectsReference[]) => boolean;
+  /** Handler to return the url to navigate to the kibana tags management */
+  getTagManagementUrl: () => string;
+  getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -79,6 +93,14 @@ export interface TableListViewKibanaDependencies {
         addDanger: (notifyArgs: { title: MountPoint; text?: string }) => void;
       };
     };
+    http: {
+      basePath: {
+        prepend: (path: string) => string;
+      };
+    };
+    overlays: {
+      openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+    };
   };
   /**
    * Handler from the '@kbn/kibana-react-plugin/public' Plugin
@@ -101,7 +123,19 @@ export interface TableListViewKibanaDependencies {
    */
   savedObjectsTagging?: {
     ui: {
-      getTableColumnDefinition: () => EuiTableFieldDataColumnType<UserContentCommonSchema>;
+      components: {
+        TagList: React.FC<{
+          object: {
+            references: SavedObjectsReference[];
+          };
+          onClick?: (tag: Tag) => void;
+          tagRender?: (tag: Tag) => JSX.Element;
+        }>;
+        SavedObjectSaveModalTagSelector: React.FC<{
+          initialSelection: string[];
+          onTagsSelected: (ids: string[]) => void;
+        }>;
+      };
       parseSearchQuery: (
         query: string,
         options?: {
@@ -111,12 +145,11 @@ export interface TableListViewKibanaDependencies {
       ) => {
         searchTerm: string;
         tagReferences: SavedObjectsFindOptionsReference[];
+        tagReferencesToExclude: SavedObjectsFindOptionsReference[];
         valid: boolean;
       };
-      getSearchBarFilter: (options?: {
-        useName?: boolean;
-        tagField?: string;
-      }) => SearchFilterConfig;
+      getTagList: () => Tag[];
+      getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
     };
   };
   /** The <FormattedRelative /> component from the @kbn/i18n-react package */
@@ -132,12 +165,6 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
 }) => {
   const { core, toMountPoint, savedObjectsTagging, FormattedRelative } = services;
 
-  const getSearchBarFilters = useMemo(() => {
-    if (savedObjectsTagging) {
-      return () => [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })];
-    }
-  }, [savedObjectsTagging]);
-
   const searchQueryParser = useMemo(() => {
     if (savedObjectsTagging) {
       return (searchQuery: string) => {
@@ -145,32 +172,80 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
         return {
           searchQuery: res.searchTerm,
           references: res.tagReferences,
+          referencesToExclude: res.tagReferencesToExclude,
         };
       };
     }
   }, [savedObjectsTagging]);
 
+  const TagList = useMemo(() => {
+    const Comp: Services['TagList'] = ({ references, onClick, tagRender }) => {
+      if (!savedObjectsTagging?.ui.components.TagList) {
+        return null;
+      }
+      const PluginTagList = savedObjectsTagging.ui.components.TagList;
+      return <PluginTagList object={{ references }} onClick={onClick} tagRender={tagRender} />;
+    };
+
+    return Comp;
+  }, [savedObjectsTagging?.ui.components.TagList]);
+
+  const getTagIdsFromReferences = useCallback(
+    (references: SavedObjectsReference[]) => {
+      if (!savedObjectsTagging?.ui.getTagIdsFromReferences) {
+        return [];
+      }
+
+      return savedObjectsTagging.ui.getTagIdsFromReferences(references);
+    },
+    [savedObjectsTagging?.ui]
+  );
+
+  const getTagList = useCallback(() => {
+    if (!savedObjectsTagging?.ui.getTagList) {
+      return [];
+    }
+
+    return savedObjectsTagging.ui.getTagList();
+  }, [savedObjectsTagging?.ui]);
+
+  const itemHasTags = useCallback(
+    (references: SavedObjectsReference[]) => {
+      return getTagIdsFromReferences(references).length > 0;
+    },
+    [getTagIdsFromReferences]
+  );
+
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
-      <TableListViewProvider
-        canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
-        getListingLimitSettingsUrl={() =>
-          core.application.getUrlForApp('management', {
-            path: `/kibana/settings?query=savedObjects:listingLimit`,
-          })
-        }
-        notifyError={(title, text) => {
-          core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
-        }}
-        getTagsColumnDefinition={savedObjectsTagging?.ui.getTableColumnDefinition}
-        getSearchBarFilters={getSearchBarFilters}
-        searchQueryParser={searchQueryParser}
-        DateFormatterComp={(props) => <FormattedRelative {...props} />}
-        currentAppId$={core.application.currentAppId$}
-        navigateToUrl={core.application.navigateToUrl}
+      <InspectorKibanaProvider
+        core={core}
+        toMountPoint={toMountPoint}
+        savedObjectsTagging={savedObjectsTagging}
       >
-        {children}
-      </TableListViewProvider>
+        <TableListViewProvider
+          canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
+          getListingLimitSettingsUrl={() =>
+            core.application.getUrlForApp('management', {
+              path: `/kibana/settings?query=savedObjects:listingLimit`,
+            })
+          }
+          notifyError={(title, text) => {
+            core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
+          }}
+          searchQueryParser={searchQueryParser}
+          DateFormatterComp={(props) => <FormattedRelative {...props} />}
+          currentAppId$={core.application.currentAppId$}
+          navigateToUrl={core.application.navigateToUrl}
+          getTagList={getTagList}
+          TagList={TagList}
+          itemHasTags={itemHasTags}
+          getTagIdsFromReferences={getTagIdsFromReferences}
+          getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+        >
+          {children}
+        </TableListViewProvider>
+      </InspectorKibanaProvider>
     </RedirectAppLinksKibanaProvider>
   );
 };

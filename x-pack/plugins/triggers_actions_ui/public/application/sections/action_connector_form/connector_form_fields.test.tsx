@@ -11,7 +11,7 @@ import {
   AppMockRenderer,
   createAppMockRenderer,
   FormTestProvider,
-} from '../../components/builtin_action_types/test_utils';
+} from '../../components/test_utils';
 import { ConnectorFormFields } from './connector_form_fields';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { waitFor } from '@testing-library/dom';

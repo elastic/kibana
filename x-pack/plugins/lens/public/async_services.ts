@@ -29,10 +29,12 @@ export * from './visualizations/heatmap';
 export * from './visualizations/gauge/gauge_visualization';
 export * from './visualizations/gauge';
 
-export * from './indexpattern_datasource/indexpattern';
-export { createFormulaPublicApi } from './indexpattern_datasource/operations/definitions/formula/formula_public_api';
+export * from './datasources/form_based/form_based';
+export { getTextBasedDatasource } from './datasources/text_based/text_based_languages';
+export { createFormulaPublicApi } from './datasources/form_based/operations/definitions/formula/formula_public_api';
 
-export * from './indexpattern_datasource';
+export * from './datasources/text_based';
+export * from './datasources/form_based';
 export * from './lens_ui_telemetry';
 export * from './lens_ui_errors';
 export * from './editor_frame_service/editor_frame';
@@ -41,3 +43,6 @@ export * from './embeddable';
 export * from './app_plugin/mounter';
 export * from './lens_attribute_service';
 export * from './app_plugin/save_modal_container';
+export * from './chart_info_api';
+
+export * from './trigger_actions/open_in_discover_helpers';

@@ -29,12 +29,15 @@ import {
   importListItemSchema,
   listItemIndexExistSchema,
   listSchema,
+  foundListsBySizeSchema,
+  FoundListsBySizeSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   LIST_INDEX,
   LIST_ITEM_URL,
   LIST_PRIVILEGES_URL,
   LIST_URL,
+  FIND_LISTS_BY_SIZE,
 } from '@kbn/securitysolution-list-constants';
 import { toError, toPromise } from '../fp_utils';
 
@@ -103,6 +106,46 @@ const findListsWithValidation = async ({
   );
 
 export { findListsWithValidation as findLists };
+
+const findListsBySize = async ({
+  http,
+  cursor,
+  page,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  per_page,
+  signal,
+}: ApiParams & FindListSchemaEncoded): Promise<FoundListsBySizeSchema> => {
+  return http.fetch(`${FIND_LISTS_BY_SIZE}`, {
+    method: 'GET',
+    query: {
+      cursor,
+      page,
+      per_page,
+    },
+    signal,
+  });
+};
+
+const findListsBySizeWithValidation = async ({
+  cursor,
+  http,
+  pageIndex,
+  pageSize,
+  signal,
+}: FindListsParams): Promise<FoundListsBySizeSchema> =>
+  pipe(
+    {
+      cursor: cursor != null ? cursor.toString() : undefined,
+      page: pageIndex != null ? pageIndex.toString() : undefined,
+      per_page: pageSize != null ? pageSize.toString() : undefined,
+    },
+    (payload) => fromEither(validateEither(findListSchema, payload)),
+    chain((payload) => tryCatch(() => findListsBySize({ http, signal, ...payload }), toError)),
+    chain((response) => fromEither(validateEither(foundListsBySizeSchema, response))),
+    flow(toPromise)
+  );
+
+export { findListsBySizeWithValidation as findListsBySize };
 
 const importList = async ({
   file,

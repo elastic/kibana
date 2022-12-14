@@ -63,7 +63,7 @@ export function generateTreeWithDAL(
       indexPatterns,
     }: {
       entityID: string;
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       indexPatterns: string[];
     }): Promise<ResolverRelatedEvents> {
       const node = allNodes.get(entityID);
@@ -88,7 +88,7 @@ export function generateTreeWithDAL(
       entityID: string;
       category: string;
       after?: string;
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       indexPatterns: string[];
     }): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
       const node = allNodes.get(entityID);
@@ -119,7 +119,7 @@ export function generateTreeWithDAL(
       eventCategory: string[];
       eventTimestamp: string;
       eventID?: string | number;
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       indexPatterns: string[];
     }): Promise<SafeResolverEvent | null> {
       return null;
@@ -135,7 +135,7 @@ export function generateTreeWithDAL(
       limit,
     }: {
       ids: string[];
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       indexPatterns: string[];
       limit: number;
     }): Promise<SafeResolverEvent[]> {

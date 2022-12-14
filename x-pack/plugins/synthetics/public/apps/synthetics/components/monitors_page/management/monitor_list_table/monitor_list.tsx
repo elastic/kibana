@@ -13,9 +13,9 @@ import {
   EuiPanel,
   EuiSpacer,
   useEuiTheme,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ListFilters } from '../list_filters/list_filters';
 import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import { MonitorListPageState } from '../../../../state';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
@@ -25,7 +25,6 @@ import {
   EncryptedSyntheticsSavedMonitor,
 } from '../../../../../../../common/runtime_types';
 import { SyntheticsSettingsContext } from '../../../../contexts/synthetics_settings_context';
-import { useBreakpoints } from '../../../../hooks';
 import { getMonitorListColumns } from './columns';
 import * as labels from './labels';
 
@@ -51,7 +50,7 @@ export const MonitorList = ({
   errorSummaries,
 }: Props) => {
   const { basePath } = useContext(SyntheticsSettingsContext);
-  const isXl = useBreakpoints().up('xl');
+  const isXl = useIsWithinMinBreakpoint('xxl');
   const canEditSynthetics = useCanEditSynthetics();
   const { euiTheme } = useEuiTheme();
 
@@ -77,7 +76,7 @@ export const MonitorList = ({
       loadPage({
         pageIndex: index,
         pageSize: size,
-        sortField: `${field}.keyword`,
+        sortField: field === 'enabled' ? field : `${field}.keyword`,
         sortOrder: direction,
       });
     },
@@ -99,7 +98,7 @@ export const MonitorList = ({
   };
 
   const recordRangeLabel = labels.getRecordRangeLabel({
-    rangeStart: pageSize * pageIndex + 1,
+    rangeStart: total === 0 ? 0 : pageSize * pageIndex + 1,
     rangeEnd: pageSize * pageIndex + pageSize,
     total,
   });
@@ -117,8 +116,6 @@ export const MonitorList = ({
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
-      <ListFilters />
-      <EuiSpacer />
       {recordRangeLabel}
       <EuiSpacer size="s" />
       <hr style={{ border: `1px solid ${euiTheme.colors.lightShade}` }} />

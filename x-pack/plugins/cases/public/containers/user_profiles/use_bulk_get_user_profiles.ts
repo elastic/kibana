@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
-import { ServerError } from '../../types';
-import { USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY } from '../constants';
+import type { ServerError } from '../../types';
+import { casesQueriesKeys } from '../constants';
 import { bulkGetUserProfiles } from './api';
 
 const profilesToMap = (profiles: UserProfileWithAvatar[]): Map<string, UserProfileWithAvatar> =>
@@ -25,7 +26,7 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
   const toasts = useToasts();
 
   return useQuery<UserProfileWithAvatar[], ServerError, Map<string, UserProfileWithAvatar>>(
-    [USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY, uids],
+    casesQueriesKeys.userProfilesList(uids),
     () => {
       return bulkGetUserProfiles({ security, uids });
     },

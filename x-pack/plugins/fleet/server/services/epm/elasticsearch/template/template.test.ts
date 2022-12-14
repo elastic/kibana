@@ -177,7 +177,6 @@ describe('EPM template', () => {
     const keywordWithIndexFalseMapping = {
       properties: {
         keywordIndexFalse: {
-          ignore_above: 1024,
           type: 'keyword',
           doc_values: false,
         },

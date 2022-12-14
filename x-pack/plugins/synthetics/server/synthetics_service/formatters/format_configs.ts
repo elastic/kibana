@@ -27,6 +27,7 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.CUSTOM_HEARTBEAT_ID,
   ConfigKey.FORM_MONITOR_TYPE,
   ConfigKey.TEXT_ASSERTION,
+  ConfigKey.CONFIG_HASH,
   'secrets',
 ];
 
@@ -64,20 +65,20 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
 export const formatHeartbeatRequest = ({
   monitor,
   monitorId,
-  customHeartbeatId,
+  heartbeatId,
   runOnce,
   testRunId,
 }: {
   monitor: SyntheticsMonitor;
   monitorId: string;
-  customHeartbeatId?: string;
+  heartbeatId: string;
   runOnce?: boolean;
   testRunId?: string;
 }): HeartbeatConfig => {
   const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
   return {
     ...monitor,
-    id: customHeartbeatId || monitorId,
+    id: heartbeatId,
     fields: {
       config_id: monitorId,
       'monitor.project.name': projectId || undefined,

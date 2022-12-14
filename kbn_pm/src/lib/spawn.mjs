@@ -16,6 +16,115 @@ import { indent } from './indent.mjs';
 /** @typedef {{ cwd?: string, env?: Record<string, string> }} SpawnOpts */
 
 /**
+ * @param {NodeJS.ReadableStream} readable
+ */
+function getLines(readable) {
+  return Readline.createInterface({
+    input: readable,
+    crlfDelay: Infinity,
+  });
+}
+
+/**
+ * Wait for the exit of a child process, if the process emits "error" the promise
+ * will reject, if it emits "exit" the promimse will resolve with the exit code or `null`
+ * @param {ChildProcess.ChildProcess} proc
+ * @returns {Promise<number | null>}
+ */
+function getExit(proc) {
+  return new Promise((resolve, reject) => {
+    /**
+     * @param {Error | null} err
+     * @param {number | null} code
+     */
+    function teardown(err = null, code = null) {
+      proc.removeListener('error', onError);
+      proc.removeListener('exit', onExit);
+
+      if (err) {
+        reject(err);
+      } else {
+        resolve(code);
+      }
+    }
+
+    /**
+     *
+     * @param {Error} err
+     */
+    function onError(err) {
+      teardown(err);
+    }
+
+    /**
+     * @param {number | null} code
+     * @param {string | null} signal
+     */
+    function onExit(code, signal) {
+      teardown(null, typeof signal === 'string' || typeof code !== 'number' ? null : code);
+    }
+
+    proc.on('error', onError);
+    proc.on('exit', onExit);
+  });
+}
+
+/**
+ * Print each line of output to the console
+ * @param {NodeJS.ReadableStream} readable
+ * @param {string | undefined} prefix
+ */
+async function printLines(readable, prefix) {
+  for await (const line of getLines(readable)) {
+    console.log(prefix ? `${prefix} ${line}` : line);
+  }
+}
+
+/**
+ * @param {NodeJS.ReadableStream} readable
+ * @param {string[]} output
+ */
+async function read(readable, output) {
+  for await (const line of getLines(readable)) {
+    output.push(line);
+  }
+}
+
+/**
+ * Run a child process and return it's stdout
+ * @param {string} cmd
+ * @param {string[]} args
+ * @param {undefined | (SpawnOpts & { description?: string })} opts
+ */
+export async function run(cmd, args, opts = undefined) {
+  const proc = ChildProcess.spawn(cmd === 'node' ? process.execPath : cmd, args, {
+    cwd: opts?.cwd ?? REPO_ROOT,
+    env: {
+      ...process.env,
+      ...opts?.env,
+    },
+  });
+
+  /** @type {string[]} */
+  const output = [];
+
+  const [, , exitCode] = await Promise.all([
+    read(proc.stdout, output),
+    read(proc.stderr, output),
+    getExit(proc),
+  ]);
+
+  if (typeof exitCode === 'number' && exitCode > 0) {
+    throw createCliError(
+      `[${opts?.description ?? cmd}] exitted with ${exitCode}:\n` +
+        `  output:\n${indent(4, output.join('\n'))}`
+    );
+  }
+
+  return output.join('\n');
+}
+
+/**
  * Run a child process and return it's stdout
  * @param {string} cmd
  * @param {string[]} args
@@ -46,22 +155,6 @@ export function spawnSync(cmd, args, opts = undefined) {
   }
 
   return result.stdout;
-}
-
-/**
- * Print each line of output to the console
- * @param {import('stream').Readable} stream
- * @param {string | undefined} prefix
- */
-async function printLines(stream, prefix) {
-  const int = Readline.createInterface({
-    input: stream,
-    crlfDelay: Infinity,
-  });
-
-  for await (const line of int) {
-    console.log(prefix ? `${prefix} ${line}` : line);
-  }
 }
 
 /**

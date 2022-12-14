@@ -1,0 +1,15 @@
+title: Alert identifiers
+description: >
+  The alert identifiers. It is required only when `type` is `alert`. You can use
+  an array of strings to add multiple alerts to a case, provided that they all
+  relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended
+  rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply
+  best effort to fix any issues, but features in technical preview are not
+  subject to the support SLA of official GA features.
+oneOf:
+  - type: string
+  - type: array
+    items:
+      type: string
+x-technical-preview: true
+example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42

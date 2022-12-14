@@ -5,14 +5,24 @@
  * 2.0.
  */
 
-import { firstValueFrom, Observable } from 'rxjs';
-import { ILicense, LicenseType } from '@kbn/licensing-plugin/server';
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import type { ILicense, LicenseType, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 export class LicensingService {
   private readonly license$: Observable<ILicense>;
+  private readonly _notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage'];
 
-  constructor(license$: Observable<ILicense>) {
+  constructor(
+    license$: Observable<ILicense>,
+    notifyUsage: LicensingPluginStart['featureUsage']['notifyUsage']
+  ) {
     this.license$ = license$;
+    this._notifyUsage = notifyUsage;
+  }
+
+  public notifyUsage(featureName: string) {
+    this._notifyUsage(featureName);
   }
 
   public async getLicenseInformation(): Promise<ILicense> {

@@ -21,7 +21,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
   fieldFromBrowserField,
   isDraggable,
   linkValue,
-  timelineId,
+  scopeId,
   values,
   isReadOnly,
 }) => {
@@ -30,7 +30,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
   return (
     <>
       <FieldValueCell
-        contextId={timelineId}
+        contextId={scopeId}
         data={data}
         eventId={eventId}
         fieldFromBrowserField={fieldFromBrowserField}
@@ -39,14 +39,14 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
         style={style}
         values={values}
       />
-      {timelineId !== TimelineId.active && !isReadOnly && hoverActionsEnabled && (
+      {scopeId !== TimelineId.active && !isReadOnly && hoverActionsEnabled && (
         <ActionCell
-          contextId={timelineId}
+          contextId={scopeId}
           data={data}
           eventId={eventId}
           fieldFromBrowserField={fieldFromBrowserField}
           linkValue={linkValue}
-          timelineId={timelineId}
+          scopeId={scopeId}
           values={values}
           applyWidthAndPadding={false}
           hideAddToTimeline={false}

@@ -18,6 +18,7 @@ import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 import {
   mockAttributeService,
@@ -39,6 +40,8 @@ import { DOC_TYPE } from '../../common';
 import { LensAppServices } from '../app_plugin/types';
 import { mockDataPlugin } from './data_plugin_mock';
 import { getLensInspectorService } from '../lens_inspector_service';
+
+const startMock = coreMock.createStart();
 
 export const defaultDoc = {
   savedObjectId: '1234',
@@ -101,9 +104,11 @@ export function makeDefaultServices(
 
   const navigationStartMock = navigationPluginMock.createStartContract();
 
-  jest.spyOn(navigationStartMock.ui.TopNavMenu.prototype, 'constructor').mockImplementation(() => {
-    return <div className="topNavMenu" />;
-  });
+  jest
+    .spyOn(navigationStartMock.ui.AggregateQueryTopNavMenu.prototype, 'constructor')
+    .mockImplementation(() => {
+      return <div className="topNavMenu" />;
+    });
 
   function makeAttributeService(): LensAttributeService {
     const attributeServiceMock = mockAttributeService<
@@ -170,5 +175,7 @@ export function makeDefaultServices(
     charts: chartPluginMock.createSetupContract(),
     dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+    docLinks: startMock.docLinks,
   };
 }

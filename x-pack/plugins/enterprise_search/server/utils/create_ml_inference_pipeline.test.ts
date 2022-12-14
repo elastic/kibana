@@ -7,95 +7,23 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import {
-  createMlInferencePipeline,
-  addSubPipelineToIndexSpecificMlPipeline,
-} from './create_ml_inference_pipeline';
+import { addSubPipelineToIndexSpecificMlPipeline } from './create_ml_inference_pipeline';
+import { getInferencePipelineNameFromIndexName } from './ml_inference_pipeline_utils';
 
-describe('createMlInferencePipeline util function', () => {
-  const pipelineName = 'my-pipeline';
-  const modelId = 'my-model-id';
-  const sourceField = 'my-source-field';
-  const destinationField = 'my-dest-field';
-  const inferencePipelineGeneratedName = `ml-inference-${pipelineName}`;
-
-  const mockClient = {
-    ingest: {
-      getPipeline: jest.fn(),
-      putPipeline: jest.fn(),
-    },
-    ml: {
-      getTrainedModels: jest.fn(),
-    },
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("should create the pipeline if it doesn't exist", async () => {
-    mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject({ statusCode: 404 })); // Pipeline does not exist
-    mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
-    mockClient.ml.getTrainedModels.mockImplementation(() =>
-      Promise.resolve({
-        trained_model_configs: [
-          {
-            input: {
-              field_names: ['target-field'],
-            },
-          },
-        ],
-      })
-    );
-
-    const expectedResult = {
-      created: true,
-      id: inferencePipelineGeneratedName,
-    };
-
-    const actualResult = await createMlInferencePipeline(
-      pipelineName,
-      modelId,
-      sourceField,
-      destinationField,
-      mockClient as unknown as ElasticsearchClient
-    );
-
-    expect(actualResult).toEqual(expectedResult);
-    expect(mockClient.ingest.putPipeline).toHaveBeenCalled();
-  });
-
-  it('should throw an error without creating the pipeline if it already exists', () => {
-    mockClient.ingest.getPipeline.mockImplementation(() =>
-      Promise.resolve({
-        [inferencePipelineGeneratedName]: {},
-      })
-    ); // Pipeline exists
-
-    const actualResult = createMlInferencePipeline(
-      pipelineName,
-      modelId,
-      sourceField,
-      destinationField,
-      mockClient as unknown as ElasticsearchClient
-    );
-
-    expect(actualResult).rejects.toThrow(Error);
-    expect(mockClient.ingest.putPipeline).not.toHaveBeenCalled();
-  });
-});
+const mockClient = {
+  ingest: {
+    getPipeline: jest.fn(),
+    putPipeline: jest.fn(),
+  },
+  ml: {
+    getTrainedModels: jest.fn(),
+  },
+};
 
 describe('addSubPipelineToIndexSpecificMlPipeline util function', () => {
   const indexName = 'my-index';
-  const parentPipelineId = `${indexName}@ml-inference`;
+  const parentPipelineId = getInferencePipelineNameFromIndexName(indexName);
   const pipelineName = 'ml-inference-my-pipeline';
-
-  const mockClient = {
-    ingest: {
-      getPipeline: jest.fn(),
-      putPipeline: jest.fn(),
-    },
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -111,8 +39,8 @@ describe('addSubPipelineToIndexSpecificMlPipeline util function', () => {
     );
 
     const expectedResult = {
-      id: pipelineName,
       addedToParentPipeline: true,
+      id: pipelineName,
     };
 
     const actualResult = await addSubPipelineToIndexSpecificMlPipeline(
@@ -139,8 +67,8 @@ describe('addSubPipelineToIndexSpecificMlPipeline util function', () => {
     mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject({ statusCode: 404 })); // Pipeline does not exist
 
     const expectedResult = {
-      id: pipelineName,
       addedToParentPipeline: false,
+      id: pipelineName,
     };
 
     const actualResult = await addSubPipelineToIndexSpecificMlPipeline(
@@ -170,8 +98,8 @@ describe('addSubPipelineToIndexSpecificMlPipeline util function', () => {
     );
 
     const expectedResult = {
-      id: pipelineName,
       addedToParentPipeline: false,
+      id: pipelineName,
     };
 
     const actualResult = await addSubPipelineToIndexSpecificMlPipeline(

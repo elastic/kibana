@@ -9,10 +9,13 @@ import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/commo
 import type { ESQuery } from '../../../../typed_json';
 
 import type { Inspect, Maybe, SortField, TimerangeInput } from '../../../common';
+import type { RiskScoreEntity } from '../common';
 
 export interface RiskScoreRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];
+  riskScoreEntity: RiskScoreEntity;
   timerange?: TimerangeInput;
+  includeAlertsCount?: boolean;
   onlyLatest?: boolean;
   pagination?: {
     cursorStart: number;
@@ -47,6 +50,8 @@ export interface HostRiskScore {
     name: string;
     risk: RiskStats;
   };
+  alertsCount?: number;
+  oldestAlertTimestamp?: string;
 }
 
 export interface UserRiskScore {
@@ -55,6 +60,8 @@ export interface UserRiskScore {
     name: string;
     risk: RiskStats;
   };
+  alertsCount?: number;
+  oldestAlertTimestamp?: string;
 }
 
 export interface RuleRisk {
@@ -65,7 +72,7 @@ export interface RuleRisk {
 
 export type RiskScoreSortField = SortField<RiskScoreFields>;
 
-export const enum RiskScoreFields {
+export enum RiskScoreFields {
   timestamp = '@timestamp',
   hostName = 'host.name',
   hostRiskScore = 'host.risk.calculated_score_norm',
@@ -73,6 +80,7 @@ export const enum RiskScoreFields {
   userName = 'user.name',
   userRiskScore = 'user.risk.calculated_score_norm',
   userRisk = 'user.risk.calculated_level',
+  alertsCount = 'alertsCount',
 }
 
 export interface RiskScoreItem {
@@ -85,9 +93,11 @@ export interface RiskScoreItem {
 
   [RiskScoreFields.hostRiskScore]: Maybe<number>;
   [RiskScoreFields.userRiskScore]: Maybe<number>;
+
+  [RiskScoreFields.alertsCount]: Maybe<number>;
 }
 
-export const enum RiskSeverity {
+export enum RiskSeverity {
   unknown = 'Unknown',
   low = 'Low',
   moderate = 'Moderate',
@@ -97,3 +107,19 @@ export const enum RiskSeverity {
 
 export const isUserRiskScore = (risk: HostRiskScore | UserRiskScore): risk is UserRiskScore =>
   'user' in risk;
+
+export const EMPTY_SEVERITY_COUNT = {
+  [RiskSeverity.critical]: 0,
+  [RiskSeverity.high]: 0,
+  [RiskSeverity.low]: 0,
+  [RiskSeverity.moderate]: 0,
+  [RiskSeverity.unknown]: 0,
+};
+
+export const SEVERITY_UI_SORT_ORDER = [
+  RiskSeverity.unknown,
+  RiskSeverity.low,
+  RiskSeverity.moderate,
+  RiskSeverity.high,
+  RiskSeverity.critical,
+];

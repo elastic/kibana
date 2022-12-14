@@ -23,6 +23,7 @@ import { registerUpdateRoute } from './update';
 import { registerBulkGetRoute } from './bulk_get';
 import { registerBulkCreateRoute } from './bulk_create';
 import { registerBulkUpdateRoute } from './bulk_update';
+import { registerBulkDeleteRoute } from './bulk_delete';
 import { registerExportRoute } from './export';
 import { registerImportRoute } from './import';
 import { registerResolveImportErrorsRoute } from './resolve_import_errors';
@@ -62,6 +63,7 @@ export function registerRoutes({
   registerBulkCreateRoute(router, { coreUsageData });
   registerBulkResolveRoute(router, { coreUsageData });
   registerBulkUpdateRoute(router, { coreUsageData });
+  registerBulkDeleteRoute(router, { coreUsageData });
   registerExportRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });

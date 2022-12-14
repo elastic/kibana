@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { stringHash } from '@kbn/ml-string-hash';
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
-import type { AnomalyChartsEmbeddableInput } from '@kbn/ml-plugin/public/embeddables';
+import type {
+  AnomalyChartsEmbeddableInput,
+  AnomalySwimlaneEmbeddableInput,
+} from '@kbn/ml-plugin/public/embeddables';
+import { stringHash } from '@kbn/ml-string-hash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 
@@ -147,6 +149,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('anomalies table is not empty');
           await ml.anomaliesTable.assertTableNotEmpty();
+        });
+
+        it('should allow filtering by influencer', async () => {
+          const fieldName = testData.expected.influencers[0].field;
+          const fieldValue = testData.expected.influencers[0].labelsContained[0];
+
+          await ml.testExecution.logTestStep(
+            'adds influencer filter by clicking on the influencer add filter button'
+          );
+          await ml.anomalyExplorer.addFilterForInfluencer(fieldName, fieldValue);
+          await ml.testExecution.logTestStep('query bar and table rows reflect filter');
+          await ml.anomalyExplorer.assertQueryBarContent(`${fieldName}:"${fieldValue}"`);
+          await ml.anomaliesTable.assertInfluencersCellsContainFilter(
+            `${fieldName}: ${fieldValue}`
+          );
+          await ml.testExecution.logTestStep('influencers list and swimlane reflect filter');
+          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [fieldValue]);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 1);
+          await ml.testExecution.logTestStep(
+            'removes influencer filter by clicking on the influencer remove filter button'
+          );
+          await ml.anomalyExplorer.removeFilterForInfluencer(fieldName, fieldValue);
+          await ml.testExecution.logTestStep('query bar reflects filter removal');
+          await ml.anomalyExplorer.assertQueryBarContent('');
+          await ml.testExecution.logTestStep(
+            'influencers list and swimlane reflect filter removal'
+          );
+          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [
+            'AAL',
+            'EGF',
+            'VRD',
+            'SWR',
+            'JZA',
+            'AMX',
+            'TRS',
+            'ACA',
+            'BAW',
+            'ASA',
+          ]);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
         });
 
         it('has enabled Single Metric Viewer button', async () => {
@@ -480,14 +522,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             const expectedAttachment = {
               jobIds: [testData.jobConfig.job_id],
-              timeRange: {
-                from: '2016-02-07T00:00:00.000Z',
-                to: '2016-02-11T23:59:54.000Z',
-              },
               maxSeriesToPlot: 6,
             } as AnomalyChartsEmbeddableInput;
 
-            expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();
+            // @ts-expect-error Setting id to be undefined here
+            // since time range expected is of the chart plotEarliest/plotLatest, not of the global time range
+            // but, chart time range might vary depends on the time of the test
+            // we don't know the hashed string id for sure
+            expectedAttachment.id = undefined;
 
             await ml.cases.assertCaseWithAnomalyChartsAttachment(
               {

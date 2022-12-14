@@ -42,7 +42,7 @@ export const OVERVIEW_SEVERITY = '[data-test-subj="eventDetails"] [data-test-sub
 
 export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj="alertStatus"]';
 
-export const SUMMARY_VIEW = '[data-test-subj="summary-view"]';
+const SUMMARY_VIEW = '[data-test-subj="summary-view"]';
 
 export const TABLE_CELL = '.euiTableRowCell';
 
@@ -64,8 +64,6 @@ export const THREAT_DETAILS_VIEW = '[data-test-subj="threat-details-view-0"]';
 
 export const THREAT_INTEL_TAB = '[data-test-subj="threatIntelTab"]';
 
-export const TITLE = '.euiTitle';
-
 export const UPDATE_ENRICHMENT_RANGE_BUTTON = '[data-test-subj="enrichment-button"]';
 
 export const OVERVIEW_TAB = '[data-test-subj="overviewTab"]';
@@ -81,3 +79,7 @@ export const INSIGHTS_INVESTIGATE_IN_TIMELINE_BUTTON = `${INSIGHTS_RELATED_ALERT
 export const INSIGHTS_RELATED_ALERTS_BY_ANCESTRY = `[data-test-subj='related-alerts-by-ancestry']`;
 
 export const INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON = `[data-test-subj='investigate-ancestry-in-timeline']`;
+
+export const ENRICHED_DATA_ROW = `[data-test-subj='EnrichedDataRow']`;
+
+export const OPEN_ALERT_DETAILS_PAGE = `[data-test-subj="open-alert-details-page"]`;

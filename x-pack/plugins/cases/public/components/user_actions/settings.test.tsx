@@ -8,7 +8,8 @@
 import { EuiCommentList } from '@elastic/eui';
 import React from 'react';
 import { Actions } from '../../../common/api';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { getUserAction } from '../../containers/mock';
 import { getMockBuilderArgs } from './mock';
 import { createSettingsUserActionBuilder } from './settings';

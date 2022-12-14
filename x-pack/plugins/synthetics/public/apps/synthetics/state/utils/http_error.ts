@@ -18,6 +18,18 @@ export interface IHttpSerializedFetchError {
 }
 
 export const serializeHttpFetchError = (error: IHttpFetchError): IHttpSerializedFetchError => {
+  if (error.name && !error.body) {
+    return {
+      name: error.name,
+      body: {
+        error: error.toString(),
+        message: error.message,
+        statusCode: undefined,
+      },
+      requestUrl: error?.request?.url,
+    };
+  }
+
   const body = error.body as { error: string; message: string; statusCode: number };
   return {
     name: error.name,

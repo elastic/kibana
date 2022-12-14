@@ -44,14 +44,11 @@ import {
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import {
-  updatePackagePolicyRuntimeCfgVar,
-  getCspRulesSO,
-} from './routes/configuration/update_rules_configuration';
-import {
   removeFindingsStatsTask,
   scheduleFindingsStatsTask,
   setupFindingsStatsTask,
 } from './tasks/findings_stats_task';
+import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 
 export class CspPlugin
   implements
@@ -64,6 +61,13 @@ export class CspPlugin
 {
   private readonly logger: Logger;
   private isCloudEnabled?: boolean;
+
+  /**
+   * CSP is initialized when the Fleet package is installed.
+   * either directly after installation, or
+   * when the plugin is started and a package is present.
+   */
+  #isInitialized: boolean = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -78,10 +82,12 @@ export class CspPlugin
     setupRoutes({
       core,
       logger: this.logger,
+      isPluginInitialized: () => this.#isInitialized,
     });
 
     const coreStartServices = core.getStartServices();
     this.setupCspTasks(plugins.taskManager, coreStartServices, this.logger);
+    registerCspmUsageCollector(this.logger, plugins.usageCollection);
 
     this.isCloudEnabled = plugins.cloud.isCloudEnabled;
 
@@ -125,27 +131,15 @@ export class CspPlugin
         async (
           packagePolicy: PackagePolicy,
           context: RequestHandlerContext,
-          request: KibanaRequest
+          _: KibanaRequest
         ): Promise<PackagePolicy> => {
           if (isCspPackage(packagePolicy.package?.name)) {
             await this.initialize(core, plugins.taskManager);
 
             const soClient = (await context.core).savedObjects.client;
-            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            const user = await plugins.security.authc.getCurrentUser(request);
-
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
 
-            const updatedPackagePolicy = await updatePackagePolicyRuntimeCfgVar({
-              rules: await getCspRulesSO(soClient, packagePolicy.id, packagePolicy.policy_id),
-              packagePolicy,
-              packagePolicyService: plugins.fleet.packagePolicyService,
-              esClient,
-              soClient,
-              user,
-            });
-
-            return updatedPackagePolicy;
+            return packagePolicy;
           }
 
           return packagePolicy;
@@ -176,12 +170,16 @@ export class CspPlugin
 
   public stop() {}
 
+  /**
+   * Initialization is idempotent and required for (re)creating indices and transforms.
+   */
   async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
     await initializeCspIndices(esClient, this.logger);
     await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);
+    this.#isInitialized = true;
   }
 
   async uninstallResources(taskManager: TaskManagerStartContract, logger: Logger): Promise<void> {

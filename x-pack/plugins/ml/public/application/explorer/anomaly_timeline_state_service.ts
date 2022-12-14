@@ -53,6 +53,8 @@ interface SwimLanePagination {
  * Service for managing anomaly timeline state.
  */
 export class AnomalyTimelineStateService extends StateService {
+  // TODO: Add services for getSelectionInfluencers, getSelectionJobIds, & getSelectionTimeRange
+  // to consolidate usage
   private readonly _explorerURLStateCallback: (
     update: AnomalyExplorerSwimLaneUrlState,
     replaceState?: boolean

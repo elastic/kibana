@@ -9,7 +9,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const spacesService = getService('spaces');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
     'security',
@@ -20,26 +21,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('per-spaces banners', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/banners/multispace');
-    });
-
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/banners/multispace');
-    });
-
-    before(async () => {
+      await spacesService.create({
+        id: 'another-space',
+        name: 'Another Space',
+        disabledFeatures: [],
+      });
+      await kibanaServer.uiSettings.replace(
+        {
+          'banners:textContent': 'default space banner text',
+        },
+        { space: 'default' }
+      );
       await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,
       });
-      await PageObjects.spaceSelector.clickSpaceCard('default');
-
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSettings();
-
-      await PageObjects.settings.setAdvancedSettingsTextArea(
-        'banners:textContent',
-        'default space banner text'
-      );
+    });
+    after(async () => {
+      await spacesService.delete('another-space');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('displays the space-specific banner within the space', async () => {

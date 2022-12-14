@@ -13,7 +13,7 @@ import {
   filterBrowserFieldsByFieldName,
   filterSelectedBrowserFields,
 } from './helpers';
-import type { BrowserFields } from './types';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 
 describe('helpers', () => {
   describe('categoryHasFields', () => {

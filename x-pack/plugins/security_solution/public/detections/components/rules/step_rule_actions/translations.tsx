@@ -28,3 +28,19 @@ export const NO_ACTIONS_READ_PERMISSIONS = i18n.translate(
       'Cannot create rule actions. You do not have "Read" permissions for the "Actions" plugin.',
   }
 );
+
+export const THROTTLE_FIELD_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleHelpText',
+  {
+    defaultMessage:
+      'Select when automated actions should be performed if a rule evaluates as true.',
+  }
+);
+
+export const THROTTLE_FIELD_HELP_TEXT_WHEN_QUERY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleHelpTextWhenQuery',
+  {
+    defaultMessage:
+      'Select when automated actions should be performed if a rule evaluates as true. This frequency does not apply to Response Actions.',
+  }
+);

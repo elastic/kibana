@@ -12,6 +12,124 @@
     "classes": [
       {
         "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+        "id": "def-server.ElasticsearchClientsMetricsCollector",
+        "type": "Class",
+        "tags": [],
+        "label": "ElasticsearchClientsMetricsCollector",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-metrics-collectors-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
+            "section": "def-server.ElasticsearchClientsMetricsCollector",
+            "text": "ElasticsearchClientsMetricsCollector"
+          },
+          " implements ",
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.MetricsCollector",
+            "text": "MetricsCollector"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.ElasticsearchClientsMetrics",
+            "text": "ElasticsearchClientsMetrics"
+          },
+          ">"
+        ],
+        "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+            "id": "def-server.ElasticsearchClientsMetricsCollector.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+                "id": "def-server.ElasticsearchClientsMetricsCollector.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "agentStore",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-client-server-internal",
+                    "scope": "server",
+                    "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
+                    "section": "def-server.AgentStore",
+                    "text": "AgentStore"
+                  }
+                ],
+                "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+            "id": "def-server.ElasticsearchClientsMetricsCollector.collect",
+            "type": "Function",
+            "tags": [],
+            "label": "collect",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.ElasticsearchClientsMetrics",
+                "text": "ElasticsearchClientsMetrics"
+              },
+              ">"
+            ],
+            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+            "id": "def-server.ElasticsearchClientsMetricsCollector.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
         "id": "def-server.EventLoopDelaysMonitor",
         "type": "Class",
         "tags": [],
@@ -26,9 +144,21 @@
             "text": "EventLoopDelaysMonitor"
           },
           " implements ",
-          "IEventLoopDelaysMonitor",
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.IEventLoopDelaysMonitor",
+            "text": "IEventLoopDelaysMonitor"
+          },
           "<",
-          "IntervalHistogram",
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.IntervalHistogram",
+            "text": "IntervalHistogram"
+          },
           ">"
         ],
         "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
@@ -64,7 +194,13 @@
             ],
             "signature": [
               "() => ",
-              "IntervalHistogram"
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.IntervalHistogram",
+                "text": "IntervalHistogram"
+              }
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
             "deprecated": false,
@@ -127,9 +263,21 @@
             "text": "OsMetricsCollector"
           },
           " implements ",
-          "MetricsCollector",
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.MetricsCollector",
+            "text": "MetricsCollector"
+          },
           "<",
-          "OpsOsMetrics",
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.OpsOsMetrics",
+            "text": "OpsOsMetrics"
+          },
           ">"
         ],
         "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
@@ -183,7 +331,13 @@
             "description": [],
             "signature": [
               "() => Promise<",
-              "OpsOsMetrics",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.OpsOsMetrics",
+                "text": "OpsOsMetrics"
+              },
               ">"
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
@@ -227,9 +381,21 @@
             "text": "ProcessMetricsCollector"
           },
           " implements ",
-          "MetricsCollector",
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.MetricsCollector",
+            "text": "MetricsCollector"
+          },
           "<",
-          "OpsProcessMetrics",
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.OpsProcessMetrics",
+            "text": "OpsProcessMetrics"
+          },
           "[]>"
         ],
         "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
@@ -245,9 +411,21 @@
             "description": [],
             "signature": [
               "(processes: ",
-              "OpsProcessMetrics",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.OpsProcessMetrics",
+                "text": "OpsProcessMetrics"
+              },
               "[]) => ",
-              "OpsProcessMetrics",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.OpsProcessMetrics",
+                "text": "OpsProcessMetrics"
+              },
               " | undefined"
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
@@ -262,7 +440,13 @@
                 "label": "processes",
                 "description": [],
                 "signature": [
-                  "OpsProcessMetrics",
+                  {
+                    "pluginId": "@kbn/core-metrics-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreMetricsServerPluginApi",
+                    "section": "def-server.OpsProcessMetrics",
+                    "text": "OpsProcessMetrics"
+                  },
                   "[]"
                 ],
                 "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
@@ -282,7 +466,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "OpsProcessMetrics",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.OpsProcessMetrics",
+                "text": "OpsProcessMetrics"
+              },
               "[]"
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
@@ -326,9 +516,21 @@
             "text": "ServerMetricsCollector"
           },
           " implements ",
-          "MetricsCollector",
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.MetricsCollector",
+            "text": "MetricsCollector"
+          },
           "<",
-          "OpsServerMetrics",
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.OpsServerMetrics",
+            "text": "OpsServerMetrics"
+          },
           ">"
         ],
         "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
@@ -376,7 +578,13 @@
             "description": [],
             "signature": [
               "() => Promise<",
-              "OpsServerMetrics",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.OpsServerMetrics",
+                "text": "OpsServerMetrics"
+              },
               ">"
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
@@ -426,7 +634,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
             "deprecated": false,

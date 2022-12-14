@@ -16,7 +16,6 @@ import {
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { formatSecrets } from '../../synthetics_service/utils';
 
 jest.mock('../telemetry/monitor_upgrade_sender', () => ({
   sendTelemetryEvents: jest.fn(),
@@ -28,7 +27,7 @@ describe('syncEditedMonitor', () => {
 
   const serverMock: UptimeServerSetup = {
     uptimeEsClient: { search: jest.fn() },
-    kibanaVersion: null,
+    stackVersion: null,
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
       get: jest.fn(),
@@ -46,6 +45,11 @@ describe('syncEditedMonitor', () => {
         fromRequest: jest
           .fn()
           .mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
+      },
+      packagePolicyService: {
+        get: jest.fn().mockReturnValue({}),
+        getByIDs: jest.fn().mockReturnValue([]),
+        buildPackagePolicyFromPackage: jest.fn().mockReturnValue({}),
       },
     },
   } as unknown as UptimeServerSetup;
@@ -74,8 +78,10 @@ describe('syncEditedMonitor', () => {
   } as unknown as SyntheticsMonitor;
 
   const previousMonitor = {
-    id: 'saved-obj-id',
-    attributes: { name: editedMonitor.name },
+    id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+    attributes: { name: editedMonitor.name, locations: [] } as any,
+    type: 'synthetics-monitor',
+    references: [],
   } as SavedObject<EncryptedSyntheticsMonitor>;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -87,7 +93,6 @@ describe('syncEditedMonitor', () => {
   it('includes the isEdit flag', async () => {
     await syncEditedMonitor({
       normalizedMonitor: editedMonitor,
-      monitorWithRevision: formatSecrets(editedMonitor),
       previousMonitor,
       decryptedPreviousMonitor:
         previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecrets>,
@@ -96,17 +101,20 @@ describe('syncEditedMonitor', () => {
       request: {} as unknown as KibanaRequest,
       savedObjectsClient:
         serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
+      spaceId: 'test-space',
     });
 
     expect(syntheticsService.editConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'saved-obj-id',
-      })
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+        }),
+      ])
     );
 
     expect(serverMock.authSavedObjectsClient?.update).toHaveBeenCalledWith(
       'synthetics-monitor',
-      'saved-obj-id',
+      '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
       expect.objectContaining({
         enabled: true,
       })

@@ -7,20 +7,25 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiLink, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer, EuiLink, EuiText, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
+import { ConnectorStatus } from '../../../../../../../common/types/connectors';
+
+import { docLinks } from '../../../../../shared/doc_links';
 
 import { ConnectorConfigurationConfig } from '../connector_configuration_config';
 import { NativeConnector } from '../types';
 
 interface NativeConnectorConfigurationConfigProps {
   nativeConnector: NativeConnector;
+  status: ConnectorStatus;
 }
 
 export const NativeConnectorConfigurationConfig: React.FC<
   NativeConnectorConfigurationConfigProps
-> = ({ nativeConnector }) => {
+> = ({ nativeConnector, status }) => {
   return (
     <ConnectorConfigurationConfig>
       <EuiText size="s">
@@ -35,7 +40,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
       <EuiSpacer />
       <EuiFlexGroup direction="row">
         <EuiFlexItem grow={false}>
-          <EuiLink href={'' /* TODO docLinks url */} target="_blank">
+          <EuiLink href={docLinks.elasticsearchSecureCluster} target="_blank">
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.securityDocumentationLinkLabel',
               {
@@ -44,20 +49,40 @@ export const NativeConnectorConfigurationConfig: React.FC<
             )}
           </EuiLink>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink href={'' /* TODO documentation url */} target="_blank">
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.sourceSecurityDocumentationLinkLabel',
+        {nativeConnector.externalAuthDocsUrl && (
+          <EuiFlexItem grow={false}>
+            <EuiLink href={nativeConnector.externalAuthDocsUrl} target="_blank">
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.sourceSecurityDocumentationLinkLabel',
+                {
+                  defaultMessage: '{name} authentication',
+                  values: {
+                    name: nativeConnector.name,
+                  },
+                }
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+
+      {status === ConnectorStatus.CONNECTED && (
+        <>
+          <EuiSpacer />
+          <EuiCallOut
+            iconType="check"
+            color="success"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.connectorConnected',
               {
-                defaultMessage: '{name} authentication',
-                values: {
-                  name: nativeConnector.name,
-                },
+                defaultMessage:
+                  'Your connector {name} has connected to Enterprise Search successfully.',
+                values: { name: nativeConnector.name },
               }
             )}
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          />
+        </>
+      )}
     </ConnectorConfigurationConfig>
   );
 };

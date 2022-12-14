@@ -30,8 +30,14 @@ export const PROJECTS = [
   createProject('tsconfig.json'),
   createProject('test/tsconfig.json', { name: 'kibana/test' }),
   createProject('x-pack/test/tsconfig.json', { name: 'x-pack/test' }),
-  createProject('src/core/tsconfig.json'),
-  createProject('.buildkite/tsconfig.json'),
+  createProject('x-pack/performance/tsconfig.json', { name: 'x-pack/performance' }),
+  ...findProjects(['src/*/tsconfig.json']),
+  createProject('.buildkite/tsconfig.json', {
+    // this directory has additionally dependencies which scripts/type_check can't guarantee
+    // are present or up-to-date, and users likely won't know how to manage either, so the
+    // type check is explicitly disabled in this project for now
+    disableTypeCheck: true,
+  }),
   createProject('kbn_pm/tsconfig.json'),
 
   createProject('x-pack/plugins/drilldowns/url_drilldown/tsconfig.json', {
@@ -88,13 +94,15 @@ export const PROJECTS = [
     'src/plugins/*/tsconfig.json',
     'src/plugins/chart_expressions/*/tsconfig.json',
     'src/plugins/vis_types/*/tsconfig.json',
-    'x-pack/plugins/*/tsconfig.json',
     'examples/*/tsconfig.json',
-    'x-pack/examples/*/tsconfig.json',
+    'test/*/plugins/*/tsconfig.json',
     'test/analytics/fixtures/plugins/*/tsconfig.json',
-    'test/plugin_functional/plugins/*/tsconfig.json',
-    'test/interpreter_functional/plugins/*/tsconfig.json',
     'test/server_integration/__fixtures__/plugins/*/tsconfig.json',
+    'test/interactive_setup_api_integration/fixtures/*/tsconfig.json',
+    'x-pack/plugins/*/tsconfig.json',
+    'x-pack/plugins/cloud_integrations/*/tsconfig.json',
+    'x-pack/examples/*/tsconfig.json',
+    'x-pack/test/*/plugins/*/tsconfig.json',
     ...BAZEL_PACKAGE_DIRS.map((dir) => `${dir}/*/tsconfig.json`),
   ]),
 ];

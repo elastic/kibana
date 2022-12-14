@@ -39,6 +39,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
+      await kibanaServer.savedObjects.cleanStandardList();
       try {
         config.get('esTestCluster.ccs');
         remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
@@ -67,6 +68,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     loadTestFile(require.resolve('./colors'));
@@ -86,7 +88,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./error_handling'));
     loadTestFile(require.resolve('./lens_tagging'));
     loadTestFile(require.resolve('./lens_reporting'));
-    loadTestFile(require.resolve('./tsvb_open_in_lens'));
     // keep these two last in the group in this order because they are messing with the default saved objects
     loadTestFile(require.resolve('./rollup'));
     loadTestFile(require.resolve('./no_data'));

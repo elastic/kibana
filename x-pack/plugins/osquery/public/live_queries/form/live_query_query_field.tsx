@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { isEmpty, map } from 'lodash';
+import { isEmpty } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
-import { MAX_QUERY_LENGTH } from '../../packs/queries/validations';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import type { SavedQueriesDropdownProps } from '../../saved_queries/saved_queries_dropdown';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
@@ -31,19 +30,19 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
 `;
 
 export interface LiveQueryQueryFieldProps {
-  disabled?: boolean;
   handleSubmitForm?: () => void;
+  disabled?: boolean;
 }
 
 const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   disabled,
   handleSubmitForm,
 }) => {
-  const formContext = useFormContext();
+  const { watch, resetField } = useFormContext();
   const [advancedContentState, setAdvancedContentState] =
     useState<EuiAccordionProps['forceState']>('closed');
   const permissions = useKibana().services.application.capabilities.osquery;
-  const queryType = formContext?.watch('queryType', 'query');
+  const [ecsMapping, queryType] = watch(['ecs_mapping', 'queryType']);
 
   const {
     field: { onChange, value },
@@ -57,45 +56,31 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         }),
         value: queryType !== 'pack',
       },
-      maxLength: {
-        message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
-          defaultMessage: 'Query is too large (max {maxLength} characters)',
-          values: { maxLength: MAX_QUERY_LENGTH },
-        }),
-        value: MAX_QUERY_LENGTH,
-      },
     },
     defaultValue: '',
   });
 
+  useEffect(() => {
+    if (!isEmpty(ecsMapping) && advancedContentState === 'closed') {
+      setAdvancedContentState('open');
+    }
+  }, [advancedContentState, ecsMapping]);
+
   const handleSavedQueryChange: SavedQueriesDropdownProps['onChange'] = useCallback(
     (savedQuery) => {
       if (savedQuery) {
-        formContext?.setValue('query', savedQuery.query);
-        formContext?.setValue('savedQueryId', savedQuery.savedQueryId);
-        if (!isEmpty(savedQuery.ecs_mapping)) {
-          formContext?.setValue(
-            'ecs_mapping',
-            map(savedQuery.ecs_mapping, (ecsValue, key) => ({
-              key,
-              result: {
-                type: Object.keys(ecsValue)[0],
-                value: Object.values(ecsValue)[0] as string,
-              },
-            }))
-          );
-        } else {
-          formContext?.resetField('ecs_mapping');
-        }
+        resetField('query', { defaultValue: savedQuery.query });
+        resetField('savedQueryId', { defaultValue: savedQuery.savedQueryId });
+        resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
 
         if (!isEmpty(savedQuery.ecs_mapping)) {
           setAdvancedContentState('open');
         }
       } else {
-        formContext?.setValue('savedQueryId', null);
+        resetField('savedQueryId');
       }
     },
-    [formContext]
+    [resetField]
   );
 
   const handleToggle = useCallback((isOpen) => {
@@ -110,6 +95,14 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
     [permissions.writeLiveQueries]
   );
 
+  const isAdvancedToggleHidden = useMemo(
+    () =>
+      !(
+        permissions.writeLiveQueries ||
+        (permissions.runSavedQueries && permissions.readSavedQueries)
+      ),
+    [permissions.readSavedQueries, permissions.runSavedQueries, permissions.writeLiveQueries]
+  );
   const isSavedQueryDisabled = useMemo(
     () => !permissions.runSavedQueries || !permissions.readSavedQueries,
     [permissions.readSavedQueries, permissions.runSavedQueries]
@@ -156,15 +149,17 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
 
       <EuiSpacer size="m" />
 
-      <StyledEuiAccordion
-        id="advanced"
-        forceState={advancedContentState}
-        onToggle={handleToggle}
-        buttonContent="Advanced"
-      >
-        <EuiSpacer size="xs" />
-        <ECSMappingEditorField euiFieldProps={ecsFieldProps} />
-      </StyledEuiAccordion>
+      {!isAdvancedToggleHidden && (
+        <StyledEuiAccordion
+          id="advanced"
+          forceState={advancedContentState}
+          onToggle={handleToggle}
+          buttonContent="Advanced"
+        >
+          <EuiSpacer size="xs" />
+          <ECSMappingEditorField euiFieldProps={ecsFieldProps} />
+        </StyledEuiAccordion>
+      )}
     </>
   );
 };

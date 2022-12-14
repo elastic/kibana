@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
@@ -115,11 +116,25 @@ export function loadInitial(
     defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
   };
 
+  let activeDatasourceId: string | undefined;
+  if (initialContext && 'query' in initialContext) {
+    activeDatasourceId = 'textBased';
+  }
+
   if (
     !initialInput ||
     (attributeService.inputIsRefType(initialInput) &&
       initialInput.savedObjectId === lens.persistedDoc?.savedObjectId)
   ) {
+    const newFilters =
+      initialContext && 'searchFilters' in initialContext && initialContext.searchFilters
+        ? cloneDeep(initialContext.searchFilters)
+        : undefined;
+
+    if (newFilters) {
+      data.query.filterManager.setAppFilters(newFilters);
+    }
+
     return initializeSources(
       {
         datasourceMap,
@@ -141,6 +156,7 @@ export function loadInitial(
               ...emptyState,
               dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
               searchSessionId: data.search.session.getSessionId() || data.search.session.start(),
+              ...(activeDatasourceId && { activeDatasourceId }),
               datasourceStates: Object.entries(datasourceStates).reduce(
                 (state, [datasourceId, datasourceState]) => ({
                   ...state,

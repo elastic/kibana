@@ -13,7 +13,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 
-import { ESSearchRequest, ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import {
   RuleDataWriteDisabledError,
   RuleDataWriterInitializationError,

@@ -103,6 +103,25 @@ export const TCP_ADVANCED = {
   },
 };
 
+export const BROWSER_ADVANCED = [
+  {
+    title: i18n.translate('xpack.synthetics.monitorConfig.section.syntAgentOptions.title', {
+      defaultMessage: 'Synthetics agent options',
+    }),
+    description: i18n.translate(
+      'xpack.synthetics.monitorConfig.section.syntAgentOptions.description',
+      {
+        defaultMessage: 'Provide fine-tuned configuration for the synthetics agent.',
+      }
+    ),
+    components: [
+      FIELD[ConfigKey.IGNORE_HTTPS_ERRORS],
+      FIELD[ConfigKey.SYNTHETICS_ARGS],
+      FIELD[ConfigKey.PLAYWRIGHT_OPTIONS],
+    ],
+  },
+];
+
 interface AdvancedFieldGroup {
   title: string;
   description: string;
@@ -185,7 +204,7 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.THROTTLING_CONFIG],
       FIELD[ConfigKey.ENABLED],
     ],
-    step3: [FIELD[ConfigKey.SOURCE_INLINE]],
+    step3: [FIELD[ConfigKey.SOURCE_INLINE], FIELD[ConfigKey.PARAMS]],
     scriptEdit: [FIELD[ConfigKey.SOURCE_INLINE]],
     advanced: [
       {
@@ -197,6 +216,7 @@ export const FORM_CONFIG: FieldConfig = {
           FIELD[ConfigKey.NAMESPACE],
         ],
       },
+      ...BROWSER_ADVANCED,
     ],
   },
   [FormMonitorType.SINGLE]: {
@@ -220,6 +240,7 @@ export const FORM_CONFIG: FieldConfig = {
           FIELD[ConfigKey.NAMESPACE],
         ],
       },
+      ...BROWSER_ADVANCED,
     ],
   },
   [FormMonitorType.ICMP]: {

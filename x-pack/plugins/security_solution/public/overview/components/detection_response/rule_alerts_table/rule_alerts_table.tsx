@@ -22,7 +22,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { HeaderSection } from '../../../../common/components/header_section';
 
-import { LastUpdatedAt, SEVERITY_COLOR } from '../utils';
+import { openAlertsFilter, SEVERITY_COLOR } from '../utils';
 import * as i18n from '../translations';
 import type { RuleAlertsItem } from './use_rule_alerts_items';
 import { useRuleAlertsItems } from './use_rule_alerts_items';
@@ -31,7 +31,8 @@ import { useNavigation } from '../../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
-import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
+import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 
@@ -89,7 +90,11 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, openRu
     name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
     'data-test-subj': 'severityRuleAlertsTable-alertCount',
     render: (alertCount: number, { name }) => (
-      <EuiLink disabled={alertCount === 0} onClick={() => openRuleInTimeline(name)}>
+      <EuiLink
+        data-test-subj="severityRuleAlertsTable-alertCountLink"
+        disabled={alertCount === 0}
+        onClick={() => openRuleInTimeline(name)}
+      >
         <FormattedCount count={alertCount} />
       </EuiLink>
     ),
@@ -113,7 +118,16 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
     skip: !toggleStatus,
   });
 
-  const { openRuleInTimeline } = useNavigateToTimeline();
+  const { openTimelineWithFilters } = useNavigateToTimeline();
+
+  const openRuleInTimeline = useCallback(
+    (ruleName: string) => {
+      openTimelineWithFilters([
+        [{ field: 'kibana.alert.rule.name', value: ruleName }, openAlertsFilter],
+      ]);
+    },
+    [openTimelineWithFilters]
+  );
 
   const navigateToAlerts = useCallback(() => {
     navigateTo({ deepLinkId: SecurityPageName.alerts });
@@ -125,7 +139,7 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
   );
 
   return (
-    <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
+    <HoverVisibilityContainer show={true} targetClassNames={[INSPECT_BUTTON_CLASS]}>
       <EuiPanel hasBorder data-test-subj="severityRuleAlertsPanel">
         <HeaderSection
           id={DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID}

@@ -23,6 +23,8 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteObject,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsClient } from './saved_objects_client';
 import { repositoryMock, savedObjectsPointInTimeFinderMock } from './mocks';
@@ -117,6 +119,22 @@ describe('SavedObjectsClient', () => {
       expect(mockRepository.createPointInTimeFinder).toHaveBeenCalledWith(options, dependencies);
       expect(result).toBe(returnValue);
     });
+  });
+
+  test(`#bulkDelete`, async () => {
+    const returnValue: any = Symbol();
+    mockRepository.bulkDelete.mockResolvedValueOnce(returnValue);
+    const client = new SavedObjectsClient(mockRepository);
+
+    const objects: SavedObjectsBulkDeleteObject[] = [
+      { type: 'foo', id: '1' },
+      { type: 'bar', id: '2' },
+    ];
+    const options: SavedObjectsBulkDeleteOptions = { namespace: 'ns-1', refresh: true };
+    const result = await client.bulkDelete(objects, options);
+
+    expect(mockRepository.bulkDelete).toHaveBeenCalledWith(objects, options);
+    expect(result).toBe(returnValue);
   });
 
   test(`#delete`, async () => {

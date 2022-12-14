@@ -12,14 +12,16 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { ThresholdNormalized } from '../../../../../common/detection_engine/rule_schema';
 import type { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';
 import { calculateThresholdSignalUuid } from '../utils';
 import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type { ThresholdSignalHistory, BulkCreate, WrapHits } from '../types';
-import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import type { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
 import type { ThresholdBucket } from './types';
+import { createEnrichEventsFunction } from '../enrichments';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 interface BulkCreateThresholdSignalsParams {
   buckets: ThresholdBucket[];
@@ -33,6 +35,7 @@ interface BulkCreateThresholdSignalsParams {
   signalHistory: ThresholdSignalHistory;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }
 
 export const getTransformedHits = (
@@ -89,5 +92,12 @@ export const bulkCreateThresholdSignals = async (
     ruleParams.ruleId
   );
 
-  return params.bulkCreate(params.wrapHits(ecsResults, buildReasonMessageForThresholdAlert));
+  return params.bulkCreate(
+    params.wrapHits(ecsResults, buildReasonMessageForThresholdAlert),
+    undefined,
+    createEnrichEventsFunction({
+      services: params.services,
+      logger: params.ruleExecutionLogger,
+    })
+  );
 };

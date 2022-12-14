@@ -58,6 +58,7 @@ import {
   AgentPolicyNameExistsError,
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyNotFoundError,
+  PackagePolicyRestrictionRelatedError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -545,6 +546,41 @@ class AgentPolicyService {
     }
   }
 
+  /**
+   * Remove a Fleet Server from all agent policies that are using it, to use the default one instead.
+   */
+  public async removeFleetServerHostFromAll(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    fleetServerHostId: string
+  ) {
+    const agentPolicies = (
+      await soClient.find<AgentPolicySOAttributes>({
+        type: SAVED_OBJECT_TYPE,
+        fields: ['revision', 'fleet_server_host_id'],
+        searchFields: ['fleet_server_host_id'],
+        search: escapeSearchQueryPhrase(fleetServerHostId),
+        perPage: SO_SEARCH_LIMIT,
+      })
+    ).saved_objects.map((so) => ({
+      id: so.id,
+      ...so.attributes,
+    }));
+
+    if (agentPolicies.length > 0) {
+      await pMap(
+        agentPolicies,
+        (agentPolicy) =>
+          this.update(soClient, esClient, agentPolicy.id, {
+            fleet_server_host_id: null,
+          }),
+        {
+          concurrency: 50,
+        }
+      );
+    }
+  }
+
   public async bumpAllAgentPoliciesForOutput(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -636,6 +672,14 @@ class AgentPolicyService {
     const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
 
     if (packagePolicies.length) {
+      const hasManagedPackagePolicies = packagePolicies.some(
+        (packagePolicy) => packagePolicy.is_managed
+      );
+      if (hasManagedPackagePolicies && !options?.force) {
+        throw new PackagePolicyRestrictionRelatedError(
+          `Cannot delete agent policy ${id} that contains managed package policies`
+        );
+      }
       const deletedPackagePolicies: DeletePackagePoliciesResponse =
         await packagePolicyService.delete(
           soClient,
@@ -769,9 +813,15 @@ class AgentPolicyService {
         .map((fleetServerPolicy) =>
           // There are some potential performance concerns around using `agentPolicyService.update` in this context.
           // This could potentially be a bottleneck in environments with several thousand agent policies being deployed here.
-          agentPolicyService.update(soClient, esClient, fleetServerPolicy.policy_id, {
-            schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-          })
+          agentPolicyService.update(
+            soClient,
+            esClient,
+            fleetServerPolicy.policy_id,
+            {
+              schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+            },
+            { force: true }
+          )
         )
     );
   }
@@ -929,6 +979,38 @@ class AgentPolicyService {
       fields: ['revision', 'download_source_id'],
       searchFields: ['download_source_id'],
       search: escapeSearchQueryPhrase(downloadSourceId),
+      perPage: SO_SEARCH_LIMIT,
+    });
+    const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
+      policy.attributes = {
+        ...policy.attributes,
+        revision: policy.attributes.revision + 1,
+        updated_at: new Date().toISOString(),
+        updated_by: options?.user ? options.user.username : 'system',
+      };
+      return policy;
+    });
+    const res = await soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+    await pMap(
+      currentPolicies.saved_objects,
+      (policy) => this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', policy.id),
+      { concurrency: 50 }
+    );
+
+    return res;
+  }
+
+  public async bumpAllAgentPoliciesForFleetServerHosts(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    fleetServerHostId: string,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
+    const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      fields: ['revision', 'fleet_server_host_id'],
+      searchFields: ['fleet_server_host_id'],
+      search: escapeSearchQueryPhrase(fleetServerHostId),
       perPage: SO_SEARCH_LIMIT,
     });
     const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {

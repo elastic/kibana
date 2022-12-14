@@ -9,8 +9,8 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { ML_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { MachineLearningRuleParams } from '../../schemas/rule_schemas';
-import { machineLearningRuleParams } from '../../schemas/rule_schemas';
+import type { MachineLearningRuleParams } from '../../rule_schema';
+import { machineLearningRuleParams } from '../../rule_schema';
 import { mlExecutor } from '../../signals/executors/ml';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 
@@ -53,11 +53,12 @@ export const createMlAlertType = (
         runOpts: {
           bulkCreate,
           completeRule,
-          exceptionItems,
           listClient,
           ruleExecutionLogger,
           tuple,
           wrapHits,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         state,
@@ -68,11 +69,12 @@ export const createMlAlertType = (
         tuple,
         ml,
         listClient,
-        exceptionItems,
         services,
         ruleExecutionLogger,
         bulkCreate,
         wrapHits,
+        exceptionFilter,
+        unprocessedExceptions,
       });
       return { ...result, state };
     },

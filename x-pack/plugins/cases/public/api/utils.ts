@@ -10,7 +10,7 @@ import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
 } from '../../common/utils/attachments';
-import {
+import type {
   CasesFindResponse,
   CaseResponse,
   CaseUserActionsResponse,
@@ -20,7 +20,7 @@ import {
   CasesResponse,
 } from '../../common/api';
 import { isCommentUserAction } from '../../common/utils/user_actions';
-import { Cases, Case, Comment, ResolvedCase } from '../containers/types';
+import type { Cases, Case, Comment, ResolvedCase } from '../containers/types';
 
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
   arrayOfSnakes.reduce((acc: unknown[], value) => {

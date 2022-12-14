@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import type { Action, Reducer } from 'redux';
 import type { RenderOptions } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -14,10 +14,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { PackageInfo } from '@kbn/fleet-plugin/common/types';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { SecuritySolutionQueryClient } from '../../../../../common/containers/query_client/query_client_provider';
+import { deepFreeze } from '@kbn/std';
 import type { AppContextTestRender, UiRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { createFleetContextReduxStore } from './with_security_context/store';
+import { createFleetContextReduxStore } from './components/with_security_context/store';
 import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
 import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
 import type { State } from '../../../../../common/store';
@@ -25,7 +25,7 @@ import { mockGlobalState } from '../../../../../common/mock';
 import { managementReducer } from '../../../../store/reducer';
 import { appReducer } from '../../../../../common/store/app';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
-import { RenderContextProviders } from './with_security_context/render_context_providers';
+import { RenderContextProviders } from './components/with_security_context/render_context_providers';
 import type { AppAction } from '../../../../../common/store/actions';
 
 // Defined a private custom reducer that reacts to an action that enables us to update the
@@ -61,9 +61,10 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
   });
 
   const mockedContext = createAppRootMockRenderer();
+  const { coreStart, depsStart, queryClient, startServices } = mockedContext;
   const store = createFleetContextReduxStore({
-    coreStart: mockedContext.coreStart,
-    depsStart: mockedContext.depsStart,
+    coreStart,
+    depsStart,
     reducersObject: {
       management: managementReducer,
       app: (state, action: AppAction | UpdateExperimentalFeaturesTestAction) => {
@@ -81,20 +82,7 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
     additionalMiddleware: [mockedContext.middlewareSpy.actionSpyMiddleware],
   });
 
-  const queryClient = new SecuritySolutionQueryClient();
-
   const Wrapper: RenderOptions['wrapper'] = ({ children }) => {
-    const services = useMemo(() => {
-      const { http, notifications, application } = mockedContext.coreStart;
-
-      return {
-        http,
-        notifications,
-        application,
-        data: mockedContext.depsStart.data,
-      };
-    }, []);
-
     useEffect(() => {
       return () => {
         // When the component un-mounts, reset the Experimental features since
@@ -105,15 +93,16 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
       };
     }, []);
 
+    startServices.application.capabilities = deepFreeze({
+      ...startServices.application.capabilities,
+      siem: { show: true, crud: true },
+    });
+
     return (
       <I18nProvider>
         <EuiThemeProvider>
-          <KibanaContextProvider services={services}>
-            <RenderContextProviders
-              store={store}
-              depsStart={mockedContext.depsStart}
-              queryClient={queryClient}
-            >
+          <KibanaContextProvider services={startServices}>
+            <RenderContextProviders store={store} depsStart={depsStart} queryClient={queryClient}>
               {children}
             </RenderContextProviders>
           </KibanaContextProvider>

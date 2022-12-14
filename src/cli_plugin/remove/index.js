@@ -8,7 +8,7 @@
 
 import { getConfigPath } from '@kbn/utils';
 import { remove } from './remove';
-import { Logger } from '../lib/logger';
+import { Logger } from '../../cli/logger';
 import { parse } from './settings';
 import { logWarnings } from '../lib/log_warnings';
 

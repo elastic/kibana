@@ -8,9 +8,12 @@
 export {
   addChangePointsAction,
   addChangePointsGroupAction,
+  addChangePointsGroupHistogramAction,
   addChangePointsHistogramAction,
   addErrorAction,
-  resetAction,
+  pingAction,
+  resetAllAction,
+  resetErrorsAction,
   updateLoadingStateAction,
   API_ACTION_NAME,
 } from './actions';

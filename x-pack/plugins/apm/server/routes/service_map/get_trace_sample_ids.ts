@@ -7,7 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -15,60 +19,62 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   TRACE_ID,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup } from '../../lib/helpers/setup_request';
+
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { APMConfig } from '../..';
 
 const MAX_TRACES_TO_INSPECT = 1000;
 
 export async function getTraceSampleIds({
-  serviceNames,
+  serviceName,
   environment,
-  setup,
+  config,
+  apmEventClient,
   start,
   end,
+  serviceGroupKuery,
 }: {
-  serviceNames?: string[];
+  serviceName?: string;
   environment: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
+  serviceGroupKuery?: string;
 }) {
-  const { apmEventClient, config } = setup;
-
   const query = {
     bool: {
-      filter: [...rangeQuery(start, end)],
+      filter: [
+        ...rangeQuery(start, end),
+        ...environmentQuery(environment),
+        ...kqlQuery(serviceGroupKuery),
+        ...termQuery(SERVICE_NAME, serviceName),
+      ],
     },
   };
 
-  let events: ProcessorEvent[];
+  const isGlobalServiceMap = !serviceName && !serviceGroupKuery;
+  let events = [ProcessorEvent.span, ProcessorEvent.transaction];
 
-  const hasServiceNamesFilter = (serviceNames?.length ?? 0) > 0;
-
-  if (hasServiceNamesFilter) {
-    query.bool.filter.push({
-      terms: { [SERVICE_NAME]: serviceNames as string[] },
-    });
-    events = [ProcessorEvent.span, ProcessorEvent.transaction];
-  } else {
+  // perf optimization that is only possible on the global service map with no filters
+  if (isGlobalServiceMap) {
     events = [ProcessorEvent.span];
     query.bool.filter.push({
-      exists: {
-        field: SPAN_DESTINATION_SERVICE_RESOURCE,
-      },
+      exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
     });
   }
 
-  query.bool.filter.push(...environmentQuery(environment));
+  const fingerprintBucketSize = isGlobalServiceMap
+    ? config.serviceMapFingerprintGlobalBucketSize
+    : config.serviceMapFingerprintBucketSize;
 
-  const fingerprintBucketSize = hasServiceNamesFilter
-    ? config.serviceMapFingerprintBucketSize
-    : config.serviceMapFingerprintGlobalBucketSize;
-  const traceIdBucketSize = hasServiceNamesFilter
-    ? config.serviceMapTraceIdBucketSize
-    : config.serviceMapTraceIdGlobalBucketSize;
+  const traceIdBucketSize = isGlobalServiceMap
+    ? config.serviceMapTraceIdGlobalBucketSize
+    : config.serviceMapTraceIdBucketSize;
+
   const samplerShardSize = traceIdBucketSize * 10;
 
   const params = {
@@ -76,6 +82,7 @@ export async function getTraceSampleIds({
       events,
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query,
       aggs: {

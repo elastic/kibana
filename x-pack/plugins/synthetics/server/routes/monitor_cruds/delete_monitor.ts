@@ -19,10 +19,7 @@ import {
 } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import {
-  syntheticsMonitorType,
-  syntheticsMonitor,
-} from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
   sendTelemetryEvents,
@@ -87,7 +84,9 @@ export const deleteMonitor = async ({
   syntheticsMonitorClient: SyntheticsMonitorClient;
   request: KibanaRequest;
 }) => {
-  const { logger, telemetry, kibanaVersion, encryptedSavedObjects } = server;
+  const { logger, telemetry, stackVersion, encryptedSavedObjects } = server;
+  const spaceId = server.spaces.spacesService.getSpaceId(request);
+
   const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
   let normalizedMonitor;
   try {
@@ -98,7 +97,7 @@ export const deleteMonitor = async ({
 
     const monitor =
       await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-        syntheticsMonitor.name,
+        syntheticsMonitorType,
         monitorId,
         {
           namespace: encryptedMonitor.namespaces?.[0],
@@ -107,15 +106,16 @@ export const deleteMonitor = async ({
 
     normalizedMonitor = normalizeSecrets(monitor);
 
-    const deleteSyncPromise = syntheticsMonitorClient.deleteMonitor(
-      {
-        ...normalizedMonitor.attributes,
-        id:
-          (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
-          monitorId,
-      },
+    const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
+      [
+        {
+          ...normalizedMonitor.attributes,
+          id: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
+        },
+      ],
       request,
-      savedObjectsClient
+      savedObjectsClient,
+      spaceId
     );
     const deletePromise = savedObjectsClient.delete(syntheticsMonitorType, monitorId);
 
@@ -126,7 +126,7 @@ export const deleteMonitor = async ({
       telemetry,
       formatTelemetryDeleteEvent(
         monitor,
-        kibanaVersion,
+        stackVersion,
         new Date().toISOString(),
         Boolean((normalizedMonitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
         errors

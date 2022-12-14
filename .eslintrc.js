@@ -178,6 +178,7 @@ const DEV_PATTERNS = [
   'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
   'x-pack/plugins/*/server/scripts/**/*',
   'x-pack/plugins/fleet/cypress',
+  'x-pack/performance/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -1110,7 +1111,10 @@ module.exports = {
       },
       overrides: [
         {
-          files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
+          files: [
+            'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+          ],
           rules: {
             '@typescript-eslint/consistent-type-imports': 'error',
           },
@@ -1313,7 +1317,7 @@ module.exports = {
     {
       // typescript for front and back end
       files: [
-        'x-pack/plugins/{alerting,stack_alerts,stack_connectors,actions,task_manager,event_log}/**/*.{ts,tsx}',
+        'x-pack/plugins/{alerting,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
@@ -1321,7 +1325,7 @@ module.exports = {
     },
     {
       // typescript only for back end
-      files: ['x-pack/plugins/triggers_actions_ui/server/**/*.ts'],
+      files: ['x-pack/plugins/{stack_connectors,triggers_actions_ui}/server/**/*.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1402,6 +1406,30 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': [
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
+        ],
+      },
+    },
+    /**
+     * Allows snake_case variables in the server, because that's how we return API properties
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/server/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/naming-convention': [
+          'error',
+          {
+            selector: 'variable',
+            modifiers: ['destructured'],
+            format: null,
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow',
+          },
+          {
+            selector: 'variable',
+            format: ['camelCase', 'UPPER_CASE'],
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow',
+          },
         ],
       },
     },

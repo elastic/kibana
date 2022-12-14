@@ -22,6 +22,7 @@ import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
+import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import type { CellValueElementProps } from '../cell_rendering';
@@ -32,11 +33,7 @@ import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { calculateTotalPages } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
-import type {
-  ControlColumnProps,
-  RowRenderer,
-  ToggleDetailPanel,
-} from '../../../../../common/types/timeline';
+import type { RowRenderer, ToggleDetailPanel } from '../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
@@ -54,10 +51,11 @@ import { useTimelineFullScreen } from '../../../../common/containers/use_full_sc
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { EqlQueryBarTimeline } from '../query_bar/eql';
-import { HeaderActions } from '../body/actions/header_actions';
 import { getDefaultControlColumn } from '../body/control_columns';
 import type { Sort } from '../body/sort';
 import { Sourcerer } from '../../../../common/components/sourcerer';
+import { useLicense } from '../../../../common/hooks/use_license';
+import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -182,7 +180,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
-  const ACTION_BUTTON_COUNT = 6;
+
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 
@@ -199,14 +199,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
     return [...columnFields, ...requiredFieldsForActions];
   };
-
-  useEffect(() => {
-    dispatch(
-      timelineActions.initializeTGridSettings({
-        id: timelineId,
-      })
-    );
-  }, [dispatch, timelineId]);
 
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
@@ -226,7 +218,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     });
 
   const handleOnPanelClosed = useCallback(() => {
-    onEventClosed({ tabType: TimelineTabs.eql, timelineId });
+    onEventClosed({ tabType: TimelineTabs.eql, id: timelineId });
 
     if (
       expandedDetail[TimelineTabs.eql]?.panelView &&
@@ -252,7 +244,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         ...x,
         headerCellRender: HeaderActions,
       })),
-    []
+    [ACTION_BUTTON_COUNT]
   );
 
   return (
@@ -356,7 +348,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.eql}
-                timelineId={timelineId}
+                scopeId={timelineId}
                 handleOnPanelClosed={handleOnPanelClosed}
               />
             </ScrollableFlexItem>

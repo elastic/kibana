@@ -6,7 +6,9 @@
  */
 
 import type { ReactNode, FunctionComponent } from 'react';
+import { useMemo } from 'react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
+import { css } from '@emotion/react';
 
 import {
   EuiFlexGrid,
@@ -33,6 +35,8 @@ import type { IntegrationCardItem } from '../../../../../../common/types/models'
 
 import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
 
+import { promoteFeaturedIntegrations } from './utils';
+
 import { PackageCard } from './package_card';
 
 export interface Props {
@@ -40,7 +44,6 @@ export interface Props {
   controls?: ReactNode | ReactNode[];
   title?: string;
   list: IntegrationCardItem[];
-  featuredList?: JSX.Element | null;
   initialSearch?: string;
   selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
@@ -62,7 +65,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   setSelectedCategory,
   categories,
   showMissingIntegrationMessage = false,
-  featuredList = null,
   callout,
   showCardLabels = true,
 }) => {
@@ -98,12 +100,8 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     ? categories.find((category) => category.id === selectedCategory)?.title
     : undefined;
 
-  const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
-  let gridContent: JSX.Element;
-
-  if (isLoading || !localSearchRef.current) {
-    gridContent = <Loading />;
-  } else {
+  const filteredPromotedList = useMemo(() => {
+    if (isLoading) return [];
     const filteredList = searchTerm
       ? list.filter((item) =>
           (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
@@ -111,9 +109,19 @@ export const PackageListGrid: FunctionComponent<Props> = ({
             .includes(item[searchIdField])
         )
       : list;
+
+    return promoteFeaturedIntegrations(filteredList, selectedCategory);
+  }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
+
+  const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
+  let gridContent: JSX.Element;
+
+  if (isLoading || !localSearchRef.current) {
+    gridContent = <Loading />;
+  } else {
     gridContent = (
       <GridColumn
-        list={filteredList}
+        list={filteredPromotedList}
         showMissingIntegrationMessage={showMissingIntegrationMessage}
         showCardLabels={showCardLabels}
       />
@@ -122,7 +130,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
 
   return (
     <>
-      {featuredList}
       <div ref={menuRef}>
         <EuiFlexGroup
           alignItems="flexStart"
@@ -251,7 +258,17 @@ function GridColumn({
       {list.length ? (
         list.map((item) => {
           return (
-            <EuiFlexItem key={item.id}>
+            <EuiFlexItem
+              key={item.id}
+              // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
+              css={css`
+                & > .euiPopover,
+                & > .euiPopover > .euiPopover__anchor,
+                & > .euiPopover > .euiPopover__anchor > .euiCard {
+                  height: 100%;
+                }
+              `}
+            >
               <PackageCard {...item} showLabels={showCardLabels} />
             </EuiFlexItem>
           );

@@ -11,20 +11,23 @@ import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../../../plugin';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   AlertsTableStatusFilter,
   ALL_ALERTS_FILTER,
   AlertStatusFilterButton,
-} from '../../alerting/service_overview_alerts/alerts_table_status_filter';
+} from './alerts_table_status_filter';
 
 export function AlertsOverview() {
   const {
     path: { serviceName },
     query: { environment },
-  } = useApmParams('/services/{serviceName}/alerts');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/alerts',
+    '/mobile-services/{serviceName}/alerts'
+  );
   const { services } = useKibana<ApmPluginStartDeps>();
   const [alertStatusFilter, setAlertStatusFilter] =
     useState<AlertStatusFilterButton>(ALL_ALERTS_FILTER);

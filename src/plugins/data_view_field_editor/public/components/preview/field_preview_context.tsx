@@ -217,8 +217,9 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       const [response, searchError] = await search
         .search({
           params: {
-            index: dataView.title,
+            index: dataView.getIndexPattern(),
             body: {
+              fields: ['*'],
               size: limit,
             },
           },
@@ -269,9 +270,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       const [response, searchError] = await search
         .search({
           params: {
-            index: dataView.title,
+            index: dataView.getIndexPattern(),
             body: {
               size: 1,
+              fields: ['*'],
               query: {
                 ids: {
                   values: [id],
@@ -408,7 +410,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
     const response = await getFieldPreview({
       index: currentDocIndex,
-      document: document!,
+      document: document?._source!,
       context: (parentName ? 'composite_field' : `${type!}_field`) as PainlessExecuteContext,
       script: previewScript,
     });
@@ -615,7 +617,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
    */
   useEffect(() => {
     updateParams({
-      document: currentDocument?._source,
+      document: currentDocument,
       index: currentDocument?._index,
     });
   }, [currentDocument, updateParams]);
@@ -669,7 +671,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         fields: fields.map((field) => {
           const nextValue =
             script === null && Boolean(document)
-              ? get(document, name ?? '') // When there is no script we try to read the value from _source
+              ? get(document?._source, name ?? '') ?? get(document?.fields, name ?? '') // When there is no script we try to read the value from _source/fields
               : field?.value;
 
           const formattedValue = valueFormatter(nextValue);

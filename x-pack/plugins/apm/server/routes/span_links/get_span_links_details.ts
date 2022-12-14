@@ -20,30 +20,28 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
   AGENT_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { Environment } from '../../../common/environment_rt';
 import { SpanLinkDetails } from '../../../common/span_links';
 import { SpanLink } from '../../../typings/es_schemas/raw/fields/span_links';
 import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { Setup } from '../../lib/helpers/setup_request';
 import { getBufferedTimerange } from './utils';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 async function fetchSpanLinksDetails({
-  setup,
+  apmEventClient,
   kuery,
   spanLinks,
   start,
   end,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   kuery: string;
   spanLinks: SpanLink[];
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
-
   const { startWithBuffer, endWithBuffer } = getBufferedTimerange({
     start,
     end,
@@ -68,6 +66,7 @@ async function fetchSpanLinksDetails({
       AGENT_NAME,
     ],
     body: {
+      track_total_hits: false,
       size: 1000,
       query: {
         bool: {
@@ -118,13 +117,13 @@ async function fetchSpanLinksDetails({
 }
 
 export async function getSpanLinksDetails({
-  setup,
+  apmEventClient,
   spanLinks,
   kuery,
   start,
   end,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   spanLinks: SpanLink[];
   kuery: string;
   start: number;
@@ -139,7 +138,7 @@ export async function getSpanLinksDetails({
   const chunkedResponses = await Promise.all(
     spanLinksChunks.map((spanLinksChunk) =>
       fetchSpanLinksDetails({
-        setup,
+        apmEventClient,
         kuery,
         spanLinks: spanLinksChunk,
         start,

@@ -5,140 +5,144 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import deepEqual from 'fast-deep-equal';
+import { Reducer, useEffect, useReducer, useRef } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { executeAction } from '../lib/action_connector_api';
 
-interface UseSubActionParams {
-  connectorId: string;
-  subAction: string;
-  subActionParams: Record<string, unknown>;
+export interface UseSubActionParams<P> {
+  connectorId?: string;
+  subAction?: string;
+  subActionParams?: P;
+  disabled?: boolean;
 }
 
-interface SubActionsState<T> {
+interface SubActionsState<R> {
   isLoading: boolean;
-  isError: boolean;
-  response: unknown | undefined;
+  response: R | undefined;
   error: Error | null;
 }
 
 enum SubActionsActionsList {
-  INIT,
-  LOADING,
+  START,
+  STOP,
   SUCCESS,
   ERROR,
 }
 
-type Action<T> =
-  | { type: SubActionsActionsList.INIT }
-  | { type: SubActionsActionsList.LOADING }
-  | { type: SubActionsActionsList.SUCCESS; payload: T | undefined }
+type Action<R> =
+  | { type: SubActionsActionsList.START }
+  | { type: SubActionsActionsList.STOP }
+  | { type: SubActionsActionsList.SUCCESS; payload: R | undefined }
   | { type: SubActionsActionsList.ERROR; payload: Error | null };
 
-const dataFetchReducer = <T,>(state: SubActionsState<T>, action: Action<T>): SubActionsState<T> => {
+const dataFetchReducer = <R,>(state: SubActionsState<R>, action: Action<R>): SubActionsState<R> => {
   switch (action.type) {
-    case SubActionsActionsList.INIT:
-      return {
-        ...state,
-        isLoading: false,
-        isError: false,
-      };
-
-    case SubActionsActionsList.LOADING:
+    case SubActionsActionsList.START:
       return {
         ...state,
         isLoading: true,
-        isError: false,
+        error: null,
       };
-
+    case SubActionsActionsList.STOP:
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+      };
     case SubActionsActionsList.SUCCESS:
       return {
         ...state,
         response: action.payload,
         isLoading: false,
-        isError: false,
+        error: null,
       };
-
     case SubActionsActionsList.ERROR:
       return {
         ...state,
         error: action.payload,
         isLoading: false,
-        isError: true,
       };
-
     default:
       return state;
   }
 };
 
-export const useSubAction = <T,>(params: UseSubActionParams | null) => {
+const useMemoParams = <P,>(subActionsParams: P): P => {
+  const paramsRef = useRef<P>(subActionsParams);
+  if (!deepEqual(paramsRef.current, subActionsParams)) {
+    paramsRef.current = subActionsParams;
+  }
+  return paramsRef.current;
+};
+
+export const useSubAction = <P, R>({
+  connectorId,
+  subAction,
+  subActionParams,
+  disabled = false,
+}: UseSubActionParams<P>) => {
   const { http } = useKibana().services;
-  const [state, dispatch] = useReducer(dataFetchReducer, {
-    isError: false,
+  const [{ isLoading, response, error }, dispatch] = useReducer<
+    Reducer<SubActionsState<R>, Action<R>>
+  >(dataFetchReducer, {
     isLoading: false,
     response: undefined,
     error: null,
   });
+  const memoParams = useMemoParams(subActionParams);
 
-  const abortCtrl = useRef(new AbortController());
-  const isMounted = useRef(false);
-
-  const executeSubAction = useCallback(async () => {
-    if (params == null) {
+  useEffect(() => {
+    if (disabled || !connectorId || !subAction) {
+      dispatch({ type: SubActionsActionsList.STOP });
       return;
     }
 
-    const { connectorId, subAction, subActionParams } = params;
-    dispatch({ type: SubActionsActionsList.INIT });
+    const abortCtrl = new AbortController();
+    let isActive = true;
 
-    try {
-      abortCtrl.current.abort();
-      abortCtrl.current = new AbortController();
-      dispatch({ type: SubActionsActionsList.LOADING });
+    const executeSubAction = async () => {
+      try {
+        dispatch({ type: SubActionsActionsList.START });
 
-      const res = (await executeAction({
-        id: connectorId,
-        http,
-        params: {
-          subAction,
-          subActionParams,
-        },
-      })) as ActionTypeExecutorResult<T>;
+        const res = await executeAction<R>({
+          id: connectorId,
+          params: {
+            subAction,
+            subActionParams: memoParams,
+          },
+          http,
+          signal: abortCtrl.signal,
+        });
 
-      if (isMounted.current) {
-        if (res.status && res.status === 'error') {
+        if (isActive) {
+          if (res.status && res.status === 'ok') {
+            dispatch({ type: SubActionsActionsList.SUCCESS, payload: res.data });
+          } else {
+            dispatch({
+              type: SubActionsActionsList.ERROR,
+              payload: new Error(`${res.message}: ${res.serviceMessage}`),
+            });
+          }
+        }
+        return res.data;
+      } catch (err) {
+        if (isActive) {
           dispatch({
             type: SubActionsActionsList.ERROR,
-            payload: new Error(`${res.message}: ${res.serviceMessage}`),
+            payload: err,
           });
         }
-
-        dispatch({ type: SubActionsActionsList.SUCCESS, payload: res.data });
       }
-
-      return res.data;
-    } catch (e) {
-      if (isMounted.current) {
-        dispatch({
-          type: SubActionsActionsList.ERROR,
-          payload: e,
-        });
-      }
-    }
-  }, [http, params]);
-
-  useEffect(() => {
-    isMounted.current = true;
-    executeSubAction();
-    return () => {
-      isMounted.current = false;
-      abortCtrl.current.abort();
     };
-  }, [executeSubAction]);
 
-  return {
-    ...state,
-  };
+    executeSubAction();
+
+    return () => {
+      isActive = false;
+      abortCtrl.abort();
+    };
+  }, [memoParams, disabled, connectorId, subAction, http]);
+
+  return { isLoading, response, error };
 };

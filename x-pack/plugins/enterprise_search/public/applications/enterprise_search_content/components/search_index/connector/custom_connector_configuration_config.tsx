@@ -22,7 +22,7 @@ export const ConnectorConfigurationConfig: React.FC = () => {
           values={{
             link: (
               <EuiLink
-                href="https://github.com/elastic/connectors-ruby/tree/main/lib/connectors/stub_connector"
+                href="https://github.com/elastic/connectors-ruby/tree/main/lib/connectors/example"
                 target="_blank"
               >
                 {i18n.translate(

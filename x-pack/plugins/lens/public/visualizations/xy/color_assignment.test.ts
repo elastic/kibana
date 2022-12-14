@@ -7,7 +7,7 @@
 
 import { getColorAssignments } from './color_assignment';
 import type { FormatFactory } from '../../../common';
-import { layerTypes } from '../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { XYDataLayerConfig } from './types';
 import { Datatable } from '@kbn/expressions-plugin/common';
 
@@ -17,7 +17,7 @@ describe('color_assignment', () => {
       seriesType: 'bar',
       palette: { type: 'palette', name: 'palette1' },
       layerId: '1',
-      layerType: layerTypes.DATA,
+      layerType: LayerTypes.DATA,
       splitAccessor: 'split1',
       accessors: ['y1', 'y2'],
     },
@@ -25,7 +25,7 @@ describe('color_assignment', () => {
       seriesType: 'bar',
       palette: { type: 'palette', name: 'palette2' },
       layerId: '2',
-      layerType: layerTypes.DATA,
+      layerType: LayerTypes.DATA,
       splitAccessor: 'split2',
       accessors: ['y3', 'y4'],
     },

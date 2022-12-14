@@ -28,6 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
           kuery: '',
+          environment: 'production',
         },
       },
     });

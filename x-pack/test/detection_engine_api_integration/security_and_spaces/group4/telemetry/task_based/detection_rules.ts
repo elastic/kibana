@@ -21,20 +21,18 @@ import {
   getSecurityTelemetryStats,
   createExceptionList,
   createExceptionListItem,
+  removeTimeFieldsFromTelemetryStats,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
+import { ELASTIC_SECURITY_RULE_ID } from '../../../../utils/create_prebuilt_rule_saved_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
+  const es = getService('es');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const retry = getService('retry');
-
-  // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-  // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint_security.json
-  // This rule has an existing exceptions_list that we are going to use.
-  const IMMUTABLE_RULE_ID = '9a1a2dae-0b5f-4c3d-8305-a268d404c306';
 
   describe('Detection rule task telemetry', async () => {
     before(async () => {
@@ -100,7 +98,15 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).to.eql([]);
+          removeTimeFieldsFromTelemetryStats(stats);
+          expect(stats.detection_rules).to.eql([
+            [
+              {
+                name: 'Security Solution Detection Rule Lists Telemetry',
+                passed: true,
+              },
+            ],
+          ]);
         });
       });
 
@@ -148,7 +154,15 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).to.eql([]);
+          removeTimeFieldsFromTelemetryStats(stats);
+          expect(stats.detection_rules).to.eql([
+            [
+              {
+                name: 'Security Solution Detection Rule Lists Telemetry',
+                passed: true,
+              },
+            ],
+          ]);
         });
       });
 
@@ -196,7 +210,15 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).to.eql([]);
+          removeTimeFieldsFromTelemetryStats(stats);
+          expect(stats.detection_rules).to.eql([
+            [
+              {
+                name: 'Security Solution Detection Rule Lists Telemetry',
+                passed: true,
+              },
+            ],
+          ]);
         });
       });
 
@@ -244,7 +266,15 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).to.eql([]);
+          removeTimeFieldsFromTelemetryStats(stats);
+          expect(stats.detection_rules).to.eql([
+            [
+              {
+                name: 'Security Solution Detection Rule Lists Telemetry',
+                passed: true,
+              },
+            ],
+          ]);
         });
       });
 
@@ -292,7 +322,15 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).to.eql([]);
+          removeTimeFieldsFromTelemetryStats(stats);
+          expect(stats.detection_rules).to.eql([
+            [
+              {
+                name: 'Security Solution Detection Rule Lists Telemetry',
+                passed: true,
+              },
+            ],
+          ]);
         });
       });
     });
@@ -300,7 +338,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('pre-built/immutable/elastic rules should show detection_rules telemetry data for each list type', () => {
       beforeEach(async () => {
         // install prepackaged rules to get immutable rules for testing
-        await installPrePackagedRules(supertest, log);
+        await installPrePackagedRules(supertest, es, log);
       });
 
       it('should return mutating types such as "id", "@timestamp", etc... for list of type "detection"', async () => {
@@ -330,12 +368,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule using "PATCH" endpoint
-        const { exceptions_list } = await getRule(supertest, log, IMMUTABLE_RULE_ID);
+        const { exceptions_list } = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send({
-            rule_id: IMMUTABLE_RULE_ID,
+            rule_id: ELASTIC_SECURITY_RULE_ID,
             exceptions_list: [
               ...exceptions_list,
               {
@@ -350,7 +388,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).length(1);
+          expect(stats.detection_rules).length(2);
           const detectionRule = stats.detection_rules[0][0];
           expect(detectionRule['@timestamp']).to.be.a('string');
           expect(detectionRule.cluster_uuid).to.be.a('string');
@@ -388,12 +426,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule
-        const immutableRule = await getRule(supertest, log, IMMUTABLE_RULE_ID);
+        const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send({
-            rule_id: IMMUTABLE_RULE_ID,
+            rule_id: ELASTIC_SECURITY_RULE_ID,
             exceptions_list: [
               ...immutableRule.exceptions_list,
               {
@@ -408,9 +446,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: { detection_rule: any }) => obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -427,6 +466,10 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'endpoint description',
               os_types: [],
               rule_version: detectionRules[0].rule_version,
+            },
+            {
+              name: 'Security Solution Detection Rule Lists Telemetry',
+              passed: true,
             },
           ]);
         });
@@ -459,12 +502,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule
-        const immutableRule = await getRule(supertest, log, IMMUTABLE_RULE_ID);
+        const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send({
-            rule_id: IMMUTABLE_RULE_ID,
+            rule_id: ELASTIC_SECURITY_RULE_ID,
             exceptions_list: [
               ...immutableRule.exceptions_list,
               {
@@ -479,9 +522,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: { detection_rule: any }) => obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -498,6 +542,10 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'endpoint description',
               os_types: [],
               rule_version: detectionRules[0].rule_version,
+            },
+            {
+              name: 'Security Solution Detection Rule Lists Telemetry',
+              passed: true,
             },
           ]);
         });
@@ -530,12 +578,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule
-        const immutableRule = await getRule(supertest, log, IMMUTABLE_RULE_ID);
+        const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send({
-            rule_id: IMMUTABLE_RULE_ID,
+            rule_id: ELASTIC_SECURITY_RULE_ID,
             exceptions_list: [
               ...immutableRule.exceptions_list,
               {
@@ -550,9 +598,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: { detection_rule: any }) => obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -569,6 +618,10 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'endpoint description',
               os_types: [],
               rule_version: detectionRules[0].rule_version,
+            },
+            {
+              name: 'Security Solution Detection Rule Lists Telemetry',
+              passed: true,
             },
           ]);
         });
@@ -601,12 +654,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule
-        const immutableRule = await getRule(supertest, log, IMMUTABLE_RULE_ID);
+        const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send({
-            rule_id: IMMUTABLE_RULE_ID,
+            rule_id: ELASTIC_SECURITY_RULE_ID,
             exceptions_list: [
               ...immutableRule.exceptions_list,
               {
@@ -621,9 +674,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: { detection_rule: any }) => obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -640,6 +694,10 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'endpoint description',
               os_types: [],
               rule_version: detectionRules[0].rule_version,
+            },
+            {
+              name: 'Security Solution Detection Rule Lists Telemetry',
+              passed: true,
             },
           ]);
         });
@@ -672,12 +730,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule
-        const immutableRule = await getRule(supertest, log, IMMUTABLE_RULE_ID);
+        const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send({
-            rule_id: IMMUTABLE_RULE_ID,
+            rule_id: ELASTIC_SECURITY_RULE_ID,
             exceptions_list: [
               ...immutableRule.exceptions_list,
               {
@@ -692,9 +750,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: { detection_rule: any }) => obj.detection_rule);
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
             {
@@ -712,6 +771,10 @@ export default ({ getService }: FtrProviderContext) => {
               os_types: [],
               rule_version: detectionRules[0].rule_version,
             },
+            {
+              name: 'Security Solution Detection Rule Lists Telemetry',
+              passed: true,
+            },
           ]);
         });
       });
@@ -720,7 +783,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('pre-built/immutable/elastic rules should show detection_rules telemetry data for multiple list items and types', () => {
       beforeEach(async () => {
         // install prepackaged rules to get immutable rules for testing
-        await installPrePackagedRules(supertest, log);
+        await installPrePackagedRules(supertest, es, log);
       });
 
       it('should give telemetry/stats for 2 exception lists to the type of "detection"', async () => {
@@ -767,12 +830,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule
-        const immutableRule = await getRule(supertest, log, IMMUTABLE_RULE_ID);
+        const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send({
-            rule_id: IMMUTABLE_RULE_ID,
+            rule_id: ELASTIC_SECURITY_RULE_ID,
             exceptions_list: [
               ...immutableRule.exceptions_list,
               {
@@ -787,11 +850,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
+          removeTimeFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
-            .map((obj: { detection_rule: any }) => obj.detection_rule)
+            .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule))
             .sort((obj1: { entries: { name: number } }, obj2: { entries: { name: number } }) => {
-              return obj1.entries.name - obj2.entries.name;
+              return obj1?.entries?.name - obj2?.entries?.name;
             });
 
           expect(detectionRules).to.eql([
@@ -824,6 +888,10 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'endpoint description 1',
               os_types: [],
               rule_version: detectionRules[1].rule_version,
+            },
+            {
+              name: 'Security Solution Detection Rule Lists Telemetry',
+              passed: true,
             },
           ]);
         });

@@ -25,20 +25,20 @@ import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
 describe('risk tab', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('risky_hosts');
+    esArchiverLoad('risk_hosts');
     login();
     visit(HOSTS_URL);
     navigateToHostRiskDetailTab();
   });
 
   after(() => {
-    esArchiverUnload('risky_hosts');
+    esArchiverUnload('risk_hosts');
   });
 
   it('renders the table', () => {
     kqlSearch('host.name: "siem-kibana" {enter}');
     cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('have.text', 'siem-kibana');
-    cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', '21.00');
+    cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', '21');
     cy.get(HOST_BY_RISK_TABLE_CELL).eq(5).should('have.text', 'Low');
     clearSearchBar();
   });

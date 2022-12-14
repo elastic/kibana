@@ -130,6 +130,8 @@ export function telemetryTaskRunner(
                 totalExecutionsPerDay.countFailedByType,
               avg_execution_time_per_day: totalExecutionsPerDay.avgExecutionTime,
               avg_execution_time_by_type_per_day: totalExecutionsPerDay.avgExecutionTimeByType,
+              count_connector_types_by_action_run_outcome_per_day:
+                totalExecutionsPerDay.countRunOutcomeByConnectorType,
             },
             runAt: getNextMidnight(),
           };

@@ -12,6 +12,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
@@ -30,7 +31,6 @@ import {
   BrowserFields,
 } from '../../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
-import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 import * as labels from '../../overview/monitor_list/translations';
 import { Actions } from './actions';
@@ -70,14 +70,13 @@ export const MonitorManagementList = ({
   errorSummaries,
 }: Props) => {
   const { basePath } = useContext(UptimeSettingsContext);
-  const isXl = useBreakpoints().up('xl');
+  const isXl = useIsWithinMinBreakpoint('xxl');
 
   const { total } = list as MonitorManagementListState['list'];
   const monitors: EncryptedSyntheticsMonitorWithId[] = useMemo(
     () =>
       list.monitors.map((monitor) => ({
         ...monitor.attributes,
-        id: monitor.id,
       })),
     [list.monitors]
   );
@@ -127,7 +126,7 @@ export const MonitorManagementList = ({
       render: (name: string, monitor: EncryptedSyntheticsMonitorWithId) => (
         <EuiLink
           href={`${basePath}/app/uptime/monitor/${btoa(
-            (monitor as unknown as BrowserFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitor.id
+            (monitor as unknown as BrowserFields)[ConfigKey.MONITOR_QUERY_ID]
           )}`}
         >
           {name}
@@ -181,7 +180,6 @@ export const MonitorManagementList = ({
       }),
       sortable: true,
       render: (urls: string, { hosts }: TCPSimpleFields | ICMPSimpleFields) => urls || hosts,
-      truncateText: true,
       textOnly: true,
     },
     {
@@ -192,7 +190,7 @@ export const MonitorManagementList = ({
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsMonitorWithId) => (
         <MonitorEnabled
-          id={monitor.id}
+          id={monitor[ConfigKey.CONFIG_ID]}
           monitor={monitor}
           isDisabled={!canEdit}
           onUpdate={onUpdate}
@@ -206,7 +204,8 @@ export const MonitorManagementList = ({
       }),
       render: (fields: EncryptedSyntheticsMonitorWithId) => (
         <Actions
-          id={fields.id}
+          key={fields[ConfigKey.CONFIG_ID]}
+          configId={fields[ConfigKey.CONFIG_ID]}
           name={fields[ConfigKey.NAME]}
           isDisabled={!canEdit}
           onUpdate={onUpdate}

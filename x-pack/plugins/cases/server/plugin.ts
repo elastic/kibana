@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IContextProvider,
   KibanaRequest,
   Logger,
@@ -14,25 +14,26 @@ import {
   CoreStart,
 } from '@kbn/core/server';
 
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import {
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
   PluginStartContract as FeaturesPluginStart,
   PluginSetupContract as FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
-import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import {
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { APP_ID } from '../common/constants';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 
+import { APP_ID } from '../common/constants';
 import {
   createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
@@ -42,7 +43,7 @@ import {
   casesTelemetrySavedObjectType,
 } from './saved_object_types';
 
-import { CasesClient } from './client';
+import type { CasesClient } from './client';
 import type { CasesRequestHandlerContext, PluginSetupContract, PluginStartContract } from './types';
 import { CasesClientFactory } from './client/factory';
 import { getCasesKibanaFeature } from './features';
@@ -53,12 +54,14 @@ import { getInternalRoutes } from './routes/api/get_internal_routes';
 import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UserProfileService } from './services';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
   lens: LensServerPluginSetup;
   features: FeaturesPluginSetup;
   security: SecurityPluginSetup;
+  licensing: LicensingPluginSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
 }
@@ -70,6 +73,7 @@ export interface PluginsStart {
   taskManager?: TaskManagerStartContract;
   security: SecurityPluginStart;
   spaces: SpacesPluginStart;
+  notifications: NotificationsPluginStart;
 }
 
 export class CasePlugin {
@@ -149,6 +153,8 @@ export class CasePlugin {
       telemetryUsageCounter,
     });
 
+    plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
+
     return {
       attachmentFramework: {
         registerExternalReference: (externalReferenceAttachmentType) => {
@@ -194,6 +200,8 @@ export class CasePlugin {
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+      publicBaseUrl: core.http.basePath.publicBaseUrl,
+      notifications: plugins.notifications,
     });
 
     const client = core.elasticsearch.client;

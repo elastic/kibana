@@ -14,6 +14,8 @@ export interface IQueryPayload {
   };
 }
 
+export type SOShard = Array<{ key: string; value: number }>;
+
 export interface PackSavedObjectAttributes {
   name: string;
   description: string | undefined;
@@ -22,6 +24,8 @@ export interface PackSavedObjectAttributes {
     name: string;
     query: string;
     interval: number;
+    snapshot?: boolean;
+    removed?: boolean;
     ecs_mapping?: Record<string, unknown>;
   }>;
   version?: number;
@@ -31,6 +35,7 @@ export interface PackSavedObjectAttributes {
   updated_at: string;
   updated_by: string | undefined;
   policy_ids?: string[];
+  shards: SOShard;
 }
 
 export type PackSavedObject = SavedObject<PackSavedObjectAttributes>;
@@ -40,6 +45,8 @@ export interface SavedQuerySavedObjectAttributes {
   description: string | undefined;
   query: string;
   interval: number | string;
+  snapshot?: boolean;
+  removed?: boolean;
   platform: string;
   ecs_mapping?: Array<Record<string, unknown>>;
   created_at: string;

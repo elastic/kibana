@@ -6,14 +6,14 @@
  */
 
 import moment from 'moment';
-import { ESFilter } from '@kbn/core/types/elasticsearch';
+import type { ESFilter } from '@kbn/es-types';
 import { CursorPagination } from './types';
 import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
-import { UptimeESClient } from '../../lib';
+import { UptimeEsClient } from '../../lib';
 import { parseRelativeDate } from '../../../../../common/lib/get_histogram_interval';
 
 export class QueryContext {
-  callES: UptimeESClient;
+  callES: UptimeEsClient;
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination: CursorPagination;
@@ -24,7 +24,7 @@ export class QueryContext {
   query?: string;
 
   constructor(
-    database: UptimeESClient,
+    database: UptimeEsClient,
     dateRangeStart: string,
     dateRangeEnd: string,
     pagination: CursorPagination,
@@ -96,7 +96,7 @@ export class QueryContext {
   // which is a bit dicey since we may have data that predates this field existing,
   // or we may have data that has it, but a slow ingestion process.
   timespanClause() {
-    // We subtract 5m from the start to account for data that shows up late,
+    // We subtract 20m from the start to account for data that shows up late,
     // for instance, with a large value for the elasticsearch refresh interval
     // setting it lower can work very well on someone's laptop, but with real world
     // latencies and slowdowns that's dangerous. Making this value larger makes things
@@ -107,7 +107,7 @@ export class QueryContext {
       return {
         range: {
           'monitor.timespan': {
-            gte: 'now-5m',
+            gte: 'now-20m',
             lte: 'now',
           },
         },
@@ -115,7 +115,7 @@ export class QueryContext {
     }
 
     const tsEnd = parseRelativeDate(this.dateRangeEnd, { roundUp: true })!;
-    const tsStart = moment(tsEnd).subtract(5, 'minutes');
+    const tsStart = moment(tsEnd).subtract(20, 'minutes');
 
     return {
       range: {

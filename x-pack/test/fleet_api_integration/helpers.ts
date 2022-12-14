@@ -69,6 +69,7 @@ export async function generateAgent(
 
   await es.index({
     index: '.fleet-agents',
+    id,
     body: {
       id,
       active: true,
@@ -79,11 +80,28 @@ export async function generateAgent(
         elastic: {
           agent: {
             version,
+            upgradeable: true,
           },
         },
       },
       ...data,
     },
     refresh: 'wait_for',
+  });
+}
+
+export function setPrereleaseSetting(supertest: any) {
+  before(async () => {
+    await supertest
+      .put('/api/fleet/settings')
+      .set('kbn-xsrf', 'xxxx')
+      .send({ prerelease_integrations_enabled: true });
+  });
+
+  after(async () => {
+    await supertest
+      .put('/api/fleet/settings')
+      .set('kbn-xsrf', 'xxxx')
+      .send({ prerelease_integrations_enabled: false });
   });
 }

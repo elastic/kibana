@@ -7,6 +7,4 @@
  */
 
 export { Project } from './project';
-export { getTsProjectForAbsolutePath } from './get_ts_project_for_absolute_path';
 export { runTypeCheckCli } from './run_type_check_cli';
-export * from './build_ts_refs_cli';

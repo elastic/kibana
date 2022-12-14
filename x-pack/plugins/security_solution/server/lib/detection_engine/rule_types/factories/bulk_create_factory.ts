@@ -21,6 +21,7 @@ import type {
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
   bulkCreateDuration: string;
+  enrichmentDuration: string;
   createdItemsCount: number;
   createdItems: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: string[];
@@ -35,12 +36,17 @@ export const bulkCreateFactory =
   ) =>
   async <T extends BaseFieldsLatest>(
     wrappedDocs: Array<WrappedFieldsLatest<T>>,
-    maxAlerts?: number
+    maxAlerts?: number,
+    enrichAlerts?: (
+      alerts: Array<Pick<WrappedFieldsLatest<T>, '_id' | '_source'>>,
+      params: { spaceId: string }
+    ) => Promise<Array<Pick<WrappedFieldsLatest<T>, '_id' | '_source'>>>
   ): Promise<GenericBulkCreateResponse<T>> => {
     if (wrappedDocs.length === 0) {
       return {
         errors: [],
         success: true,
+        enrichmentDuration: '0',
         bulkCreateDuration: '0',
         createdItemsCount: 0,
         createdItems: [],
@@ -50,6 +56,24 @@ export const bulkCreateFactory =
 
     const start = performance.now();
 
+    let enrichmentsTimeStart = 0;
+    let enrichmentsTimeFinish = 0;
+    let enrichAlertsWrapper: typeof enrichAlerts;
+    if (enrichAlerts) {
+      enrichAlertsWrapper = async (alerts, params) => {
+        enrichmentsTimeStart = performance.now();
+        try {
+          const enrichedAlerts = await enrichAlerts(alerts, params);
+          return enrichedAlerts;
+        } catch (error) {
+          ruleExecutionLogger.error(`Enrichments failed ${error}`);
+          throw error;
+        } finally {
+          enrichmentsTimeFinish = performance.now();
+        }
+      };
+    }
+
     const { createdAlerts, errors, alertsWereTruncated } = await alertWithPersistence(
       wrappedDocs.map((doc) => ({
         _id: doc._id,
@@ -57,7 +81,8 @@ export const bulkCreateFactory =
         _source: doc._source,
       })),
       refreshForBulkCreate,
-      maxAlerts
+      maxAlerts,
+      enrichAlertsWrapper
     );
 
     const end = performance.now();
@@ -73,6 +98,7 @@ export const bulkCreateFactory =
       return {
         errors: Object.keys(errors),
         success: false,
+        enrichmentDuration: makeFloatString(enrichmentsTimeFinish - enrichmentsTimeStart),
         bulkCreateDuration: makeFloatString(end - start),
         createdItemsCount: createdAlerts.length,
         createdItems: createdAlerts,
@@ -83,6 +109,7 @@ export const bulkCreateFactory =
         errors: [],
         success: true,
         bulkCreateDuration: makeFloatString(end - start),
+        enrichmentDuration: makeFloatString(enrichmentsTimeFinish - enrichmentsTimeStart),
         createdItemsCount: createdAlerts.length,
         createdItems: createdAlerts,
         alertsWereTruncated,

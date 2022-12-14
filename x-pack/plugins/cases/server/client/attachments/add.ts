@@ -16,11 +16,12 @@ import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
 } from '../../../common/utils/attachments';
-import { CaseResponse, CommentRequest, CommentRequestRt, throwErrors } from '../../../common/api';
+import type { CaseResponse, CommentRequest } from '../../../common/api';
+import { CommentRequestRt, throwErrors } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';

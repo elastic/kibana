@@ -16,6 +16,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { AuthenticationProvider } from '../../common';
 import type { ConfigType } from '../config';
 import type { SessionCookie } from './session_cookie';
+import { SessionExpiredError, SessionMissingError, SessionUnexpectedError } from './session_errors';
 import type { SessionIndex, SessionIndexValue } from './session_index';
 
 /**
@@ -49,6 +50,12 @@ export interface SessionValue {
    * time can be extended indefinitely.
    */
   lifespanExpiration: number | null;
+
+  /**
+   * The Unix time in ms which is the time when the session was initially created. The value can also be 0 indicating
+   * the migrated session that was created before `createdAt` field was introduced.
+   */
+  createdAt: number;
 
   /**
    * Session value that is fed to the authentication provider. The shape is unknown upfront and
@@ -150,7 +157,7 @@ export class Session {
   async get(request: KibanaRequest) {
     const sessionCookieValue = await this.options.sessionCookie.get(request);
     if (!sessionCookieValue) {
-      return null;
+      return { error: new SessionMissingError(), value: null };
     }
 
     const sessionLogger = this.getLoggerForSID(sessionCookieValue.sid);
@@ -162,7 +169,7 @@ export class Session {
     ) {
       sessionLogger.debug('Session has expired and will be invalidated.');
       await this.invalidate(request, { match: 'current' });
-      return null;
+      return { error: new SessionExpiredError(), value: null };
     }
 
     const sessionIndexValue = await this.options.sessionIndex.get(sessionCookieValue.sid);
@@ -171,7 +178,7 @@ export class Session {
         'Session value is not available in the index, session cookie will be invalidated.'
       );
       await this.options.sessionCookie.clear(request);
-      return null;
+      return { error: new SessionUnexpectedError(), value: null };
     }
 
     let decryptedContent: SessionValueContentToEncrypt;
@@ -184,13 +191,16 @@ export class Session {
         `Unable to decrypt session content, session will be invalidated: ${err.message}`
       );
       await this.invalidate(request, { match: 'current' });
-      return null;
+      return { error: new SessionUnexpectedError(), value: null };
     }
 
     return {
-      ...Session.sessionIndexValueToSessionValue(sessionIndexValue, decryptedContent),
-      // Unlike session index, session cookie contains the most up-to-date idle timeout expiration.
-      idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
+      error: null,
+      value: {
+        ...Session.sessionIndexValueToSessionValue(sessionIndexValue, decryptedContent),
+        // Unlike session index, session cookie contains the most up-to-date idle timeout expiration.
+        idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
+      },
     };
   }
 
@@ -202,7 +212,10 @@ export class Session {
   async create(
     request: KibanaRequest,
     sessionValue: Readonly<
-      Omit<SessionValue, 'sid' | 'idleTimeoutExpiration' | 'lifespanExpiration' | 'metadata'>
+      Omit<
+        SessionValue,
+        'sid' | 'idleTimeoutExpiration' | 'lifespanExpiration' | 'createdAt' | 'metadata'
+      >
     >
   ) {
     const [sid, aad] = await Promise.all([
@@ -222,6 +235,7 @@ export class Session {
       ...publicSessionValue,
       ...sessionExpirationInfo,
       sid,
+      createdAt: Date.now(),
       usernameHash: username && Session.getUsernameHash(username),
       content: await this.crypto.encrypt(JSON.stringify({ username, userProfileId, state }), aad),
     });
@@ -238,7 +252,7 @@ export class Session {
   }
 
   /**
-   * Creates or updates session value for the specified request.
+   * Updates session value for the specified request.
    * @param request Request instance to set session value for.
    * @param sessionValue Session value parameters.
    */
@@ -254,7 +268,10 @@ export class Session {
       sessionValue.provider,
       sessionCookieValue.lifespanExpiration
     );
-    const { username, userProfileId, state, metadata, ...publicSessionInfo } = sessionValue;
+    // We filter out the `createdAt` field and rely on the one stored in `metadata.index` since it isn't
+    // supposed to be updated after it was initially set during creation.
+    const { username, userProfileId, state, metadata, createdAt, ...publicSessionInfo } =
+      sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
@@ -479,6 +496,8 @@ export class Session {
       username,
       userProfileId,
       state,
+      // If the session was created before `createdAt` field was introduced, we set it to 0.
+      createdAt: publicSessionValue.createdAt ?? 0,
       metadata: { index: sessionIndexValue },
     };
   }

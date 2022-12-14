@@ -7,11 +7,19 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import { LabsFlyout } from './labs_flyout';
 
 export function Labs() {
   const [isOpen, setIsOpen] = useState(false);
+  const trackApmEvent = useUiTracker({ app: 'apm' });
+
+  useEffect(() => {
+    if (isOpen) {
+      trackApmEvent({ metric: 'labs_open' });
+    }
+  }, [isOpen, trackApmEvent]);
 
   function toggleFlyoutVisibility() {
     setIsOpen((state) => !state);

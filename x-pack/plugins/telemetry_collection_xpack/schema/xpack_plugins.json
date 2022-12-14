@@ -265,6 +265,23 @@
               "type": "long"
             }
           }
+        },
+        "count_connector_types_by_action_run_outcome_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "success": {
+                  "type": "long"
+                },
+                "failure": {
+                  "type": "long"
+                },
+                "unknown": {
+                  "type": "long"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -1690,6 +1707,19 @@
                   "type": "long"
                 }
               }
+            }
+          }
+        },
+        "count_rules_by_execution_status_per_day": {
+          "properties": {
+            "success": {
+              "type": "long"
+            },
+            "failure": {
+              "type": "long"
+            },
+            "unknown": {
+              "type": "long"
             }
           }
         },
@@ -4041,6 +4071,72 @@
         },
         "indices": {
           "properties": {
+            "metric": {
+              "properties": {
+                "shards": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "all": {
+                  "properties": {
+                    "total": {
+                      "properties": {
+                        "docs": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "store": {
+                          "properties": {
+                            "size_in_bytes": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "traces": {
+              "properties": {
+                "shards": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "all": {
+                  "properties": {
+                    "total": {
+                      "properties": {
+                        "docs": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "store": {
+                          "properties": {
+                            "size_in_bytes": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
             "shards": {
               "properties": {
                 "total": {
@@ -4079,6 +4175,9 @@
               "items": {
                 "type": "keyword"
               }
+            },
+            "total": {
+              "type": "long"
             }
           }
         },
@@ -4088,6 +4187,12 @@
             "properties": {
               "service_id": {
                 "type": "keyword"
+              },
+              "num_service_nodes": {
+                "type": "long"
+              },
+              "num_transaction_types": {
+                "type": "long"
               },
               "timed_out": {
                 "type": "boolean"
@@ -4626,6 +4731,19 @@
                 "daily": {
                   "type": "long"
                 },
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "status": {
                   "properties": {
                     "open": {
@@ -4688,6 +4806,19 @@
                 },
                 "daily": {
                   "type": "long"
+                },
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -4704,6 +4835,19 @@
                 },
                 "daily": {
                   "type": "long"
+                },
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -4720,6 +4864,19 @@
                 },
                 "daily": {
                   "type": "long"
+                },
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -4885,6 +5042,96 @@
       "properties": {
         "isCloudEnabled": {
           "type": "boolean"
+        },
+        "trialEndDate": {
+          "type": "date"
+        },
+        "inTrial": {
+          "type": "boolean"
+        },
+        "isElasticStaffOwned": {
+          "type": "boolean"
+        }
+      }
+    },
+    "cloudExperiments": {
+      "properties": {
+        "initialized": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether the A/B testing client is correctly initialized (identify has been called)"
+          }
+        },
+        "flags": {
+          "type": "pass_through",
+          "_meta": {
+            "description": "Flags received by the client"
+          }
+        },
+        "flagNames": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Names of the flags received by the client"
+            }
+          }
+        }
+      }
+    },
+    "cloud_security_posture": {
+      "properties": {
+        "indices": {
+          "properties": {
+            "findings": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "latest_findings": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "score": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -4932,83 +5179,6 @@
           "properties": {
             "index_creation_count": {
               "type": "long"
-            }
-          }
-        }
-      }
-    },
-    "files": {
-      "properties": {
-        "countByExtension": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "extension": {
-                "type": "keyword"
-              },
-              "count": {
-                "type": "long"
-              }
-            }
-          }
-        },
-        "countByStatus": {
-          "properties": {
-            "AWAITING_UPLOAD": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files awaiting upload"
-              }
-            },
-            "DELETED": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are marked as deleted"
-              }
-            },
-            "READY": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are ready for download"
-              }
-            },
-            "UPLOADING": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that are currently uploading"
-              }
-            },
-            "UPLOAD_ERROR": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of files that failed to upload"
-              }
-            }
-          }
-        },
-        "storage": {
-          "properties": {
-            "esFixedSizeIndex": {
-              "properties": {
-                "capacity": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Capacity of the fixed size index"
-                  }
-                },
-                "available": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Available storage in bytes"
-                  }
-                },
-                "used": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Used storage in bytes"
-                  }
-                }
-              }
             }
           }
         }
@@ -5512,6 +5682,34 @@
                   "type": "long",
                   "_meta": {
                     "description": "total number of kbn tms layers in cluster"
+                  }
+                }
+              }
+            },
+            "layer_group": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of layer groups per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of layer groups per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of layer groups per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of layer groups in cluster"
                   }
                 }
               }
@@ -9176,6 +9374,36 @@
                   "type": "integer"
                 }
               }
+            },
+            "osquery-pack": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "osquery-pack-asset": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "osquery-saved-query": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
             }
           }
         }
@@ -9862,6 +10090,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -9973,6 +10223,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -10126,6 +10398,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -10237,6 +10531,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -10390,6 +10706,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -10501,6 +10839,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -10680,6 +11040,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -10791,6 +11173,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -10944,6 +11348,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -11055,6 +11481,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -11208,6 +11656,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -11319,6 +11789,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -11498,6 +11990,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -11609,6 +12123,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -11762,6 +12298,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -11873,6 +12431,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -12026,6 +12606,28 @@
                                 }
                               }
                             },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
                             "gap_duration": {
                               "properties": {
                                 "max": {
@@ -12137,6 +12739,28 @@
                               }
                             },
                             "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
                               "properties": {
                                 "max": {
                                   "type": "float",
@@ -12455,6 +13079,16 @@
                     }
                   }
                 }
+              }
+            }
+          }
+        },
+        "endpointMetrics": {
+          "properties": {
+            "unique_endpoint_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of active unique endpoints in last 24 hours"
               }
             }
           }
@@ -12779,6 +13413,29 @@
           }
         },
         "failed_tasks": {
+          "type": "long"
+        },
+        "recurring_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "adhoc_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "capacity": {
           "type": "long"
         }
       }

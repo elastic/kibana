@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+export const SESSION_VIEW_APP_ID = 'sessionView';
+
 // routes
 export const PROCESS_EVENTS_ROUTE = '/internal/session_view/process_events';
 export const ALERTS_ROUTE = '/internal/session_view/alerts';
 export const ALERT_STATUS_ROUTE = '/internal/session_view/alert_status';
 export const IO_EVENTS_ROUTE = '/internal/session_view/io_events';
 export const GET_TOTAL_IO_BYTES_ROUTE = '/internal/session_view/get_total_io_bytes';
+
+export const SECURITY_APP_ID = 'security';
+export const POLICIES_PAGE_PATH = '/administration/policy';
 
 // index patterns
 export const PROCESS_EVENTS_INDEX = '*:logs-endpoint.events.process*,logs-endpoint.events.process*'; // match on both cross cluster and local indices
@@ -48,20 +53,24 @@ export const ALERT_STATUS = {
 export const LOCAL_STORAGE_DISPLAY_OPTIONS_KEY = 'sessionView:displayOptions';
 export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
 export const DEBOUNCE_TIMEOUT = 500;
-export const DEFAULT_TTY_PLAYSPEED_MS = 50; // milliseconds per render loop
-export const TTY_LINES_PER_FRAME = 5; // number of lines to print to xterm on each render loop
+export const DEFAULT_TTY_PLAYSPEED_MS = 30; // milliseconds per render loop
 export const TTY_LINES_PRE_SEEK = 200; // number of lines to redraw before the point we are seeking to.
 export const DEFAULT_TTY_FONT_SIZE = 11;
 export const DEFAULT_TTY_ROWS = 66;
 export const DEFAULT_TTY_COLS = 280;
 
-// we split terminal output on both newlines and cursor movements.
-export const TTY_LINE_SPLITTER_REGEX = /(\r?\n|\x1b\[\d+;\d+[Hf])/gi;
-
-// used when searching output
-export const TTY_STRIP_CONTROL_CODES_REGEX =
-  /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/gi;
+// we split terminal output on both newlines, carriage returns and cursor movements.
+// this helps search navigate through results without having a single line rewrite itself before we highlight the match.
+// it also creates a more interesting play by play
+export const TTY_LINE_SPLITTER_REGEX = /(\r?\n|\r\n?|\x1b\[\d+;\d*[Hf]?)/gi;
 
 // when showing the count of alerts in details panel tab, if the number
 // exceeds ALERT_COUNT_THRESHOLD we put a + next to it, e.g  999+
 export const ALERT_COUNT_THRESHOLD = 999;
+export const ALERT_ICONS: { [key: string]: string } = {
+  process: 'gear',
+  file: 'document',
+  network: 'globe',
+};
+export const DEFAULT_ALERT_FILTER_VALUE = 'all';
+export const ALERT = 'alert';

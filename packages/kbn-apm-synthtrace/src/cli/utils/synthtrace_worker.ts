@@ -16,7 +16,7 @@ import { StreamProcessor } from '../../lib/stream_processor';
 import { Scenario } from '../scenario';
 import { EntityIterable, Fields } from '../../..';
 import { StreamAggregator } from '../../lib/stream_aggregator';
-import { ServiceLatencyAggregator } from '../../lib/apm/aggregators/service_latency_aggregator';
+import { ServicMetricsAggregator } from '../../lib/apm/aggregators/service_metrics_aggregator';
 
 // logging proxy to main thread, ensures we see real time logging
 const l = {
@@ -63,7 +63,7 @@ async function setup() {
       parentPort?.postMessage({ workerIndex, lastTimestamp: item['@timestamp'] });
     }
   };
-  const aggregators: StreamAggregator[] = [new ServiceLatencyAggregator()];
+  const aggregators: StreamAggregator[] = [new ServicMetricsAggregator()];
   // If we are sending data to apm-server we do not have to create any aggregates in the stream processor
   streamProcessor = new StreamProcessor({
     version,

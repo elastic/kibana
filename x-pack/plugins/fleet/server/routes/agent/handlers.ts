@@ -25,11 +25,10 @@ import type {
   GetOneAgentResponse,
   GetAgentStatusResponse,
   PutAgentReassignResponse,
-  PostBulkAgentReassignResponse,
-  PostBulkUpdateAgentTagsResponse,
   GetAgentTagsResponse,
   GetAvailableVersionsResponse,
   GetActionStatusResponse,
+  GetAgentUploadsResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -43,6 +42,7 @@ import type {
   PostBulkAgentReassignRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
   GetActionStatusRequestSchema,
+  GetAgentUploadFileRequestSchema,
 } from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
@@ -151,15 +151,7 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
       request.body.tagsToRemove ?? []
     );
 
-    const body = results.items.reduce<PostBulkUpdateAgentTagsResponse>((acc: any, so: any) => {
-      acc[so.id] = {
-        success: !so.error,
-        error: so.error?.message,
-      };
-      return acc;
-    }, {});
-
-    return response.ok({ body: { ...body, actionId: results.actionId } });
+    return response.ok({ body: { actionId: results.actionId } });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
@@ -267,15 +259,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
       request.body.policy_id
     );
 
-    const body = results.items.reduce<PostBulkAgentReassignResponse>((acc, so) => {
-      acc[so.id] = {
-        success: !so.error,
-        error: so.error?.message,
-      };
-      return acc;
-    }, {});
-
-    return response.ok({ body: { ...body, actionId: results.actionId } });
+    return response.ok({ body: { actionId: results.actionId } });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
@@ -376,6 +360,40 @@ export const getActionStatusHandler: RequestHandler<
     const actionStatuses = await AgentService.getActionStatuses(esClient, request.query);
     const body: GetActionStatusResponse = { items: actionStatuses };
     return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getAgentUploadsHandler: RequestHandler<
+  TypeOf<typeof GetOneAgentRequestSchema.params>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  try {
+    const body: GetAgentUploadsResponse = {
+      items: await AgentService.getAgentUploads(esClient, request.params.agentId),
+    };
+
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getAgentUploadFileHandler: RequestHandler<
+  TypeOf<typeof GetAgentUploadFileRequestSchema.params>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  try {
+    const resp = await AgentService.getAgentUploadFile(
+      esClient,
+      request.params.fileId,
+      request.params.fileName
+    );
+
+    return response.ok(resp);
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

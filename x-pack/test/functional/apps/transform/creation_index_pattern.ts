@@ -16,13 +16,13 @@ import {
   PivotTransformTestData,
 } from '.';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
+  const PageObjects = getPageObjects(['discover']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/139781
-  describe.skip('creation_index_pattern', function () {
+  describe('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -699,6 +699,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('should navigate to discover');
           await transform.table.clickTransformRowAction(testData.transformId, 'Discover');
+          await PageObjects.discover.waitUntilSearchingHasFinished();
 
           if (testData.discoverAdjustSuperDatePicker) {
             await transform.discover.assertNoResults(testData.destinationIndex);

@@ -33,10 +33,10 @@ export function getAgentStatus(agent: Agent | FleetServerAgent): AgentStatus {
     return 'unenrolling';
   }
 
-  if (agent.last_checkin_status === 'error') {
+  if (agent.last_checkin_status?.toLowerCase() === 'error') {
     return 'error';
   }
-  if (agent.last_checkin_status === 'degraded') {
+  if (agent.last_checkin_status?.toLowerCase() === 'degraded') {
     return 'degraded';
   }
 
@@ -47,7 +47,7 @@ export function getAgentStatus(agent: Agent | FleetServerAgent): AgentStatus {
       ? agent.policy_revision_idx
       : undefined;
 
-  if (!policyRevision || (agent.upgrade_started_at && agent.upgrade_status !== 'completed')) {
+  if (!policyRevision || (agent.upgrade_started_at && !agent.upgraded_at)) {
     return 'updating';
   }
 
@@ -61,10 +61,10 @@ export function getPreviousAgentStatusForOfflineAgents(
     return 'unenrolling';
   }
 
-  if (agent.last_checkin_status === 'error') {
+  if (agent.last_checkin_status?.toLowerCase() === 'error') {
     return 'error';
   }
-  if (agent.last_checkin_status === 'degraded') {
+  if (agent.last_checkin_status?.toLowerCase() === 'degraded') {
     return 'degraded';
   }
 
@@ -75,7 +75,7 @@ export function getPreviousAgentStatusForOfflineAgents(
       ? agent.policy_revision_idx
       : undefined;
 
-  if (!policyRevision || (agent.upgrade_started_at && agent.upgrade_status !== 'completed')) {
+  if (!policyRevision || (agent.upgrade_started_at && !agent.upgraded_at)) {
     return 'updating';
   }
 }
@@ -96,7 +96,7 @@ export function buildKueryForOnlineAgents(path: string = ''): string {
 }
 
 export function buildKueryForErrorAgents(path: string = ''): string {
-  return `(${path}last_checkin_status:error or ${path}last_checkin_status:degraded) ${addExclusiveKueryFilter(
+  return `(${path}last_checkin_status:error or ${path}last_checkin_status:degraded or ${path}last_checkin_status:DEGRADED or ${path}last_checkin_status:ERROR) ${addExclusiveKueryFilter(
     [buildKueryForOfflineAgents, buildKueryForUnenrollingAgents],
     path
   )}`;
@@ -109,7 +109,7 @@ export function buildKueryForOfflineAgents(path: string = ''): string {
 }
 
 export function buildKueryForUpgradingAgents(path: string = ''): string {
-  return `(${path}upgrade_started_at:*) and not (${path}upgrade_status:completed)`;
+  return `(${path}upgrade_started_at:*) and not (${path}upgraded_at:*)`;
 }
 
 export function buildKueryForUpdatingAgents(path: string = ''): string {
