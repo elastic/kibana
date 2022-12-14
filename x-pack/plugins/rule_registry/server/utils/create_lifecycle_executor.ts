@@ -47,6 +47,7 @@ import { fetchExistingAlerts } from './fetch_existing_alerts';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { getUpdatedFlappingHistory } from './get_updated_flapping_history';
 import { fetchAlertByAlertUUID } from './fetch_alert_by_uuid';
+import { trimRecoveredAlerts } from './trim_recovered_alerts';
 
 type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
 
@@ -320,9 +321,13 @@ export const createLifecycleExecutor =
         };
       });
 
-    const trackedEventsToIndex = makeEventsDataMapFor(trackedAlertIds);
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
-    const trackedRecoveredEventsToIndex = makeEventsDataMapFor(trackedAlertRecoveredIds);
+    const { trackedEventsToIndex, trackedRecoveredEventsToIndex } = trimRecoveredAlerts(
+      logger,
+      makeEventsDataMapFor(trackedAlertRecoveredIds),
+      makeEventsDataMapFor(trackedAlertIds),
+      alertFactory.alertLimit.getValue()
+    );
     const allEventsToIndex = [...trackedEventsToIndex, ...newEventsToIndex];
 
     // Only write alerts if:

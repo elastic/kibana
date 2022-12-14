@@ -10,12 +10,12 @@ import { Alert } from '../alert';
 import { trimRecoveredAlerts } from './trim_recovered_alerts';
 
 describe('trimRecoveredAlerts', () => {
-  const logger = loggingSystemMock.createLogger();
   const alert1 = new Alert('1', { meta: { flappingHistory: [true, true, true, true] } });
   const alert2 = new Alert('2', { meta: { flappingHistory: new Array(20).fill(false) } });
   const alert3 = new Alert('3', { meta: { flappingHistory: [true, true] } });
 
   test('should remove longest recovered alerts', () => {
+    const logger = loggingSystemMock.createLogger();
     const recoveredAlerts = {
       '1': alert1,
       '2': alert2,
@@ -39,6 +39,7 @@ describe('trimRecoveredAlerts', () => {
   });
 
   test('should not remove alerts if the num of recovered alerts is not at the limit', () => {
+    const logger = loggingSystemMock.createLogger();
     const recoveredAlerts = {
       '1': alert1,
       '2': alert2,
@@ -54,5 +55,6 @@ describe('trimRecoveredAlerts', () => {
       trimmedAlertsRecovered: recoveredAlerts,
       trimmedAlertsRecoveredCurrent: recoveredAlertsCurrent,
     });
+    expect(logger.warn).not.toBeCalled();
   });
 });

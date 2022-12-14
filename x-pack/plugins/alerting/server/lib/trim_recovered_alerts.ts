@@ -29,7 +29,7 @@ export function trimRecoveredAlerts<
   currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {},
   alertLimit: number
 ): TrimmedRecoveredAlertsResult<State, Context, RecoveryActionGroupIds> {
-  if (Object.keys(recoveredAlerts).length >= alertLimit) {
+  if (Object.keys(recoveredAlerts).length > alertLimit) {
     const entries = Object.entries(recoveredAlerts);
     entries.sort((a, b) => {
       const flappingHistoryA = a[1].getFlappingHistory() || [];
@@ -51,6 +51,7 @@ export function trimRecoveredAlerts<
       trimmedAlertsRecoveredCurrent: pick(currentRecoveredAlerts, Object.keys(trimmedAlerts)),
     };
   }
+
   return {
     trimmedAlertsRecovered: recoveredAlerts,
     trimmedAlertsRecoveredCurrent: currentRecoveredAlerts,
