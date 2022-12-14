@@ -71,7 +71,6 @@ export function DiscoverLayout({
   persistDataView,
   updateAdHocDataViewId,
   searchSessionManager,
-  savedDataViewList,
   updateDataViewList,
 }: DiscoverLayoutProps) {
   const {
@@ -183,9 +182,11 @@ export function DiscoverLayout({
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const onDataViewCreated = useCallback(
-    (nextDataView: DataView) => {
+    async (nextDataView: DataView) => {
       if (!nextDataView.isPersisted()) {
         stateContainer.actions.appendAdHocDataViews(nextDataView);
+      } else {
+        await stateContainer.actions.loadDataViewList();
       }
       if (nextDataView.id) {
         onChangeDataView(nextDataView.id);
@@ -308,12 +309,12 @@ export function DiscoverLayout({
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
         onChangeDataView={onChangeDataView}
+        onDataViewCreated={onDataViewCreated}
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         onFieldEdited={onFieldEdited}
         persistDataView={persistDataView}
         updateAdHocDataViewId={updateAdHocDataViewId}
-        savedDataViewList={savedDataViewList}
         updateDataViewList={updateDataViewList}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">

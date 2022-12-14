@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
-import { type DataViewListItem, DataViewType, type DataView } from '@kbn/data-views-plugin/public';
+import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { ENABLE_SQL } from '../../../../../common';
@@ -33,12 +33,12 @@ export type DiscoverTopNavProps = Pick<
   stateContainer: DiscoverStateContainer;
   resetSavedSearch: () => void;
   onChangeDataView: (dataView: string) => void;
+  onDataViewCreated: (dataView: DataView) => void;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => Promise<void>;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
-  savedDataViewList: DataViewListItem[];
   updateDataViewList: (newAdHocDataViews: DataView[]) => void;
 };
 
@@ -53,18 +53,18 @@ export const DiscoverTopNav = ({
   savedSearch,
   resetSavedSearch,
   onChangeDataView,
+  onDataViewCreated,
   isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
   persistDataView,
   updateAdHocDataViewId,
-  savedDataViewList,
   updateDataViewList,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
   const adHocDataViewList = useInternalStateSelector((state) => state.dataViewAdHocList);
   const dataView = useInternalStateSelector((state) => state.dataView!);
-
+  const savedDataViewList = useInternalStateSelector((state) => state.dataViewList);
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
     [dataView]
@@ -131,17 +131,10 @@ export const DiscoverTopNav = ({
 
   const createNewDataView = useCallback(() => {
     closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (dataViewToSave) => {
-        if (!dataViewToSave.isPersisted()) {
-          stateContainer.actions.appendAdHocDataViews(dataViewToSave);
-        }
-        if (dataViewToSave.id) {
-          onChangeDataView(dataViewToSave.id);
-        }
-      },
+      onSave: onDataViewCreated,
       allowAdHocDataView: true,
     });
-  }, [dataViewEditor, onChangeDataView, stateContainer.actions]);
+  }, [dataViewEditor, onDataViewCreated]);
 
   const onCreateDefaultAdHocDataView = useCallback(
     async (pattern: string) => {

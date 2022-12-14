@@ -11,15 +11,17 @@ import {
   createStateContainerReactHelpers,
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 
 export interface InternalState {
   dataView: DataView | undefined;
+  dataViewList: DataViewListItem[];
   dataViewAdHocList: DataView[];
 }
 
 interface InternalStateTransitions {
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
+  setDataViewList: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
   setAdHocDataViews: (state: InternalState) => (dataViews: DataView[]) => InternalState;
   appendAdHocDataViews: (
     state: InternalState
@@ -43,11 +45,16 @@ export function getInternalStateContainer() {
     {
       dataView: undefined,
       dataViewAdHocList: [],
+      dataViewList: [],
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
         ...prevState,
         dataView: nextDataView,
+      }),
+      setDataViewList: (prevState: InternalState) => (nextDataViewList: DataViewListItem[]) => ({
+        ...prevState,
+        dataViewList: nextDataViewList,
       }),
       setAdHocDataViews: (prevState: InternalState) => (newAdHocDataViewList: DataView[]) => ({
         ...prevState,
