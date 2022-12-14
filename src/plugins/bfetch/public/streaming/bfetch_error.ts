@@ -15,7 +15,7 @@ export class BfetchRequestError extends Error {
    * constructor
    * @param message - Error message
    */
-  constructor(message: string) {
+  constructor(message?: string) {
     super(message);
     this.name = 'BfetchRequestError';
   }
