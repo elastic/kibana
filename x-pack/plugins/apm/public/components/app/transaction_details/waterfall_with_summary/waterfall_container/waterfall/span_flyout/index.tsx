@@ -13,6 +13,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiLoadingContent,
   EuiPortal,
   EuiSpacer,
   EuiTabbedContent,
@@ -26,6 +27,7 @@ import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
 import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
@@ -85,26 +87,114 @@ const ContainerWithMarginRight = euiStyled.div`
 `;
 
 interface Props {
-  span?: Span;
-  parentTransaction?: Transaction;
+  spanId: string;
+  parentTransactionId?: string;
+  traceId: string;
   totalDuration?: number;
-  onClose: () => void;
   spanLinksCount: SpanLinksCount;
   flyoutDetailTab?: string;
+  onClose: () => void;
 }
 
+const INITIAL_DATA = {
+  span: undefined,
+  parentTransaction: undefined,
+};
+
 export function SpanFlyout({
-  span,
-  parentTransaction,
+  spanId,
+  parentTransactionId,
+  traceId,
   totalDuration,
   onClose,
   spanLinksCount,
   flyoutDetailTab,
 }: Props) {
-  if (!span) {
-    return null;
-  }
+  const { data = INITIAL_DATA, status } = useFetcher(
+    (callApmApi) => {
+      return callApmApi('GET /internal/apm/traces/{traceId}/spans/{spanId}', {
+        params: { path: { traceId, spanId }, query: { parentTransactionId } },
+      });
+    },
+    [traceId, spanId, parentTransactionId]
+  );
 
+  const { span, parentTransaction } = data;
+
+  const isLoading = isPending(status);
+
+  return (
+    <EuiPortal>
+      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiTitle>
+                <h2>
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
+                    { defaultMessage: 'Span details' }
+                  )}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            {span && (
+              <EuiFlexItem grow={false}>
+                <DiscoverSpanLink spanId={span.span.id}>
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
+                    { defaultMessage: 'View span in Discover' }
+                  )}
+                </DiscoverSpanLink>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          {span?.span.composite && (
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiCallOut color="warning" iconType="gear" size="s">
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning',
+                    {
+                      defaultMessage:
+                        'This is a sample document for a group of consecutive, similar spans',
+                    }
+                  )}
+                </EuiCallOut>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          {isLoading && <EuiLoadingContent />}
+          {span && (
+            <SpanFlyoutBody
+              span={span}
+              parentTransaction={parentTransaction}
+              totalDuration={totalDuration}
+              spanLinksCount={spanLinksCount}
+              flyoutDetailTab={flyoutDetailTab}
+            />
+          )}
+        </EuiFlyoutBody>
+      </ResponsiveFlyout>
+    </EuiPortal>
+  );
+}
+
+function SpanFlyoutBody({
+  span,
+  parentTransaction,
+  totalDuration,
+  spanLinksCount,
+  flyoutDetailTab,
+}: {
+  span: Span;
+  parentTransaction?: Transaction;
+  totalDuration?: number;
+  spanLinksCount: SpanLinksCount;
+  flyoutDetailTab?: string;
+}) {
   const stackframes = span.span.stacktrace;
   const codeLanguage = parentTransaction?.service.language?.name;
   const spanDb = span.span.db;
@@ -130,7 +220,7 @@ export function SpanFlyout({
       content: (
         <Fragment>
           <EuiSpacer size="m" />
-          <SpanMetadata span={span} />
+          <SpanMetadata spanId={span.span.id} />
         </Fragment>
       ),
     },
@@ -160,118 +250,72 @@ export function SpanFlyout({
   ];
 
   const initialTab = tabs.find(({ id }) => id === flyoutDetailTab) ?? tabs[0];
-
   return (
-    <EuiPortal>
-      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiTitle>
-                <h2>
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
-                    {
-                      defaultMessage: 'Span details',
-                    }
-                  )}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <DiscoverSpanLink span={span}>
-                {i18n.translate(
-                  'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                  {
-                    defaultMessage: 'View span in Discover',
-                  }
+    <>
+      <StickySpanProperties span={span} transaction={parentTransaction} />
+      <EuiSpacer size="m" />
+      <Summary
+        items={[
+          <TimestampTooltip time={span.timestamp.us / 1000} />,
+          <>
+            <DurationSummaryItem
+              duration={span.span.duration.us}
+              totalDuration={totalDuration}
+              parentType="transaction"
+            />
+            {span.span.composite && (
+              <CompositeSpanDurationSummaryItem
+                count={span.span.composite.count}
+                durationSum={span.span.composite.sum.us}
+              />
+            )}
+          </>,
+          <ContainerWithMarginRight>
+            {spanHttpUrl && (
+              <HttpInfoSummaryItem
+                method={spanHttpMethod}
+                url={spanHttpUrl}
+                status={spanHttpStatusCode}
+              />
+            )}
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.apm.transactionDetails.spanFlyout.spanType',
+                { defaultMessage: 'Type' }
+              )}
+            >
+              <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
+            </EuiToolTip>
+            {spanTypes.spanSubtype && (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.transactionDetails.spanFlyout.spanSubtype',
+                  { defaultMessage: 'Subtype' }
                 )}
-              </DiscoverSpanLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {span.span.composite && (
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiCallOut color="warning" iconType="gear" size="s">
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning',
-                    {
-                      defaultMessage:
-                        'This is a sample document for a group of consecutive, similar spans',
-                    }
-                  )}
-                </EuiCallOut>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <StickySpanProperties span={span} transaction={parentTransaction} />
-          <EuiSpacer size="m" />
-          <Summary
-            items={[
-              <TimestampTooltip time={span.timestamp.us / 1000} />,
-              <>
-                <DurationSummaryItem
-                  duration={span.span.duration.us}
-                  totalDuration={totalDuration}
-                  parentType="transaction"
-                />
-                {span.span.composite && (
-                  <CompositeSpanDurationSummaryItem
-                    count={span.span.composite.count}
-                    durationSum={span.span.composite.sum.us}
-                  />
+              >
+                <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
+              </EuiToolTip>
+            )}
+            {spanTypes.spanAction && (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.transactionDetails.spanFlyout.spanAction',
+                  { defaultMessage: 'Action' }
                 )}
-              </>,
-              <ContainerWithMarginRight>
-                {spanHttpUrl && (
-                  <HttpInfoSummaryItem
-                    method={spanHttpMethod}
-                    url={spanHttpUrl}
-                    status={spanHttpStatusCode}
-                  />
-                )}
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.spanType',
-                    { defaultMessage: 'Type' }
-                  )}
-                >
-                  <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
-                </EuiToolTip>
-                {spanTypes.spanSubtype && (
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.apm.transactionDetails.spanFlyout.spanSubtype',
-                      { defaultMessage: 'Subtype' }
-                    )}
-                  >
-                    <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
-                  </EuiToolTip>
-                )}
-                {spanTypes.spanAction && (
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.apm.transactionDetails.spanFlyout.spanAction',
-                      { defaultMessage: 'Action' }
-                    )}
-                  >
-                    <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
-                  </EuiToolTip>
-                )}
+              >
+                <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
+              </EuiToolTip>
+            )}
 
-                <FailureBadge outcome={span.event?.outcome} />
+            <FailureBadge outcome={span.event?.outcome} />
 
-                <SyncBadge sync={span.span.sync} agentName={span.agent.name} />
-              </ContainerWithMarginRight>,
-            ]}
-          />
-          <EuiHorizontalRule />
-          <SpanDatabase spanDb={spanDb} />
-          <EuiTabbedContent initialSelectedTab={initialTab} tabs={tabs} />
-        </EuiFlyoutBody>
-      </ResponsiveFlyout>
-    </EuiPortal>
+            <SyncBadge sync={span.span.sync} agentName={span.agent.name} />
+          </ContainerWithMarginRight>,
+        ]}
+      />
+      <EuiHorizontalRule />
+      <SpanDatabase spanDb={spanDb} />
+      <EuiTabbedContent tabs={tabs} initialSelectedTab={initialTab} />
+    </>
   );
 }
