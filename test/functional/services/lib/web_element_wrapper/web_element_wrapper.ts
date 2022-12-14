@@ -700,9 +700,6 @@ export class WebElementWrapper {
         this.timeout,
         `The element with ${selector} selector was still present after ${this.timeout} sec.`
       );
-      this.logger.debug(
-        `The element with ${selector} selector was still present after ${this.timeout} sec.`
-      );
     } finally {
       await this.driver.manage().setTimeouts({ implicit: this.timeout });
     }

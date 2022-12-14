@@ -28,12 +28,20 @@ export class HomePageObject extends FtrService {
   }
 
   async openSampleDataAccordion() {
-    const accordion = await this.testSubjects.find('showSampleDataAccordion');
-    const className = await accordion.getAttribute('class');
+    let accordionButton = await this.testSubjects.find('showSampleDataButton');
+    let expandedAttribute = await accordionButton.getAttribute('aria-expanded');
+    let expanded = expandedAttribute.toLocaleLowerCase().includes('true')
+    this.log.debug(`Sample data accordion expanded: ${expanded}`);
 
-    if (!className.includes('euiAccordion-isOpen')) {
-      this.log.debug(`Opening Sample Data Accordion`);
-      await this.testSubjects.click('showSampleDataButton');
+    if (!expanded) {
+      await this.retry.waitFor('sample data according to be expanded', async () => {
+        this.log.debug(`Opening sample data accordion`);
+        await accordionButton.click();
+        expandedAttribute = await accordionButton.getAttribute('aria-expanded');
+        expanded = expandedAttribute.toLocaleLowerCase().includes('true');
+        return expanded;
+      });
+      this.log.debug(`Sample data accordion expanded: ${expanded}`);
     }
   }
 
@@ -71,7 +79,12 @@ export class HomePageObject extends FtrService {
     if (!isInstalled) {
       this.log.debug(`Attempting to add sample data: ${id}`);
       await this.retry.waitFor('sample data to be installed', async () => {
-        await this.testSubjects.click(`addSampleDataSet${id}`, 1);
+        // Echoing the adjustments made to 'removeSampleDataSet', as we are seeing flaky test cases here as well
+        // https://github.com/elastic/kibana/issues/52714
+        await this.testSubjects.waitForEnabled(`addSampleDataSet${id}`);
+        await this.common.sleep(1010);
+        await this.testSubjects.click(`addSampleDataSet${id}`);
+        await this.common.sleep(1010);
         await this._waitForSampleDataLoadingAction(id);
         return await this.isSampleDataSetInstalled(id);
       });
@@ -80,15 +93,22 @@ export class HomePageObject extends FtrService {
 
   async removeSampleDataSet(id: string) {
     await this.openSampleDataAccordion();
-    // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
-    await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
-    // https://github.com/elastic/kibana/issues/65949
-    // Even after waiting for the "Remove" button to be enabled we still have failures
-    // where it appears the click just didn't work.
-    await this.common.sleep(1010);
-    await this.testSubjects.click(`removeSampleDataSet${id}`);
-    await this.common.sleep(1010);
-    await this._waitForSampleDataLoadingAction(id);
+    const isInstalled = await this.isSampleDataSetInstalled(id);
+    if (isInstalled) {
+      this.log.debug(`Attempting to remove sample data: ${id}`);
+      await this.retry.waitFor('sample data to be removed', async () => {
+        // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
+        await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
+        // https://github.com/elastic/kibana/issues/65949
+        // Even after waiting for the "Remove" button to be enabled we still have failures
+        // where it appears the click just didn't work.
+        await this.common.sleep(1010);
+        await this.testSubjects.click(`removeSampleDataSet${id}`);
+        await this.common.sleep(1010);
+        await this._waitForSampleDataLoadingAction(id);
+        return !await this.isSampleDataSetInstalled(id);
+      });
+    }
   }
 
   // loading action is either uninstall and install
