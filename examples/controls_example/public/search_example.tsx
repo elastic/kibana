@@ -41,6 +41,7 @@ interface Props {
 
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [abortController, setAbortController] = useState(null);
+  const [controlFilters, setControlFilters] = useState<Filter[]>([]);
   const [hits, setHits] = useState(0);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -58,6 +59,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
     searchSource.setField('size', 0);
     searchSource.setField('filter', [
       ...filters,
+      ...controlFilters,
       data.query.timefilter.timefilter.createFilter(dataView, timeRange),
     ]);
     searchSource.setField('query', query);
@@ -78,7 +80,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
 
   useEffect(() => {
     search();
-  }, [filters, query, timeRange]);
+  }, [controlFilters, filters, query, timeRange]);
 
   return (
     <>
@@ -128,6 +130,11 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
               ...initialInput,
               viewMode: ViewMode.VIEW,
             };
+          }}
+          onLoadComplete={async (controlGroup) => {
+            controlGroup.onFiltersPublished$.subscribe((newFilters) => {
+              setControlFilters([...newFilters]);
+            });
           }}
           query={query}
           timeRange={timeRange}
