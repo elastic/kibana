@@ -16,7 +16,7 @@ import { SecurityPageName } from '../app/types';
 import { HOSTS_PATH, NETWORK_PATH, USERS_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
-export const NetworkRoutes = () => (
+const NetworkRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.network}>
       <NetworkContainer />
@@ -24,7 +24,7 @@ export const NetworkRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-export const UsersRoutes = () => (
+const UsersRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.users}>
       <UsersContainer />
@@ -32,7 +32,7 @@ export const UsersRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-export const HostsRoutes = () => (
+const HostsRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.hosts}>
       <HostsContainer />
@@ -40,25 +40,17 @@ export const HostsRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-export const networkRoutes: SecuritySubPluginRoutes = [
+export const routes: SecuritySubPluginRoutes = [
   {
     path: NETWORK_PATH,
     component: NetworkRoutes,
   },
-];
-
-export const usersRoutes: SecuritySubPluginRoutes = [
   {
     path: USERS_PATH,
     component: UsersRoutes,
   },
-];
-
-export const hostsRoutes: SecuritySubPluginRoutes = [
   {
     path: HOSTS_PATH,
     component: HostsRoutes,
   },
 ];
-
-export const routes = [...networkRoutes, ...usersRoutes, ...hostsRoutes];
