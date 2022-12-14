@@ -127,17 +127,23 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   return { createdAlerts: [], errors: {}, alertsWereTruncated };
                 }
 
+                const createdAlerts = augmentedAlerts
+                  .map((alert, idx) => {
+                    const responseItem = response.body.items[idx].create;
+                    return {
+                      _id: responseItem?._id ?? '',
+                      _index: responseItem?._index ?? '',
+                      ...alert._source,
+                    };
+                  })
+                  .filter((_, idx) => response.body.items[idx].create?.status === 201);
+
+                createdAlerts.forEach((alert) =>
+                  options.services.alertFactory.create(alert._id).scheduleActions('default', {})
+                );
+
                 return {
-                  createdAlerts: augmentedAlerts
-                    .map((alert, idx) => {
-                      const responseItem = response.body.items[idx].create;
-                      return {
-                        _id: responseItem?._id ?? '',
-                        _index: responseItem?._index ?? '',
-                        ...alert._source,
-                      };
-                    })
-                    .filter((_, idx) => response.body.items[idx].create?.status === 201),
+                  createdAlerts,
                   errors: errorAggregator(response.body, [409]),
                   alertsWereTruncated,
                 };
