@@ -71,7 +71,7 @@ export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
   return (
     <>
       <EuiTitle>
-        <h2>Redux Example</h2>
+        <h2>Redux example</h2>
       </EuiTitle>
       <EuiText>
         <p>

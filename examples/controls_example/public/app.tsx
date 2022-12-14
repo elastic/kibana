@@ -13,29 +13,29 @@ import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ControlsExampleStartDeps } from './plugin';
 import { BasicReduxExample } from './basic_redux_example';
-
-const ControlsExamples = ({ dataViewId }: { dataViewId?: string }) => {
-  const examples = dataViewId ? (
-    <>
-      <BasicReduxExample dataViewId={dataViewId} />
-    </>
-  ) : (
-    <div>{'Please install web logs sample data to run controls examples.'}</div>
-  );
-  return (
-    <KibanaPageTemplate>
-      <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
-      <KibanaPageTemplate.Section>{examples}</KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
-  );
-};
+import { SearchExample } from './search_example';
 
 export const renderApp = async (
-  { data }: ControlsExampleStartDeps,
+  { data, navigation }: ControlsExampleStartDeps,
   { element }: AppMountParameters
 ) => {
   const dataViews = await data.dataViews.find('kibana_sample_data_logs');
-  const dataViewId = dataViews.length > 0 ? dataViews[0].id : undefined;
-  ReactDOM.render(<ControlsExamples dataViewId={dataViewId} />, element);
+  const examples = dataViews.length > 0 ? (
+    <>
+      <SearchExample navigation={navigation} dataView={dataViews[0]} />
+      <BasicReduxExample dataViewId={dataViews[0].id} />
+    </>
+  ) : (
+    <div>{'Install web logs sample data to run controls examples.'}</div>
+  );
+
+  ReactDOM.render(
+    (
+      <KibanaPageTemplate>
+        <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
+        <KibanaPageTemplate.Section>{examples}</KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
+    ),
+    element);
   return () => ReactDOM.unmountComponentAtNode(element);
 };
