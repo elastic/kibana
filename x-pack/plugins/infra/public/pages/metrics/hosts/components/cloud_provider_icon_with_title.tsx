@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import React from 'react';
+
+const cloudIcons: Record<string, string> = {
+  gcp: 'logoGCP',
+  aws: 'logoAWS',
+  azure: 'logoAzure',
+};
+
+export const CloudProviderIconWithTitle = ({
+  provider,
+  title,
+}: {
+  provider?: string | null;
+  title: string;
+}) => {
+  return (
+    <EuiFlexGroup className="eui-textTruncate" gutterSize="s" responsive={false}>
+      {provider && (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={cloudIcons[provider]} size="l" title={title} />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false} className="eui-textTruncate">
+        <EuiText className="eui-textTruncate">{title}</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

@@ -20,6 +20,9 @@ export const SnapshotNodePathRT = rt.intersection([
   rt.partial({
     os: rt.union([rt.string, rt.null]),
   }),
+  rt.partial({
+    cloudProvider: rt.union([rt.string, rt.null]),
+  }),
 ]);
 
 const SnapshotNodeMetricOptionalRT = rt.partial({

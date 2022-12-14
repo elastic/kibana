@@ -34,7 +34,7 @@ describe('useHostTable hook', () => {
             avg: 34359.738368,
           },
         ],
-        path: [{ value: 'host-0', label: 'host-0', os: null }],
+        path: [{ value: 'host-0', label: 'host-0', os: null, cloudProvider: 'aws' }],
         name: 'host-0',
       },
       {
@@ -72,6 +72,10 @@ describe('useHostTable hook', () => {
       {
         name: 'host-0',
         os: '-',
+        title: {
+          cloudProvider: 'aws',
+          name: 'host-0',
+        },
         rx: {
           name: 'rx',
           avg: 252456.92916666667,
@@ -97,6 +101,10 @@ describe('useHostTable hook', () => {
       {
         name: 'host-1',
         os: 'macOS',
+        title: {
+          cloudProvider: null,
+          name: 'host-1',
+        },
         rx: {
           name: 'rx',
           avg: 95.86339715321859,
