@@ -13,7 +13,7 @@ import type { NavigateToAppOptions } from '@kbn/core-application-browser';
 import { UseCaseCard } from './use_case_card';
 
 interface LinkCardConstants {
-  observability: {
+  infrastructure: {
     i18nTexts: {
       title: string;
       description: string;
@@ -22,16 +22,16 @@ interface LinkCardConstants {
 }
 
 const constants: LinkCardConstants = {
-  observability: {
+  infrastructure: {
     i18nTexts: {
       title: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.linkCard.observability.cardTitle',
+        'guidedOnboardingPackage.gettingStarted.infrastructure.linkCard.cardTitle',
         {
           defaultMessage: 'Observe my data',
         }
       ),
       description: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.linkCard.observability.cardDescription',
+        'guidedOnboardingPackage.gettingStarted.infrastructure.linkCard.cardDescription',
         {
           defaultMessage:
             'Add application, infrastructure, and user data through our pre-built integrations.',
@@ -41,7 +41,7 @@ const constants: LinkCardConstants = {
   },
 };
 
-export const ObservabilityLinkCard = ({
+export const InfrastructureLinkCard = ({
   navigateToApp,
   isDarkTheme,
   addBasePath,
@@ -64,18 +64,21 @@ export const ObservabilityLinkCard = ({
           fill
           onClick={navigateToIntegrations}
         >
-          {i18n.translate('guidedOnboardingPackage.gettingStarted.linkCard.buttonLabel', {
-            defaultMessage: 'View integrations',
-          })}
+          {i18n.translate(
+            'guidedOnboardingPackage.gettingStarted.infrastructure.linkCard.buttonLabel',
+            {
+              defaultMessage: 'View integrations',
+            }
+          )}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
   return (
     <UseCaseCard
-      useCase={'observability'}
-      title={constants.observability.i18nTexts.title}
-      description={constants.observability.i18nTexts.description}
+      useCase={'infrastructure'}
+      title={constants.infrastructure.i18nTexts.title}
+      description={constants.infrastructure.i18nTexts.description}
       footer={button}
       isDarkTheme={isDarkTheme}
       addBasePath={addBasePath}

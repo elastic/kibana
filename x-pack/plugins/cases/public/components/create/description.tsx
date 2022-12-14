@@ -17,11 +17,12 @@ import { ID as LensPluginId } from '../markdown_editor/plugins/lens/constants';
 
 interface Props {
   isLoading: boolean;
+  draftStorageKey: string;
 }
 
 export const fieldName = 'description';
 
-const DescriptionComponent: React.FC<Props> = ({ isLoading }) => {
+const DescriptionComponent: React.FC<Props> = ({ isLoading, draftStorageKey }) => {
   const { draftComment, hasIncomingLensState, openLensModal, clearDraftComment } =
     useLensDraftComment();
   const { setFieldValue } = useFormContext();
@@ -62,6 +63,7 @@ const DescriptionComponent: React.FC<Props> = ({ isLoading }) => {
         caseTitle: title,
         caseTags: tags,
         disabledUiPlugins,
+        draftStorageKey,
       }}
     />
   );
