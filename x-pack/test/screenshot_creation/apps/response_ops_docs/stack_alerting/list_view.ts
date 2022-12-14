@@ -6,7 +6,6 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getTestRuleData } from '../../../../functional/services/rules/test_resources';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const commonScreenshots = getService('commonScreenshots');
@@ -14,9 +13,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const actions = getService('actions');
   const rules = getService('rules');
-  const supertest = getService('supertest');
+  const testSubjects = getService('testSubjects');
 
-  describe.only('list view', function () {
+  describe('list view', function () {
     let serverLogConnectorId: string;
     let ruleId: string;
 
@@ -46,6 +45,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot('rules-ui', screenshotDirectories, 1400, 1024);
+    });
+
+    it('rule status screenshot', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      const actionsDropdown = await testSubjects.find('statusDropdown');
+      await actionsDropdown.click();
+      await testSubjects.find('ruleStatusMenu');
+      await commonScreenshots.takeScreenshot('individual-enable-disable', screenshotDirectories, 1400, 1024);
     });
   });
 
