@@ -112,9 +112,6 @@ export const EnginesList = () => {
             showPerPageOptions: false,
           }}
           onChange={() => {}}
-          // onChange={function (criteria: CriteriaWithPagination<EngineListDetails>): void {
-          //   throw new Error('Function not implemented.');
-          // }}
         />
       </DataPanel>
 
