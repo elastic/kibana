@@ -311,13 +311,12 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
     values: { searchValue },
   });
 
-export const COMMENT_VERSION_CONFLICT_WARNING = i18n.translate(
-  'xpack.cases.configure.commentVersionConflictWarning',
-  {
+export const VERSION_CONFLICT_WARNING = (markdownId: string) =>
+  i18n.translate('xpack.cases.configure.commentVersionConflictWarning', {
     defaultMessage:
-      'This comment was updated. Saving your changes will overwrite the updated value.',
-  }
-);
+      'This {markdownId} was updated. Saving your changes will overwrite the updated value.',
+    values: { markdownId },
+  });
 
 /**
  * EUI checkbox replace {searchValue} with the current

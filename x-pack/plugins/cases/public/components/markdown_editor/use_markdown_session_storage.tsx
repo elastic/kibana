@@ -31,8 +31,11 @@ export const useMarkdownSessionStorage = ({
   const [sessionValue, setSessionValue] = useSessionStorage(sessionKey, '', true);
 
   if (!isEmpty(sessionValue) && isFirstRender.current) {
-    isFirstRender.current = false;
     field.setValue(sessionValue);
+  }
+
+  if (isFirstRender.current) {
+    isFirstRender.current = false;
   }
 
   if (initialValue !== initialValueRef.current && initialValue !== field.value) {
@@ -42,19 +45,6 @@ export const useMarkdownSessionStorage = ({
 
   useDebounce(
     () => {
-      if (isFirstRender.current) {
-        if (isEmpty(sessionValue) && !isEmpty(field.value)) {
-          /* this condition is used to for lens draft comment, 
-            when user selects and visualization and comes back to Markdown editor,
-            it is a first render for Markdown editor, however field has value of visualization which is not stored in session 
-            hence saving this item in session storage
-          */
-
-          setSessionValue(field.value);
-        }
-        isFirstRender.current = false;
-        return;
-      }
       setSessionValue(field.value);
     },
     STORAGE_DEBOUNCE_TIME,

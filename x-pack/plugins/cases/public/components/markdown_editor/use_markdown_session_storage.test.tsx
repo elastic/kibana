@@ -54,7 +54,7 @@ describe('useMarkdownSessionStorage', () => {
     });
   });
 
-  it('should not update the session value when it is first render ', async () => {
+  it('should update the session value with field value when it is first render', async () => {
     const { waitFor } = renderHook<SessionStorageType, { hasConflicts: boolean }>(
       (props) => {
         return useMarkdownSessionStorage(props);
@@ -64,8 +64,12 @@ describe('useMarkdownSessionStorage', () => {
       }
     );
 
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
     await waitFor(() => {
-      expect(sessionStorage.getItem(sessionKey)).toBe('');
+      expect(sessionStorage.getItem(sessionKey)).toBe(field.value);
     });
   });
 

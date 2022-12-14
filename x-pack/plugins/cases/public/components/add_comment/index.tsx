@@ -122,11 +122,7 @@ export const AddComment = React.memo(
 
           removeItemFromSessionStorage(draftStorageKey);
 
-          /* had to add to this check that session key is removed to avoid weird issue that on reset 
-            Markdown editor form adds session storage comment back if it is not removed immediately. */
-          if (!sessionStorage.getItem(draftStorageKey)) {
-            reset();
-          }
+          reset({ defaultValue: {} });
         }
       }, [
         submit,

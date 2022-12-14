@@ -61,6 +61,10 @@ export const MarkdownEditorForm = React.memo(
         initialValue,
       });
 
+      const conflictWarningText = i18n.VERSION_CONFLICT_WARNING(
+        id === 'description' ? id : 'comment'
+      );
+
       const commentEditorContextValue = useMemo(
         () => ({
           editorId: id,
@@ -78,7 +82,7 @@ export const MarkdownEditorForm = React.memo(
             describedByIds={idAria ? [idAria] : undefined}
             fullWidth
             error={errorMessage}
-            helpText={hasConflicts ? i18n.COMMENT_VERSION_CONFLICT_WARNING : field.helpText}
+            helpText={hasConflicts ? conflictWarningText : field.helpText}
             isInvalid={isInvalid}
             label={field.label}
             labelAppend={field.labelAppend}

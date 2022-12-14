@@ -335,7 +335,7 @@ describe('UserActionMarkdown ', () => {
           </MockHookWrapperComponent>
         );
 
-        expect(result.container.querySelector('textarea')!.value).toEqual('value set in storage');
+        expect(result.getByText('value set in storage')).toBeInTheDocument();
       });
     });
   });

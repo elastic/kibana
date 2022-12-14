@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Screen } from '@testing-library/react';
-import { waitFor, within, screen } from '@testing-library/react';
+import { waitFor, within, screen, act } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { CaseSeverity, CommentType, ConnectorTypes } from '../../../common/api';
@@ -810,7 +810,13 @@ describe('Create case', () => {
           'euiMarkdownEditorTextArea'
         );
 
-        expect(descriptionInput).toHaveValue('value set in storage');
+        jest.useFakeTimers();
+
+        act(() => jest.advanceTimersByTime(1000));
+
+        await waitFor(() => expect(descriptionInput).toHaveValue('value set in storage'));
+
+        jest.useRealTimers();
       });
     });
 
