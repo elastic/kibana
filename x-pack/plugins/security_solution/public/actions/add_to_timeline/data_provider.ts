@@ -11,8 +11,8 @@ import { INDICATOR_REFERENCE } from '../../../common/cti/constants';
 import type { DataProvider } from '../../../common/types';
 import { IS_OPERATOR } from '../../../common/types';
 import type { BrowserField } from '../../common/containers/source';
-import { IP_FIELD_TYPE } from '../../network/components/ip';
-import { PORT_NAMES } from '../../network/components/port/helpers';
+import { IP_FIELD_TYPE } from '../../explore/network/components/ip';
+import { PORT_NAMES } from '../../explore/network/components/port/helpers';
 import { EVENT_DURATION_FIELD_NAME } from '../../timelines/components/duration';
 import { BYTES_FORMAT } from '../../timelines/components/timeline/body/renderers/bytes';
 import {
