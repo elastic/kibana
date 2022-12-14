@@ -6,19 +6,39 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getTestRuleData } from './test_resources';
 
 export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
   const kbnSupertest = getService('supertest');
   const log = getService('log');
 
   return {
-    async createRule() {
+    async createRule({
+      consumer,
+      name,
+      notify_when,
+      params,
+      rule_type_id,
+      schedule,
+    }: {
+      consumer: string;
+      name: string;
+      notify_when: string;
+      params: Record<string, unknown>;
+      rule_type_id: string;
+      schedule: Record<string, unknown>;
+    }) {
       log.debug(`Create basic rule...`);
       const { body: createdRule } = await kbnSupertest
         .post(`/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData())
+        .send({
+          consumer,
+          name,
+          notify_when,
+          params,
+          rule_type_id,
+          schedule,
+        })
         .expect(200);
       return createdRule;
     },

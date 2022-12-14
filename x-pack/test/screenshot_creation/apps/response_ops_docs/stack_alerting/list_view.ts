@@ -13,18 +13,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
   const pageObjects = getPageObjects(['common', 'header']);
   const actions = getService('actions');
+  const rules = getService('rules');
   const supertest = getService('supertest');
 
   describe.only('list view', function () {
     let serverLogConnectorId: string;
+    let ruleId: string;
 
     before(async () => {
       const connectorName = `server-log-connector`;
       ({ id: serverLogConnectorId } = await createServerLogConnector(connectorName));
+      ({ id: ruleId } = await createEsQueryRule());
     });
 
     after(async () => {
       await actions.api.deleteConnector(serverLogConnectorId);
+      await rules.api.deleteRule(ruleId);
     });
 
     it('connectors list screenshot', async () => {
@@ -39,11 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('rules list screenshot', async () => {
-      await supertest
-        .post(`/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData())
-        .expect(200);
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot('rules-ui', screenshotDirectories, 1400, 1024);
@@ -58,4 +57,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       connectorTypeId: '.server-log',
     });
   };
+
+  const createEsQueryRule = async () => {
+    return rules.api.createRule({
+      consumer: 'alerts',
+      name: 'my alert',
+      notify_when: 'onActionGroupChange',
+      params: {"index":[".test-index"], "timeField":"@timestamp", "aggType":"count", "groupBy":"all", "timeWindowSize":5, "timeWindowUnit":"d", "thresholdComparator":">", "threshold":[1000]},
+      rule_type_id: '.index-threshold',
+      schedule: {"interval":"1m"},
+    });
+  }
 }
