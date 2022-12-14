@@ -138,39 +138,6 @@ describe('#fromCombinedFilter', function () {
       `);
     });
 
-    it('Handles disabled sub-filters', () => {
-      const disabledFilter = buildPhraseFilter(getField('ssl'), false, indexPattern);
-      disabledFilter.meta.disabled = true;
-      const filters = [
-        buildPhraseFilter(getField('extension'), 'value', indexPattern),
-        disabledFilter,
-        buildExistsFilter(getField('machine.os'), indexPattern),
-      ];
-      const filter = buildCombinedFilter(BooleanRelation.AND, filters, indexPattern);
-      const result = fromCombinedFilter(filter);
-      expect(result.query).toMatchInlineSnapshot(`
-        Object {
-          "bool": Object {
-            "filter": Array [
-              Object {
-                "match_phrase": Object {
-                  "extension": "value",
-                },
-              },
-              Object {
-                "exists": Object {
-                  "field": "machine.os",
-                },
-              },
-            ],
-            "must": Array [],
-            "must_not": Array [],
-            "should": Array [],
-          },
-        }
-      `);
-    });
-
     it('Preserves filter properties', () => {
       const filters = [
         buildPhraseFilter(getField('extension'), 'value', indexPattern),
@@ -191,9 +158,7 @@ describe('#fromCombinedFilter', function () {
             "negate": false,
             "params": Array [
               Object {
-                "meta": Object {
-                  "index": "logstash-*",
-                },
+                "meta": Object {},
                 "query": Object {
                   "match_phrase": Object {
                     "extension": "value",
@@ -203,7 +168,6 @@ describe('#fromCombinedFilter', function () {
               Object {
                 "meta": Object {
                   "field": "bytes",
-                  "index": "logstash-*",
                   "params": Object {},
                 },
                 "query": Object {
@@ -215,9 +179,7 @@ describe('#fromCombinedFilter', function () {
                 },
               },
               Object {
-                "meta": Object {
-                  "index": "logstash-*",
-                },
+                "meta": Object {},
                 "query": Object {
                   "exists": Object {
                     "field": "machine.os",
@@ -387,63 +349,6 @@ describe('#fromCombinedFilter', function () {
       `);
     });
 
-    it('Handles disabled sub-filters', () => {
-      const disabledFilter = buildPhraseFilter(getField('ssl'), false, indexPattern);
-      disabledFilter.meta.disabled = true;
-      const filters = [
-        buildPhraseFilter(getField('extension'), 'value', indexPattern),
-        disabledFilter,
-        buildExistsFilter(getField('machine.os'), indexPattern),
-      ];
-      const filter = buildCombinedFilter(BooleanRelation.OR, filters, indexPattern);
-      const result = fromCombinedFilter(filter);
-      expect(result.query).toMatchInlineSnapshot(`
-        Object {
-          "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
-              Object {
-                "bool": Object {
-                  "filter": Array [
-                    Object {
-                      "match_phrase": Object {
-                        "extension": "value",
-                      },
-                    },
-                  ],
-                  "must": Array [],
-                  "must_not": Array [],
-                  "should": Array [],
-                },
-              },
-              Object {
-                "bool": Object {
-                  "filter": Array [],
-                  "must": Array [],
-                  "must_not": Array [],
-                  "should": Array [],
-                },
-              },
-              Object {
-                "bool": Object {
-                  "filter": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "machine.os",
-                      },
-                    },
-                  ],
-                  "must": Array [],
-                  "must_not": Array [],
-                  "should": Array [],
-                },
-              },
-            ],
-          },
-        }
-      `);
-    });
-
     it('Preserves filter properties', () => {
       const filters = [
         buildPhraseFilter(getField('extension'), 'value', indexPattern),
@@ -464,9 +369,7 @@ describe('#fromCombinedFilter', function () {
             "negate": false,
             "params": Array [
               Object {
-                "meta": Object {
-                  "index": "logstash-*",
-                },
+                "meta": Object {},
                 "query": Object {
                   "match_phrase": Object {
                     "extension": "value",
@@ -476,7 +379,6 @@ describe('#fromCombinedFilter', function () {
               Object {
                 "meta": Object {
                   "field": "bytes",
-                  "index": "logstash-*",
                   "params": Object {},
                 },
                 "query": Object {
@@ -488,9 +390,7 @@ describe('#fromCombinedFilter', function () {
                 },
               },
               Object {
-                "meta": Object {
-                  "index": "logstash-*",
-                },
+                "meta": Object {},
                 "query": Object {
                   "exists": Object {
                     "field": "machine.os",
