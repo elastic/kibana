@@ -11,14 +11,11 @@ import {
   PingsResponse,
   EncryptedSyntheticsSavedMonitor,
 } from '../../../../../common/runtime_types';
-import { QueryParams } from './api';
 import { createAsyncAction } from '../utils/actions';
 
 export const setMonitorDetailsLocationAction = createAction<string>(
   '[MONITOR SUMMARY] SET LOCATION'
 );
-
-export const getMonitorStatusAction = createAsyncAction<QueryParams, Ping>('[MONITOR DETAILS] GET');
 
 export const getMonitorAction = createAsyncAction<
   { monitorId: string },
@@ -29,6 +26,10 @@ export const getMonitorLastRunAction = createAsyncAction<
   { monitorId: string; locationId: string },
   PingsResponse
 >('[MONITOR DETAILS] GET LAST RUN');
+
+export const updateMonitorLastRunAction = createAction<{ data: Ping }>(
+  '[MONITOR DETAILS] UPdATE LAST RUN'
+);
 
 export const getMonitorRecentPingsAction = createAsyncAction<
   {

@@ -125,14 +125,10 @@ export class ImportResolver {
       return true;
     }
 
-    // ignore requests to grammar/built_grammar.js files or bazel target dirs, these files are only
-    // available in the build output and will never resolve in dev. We will validate that people don't
-    // import these files from outside the package in another rule
-    if (
-      req.endsWith('grammar/built_grammar.js') ||
-      req.includes('/target_workers/') ||
-      req.includes('/target_node/')
-    ) {
+    // ignore requests to bazel target dirs, these files are only available in the build output
+    // and will never resolve in dev. We will validate that people don't import these files from
+    // outside the package in another rule
+    if (req.includes('/target_workers/') || req.includes('/target_node/')) {
       return true;
     }
 

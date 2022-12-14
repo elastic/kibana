@@ -11,10 +11,9 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { GuideState } from '@kbn/guided-onboarding';
 import { firstValueFrom, Subscription } from 'rxjs';
 
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH, testGuideConfig, testGuideId } from '../../common';
 import { ApiService } from './api';
 import {
-  testGuide,
   testGuideFirstStep,
   testGuideLastStep,
   testGuideManualCompletionStep,
@@ -70,13 +69,13 @@ describe('GuidedOnboarding ApiService', () => {
       expect(httpClient.get).toHaveBeenCalledTimes(1);
     });
 
-    it(`re-sends the request if the previous one failed`, async () => {
+    it(`doesn't send multiple requests if the request failed`, async () => {
       httpClient.get.mockRejectedValueOnce(new Error('request failed'));
       subscription = apiService.fetchPluginState$().subscribe();
       // wait until the request fails
       await new Promise((resolve) => process.nextTick(resolve));
       anotherSubscription = apiService.fetchPluginState$().subscribe();
-      expect(httpClient.get).toHaveBeenCalledTimes(2);
+      expect(httpClient.get).toHaveBeenCalledTimes(1);
     });
 
     it(`re-sends the request if the subscription was unsubscribed before the request completed`, async () => {
@@ -129,13 +128,13 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('activateGuide', () => {
     it('activates a new guide', async () => {
-      // update the mock to no active guides
-      httpClient.get.mockResolvedValue({
-        pluginState: mockPluginStateNotStarted,
+      // mock the get config request
+      httpClient.get.mockResolvedValueOnce({
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
 
-      await apiService.activateGuide(testGuide);
+      await apiService.activateGuide(testGuideId);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
@@ -147,7 +146,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('reactivates a guide that has already been started', async () => {
-      await apiService.activateGuide(testGuide, testGuideStep1ActiveState);
+      await apiService.activateGuide(testGuideId, testGuideStep1ActiveState);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
@@ -188,7 +187,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('updates the selected guide and marks it as complete', async () => {
-      await apiService.completeGuide(testGuide);
+      await apiService.completeGuide(testGuideId);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
@@ -208,7 +207,7 @@ describe('GuidedOnboarding ApiService', () => {
         // mock the put api response
         pluginState: { status: 'complete', isActivePeriod: true },
       });
-      await apiService.completeGuide(testGuide);
+      await apiService.completeGuide(testGuideId);
       const updateState = await firstValueFrom(apiService.fetchPluginState$());
       expect(updateState?.status).toBe('complete');
     });
@@ -240,7 +239,7 @@ describe('GuidedOnboarding ApiService', () => {
         state: [incompleteGuideState],
       });
       apiService.setup(httpClient, true);
-      const completedState = await apiService.completeGuide(testGuide);
+      const completedState = await apiService.completeGuide(testGuideId);
       expect(completedState).not.toBeDefined();
     });
   });
@@ -252,7 +251,7 @@ describe('GuidedOnboarding ApiService', () => {
       });
 
       subscription = apiService
-        .isGuideStepActive$(testGuide, testGuideFirstStep)
+        .isGuideStepActive$(testGuideId, testGuideFirstStep)
         .subscribe((isStepActive) => {
           if (isStepActive) {
             subscription.unsubscribe();
@@ -263,7 +262,7 @@ describe('GuidedOnboarding ApiService', () => {
 
     it('returns false if the step is not been started', (done) => {
       subscription = apiService
-        .isGuideStepActive$(testGuide, testGuideFirstStep)
+        .isGuideStepActive$(testGuideId, testGuideFirstStep)
         .subscribe((isStepActive) => {
           if (!isStepActive) {
             subscription.unsubscribe();
@@ -275,7 +274,7 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('startGuideStep', () => {
     it('updates the selected step and marks it as in_progress', async () => {
-      await apiService.startGuideStep(testGuide, testGuideFirstStep);
+      await apiService.startGuideStep(testGuideId, testGuideFirstStep);
 
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({ guide: testGuideStep1InProgressState }),
@@ -295,7 +294,7 @@ describe('GuidedOnboarding ApiService', () => {
       });
       apiService.setup(httpClient, true);
 
-      await apiService.completeGuideStep(testGuide, testGuideFirstStep);
+      await apiService.completeGuideStep(testGuideId, testGuideFirstStep);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       // Verify the completed step now has a "complete" status, and the subsequent step is "active"
@@ -305,12 +304,15 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it(`marks the step as 'ready_to_complete' if it's configured for manual completion`, async () => {
-      httpClient.get.mockResolvedValue({
+      httpClient.get.mockResolvedValueOnce({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep2InProgressState },
+      });
+      httpClient.get.mockResolvedValueOnce({
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
 
-      await apiService.completeGuideStep(testGuide, testGuideManualCompletionStep);
+      await apiService.completeGuideStep(testGuideId, testGuideManualCompletionStep);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       // Verify the completed step now has a "ready_to_complete" status, and the subsequent step is "inactive"
@@ -329,7 +331,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('marks the guide as "ready_to_complete" if the current step is the last step in the guide and configured for manual completion', async () => {
-      httpClient.get.mockResolvedValue({
+      httpClient.get.mockResolvedValueOnce({
         pluginState: {
           ...mockPluginStateInProgress,
           activeGuide: {
@@ -341,9 +343,12 @@ describe('GuidedOnboarding ApiService', () => {
           },
         },
       });
+      httpClient.get.mockResolvedValueOnce({
+        config: testGuideConfig,
+      });
       apiService.setup(httpClient, true);
 
-      await apiService.completeGuideStep(testGuide, testGuideLastStep);
+      await apiService.completeGuideStep(testGuideId, testGuideLastStep);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       // Verify the guide now has a "ready_to_complete" status and the last step is "complete"
@@ -370,10 +375,10 @@ describe('GuidedOnboarding ApiService', () => {
       });
       apiService.setup(httpClient, true);
 
-      await apiService.completeGuideStep(testGuide, testGuideFirstStep);
+      await apiService.completeGuideStep(testGuideId, testGuideFirstStep);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
-      // Verify the guide now has a "in_progress" status and the second step is "active"
+      // Verify the guide now has an "in_progress" status and the second step is "active"
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({
           guide: {
@@ -390,7 +395,7 @@ describe('GuidedOnboarding ApiService', () => {
 
     it('does nothing if the step is not in progress', async () => {
       // by default the state set in beforeEach is test guide, step 1 active
-      await apiService.completeGuideStep(testGuide, testGuideFirstStep);
+      await apiService.completeGuideStep(testGuideId, testGuideFirstStep);
       expect(httpClient.put).toHaveBeenCalledTimes(0);
     });
 
@@ -402,8 +407,11 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('isGuidedOnboardingActiveForIntegration$', () => {
     it('returns true if the integration is part of the active step', (done) => {
-      httpClient.get.mockResolvedValue({
+      httpClient.get.mockResolvedValueOnce({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
+      });
+      httpClient.get.mockResolvedValueOnce({
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
       subscription = apiService
@@ -449,8 +457,11 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('completeGuidedOnboardingForIntegration', () => {
     it(`completes the step if it's active for the integration`, async () => {
-      httpClient.get.mockResolvedValue({
+      httpClient.get.mockResolvedValueOnce({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
+      });
+      httpClient.get.mockResolvedValueOnce({
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
 
@@ -482,6 +493,26 @@ describe('GuidedOnboarding ApiService', () => {
     });
   });
 
+  describe('skipGuidedOnboarding', () => {
+    it(`sends a request to the put state API`, async () => {
+      await apiService.skipGuidedOnboarding();
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
+      // this assertion depends on the guides config
+      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
+        body: JSON.stringify({ status: 'skipped' }),
+      });
+    });
+  });
+
+  describe('getGuideConfig', () => {
+    it('sends a request to the get config API', async () => {
+      apiService.setup(httpClient, true);
+      await apiService.getGuideConfig(testGuideId);
+      expect(httpClient.get).toHaveBeenCalledTimes(1);
+      expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/configs/${testGuideId}`);
+    });
+  });
+
   describe('no API requests are sent on self-managed deployments', () => {
     beforeEach(() => {
       apiService.setup(httpClient, false);
@@ -500,6 +531,11 @@ describe('GuidedOnboarding ApiService', () => {
     it('updatePluginState', async () => {
       await apiService.updatePluginState({}, false);
       expect(httpClient.put).not.toHaveBeenCalled();
+    });
+
+    it('getGuideConfig', async () => {
+      await apiService.getGuideConfig(testGuideId);
+      expect(httpClient.get).not.toHaveBeenCalled();
     });
   });
 });

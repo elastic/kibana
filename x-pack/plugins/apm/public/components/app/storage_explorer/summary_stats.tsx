@@ -29,7 +29,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { asDynamicBytes, asPercent } from '../../../../common/utils/formatters';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { isPending } from '../../../hooks/use_fetcher';
 import { asTransactionRate } from '../../../../common/utils/formatters';
 import { getIndexManagementHref } from './get_storage_explorer_links';
 
@@ -78,8 +78,7 @@ export function SummaryStats() {
     [indexLifecyclePhase, environment, kuery, start, end]
   );
 
-  const loading =
-    status === FETCH_STATUS.LOADING || status === FETCH_STATUS.NOT_INITIATED;
+  const loading = isPending(status);
 
   const hasData = !isEmpty(data);
 

@@ -89,6 +89,7 @@ export interface ClientPluginsStart {
   docLinks: DocLinksStart;
   uiSettings: CoreStart['uiSettings'];
   usageCollection: UsageCollectionStart;
+  savedObjects: CoreStart['savedObjects'];
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {

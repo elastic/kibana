@@ -26,8 +26,11 @@ export interface AttachmentMetadata {
   indicatorName: string;
   indicatorType: string;
   indicatorFeedName: string;
-  indicatorFirstSeen: string;
 }
+
+const AttachmentChildrenLazy = React.lazy(
+  () => import('../components/attachment_children/attachment_children')
+);
 
 /**
  * Create an {@link ExternalReferenceAttachmentType} object used to register an external reference
@@ -50,14 +53,7 @@ export const generateAttachmentType = (): ExternalReferenceAttachmentType => ({
       />
     ),
     timelineAvatar: <EuiAvatar name="indicator" color="subdued" iconType="crosshairs" />,
-    children: React.lazy(async () => {
-      const { initComponent } = await import(
-        '../components/attachment_children/attachment_children'
-      );
-      return {
-        default: initComponent(),
-      };
-    }),
+    children: AttachmentChildrenLazy,
   }),
   icon: 'crosshairs',
 });
@@ -111,15 +107,10 @@ export const generateAttachmentsMetadata = (indicator: Indicator): AttachmentMet
     indicator,
     RawIndicatorFieldId.Feed
   ).value;
-  const indicatorFirstSeen: string | null = getIndicatorFieldAndValue(
-    indicator,
-    RawIndicatorFieldId.FirstSeen
-  ).value;
 
   return {
     indicatorName: indicatorName || EMPTY_VALUE,
     indicatorType: indicatorType || EMPTY_VALUE,
     indicatorFeedName: indicatorFeedName || EMPTY_VALUE,
-    indicatorFirstSeen: indicatorFirstSeen || EMPTY_VALUE,
   };
 };

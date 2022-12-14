@@ -87,7 +87,6 @@ export async function deleteAll(
     });
 
     await userActionService.bulkCreateAttachmentDeletion({
-      unsecuredSavedObjectsClient,
       caseId: caseID,
       attachments: comments.saved_objects.map((comment) => ({
         id: comment.id,
@@ -154,7 +153,6 @@ export async function deleteComment(
     await userActionService.createUserAction({
       type: ActionTypes.comment,
       action: Actions.delete,
-      unsecuredSavedObjectsClient,
       caseId: id,
       attachmentId: attachmentID,
       payload: { attachment: { ...myComment.attributes } },
