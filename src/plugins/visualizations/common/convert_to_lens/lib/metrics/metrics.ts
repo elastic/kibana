@@ -7,8 +7,7 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { SchemaConfig } from '../../..';
+import { PercentageModeConfig } from '../../..';
 import {
   convertMetricAggregationColumnWithoutSpecialParams,
   convertToOtherParentPipelineAggColumns,
@@ -19,18 +18,26 @@ import {
   convertToLastValueColumn,
   convertToCumulativeSumAggColumn,
   AggBasedColumn,
+  convertToColumnInPercentageMode,
+  ExtendedColumnConverterArgs,
 } from '../convert';
 import { SUPPORTED_METRICS } from '../convert/supported_metrics';
 import { getValidColumns } from '../utils';
 
 export const convertMetricToColumns = (
-  agg: SchemaConfig,
-  dataView: DataView,
-  aggs: Array<SchemaConfig<METRIC_TYPES>>
+  { agg, dataView, aggs, visType }: ExtendedColumnConverterArgs<METRIC_TYPES>,
+  percentageModeConfig: PercentageModeConfig = { isPercentageMode: false }
 ): AggBasedColumn[] | null => {
   const supportedAgg = SUPPORTED_METRICS[agg.aggType];
   if (!supportedAgg) {
     return null;
+  }
+
+  if (percentageModeConfig.isPercentageMode) {
+    const { isPercentageMode, ...minMax } = percentageModeConfig;
+
+    const formulaColumn = convertToColumnInPercentageMode({ agg, dataView, aggs, visType }, minMax);
+    return getValidColumns(formulaColumn);
   }
 
   switch (agg.aggType) {
@@ -45,6 +52,7 @@ export const convertMetricToColumns = (
       const columns = convertMetricAggregationColumnWithoutSpecialParams(supportedAgg, {
         agg,
         dataView,
+        visType,
       });
       return getValidColumns(columns);
     }
@@ -52,6 +60,7 @@ export const convertMetricToColumns = (
       const columns = convertToStdDeviationFormulaColumns({
         agg,
         dataView,
+        visType,
       });
       return getValidColumns(columns);
     }
@@ -59,6 +68,7 @@ export const convertMetricToColumns = (
       const columns = convertToPercentileColumn({
         agg,
         dataView,
+        visType,
       });
       return getValidColumns(columns);
     }
@@ -66,6 +76,7 @@ export const convertMetricToColumns = (
       const columns = convertToPercentileColumn({
         agg,
         dataView,
+        visType,
       });
       return getValidColumns(columns);
     }
@@ -73,6 +84,7 @@ export const convertMetricToColumns = (
       const columns = convertToPercentileRankColumn({
         agg,
         dataView,
+        visType,
       });
       return getValidColumns(columns);
     }
@@ -80,6 +92,7 @@ export const convertMetricToColumns = (
       const columns = convertToPercentileRankColumn({
         agg,
         dataView,
+        visType,
       });
       return getValidColumns(columns);
     }
@@ -88,6 +101,7 @@ export const convertMetricToColumns = (
       const columns = convertToLastValueColumn({
         agg,
         dataView,
+        visType,
       });
       return getValidColumns(columns);
     }
@@ -96,6 +110,7 @@ export const convertMetricToColumns = (
         agg,
         dataView,
         aggs,
+        visType,
       });
       return getValidColumns(columns);
     }
@@ -105,6 +120,7 @@ export const convertMetricToColumns = (
         agg,
         dataView,
         aggs,
+        visType,
       });
       return getValidColumns(columns);
     }
@@ -116,11 +132,10 @@ export const convertMetricToColumns = (
         agg,
         dataView,
         aggs,
+        visType,
       });
       return getValidColumns(columns);
     }
-    case METRIC_TYPES.SERIAL_DIFF:
-      return null;
     default:
       return null;
   }

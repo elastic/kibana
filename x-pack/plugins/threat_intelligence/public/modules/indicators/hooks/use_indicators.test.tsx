@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useIndicators, UseIndicatorsParams, UseIndicatorsValue } from './use_indicators';
 import { TestProvidersComponent } from '../../../common/mocks/test_providers';
 import { createFetchIndicators } from '../services/fetch_indicators';
+import { mockTimeRange } from '../../../common/mocks/mock_indicators_filters_context';
 
 jest.mock('../services/fetch_indicators');
 
@@ -16,6 +17,7 @@ const useIndicatorsParams: UseIndicatorsParams = {
   filters: [],
   filterQuery: { query: '', language: 'kuery' },
   sorting: [],
+  timeRange: mockTimeRange,
 };
 
 const indicatorsQueryResult = { indicators: [], total: 0 };
@@ -99,13 +101,15 @@ describe('useIndicators()', () => {
         expect.any(AbortSignal)
       );
 
+      await hookResult.waitFor(() => !hookResult.result.current.isLoading);
+
       expect(hookResult.result.current).toMatchInlineSnapshot(`
         Object {
-          "handleRefresh": [Function],
+          "dataUpdatedAt": 0,
           "indicatorCount": 0,
           "indicators": Array [],
-          "isFetching": true,
-          "isLoading": true,
+          "isFetching": false,
+          "isLoading": false,
           "onChangeItemsPerPage": [Function],
           "onChangePage": [Function],
           "pagination": Object {
@@ -116,6 +120,11 @@ describe('useIndicators()', () => {
               25,
               50,
             ],
+          },
+          "query": Object {
+            "id": "indicatorsTable",
+            "loading": false,
+            "refetch": [Function],
           },
         }
       `);

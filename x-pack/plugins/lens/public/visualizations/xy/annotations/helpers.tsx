@@ -15,8 +15,8 @@ import {
 } from '@kbn/event-annotation-plugin/public';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { isDraggedDataViewField } from '../../../utils';
-import { layerTypes } from '../../../../common';
 import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
 import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
@@ -111,7 +111,7 @@ export const getAnnotationsSupportedLayer = (
       : undefined;
 
   return {
-    type: layerTypes.ANNOTATIONS,
+    type: LayerTypes.ANNOTATIONS,
     label: i18n.translate('xpack.lens.xyChart.addAnnotationsLayerLabel', {
       defaultMessage: 'Annotations',
     }),

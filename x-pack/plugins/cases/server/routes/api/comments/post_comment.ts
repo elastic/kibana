@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
-import { CommentRequest } from '../../../../common/api';
+import type { CommentRequest } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 

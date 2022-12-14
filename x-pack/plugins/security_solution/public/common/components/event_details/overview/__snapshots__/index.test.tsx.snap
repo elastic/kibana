@@ -83,10 +83,10 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
 
 <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive c0"
+      class="euiFlexGroup c0 emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
           class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 emotion-euiPanel-grow-none-s-plain"
@@ -100,7 +100,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
           >
             <div
               class="c2"
@@ -114,20 +114,20 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                 >
                   <button
                     aria-label="Click to change alert status"
-                    class="euiBadge euiBadge-isClickable euiBadge--iconRight c3"
+                    class="euiBadge c3 emotion-euiBadge-clickable"
                     style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
                     title="open"
                   >
                     <span
-                      class="euiBadge__content"
+                      class="euiBadge__content emotion-euiBadge__content"
                     >
                       <span
-                        class="euiBadge__text"
+                        class="euiBadge__text emotion-euiBadge__text-clickable"
                       >
                         open
                       </span>
                       <span
-                        class="euiBadge__icon"
+                        class="euiBadge__icon emotion-euiBadge__icon-right"
                         color="inherit"
                         data-euiicon-type="arrowDown"
                       />
@@ -183,7 +183,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
         </div>
       </div>
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
           class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 emotion-euiPanel-grow-none-s-plain"
@@ -197,7 +197,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
           >
             <div
               class="c2"
@@ -256,10 +256,10 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
       class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
     />
     <div
-      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive c0"
+      class="euiFlexGroup c0 emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
           class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 emotion-euiPanel-grow-none-s-plain"
@@ -273,7 +273,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
           >
             <div
               class="c2"

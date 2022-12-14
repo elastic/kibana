@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { CASE_TELEMETRY_SAVED_OBJECT } from '../../common/constants';
 
 export const casesTelemetrySavedObjectType: SavedObjectsType = {

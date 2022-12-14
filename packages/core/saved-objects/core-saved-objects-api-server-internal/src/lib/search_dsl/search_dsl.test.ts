@@ -49,7 +49,7 @@ describe('getSearchDsl', () => {
   });
 
   describe('passes control', () => {
-    it('passes (mappings, schema, namespaces, type, typeToNamespacesMap, search, searchFields, rootSearchFields, hasReference, hasReferenceOperator) to getQueryParams', () => {
+    it('passes (mappings, schema, namespaces, type, typeToNamespacesMap, search, searchFields, rootSearchFields, hasReference, hasReferenceOperator, hasNoReference, hasNoReferenceOperator) to getQueryParams', () => {
       const opts = {
         namespaces: ['foo-namespace'],
         type: 'foo',
@@ -63,6 +63,11 @@ describe('getSearchDsl', () => {
           id: '1',
         },
         hasReferenceOperator: 'AND' as queryParamsNS.SearchOperator,
+        hasNoReference: {
+          type: 'noBar',
+          id: '1',
+        },
+        hasNoReferenceOperator: 'AND' as queryParamsNS.SearchOperator,
       };
 
       getSearchDsl(mappings, registry, opts);
@@ -78,6 +83,8 @@ describe('getSearchDsl', () => {
         defaultSearchOperator: opts.defaultSearchOperator,
         hasReference: opts.hasReference,
         hasReferenceOperator: opts.hasReferenceOperator,
+        hasNoReference: opts.hasNoReference,
+        hasNoReferenceOperator: opts.hasNoReferenceOperator,
       });
     });
 

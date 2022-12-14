@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiPageContentBody_Deprecated as EuiPageContentBody, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart, VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -45,7 +45,7 @@ export function GeoFieldWorkspacePanel(props: Props) {
   }
 
   return (
-    <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
+    <div className="lnsWorkspacePanelWrapper__pageContentBody">
       <EuiText className="lnsWorkspacePanel__emptyContent" textAlign="center" size="s">
         <div>
           <h2>
@@ -72,6 +72,6 @@ export function GeoFieldWorkspacePanel(props: Props) {
           </DragDrop>
         </div>
       </EuiText>
-    </EuiPageContentBody>
+    </div>
   );
 }

@@ -9,9 +9,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useQuery } from '@tanstack/react-query';
 import { EuiDataGridSorting } from '@elastic/eui';
-import { useInspector } from '../../../hooks/use_inspector';
+import { useInspector, useKibana } from '../../../hooks';
 import { Indicator } from '../../../../common/types/indicator';
-import { useKibana } from '../../../hooks/use_kibana';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 import { createFetchIndicators, FetchParams, Pagination } from '../services/fetch_indicators';
 
@@ -22,13 +21,11 @@ export const DEFAULT_PAGE_SIZE = PAGE_SIZES[1];
 export interface UseIndicatorsParams {
   filterQuery: Query;
   filters: Filter[];
-  timeRange?: TimeRange;
+  timeRange: TimeRange;
   sorting: EuiDataGridSorting['columns'];
 }
 
 export interface UseIndicatorsValue {
-  handleRefresh: () => void;
-
   /**
    * Array of {@link Indicator} ready to render inside the IndicatorTable component
    */
@@ -47,7 +44,13 @@ export interface UseIndicatorsValue {
    * Data loading is in progress (see docs on `isFetching` here: https://tanstack.com/query/v4/docs/guides/queries)
    */
   isFetching: boolean;
+
+  dataUpdatedAt: number;
+
+  query: { refetch: VoidFunction; id: string; loading: boolean };
 }
+
+const QUERY_ID = 'indicatorsTable';
 
 export const useIndicators = ({
   filters,
@@ -95,9 +98,9 @@ export const useIndicators = ({
     [inspectorAdapters, searchService]
   );
 
-  const { isLoading, isFetching, data, refetch } = useQuery(
+  const { isLoading, isFetching, data, refetch, dataUpdatedAt } = useQuery(
     [
-      'indicatorsTable',
+      QUERY_ID,
       {
         timeRange,
         filterQuery,
@@ -118,10 +121,10 @@ export const useIndicators = ({
     }
   );
 
-  const handleRefresh = useCallback(() => {
-    onChangePage(0);
-    refetch();
-  }, [onChangePage, refetch]);
+  const query = useMemo(
+    () => ({ refetch, id: QUERY_ID, loading: isLoading }),
+    [isLoading, refetch]
+  );
 
   return {
     indicators: data?.indicators || [],
@@ -131,6 +134,7 @@ export const useIndicators = ({
     onChangeItemsPerPage,
     isLoading,
     isFetching,
-    handleRefresh,
+    dataUpdatedAt,
+    query,
   };
 };

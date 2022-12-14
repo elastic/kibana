@@ -1,64 +1,12 @@
-$timesliderWidth: 650px;
-
 .mapTimeslider {
-  @include euiBottomShadowLarge;
-  position: fixed;
-  left: 50%;
-  bottom: $euiSize;
-  // we could center with translateX but this would impact the animation
-  margin-left: -($timesliderWidth / 2);
-  width: $timesliderWidth;
-  z-index: 99999;
-  background: $euiColorEmptyShade;
-  padding: $euiSizeL $euiSize;
-  border-radius: $euiSize;
-}
-
-.mapTimeslider__row {
-  display: flex;
-  align-items: center;
-
-  & + & {
-    margin-top: $euiSizeS;
-  }
-
-  &:first-child {
-    padding: 0 $euiSize;
-  }
-}
-
-.mapTimeslider__close {
   position: absolute;
-  top: $euiSizeXS;
-  right: $euiSizeXS;
-}
+  left: calc(50% - 400px);
+  bottom: $euiSize;
+  z-index: 99999;
 
-.mapTimeslider__timeWindow {
-  display: flex;
-  flex: 1;
-  margin-right: $euiSizeS;
-  font-size: $euiFontSizeS;
-}
-
-.mapTimeslider__controls {
-  margin-left: $euiSizeS;
-
-  .euiButtonIcon + .euiButtonIcon {
-    margin-left: $euiSizeXS;
+  .controlFrame__formControlLayout {
+    @include euiBottomShadowLarge;
   }
-}
-
-.mapTimeslider__innerPanel {
-  display: inline-flex;
-  // background: $euiColorLightestShade;
-  border-radius: $euiBorderRadiusSmall;
-  padding: $euiSizeXS;
-  display: inline-flex;
-  align-items: center;
-}
-
-.mapTimeslider__playButton {
-  border-radius: 50%;
 }
 
 .mapTimeslider--animation {

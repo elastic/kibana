@@ -34,21 +34,19 @@ export type ServiceFields = Fields &
     | 'service.name'
     | 'service.version'
     | 'service.environment'
-    | 'transaction.type'
   > &
   Partial<{
     _doc_count: number;
     transaction: {
-      duration: {
-        summary: {
-          min: number;
-          max: number;
-          sum: number;
-          value_count: number;
-        };
-      };
       failure_count: number;
       success_count: number;
+      type: string;
+      'duration.summary': {
+        min: number;
+        max: number;
+        sum: number;
+        value_count: number;
+      };
     };
   }>;
 
@@ -86,10 +84,10 @@ export class ServicMetricsAggregator implements StreamAggregator<ApmFields> {
               },
             },
             failure_count: {
-              type: { type: 'long' },
+              type: 'long',
             },
             success_count: {
-              type: { type: 'long' },
+              type: 'long',
             },
           },
         },
@@ -141,22 +139,24 @@ export class ServicMetricsAggregator implements StreamAggregator<ApmFields> {
       }
 
       const state = this.state[key];
-      state.count++;
-
-      switch (event['event.outcome']) {
-        case 'failure':
-          state.failure_count++;
-          break;
-        case 'success':
-          state.success_count++;
-          break;
-      }
 
       const duration = Number(event['transaction.duration.us']);
+
       if (duration >= 0) {
+        state.count++;
+
         state.sum += duration;
         if (duration > state.max) state.max = duration;
         if (duration < state.min) state.min = Math.min(0, duration);
+
+        switch (event['event.outcome']) {
+          case 'failure':
+            state.failure_count++;
+            break;
+          case 'success':
+            state.success_count++;
+            break;
+        }
       }
     };
 
@@ -197,18 +197,16 @@ export class ServicMetricsAggregator implements StreamAggregator<ApmFields> {
       'processor.event': 'metric',
       'service.name': state['service.name'],
       'service.environment': state['service.environment'],
-      'transaction.type': state['transaction.type'],
       transaction: {
-        duration: {
-          summary: {
-            min: state.min,
-            max: state.max,
-            sum: state.sum,
-            value_count: state.count,
-          },
+        'duration.summary': {
+          min: state.min,
+          max: state.max,
+          sum: state.sum,
+          value_count: state.count,
         },
-        failure_count: state.failure_count,
         success_count: state.success_count,
+        failure_count: state.failure_count,
+        type: state['transaction.type'] ?? 'request',
       },
     };
   }

@@ -169,6 +169,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
         const body = await mlClient.putDatafeed(
           {
             datafeed_id: datafeedId,
+            // @ts-expect-error type mismatch for `time_span` (string | number versus estypes.Duration)
             body: request.body,
           },
           getAuthorizationHeader(request)
@@ -210,6 +211,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
         const body = await mlClient.updateDatafeed(
           {
             datafeed_id: datafeedId,
+            // @ts-expect-error type mismatch for `time_span` (string | number versus estypes.Duration)
             body: request.body,
           },
           getAuthorizationHeader(request)

@@ -9,6 +9,7 @@
 import { DataViewFieldBase } from '@kbn/es-query';
 import type {
   CreateExceptionListItemSchema,
+  CreateRuleExceptionListItemSchema,
   Entry,
   EntryExists,
   EntryMatch,
@@ -18,6 +19,7 @@ import type {
   ExceptionListItemSchema,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
+  NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_LIST_NAMESPACE,
@@ -93,15 +95,22 @@ export type ExceptionListItemBuilderSchema = Omit<ExceptionListItemSchema, 'entr
 
 export type CreateExceptionListItemBuilderSchema = Omit<
   CreateExceptionListItemSchema,
-  'meta' | 'entries'
+  'meta' | 'entries' | 'list_id' | 'namespace_type'
 > & {
   meta: { temporaryUuid: string };
   entries: BuilderEntry[];
+  list_id: string | undefined;
+  namespace_type: NamespaceType | undefined;
 };
 
 export type ExceptionsBuilderExceptionItem =
   | ExceptionListItemBuilderSchema
   | CreateExceptionListItemBuilderSchema;
+
+export type ExceptionsBuilderReturnExceptionItem =
+  | ExceptionListItemSchema
+  | CreateExceptionListItemSchema
+  | CreateRuleExceptionListItemSchema;
 
 export const exceptionListSavedObjectType = EXCEPTION_LIST_NAMESPACE;
 export const exceptionListAgnosticSavedObjectType = EXCEPTION_LIST_NAMESPACE_AGNOSTIC;

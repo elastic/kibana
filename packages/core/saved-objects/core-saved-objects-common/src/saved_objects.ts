@@ -64,6 +64,7 @@ export interface SavedObjectReference {
  * @public
  */
 export interface SavedObjectsMigrationVersion {
+  /** The plugin name and version string */
   [pluginName: string]: string;
 }
 
@@ -74,8 +75,11 @@ export interface SavedObject<T = unknown> {
   type: string;
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
+  /** Timestamp of the time this document had been created.  */
+  created_at?: string;
   /** Timestamp of the last time this document had been updated.  */
   updated_at?: string;
+  /** Error associated with this object, populated if an operation failed for this object.  */
   error?: SavedObjectError;
   /** The data for a Saved Object is stored as an object in the `attributes` property. **/
   attributes: T;

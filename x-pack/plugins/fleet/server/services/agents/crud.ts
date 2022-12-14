@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
+import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { FleetServerAgent } from '../../../common/types';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
@@ -149,6 +149,30 @@ export async function getAgentTags(
     }
     throw err;
   }
+}
+
+export function getElasticsearchQuery(
+  kuery: string,
+  showInactive = false,
+  includeHosted = false,
+  hostedPolicies: string[] = []
+): estypes.QueryDslQueryContainer | undefined {
+  const filters = [];
+
+  if (kuery && kuery !== '') {
+    filters.push(kuery);
+  }
+
+  if (showInactive === false) {
+    filters.push(ACTIVE_AGENT_CONDITION);
+  }
+
+  if (!includeHosted && hostedPolicies.length > 0) {
+    filters.push('NOT (policy_id:{policyIds})'.replace('{policyIds}', hostedPolicies.join(',')));
+  }
+
+  const kueryNode = _joinFilters(filters);
+  return kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
 }
 
 export async function getAgentsByKuery(
@@ -395,10 +419,11 @@ export async function bulkUpdateAgents(
   updateData: Array<{
     agentId: string;
     data: Partial<AgentSOAttributes>;
-  }>
-): Promise<{ items: BulkActionResult[] }> {
+  }>,
+  errors: { [key: string]: Error }
+): Promise<void> {
   if (updateData.length === 0) {
-    return { items: [] };
+    return;
   }
 
   const body = updateData.flatMap(({ agentId, data }) => [
@@ -419,14 +444,12 @@ export async function bulkUpdateAgents(
     refresh: 'wait_for',
   });
 
-  return {
-    items: res.items.map((item) => ({
-      id: item.update!._id as string,
-      success: !item.update!.error,
+  res.items
+    .filter((item) => item.update!.error)
+    .forEach((item) => {
       // @ts-expect-error it not assignable to ErrorCause
-      error: item.update!.error as Error,
-    })),
-  };
+      errors[item.update!._id as string] = item.update!.error as Error;
+    });
 }
 
 export async function deleteAgent(esClient: ElasticsearchClient, agentId: string) {

@@ -292,6 +292,8 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
       fields: 'fields',
       hasReference: 'has_reference',
       hasReferenceOperator: 'has_reference_operator',
+      hasNoReference: 'has_no_reference',
+      hasNoReferenceOperator: 'has_no_reference_operator',
       page: 'page',
       perPage: 'per_page',
       search: 'search',
@@ -314,6 +316,9 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     // is not doing it implicitly.
     if (query.has_reference) {
       query.has_reference = JSON.stringify(query.has_reference);
+    }
+    if (query.has_no_reference) {
+      query.has_no_reference = JSON.stringify(query.has_no_reference);
     }
 
     // `aggs` is a structured object. we need to stringify it before sending it, as `fetch`

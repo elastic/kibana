@@ -52,8 +52,14 @@ const WaterfallItemsContainer = euiStyled.div`
 interface Props {
   waterfallItemId?: string;
   waterfall: IWaterfall;
+  showCriticalPath: boolean;
 }
-export function Waterfall({ waterfall, waterfallItemId }: Props) {
+
+export function Waterfall({
+  waterfall,
+  waterfallItemId,
+  showCriticalPath,
+}: Props) {
   const history = useHistory();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
@@ -61,7 +67,7 @@ export function Waterfall({ waterfall, waterfallItemId }: Props) {
 
   const { duration } = waterfall;
 
-  const agentMarks = getAgentMarks(waterfall.entryWaterfallTransaction?.doc);
+  const agentMarks = getAgentMarks(waterfall.entryTransaction);
   const errorMarks = getErrorMarks(waterfall.errorItems);
 
   // Calculate the left margin relative to the deepest level, or 100px, whichever
@@ -76,7 +82,7 @@ export function Waterfall({ waterfall, waterfallItemId }: Props) {
 
   return (
     <Container>
-      {waterfall.apiResponse.exceedsMax && (
+      {waterfall.exceedsMax && (
         <EuiCallOut
           color="warning"
           size="s"
@@ -119,6 +125,7 @@ export function Waterfall({ waterfall, waterfallItemId }: Props) {
               onClickWaterfallItem={(item: IWaterfallItem) =>
                 toggleFlyout({ history, item })
               }
+              showCriticalPath={showCriticalPath}
             />
           )}
         </WaterfallItemsContainer>

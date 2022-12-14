@@ -61,19 +61,27 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, save
     [push, savedQuery]
   );
 
-  return (
-    <EuiButtonIcon
-      color="primary"
-      iconType="play"
-      isDisabled={disabled}
-      onClick={handlePlayClick}
-      aria-label={i18n.translate('xpack.osquery.savedQueryList.queriesTable.runActionAriaLabel', {
+  const playText = useMemo(
+    () =>
+      i18n.translate('xpack.osquery.savedQueryList.queriesTable.runActionAriaLabel', {
         defaultMessage: 'Run {savedQueryName}',
         values: {
-          savedQueryName: savedQuery.attributes.name,
+          savedQueryName: savedQuery.attributes.id,
         },
-      })}
-    />
+      }),
+    [savedQuery]
+  );
+
+  return (
+    <EuiToolTip position="top" content={playText}>
+      <EuiButtonIcon
+        color="primary"
+        iconType="play"
+        isDisabled={disabled}
+        onClick={handlePlayClick}
+        aria-label={playText}
+      />
+    </EuiToolTip>
   );
 };
 
@@ -92,19 +100,27 @@ const EditButtonComponent: React.FC<EditButtonProps> = ({
 }) => {
   const buttonProps = useRouterNavigate(`saved_queries/${savedQueryId}`);
 
-  return (
-    <EuiButtonIcon
-      color="primary"
-      {...buttonProps}
-      iconType="pencil"
-      isDisabled={disabled}
-      aria-label={i18n.translate('xpack.osquery.savedQueryList.queriesTable.editActionAriaLabel', {
+  const editText = useMemo(
+    () =>
+      i18n.translate('xpack.osquery.savedQueryList.queriesTable.editActionAriaLabel', {
         defaultMessage: 'Edit {savedQueryName}',
         values: {
           savedQueryName,
         },
-      })}
-    />
+      }),
+    [savedQueryName]
+  );
+
+  return (
+    <EuiToolTip position="top" content={editText}>
+      <EuiButtonIcon
+        color="primary"
+        {...buttonProps}
+        iconType="pencil"
+        isDisabled={disabled}
+        aria-label={editText}
+      />
+    </EuiToolTip>
   );
 };
 
@@ -124,7 +140,7 @@ const SavedQueriesPageComponent = () => {
 
   const renderEditAction = useCallback(
     (item: SavedQuerySO) => (
-      <EditButton savedQueryId={item.id} savedQueryName={item.attributes.name} />
+      <EditButton savedQueryId={item.id} savedQueryName={item.attributes.id} />
     ),
     []
   );

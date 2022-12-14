@@ -1322,6 +1322,22 @@
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.Action.showNotification",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showNotification",
+            "description": [
+              "\nDetermines if notification should be shown in menu for that action\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1544,6 +1560,22 @@
             "label": "disabled",
             "description": [
               "\naction is disabled or not\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.ActionDefinition.showNotification",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showNotification",
+            "description": [
+              "\nDetermines if notification should be shown in menu for that action\n"
             ],
             "signature": [
               "boolean | undefined"
@@ -2141,7 +2173,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">> | undefined; runtimeFieldMap?: Record<string, ",
               {
                 "pluginId": "dataViews",
@@ -2187,6 +2225,27 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.VisualizeFieldContext.query",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false,
@@ -2355,10 +2414,13 @@
           {
             "parentPluginId": "uiActions",
             "id": "def-public.rowClickTrigger.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2366,10 +2428,13 @@
           {
             "parentPluginId": "uiActions",
             "id": "def-public.rowClickTrigger.description",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "description",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false

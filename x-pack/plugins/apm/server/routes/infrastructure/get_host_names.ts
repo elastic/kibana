@@ -6,10 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import {
-  CONTAINER_ID,
-  HOST_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+import { CONTAINER_ID, HOST_NAME } from '../../../common/es_fields/apm';
 import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 export async function getContainerHostNames({
@@ -29,6 +26,7 @@ export async function getContainerHostNames({
 
   const response = await infraMetricsClient.search({
     size: 0,
+    track_total_hits: false,
     query: {
       bool: {
         filter: [

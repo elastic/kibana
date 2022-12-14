@@ -6,27 +6,55 @@
  */
 
 import * as t from 'io-ts';
-
+import { dateType, summarySchema } from './common';
+import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
+import { timeWindowSchema } from './time_window';
 
-const rollingTimeWindowSchema = t.type({
-  duration: t.string,
-  is_rolling: t.literal(true),
+const occurrencesBudgetingMethodSchema = t.literal<string>('occurrences');
+const timeslicesBudgetingMethodSchema = t.literal<string>('timeslices');
+
+const budgetingMethodSchema = t.union([
+  occurrencesBudgetingMethodSchema,
+  timeslicesBudgetingMethodSchema,
+]);
+
+const objectiveSchema = t.intersection([
+  t.type({ target: t.number }),
+  t.partial({ timeslice_target: t.number, timeslice_window: durationType }),
+]);
+
+const settingsSchema = t.type({
+  timestamp_field: t.string,
+  sync_delay: durationType,
+  frequency: durationType,
 });
 
-const budgetingMethodSchema = t.literal('occurrences');
+const optionalSettingsSchema = t.partial({ ...settingsSchema.props });
 
-const objectiveSchema = t.type({
-  target: t.number,
-});
-
-const commonSLOSchema = t.type({
+const sloSchema = t.type({
+  id: t.string,
   name: t.string,
   description: t.string,
   indicator: indicatorSchema,
-  time_window: rollingTimeWindowSchema,
+  time_window: timeWindowSchema,
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
+  settings: settingsSchema,
+  revision: t.number,
+  created_at: dateType,
+  updated_at: dateType,
 });
 
-export { commonSLOSchema, rollingTimeWindowSchema, budgetingMethodSchema, objectiveSchema };
+const sloWithSummarySchema = t.intersection([sloSchema, t.type({ summary: summarySchema })]);
+
+export {
+  budgetingMethodSchema,
+  objectiveSchema,
+  occurrencesBudgetingMethodSchema,
+  optionalSettingsSchema,
+  settingsSchema,
+  sloSchema,
+  sloWithSummarySchema,
+  timeslicesBudgetingMethodSchema,
+};

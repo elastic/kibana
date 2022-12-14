@@ -6,7 +6,8 @@
  */
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 export const createStoredScriptBodySchema = schema.object({
   id: schema.string({ minLength: 1 }),
@@ -26,11 +27,20 @@ export const createStoredScriptBodySchema = schema.object({
 type CreateStoredScriptBodySchema = TypeOf<typeof createStoredScriptBodySchema>;
 
 export const createStoredScript = async ({
-  client,
+  esClient,
+  logger,
   options,
 }: {
-  client: IScopedClusterClient;
+  esClient: ElasticsearchClient;
+  logger: Logger;
   options: CreateStoredScriptBodySchema;
 }) => {
-  await client.asCurrentUser.putScript(options);
+  try {
+    await esClient.putScript(options);
+    return { [options.id]: { success: true, error: null } };
+  } catch (error) {
+    const createScriptError = transformError(error);
+    logger.error(`Failed to create stored script: ${options.id}: ${createScriptError.message}`);
+    return { [options.id]: { success: false, error: createScriptError } };
+  }
 };

@@ -15,6 +15,7 @@ import type {
   NewPackagePolicyInputStream,
   NewPackagePolicy,
   PackagePolicyConfigRecordEntry,
+  RegistryStreamWithDataStream,
 } from '../types';
 
 import { doesPackageHaveIntegrations } from '.';
@@ -24,7 +25,7 @@ import {
   isIntegrationPolicyTemplate,
 } from './policy_template';
 
-type PackagePolicyStream = RegistryStream & { release?: 'beta' | 'experimental' | 'ga' } & {
+type PackagePolicyStream = RegistryStream & {
   data_stream: { type: string; dataset: string };
 };
 
@@ -48,7 +49,33 @@ export const getStreamsForInputType = (
             type: dataStream.type,
             dataset: dataStream.dataset,
           },
-          release: dataStream.release,
+        });
+      }
+    });
+  });
+
+  return streams;
+};
+
+export const getRegistryStreamWithDataStreamForInputType = (
+  inputType: string,
+  packageInfo: PackageInfo,
+  dataStreamPaths: string[] = []
+): RegistryStreamWithDataStream[] => {
+  const streams: RegistryStreamWithDataStream[] = [];
+  const dataStreams = getNormalizedDataStreams(packageInfo);
+  const dataStreamsToSearch = dataStreamPaths.length
+    ? dataStreams.filter((dataStream) => dataStreamPaths.includes(dataStream.path))
+    : dataStreams;
+
+  dataStreamsToSearch.forEach((dataStream) => {
+    (dataStream.streams || []).forEach((stream) => {
+      if (stream.input === inputType) {
+        streams.push({
+          ...stream,
+          data_stream: {
+            ...dataStream,
+          },
         });
       }
     });
@@ -113,7 +140,6 @@ export const packageToPackagePolicyInputs = (
       const stream: NewPackagePolicyInputStream = {
         enabled: packageStream.enabled === false ? false : true,
         data_stream: packageStream.data_stream,
-        release: packageStream.release,
       };
       if (packageStream.vars && packageStream.vars.length) {
         stream.vars = packageStream.vars.reduce(varsReducer, {});
@@ -179,6 +205,11 @@ export const packageToPackagePolicy = (
   description?: string,
   integrationToEnable?: string
 ): NewPackagePolicy => {
+  const experimentalDataStreamFeatures =
+    'savedObject' in packageInfo
+      ? packageInfo.savedObject?.attributes?.experimental_data_stream_features
+      : undefined;
+
   const packagePolicy: NewPackagePolicy = {
     name: packagePolicyName || `${packageInfo.name}-1`,
     namespace,
@@ -187,6 +218,9 @@ export const packageToPackagePolicy = (
       name: packageInfo.name,
       title: packageInfo.title,
       version: packageInfo.version,
+      ...(experimentalDataStreamFeatures
+        ? { experimental_data_stream_features: experimentalDataStreamFeatures }
+        : undefined),
     },
     enabled: true,
     policy_id: agentPolicyId,

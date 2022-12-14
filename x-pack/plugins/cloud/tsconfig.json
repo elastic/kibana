@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
   },
   "include": [
     ".storybook/**/*",
@@ -13,11 +12,8 @@
     "server/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/home/tsconfig.json" },
-    { "path": "../cloud_integrations/cloud_experiments/tsconfig.json" },
-    { "path": "../security/tsconfig.json" },
   ]
 }

@@ -37,6 +37,7 @@ import {
   aggregationTypeTransform,
   EntityField,
   getEntityFieldList,
+  isMultiBucketAnomaly,
 } from '../../../common/util/anomaly_utils';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { isDefined } from '../../../common/types/guards';
@@ -653,6 +654,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           ? ML_JOB_AGGREGATION.LAT_LONG
           : mlFunctionToESAggregation(detector.function),
       timeField: job.data_description.time_field!,
+      // @ts-expect-error bucket_span is of type estypes.Duration
       interval: job.analysis_config.bucket_span,
       datafeedConfig: job.datafeed_config!,
       summaryCountFieldName: job.analysis_config.summary_count_field_name,
@@ -1100,9 +1102,14 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
             }
           }
 
-          if (record.multi_bucket_impact !== undefined) {
-            chartPoint.multiBucketImpact = record.multi_bucket_impact;
+          if (
+            record.anomaly_score_explanation !== undefined &&
+            record.anomaly_score_explanation.multi_bucket_impact !== undefined
+          ) {
+            chartPoint.multiBucketImpact = record.anomaly_score_explanation.multi_bucket_impact;
           }
+
+          chartPoint.isMultiBucketAnomaly = isMultiBucketAnomaly(record);
         }
       });
 
@@ -1889,8 +1896,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     const response = await mlClient.anomalySearch<estypes.SearchResponse<RecordForInfluencer>>(
       {
-        size: maxResults !== undefined ? maxResults : 100,
         body: {
+          size: maxResults !== undefined ? maxResults : 100,
           query: {
             bool: {
               filter: [

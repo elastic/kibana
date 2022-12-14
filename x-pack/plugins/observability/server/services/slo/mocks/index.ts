@@ -6,6 +6,7 @@
  */
 
 import { ResourceInstaller } from '../resource_installer';
+import { SLIClient } from '../sli_client';
 import { SLORepository } from '../slo_repository';
 import { TransformManager } from '../transform_manager';
 
@@ -29,7 +30,20 @@ const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
     save: jest.fn(),
     findById: jest.fn(),
     deleteById: jest.fn(),
+    find: jest.fn(),
   };
 };
 
-export { createResourceInstallerMock, createTransformManagerMock, createSLORepositoryMock };
+const createSLIClientMock = (): jest.Mocked<SLIClient> => {
+  return {
+    fetchCurrentSLIData: jest.fn(),
+    fetchSLIDataFrom: jest.fn(),
+  };
+};
+
+export {
+  createResourceInstallerMock,
+  createTransformManagerMock,
+  createSLORepositoryMock,
+  createSLIClientMock,
+};

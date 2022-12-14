@@ -15,10 +15,6 @@ export const PASSWORD_LABEL = i18n.translate('xpack.enterpriseSearch.passwordLab
   defaultMessage: 'Password',
 });
 
-export const TOKEN_LABEL = i18n.translate('xpack.enterpriseSearch.tokenLabel', {
-  defaultMessage: 'Token',
-});
-
 export const TYPE_LABEL = i18n.translate('xpack.enterpriseSearch.typeLabel', {
   defaultMessage: 'Type',
 });
@@ -40,4 +36,12 @@ export const NAME_LABEL = i18n.translate('xpack.enterpriseSearch.nameLabel', {
 
 export const DESCRIPTION_LABEL = i18n.translate('xpack.enterpriseSearch.descriptionLabel', {
   defaultMessage: 'Description',
+});
+
+export const OPTIONAL_LABEL = i18n.translate('xpack.enterpriseSearch.optionalLabel', {
+  defaultMessage: 'Optional',
+});
+
+export const LEARN_MORE_LINK = i18n.translate('xpack.enterpriseSearch.learnMore.link', {
+  defaultMessage: 'Learn more',
 });

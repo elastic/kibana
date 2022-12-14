@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   Logger,
   SavedObject,
   SavedObjectReference,
@@ -19,30 +19,31 @@ import {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
-import {
+import type {
+  AttachmentTotals,
   AttributesTypeAlerts,
   CommentAttributes as AttachmentAttributes,
   CommentAttributesWithoutRefs as AttachmentAttributesWithoutRefs,
   CommentPatchAttributes as AttachmentPatchAttributes,
-  CommentType,
 } from '../../../common/api';
+import { CommentType } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import { ClientArgs } from '..';
+import type { ClientArgs } from '..';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common/utils';
-import { AggregationResponse } from '../../client/metrics/types';
+import type { AggregationResponse } from '../../client/metrics/types';
 import {
   extractAttachmentSORefsFromAttributes,
   injectAttachmentSOAttributesFromRefs,
   injectAttachmentSOAttributesFromRefsForPatch,
 } from '../so_references';
-import { SavedObjectFindOptionsKueryNode } from '../../common/types';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { IndexRefresh } from '../types';
+import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { IndexRefresh } from '../types';
 
 interface AttachedToCaseArgs extends ClientArgs {
   caseId: string;
@@ -93,16 +94,48 @@ interface BulkUpdateAttachmentArgs extends ClientArgs, IndexRefresh {
   comments: UpdateArgs[];
 }
 
-interface CommentStats {
-  nonAlerts: number;
-  alerts: number;
-}
-
 export class AttachmentService {
   constructor(
     private readonly log: Logger,
     private readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
   ) {}
+
+  public async getAttachmentIdsForCases({
+    caseIds,
+    unsecuredSavedObjectsClient,
+  }: {
+    caseIds: string[];
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  }) {
+    try {
+      this.log.debug(`Attempting to retrieve attachments associated with cases: [${caseIds}]`);
+
+      const finder = unsecuredSavedObjectsClient.createPointInTimeFinder({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        hasReference: caseIds.map((id) => ({ id, type: CASE_SAVED_OBJECT })),
+        sortField: 'created_at',
+        sortOrder: 'asc',
+        /**
+         * We only care about the ids so to reduce the data returned we should limit the fields in the response. Core
+         * doesn't support retrieving no fields (id would always be returned anyway) so to limit it we'll only request
+         * the owner even though we don't need it.
+         */
+        fields: ['owner'],
+        perPage: MAX_DOCS_PER_PAGE,
+      });
+
+      const ids: string[] = [];
+
+      for await (const attachmentSavedObject of finder.find()) {
+        ids.push(...attachmentSavedObject.saved_objects.map((attachment) => attachment.id));
+      }
+
+      return ids;
+    } catch (error) {
+      this.log.error(`Error retrieving attachments associated with cases: [${caseIds}]: ${error}`);
+      throw error;
+    }
+  }
 
   public async countAlertsAttachedToCase(
     params: AlertsAttachedToCaseArgs
@@ -463,7 +496,7 @@ export class AttachmentService {
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     caseIds: string[];
-  }): Promise<Map<string, CommentStats>> {
+  }): Promise<Map<string, AttachmentTotals>> {
     if (caseIds.length <= 0) {
       return new Map();
     }
@@ -498,11 +531,11 @@ export class AttachmentService {
     return (
       res.aggregations?.references.caseIds.buckets.reduce((acc, idBucket) => {
         acc.set(idBucket.key, {
-          nonAlerts: idBucket.reverse.comments.doc_count,
+          userComments: idBucket.reverse.comments.doc_count,
           alerts: idBucket.reverse.alerts.value,
         });
         return acc;
-      }, new Map<string, CommentStats>()) ?? new Map()
+      }, new Map<string, AttachmentTotals>()) ?? new Map()
     );
   }
 

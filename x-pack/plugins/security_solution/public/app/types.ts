@@ -33,7 +33,7 @@ export interface RenderAppProps extends AppMountParameters {
 import type { State, SubPluginsInitReducer } from '../common/store';
 import type { Immutable } from '../../common/endpoint/types';
 import type { AppAction } from '../common/store/actions';
-import type { TimelineState } from '../timelines/store/timeline/types';
+import type { TableState } from '../common/store/data_table/types';
 
 export { SecurityPageName } from '../../common/constants';
 
@@ -47,7 +47,7 @@ export type SecuritySubPluginRoutes = RouteProps[];
 
 export interface SecuritySubPlugin {
   routes: SecuritySubPluginRoutes;
-  storageTimelines?: Pick<TimelineState, 'timelineById'>;
+  storageDataTables?: Pick<TableState, 'tableById'>;
 }
 
 export type SecuritySubPluginKeyStore =

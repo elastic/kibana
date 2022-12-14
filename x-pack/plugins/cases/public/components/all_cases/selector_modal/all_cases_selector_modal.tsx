@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { Case, CaseStatusWithAllStatus } from '../../../../common/ui/types';
+import type { Case, CaseStatusWithAllStatus } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
 import { casesQueryClient } from '../../cases_context/query_client';
@@ -29,8 +29,8 @@ export interface AllCasesSelectorModalProps {
 
 const Modal = styled(EuiModal)`
   ${({ theme }) => `
-    width: ${theme.eui.euiBreakpoints.l};
-    max-width: ${theme.eui.euiBreakpoints.l};
+    min-width: ${theme.eui.euiBreakpoints.l};
+    max-width: ${theme.eui.euiBreakpoints.xl};
   `}
 `;
 
@@ -68,7 +68,11 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
             />
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButton color="text" onClick={closeModal}>
+            <EuiButton
+              color="text"
+              onClick={closeModal}
+              data-test-subj="all-cases-modal-cancel-button"
+            >
               {i18n.CANCEL}
             </EuiButton>
           </EuiModalFooter>

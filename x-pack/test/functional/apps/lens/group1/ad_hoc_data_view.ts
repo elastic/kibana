@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
     'timeToVisualize',
     'common',
+    'discover',
   ]);
   const elasticChart = getService('elasticChart');
   const fieldEditor = getService('fieldEditor');
@@ -52,6 +53,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(selectedPattern).to.eql('*stash*');
     });
   }
+
+  const checkDiscoverNavigationResult = async () => {
+    await testSubjects.click('embeddablePanelToggleMenuIcon');
+    await testSubjects.click('embeddablePanelMore-mainMenu');
+    await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+
+    const [, discoverHandle] = await browser.getAllWindowHandles();
+    await browser.switchToWindow(discoverHandle);
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
+    const actualIndexPattern = await (
+      await testSubjects.find('discover-dataView-switch-link')
+    ).getVisibleText();
+    expect(actualIndexPattern).to.be('*stash*');
+
+    const actualDiscoverQueryHits = await testSubjects.getVisibleText('unifiedHistogramQueryHits');
+    expect(actualDiscoverQueryHits).to.be('14,005');
+    expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);
+  };
 
   describe('lens ad hoc data view tests', () => {
     it('should allow building a chart based on ad hoc data view', async () => {
@@ -102,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow removing a field', async () => {
       await PageObjects.lens.clickField('runtimefield');
-      await PageObjects.lens.removeField();
+      await PageObjects.lens.removeField('runtimefield');
       await fieldEditor.confirmDelete();
       await PageObjects.lens.waitForFieldMissing('runtimefield');
     });
@@ -156,15 +176,60 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.common.sleep(15000);
-
       const actualIndexPattern = await (
         await testSubjects.find('discover-dataView-switch-link')
       ).getVisibleText();
       expect(actualIndexPattern).to.be('*stash*');
 
-      const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText(
+        'unifiedHistogramQueryHits'
+      );
       expect(actualDiscoverQueryHits).to.be('14,005');
+
+      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
+
+      await PageObjects.discover.addRuntimeField(
+        '_bytes-runtimefield',
+        `emit(doc["bytes"].value.toString())`
+      );
+      await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
+      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
+      expect(newDataViewId).not.to.equal(prevDataViewId);
+      expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);
+
+      await browser.closeCurrentWindow();
+    });
+
+    it('should navigate to discover from embeddable correctly', async () => {
+      const [lensHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(lensHandle);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await setupAdHocDataView();
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.save(
+        'embeddable-test-with-adhoc-data-view',
+        false,
+        false,
+        false,
+        'new'
+      );
+
+      await checkDiscoverNavigationResult();
+
+      await browser.closeCurrentWindow();
+      const [daashboardHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(daashboardHandle);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // adhoc data view should be persisted after refresh
+      await browser.refresh();
+      await checkDiscoverNavigationResult();
     });
   });
 }

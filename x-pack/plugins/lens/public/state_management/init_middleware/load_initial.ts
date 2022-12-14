@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
@@ -117,7 +118,7 @@ export function loadInitial(
 
   let activeDatasourceId: string | undefined;
   if (initialContext && 'query' in initialContext) {
-    activeDatasourceId = 'textBasedLanguages';
+    activeDatasourceId = 'textBased';
   }
 
   if (
@@ -125,6 +126,15 @@ export function loadInitial(
     (attributeService.inputIsRefType(initialInput) &&
       initialInput.savedObjectId === lens.persistedDoc?.savedObjectId)
   ) {
+    const newFilters =
+      initialContext && 'searchFilters' in initialContext && initialContext.searchFilters
+        ? cloneDeep(initialContext.searchFilters)
+        : undefined;
+
+    if (newFilters) {
+      data.query.filterManager.setAppFilters(newFilters);
+    }
+
     return initializeSources(
       {
         datasourceMap,

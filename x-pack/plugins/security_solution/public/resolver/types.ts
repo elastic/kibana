@@ -692,7 +692,7 @@ export interface DataAccessLayer {
     indexPatterns,
   }: {
     entityID: string;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
   }) => Promise<ResolverRelatedEvents>;
 
@@ -710,7 +710,7 @@ export interface DataAccessLayer {
     entityID: string;
     category: string;
     after?: string;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
   }) => Promise<ResolverPaginatedEvents>;
 
@@ -725,7 +725,7 @@ export interface DataAccessLayer {
     limit,
   }: {
     ids: string[];
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
     limit: number;
   }): Promise<SafeResolverEvent[]>;
@@ -747,7 +747,7 @@ export interface DataAccessLayer {
     eventTimestamp: string;
     eventID?: string | number;
     winlogRecordID: string;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
   }) => Promise<SafeResolverEvent | null>;
 

@@ -93,7 +93,7 @@ describe('Service inventory', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(mainAliasNames);
 
-      cy.get('[data-test-subj="environmentFilter"]').type('production');
+      cy.getByTestSubj('environmentFilter').type('production');
 
       cy.contains('button', 'production').click();
 
@@ -175,7 +175,7 @@ describe('Service inventory', () => {
           ])
         );
       });
-      cy.get('[data-test-subj="pagination-button-1"]').click();
+      cy.getByTestSubj('pagination-button-1').click();
       cy.wait('@detailedStatisticsRequest').then((payload) => {
         expect(payload.request.body.serviceNames).eql(
           JSON.stringify([

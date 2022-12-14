@@ -10,7 +10,13 @@ import { ParsedUsageCollection } from './ts_parser';
 
 export type AllowedSchemaNumberTypes = 'long' | 'integer' | 'short' | 'byte' | 'double' | 'float';
 
-export type AllowedSchemaTypes = AllowedSchemaNumberTypes | 'keyword' | 'text' | 'boolean' | 'date';
+export type AllowedSchemaTypes =
+  | AllowedSchemaNumberTypes
+  | 'keyword'
+  | 'text'
+  | 'boolean'
+  | 'date'
+  | 'pass_through';
 
 export function compatibleSchemaTypes(type: AllowedSchemaTypes | 'array') {
   switch (type) {
@@ -29,6 +35,8 @@ export function compatibleSchemaTypes(type: AllowedSchemaTypes | 'array') {
       return 'number';
     case 'array':
       return 'array';
+    case 'pass_through':
+      return 'unknown';
     default:
       throw new Error(`Unknown schema type ${type}`);
   }

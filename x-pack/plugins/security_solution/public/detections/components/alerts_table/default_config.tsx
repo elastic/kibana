@@ -12,10 +12,9 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
-import { RowRendererId } from '../../../../common/types/timeline';
+import type { SubsetDataTableModel } from '../../../common/store/data_table/model';
+import { tableDefaults } from '../../../common/store/data_table/defaults';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
   getColumns,
   getRulePreviewColumns,
@@ -153,14 +152,13 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
       ]
     : [];
 
-export const getAlertsDefaultModel = (license?: LicenseService): SubsetTimelineModel => ({
-  ...timelineDefaults,
+export const getAlertsDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
+  ...tableDefaults,
   columns: getColumns(license),
   showCheckboxes: true,
-  excludedRowRendererIds: Object.values(RowRendererId),
 });
 
-export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetTimelineModel => ({
+export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
   ...getAlertsDefaultModel(license),
   columns: getColumns(license),
   defaultColumns: getRulePreviewColumns(license),
@@ -172,6 +170,7 @@ export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetTi
       sortDirection: 'desc',
     },
   ],
+  showCheckboxes: false,
 });
 
 export const requiredFieldsForActions = [
@@ -184,7 +183,9 @@ export const requiredFieldsForActions = [
   'kibana.alert.rule.name',
   'kibana.alert.rule.to',
   'kibana.alert.rule.uuid',
+  'kibana.alert.rule.rule_id',
   'kibana.alert.rule.type',
+  'kibana.alert.suppression.docs_count',
   'kibana.alert.original_event.kind',
   'kibana.alert.original_event.module',
   // Endpoint exception fields

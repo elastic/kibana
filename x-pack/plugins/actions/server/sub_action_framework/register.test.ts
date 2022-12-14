@@ -18,6 +18,9 @@ import {
 import { register } from './register';
 
 describe('Registration', () => {
+  const renderedVariables = { body: '' };
+  const mockRenderParameterTemplates = jest.fn().mockReturnValue(renderedVariables);
+
   const connector = {
     id: '.test',
     name: 'Test',
@@ -28,6 +31,7 @@ describe('Registration', () => {
       secrets: TestSecretsSchema,
     },
     Service: TestSubActionConnector,
+    renderParameterTemplates: mockRenderParameterTemplates,
   };
 
   const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -35,7 +39,6 @@ describe('Registration', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.clearAllMocks();
   });
 
@@ -54,7 +57,27 @@ describe('Registration', () => {
       minimumLicenseRequired: connector.minimumLicenseRequired,
       supportedFeatureIds: connector.supportedFeatureIds,
       validate: expect.anything(),
-      executor: expect.anything(),
+      executor: expect.any(Function),
+      renderParameterTemplates: expect.any(Function),
     });
+  });
+
+  it('registers the renderParameterTemplates correctly', async () => {
+    register<TestConfig, TestSecrets>({
+      actionTypeRegistry,
+      connector,
+      configurationUtilities: mockedActionsConfig,
+      logger,
+    });
+
+    const params = {};
+    const variables = {};
+    const actionId = 'action-id';
+
+    const { renderParameterTemplates } = actionTypeRegistry.register.mock.calls[0][0];
+    const rendered = renderParameterTemplates?.(params, variables, actionId);
+
+    expect(mockRenderParameterTemplates).toHaveBeenCalledWith(params, variables, actionId);
+    expect(rendered).toBe(renderedVariables);
   });
 });

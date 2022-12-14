@@ -23,6 +23,7 @@ import {
 } from './types';
 import { getFieldNameFromField } from '../utils';
 import { isFieldValid } from '../../utils';
+import { Operation } from '../../types';
 
 type MetricAggregationWithoutParams =
   | typeof Operations.AVERAGE
@@ -77,7 +78,7 @@ export const isMetricWithField = (
 
 export const convertMetricAggregationColumnWithoutSpecialParams = (
   aggregation: SupportedMetric,
-  { agg, dataView }: CommonColumnConverterArgs<MetricsWithoutSpecialParams>,
+  { visType, agg, dataView }: CommonColumnConverterArgs<MetricsWithoutSpecialParams>,
   reducedTimeRange?: string
 ): MetricAggregationColumnWithoutSpecialParams | null => {
   if (!isSupportedAggregationWithoutParams(aggregation.name)) {
@@ -93,16 +94,23 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
   }
 
   const field = dataView.getFieldByName(sourceField);
-  if (!isFieldValid(field, aggregation)) {
+  if (!isFieldValid(visType, field, aggregation)) {
     return null;
   }
+
+  const column = createColumn(agg, field, {
+    reducedTimeRange,
+  });
 
   return {
     operationType: aggregation.name,
     sourceField,
-    ...createColumn(agg, field, {
-      reducedTimeRange,
-    }),
+    ...column,
+    dataType: ([Operations.COUNT, Operations.UNIQUE_COUNT] as Operation[]).includes(
+      aggregation.name
+    )
+      ? 'number'
+      : column.dataType,
     params: { ...getFormat() },
     timeShift: agg.aggParams?.timeShift,
   };

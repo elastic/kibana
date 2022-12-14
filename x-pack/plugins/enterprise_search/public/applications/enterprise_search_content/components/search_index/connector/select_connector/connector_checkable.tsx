@@ -45,6 +45,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
       {...props}
       id={`checkableCard-${serviceType}`}
       className="connectorCheckable"
+      data-telemetry-id={`entSearchContent-connector-selectConnector-${serviceType}-select`}
       label={
         <EuiFlexGroup alignItems="center" gutterSize="s">
           {icon && (

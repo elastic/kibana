@@ -33,7 +33,7 @@ export const getFiltersMock = () =>
     },
     {
       meta: {
-        type: 'OR',
+        type: 'combined',
         params: [
           {
             meta: {
@@ -302,7 +302,7 @@ export const getDataThatNeedsNormalized = () =>
     },
     {
       meta: {
-        type: 'OR',
+        type: 'combined',
         params: [
           {
             meta: {
@@ -420,7 +420,7 @@ export const getDataAfterNormalized = () =>
     },
     {
       meta: {
-        type: 'OR',
+        type: 'combined',
         params: [
           {
             meta: {
@@ -515,7 +515,7 @@ export const getDataThatNeedNotNormalized = () =>
   [
     {
       meta: {
-        type: 'OR',
+        type: 'combined',
         params: [
           {
             meta: {

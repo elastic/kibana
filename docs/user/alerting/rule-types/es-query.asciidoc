@@ -26,7 +26,7 @@ the *time window*.
 Size:: Specifies the number of documents to pass to the configured actions when 
 the threshold condition is met.
 {es} query:: Specifies the ES DSL query. The number of documents that 
-match this query is evaluated against the threshold condition. Only the `query`, `fields` and `runtime_mappings`
+match this query is evaluated against the threshold condition. Only the `query`, `fields`, `_source` and `runtime_mappings`
 fields are used, other DSL fields are not considered. 
 Threshold:: Defines a threshold value and a comparison operator  (`is above`, 
 `is above or equals`, `is below`, `is below or equals`, or `is between`). The 

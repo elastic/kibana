@@ -22,6 +22,7 @@ import {
   Criteria,
   EuiButtonEmpty,
   EuiBadge,
+  EuiPageTemplate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
@@ -52,6 +53,8 @@ import {
 } from '../../../../common/connectors_selection';
 import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
+import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
+import { getCurrentDocTitle } from '../../../lib/doc_title';
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
   return (
@@ -83,6 +86,9 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     notifications: { toasts },
     application: { capabilities },
     actionTypeRegistry,
+    setBreadcrumbs,
+    chrome,
+    docLinks,
   } = useKibana().services;
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canExecute = hasExecuteActionsCapability(capabilities);
@@ -106,6 +112,12 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [showWarningText, setShowWarningText] = useState<boolean>(false);
+
+  // Set breadcrumb and page title
+  useEffect(() => {
+    setBreadcrumbs([getAlertingSectionBreadcrumb('connectors')]);
+    chrome.docTitle.change(getCurrentDocTitle('connectors'));
+  }, [chrome, setBreadcrumbs]);
 
   useEffect(() => {
     (async () => {
@@ -428,110 +440,144 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                   />
                 </EuiButton>,
               ],
-        toolsRight: canSave
-          ? [
-              <EuiButton
-                data-test-subj="createActionButton"
-                key="create-action"
-                fill
-                onClick={() => setAddFlyoutVisibility(true)}
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-                  defaultMessage="Create connector"
-                />
-              </EuiButton>,
-            ]
-          : [],
       }}
     />
   );
 
   return (
-    <section data-test-subj="actionsList">
-      <DeleteModalConfirmation
-        data-test-subj="deleteConnectorsConfirmation"
-        onDeleted={(deleted: string[]) => {
-          if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
-            const updatedActions = actions.filter(
-              (action) => action.id && !connectorsToDelete.includes(action.id)
-            );
-            setActions(updatedActions);
-            setSelectedItems([]);
-          }
-          setConnectorsToDelete([]);
-        }}
-        onErrors={async () => {
-          // Refresh the actions from the server, some actions may have beend deleted
-          await loadActions();
-          setConnectorsToDelete([]);
-        }}
-        onCancel={async () => {
-          setConnectorsToDelete([]);
-        }}
-        apiDeleteCall={deleteActions}
-        idsToDelete={connectorsToDelete}
-        singleTitle={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionsConnectorsList.singleTitle',
-          { defaultMessage: 'connector' }
-        )}
-        multipleTitle={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionsConnectorsList.multipleTitle',
-          { defaultMessage: 'connectors' }
-        )}
-        showWarningText={showWarningText}
-        warningText={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionsConnectorsList.warningText',
-          {
-            defaultMessage:
-              '{connectors, plural, one {This connector is} other {Some connectors are}} currently in use.',
-            values: {
-              connectors: connectorsToDelete.length,
-            },
-          }
-        )}
-        setIsLoadingState={(isLoading: boolean) => setIsLoadingActionTypes(isLoading)}
-      />
+    <>
+      {actionConnectorTableItems.length !== 0 && (
+        <EuiPageTemplate.Header
+          paddingSize="none"
+          pageTitle={i18n.translate('xpack.triggersActionsUI.connectors.home.appTitle', {
+            defaultMessage: 'Connectors',
+          })}
+          description={i18n.translate('xpack.triggersActionsUI.connectors.home.description', {
+            defaultMessage: 'Connect third-party software with your alerting data.',
+          })}
+          rightSideItems={(canSave
+            ? [
+                <EuiButton
+                  data-test-subj="createActionButton"
+                  key="create-action"
+                  fill
+                  onClick={() => setAddFlyoutVisibility(true)}
+                  iconType="plusInCircle"
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
+                    defaultMessage="Create connector"
+                  />
+                </EuiButton>,
+              ]
+            : []
+          ).concat([
+            <EuiButtonEmpty
+              data-test-subj="documentationButton"
+              key="documentation-button"
+              href={docLinks.links.alerting.connectors}
+              iconType="help"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.actionsConnectorsList.documentationButtonLabel"
+                defaultMessage="Documentation"
+              />
+            </EuiButtonEmpty>,
+          ])}
+        />
+      )}
+      <EuiPageTemplate.Section
+        paddingSize="none"
+        data-test-subj="actionsList"
+        alignment={actionConnectorTableItems.length === 0 ? 'center' : 'top'}
+      >
+        <DeleteModalConfirmation
+          data-test-subj="deleteConnectorsConfirmation"
+          onDeleted={(deleted: string[]) => {
+            if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
+              const updatedActions = actions.filter(
+                (action) => action.id && !connectorsToDelete.includes(action.id)
+              );
+              setActions(updatedActions);
+              setSelectedItems([]);
+            }
+            setConnectorsToDelete([]);
+          }}
+          onErrors={async () => {
+            // Refresh the actions from the server, some actions may have beend deleted
+            await loadActions();
+            setConnectorsToDelete([]);
+          }}
+          onCancel={async () => {
+            setConnectorsToDelete([]);
+          }}
+          apiDeleteCall={deleteActions}
+          idsToDelete={connectorsToDelete}
+          singleTitle={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.singleTitle',
+            { defaultMessage: 'connector' }
+          )}
+          multipleTitle={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.multipleTitle',
+            { defaultMessage: 'connectors' }
+          )}
+          showWarningText={showWarningText}
+          warningText={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.warningText',
+            {
+              defaultMessage:
+                '{connectors, plural, one {This connector is} other {Some connectors are}} currently in use.',
+              values: {
+                connectors: connectorsToDelete.length,
+              },
+            }
+          )}
+          setIsLoadingState={(isLoading: boolean) => setIsLoadingActionTypes(isLoading)}
+        />
 
-      <EuiSpacer size="m" />
-      {/* Render the view based on if there's data or if they can save */}
-      {(isLoadingActions || isLoadingActionTypes) && <CenterJustifiedSpinner />}
-      {actionConnectorTableItems.length !== 0 && table}
-      {actionConnectorTableItems.length === 0 &&
-        canSave &&
-        !isLoadingActions &&
-        !isLoadingActionTypes && (
-          <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
-        )}
-      {actionConnectorTableItems.length === 0 && !canSave && <NoPermissionPrompt />}
-      {addFlyoutVisible ? (
-        <CreateConnectorFlyout
-          onClose={() => {
-            setAddFlyoutVisibility(false);
-          }}
-          onTestConnector={(connector) => editItem(connector, EditConnectorTabs.Test)}
-          onConnectorCreated={loadActions}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      ) : null}
-      {editConnectorProps.initialConnector ? (
-        <EditConnectorFlyout
-          key={`${editConnectorProps.initialConnector.id}${
-            editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
-          }`}
-          connector={editConnectorProps.initialConnector}
-          tab={editConnectorProps.tab}
-          onClose={() => {
-            setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
-          }}
-          onConnectorUpdated={(connector) => {
-            setEditConnectorProps({ ...editConnectorProps, initialConnector: connector });
-            loadActions();
-          }}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      ) : null}
-    </section>
+        <EuiSpacer size="m" />
+        {/* Render the view based on if there's data or if they can save */}
+        {(isLoadingActions || isLoadingActionTypes) && <CenterJustifiedSpinner />}
+        {actionConnectorTableItems.length !== 0 && table}
+        {actionConnectorTableItems.length === 0 &&
+          canSave &&
+          !isLoadingActions &&
+          !isLoadingActionTypes && (
+            <EmptyConnectorsPrompt
+              onCTAClicked={() => setAddFlyoutVisibility(true)}
+              docLinks={docLinks}
+            />
+          )}
+        {actionConnectorTableItems.length === 0 && !canSave && <NoPermissionPrompt />}
+        {addFlyoutVisible ? (
+          <CreateConnectorFlyout
+            onClose={() => {
+              setAddFlyoutVisibility(false);
+            }}
+            onTestConnector={(connector) => editItem(connector, EditConnectorTabs.Test)}
+            onConnectorCreated={loadActions}
+            actionTypeRegistry={actionTypeRegistry}
+          />
+        ) : null}
+        {editConnectorProps.initialConnector ? (
+          <EditConnectorFlyout
+            key={`${editConnectorProps.initialConnector.id}${
+              editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
+            }`}
+            connector={editConnectorProps.initialConnector}
+            tab={editConnectorProps.tab}
+            onClose={() => {
+              setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
+            }}
+            onConnectorUpdated={(connector) => {
+              setEditConnectorProps({ ...editConnectorProps, initialConnector: connector });
+              loadActions();
+            }}
+            actionTypeRegistry={actionTypeRegistry}
+          />
+        ) : null}
+      </EuiPageTemplate.Section>
+    </>
   );
 };
 

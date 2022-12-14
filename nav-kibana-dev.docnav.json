@@ -106,6 +106,10 @@
         },
         {
           "id": "kibDevDocsEmbeddables"
+        },
+        {
+          "id": "kibCloudExperimentsPlugin",
+          "label": "A/B testing on Elastic Cloud"
         }
       ]
     },
@@ -171,6 +175,15 @@
     {
       "label": "Contributors Newsletters",
       "items": [
+        {
+          "id": "kibNovember2022ContributorNewsletter"
+        },
+        {
+          "id": "kibOctober2022ContributorNewsletter"
+        },
+        {
+          "id": "kibSeptember2022ContributorNewsletter"
+        },
         {
           "id": "kibAugust2022ContributorNewsletter"
         },
@@ -316,6 +329,9 @@
         },
         {
           "id": "kibFileUploadPluginApi"
+        },
+        {
+          "id": "kibFilesPluginApi"
         },
         {
           "id": "kibFleetPluginApi"

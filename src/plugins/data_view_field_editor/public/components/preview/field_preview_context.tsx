@@ -217,7 +217,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       const [response, searchError] = await search
         .search({
           params: {
-            index: dataView.title,
+            index: dataView.getIndexPattern(),
             body: {
               size: limit,
             },
@@ -269,7 +269,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       const [response, searchError] = await search
         .search({
           params: {
-            index: dataView.title,
+            index: dataView.getIndexPattern(),
             body: {
               size: 1,
               query: {

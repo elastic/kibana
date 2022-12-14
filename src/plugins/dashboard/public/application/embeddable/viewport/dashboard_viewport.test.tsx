@@ -160,7 +160,7 @@ test.skip('renders exit full screen button when in full screen mode and empty sc
 });
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-test.skip('DashboardViewport unmount unsubscribes', async (done) => {
+test.skip('DashboardViewport unmount unsubscribes', (done) => {
   const { props } = getProps();
   const component = mount(
     <I18nProvider>

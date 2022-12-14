@@ -15,7 +15,11 @@ import type { Entry } from '../types';
 
 const getEntryValue = (type: string, value?: string | string[]) => {
   if (type === 'match_any' && Array.isArray(value)) {
-    return value.map((currentValue) => <EuiBadge color="hollow">{currentValue}</EuiBadge>);
+    return value.map((currentValue, index) => (
+      <EuiBadge key={index} data-test-subj={`matchAnyBadge${index}`} color="hollow">
+        {currentValue}
+      </EuiBadge>
+    ));
   }
   return value ?? '';
 };
@@ -42,6 +46,7 @@ export const getValueExpression = (
     <EuiExpression
       description={getEntryOperator(type, operator)}
       value={getEntryValue(type, value)}
+      data-test-subj="entryValueExpression"
     />
     <ValueWithSpaceWarning value={value} />
   </>

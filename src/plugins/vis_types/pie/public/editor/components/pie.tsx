@@ -160,6 +160,7 @@ const PieOptions = (props: PieOptionsProps) => {
           paramName="isDonut"
           value={stateParams.isDonut}
           setValue={setValue}
+          data-test-subj="visTypePieIsDonut"
         />
         {props.showElasticChartsOptions && stateParams.isDonut && (
           <EuiFormRow label={emptySizeRatioLabel} fullWidth>

@@ -43,7 +43,7 @@ then view the results.
 and you'll get suggestions for agents by name, ID, platform, and policy.
 . Specify the query or pack to run:
 ** *Query*: Select a saved query or enter a new one in the text box. After you enter the query, you can expand the **Advanced** section to view or set <<osquery-map-fields,mapped ECS fields>> included in the results from the live query. Mapping ECS fields is optional.
-** *Pack*: Select from query packs that have been loaded and activated. After you select a pack, all of the queries in the pack are displayed.
+** *Pack*: Select from available query packs. After you select a pack, all of the queries in the pack are displayed.
 +
 TIP: Refer to <<osquery-prebuilt-packs,prebuilt packs>> to learn about using and managing Elastic prebuilt packs.
 +
@@ -61,12 +61,11 @@ TIP: To save a single query for future use, click *Save for later* and define th
 [[osquery-view-history]]
 == View or rerun previous live queries
 
-The *Live queries history* section on the *Live queries* tab shows a log of queries run over the last 30 days.
-Each query has the following options:
+The *Live queries history* section on the *Live queries* tab shows a log of queries run over the last 30 days. From the Live queries table, you can:
 
-* Click image:images/play-icon.png[Right-pointing triangle] to rerun a query.
+* Click the run icon (image:images/play-icon.png[Right-pointing triangle]) to rerun a single query or a query pack.
 
-* Click image:images/table-icon.png[Table icon] to view the query <<osquery-results,results>> and <<osquery-status,status>>.
+* Click the table icon (image:images/table-icon.png[Table icon]) to examine the <<osquery-results,results>> for a single query or a query pack. From the results table, you can also find the query <<osquery-status,status>>.
 +
 [role="screenshot"]
 image::images/live-query-check-results.png[Results of OSquery]
@@ -174,13 +173,14 @@ For information about the prebuilt packs that are available, refer to <<prebuilt
 [[load-prebuilt-packs]]
 ==== Load and activate prebuilt Elastic packs
 
+Follow these steps to load and turn on new or updated prebuilt packs:
+
 . Go to *Packs*, and then click *Load Elastic prebuilt packs*.
+. For each pack that you want to activate and schedule:
+
+* Turn on the *Active* toggle to ensure the pack runs continuously.
 +
-NOTE: This option is only available if new or updated prebuilt packs are available.
-
-. For each pack that you want to schedule:
-
-* Enable the option to make the pack *Active*.
+NOTE: You must manually run inactive packs.
 
 * Click the pack name, then *Edit*.
 

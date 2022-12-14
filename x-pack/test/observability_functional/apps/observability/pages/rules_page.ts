@@ -72,6 +72,10 @@ export default ({ getService }: FtrProviderContext) => {
           'Create Rule button is visible',
           async () => await testSubjects.exists('createRuleButton')
         );
+        await retry.waitFor(
+          'Create Rule button is enabled',
+          async () => await testSubjects.isEnabled('createRuleButton')
+        );
         await observability.alerts.rulesPage.clickCreateRuleButton();
         await retry.waitFor(
           'Create Rule flyout is visible',

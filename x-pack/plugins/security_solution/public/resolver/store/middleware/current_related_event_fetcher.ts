@@ -48,8 +48,9 @@ export function CurrentRelatedEventFetcher(
       api.dispatch({
         type: 'appRequestedCurrentRelatedEventData',
       });
-      const timeRangeFilters = selectors.timeRangeFilters(state);
-
+      const detectedBounds = selectors.detectedBounds(state);
+      const timeRangeFilters =
+        detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state);
       let result: SafeResolverEvent | null = null;
       try {
         result = await dataAccessLayer.event({

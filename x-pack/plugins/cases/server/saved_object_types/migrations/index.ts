@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 export { caseMigrations } from './cases';

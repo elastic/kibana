@@ -68,7 +68,6 @@ export interface NavTab {
 }
 export const securityNavKeys = [
   SecurityPageName.alerts,
-  SecurityPageName.responseActionsHistory,
   SecurityPageName.blocklist,
   SecurityPageName.detectionAndResponse,
   SecurityPageName.case,
@@ -81,6 +80,7 @@ export const securityNavKeys = [
   SecurityPageName.hosts,
   SecurityPageName.network,
   SecurityPageName.overview,
+  SecurityPageName.responseActionsHistory,
   SecurityPageName.rules,
   SecurityPageName.timelines,
   SecurityPageName.trustedApps,
@@ -90,7 +90,6 @@ export const securityNavKeys = [
   SecurityPageName.cloudSecurityPostureDashboard,
   SecurityPageName.cloudSecurityPostureFindings,
   SecurityPageName.cloudSecurityPostureBenchmarks,
-  SecurityPageName.cloudSecurityPostureRules,
   SecurityPageName.entityAnalytics,
 ] as const;
 export type SecurityNavKey = typeof securityNavKeys[number];

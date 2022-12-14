@@ -5,31 +5,51 @@
  * 2.0.
  */
 
+import {
+  createCollectorFetchContextMock,
+  usageCollectionPluginMock,
+} from '@kbn/usage-collection-plugin/server/mocks';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { createCloudUsageCollector } from './cloud_usage_collector';
-import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
-
-const mockUsageCollection = () => ({
-  makeUsageCollector: jest.fn().mockImplementation((args: any) => ({ ...args })),
-});
-
-const getMockConfigs = (isCloudEnabled: boolean) => ({ isCloudEnabled });
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 
 describe('createCloudUsageCollector', () => {
+  let usageCollection: UsageCollectionSetup;
+  let collectorFetchContext: jest.Mocked<CollectorFetchContext>;
+
+  beforeEach(() => {
+    usageCollection = usageCollectionPluginMock.createSetupContract();
+    collectorFetchContext = createCollectorFetchContextMock();
+  });
+
   it('calls `makeUsageCollector`', () => {
-    const mockConfigs = getMockConfigs(false);
-    const usageCollection = mockUsageCollection();
-    createCloudUsageCollector(usageCollection as any, mockConfigs);
+    createCloudUsageCollector(usageCollection, { isCloudEnabled: false });
     expect(usageCollection.makeUsageCollector).toBeCalledTimes(1);
   });
 
   describe('Fetched Usage data', () => {
     it('return isCloudEnabled boolean', async () => {
-      const mockConfigs = getMockConfigs(true);
-      const usageCollection = mockUsageCollection() as any;
-      const collector = createCloudUsageCollector(usageCollection, mockConfigs);
-      const collectorFetchContext = createCollectorFetchContextMock();
+      const collector = createCloudUsageCollector(usageCollection, { isCloudEnabled: true });
 
-      expect((await collector.fetch(collectorFetchContext)).isCloudEnabled).toBe(true); // Adding the await because the fetch can be a Promise or a synchronous method and TS complains in the test if not awaited
+      expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
+        isCloudEnabled: true,
+        isElasticStaffOwned: undefined,
+        trialEndDate: undefined,
+      });
+    });
+
+    it('return inTrial boolean if trialEndDateIsProvided', async () => {
+      const collector = createCloudUsageCollector(usageCollection, {
+        isCloudEnabled: true,
+        trialEndDate: '2020-10-01T14:30:16Z',
+      });
+
+      expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
+        isCloudEnabled: true,
+        isElasticStaffOwned: undefined,
+        trialEndDate: '2020-10-01T14:30:16Z',
+        inTrial: false,
+      });
     });
   });
 });

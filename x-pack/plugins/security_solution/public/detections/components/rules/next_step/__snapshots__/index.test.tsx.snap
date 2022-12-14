@@ -15,10 +15,12 @@ exports[`NextStep renders correctly against snapshot 1`] = `
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="nextStep-continue"
         fill={true}
         isDisabled={false}
         onClick={[MockFunction]}
+        size="m"
       >
         Continue
       </EuiButton>

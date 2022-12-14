@@ -11,6 +11,7 @@ import {
   ServiceLocations,
   ThrottlingOptions,
 } from '../../../../../common/runtime_types';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import {
   getServiceLocations,
@@ -22,7 +23,7 @@ export interface ServiceLocationsState {
   locations: ServiceLocations;
   throttling: ThrottlingOptions | null;
   loading: boolean;
-  error: Error | null;
+  error: IHttpSerializedFetchError | null;
   locationsLoaded?: boolean;
 }
 

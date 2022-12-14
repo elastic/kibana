@@ -18,10 +18,11 @@ import {
   getSyntheticsEnablementFailure,
 } from './actions';
 import { MonitorManagementEnablementResult } from '../../../../../common/runtime_types';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
 export interface SyntheticsEnablementState {
   loading: boolean;
-  error: Error | null;
+  error: IHttpSerializedFetchError | null;
   enablement: MonitorManagementEnablementResult | null;
 }
 
@@ -57,6 +58,7 @@ export const syntheticsEnablementReducer = createReducer(initialState, (builder)
         areApiKeysEnabled: state.enablement?.areApiKeysEnabled ?? false,
         canManageApiKeys: state.enablement?.canManageApiKeys ?? false,
         isEnabled: false,
+        isValidApiKey: true,
       };
     })
     .addCase(disableSyntheticsFailure, (state, action) => {
@@ -74,6 +76,7 @@ export const syntheticsEnablementReducer = createReducer(initialState, (builder)
         canEnable: state.enablement?.canEnable ?? false,
         areApiKeysEnabled: state.enablement?.areApiKeysEnabled ?? false,
         canManageApiKeys: state.enablement?.canManageApiKeys ?? false,
+        isValidApiKey: state.enablement?.isValidApiKey ?? false,
         isEnabled: true,
       };
     })

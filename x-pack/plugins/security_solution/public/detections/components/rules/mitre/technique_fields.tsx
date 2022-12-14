@@ -14,17 +14,32 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { kebabCase, camelCase } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import type { Threats, ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
-import { techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
-import { hasSubtechniqueOptions } from './helpers';
 import * as i18n from './translations';
 import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
+import type { MitreSubtechniquesOptions, MitreTechniquesOptions } from '../../../mitre/types';
+
+const lazyMitreConfiguration = () => {
+  /**
+   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+   * See https://webpack.js.org/api/module-methods/#magic-comments
+   */
+  return import(
+    /* webpackChunkName: "lazy_mitre_configuration" */
+    '../../../mitre/mitre_tactics_techniques'
+  );
+};
+
+const hasSubtechniqueOptions = (
+  subtechniquesOptions: MitreSubtechniquesOptions[],
+  technique: ThreatTechnique
+) => subtechniquesOptions.some((subtechnique) => subtechnique.techniqueId === technique.id);
 
 const TechniqueContainer = styled.div`
   ${({ theme }) => css`
@@ -50,6 +65,18 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   onFieldChange,
 }): JSX.Element => {
   const values = field.value as Threats;
+
+  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechniquesOptions[]>([]);
+  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubtechniquesOptions[]>([]);
+
+  useEffect(() => {
+    async function getMitre() {
+      const mitreConfig = await lazyMitreConfiguration();
+      setTechniquesOptions(mitreConfig.techniquesOptions);
+      setSubtechniquesOptions(mitreConfig.subtechniquesOptions);
+    }
+    getMitre();
+  }, []);
 
   const removeTechnique = useCallback(
     (index: number) => {
@@ -104,7 +131,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
         ...threats.slice(threatIndex + 1),
       ]);
     },
-    [threatIndex, onFieldChange, field]
+    [field.value, techniquesOptions, threatIndex, onFieldChange]
   );
 
   const getSelectTechnique = useCallback(
@@ -142,7 +169,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
         </>
       );
     },
-    [field, updateTechnique]
+    [field.label, techniquesOptions, updateTechnique]
   );
 
   const techniques = values[threatIndex].technique ?? [];
@@ -176,7 +203,9 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
             field={field}
             idAria={idAria}
             isDisabled={
-              isDisabled || technique.name === 'none' || hasSubtechniqueOptions(technique) === false
+              isDisabled ||
+              technique.name === 'none' ||
+              hasSubtechniqueOptions(subtechniquesOptions, technique) === false
             }
             threatIndex={threatIndex}
             techniqueIndex={index}

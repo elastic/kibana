@@ -19,15 +19,14 @@ export class DeleteSLO {
   ) {}
 
   public async execute(sloId: string): Promise<void> {
-    // ensure the slo exists on the request's space.
-    await this.repository.findById(sloId);
+    const slo = await this.repository.findById(sloId);
 
-    const sloTransformId = getSLOTransformId(sloId);
+    const sloTransformId = getSLOTransformId(slo.id, slo.revision);
     await this.transformManager.stop(sloTransformId);
     await this.transformManager.uninstall(sloTransformId);
 
-    await this.deleteRollupData(sloId);
-    await this.repository.deleteById(sloId);
+    await this.deleteRollupData(slo.id);
+    await this.repository.deleteById(slo.id);
   }
 
   private async deleteRollupData(sloId: string): Promise<void> {

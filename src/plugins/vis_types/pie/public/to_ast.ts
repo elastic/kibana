@@ -70,7 +70,7 @@ export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vi
     emptySizeRatio: vis.params.emptySizeRatio,
     palette: preparePalette(vis.params.palette),
     labels: prepareLabels(vis.params.labels),
-    metric: schemas.metric.map(prepareDimension),
+    metrics: prepareDimension(schemas.metric[schemas.metric.length - 1]),
     buckets: schemas.segment?.map(prepareDimension),
     splitColumn: schemas.split_column?.map(prepareDimension),
     splitRow: schemas.split_row?.map(prepareDimension),

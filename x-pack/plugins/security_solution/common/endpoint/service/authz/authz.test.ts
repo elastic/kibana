@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { calculateEndpointAuthz, getEndpointAuthzInitialState } from './authz';
+import {
+  calculateEndpointAuthz,
+  calculatePermissionsFromCapabilities,
+  calculatePermissionsFromPrivileges,
+  defaultEndpointPermissions,
+  getEndpointAuthzInitialState,
+} from './authz';
 import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
 import { createLicenseServiceMock } from '../../../license/mocks';
@@ -77,6 +83,20 @@ describe('Endpoint Authz service', () => {
           true
         );
       });
+
+      it(`should allow Host Isolation Exception read/delete when license is not Platinum+, but entries exist`, () => {
+        licenseService.isPlatinumPlus.mockReturnValue(false);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false, undefined, true)
+        ).toEqual(
+          expect.objectContaining({
+            canWriteHostIsolationExceptions: false,
+            canReadHostIsolationExceptions: true,
+            canDeleteHostIsolationExceptions: true,
+          })
+        );
+      });
     });
 
     describe('and `fleet.all` access is false', () => {
@@ -109,6 +129,10 @@ describe('Endpoint Authz service', () => {
     });
 
     describe('and endpoint rbac is enabled', () => {
+      beforeEach(() => {
+        userRoles = [];
+      });
+
       it.each<[EndpointAuthzKeyList[number], string]>([
         ['canWriteEndpointList', 'writeEndpointList'],
         ['canReadEndpointList', 'readEndpointList'],
@@ -116,6 +140,7 @@ describe('Endpoint Authz service', () => {
         ['canReadPolicyManagement', 'readPolicyManagement'],
         ['canWriteActionsLogManagement', 'writeActionsLogManagement'],
         ['canReadActionsLogManagement', 'readActionsLogManagement'],
+        ['canAccessEndpointActionsLogManagement', 'readActionsLogManagement'],
         ['canIsolateHost', 'writeHostIsolation'],
         ['canUnIsolateHost', 'writeHostIsolation'],
         ['canKillProcess', 'writeProcessOperations'],
@@ -142,6 +167,10 @@ describe('Endpoint Authz service', () => {
         ['canReadPolicyManagement', ['writePolicyManagement', 'readPolicyManagement']],
         ['canWriteActionsLogManagement', ['writeActionsLogManagement']],
         ['canReadActionsLogManagement', ['writeActionsLogManagement', 'readActionsLogManagement']],
+        [
+          'canAccessEndpointActionsLogManagement',
+          ['writeActionsLogManagement', 'readActionsLogManagement'],
+        ],
         ['canIsolateHost', ['writeHostIsolation']],
         ['canUnIsolateHost', ['writeHostIsolation']],
         ['canKillProcess', ['writeProcessOperations']],
@@ -168,14 +197,36 @@ describe('Endpoint Authz service', () => {
         expect(authz[auth]).toBe(false);
       });
     });
+
+    it('correctly handles permissions', () => {
+      const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true, {
+        canWriteSecuritySolution: false,
+        canReadSecuritySolution: true,
+      });
+      expect(authz.canWriteSecuritySolution).toBe(false);
+      expect(authz.canReadSecuritySolution).toBe(true);
+    });
+  });
+
+  describe('defaultEndpointPermissions', () => {
+    it('returns expected permissions', () => {
+      expect(defaultEndpointPermissions()).toEqual({
+        canWriteSecuritySolution: false,
+        canReadSecuritySolution: false,
+      });
+    });
   });
 
   describe('getEndpointAuthzInitialState()', () => {
     it('returns expected initial state', () => {
       expect(getEndpointAuthzInitialState()).toEqual({
+        canWriteSecuritySolution: false,
+        canReadSecuritySolution: false,
         canAccessFleet: false,
+        canAccessEndpointActionsLogManagement: false,
         canAccessEndpointManagement: false,
         canCreateArtifactsByPolicy: false,
+        canDeleteHostIsolationExceptions: false,
         canWriteEndpointList: false,
         canReadEndpointList: false,
         canWritePolicyManagement: false,
@@ -197,6 +248,51 @@ describe('Endpoint Authz service', () => {
         canReadBlocklist: false,
         canWriteEventFilters: false,
         canReadEventFilters: false,
+      });
+    });
+  });
+
+  describe('calculatePermissionsFromPrivileges', () => {
+    it('returns default permissions if no privileges', () => {
+      const permissions = calculatePermissionsFromPrivileges(undefined);
+      expect(permissions).toEqual(defaultEndpointPermissions());
+    });
+
+    it('returns expected permissions from privileges', () => {
+      const privileges = [
+        { privilege: 'ui:8.6.0:siem/crud', authorized: false },
+        { privilege: 'ui:8.6.0:siem/show', authorized: true },
+        { privilege: 'ui:8.6.0:siem/foobar', authorized: true },
+      ];
+      const permissions = calculatePermissionsFromPrivileges(privileges);
+      expect(permissions).toEqual({
+        canWriteSecuritySolution: false,
+        canReadSecuritySolution: true,
+      });
+    });
+  });
+
+  describe('calculatePermissionsFromCapabilities', () => {
+    it('returns default permissions if no capabilities', () => {
+      const permissions = calculatePermissionsFromCapabilities(undefined);
+      expect(permissions).toEqual(defaultEndpointPermissions());
+    });
+
+    it('returns expected permissions from capabilities', () => {
+      const capabilities = {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        siem: {
+          crud: false,
+          show: true,
+          foobar: true,
+        },
+      };
+      const permissions = calculatePermissionsFromCapabilities(capabilities);
+      expect(permissions).toEqual({
+        canWriteSecuritySolution: false,
+        canReadSecuritySolution: true,
       });
     });
   });

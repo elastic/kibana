@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SingleCaseMetricsResponse } from '../../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 
 import { SingleCaseAggregationHandler } from '../single_case_aggregation_handler';
-import { AggregationBuilder, SingleCaseBaseHandlerCommonOptions } from '../types';
+import type { AggregationBuilder, SingleCaseBaseHandlerCommonOptions } from '../types';
 import { AlertHosts, AlertUsers } from './aggregations';
 
 export class AlertDetails extends SingleCaseAggregationHandler {

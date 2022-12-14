@@ -66,9 +66,9 @@ describe('Dependencies', () => {
         })}`
       );
 
-      cy.get('[data-test-subj="latencyChart"]');
-      cy.get('[data-test-subj="throughputChart"]');
-      cy.get('[data-test-subj="errorRateChart"]');
+      cy.getByTestSubj('latencyChart');
+      cy.getByTestSubj('throughputChart');
+      cy.getByTestSubj('errorRateChart');
 
       cy.contains('opbeans-java').click({ force: true });
 

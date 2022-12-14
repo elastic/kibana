@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
+
 import type {
   CustomRule,
   ThreatIndicatorRule,
@@ -38,12 +40,12 @@ export const createMachineLearningRule = (rule: MachineLearningRule, ruleId = 'm
 
 export const createCustomRule = (
   rule: CustomRule,
-  ruleId = 'rule_testing',
-  interval = '100m'
+  ruleId = 'rule_testing'
 ): Cypress.Chainable<Cypress.Response<unknown>> => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
   const timeline = rule.timeline != null ? rule.timeline : undefined;
+  const interval = rule.runsEvery ? `${rule.runsEvery.interval}${rule.runsEvery.type}` : '100m';
 
   return cy.request({
     method: 'POST',
@@ -70,6 +72,7 @@ export const createCustomRule = (
             timeline_title: timeline.title,
           }
         : {}),
+      actions: rule.actions,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
@@ -79,6 +82,7 @@ export const createCustomRule = (
 export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_testing') => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLowerCase() : undefined;
+  const interval = rule.runsEvery ? `${rule.runsEvery.interval}${rule.runsEvery.type}` : '100m';
 
   cy.request({
     method: 'POST',
@@ -87,7 +91,7 @@ export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_test
       rule_id: ruleId,
       risk_score: riskScore,
       description: rule.description,
-      interval: `${rule.runsEvery?.interval}${rule.runsEvery?.type}`,
+      interval,
       from: `now-${rule.lookBack?.interval}${rule.lookBack?.type}`,
       name: rule.name,
       severity,
@@ -106,6 +110,7 @@ export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_test
 export const createThresholdRule = (rule: ThresholdRule, ruleId = 'rule_testing') => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
+  const interval = rule.runsEvery ? `${rule.runsEvery.interval}${rule.runsEvery.type}` : '100m';
 
   cy.request({
     method: 'POST',
@@ -114,7 +119,7 @@ export const createThresholdRule = (rule: ThresholdRule, ruleId = 'rule_testing'
       rule_id: ruleId,
       risk_score: riskScore,
       description: rule.description,
-      interval: `${rule.runsEvery?.interval}${rule.runsEvery?.type}`,
+      interval,
       from: `now-${rule.lookBack?.interval}${rule.lookBack?.type}`,
       name: rule.name,
       severity,
@@ -137,6 +142,7 @@ export const createThresholdRule = (rule: ThresholdRule, ruleId = 'rule_testing'
 export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
+  const interval = rule.runsEvery ? `${rule.runsEvery.interval}${rule.runsEvery.type}` : '100m';
 
   cy.request({
     method: 'POST',
@@ -145,7 +151,7 @@ export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') 
       rule_id: ruleId,
       risk_score: riskScore,
       description: rule.description,
-      interval: `${rule.runsEvery?.interval}${rule.runsEvery?.type}`,
+      interval,
       from: `now-${rule.lookBack?.interval}${rule.lookBack?.type}`,
       name: rule.name,
       severity,
@@ -169,6 +175,7 @@ export const createSavedQueryRule = (
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
   const timeline = rule.timeline != null ? rule.timeline : undefined;
+  const interval = rule.runsEvery ? `${rule.runsEvery.interval}${rule.runsEvery.type}` : '100m';
 
   return cy.request({
     method: 'POST',
@@ -177,7 +184,7 @@ export const createSavedQueryRule = (
       rule_id: ruleId,
       risk_score: riskScore,
       description: rule.description,
-      interval: rule.interval,
+      interval,
       name: rule.name,
       severity,
       type: 'saved_query',
@@ -205,6 +212,7 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
   const timeline = rule.timeline != null ? rule.timeline : undefined;
+  const interval = rule.runsEvery ? `${rule.runsEvery.interval}${rule.runsEvery.type}` : '100m';
 
   cy.request({
     method: 'POST',
@@ -213,9 +221,7 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       rule_id: ruleId,
       risk_score: riskScore,
       description: rule.description,
-      // Default interval is 1m, our tests config overwrite this to 1s
-      // See https://github.com/elastic/kibana/pull/125396 for details
-      interval: '10s',
+      interval,
       name: rule.name,
       severity,
       type: 'threat_match',
@@ -253,11 +259,12 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
 export const createCustomRuleEnabled = (
   rule: CustomRule,
   ruleId = '1',
-  interval = '100m',
-  maxSignals = 500
+  maxSignals = 500,
+  actions?: RuleActionArray
 ) => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
+  const interval = rule.runsEvery ? `${rule.runsEvery.interval}${rule.runsEvery.type}` : '100m';
 
   if (rule.dataSource.type === 'indexPatterns') {
     cy.request({
@@ -280,6 +287,7 @@ export const createCustomRuleEnabled = (
         tags: ['rule1'],
         max_signals: maxSignals,
         building_block_type: rule.buildingBlockType,
+        actions,
       },
       headers: { 'kbn-xsrf': 'cypress-creds' },
       failOnStatusCode: false,
@@ -306,6 +314,7 @@ export const createCustomRuleEnabled = (
         tags: ['rule1'],
         max_signals: maxSignals,
         building_block_type: rule.buildingBlockType,
+        actions,
       },
       headers: { 'kbn-xsrf': 'cypress-creds' },
       failOnStatusCode: false,

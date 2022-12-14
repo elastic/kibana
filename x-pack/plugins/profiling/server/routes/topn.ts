@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths, INDEX_EVENTS } from '../../common';
 import { ProfilingESField } from '../../common/elasticsearch';
@@ -14,8 +14,8 @@ import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/hist
 import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 import { createTopNSamples, getTopNAggregationRequest, TopNResponse } from '../../common/topn';
-import { ProfilingRequestHandlerContext } from '../types';
-import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
+import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
+import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
 import { findDownsampledIndex } from './downsampling';
@@ -155,13 +155,18 @@ export async function topNElasticSearchQuery({
   };
 }
 
-export function queryTopNCommon(
-  router: IRouter<ProfilingRequestHandlerContext>,
-  logger: Logger,
-  pathName: string,
-  searchField: string,
-  highCardinality: boolean
-) {
+export function queryTopNCommon({
+  logger,
+  router,
+  services: { createProfilingEsClient },
+  pathName,
+  searchField,
+  highCardinality,
+}: RouteRegisterParameters & {
+  pathName: string;
+  searchField: string;
+  highCardinality: boolean;
+}) {
   router.get(
     {
       path: pathName,
@@ -189,86 +194,59 @@ export function queryTopNCommon(
             kuery,
           }),
         });
-      } catch (e) {
-        logger.error(e);
-
-        return response.customError({
-          statusCode: e.statusCode ?? 500,
-          body: {
-            message: 'Profiling TopN request failed: ' + e.message + '; full error ' + e.toString(),
-          },
-        });
+      } catch (error) {
+        return handleRouteHandlerError({ error, logger, response });
       }
     }
   );
 }
 
-export function registerTraceEventsTopNContainersSearchRoute({
-  router,
-  logger,
-}: RouteRegisterParameters) {
+export function registerTraceEventsTopNContainersSearchRoute(parameters: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon(
-    router,
-    logger,
-    paths.TopNContainers,
-    getFieldNameForTopNType(TopNType.Containers),
-    false
-  );
+  return queryTopNCommon({
+    ...parameters,
+    pathName: paths.TopNContainers,
+    searchField: getFieldNameForTopNType(TopNType.Containers),
+    highCardinality: false,
+  });
 }
 
-export function registerTraceEventsTopNDeploymentsSearchRoute({
-  router,
-  logger,
-}: RouteRegisterParameters) {
+export function registerTraceEventsTopNDeploymentsSearchRoute(parameters: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon(
-    router,
-    logger,
-    paths.TopNDeployments,
-    getFieldNameForTopNType(TopNType.Deployments),
-    false
-  );
+  return queryTopNCommon({
+    ...parameters,
+    pathName: paths.TopNDeployments,
+    searchField: getFieldNameForTopNType(TopNType.Deployments),
+    highCardinality: false,
+  });
 }
 
-export function registerTraceEventsTopNHostsSearchRoute({
-  router,
-  logger,
-}: RouteRegisterParameters) {
+export function registerTraceEventsTopNHostsSearchRoute(parameters: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon(
-    router,
-    logger,
-    paths.TopNHosts,
-    getFieldNameForTopNType(TopNType.Hosts),
-    false
-  );
+  return queryTopNCommon({
+    ...parameters,
+    pathName: paths.TopNHosts,
+    searchField: getFieldNameForTopNType(TopNType.Hosts),
+    highCardinality: false,
+  });
 }
 
-export function registerTraceEventsTopNStackTracesSearchRoute({
-  router,
-  logger,
-}: RouteRegisterParameters) {
+export function registerTraceEventsTopNStackTracesSearchRoute(parameters: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon(
-    router,
-    logger,
-    paths.TopNTraces,
-    getFieldNameForTopNType(TopNType.Traces),
-    false
-  );
+  return queryTopNCommon({
+    ...parameters,
+    pathName: paths.TopNTraces,
+    searchField: getFieldNameForTopNType(TopNType.Traces),
+    highCardinality: false,
+  });
 }
 
-export function registerTraceEventsTopNThreadsSearchRoute({
-  router,
-  logger,
-}: RouteRegisterParameters) {
+export function registerTraceEventsTopNThreadsSearchRoute(parameters: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon(
-    router,
-    logger,
-    paths.TopNThreads,
-    getFieldNameForTopNType(TopNType.Threads),
-    true
-  );
+  return queryTopNCommon({
+    ...parameters,
+    pathName: paths.TopNThreads,
+    searchField: getFieldNameForTopNType(TopNType.Threads),
+    highCardinality: true,
+  });
 }

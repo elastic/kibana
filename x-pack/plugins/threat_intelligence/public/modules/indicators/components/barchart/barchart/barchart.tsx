@@ -16,6 +16,7 @@ import type { ChartSeries } from '../../../services';
 const ID = 'tiIndicator';
 const DEFAULT_CHART_HEIGHT = '200px';
 const DEFAULT_CHART_WIDTH = '100%';
+const DEFAULT_LEGEND_SIZE = 200;
 
 export interface IndicatorsBarChartProps {
   /**
@@ -27,7 +28,7 @@ export interface IndicatorsBarChartProps {
    */
   dateRange: TimeRangeBounds;
   /**
-   * Indicator field selected in the IndicatorFieldSelector component, passed to the {@link AddToTimeline} to populate the timeline.
+   * Indicator field selected in the IndicatorFieldSelector component, passed to AddToTimeline to populate the timeline.
    */
   field: string;
   /**
@@ -50,8 +51,8 @@ export const IndicatorsBarChart: VFC<IndicatorsBarChartProps> = ({
       <Chart size={{ width: DEFAULT_CHART_WIDTH, height }}>
         <Settings
           showLegend
-          showLegendExtra
           legendPosition={Position.Right}
+          legendSize={DEFAULT_LEGEND_SIZE}
           legendAction={({ label }) => <IndicatorBarchartLegendAction field={field} data={label} />}
         />
         <Axis

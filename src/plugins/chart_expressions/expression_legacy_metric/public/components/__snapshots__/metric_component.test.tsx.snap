@@ -28,7 +28,6 @@ Array [
       }
     }
     onFilter={[Function]}
-    renderComplete={[MockFunction]}
     style={
       Object {
         "bgColor": false,

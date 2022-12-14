@@ -16,7 +16,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 import type { Filter } from '@kbn/es-query';
-import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import { getFilter } from '../get_filter';
 import {
   bulkCreateThresholdSignals,
@@ -92,7 +92,7 @@ export const thresholdExecutor = async ({
       : await getThresholdSignalHistory({
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
-          ruleId: ruleParams.ruleId,
+          frameworkRuleId: completeRule.alertId,
           bucketByFields: ruleParams.threshold.field,
           ruleDataReader,
         });

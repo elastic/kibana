@@ -22,7 +22,8 @@ export const openSourcerer = (sourcererScope?: string) => {
   cy.get(SOURCERER.trigger).click();
   cy.get(SOURCERER.wrapper).should('be.visible');
 };
-export const openTimelineSourcerer = () => {
+
+const openTimelineSourcerer = () => {
   cy.get(SOURCERER.triggerTimeline).should('be.enabled');
   cy.get(SOURCERER.triggerTimeline).should('be.visible');
   cy.get(SOURCERER.triggerTimeline).first().click();
@@ -33,7 +34,7 @@ export const openAdvancedSettings = () => {
   cy.get(SOURCERER.advancedSettings).click();
 };
 
-export const clickOutOfSelector = () => {
+const clickOutOfSelector = () => {
   return cy.get(SOURCERER.popoverTitle).first().click();
 };
 
@@ -101,8 +102,9 @@ export const addIndexToDefault = (index: string) => {
           cy.get('[data-test-subj="toastCloseButton]"').click();
         }
       });
+
       cy.get('button[data-test-subj="advancedSetting-saveButton"]').click();
-      cy.get('.euiToast .euiButton--primary').click();
+      cy.get('button[data-test-subj="windowReloadButton"]').click();
       waitForPage(HOSTS_URL);
     });
 };
@@ -128,7 +130,7 @@ export const deleteAlertsIndex = () => {
   });
 };
 
-export const refreshUntilAlertsIndexExists = async () => {
+const refreshUntilAlertsIndexExists = async () => {
   cy.waitUntil(
     () => {
       cy.reload();
@@ -146,6 +148,6 @@ export const refreshUntilAlertsIndexExists = async () => {
 };
 
 export const waitForAlertsIndexToExist = () => {
-  createCustomRuleEnabled(getNewRule(), '1', '100m', 100);
+  createCustomRuleEnabled(getNewRule(), '1', 100);
   refreshUntilAlertsIndexExists();
 };

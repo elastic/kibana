@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type { Throttle } from '@kbn/securitysolution-io-ts-alerting-types';
-import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
+import type { RuleActionThrottle } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import type { CompleteTimeline } from './timeline';
 import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
-import type { FullResponseSchema } from '../../common/detection_engine/schemas/request';
+import type { RuleResponse } from '../../common/detection_engine/rule_schema';
 import type { Connectors } from './connector';
-
-export const totalNumberOfPrebuiltRules = rawRules.length;
 
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
 
@@ -39,7 +36,7 @@ interface Interval {
 }
 
 export interface Actions {
-  throttle: Throttle;
+  throttle: RuleActionThrottle;
   connectors: Connectors[];
 }
 
@@ -52,7 +49,6 @@ export interface CustomRule {
   name: string;
   description: string;
   dataSource: RuleDataSource;
-  interval?: string;
   severity?: string;
   riskScore?: string;
   tags?: string[];
@@ -62,6 +58,7 @@ export interface CustomRule {
   mitre?: Mitre[];
   note?: string;
   runsEvery?: Interval;
+  interval?: string;
   lookBack?: Interval;
   timeline?: CompleteTimeline;
   maxSignals?: number;
@@ -183,16 +180,8 @@ const getSeverityOverride4 = (): SeverityOverride => ({
   sourceValue: 'auditbeat',
 });
 
-// Default interval is 1m, our tests config overwrite this to 1s
-// See https://github.com/elastic/kibana/pull/125396 for details
 const getRunsEvery = (): Interval => ({
-  interval: '1',
-  timeType: 'Seconds',
-  type: 's',
-});
-
-const getRunsEveryFiveMinutes = (): Interval => ({
-  interval: '5',
+  interval: '100',
   timeType: 'Minutes',
   type: 'm',
 });
@@ -215,7 +204,7 @@ export const getDataViewRule = (): CustomRule => ({
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
-  runsEvery: getRunsEveryFiveMinutes(),
+  runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
@@ -308,7 +297,6 @@ export const getExistingRule = (): CustomRule => ({
   name: 'Rule 1',
   description: 'Description for Rule 1',
   dataSource: { index: ['auditbeat-*'], type: 'indexPatterns' },
-  interval: '100m',
   severity: 'High',
   riskScore: '19',
   tags: ['rule1'],
@@ -317,6 +305,7 @@ export const getExistingRule = (): CustomRule => ({
   mitre: [],
   note: 'This is my note',
   runsEvery: getRunsEvery(),
+  interval: '100m',
   lookBack: getLookBack(),
   timeline: getTimeline(),
   // Please do not change, or if you do, needs
@@ -398,8 +387,8 @@ export const getNewTermsRule = (): NewTermsRule => ({
 
 export const getMachineLearningRule = (): MachineLearningRule => ({
   machineLearningJobs: [
-    'v3_linux_anomalous_process_all_hosts',
     'v3_linux_anomalous_network_activity',
+    'v3_linux_anomalous_process_all_hosts',
   ],
   anomalyScoreThreshold: 20,
   name: 'New ML Rule Test',
@@ -509,9 +498,7 @@ export const getEditedRule = (): CustomRule => ({
   tags: [...(getExistingRule().tags || []), 'edited'],
 });
 
-export const expectedExportedRule = (
-  ruleResponse: Cypress.Response<FullResponseSchema>
-): string => {
+export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse>): string => {
   const {
     id,
     updated_at: updatedAt,
@@ -534,7 +521,7 @@ export const expectedExportedRule = (
   // NOTE: Order of the properties in this object matters for the tests to work.
   // TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
   // without using Partial
-  const rule: Partial<FullResponseSchema> = {
+  const rule: Partial<RuleResponse> = {
     id,
     updated_at: updatedAt,
     updated_by: updatedBy,

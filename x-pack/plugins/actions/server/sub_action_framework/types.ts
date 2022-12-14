@@ -6,12 +6,18 @@
  */
 
 import type { Type } from '@kbn/config-schema';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { ActionTypeParams, Services } from '../types';
-import { SubActionConnector } from './sub_action_connector';
+import type { Method, AxiosRequestConfig } from 'axios';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type {
+  ActionTypeParams,
+  RenderParameterTemplates,
+  Services,
+  ValidatorType as ValidationSchema,
+} from '../types';
+import type { SubActionConnector } from './sub_action_connector';
 
 export interface ServiceParams<Config, Secrets> {
   /**
@@ -26,6 +32,12 @@ export interface ServiceParams<Config, Secrets> {
   services: Services;
 }
 
+export type SubActionRequestParams<R> = {
+  url: string;
+  responseSchema: Type<R>;
+  method?: Method;
+} & AxiosRequestConfig;
+
 export type IService<Config, Secrets> = new (
   params: ServiceParams<Config, Secrets>
 ) => SubActionConnector<Config, Secrets>;
@@ -33,6 +45,29 @@ export type IService<Config, Secrets> = new (
 export type IServiceAbstract<Config, Secrets> = abstract new (
   params: ServiceParams<Config, Secrets>
 ) => SubActionConnector<Config, Secrets>;
+
+export enum ValidatorType {
+  CONFIG,
+  SECRETS,
+}
+
+interface Validate<T> {
+  validator: ValidateFn<T>;
+}
+
+export type ValidateFn<T> = NonNullable<ValidationSchema<T>['customValidator']>;
+
+interface ConfigValidator<T> extends Validate<T> {
+  type: ValidatorType.CONFIG;
+}
+
+interface SecretsValidator<T> extends Validate<T> {
+  type: ValidatorType.SECRETS;
+}
+
+export type Validators<Config, Secrets> = Array<
+  ConfigValidator<Config> | SecretsValidator<Secrets>
+>;
 
 export interface SubActionConnectorType<Config, Secrets> {
   id: string;
@@ -43,7 +78,9 @@ export interface SubActionConnectorType<Config, Secrets> {
     config: Type<Config>;
     secrets: Type<Secrets>;
   };
+  validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
   Service: IService<Config, Secrets>;
+  renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
 }
 
 export interface ExecutorParams extends ActionTypeParams {

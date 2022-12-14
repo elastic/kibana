@@ -7,7 +7,7 @@
 
 import { CommentType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { Comment } from '../../containers/types';
+import type { Comment } from '../../containers/types';
 import { isUserActionTypeSupported, getManualAlertIdsWithNoRuleId } from './helpers';
 
 const comments: Comment[] = [

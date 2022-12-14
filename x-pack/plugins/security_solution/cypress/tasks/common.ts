@@ -56,13 +56,26 @@ export const reload = () => {
   cy.contains('a', 'Security');
 };
 
+const clearSessionStorage = () => {
+  cy.window().then((win) => {
+    win.sessionStorage.clear();
+  });
+};
+
+/** Clears the rules and monitoring tables state. Automatically called in `cleanKibana()`. */
+export const resetRulesTableState = () => {
+  clearSessionStorage();
+};
+
 export const cleanKibana = () => {
+  resetRulesTableState();
   deleteAlertsAndRules();
   deleteCases();
   deleteTimelines();
 };
 
 export const deleteAlertsAndRules = () => {
+  cy.log('Delete all alerts and rules');
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
   cy.request({
@@ -74,6 +87,7 @@ export const deleteAlertsAndRules = () => {
     },
     failOnStatusCode: false,
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    timeout: 300000,
   });
 
   cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
@@ -146,23 +160,6 @@ export const deleteConnectors = () => {
           {
             match: {
               type: 'action',
-            },
-          },
-        ],
-      },
-    },
-  });
-};
-
-export const deleteSavedQueries = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'query',
             },
           },
         ],

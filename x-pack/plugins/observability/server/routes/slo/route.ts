@@ -7,29 +7,35 @@
 
 import {
   CreateSLO,
-  DeleteSLO,
   DefaultResourceInstaller,
+  DefaultSLIClient,
   DefaultTransformManager,
-  KibanaSavedObjectsSLORepository,
+  DeleteSLO,
+  FindSLO,
   GetSLO,
+  KibanaSavedObjectsSLORepository,
+  UpdateSLO,
 } from '../../services/slo';
-
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
+  KQLCustomTransformGenerator,
   TransformGenerator,
 } from '../../services/slo/transform_generators';
-import { SLITypes } from '../../types/models';
+import { IndicatorTypes } from '../../domain/models';
 import {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
+  findSLOParamsSchema,
   getSLOParamsSchema,
+  updateSLOParamsSchema,
 } from '../../types/rest_specs';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
-const transformGenerators: Record<SLITypes, TransformGenerator> = {
-  'slo.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
-  'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
+  'sli.apm.transaction_duration': new ApmTransactionDurationTransformGenerator(),
+  'sli.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+  'sli.kql.custom': new KQLCustomTransformGenerator(),
 };
 
 const createSLORoute = createObservabilityServerRoute({
@@ -48,6 +54,26 @@ const createSLORoute = createObservabilityServerRoute({
     const createSLO = new CreateSLO(resourceInstaller, repository, transformManager);
 
     const response = await createSLO.execute(params.body);
+
+    return response;
+  },
+});
+
+const updateSLORoute = createObservabilityServerRoute({
+  endpoint: 'PUT /api/observability/slos/{id}',
+  options: {
+    tags: [],
+  },
+  params: updateSLOParamsSchema,
+  handler: async ({ context, params, logger }) => {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const soClient = (await context.core).savedObjects.client;
+
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
+    const updateSLO = new UpdateSLO(repository, transformManager, esClient);
+
+    const response = await updateSLO.execute(params.path.id, params.body);
 
     return response;
   },
@@ -80,8 +106,10 @@ const getSLORoute = createObservabilityServerRoute({
   params: getSLOParamsSchema,
   handler: async ({ context, params }) => {
     const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const getSLO = new GetSLO(repository);
+    const sliClient = new DefaultSLIClient(esClient);
+    const getSLO = new GetSLO(repository, sliClient);
 
     const response = await getSLO.execute(params.path.id);
 
@@ -89,4 +117,29 @@ const getSLORoute = createObservabilityServerRoute({
   },
 });
 
-export const slosRouteRepository = { ...createSLORoute, ...getSLORoute, ...deleteSLORoute };
+const findSLORoute = createObservabilityServerRoute({
+  endpoint: 'GET /api/observability/slos',
+  options: {
+    tags: [],
+  },
+  params: findSLOParamsSchema,
+  handler: async ({ context, params }) => {
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const sliClient = new DefaultSLIClient(esClient);
+    const findSLO = new FindSLO(repository, sliClient);
+
+    const response = await findSLO.execute(params?.query ?? {});
+
+    return response;
+  },
+});
+
+export const slosRouteRepository = {
+  ...createSLORoute,
+  ...updateSLORoute,
+  ...getSLORoute,
+  ...deleteSLORoute,
+  ...findSLORoute,
+};

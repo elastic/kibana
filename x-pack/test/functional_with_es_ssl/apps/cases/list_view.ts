@@ -20,7 +20,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
-  const retry = getService('retry');
   const browser = getService('browser');
 
   describe('cases list', () => {
@@ -56,33 +55,120 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('deleting', () => {
-      before(async () => {
-        await cases.api.createNthRandomCases(8);
-        await cases.api.createCase({ title: 'delete me', tags: ['one'] });
-        await header.waitUntilLoadingHasFinished();
-        await cases.casesTable.waitForCasesToBeListed();
-      });
+    describe('bulk actions', () => {
+      describe('delete', () => {
+        before(async () => {
+          await cases.api.createNthRandomCases(8);
+          await cases.api.createCase({ title: 'delete me', tags: ['one'] });
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
 
-      after(async () => {
-        await cases.api.deleteAllCases();
-        await cases.casesTable.waitForCasesToBeDeleted();
-      });
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
 
-      it('deletes a case correctly from the list', async () => {
-        await cases.casesTable.deleteFirstListedCase();
-        await cases.casesTable.waitForTableToFinishLoading();
-
-        await retry.tryForTime(2000, async () => {
-          const firstRow = await testSubjects.find('case-details-link');
-          expect(await firstRow.getVisibleText()).not.to.be('delete me');
+        it('bulk delete cases from the list', async () => {
+          await cases.casesTable.selectAndDeleteAllCases();
+          await cases.casesTable.waitForTableToFinishLoading();
+          await cases.casesTable.validateCasesTableHasNthRows(0);
         });
       });
 
-      it('bulk delete cases from the list', async () => {
-        await cases.casesTable.selectAndDeleteAllCases();
-        await cases.casesTable.waitForTableToFinishLoading();
-        await cases.casesTable.validateCasesTableHasNthRows(0);
+      describe('status', () => {
+        before(async () => {
+          await cases.api.createNthRandomCases(2);
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
+
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
+
+        it('change the status of cases to in-progress correctly', async () => {
+          await cases.casesTable.selectAndChangeStatusOfAllCases(CaseStatuses['in-progress']);
+          await cases.casesTable.waitForTableToFinishLoading();
+          await testSubjects.missingOrFail('case-status-badge-open');
+        });
+      });
+
+      describe('severity', () => {
+        before(async () => {
+          await cases.api.createNthRandomCases(2);
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
+
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
+
+        it('change the severity of cases to medium correctly', async () => {
+          await cases.casesTable.selectAndChangeSeverityOfAllCases(CaseSeverity.MEDIUM);
+          await cases.casesTable.waitForTableToFinishLoading();
+          await testSubjects.missingOrFail('case-table-column-severity-low');
+        });
+      });
+
+      describe('tags', () => {
+        let caseIds: string[] = [];
+        beforeEach(async () => {
+          caseIds = [];
+          const case1 = await cases.api.createCase({ title: 'case 1', tags: ['one', 'three'] });
+          const case2 = await cases.api.createCase({ title: 'case 2', tags: ['two', 'four'] });
+          const case3 = await cases.api.createCase({ title: 'case 3', tags: ['two', 'five'] });
+
+          caseIds.push(case1.id);
+          caseIds.push(case2.id);
+          caseIds.push(case3.id);
+
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
+
+        afterEach(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
+
+        it('bulk edit tags', async () => {
+          /**
+           * Case 3 tags: two, five
+           * Case 2 tags: two, four
+           * Case 1 tags: one, three
+           * All tags: one, two, three, four, five.
+           *
+           * It selects Case 3 and Case 2 because the table orders
+           * the cases in descending order by creation date and clicks
+           * the one, three, and five tags
+           */
+          await cases.casesTable.bulkEditTags([0, 1], ['two', 'three', 'five']);
+          await header.waitUntilLoadingHasFinished();
+          const case1 = await cases.api.getCase({ caseId: caseIds[0] });
+          const case2 = await cases.api.getCase({ caseId: caseIds[1] });
+          const case3 = await cases.api.getCase({ caseId: caseIds[2] });
+
+          expect(case3.tags).eql(['five', 'three']);
+          expect(case2.tags).eql(['four', 'five', 'three']);
+          expect(case1.tags).eql(['one', 'three']);
+        });
+
+        it('adds a new tag', async () => {
+          await cases.casesTable.bulkAddNewTag([0, 1], 'tw');
+          await header.waitUntilLoadingHasFinished();
+
+          const case1 = await cases.api.getCase({ caseId: caseIds[0] });
+          const case2 = await cases.api.getCase({ caseId: caseIds[1] });
+          const case3 = await cases.api.getCase({ caseId: caseIds[2] });
+
+          expect(case3.tags).eql(['two', 'five', 'tw']);
+          expect(case2.tags).eql(['two', 'four', 'tw']);
+          expect(case1.tags).eql(['one', 'three']);
+        });
       });
     });
 
@@ -188,24 +274,56 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.refreshTable();
         await cases.casesTable.validateCasesTableHasNthRows(1);
         const row = await cases.casesTable.getCaseFromTable(0);
-        const tags = await row.findByCssSelector('[data-test-subj="case-table-column-tags-one"]');
+        const tags = await row.findByTestSubject('case-table-column-tags-one');
         expect(await tags.getVisibleText()).to.be('one');
       });
 
       it('filters cases by status', async () => {
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+        await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
+        await testSubjects.existOrFail(`case-status-badge-${CaseStatuses['in-progress']}`);
         await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
         await cases.casesTable.validateCasesTableHasNthRows(1);
       });
 
-      it('filters cases by the first cases all user assignee', async () => {
-        await cases.casesTable.filterByAssignee('all');
-        await cases.casesTable.validateCasesTableHasNthRows(1);
-      });
+      describe('assignees filtering', () => {
+        it('filters cases by the first cases all user assignee', async () => {
+          await cases.casesTable.filterByAssignee('all');
+          await cases.casesTable.validateCasesTableHasNthRows(1);
+          await testSubjects.exists('case-user-profile-avatar-cases_all_user');
+        });
 
-      it('filters cases by the casesAllUser2 assignee', async () => {
-        await cases.casesTable.filterByAssignee('2');
-        await cases.casesTable.validateCasesTableHasNthRows(1);
+        it('filters cases by the casesAllUser2 assignee', async () => {
+          await cases.casesTable.filterByAssignee('2');
+          await cases.casesTable.validateCasesTableHasNthRows(1);
+          await testSubjects.exists('case-user-profile-avatar-cases_all_user2');
+        });
+
+        it('filters cases without assignees', async () => {
+          await cases.casesTable.openAssigneesPopover();
+          await cases.common.selectFirstRowInAssigneesPopover();
+          await cases.casesTable.validateCasesTableHasNthRows(2);
+
+          const firstCaseTitle = await (
+            await cases.casesTable.getCaseFromTable(0)
+          ).findByTestSubject('case-details-link');
+
+          const secondCaseTitle = await (
+            await cases.casesTable.getCaseFromTable(1)
+          ).findByTestSubject('case-details-link');
+
+          expect(await firstCaseTitle.getVisibleText()).be('test2');
+          expect(await secondCaseTitle.getVisibleText()).be('matchme');
+        });
+
+        it('filters cases with and without assignees', async () => {
+          await cases.casesTable.openAssigneesPopover();
+          await cases.common.selectRowsInAssigneesPopover([0, 2]);
+          await cases.casesTable.validateCasesTableHasNthRows(3);
+
+          expect(await cases.casesTable.getCaseTitle(0)).be('test4');
+          expect(await cases.casesTable.getCaseTitle(1)).be('test2');
+          expect(await cases.casesTable.getCaseTitle(2)).be('matchme');
+        });
       });
     });
 
@@ -258,7 +376,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('pagination', () => {
       before(async () => {
-        await cases.api.createNthRandomCases(8);
+        await cases.api.createNthRandomCases(12);
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
@@ -270,35 +388,95 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('paginates cases correctly', async () => {
         await testSubjects.click('tablePaginationPopoverButton');
-        await testSubjects.click('tablePagination-5-rows');
+        await testSubjects.click('tablePagination-25-rows');
+        await testSubjects.missingOrFail('pagination-button-1');
+        await testSubjects.click('tablePaginationPopoverButton');
+        await testSubjects.click('tablePagination-10-rows');
         await testSubjects.isEnabled('pagination-button-1');
         await testSubjects.click('pagination-button-1');
         await testSubjects.isEnabled('pagination-button-0');
       });
     });
 
-    describe('changes status from the list', () => {
-      before(async () => {
-        await cases.api.createNthRandomCases(1);
-        await header.waitUntilLoadingHasFinished();
-        await cases.casesTable.waitForCasesToBeListed();
+    describe('row actions', () => {
+      describe('Status', () => {
+        before(async () => {
+          await cases.api.createNthRandomCases(1);
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
+
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
+
+        it('to in progress', async () => {
+          await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
+          await testSubjects.existOrFail(`case-status-badge-${CaseStatuses['in-progress']}`);
+        });
+
+        it('to closed', async () => {
+          await cases.casesTable.changeStatus(CaseStatuses.closed, 0);
+          await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.closed}`);
+        });
+
+        it('to open', async () => {
+          await cases.casesTable.changeStatus(CaseStatuses.open, 0);
+          await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.open}`);
+        });
       });
 
-      after(async () => {
-        await cases.api.deleteAllCases();
-        await cases.casesTable.waitForCasesToBeDeleted();
+      describe('Severity', () => {
+        before(async () => {
+          await cases.api.createNthRandomCases(1);
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
+
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
+
+        it('to medium', async () => {
+          await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
+          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+        });
+
+        it('to high', async () => {
+          await cases.casesTable.changeSeverity(CaseSeverity.HIGH, 0);
+          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.HIGH}`);
+        });
+
+        it('to critical', async () => {
+          await cases.casesTable.changeSeverity(CaseSeverity.CRITICAL, 0);
+          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.CRITICAL}`);
+        });
+
+        it('to low', async () => {
+          await cases.casesTable.changeSeverity(CaseSeverity.LOW, 0);
+          await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.LOW}`);
+        });
       });
 
-      it('to in progress', async () => {
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
-      });
+      describe('Delete', () => {
+        before(async () => {
+          await cases.api.createNthRandomCases(1);
+          await header.waitUntilLoadingHasFinished();
+          await cases.casesTable.waitForCasesToBeListed();
+        });
 
-      it('to closed', async () => {
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.closed);
-      });
+        after(async () => {
+          await cases.api.deleteAllCases();
+          await cases.casesTable.waitForCasesToBeDeleted();
+        });
 
-      it('to open', async () => {
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
+        it('deletes a case correctly', async () => {
+          await cases.casesTable.deleteCase(0);
+          await cases.casesTable.waitForTableToFinishLoading();
+          await cases.casesTable.validateCasesTableHasNthRows(0);
+        });
       });
     });
   });

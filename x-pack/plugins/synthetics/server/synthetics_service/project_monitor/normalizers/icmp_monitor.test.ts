@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { Locations, LocationStatus, PrivateLocation } from '../../../../common/runtime_types';
+import {
+  DataStream,
+  Locations,
+  LocationStatus,
+  PrivateLocation,
+} from '../../../../common/runtime_types';
+import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
 
 describe('icmp normalizers', () => {
+  const testHash = 'ljlkj';
   describe('normalize push monitors', () => {
     const projectId = 'test-project-id';
     const locations: Locations = [
@@ -51,6 +58,7 @@ describe('icmp normalizers', () => {
         timeout: '1m',
         wait: '30s',
         'service.name': 'test service',
+        hash: testHash,
       },
       {
         locations: ['us_central'],
@@ -65,6 +73,7 @@ describe('icmp normalizers', () => {
         service: {
           name: 'test service',
         },
+        hash: testHash,
       },
       {
         locations: ['us_central'],
@@ -78,6 +87,7 @@ describe('icmp normalizers', () => {
         unsupportedKey: {
           nestedUnsupportedKey: 'unnsuportedValue',
         },
+        hash: testHash,
       },
     ];
 
@@ -94,6 +104,7 @@ describe('icmp normalizers', () => {
         {
           errors: [],
           normalizedFields: {
+            ...DEFAULT_FIELDS[DataStream.ICMP],
             config_id: '',
             custom_heartbeat_id: 'Cloudflare-DNS-test-project-id-test-space',
             enabled: true,
@@ -109,8 +120,6 @@ describe('icmp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                status: 'ga',
-                url: 'test-url',
               },
             ],
             name: 'Cloudflare DNS',
@@ -127,12 +136,15 @@ describe('icmp normalizers', () => {
             timeout: '60',
             type: 'icmp',
             wait: '30',
+            id: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
         },
         {
           errors: [],
           normalizedFields: {
+            ...DEFAULT_FIELDS[DataStream.ICMP],
             config_id: '',
             custom_heartbeat_id: 'Cloudflare-DNS-2-test-project-id-test-space',
             enabled: true,
@@ -148,8 +160,6 @@ describe('icmp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                status: 'ga',
-                url: 'test-url',
               },
             ],
             name: 'Cloudflare DNS 2',
@@ -166,6 +176,8 @@ describe('icmp normalizers', () => {
             timeout: '16',
             type: 'icmp',
             wait: '60',
+            id: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
         },
@@ -185,6 +197,7 @@ describe('icmp normalizers', () => {
             },
           ],
           normalizedFields: {
+            ...DEFAULT_FIELDS[DataStream.ICMP],
             config_id: '',
             custom_heartbeat_id: 'Cloudflare-DNS-3-test-project-id-test-space',
             enabled: true,
@@ -200,8 +213,6 @@ describe('icmp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                status: 'ga',
-                url: 'test-url',
               },
             ],
             name: 'Cloudflare DNS 3',
@@ -218,6 +229,8 @@ describe('icmp normalizers', () => {
             timeout: '16',
             type: 'icmp',
             wait: '1',
+            id: '',
+            hash: testHash,
           },
           unsupportedKeys: ['unsupportedKey.nestedUnsupportedKey'],
         },

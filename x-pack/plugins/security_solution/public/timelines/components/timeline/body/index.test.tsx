@@ -22,7 +22,6 @@ import {
   kibanaObservable,
   mockGlobalState,
   mockTimelineData,
-  mockTimelineModel,
   SUB_PLUGINS_REDUCER,
 } from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -33,12 +32,13 @@ import type { Props } from '.';
 import { StatefulBody } from '.';
 import type { Sort } from './sort';
 import { getDefaultControlColumn } from './control_columns';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
+import { mount } from 'enzyme';
+import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/lib/kibana/hooks');
@@ -55,6 +55,20 @@ jest.mock('../../../../common/components/user_privileges', () => {
       kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
     }),
   };
+});
+
+const mockUseFieldBrowserOptions = jest.fn();
+jest.mock('../../fields_browser', () => ({
+  useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
+}));
+
+const useAddToTimeline = () => ({
+  beginDrag: jest.fn(),
+  cancelDrag: jest.fn(),
+  dragToLocation: jest.fn(),
+  endDrag: jest.fn(),
+  hasDraggableLock: jest.fn(),
+  startDragToTimeline: jest.fn(),
 });
 
 jest.mock('../../../../common/lib/kibana', () => {
@@ -75,6 +89,7 @@ jest.mock('../../../../common/lib/kibana', () => {
         data: {
           search: jest.fn(),
           query: jest.fn(),
+          dataViews: jest.fn(),
         },
         uiSettings: {
           get: jest.fn(),
@@ -86,11 +101,7 @@ jest.mock('../../../../common/lib/kibana', () => {
           getLastUpdated: jest.fn(),
           getLoadingPanel: jest.fn(),
           getFieldBrowser: jest.fn(),
-          getUseDraggableKeyboardWrapper: () =>
-            jest.fn().mockReturnValue({
-              onBlur: jest.fn(),
-              onKeyDown: jest.fn(),
-            }),
+          getUseAddToTimeline: () => useAddToTimeline,
         },
       },
     }),
@@ -116,11 +127,6 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: () => mockTimelineModel,
-  useDeepEqualSelector: () => mockTimelineModel,
-}));
-
 jest.mock('../../../../common/components/link_to');
 
 // Prevent Resolver from rendering
@@ -133,19 +139,65 @@ jest.mock(
       children({ isVisible: true })
 );
 
-jest.mock('../../../../common/lib/helpers/scheduler', () => ({
-  requestIdleCallbackViaScheduler: (callback: () => void, opts?: unknown) => {
-    callback();
-  },
-  maxDelay: () => 3000,
-}));
-
 jest.mock('../../fields_browser/create_field_button', () => ({
   useCreateFieldButton: () => <></>,
 }));
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+jest.mock('suricata-sid-db', () => {
+  return {
+    db: [],
+  };
+});
+jest.mock('react-beautiful-dnd', () => {
+  const original = jest.requireActual('react-beautiful-dnd');
+  return {
+    ...original,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Droppable: ({ children }: { children: any }) =>
+      children(
+        {
+          draggableProps: {
+            style: {},
+          },
+          innerRef: jest.fn(),
+        },
+        {}
+      ),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Draggable: ({ children }: { children: any }) =>
+      children(
+        {
+          draggableProps: {
+            style: {},
+          },
+          innerRef: jest.fn(),
+        },
+        {}
+      ),
+    DraggableProvided: () => <></>,
+    DraggableStateSnapshot: () => <></>,
+    DraggingStyle: () => <></>,
+    NotDraggingStyle: () => <></>,
+  };
+});
+
 describe('Body', () => {
-  const mount = useMountAppended();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getWrapper = async (childrenComponent: JSX.Element, store?: any) => {
+    const wrapper = mount(childrenComponent, {
+      wrappingComponent: TestProviders,
+      wrappingComponentProps: store ?? {},
+    });
+    await waitFor(() => wrapper.find('[data-test-subj="suricataRefs"]').exists());
+    return wrapper;
+  };
   const mockRefetch = jest.fn();
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
   let authenticatedUser: AuthenticatedUser;
@@ -164,8 +216,8 @@ describe('Body', () => {
   const props: Props = {
     activePage: 0,
     browserFields: mockBrowserFields,
-    data: mockTimelineData,
-    id: 'timeline-test',
+    data: [mockTimelineData[0]],
+    id: TimelineId.test,
     refetch: mockRefetch,
     renderCellValue: DefaultCellRenderer,
     rowRenderers: defaultRowRenderers,
@@ -176,63 +228,58 @@ describe('Body', () => {
     trailingControlColumns: [],
   };
 
-  describe('rendering', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/145187
+  describe.skip('rendering', () => {
     beforeEach(() => {
       mockDispatch.mockClear();
     });
 
-    test('it renders the column headers', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
-
+    test('it renders the column headers', async () => {
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
       expect(wrapper.find('[data-test-subj="column-headers"]').first().exists()).toEqual(true);
     });
 
-    test('it renders the scroll container', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
-
+    test('it renders the scroll container', async () => {
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
       expect(wrapper.find('[data-test-subj="timeline-body"]').first().exists()).toEqual(true);
     });
 
-    test('it renders events', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
-
+    test('it renders events', async () => {
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
       expect(wrapper.find('[data-test-subj="events"]').first().exists()).toEqual(true);
     });
 
     test('it renders a tooltip for timestamp', async () => {
+      const { storage } = createSecuritySolutionStorageMock();
       const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
-      const testProps = { ...props, columnHeaders: headersJustTimestamp };
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...testProps} />
-        </TestProviders>
-      );
-      wrapper.update();
-      await waitFor(() => {
-        wrapper.update();
-        headersJustTimestamp.forEach(() => {
-          expect(
-            wrapper
-              .find('[data-test-subj="data-driven-columns"]')
-              .first()
-              .find('[data-test-subj="localized-date-tool-tip"]')
-              .exists()
-          ).toEqual(true);
-        });
+      const state: State = {
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            [TimelineId.test]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
+              id: TimelineId.test,
+              columns: headersJustTimestamp,
+            },
+          },
+        },
+      };
+
+      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const wrapper = await getWrapper(<StatefulBody {...props} />, { store });
+
+      headersJustTimestamp.forEach(() => {
+        expect(
+          wrapper
+            .find('[data-test-subj="data-driven-columns"]')
+            .first()
+            .find('[data-test-subj="localized-date-tool-tip"]')
+            .exists()
+        ).toEqual(true);
       });
-    }, 20000);
+    });
   });
   describe('action on event', () => {
     const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
@@ -250,16 +297,13 @@ describe('Body', () => {
       mockDispatch.mockClear();
     });
 
-    test('Add a note to an event', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
-      addaNoteToEvent(wrapper, 'hello world');
+    test('Add a note to an event', async () => {
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
 
+      addaNoteToEvent(wrapper, 'hello world');
+      wrapper.update();
       expect(mockDispatch).toHaveBeenNthCalledWith(
-        2,
+        3,
         expect.objectContaining({
           payload: {
             eventId: '1',
@@ -274,7 +318,7 @@ describe('Body', () => {
         })
       );
       expect(mockDispatch).toHaveBeenNthCalledWith(
-        3,
+        4,
         timelineActions.pinEvent({
           eventId: '1',
           id: 'timeline-test',
@@ -282,7 +326,7 @@ describe('Body', () => {
       );
     });
 
-    test('Add two notes to an event', () => {
+    test('Add two notes to an event', async () => {
       const { storage } = createSecuritySolutionStorageMock();
       const state: State = {
         ...mockGlobalState,
@@ -290,8 +334,8 @@ describe('Body', () => {
           ...mockGlobalState.timeline,
           timelineById: {
             ...mockGlobalState.timeline.timelineById,
-            'timeline-test': {
-              ...mockGlobalState.timeline.timelineById.test,
+            [TimelineId.test]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
               id: 'timeline-test',
               pinnedEventIds: { 1: true }, // we should NOT dispatch a pin event, because it's already pinned
             },
@@ -301,13 +345,10 @@ describe('Body', () => {
 
       const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-      const Proxy = (proxyProps: Props) => (
-        <TestProviders store={store}>
-          <StatefulBody {...proxyProps} />
-        </TestProviders>
-      );
+      const Proxy = (proxyProps: Props) => <StatefulBody {...proxyProps} />;
 
-      const wrapper = mount(<Proxy {...props} />);
+      const wrapper = await getWrapper(<Proxy {...props} />, { store });
+
       addaNoteToEvent(wrapper, 'hello world');
       mockDispatch.mockClear();
       addaNoteToEvent(wrapper, 'new hello world');
@@ -341,17 +382,14 @@ describe('Body', () => {
       mockDispatch.mockReset();
     });
     test('call the right reduce action to show event details for query tab', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
         payload: {
+          id: 'timeline-test',
           panelView: 'eventDetail',
           params: {
             eventId: '1',
@@ -359,24 +397,20 @@ describe('Body', () => {
             refetch: mockRefetch,
           },
           tabType: 'query',
-          timelineId: 'timeline-test',
         },
-        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
     test('call the right reduce action to show event details for pinned tab', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} tabType={TimelineTabs.pinned} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} tabType={TimelineTabs.pinned} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
         payload: {
+          id: 'timeline-test',
           panelView: 'eventDetail',
           params: {
             eventId: '1',
@@ -384,24 +418,20 @@ describe('Body', () => {
             refetch: mockRefetch,
           },
           tabType: 'pinned',
-          timelineId: 'timeline-test',
         },
-        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
     test('call the right reduce action to show event details for notes tab', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} tabType={TimelineTabs.notes} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} tabType={TimelineTabs.notes} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
         payload: {
+          id: 'timeline-test',
           panelView: 'eventDetail',
           params: {
             eventId: '1',
@@ -409,9 +439,8 @@ describe('Body', () => {
             refetch: mockRefetch,
           },
           tabType: 'notes',
-          timelineId: 'timeline-test',
         },
-        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
   });

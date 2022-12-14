@@ -6,4 +6,4 @@
  */
 
 export const enterpriseSearchFeatureId = 'enterpriseSearch';
-export const enableBehavioralAnalyticsSection = 'enterpriseSearch:enableBehavioralAnalyticsSection';
+export const enableEnginesSection = 'enterpriseSearch:enableEnginesSection';

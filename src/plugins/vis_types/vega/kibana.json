@@ -8,7 +8,7 @@
   "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"],
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Registers the vega visualization. Is the elastic version of vega and vega-lite libraries."
 }

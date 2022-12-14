@@ -93,9 +93,9 @@ export function ResolverTreeFetcher(
             descendants: descendantsRequestAmount(),
           });
           if (unboundedTree.length > 0) {
-            const timestamps = unboundedTree.map((event) =>
-              firstNonNullValue(event.data['@timestamp'])
-            );
+            const timestamps = unboundedTree
+              .map((event) => firstNonNullValue(event.data['@timestamp']))
+              .sort();
             const oldestTimestamp = timestamps[0];
             const newestTimestamp = timestamps.slice(-1);
             api.dispatch({

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
@@ -49,7 +48,7 @@ const ParamsSchema = schema.object({
 
 export const ConnectorTypeId = '.server-log';
 // connector type definition
-export function getConnectorType({ logger }: { logger: Logger }): ServerLogConnectorType {
+export function getConnectorType(): ServerLogConnectorType {
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'basic',
@@ -62,18 +61,16 @@ export function getConnectorType({ logger }: { logger: Logger }): ServerLogConne
         schema: ParamsSchema,
       },
     },
-    executor: curry(executor)({ logger }),
+    executor,
   };
 }
 
 // action executor
 
 async function executor(
-  { logger }: { logger: Logger },
   execOptions: ServerLogConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<void>> {
-  const actionId = execOptions.actionId;
-  const params = execOptions.params;
+  const { actionId, params, logger } = execOptions;
 
   const sanitizedMessage = withoutControlCharacters(params.message);
   try {

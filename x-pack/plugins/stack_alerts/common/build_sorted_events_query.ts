@@ -23,6 +23,7 @@ export interface BuildSortedEventsQuery extends BuildSortedEventsQueryOpts {
   timeField: string;
   fields?: string[];
   runtime_mappings?: unknown;
+  _source?: unknown;
 }
 
 export const buildSortedEventsQuery = ({
@@ -40,6 +41,7 @@ export const buildSortedEventsQuery = ({
   fields,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   runtime_mappings,
+  _source,
 }: BuildSortedEventsQuery): ESSearchRequest => {
   const sortField = timeField;
   const docFields = [timeField].map((tstamp) => ({
@@ -89,6 +91,7 @@ export const buildSortedEventsQuery = ({
     },
     ...(runtime_mappings ? { runtime_mappings } : {}),
     ...(fields ? { fields } : {}),
+    ...(_source != null ? { _source } : {}),
   };
 
   if (searchAfterSortId) {

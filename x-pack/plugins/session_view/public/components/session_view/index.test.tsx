@@ -39,6 +39,8 @@ describe('SessionView component', () => {
         dispatchEvent: jest.fn(),
       })),
     });
+
+    global.ResizeObserver = require('resize-observer-polyfill');
   });
 
   beforeEach(() => {
@@ -207,8 +209,8 @@ describe('SessionView component', () => {
         render();
 
         await waitFor(() => {
-          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toHaveClass(
-            'euiButtonIcon-isDisabled'
+          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')?.classList[2]).toContain(
+            'disabled'
           );
         });
       });

@@ -49,33 +49,46 @@ export const metricsRequestHandler = async ({
     const dataSearch = data.search;
     const parsedTimeRange = data.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
 
+    const doSearch = async (
+      searchOptions: ReturnType<typeof dataSearch.session.getSearchOptions>
+    ): Promise<TimeseriesVisData> => {
+      return await getCoreStart().http.post(ROUTES.VIS_DATA, {
+        body: JSON.stringify({
+          timerange: {
+            timezone,
+            ...parsedTimeRange,
+          },
+          query: input?.query,
+          filters: input?.filters,
+          panels: [visParams],
+          state: uiStateObj,
+          ...(searchOptions
+            ? {
+                searchSession: searchOptions,
+              }
+            : {}),
+        }),
+        context: executionContext,
+        signal: abortController.signal,
+      });
+    };
+
     if (visParams && visParams.id && !visParams.isModelInvalid && !expressionAbortSignal.aborted) {
-      const untrackSearch =
-        dataSearch.session.isCurrentSession(searchSessionId) &&
-        dataSearch.session.trackSearch({
-          abort: () => abortController.abort(),
-        });
+      const searchTracker = dataSearch.session.isCurrentSession(searchSessionId)
+        ? dataSearch.session.trackSearch({
+            abort: () => abortController.abort(),
+            poll: async () => {
+              // don't use, keep this empty, onSavingSession is used instead
+            },
+            onSavingSession: async (searchSessionOptions) => {
+              await doSearch(searchSessionOptions);
+            },
+          })
+        : undefined;
 
       try {
         const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
-
-        const visData: TimeseriesVisData = await getCoreStart().http.post(ROUTES.VIS_DATA, {
-          body: JSON.stringify({
-            timerange: {
-              timezone,
-              ...parsedTimeRange,
-            },
-            query: input?.query,
-            filters: input?.filters,
-            panels: [visParams],
-            state: uiStateObj,
-            ...(searchSessionOptions && {
-              searchSession: searchSessionOptions,
-            }),
-          }),
-          context: executionContext,
-          signal: abortController.signal,
-        });
+        const visData: TimeseriesVisData = await doSearch(searchSessionOptions);
 
         inspectorAdapters?.requests?.reset();
 
@@ -86,12 +99,13 @@ export const metricsRequestHandler = async ({
             .ok({ time: query.time, json: { rawResponse: query.response } });
         });
 
+        searchTracker?.complete();
+
         return visData;
+      } catch (e) {
+        searchTracker?.error();
+        throw e;
       } finally {
-        if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
-          // untrack if this search still belongs to current session
-          untrackSearch();
-        }
         expressionAbortSignal.removeEventListener('abort', expressionAbortHandler);
       }
     }
