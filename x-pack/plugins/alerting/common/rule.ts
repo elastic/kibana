@@ -187,11 +187,36 @@ export interface AlertsHealth {
   };
 }
 
+export interface SummarizedAlertsWithAll {
+  new: {
+    count: number;
+    data: unknown[];
+  };
+  ongoing: {
+    count: number;
+    data: unknown[];
+  };
+  recovered: {
+    count: number;
+    data: unknown[];
+  };
+  all: {
+    count: number;
+    data: unknown[];
+  };
+}
+
 export interface ActionVariable {
   name: string;
   description: string;
   deprecated?: boolean;
   useWithTripleBracesInTemplates?: boolean;
+
+  // If this callback function is defined, this
+  // action variable will be available for summary
+  // alerts and will be generated from the list of summary
+  // alerts
+  summaryBuilder?: (alerts: SummarizedAlertsWithAll) => unknown;
 }
 
 export interface RuleMonitoringHistory extends SavedObjectAttributes {

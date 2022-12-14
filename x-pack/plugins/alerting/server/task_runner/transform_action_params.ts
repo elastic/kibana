@@ -12,6 +12,8 @@ import {
   AlertInstanceContext,
   RuleTypeParams,
   SanitizedRule,
+  ActionVariable,
+  SummarizedAlertsWithAll,
 } from '../types';
 
 interface TransformActionParamsOptions {
@@ -32,25 +34,6 @@ interface TransformActionParamsOptions {
   kibanaBaseUrl?: string;
   context: AlertInstanceContext;
   ruleUrl?: string;
-}
-
-interface SummarizedAlertsWithAll {
-  new: {
-    count: number;
-    data: unknown[];
-  };
-  ongoing: {
-    count: number;
-    data: unknown[];
-  };
-  recovered: {
-    count: number;
-    data: unknown[];
-  };
-  all: {
-    count: number;
-    data: unknown[];
-  };
 }
 
 export function transformActionParams({
@@ -122,11 +105,13 @@ export function transformSummaryActionParams({
   actionParams,
   ruleUrl,
   kibanaBaseUrl,
+  summaryContext,
 }: {
   alerts: SummarizedAlertsWithAll;
   rule: SanitizedRule<RuleTypeParams>;
   ruleTypeId: string;
   actionsPlugin: ActionsPluginStartContract;
+  summaryContext: AlertInstanceContext;
   actionId: string;
   actionTypeId: string;
   spaceId: string;
@@ -137,6 +122,7 @@ export function transformSummaryActionParams({
   const variables = {
     kibanaBaseUrl,
     date: new Date().toISOString(),
+    context: summaryContext,
     rule: {
       params: rule.params,
       id: rule.id,
@@ -154,4 +140,19 @@ export function transformSummaryActionParams({
     actionParams,
     variables
   );
+}
+
+export function transformSummaryContext(
+  context: ActionVariable[] | undefined,
+  alerts: SummarizedAlertsWithAll
+): AlertInstanceContext {
+  return (context ?? []).reduce((acc, currContext: ActionVariable) => {
+    if (currContext.summaryBuilder) {
+      return {
+        ...acc,
+        [currContext.name]: currContext.summaryBuilder(alerts),
+      };
+    }
+    return acc;
+  }, {});
 }

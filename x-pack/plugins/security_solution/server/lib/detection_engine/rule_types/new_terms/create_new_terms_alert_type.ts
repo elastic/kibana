@@ -41,6 +41,7 @@ import {
   getUnprocessedExceptionsWarnings,
 } from '../../signals/utils';
 import { createEnrichEventsFunction } from '../../signals/enrichments';
+import { getActionContext } from '../utils/helpers';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
@@ -86,7 +87,7 @@ export const createNewTermsAlertType = (
     ],
     defaultActionGroupId: 'default',
     actionVariables: {
-      context: [{ name: 'server', description: 'the server' }],
+      context: getActionContext('new_terms'),
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,

@@ -13,6 +13,7 @@ import type { MachineLearningRuleParams } from '../../rule_schema';
 import { machineLearningRuleParams } from '../../rule_schema';
 import { mlExecutor } from '../../signals/executors/ml';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import { getActionContext } from '../utils/helpers';
 
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
@@ -43,7 +44,7 @@ export const createMlAlertType = (
     ],
     defaultActionGroupId: 'default',
     actionVariables: {
-      context: [{ name: 'server', description: 'the server' }],
+      context: getActionContext('machine_learning'),
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,

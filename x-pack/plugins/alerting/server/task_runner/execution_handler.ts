@@ -19,7 +19,11 @@ import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
 import { ExecutionHandlerOptions, RuleTaskInstance } from './types';
 import { TaskRunnerContext } from './task_runner_factory';
-import { transformActionParams, transformSummaryActionParams } from './transform_action_params';
+import {
+  transformActionParams,
+  transformSummaryActionParams,
+  transformSummaryContext,
+} from './transform_action_params';
 import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
@@ -217,6 +221,10 @@ export class ExecutionHandler<
                 actionsPlugin,
                 actionTypeId,
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+                summaryContext: transformSummaryContext(
+                  this.ruleType.actionVariables?.context,
+                  summarizedAlerts
+                ),
                 ruleUrl: this.buildRuleUrl(spaceId),
               }),
             }),

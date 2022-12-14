@@ -15,6 +15,7 @@ import { thresholdExecutor } from '../../signals/executors/threshold';
 import type { ThresholdAlertState } from '../../signals/types';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
+import { getActionContext } from '../utils/helpers';
 
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
@@ -56,7 +57,7 @@ export const createThresholdAlertType = (
     ],
     defaultActionGroupId: 'default',
     actionVariables: {
-      context: [{ name: 'server', description: 'the server' }],
+      context: getActionContext('threshold'),
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,

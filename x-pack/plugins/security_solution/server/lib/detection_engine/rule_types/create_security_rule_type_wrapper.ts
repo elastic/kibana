@@ -11,7 +11,6 @@ import agent from 'elastic-apm-node';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
-import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import {
@@ -25,10 +24,6 @@ import {
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
 import { getListClient } from './utils/get_list_client';
-// eslint-disable-next-line no-restricted-imports
-import type { NotificationRuleTypeParams } from '../rule_actions_legacy';
-// eslint-disable-next-line no-restricted-imports
-import { getNotificationResultsLink } from '../rule_actions_legacy';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
@@ -71,15 +66,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let runState = state;
           let inputIndex: string[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
-          const {
-            from,
-            maxSignals,
-            meta,
-            ruleId,
-            timestampOverride,
-            timestampOverrideFallbackDisabled,
-            to,
-          } = params;
+          const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
+            params;
           const {
             alertWithPersistence,
             savedObjectsClient,
@@ -110,7 +98,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const {
             actions,
-            name,
             schedule: { interval },
           } = completeRule.ruleConfig;
 
@@ -126,12 +113,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let result = createResultObject(state);
           let wroteWarningStatus = false;
           let hasError = false;
-
-          const notificationRuleParams: NotificationRuleTypeParams = {
-            ...params,
-            name,
-            id: rule.id,
-          };
 
           const primaryTimestamp = timestampOverride ?? TIMESTAMP;
           const secondaryTimestamp =
@@ -382,47 +363,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             }
 
             const createdSignalsCount = result.createdSignals.length;
-
-            if (actions.length) {
-              const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
-              const toInMs = parseScheduleDates('now')?.format('x');
-              const resultsLink = getNotificationResultsLink({
-                from: fromInMs,
-                to: toInMs,
-                id: rule.id,
-                kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
-                  ?.kibana_siem_app_url,
-              });
-
-              ruleExecutionLogger.debug(`Found ${createdSignalsCount} signals for notification.`);
-
-              // if (completeRule.ruleConfig.throttle != null) {
-              //   // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
-              //   await scheduleThrottledNotificationActions({
-              //     alertInstance: services.alertFactory.create(rule.id),
-              //     throttle: completeRule.ruleConfig.throttle ?? '',
-              //     startedAt,
-              //     id: rule.id,
-              //     kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
-              //       ?.kibana_siem_app_url,
-              //     outputIndex: ruleDataClient.indexNameWithNamespace(spaceId),
-              //     ruleId,
-              //     esClient: services.scopedClusterClient.asCurrentUser,
-              //     notificationRuleParams,
-              //     signals: result.createdSignals,
-              //     logger,
-              //   });
-              // } else if (createdSignalsCount) {
-              //   const alertInstance = services.alertFactory.create(rule.id);
-              //   scheduleNotificationActions({
-              //     alertInstance,
-              //     signalsCount: createdSignalsCount,
-              //     signals: result.createdSignals,
-              //     resultsLink,
-              //     ruleParams: notificationRuleParams,
-              //   });
-              // }
-            }
 
             if (result.success) {
               ruleExecutionLogger.debug('[+] Signal Rule execution completed.');

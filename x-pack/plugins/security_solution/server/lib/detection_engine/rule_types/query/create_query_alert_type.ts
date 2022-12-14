@@ -14,6 +14,7 @@ import { unifiedQueryRuleParams } from '../../rule_schema';
 import { queryExecutor } from '../../signals/executors/query';
 import type { CreateQueryRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
+import { getActionContext } from '../utils/helpers';
 
 export interface QueryRuleState {
   suppressionGroupHistory?: BucketHistory[];
@@ -68,7 +69,7 @@ export const createQueryAlertType = (
     ],
     defaultActionGroupId: 'default',
     actionVariables: {
-      context: [{ name: 'server', description: 'the server' }],
+      context: getActionContext('query'),
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
