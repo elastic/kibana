@@ -49,7 +49,6 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/146115
   describe('bulkDisableRules', () => {
     const objectRemover = new ObjectRemover(supertest);
 
@@ -445,17 +444,17 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Validation tests', () => {
       const { user, space } = SuperuserAtSpace1;
       it('should throw an error when bulk disable of rules when both ids and filter supplied in payload', async () => {
-        const { body: createdRule1 } = await supertest
+        const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
           .send(getTestRuleData({ enabled: true, tags: ['foo'] }))
           .expect(200);
-        objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
         const response = await supertestWithoutAuth
           .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_disable`)
           .set('kbn-xsrf', 'foo')
-          .send({ filter: 'fake_filter', ids: [createdRule1.id] })
+          .send({ filter: 'fake_filter', ids: [createdRule.id] })
           .auth(user.username, user.password);
 
         expect(response.statusCode).to.eql(400);
@@ -481,12 +480,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return an error if we do not pass any arguments', async () => {
-        const { body: createdRule1 } = await supertest
+        const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
           .send(getTestRuleData())
           .expect(200);
-        objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
         const response = await supertestWithoutAuth
           .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_disable`)
