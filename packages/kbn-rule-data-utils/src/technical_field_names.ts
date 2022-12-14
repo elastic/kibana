@@ -11,7 +11,6 @@ import { ValuesType } from 'utility-types';
 const KIBANA_NAMESPACE = 'kibana' as const;
 
 const ALERT_NAMESPACE = `${KIBANA_NAMESPACE}.alert` as const;
-const ALERT_CASES_NAMESPACE = `${ALERT_NAMESPACE}.cases` as const;
 const ALERT_RULE_NAMESPACE = `${ALERT_NAMESPACE}.rule` as const;
 const ALERT_RULE_THREAT_NAMESPACE = `${ALERT_RULE_NAMESPACE}.threat` as const;
 
@@ -53,7 +52,7 @@ const ALERT_SUPPRESSION_END = `${ALERT_SUPPRESSION_META}.end` as const;
 const ALERT_SUPPRESSION_DOCS_COUNT = `${ALERT_SUPPRESSION_META}.docs_count` as const;
 
 // Fields pertaining to the cases associated with the alert
-const ALERT_CASES_ID = `${ALERT_CASES_NAMESPACE}.id` as const;
+const ALERT_CASES_IDS = `${ALERT_NAMESPACE}.cases_ids` as const;
 
 // Fields pertaining to the rule associated with the alert
 const ALERT_RULE_AUTHOR = `${ALERT_RULE_NAMESPACE}.author` as const;
@@ -133,7 +132,7 @@ const fields = {
   ALERT_RULE_PRODUCER,
   ALERT_REASON,
   ALERT_RISK_SCORE,
-  ALERT_CASES_ID,
+  ALERT_CASES_IDS,
   ALERT_RULE_AUTHOR,
   ALERT_RULE_CREATED_AT,
   ALERT_RULE_CREATED_BY,
@@ -208,7 +207,7 @@ export {
   ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_USER,
-  ALERT_CASES_ID,
+  ALERT_CASES_IDS,
   ALERT_RULE_AUTHOR,
   ALERT_RULE_CREATED_AT,
   ALERT_RULE_CREATED_BY,
