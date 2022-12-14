@@ -7,6 +7,7 @@
  */
 
 import uuid from 'uuid';
+import { isEqual } from 'lodash';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 

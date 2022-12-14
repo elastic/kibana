@@ -10,13 +10,23 @@ import React, { useMemo, useState } from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import {
+  LazyControlGroupRenderer,
+  ControlGroupContainer,
+  useControlGroupContainerContext,
+  ControlStyle,
+} from '@kbn/controls-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { PLUGIN_ID } from './constants';
+
+const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 interface Props {
   dataView: DataViewSpec;
@@ -52,6 +62,31 @@ export const SearchExample = ({ dataView, navigation }: Props) => {
           query={query}
           showSearchBar={true}
           useDefaultBehaviors={true}
+        />
+        <ControlGroupRenderer
+          filters={filters}
+          getInitialInput={async (initialInput, builder) => {
+            await builder.addDataControlFromField(initialInput, {
+              dataViewId: dataView.id,
+              title: 'Destintion country',
+              fieldName: 'geo.dest',
+              width: 'medium',
+              grow: false,
+            });
+            await builder.addDataControlFromField(initialInput, {
+              dataViewId: dataView.id,
+              fieldName: 'bytes',
+              width: 'medium',
+              grow: true,
+              title: 'Bytes',
+            });
+            return {
+              ...initialInput,
+              viewMode: ViewMode.VIEW,
+            };
+          }}
+          query={query}
+          timeRange={timeRange}
         />
       </EuiPanel>
     </>
