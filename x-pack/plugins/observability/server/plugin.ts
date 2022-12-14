@@ -21,6 +21,12 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
+import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+
+import {
+  kubernetesGuideId,
+  kubernetesGuideConfig,
+} from '../common/guided_onboarding/kubernetes_guide_config';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -42,6 +48,7 @@ interface PluginSetup {
   ruleRegistry: RuleRegistryPluginSetupContract;
   spaces: SpacesPluginStart;
   alerting: PluginSetupContract;
+  guidedOnboarding: GuidedOnboardingPluginSetup;
 }
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
@@ -180,6 +187,11 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       repository: getGlobalObservabilityServerRouteRepository(config),
       ruleDataService,
     });
+
+    /**
+     * Register a config for the observability guide
+     */
+    plugins.guidedOnboarding.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
 
     return {
       getAlertDetailsConfig() {

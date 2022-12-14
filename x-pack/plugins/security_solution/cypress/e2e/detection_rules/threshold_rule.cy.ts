@@ -7,7 +7,7 @@
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
 import type { Mitre } from '../../objects/rule';
-import { getIndexPatterns, getNewThresholdRule } from '../../objects/rule';
+import { getNewThresholdRule } from '../../objects/rule';
 
 import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
 
@@ -16,8 +16,6 @@ import {
   RISK_SCORE,
   RULE_NAME,
   RULE_SWITCH,
-  RULES_ROW,
-  RULES_TABLE,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
 import {
@@ -46,7 +44,7 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { expectNumberOfRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
@@ -95,10 +93,7 @@ describe('Detection rules, threshold', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    const expectedNumberOfRules = 1;
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-    });
+    expectNumberOfRules(1);
 
     cy.get(RULE_NAME).should('have.text', rule.name);
     cy.get(RISK_SCORE).should('have.text', rule.riskScore);
@@ -124,7 +119,7 @@ describe('Detection rules, threshold', () => {
     cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
+      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', 'auditbeat-*');
       getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Threshold');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
