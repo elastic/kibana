@@ -7,16 +7,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { KNOWN_FIELD_TYPES } from './field_types';
 
-const UNKNOWN_FIELD_TYPE_DESC = i18n.translate(
+export const UNKNOWN_FIELD_TYPE_DESC = i18n.translate(
   'unifiedFieldList.fieldNameDescription.unknownField',
   {
     defaultMessage: 'Unknown field',
   }
 );
 
-export function getFieldTypeDescription(type: string) {
+export function getFieldTypeDescription(type?: string) {
+  if (!type || type === KBN_FIELD_TYPES.UNKNOWN) {
+    return UNKNOWN_FIELD_TYPE_DESC;
+  }
+
   const knownType: KNOWN_FIELD_TYPES = type as KNOWN_FIELD_TYPES;
   switch (knownType) {
     case KNOWN_FIELD_TYPES.DOCUMENT:
@@ -99,6 +104,6 @@ export function getFieldTypeDescription(type: string) {
     default:
       // If you see a typescript error here, that's a sign that there are missing switch cases ^^
       const _exhaustiveCheck: never = knownType;
-      return UNKNOWN_FIELD_TYPE_DESC || _exhaustiveCheck;
+      return knownType || _exhaustiveCheck;
   }
 }

@@ -15,5 +15,5 @@ export function getFieldType<T extends FieldListItem = DataViewField>(field: T):
   if (timeSeriesMetric) {
     return timeSeriesMetric;
   }
-  return field.type;
+  return field.type ?? 'string';
 }

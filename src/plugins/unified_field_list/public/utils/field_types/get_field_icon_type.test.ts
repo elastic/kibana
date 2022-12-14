@@ -7,9 +7,9 @@
  */
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { getFieldIconType } from './get_field_type';
+import { getFieldIconType } from './get_field_icon_type';
 
-describe('getFieldIconType()', () => {
+describe('UnifiedFieldList getFieldIconType()', () => {
   it('extracts type for non-string types', () => {
     expect(
       getFieldIconType({

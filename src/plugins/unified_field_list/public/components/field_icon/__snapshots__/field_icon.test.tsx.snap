@@ -3,28 +3,28 @@
 exports[`UnifiedFieldList <FieldIcon /> accepts additional props 1`] = `
 <FieldIcon
   fill="none"
-  label="Date field"
+  label="Date"
   type="date"
 />
 `;
 
 exports[`UnifiedFieldList <FieldIcon /> renders Document type properly 1`] = `
 <FieldIcon
-  label="Number of records"
+  label="Records"
   type="number"
 />
 `;
 
 exports[`UnifiedFieldList <FieldIcon /> renders Histogram type properly 1`] = `
 <FieldIcon
-  label="Histogram field"
+  label="Histogram"
   type="number"
 />
 `;
 
 exports[`UnifiedFieldList <FieldIcon /> renders properly 1`] = `
 <FieldIcon
-  label="Date field"
+  label="Date"
   type="date"
 />
 `;
