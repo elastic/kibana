@@ -74,7 +74,7 @@ export function updateSearchSource(
     if (latestTimestamp && latestTimestamp > dateStart) {
       // add additional filter for documents with a timestamp greater then
       // the timestamp of the previous run, so that those documents are not counted twice
-      const field = index.fields.find((f) => f.name === params.timeField);
+      const field = index.fields.find((f) => f.name === timeFieldName);
       const addTimeRangeField = buildRangeFilter(field!, { gt: latestTimestamp }, index);
       filters.push(addTimeRangeField);
     }
