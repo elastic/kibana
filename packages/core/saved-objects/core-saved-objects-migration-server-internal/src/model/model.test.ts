@@ -710,10 +710,6 @@ describe('migrations v2 model', () => {
                 },
               },
               "properties": Object {
-                "disabled_saved_object_type": Object {
-                  "dynamic": false,
-                  "properties": Object {},
-                },
                 "new_saved_object_type": Object {
                   "properties": Object {
                     "value": Object {
@@ -1285,10 +1281,6 @@ describe('migrations v2 model', () => {
               },
             },
             "properties": Object {
-              "disabled_saved_object_type": Object {
-                "dynamic": false,
-                "properties": Object {},
-              },
               "new_saved_object_type": Object {
                 "properties": Object {
                   "value": Object {
