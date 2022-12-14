@@ -175,9 +175,6 @@ export interface PostInitState extends BaseState {
   readonly targetIndex: string;
   readonly versionIndexReadyActions: Option.Option<AliasAction[]>;
   readonly outdatedDocumentsQuery: QueryDslQueryContainer;
-
-  /** Whether to run a subset of migration steps optimised for scenarios where we do not need to reindex */
-  readonly skipReindex?: true;
 }
 
 export interface DoneState extends PostInitState {

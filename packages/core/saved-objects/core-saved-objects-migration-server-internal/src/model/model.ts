@@ -176,7 +176,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           // We set a special flag that indicates we DO NOT need to reindex
-          skipReindex: true,
           controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
           sourceIndex: Option.none,
           targetIndex,
@@ -1023,20 +1022,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      const { pitId, hasTransformedDocs, skipReindex, ...state } = stateP;
+      const { pitId, hasTransformedDocs, ...state } = stateP;
       if (hasTransformedDocs) {
         return {
           ...state,
           controlState: 'OUTDATED_DOCUMENTS_REFRESH',
-        };
-      }
-      if (skipReindex) {
-        return {
-          ...stateP,
-          controlState: 'MARK_VERSION_INDEX_READY',
-          versionIndexReadyActions: Option.some([
-            { add: { index: stateP.targetIndex, alias: stateP.versionAlias } },
-          ]) as Option.Some<AliasAction[]>,
         };
       }
       return {
@@ -1049,15 +1039,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_REFRESH') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (stateP.skipReindex) {
-        return {
-          ...stateP,
-          controlState: 'MARK_VERSION_INDEX_READY',
-          versionIndexReadyActions: Option.some([
-            { add: { index: stateP.targetIndex, alias: stateP.versionAlias } },
-          ]) as Option.Some<AliasAction[]>,
-        };
-      }
       return {
         ...stateP,
         controlState: 'CHECK_TARGET_MAPPINGS',
