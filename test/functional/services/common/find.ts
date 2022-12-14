@@ -407,6 +407,7 @@ export class FindService extends FtrService {
     await this.retry.try(async () => {
       const element = await this.byCssSelector(selector, timeout);
       if (element) {
+        this.log.debug(`'${selector}' element found, attempting click...`);
         // await element.moveMouseTo();
         await element.click(topOffset);
       } else {

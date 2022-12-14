@@ -13,6 +13,7 @@ export class HomePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
+  public readonly log = this.ctx.getService('log');
 
   async clickSynopsis(title: string) {
     await this.testSubjects.click(`homeSynopsisLink${title}`);
@@ -31,6 +32,7 @@ export class HomePageObject extends FtrService {
     const className = await accordion.getAttribute('class');
 
     if (!className.includes('euiAccordion-isOpen')) {
+      this.log.debug(`Opening Sample Data Accordion`);
       await this.testSubjects.click('showSampleDataButton');
     }
   }
@@ -38,6 +40,7 @@ export class HomePageObject extends FtrService {
   async isSampleDataSetInstalled(id: string) {
     const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
     const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
+    this.log.debug(`Sample data installed: ${deleteButton.length > 0}`);
     return deleteButton.length > 0;
   }
 
@@ -66,8 +69,9 @@ export class HomePageObject extends FtrService {
     await this.openSampleDataAccordion();
     const isInstalled = await this.isSampleDataSetInstalled(id);
     if (!isInstalled) {
-      await this.retry.waitFor('wait until sample data is installed', async () => {
-        await this.testSubjects.click(`addSampleDataSet${id}`);
+      this.log.debug(`Attempting to add sample data: ${id}`);
+      await this.retry.waitFor('sample data to be installed', async () => {
+        await this.testSubjects.click(`addSampleDataSet${id}`, 1);
         await this._waitForSampleDataLoadingAction(id);
         return await this.isSampleDataSetInstalled(id);
       });
@@ -93,6 +97,7 @@ export class HomePageObject extends FtrService {
     await this.retry.try(async () => {
       // waitForDeletedByCssSelector needs to be inside retry because it will timeout at least once
       // before action is complete
+      this.log.debug(`Waiting for loading spinner to be deleted for sampleDataSetCard${id}`);
       await sampleDataCard.waitForDeletedByCssSelector('.euiLoadingSpinner');
     });
   }
