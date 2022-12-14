@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -34,8 +35,10 @@ export function ServiceGroupsCard({
   href,
   servicesCount,
 }: Props) {
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
+
   const cardProps: EuiCardProps = {
-    style: { width: 286 },
+    style: { width: isMobile ? '100%' : 286 },
     icon: (
       <EuiAvatar
         name={serviceGroup.groupName}
@@ -80,8 +83,12 @@ export function ServiceGroupsCard({
   };
 
   return (
-    <EuiFlexItem key={serviceGroup.groupName}>
-      <EuiCard layout="vertical" {...cardProps} />
+    <EuiFlexItem key={serviceGroup.groupName} grow={false}>
+      <EuiCard
+        layout="vertical"
+        {...cardProps}
+        data-test-subj="serviceGroupCard"
+      />
     </EuiFlexItem>
   );
 }

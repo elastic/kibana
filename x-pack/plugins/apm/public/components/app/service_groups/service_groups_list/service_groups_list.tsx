@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGrid } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import { SavedServiceGroup } from '../../../../../common/service_groups';
-import { ServiceGroupsCard } from './service_group_card';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useDefaultEnvironment } from '../../../../hooks/use_default_environment';
+import { ServiceGroupsCard } from './service_group_card';
 
 interface Props {
   items: SavedServiceGroup[];
@@ -25,7 +25,7 @@ export function ServiceGroupsListItems({ items, servicesCounts }: Props) {
   const environment = useDefaultEnvironment();
 
   return (
-    <EuiFlexGrid gutterSize="m">
+    <EuiFlexGroup gutterSize="m" wrap>
       {items.map((item) => (
         <ServiceGroupsCard
           serviceGroup={item}
@@ -40,6 +40,6 @@ export function ServiceGroupsListItems({ items, servicesCounts }: Props) {
           })}
         />
       ))}
-    </EuiFlexGrid>
+    </EuiFlexGroup>
   );
 }
