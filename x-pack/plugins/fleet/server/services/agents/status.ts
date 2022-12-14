@@ -6,9 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import pMap from 'p-map';
 
-import type { KueryNode } from '@kbn/es-query';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 
@@ -18,7 +16,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { AGENTS_INDEX, AGENTS_PREFIX } from '../../constants';
+import { AGENTS_INDEX } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
 import { FleetUnauthorizedError } from '../../errors';
@@ -27,13 +25,7 @@ import { appContextService } from '../app_context';
 
 import { agentPolicyService } from '../agent_policy';
 
-import {
-  closePointInTime,
-  getAgentById,
-  getAgentsByKuery,
-  openPointInTime,
-  removeSOAttributes,
-} from './crud';
+import { getAgentById, removeSOAttributes } from './crud';
 import { buildStatusRuntimeQuery } from './build_status_query';
 
 interface AggregationsStatusTermsBucketKeys extends AggregationsTermsBucketBase {
@@ -42,6 +34,7 @@ interface AggregationsStatusTermsBucketKeys extends AggregationsTermsBucketBase 
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 const MAX_AGENT_DATA_PREVIEW_SIZE = 20;
+
 export async function getAgentStatusById(
   esClient: ElasticsearchClient,
   agentId: string
@@ -51,28 +44,7 @@ export async function getAgentStatusById(
 
 export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
 
-function joinKuerys(...kuerys: Array<string | undefined>) {
-  return kuerys
-    .filter((kuery) => kuery !== undefined)
-    .reduce((acc: KueryNode | undefined, kuery: string | undefined): KueryNode | undefined => {
-      if (kuery === undefined) {
-        return acc;
-      }
-      const normalizedKuery: KueryNode = fromKueryExpression(removeSOAttributes(kuery || ''));
-
-      if (!acc) {
-        return normalizedKuery;
-      }
-
-      return {
-        type: 'function',
-        function: 'and',
-        arguments: [acc, normalizedKuery],
-      };
-    }, undefined as KueryNode | undefined);
-}
-
-export async function getAgentStatusForAgentPolicyExperimental(
+export async function getAgentStatusForAgentPolicy(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   agentPolicyId?: string,
@@ -108,13 +80,16 @@ export async function getAgentStatusForAgentPolicyExperimental(
         }
       : undefined;
 
-  const statuses: Partial<Record<AgentStatus, number>> = {
+  const statuses: Record<AgentStatus, number> = {
     online: 0,
     error: 0,
     inactive: 0,
     offline: 0,
     updating: 0,
     unenrolled: 0,
+    degraded: 0,
+    enrolling: 0,
+    unenrolling: 0,
   };
 
   let response;
@@ -155,87 +130,23 @@ export async function getAgentStatusForAgentPolicyExperimental(
     }
   });
 
+  const combinedStatuses = {
+    online: statuses.online,
+    error: statuses.error + statuses.degraded,
+    inactive: statuses.inactive,
+    offline: statuses.offline,
+    updating: statuses.updating + statuses.enrolling + statuses.unenrolling,
+    unenrolled: statuses.unenrolled,
+  };
+
   return {
-    ...statuses,
+    ...combinedStatuses,
     /* @deprecated no agents will have other status */
     other: 0,
     /* @deprecated Agent events do not exists anymore */
     events: 0,
     total: Object.values(statuses).reduce((acc, val) => acc + val, 0),
   };
-}
-
-export async function getAgentStatusForAgentPolicy(
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract,
-  agentPolicyId?: string,
-  filterKuery?: string
-) {
-  const logger = appContextService.getLogger();
-  let pitId: string | undefined;
-  try {
-    pitId = await openPointInTime(esClient);
-  } catch (error) {
-    if (error.statusCode === 404) {
-      logger.debug('Index .fleet-agents does not exist yet, skipping point in time.');
-    } else {
-      throw error;
-    }
-  }
-  const [all, allActive, online, error, offline, updating, unenrolled] = await pMap(
-    [
-      [undefined, true], // All agents, including inactive
-      [undefined], // All active agents
-      [AgentStatusKueryHelper.buildKueryForOnlineAgents()],
-      [AgentStatusKueryHelper.buildKueryForErrorAgents()],
-      [AgentStatusKueryHelper.buildKueryForOfflineAgents()],
-      [AgentStatusKueryHelper.buildKueryForUpdatingAgents()],
-      [AgentStatusKueryHelper.buildKueryForUnenrolledAgents(), true], // unenrolled agents are inactive
-    ],
-    ([kuery, showInactive = false]: [kuery?: string, showInactive?: boolean], index) =>
-      getAgentsByKuery(esClient, soClient, {
-        showInactive,
-        perPage: 0,
-        page: 1,
-        pitId,
-        kuery: joinKuerys(
-          ...[
-            kuery,
-            filterKuery,
-            agentPolicyId ? `${AGENTS_PREFIX}.policy_id:"${agentPolicyId}"` : undefined,
-          ]
-        ),
-      }),
-    {
-      concurrency: 1,
-    }
-  );
-
-  if (pitId) {
-    await closePointInTime(esClient, pitId);
-  }
-
-  const result = {
-    total: allActive.total,
-    inactive: all.total - allActive.total - unenrolled.total,
-    online: online.total,
-    error: error.total,
-    offline: offline.total,
-    updating: updating.total,
-    unenrolled: unenrolled.total,
-    other: all.total - online.total - error.total - offline.total,
-    /* @deprecated Agent events do not exists anymore */
-    events: 0,
-  };
-
-  const aggResult = await getAgentStatusForAgentPolicyExperimental(
-    esClient,
-    soClient,
-    agentPolicyId,
-    filterKuery
-  );
-
-  return { ...result, aggResult };
 }
 export async function getIncomingDataByAgentsId(
   esClient: ElasticsearchClient,

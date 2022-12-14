@@ -84,59 +84,26 @@ export function getPreviousAgentStatusForOfflineAgents(
   }
 }
 
-export function buildKueryForEnrollingAgents(path: string = ''): string {
-  return `not (${path}last_checkin:*)`;
+export function buildKueryForUnenrolledAgents(): string {
+  return 'calculated_status:unenrolled';
 }
 
-export function buildKueryForUnenrollingAgents(path: string = ''): string {
-  return `${path}unenrollment_started_at:*`;
+export function buildKueryForOnlineAgents(): string {
+  return 'calculated_status:online';
 }
 
-export function buildKueryForUnenrolledAgents(path: string = ''): string {
-  return `${path}unenrolled_at:*`;
+export function buildKueryForErrorAgents(): string {
+  return '(calculated_status:error or calculated_status:degraded)';
 }
 
-export function buildKueryForOnlineAgents(path: string = ''): string {
-  return `${path}last_checkin:* ${addExclusiveKueryFilter(
-    [buildKueryForOfflineAgents, buildKueryForUpdatingAgents, buildKueryForErrorAgents],
-    path
-  )}`;
+export function buildKueryForOfflineAgents(): string {
+  return 'calculated_status:offline';
 }
 
-export function buildKueryForErrorAgents(path: string = ''): string {
-  return `(${path}last_checkin_status:error or ${path}last_checkin_status:degraded or ${path}last_checkin_status:DEGRADED or ${path}last_checkin_status:ERROR) ${addExclusiveKueryFilter(
-    [buildKueryForOfflineAgents, buildKueryForUnenrollingAgents],
-    path
-  )}`;
+export function buildKueryForUpdatingAgents(): string {
+  return '(calculated_status:updating or calculated_status:unenrolling or calculated_status:enrolling)';
 }
 
-export function buildKueryForOfflineAgents(path: string = ''): string {
-  return `${path}last_checkin < now-${
-    (offlineTimeoutIntervalCount * AGENT_POLLING_THRESHOLD_MS) / 1000
-  }s`;
-}
-
-export function buildKueryForUpgradingAgents(path: string = ''): string {
-  return `(${path}upgrade_started_at:*) and not (${path}upgraded_at:*)`;
-}
-
-export function buildKueryForUpdatingAgents(path: string = ''): string {
-  return `((${buildKueryForUpgradingAgents(path)}) or (${buildKueryForEnrollingAgents(
-    path
-  )}) or (${buildKueryForUnenrollingAgents(
-    path
-  )}) or (not ${path}policy_revision_idx:*)) ${addExclusiveKueryFilter(
-    [buildKueryForOfflineAgents, buildKueryForErrorAgents],
-    path
-  )}`;
-}
-
-export function buildKueryForInactiveAgents(path: string = '') {
-  return `(${path}active:false) and not (${path}unenrolled_at:*)`;
-}
-
-function addExclusiveKueryFilter(kueryBuilders: Array<(path?: string) => string>, path?: string) {
-  return ` AND not (${kueryBuilders
-    .map((kueryBuilder) => `(${kueryBuilder(path)})`)
-    .join(' or ')})`;
+export function buildKueryForInactiveAgents() {
+  return 'calculated_status:inactive';
 }

@@ -129,7 +129,6 @@ describe('Agents CRUD test', () => {
         showInactive: false,
         page: 1,
         perPage: 5,
-        getAgentStatus: false,
       });
 
       expect(result).toEqual({
@@ -159,7 +158,6 @@ describe('Agents CRUD test', () => {
         showInactive: false,
         page: 1,
         perPage: 5,
-        getAgentStatus: false,
       });
 
       expect(result).toEqual({
@@ -196,7 +194,6 @@ describe('Agents CRUD test', () => {
         showInactive: false,
         page: 2,
         perPage: 5,
-        getAgentStatus: false,
       });
 
       expect(result).toEqual({
@@ -224,7 +221,6 @@ describe('Agents CRUD test', () => {
         showInactive: false,
         page: 1,
         perPage: 5,
-        getAgentStatus: false,
       });
 
       expect(result).toEqual({
@@ -250,7 +246,6 @@ describe('Agents CRUD test', () => {
         showInactive: false,
         page: 2,
         perPage: 5,
-        getAgentStatus: false,
       });
 
       expect(result).toEqual({
@@ -280,7 +275,6 @@ describe('Agents CRUD test', () => {
       searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 2)));
       await getAgentsByKuery(esClientMock, soClientMock, {
         showInactive: false,
-        getAgentStatus: false,
       });
 
       expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
@@ -294,7 +288,6 @@ describe('Agents CRUD test', () => {
       await getAgentsByKuery(esClientMock, soClientMock, {
         showInactive: false,
         sortField: 'policy_id',
-        getAgentStatus: false,
       });
       expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
         { policy_id: { order: 'desc' } },

@@ -58,16 +58,16 @@ function _buildSource(unenrollTimeouts: Array<{ policy_ids: string[]; unenroll_t
     ) { 
         emit('degraded');
     } else if (
-        doc['upgrade_started_at'].size() > 0 
-        && doc['upgraded_at'].size() == 0
+      doc['policy_revision_idx'].size() == 0 || (
+        doc['upgrade_started_at'].size() > 0 &&
+        doc['upgraded_at'].size() == 0
+      )
     ) { 
         emit('updating'); 
     } else if (doc['last_checkin'].size() == 0) {
-        emit('updating'); 
+        emit('enrolling'); 
     } else if (doc['unenrollment_started_at'].size() > 0) {
-        emit('updating'); 
-    } else if (doc['policy_revision_idx'].size() == 0) {
-        emit('updating');
+        emit('unenrolling'); 
     } else { 
         emit('online'); 
     }

@@ -190,7 +190,7 @@ export async function getAgentsByKuery(
     sortOrder?: 'asc' | 'desc';
     pitId?: string;
     searchAfter?: SortResults;
-    getAgentStatus?: boolean;
+    useRuntimeAgentStatus?: boolean;
   }
 ): Promise<{
   agents: Agent[];
@@ -208,7 +208,7 @@ export async function getAgentsByKuery(
     showUpgradeable,
     searchAfter,
     pitId,
-    getAgentStatus = true, // TODO: use feature flag
+    useRuntimeAgentStatus = true,
   } = options;
   const filters = [];
 
@@ -223,7 +223,7 @@ export async function getAgentsByKuery(
   const kueryNode = _joinFilters(filters);
 
   let runtimeFields: estypes.MappingRuntimeFields = {};
-  if (getAgentStatus) {
+  if (useRuntimeAgentStatus) {
     const unenrollTimeouts = await agentPolicyService.getUnenrollTimeouts(soClient);
     runtimeFields = buildStatusRuntimeQuery(unenrollTimeouts);
   }
@@ -239,7 +239,7 @@ export async function getAgentsByKuery(
       size,
       track_total_hits: true,
       rest_total_hits_as_int: true,
-      ...(getAgentStatus && {
+      ...(useRuntimeAgentStatus && {
         runtime_mappings: runtimeFields,
         fields: Object.keys(runtimeFields),
       }),
@@ -258,7 +258,13 @@ export async function getAgentsByKuery(
           }),
       ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
     });
-  const res = await queryAgents((page - 1) * perPage, perPage);
+  let res;
+  try {
+    res = await queryAgents((page - 1) * perPage, perPage);
+  } catch (err) {
+    appContextService.getLogger().error(`Error getting agents by kuery: ${JSON.stringify(err)}`);
+    throw err;
+  }
 
   let agents = res.hits.hits.map(searchHitToAgent);
   let total = res.hits.total as number;
