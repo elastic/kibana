@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
+import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import {
   BLOCKLISTS_LABELS,
   EVENT_FILTERS_LABELS,
@@ -36,7 +37,6 @@ import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../.
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../../../blocklist/constants';
 import { useHttp } from '../../../../../../../common/lib/kibana';
-import { useEndpointPrivileges } from '../../../../../../../common/components/user_privileges/endpoint';
 
 interface PolicyArtifactCardProps {
   policyId: string;
@@ -48,7 +48,7 @@ const TrustedAppsPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
     () => TrustedAppsApiClient.getInstance(http),
     [http]
   );
-  const { canReadPolicyManagement } = useEndpointPrivileges();
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
   const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
     useCallback(() => {
@@ -78,7 +78,7 @@ const EventFiltersPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
     () => EventFiltersApiClient.getInstance(http),
     [http]
   );
-  const { canReadPolicyManagement } = useEndpointPrivileges();
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
   const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
     useCallback(() => {
@@ -108,7 +108,7 @@ const HostIsolationExceptionsPolicyCard = memo<PolicyArtifactCardProps>(({ polic
     () => HostIsolationExceptionsApiClient.getInstance(http),
     [http]
   );
-  const { canReadPolicyManagement } = useEndpointPrivileges();
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
   const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
     useCallback(() => {
@@ -135,7 +135,7 @@ HostIsolationExceptionsPolicyCard.displayName = 'HostIsolationExceptionsPolicyCa
 const BlocklistPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
   const http = useHttp();
   const blocklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
-  const { canReadPolicyManagement } = useEndpointPrivileges();
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
   const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
     useCallback(() => {
@@ -174,7 +174,7 @@ export const EndpointPolicyArtifactCards = memo<EndpointPolicyArtifactCardsProps
       canReadEventFilters,
       canReadTrustedApplications,
       canReadHostIsolationExceptions,
-    } = useEndpointPrivileges();
+    } = useUserPrivileges().endpointPrivileges;
     const canAccessArtifactContent = useCanAccessSomeArtifacts();
 
     if (loading) {

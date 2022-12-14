@@ -9,6 +9,7 @@ import type { ReactElement } from 'react';
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { NoPrivileges } from '../../../../../../common/components/no_privileges';
 import { useCanAccessSomeArtifacts } from '../hooks/use_can_access_some_artifacts';
 import { useHttp } from '../../../../../../common/lib/kibana';
@@ -29,7 +30,6 @@ import {
   HOST_ISOLATION_EXCEPTIONS_LABELS,
   TRUSTED_APPS_LABELS,
 } from './translations';
-import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint';
 
 const TrustedAppsArtifactCard = memo<PackageCustomExtensionComponentProps>((props) => {
   const http = useHttp();
@@ -115,7 +115,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       canReadEventFilters,
       canReadTrustedApplications,
       canReadHostIsolationExceptions,
-    } = useEndpointPrivileges();
+    } = useUserPrivileges().endpointPrivileges;
 
     const userCanAccessContent = useCanAccessSomeArtifacts();
 

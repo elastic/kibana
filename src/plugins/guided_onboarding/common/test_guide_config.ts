@@ -14,6 +14,7 @@ export const testGuideConfig: GuideConfig = {
   title: 'Test guide for development',
   description: `This guide is used to test the guided onboarding UI while in development and to run automated tests for the API and UI components.`,
   guideName: 'Testing example',
+  telemetryId: 'testGuide',
   completedGuideRedirectLocation: {
     appID: 'guidedOnboardingExample',
     path: '/',

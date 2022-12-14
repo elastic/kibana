@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Rule } from '../../../../types';
+import { AlertSummaryTimeRange } from '../../hooks/use_load_rule_alerts_aggregations';
+import { Rule } from '../../../types';
 
 export const mockRule = (): Rule => {
   return {
@@ -76,4 +77,10 @@ export const mockAggsResponse = () => {
       },
     },
   };
+};
+
+export const mockAlertSummaryTimeRange: AlertSummaryTimeRange = {
+  utcFrom: 'mockedUtcFrom',
+  utcTo: 'mockedUtcTo',
+  title: 'mockedTitle',
 };

@@ -73,6 +73,7 @@ export interface GuideConfig {
   title: string;
   description: string;
   guideName: string;
+  telemetryId: string;
   docs?: {
     text: string;
     url: string;
