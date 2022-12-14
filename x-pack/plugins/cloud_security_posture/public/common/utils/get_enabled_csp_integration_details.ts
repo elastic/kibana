@@ -6,7 +6,7 @@
  */
 
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { SUPPORTED_CLOUDBEAT_INPUTS } from '../../../common/constants';
+import { PostureInput, SUPPORTED_CLOUDBEAT_INPUTS } from '../../../common/constants';
 import { cloudPostureIntegrations, CloudPostureIntegrations } from '../constants';
 
 const isPolicyTemplate = (name: unknown): name is keyof CloudPostureIntegrations =>
@@ -19,7 +19,7 @@ export const getEnabledCspIntegrationDetails = (packageInfo?: PackagePolicy) => 
   if (
     !enabledInput ||
     !isPolicyTemplate(enabledInput.policy_template) ||
-    !SUPPORTED_CLOUDBEAT_INPUTS.includes(enabledInput.type)
+    !SUPPORTED_CLOUDBEAT_INPUTS.includes(enabledInput.type as PostureInput)
   )
     return null;
 

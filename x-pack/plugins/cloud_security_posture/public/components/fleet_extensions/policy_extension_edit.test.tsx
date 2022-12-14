@@ -5,14 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import CspEditPolicyExtension from './policy_extension_edit';
 import { TestProvider } from '../../test/test_provider';
-import { getCspNewPolicyMock, getCspPolicyMock } from './mocks';
-import Chance from 'chance';
-import { eksVars } from './eks_form';
-
-const chance = new Chance();
+import { getMockPolicyAWS, getMockPolicyK8s } from './mocks';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
@@ -27,54 +25,41 @@ jest.mock('@elastic/eui/lib/services/accessibility', () => ({
 }));
 
 describe('<CspEditPolicyExtension />', () => {
-  const onChange = jest.fn();
-
-  const WrappedComponent = ({ policy = getCspPolicyMock(), newPolicy = getCspNewPolicyMock() }) => (
-    <TestProvider>
-      <CspEditPolicyExtension policy={policy} newPolicy={newPolicy} onChange={onChange} />
-    </TestProvider>
-  );
-
-  beforeEach(() => {
-    onChange.mockClear();
-  });
-
-  it('renders disabled <DeploymentTypeSelect/>', () => {
-    const { getByLabelText } = render(<WrappedComponent />);
-    const input = getByLabelText('Kubernetes Deployment') as HTMLInputElement;
-    expect(input).toBeInTheDocument();
-    expect(input).toBeDisabled();
-  });
-
-  it('renders non-disabled <EksForm/>', () => {
-    const { getByLabelText } = render(
-      <WrappedComponent newPolicy={getCspNewPolicyMock('cis_eks')} />
+  const WrappedComponent = ({ newPolicy }: { newPolicy: NewPackagePolicy }) => {
+    const policy = createPackagePolicyMock();
+    return (
+      <TestProvider>
+        <CspEditPolicyExtension policy={policy} newPolicy={newPolicy} onChange={jest.fn()} />
+      </TestProvider>
     );
+  };
 
-    eksVars.forEach((eksVar) => {
-      expect(getByLabelText(eksVar.label)).toBeInTheDocument();
-      expect(getByLabelText(eksVar.label)).not.toBeDisabled();
-    });
+  it('renders disabled KSPM input selector', () => {
+    const { getByText } = render(<WrappedComponent newPolicy={getMockPolicyK8s()} />);
+
+    const option1 = getByText('Self-Managed/Vanilla Kubernetes', { selector: 'button span' });
+    const option2 = getByText('EKS (Elastic Kubernetes Service)', { selector: 'button span' });
+
+    expect(option1).toBeInTheDocument();
+    expect(option2).toBeInTheDocument();
+    expect(option1.parentElement).toBeDisabled();
+    expect(option2.parentElement).toBeDisabled();
+    expect(option1.querySelector('input')).toBeChecked();
   });
 
-  it('handles updating EKS vars', () => {
-    const { getByLabelText } = render(
-      <WrappedComponent newPolicy={getCspNewPolicyMock('cis_eks')} />
-    );
+  it('renders disabled CSPM input selector', () => {
+    const { getByText } = render(<WrappedComponent newPolicy={getMockPolicyAWS()} />);
 
-    const randomValues = chance.unique(chance.string, eksVars.length);
+    const option1 = getByText('Amazon Web Services', { selector: 'button span' });
+    const option2 = getByText('GCP', { selector: 'button span' });
+    const option3 = getByText('Azure', { selector: 'button span' });
 
-    eksVars.forEach((eksVar, i) => {
-      const eksVarInput = getByLabelText(eksVar.label) as HTMLInputElement;
-      fireEvent.change(eksVarInput, { target: { value: randomValues[i] } });
-
-      const policy = getCspNewPolicyMock('cis_eks');
-      policy.inputs[1].streams[0].vars![eksVar.id].value = randomValues[i];
-
-      expect(onChange).toBeCalledWith({
-        isValid: true,
-        updatedPolicy: policy,
-      });
-    });
+    expect(option1).toBeInTheDocument();
+    expect(option2).toBeInTheDocument();
+    expect(option3).toBeInTheDocument();
+    expect(option1.parentElement).toBeDisabled();
+    expect(option2.parentElement).toBeDisabled();
+    expect(option3.parentElement).toBeDisabled();
+    expect(option1.querySelector('input')).toBeChecked();
   });
 });
