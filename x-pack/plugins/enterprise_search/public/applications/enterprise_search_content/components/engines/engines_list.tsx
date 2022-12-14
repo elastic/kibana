@@ -5,28 +5,120 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+
+import { useActions, useValues } from 'kea';
+
+import { EuiButton, EuiFieldSearch, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { i18n } from '@kbn/i18n';
+
+import { DataPanel } from '../../../shared/data_panel/data_panel';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
+import { EnginesTable } from './components/tables/engines_table';
+
+import { EnginesListLogic } from './engines_list_logic';
+
 export const EnginesList = () => {
+  const { engines } = useValues(EnginesListLogic);
+
+  const { loadEngines } = useActions(EnginesListLogic);
+
+  useEffect(() => {
+    loadEngines();
+  }, []);
+
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
-        i18n.translate('xpack.enterpriseSearch.content.engines.breadcrumb', {
+        i18n.translate('xpack.enterpriseSearch.enterprise_search_content.engines.breadcrumb', {
           defaultMessage: 'Engines',
         }),
       ]}
       pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.content.engines.headerTitle', {
-          defaultMessage: 'Engines',
-        }),
+        pageTitle: i18n.translate(
+          'xpack.enterpriseSearch.enterprise_search_content.engines.title',
+          {
+            defaultMessage: 'Engines',
+          }
+        ),
+        rightSideItems: [
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            data-test-subj="appSearchEnginesEngineCreationButton"
+            href={'TODO'}
+          >
+            {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
+              defaultMessage: 'Create engine',
+            })}
+          </EuiButton>,
+        ],
       }}
       pageViewTelemetry="Engines"
       isLoading={false}
     >
+      <EuiText>
+        {i18n.translate('xpack.enterpriseSearch.enterprise_search_content.engines.description', {
+          defaultMessage:
+            'Engines allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how engines work in Enterprise search ',
+        })}
+
+        <EuiLink data-test-subj="documentationLink" href="TODO" target="_blank">
+          {i18n.translate(
+            'xpack.enterpriseSearch.enterprise_search_content.engines.documentation',
+            {
+              defaultMessage: 'explore our Engines documentation',
+            }
+          )}
+        </EuiLink>
+      </EuiText>
+      <EuiSpacer />
+      <div>
+        <EuiFieldSearch
+          placeholder={i18n.translate('xpack.enterpriseSearch.content.engines.searchPlaceholder', {
+            defaultMessage: 'Search engines',
+          })}
+          fullWidth
+        />
+      </div>
+      <EuiSpacer size="s" />
+      <EuiText color="subdued" size="s">
+        {i18n.translate('xpack.enterpriseSearch.content.engines.searchPlaceholder.description', {
+          defaultMessage: 'Locate an engine via name or indices',
+        })}
+      </EuiText>
+
+      <EuiSpacer />
+      <DataPanel
+        title={
+          <h2>
+            {i18n.translate('xpack.enterpriseSearch.enterprise_search_content.engines.title', {
+              defaultMessage: 'Engines',
+            })}
+          </h2>
+        }
+      >
+        <EnginesTable
+          items={engines}
+          loading={false}
+          pagination={{
+            pageIndex: 0,
+            pageSize: 1,
+            totalItemCount: 1,
+            showPerPageOptions: false,
+          }}
+          onChange={() => {}}
+          // onChange={function (criteria: CriteriaWithPagination<EngineListDetails>): void {
+          //   throw new Error('Function not implemented.');
+          // }}
+        />
+      </DataPanel>
+
+      <EuiSpacer size="xxl" />
       <div />
     </EnterpriseSearchContentPageTemplate>
   );
