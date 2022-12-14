@@ -1391,7 +1391,7 @@ describe('when on the endpoint list page', () => {
       expect(startButton).toBeNull();
     });
   });
-  describe('endpoint list take action with RBAC controls', () => {
+  describe.only('endpoint list take action with RBAC controls', () => {
     let renderResult: ReturnType<AppContextTestRender['render']>;
 
     const renderAndClickActionsButton = async (tableRow: number = 0) => {
@@ -1476,6 +1476,8 @@ describe('when on the endpoint list page', () => {
       jest.clearAllMocks();
       mockUserPrivileges.mockReset();
     });
+
+    // it.each([])('shows
     it('shows Isolate host option if canHostIsolate is READ/ALL', async () => {
       mockUserPrivileges.mockReturnValue({
         ...mockInitialUserPrivilegesState(),
@@ -1484,11 +1486,11 @@ describe('when on the endpoint list page', () => {
           canIsolateHost: true,
         },
       });
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const isolateLink = await renderResult.findByTestId('isolateLink');
       expect(isolateLink).not.toBeNull();
     });
-    it('hides Isolate host option if canIsolateHost is NONE', () => {
+    it('hides Isolate host option if canIsolateHost is NONE', async () => {
       mockUserPrivileges.mockReturnValue({
         ...mockInitialUserPrivilegesState(),
         endpointPrivileges: {
@@ -1496,7 +1498,7 @@ describe('when on the endpoint list page', () => {
           canIsolateHost: false,
         },
       });
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const isolateLink = screen.queryByTestId('isolateLink');
       expect(isolateLink).toBeNull();
     });
@@ -1508,11 +1510,11 @@ describe('when on the endpoint list page', () => {
           canUnIsolateHost: true,
         },
       });
-      renderAndClickActionsButton(1);
+      await renderAndClickActionsButton(1);
       const unisolateLink = await renderResult.findByTestId('unIsolateLink');
       expect(unisolateLink).not.toBeNull();
     });
-    it('hides unisolate host option if canUnIsolateHost is NONE', () => {
+    it('hides unisolate host option if canUnIsolateHost is NONE', async () => {
       mockUserPrivileges.mockReturnValue({
         ...mockInitialUserPrivilegesState(),
         endpointPrivileges: {
@@ -1520,7 +1522,7 @@ describe('when on the endpoint list page', () => {
           canUnIsolateHost: false,
         },
       });
-      renderAndClickActionsButton(1);
+      await renderAndClickActionsButton(1);
       const unisolateLink = renderResult.queryByTestId('unIsolateLink');
       expect(unisolateLink).toBeNull();
     });
@@ -1533,12 +1535,12 @@ describe('when on the endpoint list page', () => {
           canAccessResponseConsole: true,
         },
       });
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const responderButton = await renderResult.findByTestId('console');
       expect(responderButton).not.toBeNull();
     });
 
-    it('hides the Responder option when host isolation, process operation and file operations are ALL set to NONE', () => {
+    it('hides the Responder option when host isolation, process operation and file operations are ALL set to NONE', async () => {
       mockUserPrivileges.mockReturnValue({
         ...mockInitialUserPrivilegesState(),
         endpointPrivileges: {
@@ -1546,13 +1548,13 @@ describe('when on the endpoint list page', () => {
           canAccessResponseConsole: false,
         },
       });
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const responderButton = renderResult.queryByTestId('console');
       expect(responderButton).toBeNull();
     });
     it('always shows the Host details link', async () => {
       mockUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const hostLink = await renderResult.findByTestId('hostLink');
       expect(hostLink).not.toBeNull();
     });
@@ -1564,7 +1566,7 @@ describe('when on the endpoint list page', () => {
           canAccessFleet: true,
         },
       });
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
       const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
       const agentPolicyReassignLink = await renderResult.findByTestId('agentPolicyReassignLink');
@@ -1572,7 +1574,7 @@ describe('when on the endpoint list page', () => {
       expect(agentDetailsLink).not.toBeNull();
       expect(agentPolicyReassignLink).not.toBeNull();
     });
-    it('hides Agent Policy, View Agent Details and Reassign Policy Links when canAccessFleet RBAC control is NOT enabled', () => {
+    it('hides Agent Policy, View Agent Details and Reassign Policy Links when canAccessFleet RBAC control is NOT enabled', async () => {
       mockUserPrivileges.mockReturnValue({
         ...mockInitialUserPrivilegesState(),
         endpointPrivileges: {
@@ -1580,7 +1582,7 @@ describe('when on the endpoint list page', () => {
           canAccessFleet: false,
         },
       });
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const agentPolicyLink = renderResult.queryByTestId('agentPolicyLink');
       const agentDetailsLink = renderResult.queryByTestId('agentDetailsLink');
       const agentPolicyReassignLink = renderResult.queryByTestId('agentPolicyReassignLink');
