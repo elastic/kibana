@@ -40,18 +40,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('rules list screenshot', async () => {
       await supertest
-      .post(`/api/alerting/rule`)
-      .set('kbn-xsrf', 'foo')
-      .send(getTestRuleData())
-      .expect(200);
+        .post(`/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData())
+        .expect(200);
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await commonScreenshots.takeScreenshot(
-        'rules-ui',
-        screenshotDirectories,
-        1400,
-        1024
-      );
+      await commonScreenshots.takeScreenshot('rules-ui', screenshotDirectories, 1400, 1024);
     });
   });
 

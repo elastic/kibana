@@ -45,5 +45,4 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
       }
     },
   };
-
 }

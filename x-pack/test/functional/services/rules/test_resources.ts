@@ -13,7 +13,6 @@ export function getTestRuleData() {
     schedule: { interval: '1m' },
     throttle: '1m',
     notify_when: 'onThrottleInterval',
-    params: {}
+    params: {},
   };
 }
-
