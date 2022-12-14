@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fields } from './__mocks__/artificial_logs/fields';
-import { filteredFrequentItems } from './__mocks__/artificial_logs/filtered_frequent_items';
+import { fields } from '../../../common/__mocks__/artificial_logs/fields';
+import { filteredFrequentItems } from '../../../common/__mocks__/artificial_logs/filtered_frequent_items';
 
 import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';

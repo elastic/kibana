@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/logging';
 import { type ChangePoint, RANDOM_SAMPLER_SEED } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type { ChangePointDuplicateGroup, ItemsetResult } from './types';
+import type { ChangePointDuplicateGroup, ItemsetResult } from '../../../common/types';
 
 const FREQUENT_ITEMS_FIELDS_LIMIT = 15;
 

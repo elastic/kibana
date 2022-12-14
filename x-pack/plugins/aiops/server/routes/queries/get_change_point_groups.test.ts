@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { fields } from './__mocks__/artificial_logs/fields';
-import { frequentItems } from './__mocks__/artificial_logs/frequent_items';
-import { changePoints } from './__mocks__/artificial_logs/change_points';
-import { finalChangePointGroups } from './__mocks__/artificial_logs/final_change_point_groups';
+import { fields } from '../../../common/__mocks__/artificial_logs/fields';
+import { frequentItems } from '../../../common/__mocks__/artificial_logs/frequent_items';
+import { changePoints } from '../../../common/__mocks__/artificial_logs/change_points';
+import { finalChangePointGroups } from '../../../common/__mocks__/artificial_logs/final_change_point_groups';
 
 import { getChangePointGroups } from './get_change_point_groups';
 

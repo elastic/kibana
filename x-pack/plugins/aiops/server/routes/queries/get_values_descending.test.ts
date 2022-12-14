@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { frequentItems } from './__mocks__/artificial_logs/frequent_items';
+import { frequentItems } from '../../../common/__mocks__/artificial_logs/frequent_items';
 import { getValuesDescending } from './get_values_descending';
 
 describe('getValuesDescending', () => {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { changePointGroups } from './__mocks__/farequote/change_point_groups';
-import { fields } from './__mocks__/artificial_logs/fields';
-import { filteredFrequentItems } from './__mocks__/artificial_logs/filtered_frequent_items';
+import { changePointGroups } from '../../../common/__mocks__/farequote/change_point_groups';
+import { fields } from '../../../common/__mocks__/artificial_logs/fields';
+import { filteredFrequentItems } from '../../../common/__mocks__/artificial_logs/filtered_frequent_items';
 
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getMarkedDuplicates } from './get_marked_duplicates';

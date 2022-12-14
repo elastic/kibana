@@ -7,7 +7,7 @@
 
 import type { ChangePointGroup } from '@kbn/ml-agg-utils';
 
-import type { FieldValuePairCounts } from './types';
+import type { FieldValuePairCounts } from '../../../common/types';
 
 /**
  * Get a nested record of field/value pairs with counts

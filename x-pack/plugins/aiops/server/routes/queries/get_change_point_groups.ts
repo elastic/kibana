@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { ChangePoint, ChangePointGroup } from '@kbn/ml-agg-utils';
 
 import { duplicateIdentifier } from './duplicate_identifier';
 import { dropDuplicates, groupDuplicates } from './fetch_frequent_items';
@@ -17,13 +17,13 @@ import { getFilteredFrequentItems } from './get_filtered_frequent_items';
 import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplicates';
 import { getMissingChangePoints } from './get_missing_change_points';
 import { transformChangePointToGroup } from './transform_change_point_to_group';
-import type { ItemsetResult } from './types';
+import type { ItemsetResult } from '../../../common/types';
 
 export function getChangePointGroups(
   itemsets: ItemsetResult[],
   changePoints: ChangePoint[],
   fields: string[]
-) {
+): ChangePointGroup[] {
   // These are the deduplicated change points we pass to the `frequent_items` aggregation.
   const deduplicatedChangePoints = dropDuplicates(changePoints, duplicateIdentifier);
 

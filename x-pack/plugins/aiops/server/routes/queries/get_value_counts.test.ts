@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { frequentItems } from './__mocks__/artificial_logs/frequent_items';
+import { frequentItems } from '../../../common/__mocks__/artificial_logs/frequent_items';
 import { getValueCounts } from './get_value_counts';
 
 describe('getValueCounts', () => {

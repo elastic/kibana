@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { changePointGroups } from './__mocks__/artificial_logs/change_point_groups';
-import { changePoints } from './__mocks__/artificial_logs/change_points';
+import { changePointGroups } from '../../../common/__mocks__/artificial_logs/change_point_groups';
+import { changePoints } from '../../../common/__mocks__/artificial_logs/change_points';
 
 import { duplicateIdentifier } from './duplicate_identifier';
 import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplicates';

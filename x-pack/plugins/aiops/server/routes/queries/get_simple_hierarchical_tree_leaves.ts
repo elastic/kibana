@@ -8,7 +8,7 @@
 import type { ChangePointGroup } from '@kbn/ml-agg-utils';
 import { stringHash } from '@kbn/ml-string-hash';
 
-import type { SimpleHierarchicalTreeNode } from './types';
+import type { SimpleHierarchicalTreeNode } from '../../../common/types';
 
 /**
  * Get leaves from hierarchical tree.

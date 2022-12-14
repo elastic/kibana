@@ -7,7 +7,7 @@
 
 import type { ChangePointGroup } from '@kbn/ml-agg-utils';
 
-import type { FieldValuePairCounts } from './types';
+import type { FieldValuePairCounts } from '../../../common/types';
 
 /**
  * Analyse duplicate field/value pairs in change point groups.

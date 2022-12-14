@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ItemsetResult, SimpleHierarchicalTreeNode } from './types';
+import type { ItemsetResult, SimpleHierarchicalTreeNode } from '../../../common/types';
+
 import { getValueCounts } from './get_value_counts';
 import { getValuesDescending } from './get_values_descending';
 

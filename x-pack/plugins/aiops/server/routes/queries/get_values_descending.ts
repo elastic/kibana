@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ItemsetResult } from './types';
+import type { ItemsetResult } from '../../../common/types';
+
 import { getValueCounts } from './get_value_counts';
 
 export function getValuesDescending(df: ItemsetResult[], field: string): string[] {

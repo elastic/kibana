@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
-import type { ItemsetResult } from './types';
+import type { ItemsetResult } from '../../../common/types';
 
 // The way the `frequent_items` aggregation works could return item sets that include
 // field/value pairs that are not part of the original list of significant change points.

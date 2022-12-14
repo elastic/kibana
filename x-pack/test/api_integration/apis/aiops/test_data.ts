@@ -8,8 +8,8 @@
 // We're using the mocks for jest unit tests as expected data in the integration tests here.
 // This makes sure should the assertions for the integration tests need to be updated,
 // that also the jest unit tests use mocks that are not outdated.
-import { changePoints as artificialLogChangePoints } from '@kbn/aiops-plugin/server/routes/queries/__mocks__/artificial_logs/change_points';
-import { finalChangePointGroups as artificialLogsChangePointGroups } from '@kbn/aiops-plugin/server/routes/queries/__mocks__/artificial_logs/final_change_point_groups';
+import { changePoints as artificialLogChangePoints } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/change_points';
+import { finalChangePointGroups as artificialLogsChangePointGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_change_point_groups';
 
 import type { TestData } from './types';
 

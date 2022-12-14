@@ -8,7 +8,7 @@
 import { stringHash } from '@kbn/ml-string-hash';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
-import type { ChangePointDuplicateGroup } from './types';
+import type { ChangePointDuplicateGroup } from '../../../common/types';
 
 export function transformChangePointToGroup(
   changePoint: ChangePoint,

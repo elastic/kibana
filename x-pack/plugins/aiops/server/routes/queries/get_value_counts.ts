@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ItemsetResult } from './types';
+import type { ItemsetResult } from '../../../common/types';
 
 export function getValueCounts(df: ItemsetResult[], field: string) {
   return df.reduce<Record<string, number>>((p, c) => {

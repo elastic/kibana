@@ -9,7 +9,7 @@ import { uniqWith, isEqual } from 'lodash';
 
 import type { ChangePointGroup } from '@kbn/ml-agg-utils';
 
-import type { ChangePointDuplicateGroup } from './types';
+import type { ChangePointDuplicateGroup } from '../../../common/types';
 
 export function getGroupsWithReaddedDuplicates(
   groups: ChangePointGroup[],
