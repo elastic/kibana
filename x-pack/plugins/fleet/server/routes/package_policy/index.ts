@@ -96,7 +96,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
       validate: CreatePackagePolicyRequestSchema,
-      fleetAuthz: {},
     },
     createPackagePolicyHandler
   );
