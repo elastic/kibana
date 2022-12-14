@@ -7,6 +7,17 @@
 
 export const changePoints = [
   {
+    fieldName: 'response_code',
+    fieldValue: '500',
+    doc_count: 1821,
+    bg_count: 553,
+    total_doc_count: 4671,
+    total_bg_count: 1975,
+    score: 26.546201745993947,
+    pValue: 2.9589053032077285e-12,
+    normalizedScore: 0.7814127409489161,
+  },
+  {
     fieldName: 'url',
     fieldValue: 'home.php',
     doc_count: 1742,
@@ -38,16 +49,5 @@ export const changePoints = [
     score: 47.34435085428873,
     pValue: 2.7454255728359757e-21,
     normalizedScore: 0.8327337555873047,
-  },
-  {
-    fieldName: 'response_code',
-    fieldValue: '500',
-    doc_count: 1821,
-    bg_count: 553,
-    total_doc_count: 4671,
-    total_bg_count: 1975,
-    score: 26.546201745993947,
-    pValue: 2.9589053032077285e-12,
-    normalizedScore: 0.7814127409489161,
   },
 ];
