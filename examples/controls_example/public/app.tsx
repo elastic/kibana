@@ -8,6 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { EuiSpacer } from '@elastic/eui';
 
 import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -23,6 +24,7 @@ export const renderApp = async (
   const examples = dataViews.length > 0 ? (
     <>
       <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
+      <EuiSpacer size="xl" />
       <BasicReduxExample dataViewId={dataViews[0].id} />
     </>
   ) : (
