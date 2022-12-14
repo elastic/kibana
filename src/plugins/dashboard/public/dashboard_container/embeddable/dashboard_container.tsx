@@ -266,10 +266,19 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         Boolean(initialInput.panels[incomingEmbeddable.embeddableId])
       ) {
         // this embeddable already exists, we will update the explicit input.
-        initialInput.panels[incomingEmbeddable.embeddableId].type = incomingEmbeddable.type;
-        initialInput.panels[incomingEmbeddable.embeddableId].explicitInput = {
+        const panelToUpdate = initialInput.panels[incomingEmbeddable.embeddableId];
+        const sameType = panelToUpdate.type === incomingEmbeddable.type;
+
+        panelToUpdate.type = incomingEmbeddable.type;
+        panelToUpdate.explicitInput = {
+          // if the incoming panel is the same type as what was there before we can safely spread the old panel's explicit input
+          ...(sameType ? panelToUpdate.explicitInput : {}),
+
           ...incomingEmbeddable.input,
           id: incomingEmbeddable.embeddableId,
+
+          // maintain hide panel titles setting.
+          hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
         };
       } else {
         // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.

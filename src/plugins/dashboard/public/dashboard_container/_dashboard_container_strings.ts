@@ -59,11 +59,6 @@ export const dashboardSaveToastStrings = {
 };
 
 export const dashboardSavedObjectErrorStrings = {
-  getDashboardLoadError: (message: string) =>
-    i18n.translate('dashboard.loadingError.errorMessage', {
-      defaultMessage: 'Error encountered while loading saved dashboard: {message}',
-      values: { message },
-    }),
   getDashboardGridError: (message: string) =>
     i18n.translate('dashboard.loadingError.dashboardGridErrorMessage', {
       defaultMessage: 'Unable to load dashboard: {message}',

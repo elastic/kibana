@@ -137,18 +137,9 @@ export const createConfirmStrings = {
 };
 
 export const dashboardListingErrorStrings = {
-  getDashboardLoadError: (message: string) =>
-    i18n.translate('dashboard.loadingError.errorMessage', {
-      defaultMessage: 'Error encountered while loading saved dashboard: {message}',
-      values: { message },
-    }),
   getErrorDeletingDashboardToast: () =>
     i18n.translate('dashboard.deleteError.toastDescription', {
       defaultMessage: 'Error encountered while deleting dashboard',
-    }),
-  getPanelTooOldError: () =>
-    i18n.translate('dashboard.loadURLError.PanelTooOld', {
-      defaultMessage: 'Cannot load panels from a URL created in a version older than 7.3',
     }),
 };
 
