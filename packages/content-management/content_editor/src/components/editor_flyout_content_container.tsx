@@ -8,8 +8,8 @@
 import React from 'react';
 import type { FC } from 'react';
 
-import { ContentEditorFlyoutContent } from './inspector_flyout_content';
-import type { Props as ContentEditorFlyoutContentProps } from './inspector_flyout_content';
+import { ContentEditorFlyoutContent } from './editor_flyout_content';
+import type { Props as ContentEditorFlyoutContentProps } from './editor_flyout_content';
 
 type CommonProps = Pick<
   ContentEditorFlyoutContentProps,

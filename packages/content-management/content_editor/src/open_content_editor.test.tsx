@@ -12,7 +12,7 @@ import { WithServices, getMockServices } from './__jest__';
 import type { Services } from './services';
 import type { Item } from './types';
 import { ContentEditorLoader } from './components';
-import { useOpenContentEditor } from './open_inspector';
+import { useOpenContentEditor } from './open_content_editor';
 
 describe('useOpenContentEditor() hook', () => {
   const savedObjectItem: Item = { id: 'id', title: 'Foo', tags: [] };

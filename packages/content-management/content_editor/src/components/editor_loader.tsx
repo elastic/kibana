@@ -9,14 +9,14 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 
-import type { Props } from './inspector_flyout_content_container';
+import type { Props } from './editor_flyout_content_container';
 
 export const ContentEditorLoader: React.FC<Props> = (props) => {
   const [Editor, setEditor] = useState<React.ComponentType<Props> | null>(null);
 
   const loadEditor = useCallback(async () => {
     const { ContentEditorFlyoutContentContainer } = await import(
-      './inspector_flyout_content_container'
+      './editor_flyout_content_container'
     );
     setEditor(() => ContentEditorFlyoutContentContainer);
   }, []);

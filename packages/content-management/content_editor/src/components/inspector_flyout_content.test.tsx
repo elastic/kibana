@@ -11,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import type { TestBed } from '@kbn/test-jest-helpers';
 import { getMockServices } from '../__jest__';
-import { ContentEditorFlyoutContent } from './inspector_flyout_content';
-import type { Props as ContentEditorFlyoutContentProps } from './inspector_flyout_content';
+import { ContentEditorFlyoutContent } from './editor_flyout_content';
+import type { Props as ContentEditorFlyoutContentProps } from './editor_flyout_content';
 
 describe('<ContentEditorFlyoutContent />', () => {
   beforeAll(() => {

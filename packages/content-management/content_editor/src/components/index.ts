@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { ContentEditorLoader } from './inspector_loader';
-export type { Props as ContentEditorFlyoutContentContainerProps } from './inspector_flyout_content_container';
+export { ContentEditorLoader } from './editor_loader';
+export type { Props as ContentEditorFlyoutContentContainerProps } from './editor_flyout_content_container';
