@@ -73,7 +73,7 @@ export function getFieldTypeName(type?: string) {
       });
     case KNOWN_FIELD_TYPES.IP:
       return i18n.translate('unifiedFieldList.fieldNameIcons.ipAddressFieldAriaLabel', {
-        defaultMessage: 'IP',
+        defaultMessage: 'IP address',
       });
     case KNOWN_FIELD_TYPES.IP_RANGE:
       return i18n.translate('unifiedFieldList.fieldNameIcons.ipRangeFieldAriaLabel', {

@@ -118,20 +118,23 @@ export function TextBasedDataPanel({
 
   const fieldNameHighlight = fieldListFilters.fieldNameHighlight;
   const renderFieldItem: FieldListGroupedProps<DatatableColumn>['renderFieldItem'] = useCallback(
-    ({ field, itemIndex, groupIndex, hideDetails }) => {
+    ({ field, itemIndex }) => {
+      if (!field) {
+        return <></>;
+      }
       return (
         <DragDrop
           draggable
           order={[itemIndex]}
           value={{
-            field: field?.name,
+            field: field.name,
             id: field.id,
-            humanData: { label: field?.name },
+            humanData: { label: field.name },
           }}
           dataTestSubj={`lnsFieldListPanelField-${field.name}`}
         >
           <FieldButton
-            className={`lnsFieldItem lnsFieldItem--${field?.meta?.type}`}
+            className={`lnsFieldItem lnsFieldItem--${field.meta.type}`}
             isActive={false}
             onClick={() => {}}
             fieldIcon={<FieldIcon type={getCustomFieldType(field)} />}
@@ -164,6 +167,7 @@ export function TextBasedDataPanel({
             <FieldListFilters
               {...fieldListFilters.fieldListFiltersProps}
               fieldSearchDescriptionId={fieldSearchDescriptionId}
+              data-test-subj="lnsTextBasedLanguages"
             />
           </EuiFlexItem>
           <EuiFlexItem>

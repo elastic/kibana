@@ -13,6 +13,7 @@ import { FieldTypeFilter, type FieldTypeFilterProps } from './field_type_filter'
 import { type FieldListItem } from '../../types';
 
 export interface FieldListFiltersProps<T extends FieldListItem> {
+  'data-test-subj'?: string;
   docLinks: FieldTypeFilterProps<T>['docLinks'];
   selectedFieldTypes?: FieldTypeFilterProps<T>['selectedFieldTypes'];
   allFields?: FieldTypeFilterProps<T>['allFields'];
@@ -25,6 +26,7 @@ export interface FieldListFiltersProps<T extends FieldListItem> {
 }
 
 export function FieldListFilters<T extends FieldListItem = DataViewField>({
+  'data-test-subj': dataTestSubject = 'fieldListFilters',
   docLinks,
   selectedFieldTypes,
   allFields,
@@ -37,9 +39,11 @@ export function FieldListFilters<T extends FieldListItem = DataViewField>({
 }: FieldListFiltersProps<T>) {
   return (
     <FieldNameSearch
+      data-test-subj={dataTestSubject}
       append={
         allFields && selectedFieldTypes && onChangeFieldTypes ? (
           <FieldTypeFilter
+            data-test-subj={dataTestSubject}
             docLinks={docLinks}
             selectedFieldTypes={selectedFieldTypes}
             allFields={allFields}

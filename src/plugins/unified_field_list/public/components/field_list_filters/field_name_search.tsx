@@ -11,15 +11,15 @@ import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, type EuiFieldSearchProps } from '@elastic/eui';
 
 export interface FieldNameSearchProps {
+  'data-test-subj': string;
   append?: EuiFieldSearchProps['append'];
   nameFilter: string;
   fieldSearchDescriptionId?: string;
   onChange: (nameFilter: string) => unknown;
 }
 
-// TODO: refactor test-subj
-
 export const FieldNameSearch: React.FC<FieldNameSearchProps> = ({
+  'data-test-subj': dataTestSubject,
   append,
   nameFilter,
   fieldSearchDescriptionId,
@@ -34,7 +34,7 @@ export const FieldNameSearch: React.FC<FieldNameSearchProps> = ({
     <EuiFieldSearch
       aria-describedby={fieldSearchDescriptionId}
       aria-label={searchPlaceholder}
-      data-test-subj="fieldFilterSearchInput" // lnsIndexPatternFieldSearch
+      data-test-subj={`${dataTestSubject}FieldSearch`}
       fullWidth
       onChange={(event) => onChange(event.target.value)}
       placeholder={searchPlaceholder}

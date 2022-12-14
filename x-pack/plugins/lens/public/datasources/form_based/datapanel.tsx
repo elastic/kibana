@@ -451,6 +451,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
           <FieldListFilters
             {...fieldListFilters.fieldListFiltersProps}
             fieldSearchDescriptionId={fieldSearchDescriptionId}
+            data-test-subj="lnsIndexPattern"
           />
         </EuiFlexItem>
         <EuiFlexItem>

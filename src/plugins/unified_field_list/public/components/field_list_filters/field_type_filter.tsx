@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiContextMenuItem,
@@ -24,6 +24,7 @@ import {
   EuiPopoverFooter,
   EuiNotificationBadge,
   EuiIconTip,
+  EuiButtonEmpty,
   useEuiTheme,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -40,7 +41,10 @@ import {
 } from '../../utils/field_types';
 import type { FieldListItem, FieldTypeKnown, GetCustomFieldType } from '../../types';
 
+const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after "Clear all" appears
+
 export interface FieldTypeFilterProps<T extends FieldListItem> {
+  'data-test-subj': string;
   docLinks: CoreStart['docLinks'];
   allFields: T[] | null;
   getCustomFieldType?: GetCustomFieldType<T>;
@@ -49,9 +53,8 @@ export interface FieldTypeFilterProps<T extends FieldListItem> {
   onChange: (fieldTypes: FieldTypeKnown[]) => unknown;
 }
 
-// TODO: refactor test-subj and className
-
 export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
+  'data-test-subj': dataTestSubject,
   docLinks,
   allFields,
   getCustomFieldType,
@@ -59,16 +62,32 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   onSupportedFieldFilter,
   onChange,
 }: FieldTypeFilterProps<T>) {
+  const testSubj = `${dataTestSubject}FieldTypeFilter`;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [typeCounts, setTypeCounts] = useState<Map<string, number>>();
 
   const { euiTheme } = useEuiTheme();
 
+  const titleStyle = useMemo(
+    () => css`
+      padding-top: calc(${euiTheme.size.m} - ${EQUAL_HEIGHT_OFFSET}px);
+      padding-bottom: calc(${euiTheme.size.m} - ${EQUAL_HEIGHT_OFFSET}px);
+      padding-left: ${euiTheme.size.m};
+      padding-right: ${euiTheme.size.xs};
+    `,
+    [euiTheme.size.m, euiTheme.size.xs]
+  );
+
   const itemStyle = useMemo(
     () => css`
-      padding: 0 ${euiTheme.size.xs};
+      font-size: ${euiTheme.size.m};
+      padding: ${euiTheme.size.s} ${euiTheme.size.m};
+
+      & + & {
+        border-top: 1px solid ${euiTheme.colors.lightestShade};
+      }
     `,
-    [euiTheme.size.xs]
+    [euiTheme]
   );
 
   useEffect(() => {
@@ -99,6 +118,10 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
     });
   }, [typeCounts, selectedFieldTypes]);
 
+  const clearAll = useCallback(() => {
+    onChange([]);
+  }, [onChange]);
+
   return (
     <EuiPopover
       id="unifiedFieldTypeFilter"
@@ -118,29 +141,50 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
           numFilters={selectedFieldTypes.length}
           hasActiveFilters={!!selectedFieldTypes.length}
           numActiveFilters={selectedFieldTypes.length}
-          data-test-subj="lnsIndexPatternFiltersToggle"
-          className="lnsFilterButton"
+          data-test-subj={`${testSubj}Toggle`}
           onClick={() => setIsOpen((value) => !value)}
+          css={css`
+            .euiFilterButton__textShift {
+              min-width: 0;
+            }
+          `}
         >
           <EuiIcon type="filter" />
         </EuiFilterButton>
       }
     >
       <>
-        <EuiPopoverTitle paddingSize="m">
-          {i18n.translate('unifiedFieldList.fieldTypeFilter.title', {
-            defaultMessage: 'Filter by field type',
-          })}
+        <EuiPopoverTitle paddingSize="none">
+          <EuiFlexGroup responsive={false} gutterSize="xs" css={titleStyle} alignItems="center">
+            <EuiFlexItem
+              css={css`
+                padding: ${EQUAL_HEIGHT_OFFSET}px 0;
+              `}
+            >
+              {i18n.translate('unifiedFieldList.fieldTypeFilter.title', {
+                defaultMessage: 'Filter by field type',
+              })}
+            </EuiFlexItem>
+            {selectedFieldTypes.length > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty size="xs" onClick={clearAll} data-test-subj={`${testSubj}ClearAll`}>
+                  {i18n.translate('unifiedFieldList.fieldTypeFilter.clearAllLink', {
+                    defaultMessage: 'Clear all',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiPopoverTitle>
         {availableFieldTypes.length > 0 ? (
           <EuiContextMenuPanel
-            data-test-subj="lnsIndexPatternTypeFilterOptions"
+            data-test-subj={`${testSubj}Options`}
             items={availableFieldTypes.map((type) => (
               <EuiContextMenuItem
-                className="lnsInnerIndexPatternDataPanel__filterType"
                 key={type}
                 icon={selectedFieldTypes.includes(type) ? 'check' : 'empty'}
                 data-test-subj={`typeFilter-${type}`}
+                css={itemStyle}
                 onClick={() => {
                   onChange(
                     selectedFieldTypes.includes(type)
@@ -149,7 +193,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                   );
                 }}
               >
-                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center" css={itemStyle}>
+                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <FieldIcon type={type} />
                   </EuiFlexItem>
@@ -189,13 +233,13 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
           <EuiPanel color="transparent" paddingSize="m">
             <EuiText size="s">
               <p>
-                {i18n.translate('discover.fieldTypesPopover.learnMoreText', {
+                {i18n.translate('unifiedFieldList.fieldTypeFilter.learnMoreText', {
                   defaultMessage: 'Learn more about',
                 })}
                 &nbsp;
                 <EuiLink href={docLinks.links.discover.fieldTypeHelp} target="_blank" external>
                   <FormattedMessage
-                    id="discover.fieldTypesPopover.fieldTypesDocLinkLabel"
+                    id="unifiedFieldList.fieldTypeFilter.fieldTypesDocLinkLabel"
                     defaultMessage="field types"
                   />
                 </EuiLink>
