@@ -12,6 +12,7 @@ const cloudIcons: Record<string, string> = {
   gcp: 'logoGCP',
   aws: 'logoAWS',
   azure: 'logoAzure',
+  unknownProvider: 'cloudSunny',
 };
 
 export const CloudProviderIconWithTitle = ({
@@ -23,11 +24,13 @@ export const CloudProviderIconWithTitle = ({
 }) => {
   return (
     <EuiFlexGroup className="eui-textTruncate" gutterSize="s" responsive={false}>
-      {provider && (
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={cloudIcons[provider]} size="l" title={title} />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiIcon
+          type={provider ? cloudIcons[provider] : cloudIcons.unknownProvider}
+          size="l"
+          title={title}
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-textTruncate">
         <EuiText className="eui-textTruncate">{title}</EuiText>
       </EuiFlexItem>
