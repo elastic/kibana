@@ -23,16 +23,23 @@ export const CloudProviderIconWithTitle = ({
   title: string;
 }) => {
   return (
-    <EuiFlexGroup className="eui-textTruncate" gutterSize="s" responsive={false}>
+    <EuiFlexGroup
+      alignItems="center"
+      className="eui-textTruncate"
+      gutterSize="s"
+      responsive={false}
+    >
       <EuiFlexItem grow={false}>
         <EuiIcon
           type={provider ? cloudIcons[provider] : cloudIcons.unknownProvider}
-          size="l"
+          size="m"
           title={title}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-textTruncate">
-        <EuiText className="eui-textTruncate">{title}</EuiText>
+        <EuiText size="relative" className="eui-textTruncate">
+          {title}
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
