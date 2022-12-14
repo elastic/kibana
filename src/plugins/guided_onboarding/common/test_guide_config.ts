@@ -44,7 +44,7 @@ export const testGuideConfig: GuideConfig = {
         'This step is set to ready_to_complete on page navigation.',
         {
           descriptionText:
-            'After that click the popover on the guide button in the header and mark the step done',
+            'After that click the popover on the guide button in the header and mark the step done.',
           linkText: 'Example link',
           linkUrl: 'https://www.elastic.co',
           isLinkExternal: true,
