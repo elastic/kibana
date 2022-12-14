@@ -56,6 +56,12 @@ export async function persistSavedSearch(
     savedSearch.viewMode = state.viewMode;
   }
 
+  if (typeof state.breakdownField !== 'undefined') {
+    savedSearch.breakdownField = state.breakdownField;
+  } else if (savedSearch.breakdownField) {
+    savedSearch.breakdownField = '';
+  }
+
   if (state.hideAggregatedPreview) {
     savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
   }

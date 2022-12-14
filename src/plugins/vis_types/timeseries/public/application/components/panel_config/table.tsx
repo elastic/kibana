@@ -30,9 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { FieldSelect } from '../aggs/field_select';
-// @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
-// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
 import { YesNo } from '../yes_no';
 

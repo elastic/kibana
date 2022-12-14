@@ -53,11 +53,9 @@ export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
 
     const selectedFieldChange = useCallback(
       (values: Array<EuiComboBoxOptionOption<string>>) => {
-        if (!values || values.length === 0) {
-          return;
+        if (values && values.length > 0) {
+          valueChange(values[0].label);
         }
-
-        valueChange(values[0].label);
         setSelectedField(values);
       },
       [valueChange]

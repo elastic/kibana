@@ -328,6 +328,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         field: currentField || undefined,
         filterOperations: props.filterOperations,
         visualizationGroups: dimensionGroups,
+        dateRange,
       }),
       disabledStatus:
         definition.getDisabledStatus &&
