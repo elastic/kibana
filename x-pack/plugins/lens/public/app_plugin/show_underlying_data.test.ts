@@ -8,8 +8,8 @@
 import { createMockDatasource, createMockVisualization } from '../mocks';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { Filter } from '@kbn/es-query';
-import { DatasourcePublicAPI } from '../types';
 import { createMockedIndexPattern } from '../datasources/form_based/mocks';
+import { LayerType } from '..';
 
 describe('getLayerMetaInfo', () => {
   const capabilities = {
@@ -39,8 +39,10 @@ describe('getLayerMetaInfo', () => {
         mockDatasource,
         {},
         createMockVisualization('testVisualization'),
-        { layers: [{}, {}] },
         {},
+        {
+          datatable1: { type: 'datatable', columns: [], rows: [] },
+        },
         {},
         undefined,
         capabilities
@@ -63,7 +65,7 @@ describe('getLayerMetaInfo', () => {
     ).toBe('Visualization has no data available to show');
   });
 
-  it('should return error in case of missing configuration/state', () => {
+  it('should return error in case of missing datasource configuration/state', () => {
     expect(
       getLayerMetaInfo(
         createMockDatasource('testDatasource'),
@@ -108,10 +110,59 @@ describe('getLayerMetaInfo', () => {
     ).toBe('Visualization has no data available to show');
   });
 
+  it('should ignore the number of datatables passed, rather check the datasource and visualization configuration', () => {
+    expect(
+      getLayerMetaInfo(
+        createMockDatasource('testDatasource', {
+          getFilters: jest.fn(() => ({
+            enabled: { kuery: [], lucene: [] },
+            disabled: { kuery: [], lucene: [] },
+          })),
+        }),
+        {},
+        createMockVisualization('testVisualization'),
+        {},
+        {
+          datatable1: { type: 'datatable', columns: [], rows: [] },
+          datatable2: { type: 'datatable', columns: [], rows: [] },
+        },
+        {},
+        undefined,
+        capabilities
+      ).error
+    ).toBeUndefined();
+  });
+
+  it('should return no multiple layers error when non-data layers are used together with a single data layer', () => {
+    const mockDatasource = createMockDatasource('testDatasource', {
+      getFilters: jest.fn(() => ({
+        enabled: { kuery: [], lucene: [] },
+        disabled: { kuery: [], lucene: [] },
+      })),
+    });
+    mockDatasource.getLayers.mockReturnValue(['layer1', 'layer2', 'layer3']);
+    const mockVisualization = createMockVisualization('testVisualization');
+    let counter = 0;
+    const layerTypes: LayerType[] = ['data', 'annotations', 'referenceLine'];
+    mockVisualization.getLayerType.mockImplementation(() => layerTypes[counter++]);
+    expect(
+      getLayerMetaInfo(
+        mockDatasource,
+        {},
+        mockVisualization,
+        {},
+        {
+          datatable1: { type: 'datatable', columns: [], rows: [] },
+        },
+        {},
+        undefined,
+        capabilities
+      ).error
+    ).toBeUndefined();
+  });
+
   it('should return error in case of a timeshift declared in a column', () => {
-    const mockDatasource = createMockDatasource('testDatasource');
-    const updatedPublicAPI: DatasourcePublicAPI = {
-      datasourceId: 'testDatasource',
+    const mockDatasource = createMockDatasource('testDatasource', {
       getOperationForColumnId: jest.fn(() => ({
         dataType: 'number',
         isBucketed: false,
@@ -122,18 +173,10 @@ describe('getLayerMetaInfo', () => {
         hasTimeShift: true,
         hasReducedTimeRange: true,
       })),
-      getTableSpec: jest.fn(),
-      getVisualDefaults: jest.fn(),
-      getSourceId: jest.fn(),
-      getMaxPossibleNumValues: jest.fn(),
-      getFilters: jest.fn(),
-      isTextBasedLanguage: jest.fn(() => false),
-      hasDefaultTimeField: jest.fn(() => true),
-    };
-    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    });
     expect(
       getLayerMetaInfo(
-        createMockDatasource('testDatasource'),
+        mockDatasource,
         {},
         createMockVisualization('testVisualization'),
         {},
@@ -146,19 +189,11 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should return error in case of getFilters returning errors', () => {
-    const mockDatasource = createMockDatasource('testDatasource');
-    const updatedPublicAPI: DatasourcePublicAPI = {
+    const mockDatasource = createMockDatasource('testDatasource', {
       datasourceId: 'formBased',
-      getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
-      getVisualDefaults: jest.fn(),
-      getSourceId: jest.fn(),
-      getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
-      isTextBasedLanguage: jest.fn(() => false),
-      hasDefaultTimeField: jest.fn(() => true),
-    };
-    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    });
     expect(
       getLayerMetaInfo(
         mockDatasource,
@@ -176,19 +211,11 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should not be visible if discover is not available', () => {
-    const mockDatasource = createMockDatasource('testDatasource');
-    const updatedPublicAPI: DatasourcePublicAPI = {
+    const mockDatasource = createMockDatasource('testDatasource', {
       datasourceId: 'indexpattern',
-      getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
-      getVisualDefaults: jest.fn(),
-      getSourceId: jest.fn(),
-      getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
-      isTextBasedLanguage: jest.fn(() => false),
-      hasDefaultTimeField: jest.fn(() => true),
-    };
-    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    });
     // both capabilities should be enabled to enable discover
     expect(
       getLayerMetaInfo(
@@ -227,15 +254,10 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should basically work collecting fields and filters in the visualization', () => {
-    const mockDatasource = createMockDatasource('testDatasource');
-    const updatedPublicAPI: DatasourcePublicAPI = {
+    const mockDatasource = createMockDatasource('testDatasource', {
       datasourceId: 'formBased',
-      getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
-      getVisualDefaults: jest.fn(),
       getSourceId: jest.fn(() => '1'),
-      getMaxPossibleNumValues: jest.fn(),
-      isTextBasedLanguage: jest.fn(() => false),
       getFilters: jest.fn(() => ({
         enabled: {
           kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],
@@ -243,9 +265,7 @@ describe('getLayerMetaInfo', () => {
         },
         disabled: { kuery: [], lucene: [] },
       })),
-      hasDefaultTimeField: jest.fn(() => true),
-    };
-    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    });
     const sampleIndexPatternsFromService = {
       '1': createMockedIndexPattern(),
     };
@@ -280,15 +300,10 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should order date fields first', () => {
-    const mockDatasource = createMockDatasource('testDatasource');
-    const updatedPublicAPI: DatasourcePublicAPI = {
+    const mockDatasource = createMockDatasource('testDatasource', {
       datasourceId: 'formBased',
-      getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes', 'timestamp'] }]),
-      getVisualDefaults: jest.fn(),
       getSourceId: jest.fn(() => '1'),
-      getMaxPossibleNumValues: jest.fn(),
-      isTextBasedLanguage: jest.fn(() => false),
       getFilters: jest.fn(() => ({
         enabled: {
           kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],
@@ -296,9 +311,7 @@ describe('getLayerMetaInfo', () => {
         },
         disabled: { kuery: [], lucene: [] },
       })),
-      hasDefaultTimeField: jest.fn(() => true),
-    };
-    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    });
     const sampleIndexPatternsFromService = {
       '1': createMockedIndexPattern(),
     };
