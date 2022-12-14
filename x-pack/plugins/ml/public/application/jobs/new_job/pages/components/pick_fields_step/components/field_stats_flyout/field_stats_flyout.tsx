@@ -24,11 +24,8 @@ import {
   useGeneratedHtmlId,
   EuiFlyoutFooter,
   EuiButton,
-  EuiButtonIcon,
-  EuiToolTip,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getDefaultDatafeedQuery } from '../../../../../utils/new_job_utils';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
@@ -112,34 +109,6 @@ export const MLJobWizardFieldStatsFlyoutContext = createContext<MLJobWizardField
   setFieldValue: () => {},
 });
 
-export const FieldStatsFlyoutTrigger = () => {
-  const { setIsFlyoutVisible, isFlyoutVisible } = useContext(MLJobWizardFieldStatsFlyoutContext);
-
-  return (
-    <EuiToolTip
-      content={i18n.translate(
-        'xpack.ml.newJob.wizard.fieldContextPopover.descriptionTooltipContent',
-        {
-          defaultMessage: 'Show top 10 field values',
-        }
-      )}
-    >
-      <EuiButtonIcon
-        iconType="inspect"
-        onClick={() => {
-          setIsFlyoutVisible(!isFlyoutVisible);
-        }}
-        aria-label={i18n.translate(
-          'xpack.ml.newJob.wizard.fieldContextPopover.topFieldValuesAriaLabel',
-          {
-            defaultMessage: 'Show top 10 field values',
-          }
-        )}
-        data-test-subj={'apmCorrelationsContextPopoverButton'}
-      />
-    </EuiToolTip>
-  );
-};
 export const FieldStatsFlyout = () => {
   const { setIsFlyoutVisible, isFlyoutVisible, fieldName } = useContext(
     MLJobWizardFieldStatsFlyoutContext

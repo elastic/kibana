@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
@@ -32,28 +33,41 @@ export const useFieldStatsTrigger = () => {
       ) : (
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              disabled={field.id === EVENT_RATE_FIELD_ID}
-              size="xs"
-              iconType="inspect"
-              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                if (ev.type === 'click') {
-                  ev.currentTarget.focus();
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltip',
+                {
+                  defaultMessage: 'Inspect field statistics',
                 }
-                ev.preventDefault();
-                ev.stopPropagation();
+              )}
+            >
+              <EuiButtonIcon
+                disabled={field.id === EVENT_RATE_FIELD_ID}
+                size="xs"
+                iconType="inspect"
+                onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+                  if (ev.type === 'click') {
+                    ev.currentTarget.focus();
+                  }
+                  ev.preventDefault();
+                  ev.stopPropagation();
 
-                if (typeof field.id === 'string') {
-                  setFieldName(field.id);
-                  setIsFlyoutVisible(true);
-                }
-              }}
-              aria-label={i18n.translate('xpack.ml.fieldContextPopover.topFieldValuesAriaLabel', {
-                defaultMessage: 'Show top 10 field values',
-              })}
-              data-test-subj={'mlAggSelectFieldStatsPopoverButton'}
-            />
+                  if (typeof field.id === 'string') {
+                    setFieldName(field.id);
+                    setIsFlyoutVisible(true);
+                  }
+                }}
+                aria-label={i18n.translate(
+                  'xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltipArialabel',
+                  {
+                    defaultMessage: 'Inspect field statistics',
+                  }
+                )}
+                data-test-subj={'mlAggSelectFieldStatsPopoverButton'}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <FieldIcon type={getKbnFieldIconType(field.type)} fill="none" />
           </EuiFlexItem>
