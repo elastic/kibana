@@ -11,17 +11,24 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 export function getHttpError(message: string) {
-  return (
+  const msgFormatted = message ? (
     <>
-      {i18n.translate('data.errors.fetchError', {
-        defaultMessage:
-          'Check your network and proxy configuration. If the problem persists, contact your network administrator.',
-      })}
       <EuiSpacer size="s" />
       <EuiSpacer size="s" />
       <EuiCodeBlock data-test-subj="errMessage" isCopyable={true} paddingSize="s">
         {message}
       </EuiCodeBlock>
+    </>
+  ) : (
+    <></>
+  );
+
+  return (
+    <>
+      {i18n.translate('data.errors.fetchError', {
+        defaultMessage: 'Please check your network connection and try again.',
+      })}
+      {msgFormatted}
     </>
   );
 }

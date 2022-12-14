@@ -64,15 +64,13 @@ export const fromStreamingXhr = (
       if (isErrorStatus()) {
         const errorMsg =
           xhr.status === 0
-            ? i18n.translate('bfetch.networkError', {
-                defaultMessage:
-                  'Error connecting to the Kibana server. Please check your network connection.',
-              })
+            ? undefined
             : i18n.translate('bfetch.networkErrorWithStatus', {
-                defaultMessage: 'Error connecting to server - code {status}',
+                defaultMessage: 'Code {status}',
                 values: { status: xhr.status },
               });
-        subject.error(new Error(errorMsg));
+        // faking an error is necessary for proper handling
+        subject.error({ constructor: { name: 'BfetchRequestError' }, message: errorMsg });
       } else {
         subject.complete();
       }

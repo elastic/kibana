@@ -46,6 +46,7 @@ import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { BfetchRequestError } from './bfetch_error';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -204,6 +205,8 @@ export class SearchInterceptor {
       } else {
         return new EsError(e);
       }
+    } else if (e.constructor.name === 'BfetchRequestError') {
+      return new BfetchRequestError(e.message);
     } else {
       return e instanceof Error ? e : new Error(e.message);
     }
@@ -525,12 +528,16 @@ export class SearchInterceptor {
         }),
         text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
       });
-    } else if (e.constructor.name === 'HttpFetchError') {
+    } else if (
+      e.constructor.name === 'HttpFetchError' ||
+      e.constructor.name === 'BfetchRequestError'
+    ) {
+      const msg = e.message === 'Unknown error.' ? '' : e.message;
       this.deps.toasts.addDanger({
         title: i18n.translate('data.search.httpErrorTitle', {
-          defaultMessage: 'Cannot retrieve your data',
+          defaultMessage: 'Unable to connect to the Kibana server',
         }),
-        text: toMountPoint(getHttpError(e.message), { theme$: this.deps.theme.theme$ }),
+        text: toMountPoint(getHttpError(msg), { theme$: this.deps.theme.theme$ }),
       });
     } else {
       this.deps.toasts.addError(e, {
