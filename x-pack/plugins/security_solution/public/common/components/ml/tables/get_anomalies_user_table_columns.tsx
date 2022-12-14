@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import type { Columns } from '../../paginated_table';
+import type { Columns } from '../../../../explore/components/paginated_table';
 import type { AnomaliesByUser, Anomaly } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { createCompoundAnomalyKey } from './create_compound_key';
 import { UserDetailsLink } from '../../links';
 
 import * as i18n from './translations';
-import { UsersType } from '../../../../users/store/model';
+import { UsersType } from '../../../../explore/users/store/model';
 import { getAnomaliesDefaultTableColumns } from './get_anomalies_table_columns';
 
 export const getAnomaliesUserTableColumns = (
