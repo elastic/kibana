@@ -70,6 +70,7 @@ import { getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
+import { RuleLastRunService } from '../monitoring/rule_last_run_service';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -113,6 +114,7 @@ export class TaskRunner<
   private cancelled: boolean;
   private stackTraceLog: StackTraceLog | null;
   private ruleMonitoring: RuleMonitoringService;
+  private ruleLastRun: RuleLastRunService;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -146,6 +148,7 @@ export class TaskRunner<
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
     this.ruleMonitoring = new RuleMonitoringService();
+    this.ruleLastRun = new RuleLastRunService();
   }
 
   private async updateRuleSavedObject(
@@ -334,6 +337,7 @@ export class TaskRunner<
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
+                ruleLastRunService: this.ruleLastRun.getLastRunSetters(),
               },
               params,
               state: ruleTypeState as RuleState,
@@ -579,7 +583,7 @@ export class TaskRunner<
       ILastRun
     >(
       stateWithMetrics,
-      (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics),
+      (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics, this.ruleLastRun),
       (err: ElasticsearchError) => lastRunFromError(err)
     );
 
@@ -637,6 +641,7 @@ export class TaskRunner<
           executionStatus
         )} - ${JSON.stringify(lastRun)}`
       );
+
       await this.updateRuleSavedObject(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
         nextRun,

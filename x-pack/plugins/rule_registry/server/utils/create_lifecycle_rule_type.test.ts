@@ -129,6 +129,8 @@ function createRule(shouldWriteAlerts: boolean = true) {
           shouldStopExecution: () => false,
           shouldWriteAlerts: () => shouldWriteAlerts,
           uiSettingsClient: {} as any,
+          ruleLastRunService: {} as any,
+          ruleMonitoringService: {} as any,
         },
         spaceId: 'spaceId',
         startedAt,

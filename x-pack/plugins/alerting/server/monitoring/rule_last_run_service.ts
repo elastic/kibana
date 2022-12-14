@@ -10,13 +10,13 @@ import { PublicLastRunSetters } from '../types';
 export interface RuleLastRunResults {
   errors: string[];
   warnings: string[];
-  outcomeMessages: string[];
+  outcomeMessage: string;
 }
 
 export class RuleLastRunService {
   private errors: string[] = [];
   private warnings: string[] = [];
-  private outcomeMessages: string[] = [];
+  private outcomeMessage: string = '';
 
   public getLastRunErrors(): string[] {
     return this.errors;
@@ -26,15 +26,15 @@ export class RuleLastRunService {
     return this.warnings;
   }
 
-  public getLastRunOutcomeMessages(): string[] {
-    return this.outcomeMessages;
+  public getLastRunOutcomeMessage(): string {
+    return this.outcomeMessage;
   }
 
   public getLastRunResults(): RuleLastRunResults {
     return {
       errors: this.errors,
       warnings: this.warnings,
-      outcomeMessages: this.outcomeMessages,
+      outcomeMessage: this.outcomeMessage,
     };
   }
 
@@ -42,7 +42,7 @@ export class RuleLastRunService {
     return {
       addLastRunError: this.addLastRunError.bind(this),
       addLastRunWarning: this.addLastRunWarning.bind(this),
-      addLastRunOutcomeMessage: this.addLastRunOutcomeMessage.bind(this),
+      setLastRunOutcomeMessage: this.setLastRunOutcomeMessage.bind(this),
     };
   }
 
@@ -54,7 +54,7 @@ export class RuleLastRunService {
     this.warnings.push(warning);
   }
 
-  private addLastRunOutcomeMessage(outcomeMessage: string) {
-    this.outcomeMessages.push(outcomeMessage);
+  private setLastRunOutcomeMessage(outcomeMessage: string) {
+    this.outcomeMessage = outcomeMessage;
   }
 }

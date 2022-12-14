@@ -26,7 +26,7 @@ describe('RuleLastRunService', () => {
   });
 
   test('should return empty outcome messages array if none were added', () => {
-    expect(ruleLastRunService.getLastRunOutcomeMessages()).toEqual([]);
+    expect(ruleLastRunService.getLastRunOutcomeMessage()).toEqual('');
   });
 
   test('should return errors array with added error', () => {
@@ -40,30 +40,32 @@ describe('RuleLastRunService', () => {
   });
 
   test('should return outcome messages array with added outcome message', () => {
-    lastRunSetters.addLastRunOutcomeMessage('Third outcome message');
-    expect(ruleLastRunService.getLastRunOutcomeMessages()).toEqual(['Third outcome message']);
+    lastRunSetters.setLastRunOutcomeMessage('Third outcome message');
+    expect(ruleLastRunService.getLastRunOutcomeMessage()).toEqual('Third outcome message');
   });
 
   test('should return last run object with added errors, warnings and outcome messages', () => {
     lastRunSetters.addLastRunError('error');
     lastRunSetters.addLastRunWarning('warning');
-    lastRunSetters.addLastRunOutcomeMessage('outcome message');
+    lastRunSetters.setLastRunOutcomeMessage('outcome message');
     const expectedLastRun: RuleLastRunResults = {
       errors: ['error'],
       warnings: ['warning'],
-      outcomeMessages: ['outcome message'],
+      outcomeMessage: 'outcome message',
     };
     expect(ruleLastRunService.getLastRunResults()).toEqual(expectedLastRun);
   });
 
-  test('should return last run object with multiple added errors, warnings and outcome messages', () => {
+  test('should return last run object with multiple added errors, warnings and the last outcome messag reported', () => {
     lastRunSetters.addLastRunError('first error');
     lastRunSetters.addLastRunError('second error');
-    lastRunSetters.addLastRunOutcomeMessage('outcome message');
+    lastRunSetters.setLastRunOutcomeMessage('first outcome message');
+    lastRunSetters.setLastRunOutcomeMessage('second outcome message');
+    lastRunSetters.setLastRunOutcomeMessage('last outcome message');
     const expectedLastRun = {
       errors: ['first error', 'second error'],
       warnings: [],
-      outcomeMessages: ['outcome message'],
+      outcomeMessage: 'last outcome message',
     };
     expect(ruleLastRunService.getLastRunResults()).toEqual(expectedLastRun);
   });

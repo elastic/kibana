@@ -16,7 +16,11 @@ import {
   RuleTypeParams,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import {
+  alertsMock,
+  ruleLastRunServiceMock,
+  ruleMonitoringServiceMock,
+} from '@kbn/alerting-plugin/server/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Logger } from '@kbn/logging';
 
@@ -77,6 +81,8 @@ export const createDefaultAlertExecutorOptions = <
     shouldWriteAlerts: () => shouldWriteAlerts,
     shouldStopExecution: () => false,
     searchSourceClient: searchSourceCommonMock,
+    ruleLastRunService: ruleLastRunServiceMock.create(),
+    ruleMonitoringService: ruleMonitoringServiceMock.create(),
   },
   state,
   previousStartedAt: null,

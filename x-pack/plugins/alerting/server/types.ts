@@ -83,7 +83,8 @@ export interface RuleExecutorServices<
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
-  ruleMonitoringService?: PublicRuleMonitoringService;
+  ruleMonitoringService: PublicRuleMonitoringService;
+  ruleLastRunService: PublicRuleLastRunService;
 }
 
 export interface RuleExecutorOptions<
@@ -313,7 +314,7 @@ export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
-export interface PublicRuleMonitoringService {
+export interface PublicMetricsSetters {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
   setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
   setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
@@ -324,8 +325,10 @@ export interface PublicRuleMonitoringService {
 export interface PublicLastRunSetters {
   addLastRunError: (outcome: string) => void;
   addLastRunWarning: (outcomeMsg: string) => void;
-  addLastRunOutcomeMessage: (warning: string) => void;
+  setLastRunOutcomeMessage: (warning: string) => void;
 }
+
+export type PublicRuleMonitoringService = PublicMetricsSetters;
 
 export type PublicRuleLastRunService = PublicLastRunSetters;
 
