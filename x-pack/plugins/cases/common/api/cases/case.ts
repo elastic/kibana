@@ -325,6 +325,11 @@ export const AllTagsFindRequestRt = rt.partial({
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
+export const CasesBulkGetRequestRt = rt.type({
+  ids: rt.array(rt.string),
+  fields: rt.union([rt.undefined, rt.array(rt.string), rt.string]),
+});
+
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
@@ -347,3 +352,5 @@ export type AllReportersFindRequest = AllTagsFindRequest;
 export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
 export type RelatedCaseInfo = rt.TypeOf<typeof RelatedCaseInfoRt>;
 export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
+
+export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;

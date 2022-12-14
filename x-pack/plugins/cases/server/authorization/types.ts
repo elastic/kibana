@@ -28,6 +28,7 @@ export enum ReadOperations {
   GetCase = 'getCase',
   ResolveCase = 'resolveCase',
   FindCases = 'findCases',
+  BulkGetCases = 'bulkGetCases',
   GetCaseIDsByAlertID = 'getCaseIDsByAlertID',
   GetCaseStatuses = 'getCaseStatuses',
   GetComment = 'getComment',
