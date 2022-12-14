@@ -89,6 +89,7 @@ describe('update()', () => {
       params: {},
       throttle: null,
       notifyWhen: null,
+      revision: 0,
       actions: [
         {
           group: 'default',
@@ -382,6 +383,7 @@ describe('update()', () => {
           "risk_score": 40,
           "severity": "low",
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -568,6 +570,7 @@ describe('update()', () => {
       },
     });
 
+    // TODO: Review update results once increment logic is finalized
     expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
       1,
       'alert',
@@ -607,6 +610,7 @@ describe('update()', () => {
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true },
+        revision: 1,
         schedule: { interval: '1m' },
         scheduledTaskId: 'task-123',
         tags: ['foo'],
@@ -767,6 +771,7 @@ describe('update()', () => {
       },
     });
 
+    // TODO: Review update results once increment logic is finalized
     expect(extractReferencesFn).toHaveBeenCalledWith(ruleParams);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
@@ -783,6 +788,7 @@ describe('update()', () => {
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
+        revision: 1,
         schedule: { interval: '1m' },
         scheduledTaskId: 'task-123',
         tags: ['foo'],
@@ -961,6 +967,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1109,6 +1116,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },

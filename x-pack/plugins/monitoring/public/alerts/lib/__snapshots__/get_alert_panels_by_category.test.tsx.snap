@@ -87,6 +87,7 @@ Array [
           "name": "monitoring_alert_cpu_usage_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -250,6 +251,7 @@ Array [
           "name": "monitoring_alert_jvm_memory_usage_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -310,6 +312,7 @@ Array [
           "name": "monitoring_alert_jvm_memory_usage_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -602,6 +605,7 @@ Array [
           "name": "monitoring_alert_nodes_changed_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -662,6 +666,7 @@ Array [
           "name": "monitoring_alert_nodes_changed_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -722,6 +727,7 @@ Array [
           "name": "monitoring_alert_disk_usage_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -782,6 +788,7 @@ Array [
           "name": "monitoring_alert_license_expiration_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -842,6 +849,7 @@ Array [
           "name": "monitoring_alert_license_expiration_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -931,6 +939,7 @@ Array [
           "name": "monitoring_alert_jvm_memory_usage_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -1032,6 +1041,7 @@ Array [
           "name": "monitoring_alert_nodes_changed_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -1068,6 +1078,7 @@ Array [
           "name": "monitoring_alert_disk_usage_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -1104,6 +1115,7 @@ Array [
           "name": "monitoring_alert_license_expiration_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -1205,6 +1217,7 @@ Array [
           "name": "monitoring_alert_logstash_version_mismatch_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -1241,6 +1254,7 @@ Array [
           "name": "monitoring_alert_cpu_usage_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
@@ -1277,6 +1291,7 @@ Array [
           "name": "monitoring_alert_thread_pool_write_rejections_label",
           "notifyWhen": null,
           "params": Object {},
+          "revision": 0,
           "schedule": Object {
             "interval": "1m",
           },
