@@ -26,8 +26,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { useOpenInspector } from '@kbn/content-management-inspector';
-import type { OpenInspectorParams } from '@kbn/content-management-inspector';
+import { useOpenInspector } from '@kbn/content-management-content-editor';
+import type { OpenInspectorParams } from '@kbn/content-management-content-editor';
 
 import {
   Table,
@@ -43,7 +43,7 @@ import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 
-interface InspectorConfig
+interface ContentEditorConfig
   extends Pick<OpenInspectorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
   enabled?: boolean;
 }
@@ -96,7 +96,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
    * @deprecated
    */
   withoutPageTemplateWrapper?: boolean;
-  inspector?: InspectorConfig;
+  contentEditor?: ContentEditorConfig;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -151,7 +151,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   getDetailViewLink,
   onClickTitle,
   id = 'userContent',
-  inspector = { enabled: false },
+  contentEditor = { enabled: false },
   children,
   titleColumnName,
   additionalRightSideActions = [],
@@ -169,9 +169,9 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     );
   }
 
-  if (inspector.isReadonly === false && inspector.onSave === undefined) {
+  if (contentEditor.isReadonly === false && contentEditor.onSave === undefined) {
     throw new Error(
-      `[TableListView] A value for [inspector.onSave()] must be provided when [inspector.isReadonly] is false.`
+      `[TableListView] A value for [contentEditor.onSave()] must be provided when [contentEditor.isReadonly] is false.`
     );
   }
 
@@ -309,18 +309,18 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           tags,
         },
         entityName,
-        ...inspector,
+        ...contentEditor,
         onSave:
-          inspector.onSave &&
+          contentEditor.onSave &&
           (async (args) => {
-            await inspector.onSave!(args);
+            await contentEditor.onSave!(args);
             await fetchItems();
 
             close();
           }),
       });
     },
-    [getTagIdsFromReferences, openInspector, entityName, inspector, fetchItems]
+    [getTagIdsFromReferences, openInspector, entityName, contentEditor, fetchItems]
   );
 
   const tableColumns = useMemo(() => {
@@ -373,7 +373,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
 
     // Add "Actions" column
-    if (editItem || inspector.enabled !== false) {
+    if (editItem || contentEditor.enabled !== false) {
       const actions: EuiTableActionsColumnType<T>['actions'] = [];
 
       if (editItem) {
@@ -399,7 +399,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         });
       }
 
-      if (inspector.enabled !== false) {
+      if (contentEditor.enabled !== false) {
         actions.push({
           name: (item) => {
             return i18n.translate('contentManagement.tableList.listing.table.inspectActionName', {
@@ -443,7 +443,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     addOrRemoveIncludeTagFilter,
     addOrRemoveExcludeTagFilter,
     DateFormatterComp,
-    inspector,
+    contentEditor,
     inspectItem,
   ]);
 

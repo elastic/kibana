@@ -12,7 +12,7 @@ import type { FormattedRelative } from '@kbn/i18n-react';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
-import { InspectorKibanaProvider } from '@kbn/content-management-inspector';
+import { InspectorKibanaProvider } from '@kbn/content-management-content-editor';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
 import type { Tag } from './types';

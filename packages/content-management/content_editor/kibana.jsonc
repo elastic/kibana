@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/content-management-inspector",
+  "id": "@kbn/content-management-content-editor",
   "owner": "@elastic/kibana-global-experience",
   "runtimeDeps": [],
   "typeDeps": [],

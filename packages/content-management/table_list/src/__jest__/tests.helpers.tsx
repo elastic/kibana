@@ -8,7 +8,7 @@
 import React from 'react';
 import type { ComponentType } from 'react';
 import { from } from 'rxjs';
-import { InspectorProvider } from '@kbn/content-management-inspector';
+import { InspectorProvider } from '@kbn/content-management-content-editor';
 
 import { TagList } from '../mocks';
 import { TableListViewProvider, Services } from '../services';

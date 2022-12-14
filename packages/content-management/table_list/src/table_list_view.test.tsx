@@ -538,7 +538,7 @@ describe.skip('TableListView', () => {
     });
   });
 
-  describe('inspector', () => {
+  describe('content editor', () => {
     const setupInspector = registerTestBed<string, TableListViewProps>(
       WithServices<TableListViewProps>(TableListView),
       {
@@ -570,13 +570,13 @@ describe.skip('TableListView', () => {
       },
     ];
 
-    test('should have an "inpect" button if the inspector is enabled', async () => {
+    test('should have an "inpect" button if the content editor is enabled', async () => {
       let testBed: TestBed;
 
       await act(async () => {
         testBed = await setupInspector({
           findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
-          inspector: { enabled: true },
+          contentEditor: { enabled: true },
         });
       });
 
