@@ -42,6 +42,7 @@ describe('gatherInfo', () => {
   });
 
   test('missing cgroup file', async () => {
+    mockFs({});
     await expect(gatherInfo()).rejects.toMatchObject({ code: 'ENOENT' });
   });
 
