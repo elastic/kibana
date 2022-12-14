@@ -7,5 +7,5 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "ui": true,
-  "requiredPlugins": ["data", "developerExamples", "presentationUtil", "controls"]
+  "requiredPlugins": ["data", "developerExamples", "presentationUtil", "controls", "embeddable"]
 }

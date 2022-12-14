@@ -20,7 +20,7 @@ const ControlsExamples = ({ dataViewId }: { dataViewId?: string }) => {
       <BasicReduxExample dataViewId={dataViewId} />
     </>
   ) : (
-    <div>{'Please install e-commerce sample data to run controls examples.'}</div>
+    <div>{'Please install web logs sample data to run controls examples.'}</div>
   );
   return (
     <KibanaPageTemplate>
@@ -34,7 +34,7 @@ export const renderApp = async (
   { data }: ControlsExampleStartDeps,
   { element }: AppMountParameters
 ) => {
-  const dataViews = await data.dataViews.find('kibana_sample_data_ecommerce');
+  const dataViews = await data.dataViews.find('kibana_sample_data_logs');
   const dataViewId = dataViews.length > 0 ? dataViews[0].id : undefined;
   ReactDOM.render(<ControlsExamples dataViewId={dataViewId} />, element);
   return () => ReactDOM.unmountComponentAtNode(element);
