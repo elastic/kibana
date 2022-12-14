@@ -911,32 +911,6 @@ export const LensTopNavMenu = ({
     }
   }
 
-  // const showDatePicker = useMemo(() => {
-  //   if (isOnTextBasedMode && query && isOfAggregateQueryType(query)) {
-  //     const timeField = getTimeFieldFromTextBasedQuery(query);
-  //     return Boolean(timeField);
-  //   }
-  //   return (
-  //     indexPatterns.some((ip) => ip.isTimeBased()) ||
-  //     Boolean(
-  //       allLoaded &&
-  //         activeDatasourceId &&
-  //         datasourceMap[activeDatasourceId].isTimeBased(
-  //           datasourceStates[activeDatasourceId].state,
-  //           dataViews.indexPatterns
-  //         )
-  //     )
-  //   );
-  // }, [
-  //   activeDatasourceId,
-  //   allLoaded,
-  //   dataViews.indexPatterns,
-  //   datasourceMap,
-  //   datasourceStates,
-  //   indexPatterns,
-  //   isOnTextBasedMode,
-  //   query,
-  // ]);
   return (
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}

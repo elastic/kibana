@@ -169,7 +169,7 @@ export function useDiscoverState({
     documents$: data$.documents$,
     dataViews,
     stateContainer,
-    dataViewList: savedDataViewList,
+    dataViewList: [...savedDataViewList, ...adHocDataViewList],
     savedSearch,
   });
 

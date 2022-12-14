@@ -13,7 +13,7 @@ import {
   Query,
 } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
-import { DataViewListItem, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewListItem, DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { GetStateReturn } from '../services/discover_state';
 import type { DataDocuments$ } from './use_saved_search';
@@ -35,7 +35,7 @@ export function useTextBasedQueryLanguage({
   documents$: DataDocuments$;
   stateContainer: GetStateReturn;
   dataViews: DataViewsContract;
-  dataViewList: DataViewListItem[];
+  dataViewList: Array<DataViewListItem | DataView>;
   savedSearch: SavedSearch;
 }) {
   const prev = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] }>({

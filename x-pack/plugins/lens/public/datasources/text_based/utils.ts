@@ -14,6 +14,7 @@ import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 
 import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
+import type { DataViewsState } from '../../state_management';
 
 export async function loadIndexPatternRefs(
   indexPatternsService: DataViewsPublicPluginStart
@@ -64,9 +65,12 @@ export async function getStateFromAggregateQuery(
   query: AggregateQuery,
   dataViews: DataViewsPublicPluginStart,
   data: DataPublicPluginStart,
-  expressions: ExpressionsStart
+  expressions: ExpressionsStart,
+  frameDataViews?: DataViewsState
 ) {
-  const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
+  let indexPatternRefs: IndexPatternRef[] = frameDataViews?.indexPatternRefs.length
+    ? frameDataViews.indexPatternRefs
+    : await loadIndexPatternRefs(dataViews);
   const errors: Error[] = [];
   const layerIds = Object.keys(state.layers);
   const context = state.initialContext;
@@ -95,11 +99,14 @@ export async function getStateFromAggregateQuery(
           dataView.timeFieldName = dateFields[0].name;
         }
         index = dataView?.id;
-        indexPatternRefs.push({
-          id: dataView.id,
-          title: dataView.name,
-          timeField: dataView.timeFieldName,
-        });
+        indexPatternRefs = [
+          ...indexPatternRefs,
+          {
+            id: dataView.id,
+            title: dataView.name,
+            timeField: dataView.timeFieldName,
+          },
+        ];
       }
     }
     timeFieldName = dataView.timeFieldName;
