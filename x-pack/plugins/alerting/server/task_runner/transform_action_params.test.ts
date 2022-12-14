@@ -51,6 +51,7 @@ describe('transformActionParams', () => {
       alertParams: {
         foo: 'test',
       },
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
         Object {
@@ -85,6 +86,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
         Object {
@@ -114,6 +116,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
         Object {
@@ -142,6 +145,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
         Object {
@@ -170,6 +174,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
     Object {
@@ -198,6 +203,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
     Object {
@@ -226,6 +232,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
     Object {
@@ -253,6 +260,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
     Object {
@@ -281,6 +289,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
     Object {
@@ -309,6 +318,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
     Object {
@@ -337,6 +347,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
     Object {
@@ -365,6 +376,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
     Object {
@@ -393,6 +405,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
     Object {
@@ -421,6 +434,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
     Object {
@@ -450,6 +464,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
     Object {
@@ -479,6 +494,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     const dateAfter = Date.now();
     const dateVariable = new Date(`${result.message}`).valueOf();
@@ -509,6 +525,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
         Object {
@@ -541,6 +558,7 @@ describe('transformActionParams', () => {
       alertActionGroup: 'action-group',
       alertActionGroupName: 'Action Group',
       alertParams: {},
+      flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
         Object {
@@ -551,6 +569,35 @@ describe('transformActionParams', () => {
           },
         }
     `);
+  });
+
+  test('flapping is passed to templates', () => {
+    const actionParams = {
+      message: 'Value "{{alert.flapping}}" exists',
+    };
+    const result = transformActionParams({
+      actionsPlugin,
+      actionTypeId,
+      actionParams,
+      state: {},
+      context: {},
+      alertId: '1',
+      alertType: 'rule-type-id',
+      actionId: 'action-id',
+      alertName: 'alert-name',
+      tags: ['tag-A', 'tag-B'],
+      spaceId: 'spaceId-A',
+      alertInstanceId: '2',
+      alertActionGroup: 'action-group',
+      alertActionGroupName: 'Action Group',
+      alertParams: {},
+      flapping: true,
+    });
+    expect(result).toMatchInlineSnapshot(`
+    Object {
+      "message": "Value \\"true\\" exists",
+    }
+  `);
   });
 });
 

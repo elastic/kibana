@@ -28476,6 +28476,41 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.DeprecationsGetResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeprecationsGetResponse",
+        "description": [],
+        "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.DeprecationsGetResponse.deprecations",
+            "type": "Array",
+            "tags": [],
+            "label": "deprecations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-deprecations-common",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+                "section": "def-common.DomainDeprecationDetails",
+                "text": "DomainDeprecationDetails"
+              },
+              "[]"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.DeprecationsRequestHandlerContext",
         "type": "Interface",
         "tags": [],
@@ -61089,6 +61124,28 @@
           }
         ],
         "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.DomainDeprecationDetails",
+        "type": "Type",
+        "tags": [],
+        "label": "DomainDeprecationDetails",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-deprecations-common",
+            "scope": "common",
+            "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+            "section": "def-common.DeprecationsDetails",
+            "text": "DeprecationsDetails"
+          },
+          " & { domainId: string; }"
+        ],
+        "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

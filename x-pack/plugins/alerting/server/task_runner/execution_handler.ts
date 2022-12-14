@@ -264,6 +264,7 @@ export class ExecutionHandler<
                 alertParams: this.rule.params,
                 actionParams: action.params,
                 ruleUrl: this.buildRuleUrl(spaceId),
+                flapping: executableAlert.getFlapping(),
               }),
             }),
           };
