@@ -40,11 +40,13 @@ export function SloList() {
     setShouldReload(true);
   };
 
-  const handleChangeQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
-  };
-
-  const debounceChange = useMemo(() => debounce(handleChangeQuery, 300), []);
+  const handleChange = useMemo(
+    () =>
+      debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+        setQuery(e.target.value);
+      }, 300),
+    []
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
@@ -52,7 +54,7 @@ export function SloList() {
         <EuiFieldSearch
           fullWidth
           isLoading={loading}
-          onChange={debounceChange}
+          onChange={handleChange}
           placeholder={i18n.translate('observability.slos.list.search', {
             defaultMessage: 'Search',
           })}
