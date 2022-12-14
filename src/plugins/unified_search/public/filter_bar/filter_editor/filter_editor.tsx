@@ -33,7 +33,7 @@ import {
   getFilterParams,
   isCombinedFilter,
 } from '@kbn/es-query';
-import { cloneDeep } from 'lodash';
+import { merge } from 'lodash';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
@@ -136,7 +136,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       customLabel: props.filter.meta.alias || '',
       queryDsl: this.parseFilterToQueryDsl(props.filter),
       isCustomEditorOpen: this.isUnknownFilterType(),
-      localFilter: dataView ? cloneDeep(props.filter) : buildEmptyFilter(false),
+      localFilter: dataView ? merge({}, props.filter) : buildEmptyFilter(false),
     };
   }
 
