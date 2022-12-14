@@ -277,6 +277,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       ? this.props.embeddable.getSelfStyledOptions()
       : undefined;
 
+    console.log('are we here??????', this.state);
+
     return (
       <EuiPanel
         className={classes}
@@ -341,6 +343,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     this.subscription.add(
       this.props.embeddable.getOutput$().subscribe(
         (output: EmbeddableOutput) => {
+          console.log('output', output);
           this.setState({
             error: output.error,
             loading: output.loading,

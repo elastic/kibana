@@ -246,6 +246,7 @@ export const EmbeddedMapComponent = ({
     if (!storageValue) {
       return null;
     }
+    console.log('oy', embeddable);
     return (
       <Embeddable>
         <InPortal node={portalNode}>
