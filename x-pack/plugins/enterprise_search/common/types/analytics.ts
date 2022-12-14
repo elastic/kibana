@@ -13,3 +13,7 @@ export interface AnalyticsCollection {
 }
 
 export type AnalyticsCollectionDocument = Omit<AnalyticsCollection, 'id'>;
+
+export interface AnalyticsEventsIndexExists {
+  exists: boolean;
+}
