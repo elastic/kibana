@@ -15,6 +15,7 @@ import {
   SortDirection,
 } from '@kbn/data-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { OnlySearchSourceRuleParams } from '../types';
 
 export async function fetchSearchSourceQuery(
@@ -53,17 +54,18 @@ export async function fetchSearchSourceQuery(
   const searchResult = await searchSource.fetch();
 
   const discoverLocator = services.share.url.locators.get('DISCOVER_APP_LOCATOR');
-  const redirectUrlParams = {
+  const redirectUrlParams: DiscoverAppLocatorParams = {
     dataViewSpec: { ...index.toSpec(false), id: undefined, version: undefined }, // make separate adhoc data view
     filters: initialSearchSource.getField('filter') as Filter[],
     query: initialSearchSource.getField('query'),
     timeRange: { from: dateStart, to: dateEnd },
+    isAlertResults: true,
   };
-  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
 
-  const [firstPart, rest] = redirectUrl.split('/app');
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
+  const [start, end] = redirectUrl.split('/app');
   return {
-    link: firstPart + spacePrefix + '/app' + rest,
+    link: start + spacePrefix + '/app' + end,
     numMatches: Number(searchResult.hits.total),
     searchResult,
     dateStart,

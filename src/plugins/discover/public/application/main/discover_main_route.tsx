@@ -30,6 +30,7 @@ import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { restoreStateFromSavedSearch } from '../../services/saved_searches/restore_from_saved_search';
+import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -70,6 +71,11 @@ export function DiscoverMainRoute(props: Props) {
     () => getScopedHistory().location.state as MainHistoryLocationState | undefined,
     []
   );
+
+  useAlertResultsToast({
+    isAlertResults: historyLocationState?.isAlertResults,
+    toastNotifications,
+  });
 
   useExecutionContext(core.executionContext, {
     type: 'application',

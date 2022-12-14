@@ -95,6 +95,10 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Breakdown field
    */
   breakdownField?: string;
+  /**
+   * Used when navigating to particular alert results
+   */
+  isAlertResults?: boolean;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
@@ -109,6 +113,7 @@ export interface DiscoverAppLocatorDependencies {
  */
 export interface MainHistoryLocationState {
   dataViewSpec?: DataViewSpec;
+  isAlertResults?: boolean;
 }
 
 export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverAppLocatorParams> {
@@ -135,6 +140,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       viewMode,
       hideAggregatedPreview,
       breakdownField,
+      isAlertResults,
     } = params;
     const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
     const appState: {
@@ -169,9 +175,8 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (breakdownField) appState.breakdownField = breakdownField;
 
     const state: MainHistoryLocationState = {};
-    if (dataViewSpec) {
-      state.dataViewSpec = dataViewSpec;
-    }
+    if (dataViewSpec) state.dataViewSpec = dataViewSpec;
+    if (isAlertResults) state.isAlertResults = isAlertResults;
 
     let path = `#/${savedSearchPath}`;
     path = this.deps.setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
