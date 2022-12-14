@@ -20,7 +20,7 @@ export function getFieldFromFilter(filter: Filter, indexPattern?: DataView) {
 
 export function getOperatorFromFilter(filter: Filter) {
   return FILTER_OPERATORS.find((operator) => {
-    return filter.meta.type === operator.type && filter.meta.negate === operator.negate;
+    return filter.meta.type === operator.type;
   });
 }
 
