@@ -107,7 +107,7 @@ export async function getTraceItems(
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     body: {
-      track_total_hits: maxTraceItems + 1,
+      track_total_hits: Math.max(10000, maxTraceItems + 1),
       size: maxTraceItems,
       _source: [
         TIMESTAMP,
