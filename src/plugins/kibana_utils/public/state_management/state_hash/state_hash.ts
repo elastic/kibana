@@ -32,7 +32,7 @@ export function retrieveState<State>(stateHash: string): State {
 
 export function persistState<State>(state: State): string {
   const json = JSON.stringify(state);
-  const hash = createStateHash(json);
+  const hash = createStateHash(json, hashedItemStore.getItem.bind(hashedItemStore));
 
   const isItemSet = hashedItemStore.setItem(hash, json);
   if (isItemSet) return hash;

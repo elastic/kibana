@@ -17,7 +17,7 @@ export function isStateHash(str: string) {
 
 export function createStateHash(
   json: string,
-  existingJsonProvider?: (hash: string) => string | null // TODO: temp while state.js relies on this in tests
+  existingJsonProvider?: (hash: string) => string | null
 ) {
   if (typeof json !== 'string') {
     throw new Error('createHash only accepts strings (JSON).');
@@ -33,7 +33,6 @@ export function createStateHash(
   for (let i = 7; i < hash.length; i++) {
     shortenedHash = hash.slice(0, i);
     const existingJson = existingJsonProvider ? existingJsonProvider(shortenedHash) : null;
-    //   : hashedItemStore.getItem(shortenedHash);
     if (existingJson === null || existingJson === json) break;
   }
 

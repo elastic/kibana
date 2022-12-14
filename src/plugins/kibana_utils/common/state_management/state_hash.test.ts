@@ -32,6 +32,13 @@ describe('stateHash', () => {
       const hash2 = createStateHash(json2);
       expect(hash1).not.toEqual(hash2);
     });
+
+    it('calls existingJsonProvider if provided', () => {
+      const json = JSON.stringify({ a: 'a' });
+      const existingJsonProvider = jest.fn(() => json);
+      createStateHash(json, existingJsonProvider);
+      expect(existingJsonProvider).toHaveBeenCalled();
+    });
   });
 
   describe('#isStateHash', () => {

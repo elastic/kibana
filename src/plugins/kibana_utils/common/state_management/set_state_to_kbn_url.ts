@@ -8,6 +8,34 @@
 
 import { encodeState } from './encode_state';
 import { replaceUrlHashQuery, replaceUrlQuery } from './format';
+import { createStateHash } from './state_hash';
+
+export type SetStateToKbnUrlHashOptions = { useHash: boolean; storeInHashQuery?: boolean };
+
+export function createSetStateToKbnUrl(createHash: <State>(rawState: State) => string) {
+  return <State>(
+    key: string,
+    state: State,
+    { useHash = false, storeInHashQuery = true }: SetStateToKbnUrlHashOptions = {
+      useHash: false,
+      storeInHashQuery: true,
+    },
+    rawUrl: string
+  ): string => {
+    const replacer = storeInHashQuery ? replaceUrlHashQuery : replaceUrlQuery;
+    return replacer(rawUrl, (query) => {
+      const encoded = encodeState(state, useHash, createHash);
+      return {
+        ...query,
+        [key]: encoded,
+      };
+    });
+  };
+}
+
+const internalSetStateToKbnUrl = createSetStateToKbnUrl(<State>(rawState: State) =>
+  createStateHash(JSON.stringify(rawState))
+);
 
 /**
  * Common 'setStateToKbnUrl' without HashedItemStore support
@@ -15,18 +43,8 @@ import { replaceUrlHashQuery, replaceUrlQuery } from './format';
 export function setStateToKbnUrl<State>(
   key: string,
   state: State,
-  { useHash = false, storeInHashQuery = true }: { useHash: boolean; storeInHashQuery?: boolean } = {
-    useHash: false,
-    storeInHashQuery: true,
-  },
+  hashOptions: SetStateToKbnUrlHashOptions,
   rawUrl: string
 ): string {
-  const replacer = storeInHashQuery ? replaceUrlHashQuery : replaceUrlQuery;
-  return replacer(rawUrl, (query) => {
-    const encoded = encodeState(state, useHash);
-    return {
-      ...query,
-      [key]: encoded,
-    };
-  });
+  return internalSetStateToKbnUrl(key, state, hashOptions, rawUrl);
 }
