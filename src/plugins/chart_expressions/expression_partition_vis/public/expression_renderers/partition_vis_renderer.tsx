@@ -11,7 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
+import { Datatable, ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -19,10 +19,10 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { VisTypePieDependencies } from '../plugin';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
-import { ChartTypes, RenderValue } from '../../common/types';
+import { CellValueAction, GetCompatibleCellValueActions } from '../types';
+import { ChartTypes, PartitionVisParams, RenderValue } from '../../common/types';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { extractContainerType, extractVisualizationType } from '../../../common';
-import { CellValueAction, ColumnCellValueActions } from '../types';
 
 export const strings = {
   getDisplayName: () =>
@@ -44,6 +44,28 @@ const partitionVisRenderer = css({
   height: '100%',
 });
 
+/**
+ * Retrieves the compatible CELL_VALUE_TRIGGER actions indexed by column
+ **/
+export const getColumnCellValueActions = async (
+  visConfig: PartitionVisParams,
+  visData: Datatable,
+  getCompatibleCellValueActions: GetCompatibleCellValueActions | undefined
+) => {
+  if (!Array.isArray(visConfig.dimensions.buckets) || !getCompatibleCellValueActions) {
+    return [];
+  }
+  return Promise.all(
+    visConfig.dimensions.buckets.reduce<Array<Promise<CellValueAction[]>>>((acc, accessor) => {
+      const column = getColumnByAccessor(accessor, visData.columns);
+      if (column) {
+        acc.push(getCompatibleCellValueActions([{ columnMeta: column.meta }]));
+      }
+      return acc;
+    }, [])
+  );
+};
+
 export const getPartitionVisRenderer: (
   deps: VisTypePieDependencies
 ) => ExpressionRenderDefinition<RenderValue> = ({ getStartDeps }) => ({
@@ -62,24 +84,11 @@ export const getPartitionVisRenderer: (
       unmountComponentAtNode(domNode);
     });
 
-    const { getCompatibleCellValueActions } = handlers;
-    let columnCellValueActions: ColumnCellValueActions = [];
-
-    if (getCompatibleCellValueActions && Array.isArray(visConfig.dimensions.buckets)) {
-      columnCellValueActions = await Promise.all(
-        visConfig.dimensions.buckets.reduce<Array<Promise<CellValueAction[]>>>((acc, accessor) => {
-          const column = getColumnByAccessor(accessor, visData.columns);
-          if (column) {
-            acc.push(
-              getCompatibleCellValueActions([{ columnMeta: column.meta }]) as Promise<
-                CellValueAction[]
-              >
-            );
-          }
-          return acc;
-        }, [])
-      );
-    }
+    const columnCellValueActions = await getColumnCellValueActions(
+      visConfig,
+      visData,
+      handlers.getCompatibleCellValueActions as GetCompatibleCellValueActions
+    );
 
     const renderComplete = () => {
       const executionContext = handlers.getExecutionContext();
@@ -111,6 +120,7 @@ export const getPartitionVisRenderer: (
               visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
               renderComplete={renderComplete}
               fireEvent={handlers.event}
+              interactive={handlers.isInteractive()}
               uiState={handlers.uiState as PersistedState}
               services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
               syncColors={syncColors}

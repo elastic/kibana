@@ -85,6 +85,7 @@ export interface PartitionVisComponentProps {
   uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
+  interactive: boolean;
   chartsThemeService: ChartsPluginSetup['theme'];
   palettesRegistry: PaletteRegistry;
   services: Pick<StartDeps, 'data' | 'fieldFormats'>;
@@ -100,6 +101,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     visType,
     services,
     syncColors,
+    interactive,
   } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
   const chartTheme = props.chartsThemeService.useChartsTheme();
@@ -315,6 +317,32 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     ]
   );
 
+  const legendActions = useMemo(
+    () =>
+      interactive
+        ? getLegendActions(
+            canFilter,
+            getLegendActionEventData(visData),
+            handleLegendAction,
+            columnCellValueActions,
+            visParams,
+            visData,
+            services.data.actions,
+            services.fieldFormats
+          )
+        : undefined,
+    [
+      columnCellValueActions,
+      getLegendActionEventData,
+      handleLegendAction,
+      interactive,
+      services.data.actions,
+      services.fieldFormats,
+      visData,
+      visParams,
+    ]
+  );
+
   const rescaleFactor = useMemo(() => {
     const overallSum = visData.rows.reduce((sum, row) => sum + row[metricColumn.id], 0);
     const slices = visData.rows.map((row) => row[metricColumn.id] / overallSum);
@@ -448,16 +476,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                     splitChartFormatter
                   );
                 }}
-                legendAction={getLegendActions(
-                  canFilter,
-                  getLegendActionEventData(visData),
-                  handleLegendAction,
-                  columnCellValueActions,
-                  visParams,
-                  visData,
-                  services.data.actions,
-                  services.fieldFormats
-                )}
+                legendAction={legendActions}
                 theme={[
                   // Chart background should be transparent for the usage at Canvas.
                   { background: { color: 'transparent' } },

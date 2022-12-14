@@ -21,7 +21,11 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
 
-import type { ILensInterpreterRenderHandlers, LensCellValueAction } from '../../types';
+import type {
+  GetCompatibleCellValueActions,
+  ILensInterpreterRenderHandlers,
+  LensCellValueAction,
+} from '../../types';
 import type { FormatFactory } from '../../../common';
 import type { DatatableProps } from '../../../common/expressions';
 
@@ -45,6 +49,27 @@ async function columnsFilterable(table: Datatable, handlers: IInterpreterRenderH
           },
         })
       );
+    })
+  );
+}
+
+/**
+ * Retrieves the compatible CELL_VALUE_TRIGGER actions indexed by column
+ **/
+export async function getColumnCellValueActions(
+  config: DatatableProps,
+  getCompatibleCellValueActions: GetCompatibleCellValueActions | undefined
+): Promise<LensCellValueAction[][]> {
+  if (!config.data || !getCompatibleCellValueActions) {
+    return [];
+  }
+  return Promise.all(
+    config.data.columns.map(({ meta: columnMeta }) => {
+      try {
+        return getCompatibleCellValueActions([{ columnMeta }]);
+      } catch {
+        return [];
+      }
     })
   );
 }
@@ -104,22 +129,10 @@ export const getDatatableRenderer = (dependencies: {
       }
     }
 
-    let columnCellValueActions: LensCellValueAction[][] = [];
-    if (getCompatibleCellValueActions) {
-      if (!!config.data) {
-        columnCellValueActions = await Promise.all(
-          config.data.columns.map(({ meta: columnMeta }) => {
-            try {
-              return getCompatibleCellValueActions([{ columnMeta }]) as Promise<
-                LensCellValueAction[]
-              >;
-            } catch {
-              return [];
-            }
-          })
-        );
-      }
-    }
+    const columnCellValueActions = await getColumnCellValueActions(
+      config,
+      getCompatibleCellValueActions as GetCompatibleCellValueActions | undefined
+    );
 
     ReactDOM.render(
       <KibanaThemeProvider theme$={dependencies.theme.theme$}>
