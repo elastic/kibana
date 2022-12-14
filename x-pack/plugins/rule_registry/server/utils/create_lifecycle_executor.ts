@@ -374,7 +374,7 @@ export const createLifecycleExecutor =
             // this is a space saving effort that will stop tracking a recovered alert if it wasn't flapping and doesn't have state changes
             // in the last max capcity number of executions
             event[ALERT_STATUS] === ALERT_STATUS_RECOVERED &&
-            (flapping || flappingHistory.filter((f) => f).length > 0)
+            (flapping || flappingHistory.filter((f: boolean) => f).length > 0)
         )
         .map(({ event, flappingHistory, flapping }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
