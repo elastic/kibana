@@ -5,25 +5,29 @@
  * 2.0.
  */
 
-import { buildEsQuery, EsQueryConfig, isOfQueryType } from '@kbn/es-query';
+import { EsQueryConfig } from '@kbn/es-query';
 import { actions, createMachine, SpecialTargets } from 'xstate';
-import { QueryParsingError, UnsupportedLanguageError } from './errors';
+import { QueryStringContract } from '@kbn/data-plugin/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { sendIfDefined } from '../../xstate_helpers';
+import { logStreamQueryNotificationEventSelectors } from './notifications';
+import { validateQuery } from './validate_query_service';
 import type {
   LogStreamQueryContext,
   LogStreamQueryContextWithDataViews,
+  LogStreamQueryContextWithParsedQuery,
   LogStreamQueryContextWithQuery,
   LogStreamQueryContextWithValidationError,
   LogStreamQueryEvent,
   LogStreamQueryTypestate,
-  LogStreamQueryContextWithParsedQuery,
 } from './types';
-import { logStreamQueryNotificationEventSelectors } from './notifications';
-import { sendIfDefined } from '../../xstate_helpers';
+import { subscribeToSearchBarChanges, updateQueryInSearchBar } from './search_bar_state_service';
+import { initializeFromUrl } from './url_state_storage_service';
 
 export const createPureLogStreamQueryStateMachine = (
   initialContext: LogStreamQueryContextWithDataViews
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QEUCuYBOBPAdKgdgJZEAuhAhgDaEBekAxANoAMAuoqAA4D2shZ3fBxAAPRACZmzHABZxARhnyArOIBsADjUyZAGhBZEGmTilTxyjeOMBONQGZxAXyf60mXAAtysd9nrIAKoAogBKAJoA+gBioQDyALKRgQCSkQDCABIAggByAOLBACIs7EggPHwCQuViCDL2Jhr2Nvb2DmryzK0A7Pb6hgg9PTg9zMb2ysw9XWriMy5u6Ng43r7LWAEhETHxSYGhADIZOQXFpcKV-ISCwnWa4jjyXT3K8mo2w+96BojDo+MGlMZsw5q9FiA-F4fFD6EVsgAVbKRABqKWCAHUAMonPKFEpsS68a63WqIGxTHD2ZjKRqvWnKNS0gbktQ4T5qNTjZiNJk9cT2CFQ1YwjY4ABuVEIEHIZHwUHoKOyhxS8IRKTiuRi2RSh3OhPKV2qd1ZJnmMmmGmeNPGNhZCGpygBPQ0NnEFjmNMmQrFa2FkuoMrlCqVKrVGq1WMC6XSwWK+rKXGJxrJ9QaAKZ1OGDmmymU9sdztd7sZkgZLlcIHw3AgcGEUKJVRuNVAdQAtGp7W3FGabCplDZpuJPhZnJXhQRiNcpXQII2SS3RIg5PbnjYAfZ5O0HGNOlYfR4ResPPOU63EPZ-vIbBp+X1ugKu4zRn3lGMbEpmDJ+coZAeVn6YoBtKp7Nia9QWE8N53tSbr9L8EHrlaXRWmofRcqo-7QseKzEMBc6GsmYGpm60jDq8KidDadoIXISHWqh6E0mOSyHoBh74bKxBQKBpLnggHwaE8zDDi015fNo9ruuuszyD0DxyLSFgVk4QA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QEUCuYBOBPAdKgdgJZEAuhAhgDaEBekAxANoAMAuoqAA4D2shZ3fBxAAPRAFYATDmYBmWQDYAnMwAsARknjZ69aoA0ILIgDs05pNnjN4hQA5JS9SbsBfV4bSZcAC3KwvbHpkAFUAUQAlAE0AfQAxCIB5AFkYkIiAGRiAYQAJAEEAOQBxMIARFnYkEB4+ASFqsQR7aV1mE0VJBXlFJUNjBDtZHBNxZjlJZiUFSVHbd090bBw-AKWsejL8gBV8mIA1AEkwgHUAZRyCkvLK4Vr+QkFhJqVxOxxZZm1VOasFbX6iGmOCUJn+3Ts6i+6ns6gWIECvn8iOC4Wi8SSqTOYXyETyMQAQrjLkVShU2HdeA8no1EPJxDhVApVPIIRopAYjIghiMxnJmHoobJHOJ4YiVsj1jgAG5UQgQchkfBQej7fIZQ5bbaHRKFeL5Q4ZG4U6r3erPIHMnCzVTtN56STqKyAhCOaSWKQWWS2pSWWQmMVS1bi2XUBVKlVqjVanV6s4hbLZMLlY1VLhU820hCyOwKEbMf6qVSSOx2axaF1u61WSaWH1+gPw-DcCBwYSIyl1R4NUBNAC06m0ODsZnE2lkSl99gULoHVskqknvpLCmZTtUge8eCIpAo1DoEE71J7okQA6+w9H48nXVzshduiU+Z0YOnJlUoo8CKDku8R8zvaICWJiMsyrI5uyC6zmCIyLkoQyDn6UiSJuyzBlKobyv+3YWtm9g4Oo8FmB0UyWC6xZPpCUKQgoHQKF8KFfuK6FbsQmGHqaGY4VmvrMNaoLWLYUJjH0XIIBRw5tDRdEMahSJrFu7GKsQUDYTSgHNPBBEWEoE6ESYJgwpyAySI42kKM4LTFtoWjuO4QA */
   createMachine<LogStreamQueryContext, LogStreamQueryEvent, LogStreamQueryTypestate>(
     {
       context: initialContext,
@@ -35,13 +39,18 @@ export const createPureLogStreamQueryStateMachine = (
         uninitialized: {
           always: {
             target: 'hasQuery',
-            actions: ['initializeFromUrl', 'populateUrl'],
+            actions: ['initializeFromUrl', 'updateQueryInUrl', 'updateQueryInSearchBar'],
           },
         },
         hasQuery: {
-          invoke: {
-            src: 'subscribeToUrlStateStorageChanges',
-          },
+          invoke: [
+            {
+              src: 'subscribeToUrlStateStorageChanges',
+            },
+            {
+              src: 'subscribeToSearchBarChanges',
+            },
+          ],
           initial: 'validating',
           states: {
             valid: {
@@ -51,34 +60,33 @@ export const createPureLogStreamQueryStateMachine = (
               entry: 'notifyInvalidQueryChanged',
             },
             validating: {
-              entry: ['clearValidationError', 'clearParsedQuery'],
               invoke: {
                 src: 'validateQuery',
               },
               on: {
                 VALIDATION_FAILED: {
                   target: 'invalid',
-                  actions: 'storeValidationError',
+                  actions: ['clearParsedQuery', 'storeValidationError'],
                 },
                 VALIDATION_SUCCEEDED: {
                   target: 'valid',
-                  actions: 'storeParsedQuery',
+                  actions: ['clearValidationError', 'storeParsedQuery'],
                 },
               },
             },
           },
           on: {
-            QUERY_FROM_UI_CHANGED: {
-              target: '.validating',
-              actions: ['updateQueryInUrl', 'storeQuery'],
-            },
             QUERY_FROM_URL_CHANGED: {
               target: '.validating',
-              actions: ['updateQueryInUi', 'storeQuery'],
+              actions: ['storeQuery', 'updateQueryInSearchBar'],
             },
             DATA_VIEWS_CHANGED: {
               target: '.validating',
               actions: 'storeDataViews',
+            },
+            QUERY_FROM_SEARCH_BAR_CHANGED: {
+              target: '.validating',
+              actions: ['storeQuery', 'updateQueryInUrl'],
             },
           },
         },
@@ -126,52 +134,34 @@ export const createPureLogStreamQueryStateMachine = (
     }
   );
 
-export const createLogStreamQueryStateMachine = ({
-  initialContext,
-  kibanaQuerySettings,
-}: {
-  initialContext: LogStreamQueryContextWithDataViews;
+export interface LogStreamQueryStateMachineDependencies {
   kibanaQuerySettings: EsQueryConfig;
-}) =>
+  queryStringService: QueryStringContract;
+  urlStateStorage: IKbnUrlStateStorage;
+}
+
+export const createLogStreamQueryStateMachine = (
+  initialContext: LogStreamQueryContextWithDataViews,
+  {
+    kibanaQuerySettings,
+    queryStringService,
+    urlStateStorage,
+  }: LogStreamQueryStateMachineDependencies
+) =>
   createPureLogStreamQueryStateMachine(initialContext).withConfig({
     actions: {
+      initializeFromUrl: initializeFromUrl({ urlStateStorage }),
       notifyInvalidQueryChanged: sendIfDefined(SpecialTargets.Parent)(
         logStreamQueryNotificationEventSelectors.invalidQueryChanged
       ),
-      notifyValidQueryChanged: actions.pure(() => undefined),
+      notifyValidQueryChanged: sendIfDefined(SpecialTargets.Parent)(
+        logStreamQueryNotificationEventSelectors.validQueryChanged
+      ),
       updateQueryInUrl: () => {},
-      updateQueryInUi: () => {},
+      updateQueryInSearchBar: updateQueryInSearchBar({ queryStringService }),
     },
     services: {
-      validateQuery: (context) => (send) => {
-        if (!('query' in context)) {
-          throw new Error('Failed to validate query: no query in context');
-        }
-
-        const { dataViews, query } = context;
-
-        if (!isOfQueryType(query)) {
-          send({
-            type: 'VALIDATION_FAILED',
-            error: new UnsupportedLanguageError('Failed to validate query: unsupported language'),
-          });
-
-          return;
-        }
-
-        try {
-          const parsedQuery = buildEsQuery(dataViews, query, [], kibanaQuerySettings);
-
-          send({
-            type: 'VALIDATION_SUCCEEDED',
-            parsedQuery,
-          });
-        } catch (error) {
-          send({
-            type: 'VALIDATION_FAILED',
-            error: new QueryParsingError(`${error}`),
-          });
-        }
-      },
+      validateQuery: validateQuery({ kibanaQuerySettings }),
+      subscribeToSearchBarChanges: subscribeToSearchBarChanges({ queryStringService }),
     },
   });

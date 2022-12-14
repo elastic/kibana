@@ -19,7 +19,7 @@ export interface LogStreamQueryContextWithDataViews {
 }
 
 export interface LogStreamQueryContextWithQuery {
-  query: AnyQuery;
+  query: AnyQuery; // TODO: support filters
 }
 
 export interface LogStreamQueryContextWithParsedQuery {
@@ -37,7 +37,9 @@ export type LogStreamQueryTypestate =
     }
   | {
       value: 'hasQuery' | { hasQuery: 'validating' };
-      context: LogStreamQueryContextWithDataViews & LogStreamQueryContextWithQuery;
+      context: LogStreamQueryContextWithDataViews &
+        LogStreamQueryContextWithQuery &
+        Partial<LogStreamQueryContextWithParsedQuery>;
     }
   | {
       value: { hasQuery: 'valid' };
@@ -62,7 +64,7 @@ export type LogStreamQueryEvent =
       query: AnyQuery;
     }
   | {
-      type: 'QUERY_FROM_UI_CHANGED';
+      type: 'QUERY_FROM_SEARCH_BAR_CHANGED';
       query: AnyQuery;
     }
   | {

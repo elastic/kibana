@@ -21,8 +21,6 @@ import { LogStreamProvider, useLogStreamContext } from '../../../containers/logs
 import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_configuration';
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { useLogViewContext } from '../../../hooks/use_log_view';
-import { LogStreamPageStateProvider } from '../../../observability_logs/log_stream_page/state';
-import { type LogViewNotificationChannel } from '../../../observability_logs/log_view_state';
 
 const LogFilterState: React.FC = ({ children }) => {
   const { derivedDataView } = useLogViewContext();
@@ -92,16 +90,6 @@ const LogHighlightsState: React.FC = ({ children }) => {
     filterQuery: filterQuery?.serializedQuery ?? null,
   };
   return <LogHighlightsStateProvider {...highlightsProps}>{children}</LogHighlightsStateProvider>;
-};
-
-export const LogStreamPageProviders: React.FunctionComponent<{
-  logViewStateNotifications: LogViewNotificationChannel;
-}> = ({ children, logViewStateNotifications }) => {
-  return (
-    <LogStreamPageStateProvider logViewStateNotifications={logViewStateNotifications}>
-      {children}
-    </LogStreamPageStateProvider>
-  );
 };
 
 export const LogStreamPageContentProviders: React.FunctionComponent = ({ children }) => {
