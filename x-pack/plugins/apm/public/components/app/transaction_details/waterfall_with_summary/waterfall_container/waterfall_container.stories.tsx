@@ -81,6 +81,7 @@ export const Example: Story<any> = () => {
     traceDocs,
     errorDocs: errorDocs.map((error) => dedot(error, {}) as WaterfallError),
     spanLinksCountById: {},
+    totalItems: traceDocs.length,
   };
 
   const entryTransaction = dedot(traceDocs[0]!, {}) as Transaction;

@@ -138,6 +138,7 @@ describe('waterfall_helpers', () => {
           errorDocs,
           exceedsMax: false,
           spanLinksCountById: {},
+          totalItems: hits.length,
         },
         entryTransaction: {
           processor: { event: 'transaction' },
@@ -166,6 +167,7 @@ describe('waterfall_helpers', () => {
           errorDocs,
           exceedsMax: false,
           spanLinksCountById: {},
+          totalItems: hits.length,
         },
         entryTransaction: {
           parent: { id: 'mySpanIdD' },
@@ -267,6 +269,7 @@ describe('waterfall_helpers', () => {
           errorDocs: [],
           exceedsMax: false,
           spanLinksCountById: {},
+          totalItems: traceItems.length,
         },
         entryTransaction: {
           processor: { event: 'transaction' },
@@ -384,6 +387,7 @@ describe('waterfall_helpers', () => {
           errorDocs: [],
           exceedsMax: false,
           spanLinksCountById: {},
+          totalItems: hits.length,
         },
         entryTransaction: {
           processor: { event: 'transaction' },

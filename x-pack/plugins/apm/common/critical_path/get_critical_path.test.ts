@@ -21,6 +21,7 @@ describe('getCriticalPath', () => {
         errorDocs: [],
         exceedsMax: false,
         spanLinksCountById: {},
+        totalItems: events.length,
       },
       entryTransaction,
     });
