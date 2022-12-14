@@ -79,7 +79,7 @@ export function buildStatusRuntimeQuery(
 ): NonNullable<estypes.SearchRequest['runtime_mappings']> {
   const source = _buildSource(inactivityTimeouts);
   return {
-    calculated_status: {
+    status: {
       type: 'keyword',
       script: {
         lang: 'painless',

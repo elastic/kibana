@@ -107,7 +107,7 @@ export async function getAgentStatusForAgentPolicy(
       aggregations: {
         status: {
           terms: {
-            field: 'calculated_status',
+            field: 'status',
             size: Object.keys(statuses).length,
           },
         },

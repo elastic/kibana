@@ -20,7 +20,7 @@ type FleetServerAgentESResponse =
 export function searchHitToAgent(
   hit: FleetServerAgentESResponse & {
     sort?: SortResults;
-    fields?: { calculated_status?: AgentStatus[] };
+    fields?: { status?: AgentStatus[] };
   }
 ): Agent {
   // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
@@ -34,9 +34,7 @@ export function searchHitToAgent(
     sort: hit.sort,
   };
 
-  agent.status = hit.fields?.calculated_status?.length
-    ? hit.fields.calculated_status[0]
-    : getAgentStatus(agent);
+  agent.status = hit.fields?.status?.length ? hit.fields.status[0] : getAgentStatus(agent);
 
   return agent;
 }

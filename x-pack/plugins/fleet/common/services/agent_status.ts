@@ -85,25 +85,25 @@ export function getPreviousAgentStatusForOfflineAgents(
 }
 
 export function buildKueryForUnenrolledAgents(): string {
-  return 'calculated_status:unenrolled';
+  return 'status:unenrolled';
 }
 
 export function buildKueryForOnlineAgents(): string {
-  return 'calculated_status:online';
+  return 'status:online';
 }
 
 export function buildKueryForErrorAgents(): string {
-  return '(calculated_status:error or calculated_status:degraded)';
+  return '(status:error or status:degraded)';
 }
 
 export function buildKueryForOfflineAgents(): string {
-  return 'calculated_status:offline';
+  return 'status:offline';
 }
 
 export function buildKueryForUpdatingAgents(): string {
-  return '(calculated_status:updating or calculated_status:unenrolling or calculated_status:enrolling)';
+  return '(status:updating or status:unenrolling or status:enrolling)';
 }
 
 export function buildKueryForInactiveAgents() {
-  return 'calculated_status:inactive';
+  return 'status:inactive';
 }
