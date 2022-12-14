@@ -88,13 +88,13 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
                   <div>
                     {isSloHealthy(slo) ? (
                       <EuiBadge color={euiLightVars.euiColorSuccess}>
-                        {i18n.translate('observability.slos.slo.state.healthy', {
+                        {i18n.translate('xpack.observability.slos.slo.state.healthy', {
                           defaultMessage: 'Healthy',
                         })}
                       </EuiBadge>
                     ) : (
                       <EuiBadge color={euiLightVars.euiColorDanger}>
-                        {i18n.translate('observability.slos.slo.state.failed', {
+                        {i18n.translate('xpack.observability.slos.slo.state.failed', {
                           defaultMessage: 'Failed',
                         })}
                       </EuiBadge>
@@ -131,7 +131,7 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
               size="s"
               items={[
                 <EuiContextMenuItem key="edit" icon="trash" onClick={handleDelete}>
-                  {i18n.translate('observability.slos.slo.item.actions.delete', {
+                  {i18n.translate('xpack.observability.slos.slo.item.actions.delete', {
                     defaultMessage: 'Delete',
                   })}
                 </EuiContextMenuItem>,

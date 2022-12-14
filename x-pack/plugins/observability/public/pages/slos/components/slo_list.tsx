@@ -61,7 +61,7 @@ export function SloList() {
           fullWidth
           isLoading={loading || deleting}
           onChange={handleChange}
-          placeholder={i18n.translate('observability.slos.list.search', {
+          placeholder={i18n.translate('xpack.observability.slos.list.search', {
             defaultMessage: 'Search',
           })}
         />

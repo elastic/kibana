@@ -25,7 +25,7 @@ export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
     <EuiFlexGroup direction="row" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiStat
-          description={i18n.translate('observability.slos.slo.stats.observedValue', {
+          description={i18n.translate('xpack.observability.slos.slo.stats.observedValue', {
             defaultMessage: 'Observed value',
           })}
           title={asPercent(slo.summary.sliValue, 1, 'n/a')}
@@ -36,7 +36,7 @@ export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiStat
-          description={i18n.translate('observability.slos.slo.stats.slo', {
+          description={i18n.translate('xpack.observability.slos.slo.stats.slo', {
             defaultMessage: 'SLO',
           })}
           title={asPercent(slo.objective.target, 1, 'n/a')}
@@ -46,7 +46,7 @@ export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiStat
-          description={i18n.translate('observability.slos.slo.stats.difference', {
+          description={i18n.translate('xpack.observability.slos.slo.stats.difference', {
             defaultMessage: 'Difference',
           })}
           title={differenceValue}
@@ -57,7 +57,7 @@ export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiStat
-          description={i18n.translate('observability.slos.slo.stats.budgetRemaining', {
+          description={i18n.translate('xpack.observability.slos.slo.stats.budgetRemaining', {
             defaultMessage: 'Budget remaining',
           })}
           title={asPercent(slo.summary.errorBudget.remaining, 1, 'n/a')}
