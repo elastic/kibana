@@ -26,8 +26,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { useOpenInspector } from '@kbn/content-management-content-editor';
-import type { OpenInspectorParams } from '@kbn/content-management-content-editor';
+import { useOpenContentEditor } from '@kbn/content-management-content-editor';
+import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 
 import {
   Table,
@@ -44,7 +44,7 @@ import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 
 interface ContentEditorConfig
-  extends Pick<OpenInspectorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
+  extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
   enabled?: boolean;
 }
 
@@ -275,7 +275,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
   }, [searchQueryParser, findItems, searchQuery.text]);
 
-  const openInspector = useOpenInspector();
+  const openContentEditor = useOpenContentEditor();
 
   const updateQuery = useCallback((query: Query) => {
     dispatch({
@@ -301,7 +301,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
       });
 
-      const close = openInspector({
+      const close = openContentEditor({
         item: {
           id: item.id,
           title: item.attributes.title,
@@ -320,7 +320,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           }),
       });
     },
-    [getTagIdsFromReferences, openInspector, entityName, contentEditor, fetchItems]
+    [getTagIdsFromReferences, openContentEditor, entityName, contentEditor, fetchItems]
   );
 
   const tableColumns = useMemo(() => {
