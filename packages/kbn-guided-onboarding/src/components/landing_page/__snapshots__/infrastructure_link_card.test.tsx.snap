@@ -25,6 +25,6 @@ exports[`observability link card snapshots should render link card for observabi
   }
   isDarkTheme={false}
   title="Observe my data"
-  useCase="observability"
+  useCase="infrastructure"
 />
 `;
