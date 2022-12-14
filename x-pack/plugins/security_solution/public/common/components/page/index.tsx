@@ -35,6 +35,9 @@ export const FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET = () => css`
   }
 `;
 
+/** The `z-index` for EuiPopover Panels that are displayed from inside of Timeline page */
+export const TIMELINE_EUI_POPOVER_PANEL_ZINDEX = 9900;
+
 /**
  * Stylesheet with Eui class overrides in order to address display issues caused when
  * the Timeline overlay is opened. These are normally adjustments to ensure that the
@@ -43,7 +46,7 @@ export const FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET = () => css`
  */
 export const TIMELINE_OVERRIDES_CSS_STYLESHEET = () => css`
   .euiPopover__panel[data-popover-open] {
-    z-index: 9900 !important;
+    z-index: ${TIMELINE_EUI_POPOVER_PANEL_ZINDEX} !important;
     min-width: 24px;
   }
   .euiPopover__panel[data-popover-open].sourcererPopoverPanel {

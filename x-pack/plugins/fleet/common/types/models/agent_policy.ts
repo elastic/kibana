@@ -96,16 +96,7 @@ export interface FullAgentPolicy {
     [output: string]: FullAgentPolicyOutputPermissions;
   };
   fleet?:
-    | {
-        hosts: string[];
-        proxy_url?: string;
-        proxy_headers?: any;
-        ssl?: {
-          verification_mode?: string;
-          certificate_authorities?: string[];
-          renegotiation?: string;
-        };
-      }
+    | FullAgentPolicyFleetConfig
     | {
         kibana: FullAgentPolicyKibanaConfig;
       };
@@ -120,6 +111,17 @@ export interface FullAgentPolicy {
       logs: boolean;
     };
     download: { sourceURI: string };
+  };
+}
+
+export interface FullAgentPolicyFleetConfig {
+  hosts: string[];
+  proxy_url?: string;
+  proxy_headers?: any;
+  ssl?: {
+    verification_mode?: string;
+    certificate_authorities?: string[];
+    renegotiation?: string;
   };
 }
 
