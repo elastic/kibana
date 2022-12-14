@@ -9,8 +9,8 @@
 import type { Logger } from '@kbn/logging';
 import type { MetricsCollector } from '@kbn/core-metrics-server';
 
-import * as v1 from './v1';
-import * as v2 from './v2';
+import { gatherV1CgroupMetrics } from './v1';
+import { gatherV2CgroupMetrics } from './v2';
 import { gatherInfo } from './gather_info';
 import { GROUP_CPU, GROUP_CPUACCT } from './constants';
 import { OsCgroupMetrics } from './types';
@@ -44,7 +44,7 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
 
       const args = { cpuAcctPath: this.cpuAcctPath!, cpuPath: this.cpuPath! };
       // "await" to handle any errors here.
-      return await (this.isCgroup2 ? v2.gatherCgroupMetrics(args) : v1.gatherCgroupMetrics(args));
+      return await (this.isCgroup2 ? gatherV2CgroupMetrics(args) : gatherV1CgroupMetrics(args));
     } catch (err) {
       this.noCgroupPresent = true;
 

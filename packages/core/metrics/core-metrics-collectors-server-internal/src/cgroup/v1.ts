@@ -21,7 +21,10 @@ interface Arg {
   cpuAcctPath: string;
 }
 
-export async function gatherCgroupMetrics({ cpuAcctPath, cpuPath }: Arg): Promise<OsCgroupMetrics> {
+export async function gatherV1CgroupMetrics({
+  cpuAcctPath,
+  cpuPath,
+}: Arg): Promise<OsCgroupMetrics> {
   const [cpuAcctUsage, cpuFsPeriod, cpuFsQuota, cpuStat] = await Promise.all([
     readCPUAcctUsage(cpuAcctPath),
     readCPUFsPeriod(cpuPath),

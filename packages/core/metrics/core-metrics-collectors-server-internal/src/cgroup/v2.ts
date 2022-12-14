@@ -19,7 +19,7 @@ interface Arg {
   cpuAcctPath: string;
 }
 
-export async function gatherCgroupMetrics(arg: Arg): Promise<OsCgroupMetrics> {
+export async function gatherV2CgroupMetrics(arg: Arg): Promise<OsCgroupMetrics> {
   const [{ usage_nanos: usageNanos, ...stat }, cpuMax] = await Promise.all([
     readCPUStat(arg.cpuPath),
     readCPUMax(arg.cpuPath),
