@@ -8,6 +8,7 @@
 
 import { Observable, Subject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { BfetchRequestError } from './bfetch_error';
 
 /**
  * Creates observable from streaming XMLHttpRequest, where each event
@@ -69,8 +70,7 @@ export const fromStreamingXhr = (
                 defaultMessage: 'Code {status}',
                 values: { status: xhr.status },
               });
-        // faking an error is necessary for proper handling
-        subject.error({ constructor: { name: 'BfetchRequestError' }, message: errorMsg });
+        subject.error(new BfetchRequestError(errorMsg));
       } else {
         subject.complete();
       }

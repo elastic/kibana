@@ -14,6 +14,9 @@ export const normalizeError = <E extends ErrorLike = ErrorLike>(err: any): E => 
       message: 'Unknown error.',
     } as E;
   }
+  if (err.constructor.name === 'BfetchRequestError') {
+    return err;
+  }
   if (err instanceof Error) {
     return { message: err.message } as E;
   }
