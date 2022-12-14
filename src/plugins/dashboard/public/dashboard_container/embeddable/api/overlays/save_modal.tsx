@@ -17,6 +17,7 @@ import { pluginServices } from '../../../../services/plugin_services';
 
 /**
  * TODO: Portable Dashboard followup, convert this to a functional component & use redux for the state.
+ * https://github.com/elastic/kibana/issues/147490
  */
 
 interface Props {

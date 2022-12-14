@@ -17,16 +17,15 @@ import { DashboardGrid } from '../grid';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { useDashboardContainerContext } from '../../dashboard_container_renderer';
-import { DashboardContainer, DashboardLoadedInfo } from '../../embeddable/dashboard_container';
+import { DashboardLoadedInfo } from '../../embeddable/dashboard_container';
 
 const ControlsCallout = withSuspense<CalloutProps>(LazyControlsCallout);
 
-export interface DashboardViewportProps {
-  container: DashboardContainer;
+export const DashboardViewport = ({
+  onDataLoaded,
+}: {
   onDataLoaded?: (data: DashboardLoadedInfo) => void;
-}
-
-export const DashboardViewport = ({ onDataLoaded }: DashboardViewportProps) => {
+}) => {
   const {
     settings: { isProjectEnabledInLabs, uiSettings },
   } = pluginServices.getServices();
@@ -63,7 +62,6 @@ export const DashboardViewport = ({ onDataLoaded }: DashboardViewportProps) => {
   const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
   const hideAnnouncements = Boolean(uiSettings.get('hideAnnouncements'));
 
-  // TODO is embedded externally
   return (
     <>
       {controlsEnabled && controlGroup ? (

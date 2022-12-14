@@ -1046,7 +1046,6 @@
     "dashboard.listing.unsaved.editAria": "继续编辑 {title}",
     "dashboard.listing.unsaved.unsavedChangesTitle": "在以下 {dash} 中有未保存更改：",
     "dashboard.loadingError.dashboardGridErrorMessage": "无法加载仪表板：{message}",
-    "dashboard.loadingError.errorMessage": "加载保存的仪表板时发生错误：{message}",
     "dashboard.noMatchRoute.bannerText": "Dashboard 应用程序无法识别此路由：{route}。",
     "dashboard.panel.addToLibrary.successMessage": "面板 {panelTitle} 已添加到可视化库",
     "dashboard.panel.unableToMigratePanelDataForSixThreeZeroErrorMessage": "无法迁移用于“6.3.0”向后兼容的面板数据，面板不包含所需字段：{key}",

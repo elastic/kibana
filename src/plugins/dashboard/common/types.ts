@@ -48,7 +48,10 @@ export interface GridData {
 
 /**
  * Types below this line are copied here because so many important types are tied up in public. These types should be
- * moved from public into common. TODO DELETE THIS TYPE
+ * moved from public into common.
+ *
+ * TODO replace this type with a type that uses the real Dashboard Input type.
+ * See https://github.com/elastic/kibana/issues/147488 for more information.
  */
 export interface DashboardContainerStateWithType extends EmbeddableStateWithType {
   panels: {

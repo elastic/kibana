@@ -53,7 +53,7 @@ export interface DashboardContainerByValueInput extends EmbeddableInput {
   isEmbeddedExternally?: boolean;
   executionContext?: KibanaExecutionContext;
 
-  // dashboard options: TODO, build a new system to avoid all shared state appearing here.
+  // dashboard options: TODO, build a new system to avoid all shared state appearing here. See https://github.com/elastic/kibana/issues/144532 for more information.
   hidePanelTitles: DashboardOptions['hidePanelTitles'];
   syncTooltips: DashboardOptions['syncTooltips'];
   useMargins: DashboardOptions['useMargins'];

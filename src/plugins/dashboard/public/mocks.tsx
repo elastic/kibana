@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/public';
+import { Embeddable, EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/public';
+import { createReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public/redux_embeddables/create_redux_embeddable_tools';
 
 import { DashboardStart } from './plugin';
 import { DashboardContainerByValueInput, DashboardPanelState } from '../common';
+import { DashboardContainerOutput, DashboardReduxState } from './dashboard_container/types';
+import { DashboardContainer } from './dashboard_container/embeddable/dashboard_container';
+import { dashboardContainerReducers } from './dashboard_container/state/dashboard_container_reducers';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -63,6 +67,25 @@ export function setupIntersectionObserverMock({
     value: MockIntersectionObserver,
   });
 }
+
+export const mockDashboardReduxEmbeddableTools = async (
+  partialState?: Partial<DashboardReduxState>
+) => {
+  const mockDashboard = new DashboardContainer(
+    getSampleDashboardInput(partialState?.explicitInput)
+  ) as Embeddable<DashboardContainerByValueInput, DashboardContainerOutput>;
+
+  const mockReduxEmbeddableTools = createReduxEmbeddableTools<DashboardReduxState>({
+    embeddable: mockDashboard,
+    reducers: dashboardContainerReducers,
+    initialComponentState: { lastSavedInput: mockDashboard.getInput() },
+  });
+
+  return {
+    tools: mockReduxEmbeddableTools,
+    dashboardContainer: mockDashboard as DashboardContainer,
+  };
+};
 
 export function getSampleDashboardInput(
   overrides?: Partial<DashboardContainerByValueInput>

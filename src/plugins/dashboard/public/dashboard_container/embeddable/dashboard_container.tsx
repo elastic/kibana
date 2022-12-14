@@ -413,7 +413,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         <ExitFullScreenButtonKibanaProvider coreStart={{ chrome: this.chrome }}>
           <KibanaThemeProvider theme$={this.theme$}>
             <DashboardReduxWrapper>
-              <DashboardViewport onDataLoaded={this.onDataLoaded.bind(this)} container={this} />
+              <DashboardViewport onDataLoaded={this.onDataLoaded.bind(this)} />
             </DashboardReduxWrapper>
           </KibanaThemeProvider>
         </ExitFullScreenButtonKibanaProvider>
@@ -492,7 +492,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
   private expectingIdChange = false;
   public expectIdChange() {
-    // this.expectingIdChange = true; TODO - re-enable this for saving speed-ups. It causes some functional test failures because the _g param is not carried over.
+    /**
+     * this.expectingIdChange = true; TODO - re-enable this for saving speed-ups. It causes some functional test failures because the _g param is not carried over.
+     * See https://github.com/elastic/kibana/issues/147491 for more information.
+     **/
     setTimeout(() => {
       this.expectingIdChange = false;
     }, 1); // turn this off after the next update.
