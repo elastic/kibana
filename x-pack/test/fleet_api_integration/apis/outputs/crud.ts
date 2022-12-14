@@ -221,6 +221,38 @@ export default function (providerContext: FtrProviderContext) {
         expect(defaultOutputs).to.have.length(1);
         expect(defaultOutputs[0].id).eql(output2.id);
       });
+
+      it('should allow to create an ES output with the shipper values', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'default monitoring output 1',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            is_default_monitoring: true,
+            disk_queue_enabled: true,
+            disk_queue_path: 'path/to/disk/queue',
+            disk_queue_encryption_enabled: true,
+          })
+          .expect(200);
+      });
+
+      it('should allow to create a logstash output with the shipper values', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'default monitoring output 1',
+            type: 'logstash',
+            hosts: ['https://test.fr'],
+            is_default_monitoring: true,
+            disk_queue_enabled: true,
+            disk_queue_path: 'path/to/disk/queue',
+            disk_queue_encryption_enabled: true,
+          })
+          .expect(200);
+      });
     });
 
     describe('DELETE /outputs/{outputId}', () => {

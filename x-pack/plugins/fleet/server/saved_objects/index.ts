@@ -53,8 +53,8 @@ import {
   migrateInstallationToV860,
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
+import { migrateOutputToV870 } from './migrations/to_v8_7_0';
 
-// TODO: add migration to 8.7.0 for new shipper
 /*
  * Saved object types and mappings
  *
@@ -158,6 +158,7 @@ const getSavedObjectTypes = (
     migrations: {
       '7.13.0': migrateOutputToV7130,
       '8.0.0': migrateOutputToV800,
+      '8.7.0': migrateOutputToV870,
     },
   },
   [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {

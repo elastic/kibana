@@ -300,9 +300,14 @@ function buildShipperQueueData(output: Output) {
     disk_queue_path,
     disk_queue_max_size,
     disk_queue_compression_enabled,
-    // TODO: still missing mem_queue_events parameter, where should it go?
   } = output;
   if (!disk_queue_enabled) return {};
+  /*
+    TODO: Add following parameters once the shipper work is completed:
+    mem_queue_events
+    queue_flush_timeout
+    max_batch_bytes
+  */
 
   return {
     shipper: {

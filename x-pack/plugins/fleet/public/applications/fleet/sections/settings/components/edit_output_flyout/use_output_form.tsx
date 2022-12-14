@@ -107,8 +107,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     validateESHosts,
     isPreconfigured
   );
-  // Shipper inputs - disk queue inputs are under this as well
-
   /*
   Shipper feature flag - currently depends on the content of the yaml
   # Enables the shipper:
@@ -161,7 +159,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     !diskQueueCompressionEnabled.value ?? false
   );
 
-  // These three parameters are yet tbd
+  // These parameters are yet tbd
   const memQueueEvents = useNumberInput(output?.mem_queue_events);
   const queueFlushTimeout = useNumberInput(output?.queue_flush_timeout);
   const maxBatchBytes = useNumberInput(output?.max_batch_bytes);
