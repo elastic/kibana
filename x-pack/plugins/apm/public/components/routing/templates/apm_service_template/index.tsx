@@ -110,7 +110,7 @@ function TemplateWithContext({
 
   if (isMobileAgentName(agentName)) {
     replace(history, {
-      pathname: location.pathname.replace('services', 'mobile-services'),
+      pathname: location.pathname.replace('/apm/services/', '/apm/mobile-services/'),
     });
   }
 
