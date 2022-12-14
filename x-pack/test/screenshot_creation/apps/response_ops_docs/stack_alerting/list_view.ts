@@ -53,7 +53,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const actionsDropdown = await testSubjects.find('statusDropdown');
       await actionsDropdown.click();
       await testSubjects.find('ruleStatusMenu');
-      await commonScreenshots.takeScreenshot('individual-enable-disable', screenshotDirectories, 1400, 1024);
+      await commonScreenshots.takeScreenshot(
+        'individual-enable-disable',
+        screenshotDirectories,
+        1400,
+        1024
+      );
     });
   });
 
@@ -71,9 +76,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       consumer: 'alerts',
       name: 'my alert',
       notify_when: 'onActionGroupChange',
-      params: {"index":[".test-index"], "timeField":"@timestamp", "aggType":"count", "groupBy":"all", "timeWindowSize":5, "timeWindowUnit":"d", "thresholdComparator":">", "threshold":[1000]},
+      params: {
+        index: ['.test-index'],
+        timeField: '@timestamp',
+        aggType: 'count',
+        groupBy: 'all',
+        timeWindowSize: 5,
+        timeWindowUnit: 'd',
+        thresholdComparator: '>',
+        threshold: [1000],
+      },
       rule_type_id: '.index-threshold',
-      schedule: {"interval":"1m"},
+      schedule: { interval: '1m' },
     });
-  }
+  };
 }
