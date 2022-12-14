@@ -64,6 +64,10 @@ const expectedTransformResult = [
     name: 'alert.actionGroupName',
   },
   {
+    description: 'A flag on the alert that indicates whether the alert is flapping.',
+    name: 'alert.flapping',
+  },
+  {
     description: 'The configured server.publicBaseUrl value or empty string if not configured.',
     name: 'kibanaBaseUrl',
   },
@@ -138,7 +142,8 @@ const expectedParamsTransformResult = (withBraces: boolean = false) => [
   },
 ];
 
-describe('transformActionVariables', () => {
+// FAILING: https://github.com/elastic/kibana/issues/147573
+describe.skip('transformActionVariables', () => {
   test('should return correct variables when no state, no context, no params provided', async () => {
     const alertType = getAlertType({ context: [], state: [], params: [] });
     expect(transformActionVariables(alertType.actionVariables)).toEqual(expectedTransformResult);

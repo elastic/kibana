@@ -12,7 +12,6 @@ import * as Option from 'fp-ts/lib/Option';
 import { type AliasAction, isTypeof } from '../actions';
 import type { AllActionStates, State } from '../state';
 import type { ResponseType } from '../next';
-import { disableUnknownTypeMappingFields } from '../core';
 import {
   createInitialProgress,
   incrementProcessedProgress,
@@ -115,6 +114,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           sourceIndex: Option.none,
           targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
           sourceIndexMappings: indices[source].mappings,
+          // in this scenario, a .kibana_X.Y.Z_001 index exists that matches the current kibana version
+          // aka we are NOT upgrading to a newer version
+          // we inject the target index's current mappings in the state, to check them later
+          targetIndexCurrentMappings: indices[source].mappings,
           targetIndexMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetIndexMappings,
             indices[aliases[stateP.currentAlias]!].mappings
@@ -191,10 +194,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'LEGACY_SET_WRITE_BLOCK',
           sourceIndex: Option.some(legacyReindexTarget) as Option.Some<string>,
           targetIndex: target,
-          targetIndexMappings: disableUnknownTypeMappingFields(
-            stateP.targetIndexMappings,
-            indices[stateP.legacyIndex].mappings
-          ),
           legacyReindexTargetMappings: indices[stateP.legacyIndex].mappings,
           legacyPreMigrationDoneActions: [
             { remove_index: { index: stateP.legacyIndex } },
@@ -486,10 +485,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       excludeOnUpgradeQuery,
       sourceIndex: source,
       targetIndex: target,
-      targetIndexMappings: disableUnknownTypeMappingFields(
-        stateP.targetIndexMappings,
-        stateP.sourceIndexMappings
-      ),
       versionIndexReadyActions: Option.some<AliasAction[]>([
         { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
         { add: { index: target, alias: stateP.currentAlias } },
