@@ -12,3 +12,18 @@ export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
     values: { fieldName },
     defaultMessage: `You are in a dialog, containing options for field {fieldName}. Press tab to navigate options. Press escape to exit.`,
   });
+
+export const EXTRA_ACTIONS_ARIA_LABEL = i18n.translate(
+  'uiActions.cellActions.extraActionsAriaLabel',
+  {
+    defaultMessage: 'Extra actions',
+  }
+);
+
+export const SHOW_MORE_ACTIONS = i18n.translate('uiActions.showMoreActionsLabel', {
+  defaultMessage: 'More actions',
+});
+
+export const ACTIONS_AREA_LABEL = i18n.translate('uiActions.cellActions.actionsAriaLabel', {
+  defaultMessage: 'Actions',
+});

@@ -96,11 +96,11 @@ export const CellActions: React.FC<CellActionsProps> = ({
         'No CellActionsContext found. Please wrap the application with CellActionsContextProvider'
       );
       return Promise.resolve([]);
-    } else {
-      return context
-        .getCompatibleActions(triggerId, actionContext)
-        .then((actions) => orderBy(['order', 'id'], ['asc', 'asc'], actions));
     }
+
+    return context
+      .getCompatibleActions(triggerId, actionContext)
+      .then((actions) => orderBy(['order', 'id'], ['asc', 'asc'], actions));
   }, [context, triggerId, actionContext]);
 
   if (mode === CellActionsMode.HOVER_POPOVER) {
@@ -118,22 +118,20 @@ export const CellActions: React.FC<CellActionsProps> = ({
         <div ref={extraContentNodeRef} />
       </div>
     );
-  } else if (mode === CellActionsMode.ALWAYS_VISIBLE) {
-    return (
-      <div ref={nodeRef} data-test-subj={'cellActions'}>
-        {children}
-        <InlineActions
-          getActions={getActions}
-          actionContext={actionContext}
-          showTooltip={showTooltip}
-          showMoreActionsFrom={showMoreActionsFrom}
-        />
-        <div ref={extraContentNodeRef} />
-      </div>
-    );
-  } else {
-    return <>Not implemented</>;
   }
+
+  return (
+    <div ref={nodeRef} data-test-subj={'cellActions'}>
+      {children}
+      <InlineActions
+        getActions={getActions}
+        actionContext={actionContext}
+        showTooltip={showTooltip}
+        showMoreActionsFrom={showMoreActionsFrom}
+      />
+      <div ref={extraContentNodeRef} />
+    </div>
+  );
 };
 
 CellActions.displayName = 'CellActions';

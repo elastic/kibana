@@ -8,16 +8,12 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { SHOW_MORE_ACTIONS } from './translations';
 
 interface ExtraActionsButtonProps {
   onClick: () => void;
   showTooltip: boolean;
 }
-
-export const SHOW_MORE_ACTIONS = i18n.translate('uiActions.showMoreActionsLabel', {
-  defaultMessage: 'More actions',
-});
 
 export const ExtraActionsButton: React.FC<ExtraActionsButtonProps> = ({ onClick, showTooltip }) =>
   showTooltip ? (
