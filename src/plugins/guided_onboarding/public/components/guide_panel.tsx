@@ -59,20 +59,6 @@ const getProgress = (state?: GuideState): number => {
   return 0;
 };
 
-// Temporarily provide a different guide ID for telemetry purposes
-// Should not be necessary once https://github.com/elastic/kibana/issues/144452 is addressed
-const getTelemetryGuideId = (guideId?: GuideId) => {
-  switch (guideId) {
-    case 'security':
-      return 'siem';
-    case 'observability':
-      return 'kubernetes';
-    case 'search':
-    default:
-      return guideId;
-  }
-};
-
 export const GuidePanel = ({ api, application, notifications }: GuidePanelProps) => {
   const { euiTheme } = useEuiTheme();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -186,7 +172,6 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
 
   const stepsCompleted = getProgress(pluginState?.activeGuide);
   const isGuideReadyToComplete = pluginState?.activeGuide?.status === 'ready_to_complete';
-  const telemetryGuideId = getTelemetryGuideId(pluginState?.activeGuide?.guideId);
 
   return (
     <>
@@ -311,7 +296,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
                       stepNumber={index + 1}
                       handleButtonClick={() => handleStepButtonClick(stepState, step)}
                       key={accordionId}
-                      telemetryGuideId={telemetryGuideId!}
+                      telemetryGuideId={guideConfig!.telemetryId}
                     />
                   );
                 }
@@ -324,7 +309,9 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
                       onClick={() => completeGuide(guideConfig.completedGuideRedirectLocation)}
                       fill
                       // data-test-subj used for FS tracking and testing
-                      data-test-subj={`onboarding--completeGuideButton--${telemetryGuideId}`}
+                      data-test-subj={`onboarding--completeGuideButton--${
+                        guideConfig!.telemetryId
+                      }`}
                     >
                       {i18n.translate('guidedOnboarding.dropdownPanel.elasticButtonLabel', {
                         defaultMessage: 'Continue using Elastic',
@@ -405,7 +392,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
         <QuitGuideModal
           closeModal={closeQuitGuideModal}
           currentGuide={pluginState!.activeGuide!}
-          telemetryGuideId={telemetryGuideId!}
+          telemetryGuideId={guideConfig!.telemetryId}
           notifications={notifications}
         />
       )}

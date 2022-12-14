@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sloList } from '../../../../common/data/sli_list';
+import { sloList } from '../../../../common/data/slo';
 import { UseFetchSloListResponse } from '../use_fetch_slo_list';
 
 export const useFetchSloList = (name?: string): UseFetchSloListResponse => {
