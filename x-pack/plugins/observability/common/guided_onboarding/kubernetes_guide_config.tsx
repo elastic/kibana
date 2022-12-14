@@ -8,8 +8,8 @@
 import type { GuideConfig } from '@kbn/guided-onboarding-plugin/common';
 import { i18n } from '@kbn/i18n';
 
-export const observabilityGuideId = 'observability';
-export const observabilityGuideConfig: GuideConfig = {
+export const kubernetesGuideId = 'kubernetes';
+export const kubernetesGuideConfig: GuideConfig = {
   title: i18n.translate('xpack.observability.guideConfig.title', {
     defaultMessage: 'Observe my Kubernetes infrastructure',
   }),
@@ -17,6 +17,7 @@ export const observabilityGuideConfig: GuideConfig = {
     defaultMessage: `We'll help you quickly get visibility into your Kubernetes environment with our Elastic integration. Gain deep insights from your logs, metrics, and traces to proactively detect issues and take action to resolve them.`,
   }),
   guideName: 'Kubernetes',
+  telemetryId: 'kubernetes',
   docs: {
     text: i18n.translate('xpack.observability.guideConfig.documentationLink', {
       defaultMessage: 'Learn more',

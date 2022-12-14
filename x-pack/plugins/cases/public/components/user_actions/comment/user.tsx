@@ -28,6 +28,7 @@ type BuilderArgs = Pick<
   | 'userProfiles'
 > & {
   comment: SnakeToCamelCase<CommentResponseUserType>;
+  caseId: string;
   outlined: boolean;
   isEdit: boolean;
   isLoading: boolean;
@@ -40,6 +41,7 @@ export const createUserAttachmentUserActionBuilder = ({
   isEdit,
   isLoading,
   commentRefs,
+  caseId,
   handleManageMarkdownEditId,
   handleSaveComment,
   handleManageQuote,
@@ -65,6 +67,7 @@ export const createUserAttachmentUserActionBuilder = ({
           id={comment.id}
           content={comment.comment}
           isEditable={isEdit}
+          caseId={caseId}
           onChangeEditable={handleManageMarkdownEditId}
           onSaveContent={handleSaveComment.bind(null, {
             id: comment.id,
