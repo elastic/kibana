@@ -61,7 +61,7 @@ const routes = {
             },
           },
           '/stacktraces': {
-            element: <RedirectTo pathname="/stacktraces/containers" />,
+            element: <RedirectTo pathname="/stacktraces/threads" />,
           },
           '/flamegraphs': {
             element: (
@@ -179,7 +179,7 @@ const routes = {
             },
           },
           '/': {
-            element: <RedirectTo pathname="/stacktraces/containers" />,
+            element: <RedirectTo pathname="/stacktraces/threads" />,
           },
         },
         element: <Outlet />,
