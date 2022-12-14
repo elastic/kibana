@@ -51,7 +51,7 @@ const properties: Properties = {
 export const fileObjectType: SavedObjectsType<FileMetadata> = {
   name: FILE_SO_TYPE,
   hidden: true,
-  namespaceType: 'agnostic',
+  namespaceType: 'multiple-isolated',
   management: {
     importableAndExportable: false,
   },

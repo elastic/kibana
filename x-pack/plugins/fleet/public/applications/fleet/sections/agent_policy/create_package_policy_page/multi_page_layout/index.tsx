@@ -52,6 +52,7 @@ const standaloneSteps = [addIntegrationStep, installAgentStep, confirmDataStep];
 export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   from,
   queryParamsPolicyId,
+  prerelease,
 }) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
   const { pkgkey, policyId, integration } = params;
@@ -70,7 +71,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion, { prerelease: true, full: true });
+  } = useGetPackageInfoByKey(pkgName, pkgVersion, { prerelease, full: true });
 
   const {
     agentPolicy,
