@@ -11,14 +11,16 @@ import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugi
 import { ExpressionFunctionKibanaFilter } from './kibana_filter';
 
 export const filtersToAst = (filters: Filter[] | Filter) => {
-  return (Array.isArray(filters) ? filters : [filters]).map((filter) => {
-    const { meta, $state, query, ...restOfFilters } = filter;
-    return buildExpression([
-      buildExpressionFunction<ExpressionFunctionKibanaFilter>('kibanaFilter', {
-        query: JSON.stringify(query || restOfFilters),
-        negate: meta.negate,
-        disabled: meta.disabled,
-      }),
-    ]).toAst();
-  });
+  return (Array.isArray(filters) ? filters : [filters])
+    .filter((filter) => filter.meta.type !== 'combined')
+    .map((filter) => {
+      const { meta, $state, query, ...restOfFilters } = filter;
+      return buildExpression([
+        buildExpressionFunction<ExpressionFunctionKibanaFilter>('kibanaFilter', {
+          query: JSON.stringify(query || restOfFilters),
+          negate: meta.negate,
+          disabled: meta.disabled,
+        }),
+      ]).toAst();
+    });
 };
