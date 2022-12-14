@@ -74,12 +74,13 @@ export class AddToTimelineAction implements Action<CellValueContext> {
   }
 
   public async execute({ data }: CellValueContext) {
-    const dataProviders = data.reduce<DataProvider[]>((acc, { columnMeta, value }) => {
+    const dataProviders = data.reduce<DataProvider[]>((acc, { columnMeta, value, eventId }) => {
       const dataProvider = createDataProviders({
         contextId: TimelineId.active,
         fieldType: columnMeta?.type,
         values: value,
         field: columnMeta?.field,
+        eventId,
       });
       if (dataProvider) {
         acc.push(...dataProvider);
@@ -98,7 +99,7 @@ export class AddToTimelineAction implements Action<CellValueContext> {
         ),
         text: i18n.translate(
           'xpack.securitySolution.actions.cellValue.addToTimeline.warningMessage',
-          { defaultMessage: 'Filter received is empty or can not be added to timeline' }
+          { defaultMessage: 'Filter received is empty or cannot be added to timeline' }
         ),
       });
     }

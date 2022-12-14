@@ -44,7 +44,9 @@ const columnMeta = {
   source: 'esaggs',
   sourceParams: { indexPatternId: 'some-pattern-id' },
 };
-const data: CellValueContext['data'] = [{ columnMeta, value: 'the value' }];
+const value = 'the value';
+const eventId = 'event_1';
+const data: CellValueContext['data'] = [{ columnMeta, value, eventId }];
 
 describe('AddToTimelineAction', () => {
   const addToTimelineAction = new AddToTimelineAction(store);
@@ -173,7 +175,7 @@ describe('AddToTimelineAction', () => {
               and: [],
               enabled: true,
               excluded: false,
-              id: 'event-details-value-default-draggable-timeline-1-undefined-user_name-0-the value',
+              id: 'event-details-value-default-draggable-timeline-1-event_1-user_name-0-the value',
               kqlQuery: '',
               name: 'user.name',
               queryMatch: {
@@ -199,6 +201,24 @@ describe('AddToTimelineAction', () => {
       await addToTimelineAction.execute({
         embeddable: lensEmbeddable,
         data: [],
+      });
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockWarningToast).toHaveBeenCalled();
+    });
+
+    it('should show warning if no value in the data', async () => {
+      await addToTimelineAction.execute({
+        embeddable: lensEmbeddable,
+        data: [{ columnMeta }],
+      });
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockWarningToast).toHaveBeenCalled();
+    });
+
+    it('should show warning if no field in the data column meta', async () => {
+      await addToTimelineAction.execute({
+        embeddable: lensEmbeddable,
+        data: [{ columnMeta: { ...columnMeta, field: undefined }, value }],
       });
       expect(mockDispatch).not.toHaveBeenCalled();
       expect(mockWarningToast).toHaveBeenCalled();

@@ -33,6 +33,7 @@ export interface CellValueContext<T extends IEmbeddable = IEmbeddable> {
   embeddable: T;
   data: Array<{
     value?: any;
+    eventId?: string;
     columnMeta?: DatatableColumnMeta;
   }>;
 }
