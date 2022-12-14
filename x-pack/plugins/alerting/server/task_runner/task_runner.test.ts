@@ -1345,8 +1345,8 @@ describe('Task Runner', () => {
       );
       expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-      rulesClient.get.mockResolvedValue({
-        ...mockedRuleTypeSavedObject,
+      rulesClient.getAlertFromRaw.mockReturnValue({
+        ...(mockedRuleTypeSavedObject as Rule),
         actions: [
           {
             group: 'default',
@@ -1419,8 +1419,8 @@ describe('Task Runner', () => {
       );
       expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-      rulesClient.get.mockResolvedValue({
-        ...mockedRuleTypeSavedObject,
+      rulesClient.getAlertFromRaw.mockReturnValue({
+        ...(mockedRuleTypeSavedObject as Rule),
         actions: [
           {
             group: 'default',

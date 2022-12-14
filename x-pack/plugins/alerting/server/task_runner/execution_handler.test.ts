@@ -1096,6 +1096,39 @@ describe('Execution Handler', () => {
     });
   });
 
+  test(`skips scheduling actions if the ruleType doesn't have getSummarizedAlerts method`, async () => {
+    const { getSummarizedAlerts, ...ruleTypeWithoutSummaryMethod } = ruleType;
+
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        ...defaultExecutionParams,
+        ruleType: ruleTypeWithoutSummaryMethod,
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions: [
+            {
+              ...defaultExecutionParams.rule.actions[0],
+              frequency: {
+                summary: true,
+                notifyWhen: 'onThrottleInterval',
+                throttle: null,
+              },
+            },
+          ],
+        },
+      })
+    );
+    await executionHandler.run(generateAlert({ id: 2 }));
+
+    expect(defaultExecutionParams.logger.error).toHaveBeenCalledWith(
+      'Skipping action "1" for rule "1" because the rule type "Test" does not support alert-as-data.'
+    );
+
+    expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
+    expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(0);
+    expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.COMPLETE);
+  });
+
   describe('rule url', () => {
     const ruleWithUrl = {
       ...rule,

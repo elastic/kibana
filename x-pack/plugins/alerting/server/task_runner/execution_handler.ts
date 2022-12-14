@@ -454,6 +454,7 @@ export class ExecutionHandler<
     for (const action of this.rule.actions) {
       if (isSummaryAction(action)) {
         if (
+          this.canFetchSummarizedAlerts(action) &&
           !isSummaryActionThrottled({
             action,
             summaryActions: this.taskInstance.state?.summaryActions,
@@ -485,6 +486,17 @@ export class ExecutionHandler<
     }
 
     return executables;
+  }
+
+  private canFetchSummarizedAlerts(action: RuleAction) {
+    const hasGetSummarizedAlerts = this.ruleType.getSummarizedAlerts !== undefined;
+
+    if (!hasGetSummarizedAlerts) {
+      this.logger.error(
+        `Skipping action "${action.id}" for rule "${this.rule.id}" because the rule type "${this.ruleType.name}" does not support alert-as-data.`
+      );
+    }
+    return hasGetSummarizedAlerts;
   }
 
   private async getSummarizedAlerts({
