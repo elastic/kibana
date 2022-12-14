@@ -13,10 +13,7 @@ import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { ProductAccess } from '../../../../common/types';
 
-import {
-  enableBehavioralAnalyticsSection,
-  enableEnginesSection,
-} from '../../../../common/ui_settings_keys';
+import { enableEnginesSection } from '../../../../common/ui_settings_keys';
 
 import { useEnterpriseSearchNav } from './nav';
 
@@ -57,7 +54,7 @@ describe('useEnterpriseSearchContentNav', () => {
         name: 'Content',
       },
       {
-        id: 'enterpiseSearchEngines',
+        id: 'enterpriseSearchEngines',
         name: 'Engines',
         href: '/app/enterprise_search/content/engines',
       },
@@ -99,10 +96,6 @@ describe('useEnterpriseSearchContentNav', () => {
         name: 'Search',
       },
     ]);
-    expect(mockKibanaValues.uiSettings.get).toHaveBeenCalledWith(
-      enableBehavioralAnalyticsSection,
-      false
-    );
     expect(mockKibanaValues.uiSettings.get).toHaveBeenCalledWith(enableEnginesSection, false);
   });
 
@@ -204,27 +197,6 @@ describe('useEnterpriseSearchContentNav', () => {
     });
   });
 
-  it('excludes analytics when feature flag is off', () => {
-    const fullProductAccess: ProductAccess = {
-      hasAppSearchAccess: true,
-      hasWorkplaceSearchAccess: true,
-    };
-    setMockValues({ productAccess: fullProductAccess });
-
-    const esNav = useEnterpriseSearchNav();
-    expect(esNav.find((item) => item.id === 'enterpriseSearchAnalytics')).toBeUndefined();
-  });
-  it('includes analytics when feature flag is off', () => {
-    const fullProductAccess: ProductAccess = {
-      hasAppSearchAccess: true,
-      hasWorkplaceSearchAccess: true,
-    };
-    setMockValues({ productAccess: fullProductAccess });
-    mockKibanaValues.uiSettings.get.mockReturnValueOnce(true).mockReturnValue(false);
-
-    const esNav = useEnterpriseSearchNav();
-    expect(esNav.find((item) => item.id === 'enterpriseSearchAnalytics')).not.toBeUndefined();
-  });
   it('excludes engines when feature flag is off', () => {
     const fullProductAccess: ProductAccess = {
       hasAppSearchAccess: true,
@@ -233,7 +205,7 @@ describe('useEnterpriseSearchContentNav', () => {
     setMockValues({ productAccess: fullProductAccess });
 
     const esNav = useEnterpriseSearchNav();
-    expect(esNav.find((item) => item.id === 'enterpiseSearchEngines')).toBeUndefined();
+    expect(esNav.find((item) => item.id === 'enterpriseSearchEngines')).toBeUndefined();
   });
   it('includes engines when feature flag is on', () => {
     const fullProductAccess: ProductAccess = {
@@ -241,12 +213,9 @@ describe('useEnterpriseSearchContentNav', () => {
       hasWorkplaceSearchAccess: true,
     };
     setMockValues({ productAccess: fullProductAccess });
-    mockKibanaValues.uiSettings.get
-      .mockReturnValueOnce(false)
-      .mockReturnValueOnce(true)
-      .mockReturnValue(false);
+    mockKibanaValues.uiSettings.get.mockReturnValue(true);
 
     const esNav = useEnterpriseSearchNav();
-    expect(esNav.find((item) => item.id === 'enterpiseSearchEngines')).not.toBeUndefined();
+    expect(esNav.find((item) => item.id === 'enterpriseSearchEngines')).not.toBeUndefined();
   });
 });

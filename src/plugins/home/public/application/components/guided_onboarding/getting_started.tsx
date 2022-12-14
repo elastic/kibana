@@ -26,8 +26,9 @@ import { useHistory } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { GuideState, GuideId, UseCase } from '@kbn/guided-onboarding';
-import { GuideCard, ObservabilityLinkCard } from '@kbn/guided-onboarding';
+import type { GuideState, GuideId } from '@kbn/guided-onboarding';
+import { GuideCard, InfrastructureLinkCard } from '@kbn/guided-onboarding';
+import type { GuideCardUseCase } from '@kbn/guided-onboarding';
 
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
@@ -113,7 +114,7 @@ export const GettingStarted = () => {
   `;
 
   const isDarkTheme = uiSettings.get<boolean>('theme:darkMode');
-  const activateGuide = async (useCase: UseCase, guideState?: GuideState) => {
+  const activateGuide = async (useCase: GuideCardUseCase, guideState?: GuideState) => {
     try {
       await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
     } catch (err) {
@@ -196,11 +197,11 @@ export const GettingStarted = () => {
         <EuiSpacer size="s" />
         <EuiSpacer size="xxl" />
         <EuiFlexGrid columns={4} gutterSize="l">
-          {['search', 'observability', 'observabilityLink', 'security'].map((useCase) => {
-            if (useCase === 'observabilityLink') {
+          {['search', 'kubernetes', 'infrastructure', 'siem'].map((useCase) => {
+            if (useCase === 'infrastructure') {
               return (
                 <EuiFlexItem key={`linkCard-${useCase}`}>
-                  <ObservabilityLinkCard
+                  <InfrastructureLinkCard
                     navigateToApp={application.navigateToApp}
                     isDarkTheme={isDarkTheme}
                     addBasePath={http.basePath.prepend}
@@ -211,7 +212,7 @@ export const GettingStarted = () => {
             return (
               <EuiFlexItem key={`guideCard-${useCase}`}>
                 <GuideCard
-                  useCase={useCase as UseCase}
+                  useCase={useCase as GuideCardUseCase}
                   guides={guidesState}
                   activateGuide={activateGuide}
                   isDarkTheme={isDarkTheme}
