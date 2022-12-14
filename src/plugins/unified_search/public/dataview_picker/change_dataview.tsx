@@ -98,7 +98,9 @@ export function ChangeDataView({
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const dataViewsRefs: DataViewListItemEnhanced[] = await data.dataViews.getIdsWithTitle();
+      const dataViewsRefs: DataViewListItemEnhanced[] = savedDataViews
+        ? savedDataViews
+        : await data.dataViews.getIdsWithTitle();
       if (adHocDataViews?.length) {
         adHocDataViews.forEach((adHocDataView) => {
           if (adHocDataView.id) {
