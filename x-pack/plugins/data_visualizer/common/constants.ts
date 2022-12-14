@@ -71,7 +71,6 @@ const UNKNOWN_FIELD_TYPE_DESC = i18n.translate(
   }
 );
 
-// TODO: unify with `getFieldTypeDescription` from UnifiedFieldList plugin
 export function getFieldTypeDescription(type: string, docLinks: DocLinksStart) {
   switch (type) {
     case SUPPORTED_FIELD_TYPES.BOOLEAN:
