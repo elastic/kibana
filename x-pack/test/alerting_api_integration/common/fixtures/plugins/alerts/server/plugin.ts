@@ -21,15 +21,18 @@ import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { defineAlertTypes } from './alert_types';
-import { defineActionTypes } from './action_types';
+import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { defineRoutes } from './routes';
+import { defineActionTypes } from './action_types';
+import { defineAlertTypes } from './alert_types';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
   actions: ActionsPluginSetup;
   alerting: AlertingPluginSetup;
   taskManager: TaskManagerSetupContract;
+  ruleRegistry: RuleRegistryPluginSetupContract;
 }
 
 export interface FixtureStartDeps {
@@ -53,7 +56,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
   public setup(
     core: CoreSetup<FixtureStartDeps>,
-    { features, actions, alerting }: FixtureSetupDeps
+    { features, actions, alerting, ruleRegistry }: FixtureSetupDeps
   ) {
     features.registerKibanaFeature({
       id: 'alertsFixture',
@@ -77,6 +80,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         'test.throw',
         'test.longRunning',
         'test.exceedsAlertLimit',
+        'test.always-firing-alert-as-data',
       ],
       privileges: {
         all: {
@@ -104,6 +108,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.throw',
                 'test.longRunning',
                 'test.exceedsAlertLimit',
+                'test.always-firing-alert-as-data',
               ],
             },
           },
@@ -134,6 +139,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.throw',
                 'test.longRunning',
                 'test.exceedsAlertLimit',
+                'test.always-firing-alert-as-data',
               ],
             },
           },
@@ -142,8 +148,22 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
     });
 
+    const { ruleDataService } = ruleRegistry;
+    ruleDataService.initializeService();
+    const ruleDataClient = ruleDataService.initializeIndex({
+      feature: AlertConsumers.OBSERVABILITY,
+      registrationContext: 'observability.test.alerts',
+      dataset: Dataset.alerts,
+      componentTemplateRefs: [],
+      componentTemplates: [
+        {
+          name: 'mappings',
+        },
+      ],
+    });
+
     defineActionTypes(core, { actions });
-    defineAlertTypes(core, { alerting });
+    defineAlertTypes(core, { alerting }, this.logger, ruleDataClient);
     defineRoutes(core, this.taskManagerStart, { logger: this.logger });
   }
 

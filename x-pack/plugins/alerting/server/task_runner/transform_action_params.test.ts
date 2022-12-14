@@ -557,10 +557,10 @@ describe('transformActionParams', () => {
 describe('transformSummaryActionParams', () => {
   const params = {
     alerts: {
-      new: { count: 1, alerts: [mockAAD] },
-      ongoing: { count: 0, alerts: [] },
-      recovered: { count: 0, alerts: [] },
-      all: { count: 0, alerts: [] },
+      new: { count: 1, data: [mockAAD] },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+      all: { count: 0, data: [] },
     },
     rule: {
       id: '1',
@@ -595,7 +595,7 @@ describe('transformSummaryActionParams', () => {
     const actionParams = {
       message:
         'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}} ' +
-        'Alert Name: {{#alerts.new.alerts}} {{kibana.alert.rule.name}} {{/alerts.new.alerts}}',
+        'Alert Name: {{#alerts.new.data}} {{kibana.alert.rule.name}} {{/alerts.new.data}}',
     };
 
     const result = transformSummaryActionParams({ ...params, actionParams });
