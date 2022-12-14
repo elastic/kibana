@@ -17,8 +17,8 @@ jest.mock('../../../../common/lib/kibana');
 const onRuleChanged = jest.fn();
 const onEditRule = jest.fn();
 const setRulesToDelete = jest.fn();
-const disableRule = jest.fn();
-const enableRule = jest.fn();
+const bulkDisableRules = jest.fn();
+const bulkEnableRules = jest.fn();
 const onUpdateAPIKey = jest.fn();
 const snoozeRule = jest.fn();
 const unsnoozeRule = jest.fn();
@@ -92,8 +92,8 @@ describe('CollapsedItemActions', () => {
       onRuleChanged,
       onEditRule,
       setRulesToDelete,
-      disableRule,
-      enableRule,
+      bulkDisableRules,
+      bulkEnableRules,
       onUpdateAPIKey,
       snoozeRule,
       unsnoozeRule,
@@ -228,7 +228,7 @@ describe('CollapsedItemActions', () => {
         await tick(10);
         wrapper.update();
       });
-      expect(disableRule).toHaveBeenCalled();
+      expect(bulkDisableRules).toHaveBeenCalled();
     });
 
     test('handles case when rule is unmuted and disabled and enable is clicked', async () => {
@@ -245,7 +245,7 @@ describe('CollapsedItemActions', () => {
         await tick(10);
         wrapper.update();
       });
-      expect(enableRule).toHaveBeenCalled();
+      expect(bulkEnableRules).toHaveBeenCalled();
     });
 
     test('handles case when edit rule is clicked', async () => {
