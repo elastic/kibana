@@ -13,8 +13,8 @@ import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
-  PostureInput,
-  PosturePolicyTemplate,
+  type PostureInput,
+  type PosturePolicyTemplate,
 } from '../../common/constants';
 
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
@@ -68,7 +68,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         }),
         icon: 'logoAWS',
         tooltip: i18n.translate('xpack.csp.cspmIntegration.awsOption.tooltipContent', {
-          defaultMessage: 'Only AWS avalible for now',
+          defaultMessage: 'Only AWS available for now',
         }),
       },
       {

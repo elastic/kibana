@@ -10,6 +10,7 @@ import { EuiButton, EuiRadio, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 interface Props<T extends string> {
+  size?: 's' | 'm';
   idSelected: string;
   options: Array<{
     id: T;
@@ -19,7 +20,6 @@ interface Props<T extends string> {
     tooltip?: string;
   }>;
   onChange: (id: T) => void;
-  size?: 's' | 'm';
 }
 
 export const InlineRadioGroup = <T extends string>({
@@ -57,7 +57,6 @@ export const InlineRadioGroup = <T extends string>({
         const button = (
           <EuiButton
             key={option.id}
-            data-test-subj="inline-radio-group-button"
             size="m"
             color={'text'}
             onClick={() => onChange(option.id)}

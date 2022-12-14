@@ -157,7 +157,8 @@ const AWS_CREDENTIALS_OPTIONS: ReadonlyArray<{
   { id: 'shared_credentials', label: 'Shared credentials' },
 ];
 
-const DEFAULT_AWS_VARS_GROUP: typeof AWS_CREDENTIALS_OPTIONS[number]['id'] = 'assume_role';
+type AwsCredentialsType = typeof AWS_CREDENTIALS_OPTIONS[number]['id'];
+const DEFAULT_AWS_VARS_GROUP: AwsCredentialsType = 'assume_role';
 
 interface Props {
   newPolicy: NewPackagePolicy;
@@ -165,31 +166,29 @@ interface Props {
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
 }
 
-const getAwsGroupVars = (input: NewPackagePolicyInput, fields: readonly string[]) =>
+const getAwsCredentialVars = (input: NewPackagePolicyInput, fields: readonly string[]) =>
   Object.fromEntries(
     Object.entries(input.streams[0].vars || {}).filter(([k]) => fields.includes(k))
   );
 
-const getDefaultAwsType = (input: Props['input']): typeof AWS_CREDENTIALS_OPTIONS[number]['id'] =>
+const getDefaultAwsType = (input: Props['input']): AwsCredentialsType =>
   input?.streams[0].vars?.['aws.credentials.type']?.value || DEFAULT_AWS_VARS_GROUP;
 
 export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) => {
   const awsCredentialsType = getDefaultAwsType(input);
-  const groupVars = getAwsGroupVars(input, AWS_FIELDS[awsCredentialsType] || []);
+  const awsCredentialVars = getAwsCredentialVars(input, AWS_FIELDS[awsCredentialsType] || []);
+  const awsCredentialVarsKeys = Object.keys(awsCredentialVars);
 
   return (
     <>
       <EuiSpacer size="l" />
-      {/* PolicyTemplate input vars group */}
-      <InlineRadioGroup
-        size="s"
-        idSelected={awsCredentialsType}
-        options={[...AWS_CREDENTIALS_OPTIONS]}
+      <AwsCredentialTypeSelector
+        type={awsCredentialsType}
         onChange={(optionId) => {
           let policy = getPolicyWithInputVars(newPolicy, 'aws.credentials.type', optionId);
 
           // reset all form group values when changing group
-          Object.keys(groupVars).forEach((key) => {
+          awsCredentialVarsKeys.forEach((key) => {
             policy = getPolicyWithInputVars(policy, key, '');
           });
 
@@ -199,12 +198,11 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
       <EuiSpacer size="m" />
       {AWS_VARS_INFO?.[awsCredentialsType]}
       <EuiSpacer />
-      {/* PolicyTemplate input vars fields */}
-      <TextFields
+      <AwsInputVarFields
         onChange={(key, value) => updatePolicy(getPolicyWithInputVars(newPolicy, key, value))}
-        fields={Object.keys(groupVars).map((field) => ({
+        fields={awsCredentialVarsKeys.map((field) => ({
           id: field,
-          value: groupVars[field].value,
+          value: awsCredentialVars[field].value,
           label: AWS_FIELD_LABEL?.[field as keyof typeof AWS_FIELD_LABEL],
         }))}
       />
@@ -213,7 +211,22 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
   );
 };
 
-const TextFields = ({
+const AwsCredentialTypeSelector = ({
+  type,
+  onChange,
+}: {
+  onChange(type: AwsCredentialsType): void;
+  type: AwsCredentialsType;
+}) => (
+  <InlineRadioGroup
+    size="s"
+    options={[...AWS_CREDENTIALS_OPTIONS]}
+    idSelected={type}
+    onChange={onChange}
+  />
+);
+
+const AwsInputVarFields = ({
   fields,
   onChange,
 }: {

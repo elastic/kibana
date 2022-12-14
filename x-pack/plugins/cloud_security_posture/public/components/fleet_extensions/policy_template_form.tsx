@@ -79,7 +79,7 @@ export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit })
 
   useEffect(() => {
     // Pick default input type for policy template.
-    // Only 1 input is supported when all inputs are initially enabled.
+    // Only 1 enabled input is supported when all inputs are initially enabled.
     if (!edit) updatePolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
 
     // Required for mount only to ensure a single input type is selected
