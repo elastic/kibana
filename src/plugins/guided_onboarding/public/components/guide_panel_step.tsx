@@ -17,12 +17,13 @@ import {
   EuiFlexItem,
   EuiIcon,
   useEuiTheme,
+  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import type { StepStatus } from '@kbn/guided-onboarding';
-import type { StepConfig } from '../../common';
+import type { StepDescriptionWithLink, StepConfig } from '../../common';
 import { getGuidePanelStepStyles } from './guide_panel_step.styles';
 
 interface GuideStepProps {
@@ -34,6 +35,25 @@ interface GuideStepProps {
   telemetryGuideId: string;
 }
 
+const renderDescription = (description: string | StepDescriptionWithLink) => {
+  if (typeof description === 'string') {
+    return description;
+  }
+  const { descriptionText, linkText, linkUrl, isLinkExternal } = description;
+  return (
+    <>
+      {descriptionText}{' '}
+      <EuiLink
+        data-test-subj="guidePanelStepDescriptionLink"
+        href={linkUrl}
+        external={isLinkExternal}
+        target={isLinkExternal ? '_blank' : ''}
+      >
+        {linkText}
+      </EuiLink>
+    </>
+  );
+};
 export const GuideStep = ({
   accordionId,
   stepStatus,
@@ -96,11 +116,11 @@ export const GuideStep = ({
           <>
             <EuiSpacer size="s" />
             <EuiText size="s" data-test-subj="guidePanelStepDescription" css={styles.description}>
-              {stepConfig.description && <p>{stepConfig.description}</p>}
+              {stepConfig.description && <p>{renderDescription(stepConfig.description)}</p>}
               {stepConfig.descriptionList && (
                 <ul>
                   {stepConfig.descriptionList.map((description, index) => {
-                    return <li key={`description-${index}`}>{description}</li>;
+                    return <li key={`description-${index}`}>{renderDescription(description)}</li>;
                   })}
                 </ul>
               )}
