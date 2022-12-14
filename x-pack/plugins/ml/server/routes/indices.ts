@@ -29,7 +29,7 @@ export function indicesRoutes({ router, routeGuard }: RouteInitialization) {
         body: indicesSchema,
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetFieldInfo'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {

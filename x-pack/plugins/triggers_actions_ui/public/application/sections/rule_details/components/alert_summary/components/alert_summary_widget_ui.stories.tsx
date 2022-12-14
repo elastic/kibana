@@ -17,7 +17,7 @@ export const Overview = {
   args: {
     active: 15,
     recovered: 53,
-    timeRange: 'Last 30 days',
+    timeRangeTitle: 'Last 30 days',
     onClick: action('clicked'),
   },
 };
