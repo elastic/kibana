@@ -22,11 +22,17 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
     this.tags('skipFirefox');
 
     before(async () => {
-      // await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.load(archive);
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/legacy.json');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern.json'
+      );
 
       await kibanaServer.uiSettings.update({
-        defaultIndex: 'logstash-*',
+        defaultIndex: 'kibana_sample_data_flights',
       });
 
       // create new test workpad
@@ -36,7 +42,11 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
 
     after(async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.unload(archive);
+      await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/legacy.json');
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern.json'
+      );
     });
 
     describe('esdocs', function () {
