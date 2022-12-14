@@ -32,6 +32,6 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-network",
-    "security_app_display_name": "Spike in Network Traffic To a Country"
+    "security_app_display_name": "Spike in Network Traffic to a Country"
   }
 }

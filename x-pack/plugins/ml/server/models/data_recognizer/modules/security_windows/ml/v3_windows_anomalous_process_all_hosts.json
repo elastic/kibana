@@ -62,6 +62,6 @@
         "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
     ],
-    "security_app_display_name": "Anomalous Process For a Windows Population"
+    "security_app_display_name": "Anomalous Process for a Windows Population"
   }
 }
