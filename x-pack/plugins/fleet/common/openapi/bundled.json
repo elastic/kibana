@@ -119,6 +119,56 @@
         "operationId": "update-settings"
       }
     },
+    "/health_check": {
+      "post": {
+        "summary": "Fleet Server Health Check",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "host": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "fleet-server-health-check",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "host": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/service-tokens": {
       "post": {
         "summary": "Generate service tokens",
@@ -1671,6 +1721,96 @@
         }
       }
     },
+    "/agents/{agentId}/actions/{actionId}/cancel": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "actionId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Agent - Cancel Action",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/agent_action"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "agent-action-cancel",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
+    "/agents/files@{fileId}@{fileName}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "fileId",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "fileName",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Get agent upload file",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "body": {},
+                            "headers": {}
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-agent-upload-file"
+      }
+    },
     "/agents/{agentId}/reassign": {
       "parameters": [
         {
@@ -1850,6 +1990,48 @@
             }
           }
         }
+      }
+    },
+    "/agents/{agentId}/upload": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "List agent uploads",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "object",
+                      "properties": {
+                        "item": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/agent_diagnostics"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "list-agent-uploads"
       }
     },
     "/agents/bulk_reassign": {
@@ -2439,6 +2621,127 @@
         }
       }
     },
+    "/agent_policies/{agentPolicyId}/full": {
+      "get": {
+        "summary": "Agent policy - Get full policy",
+        "operationId": "agent-policy-full",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/components/schemas/agent_policy_full"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentPolicyId",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "download",
+          "in": "query",
+          "required": false
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "standalone",
+          "in": "query",
+          "required": false
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "kubernetes",
+          "in": "query",
+          "required": false
+        }
+      ]
+    },
+    "/agent_policies/{agentPolicyId}/download": {
+      "get": {
+        "summary": "Agent policy - Download",
+        "operationId": "agent-policy-download",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentPolicyId",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "download",
+          "in": "query",
+          "required": false
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "standalone",
+          "in": "query",
+          "required": false
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "kubernetes",
+          "in": "query",
+          "required": false
+        }
+      ]
+    },
     "/agent_policies/_bulk_get": {
       "post": {
         "summary": "Agent policies - Bulk Get",
@@ -2959,35 +3262,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/simplified_package_policy"
-                  },
-                  {
-                    "deprecated": true,
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/new_package_policy"
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "force": {
-                            "type": "boolean"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
+                "$ref": "#/components/schemas/package_policy_request"
               }
             }
           }
@@ -3276,7 +3551,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/update_package_policy"
+                "$ref": "#/components/schemas/package_policy_request"
               }
             }
           }
@@ -3287,25 +3562,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/simplified_package_policy"
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/package_policy"
                     },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "item": {
-                          "$ref": "#/components/schemas/package_policy"
-                        },
-                        "sucess": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [
-                        "item",
-                        "sucess"
-                      ]
+                    "sucess": {
+                      "type": "boolean"
                     }
+                  },
+                  "required": [
+                    "item",
+                    "sucess"
                   ]
                 }
               }
@@ -4300,6 +4568,56 @@
           }
         ]
       }
+    },
+    "/kubernetes": {
+      "get": {
+        "summary": "Get K8s Full Agent Manifest",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-full-k8s-manifest",
+        "parameters": [
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "name": "download",
+            "in": "query",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "fleetServer",
+            "in": "query",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "enrolToken",
+            "in": "query",
+            "required": false
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -5212,6 +5530,43 @@
           }
         ]
       },
+      "agent_diagnostics": {
+        "title": "Agent diagnostics",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createTime": {
+            "type": "string"
+          },
+          "filePath": {
+            "type": "string"
+          },
+          "actionId": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "READY",
+              "AWAITING_UPLOAD",
+              "DELETED",
+              "IN_PROGRESS"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "createTime",
+          "filePath",
+          "actionId",
+          "status"
+        ]
+      },
       "get_agent_tags_response": {
         "title": "Get Agent Tags response",
         "type": "object",
@@ -5264,6 +5619,14 @@
           },
           "download_source_id": {
             "type": "string",
+            "nullable": true
+          },
+          "unenroll_timeout": {
+            "type": "number",
+            "nullable": true
+          },
+          "inactivity_timeout": {
+            "type": "number",
             "nullable": true
           }
         },
@@ -5443,6 +5806,208 @@
           }
         ]
       },
+      "full_agent_policy_output": {
+        "title": "Full agent policy",
+        "type": "object",
+        "properties": {
+          "hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ca_sha256": {
+            "type": "string",
+            "nullable": true
+          },
+          "proxy_url": {
+            "type": "string"
+          },
+          "proxy_headers": {},
+          "type": {},
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "text": {}
+            }
+          }
+        },
+        "required": [
+          "type",
+          "hosts",
+          "ca_sha256"
+        ]
+      },
+      "full_agent_policy_output_permissions": {
+        "title": "Full agent policy output permissions",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "packagePolicyName": {
+              "type": "string"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "cluster": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "indices": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "names": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "privileges": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "full_agent_policy": {
+        "title": "Full agent policy",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "outputs": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/full_agent_policy_output"
+            }
+          },
+          "output_permissions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "output": {
+                  "type": "integer"
+                },
+                "data": {
+                  "$ref": "#/components/schemas/full_agent_policy_output_permissions"
+                }
+              }
+            }
+          },
+          "fleet": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "hosts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "proxy_url": {
+                    "type": "string"
+                  },
+                  "proxy_headers": {},
+                  "ssl": {
+                    "type": "object",
+                    "properties": {
+                      "verification_mode": {
+                        "type": "string"
+                      },
+                      "certificate_authorities": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "renegotiation": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kibana": {
+                    "type": "object",
+                    "properties": {
+                      "hosts": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "protocol": {
+                        "type": "string"
+                      },
+                      "path": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "inputs": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "number"
+          },
+          "agent": {
+            "type": "string",
+            "nullable": true
+          },
+          "download_source_id": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "outputs",
+          "inputs"
+        ]
+      },
+      "agent_policy_full": {
+        "title": "Agent policy full response",
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "item": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "item": {
+                "$ref": "#/components/schemas/full_agent_policy"
+              }
+            }
+          }
+        ]
+      },
       "data_stream": {
         "title": "Data stream",
         "type": "object",
@@ -5524,8 +6089,8 @@
           "created_at"
         ]
       },
-      "simplified_package_policy": {
-        "title": "Simplified Package Policy",
+      "package_policy_request": {
+        "title": "Package Policy Request",
         "type": "object",
         "properties": {
           "id": {
@@ -5534,30 +6099,36 @@
           },
           "name": {
             "type": "string",
-            "description": "Package policy name (should be unique)"
+            "description": "Package policy name (should be unique)",
+            "example": "nginx-123"
           },
           "description": {
             "type": "string",
-            "description": "Package policy description"
+            "description": "Package policy description",
+            "example": "my description"
           },
           "namespace": {
             "type": "string",
-            "description": "namespace by default \"default\""
+            "description": "namespace by default \"default\"",
+            "example": "default"
           },
           "policy_id": {
             "type": "string",
-            "description": "Agent policy ID where that package policy will be added"
+            "description": "Agent policy ID where that package policy will be added",
+            "example": "agent-policy-id"
           },
           "package": {
             "type": "object",
             "properties": {
               "name": {
                 "type": "string",
-                "description": "Package name"
+                "description": "Package name",
+                "example": "nginx"
               },
               "version": {
                 "type": "string",
-                "description": "Package version"
+                "description": "Package version",
+                "example": "1.6.0"
               }
             },
             "required": [
@@ -5572,6 +6143,26 @@
           "inputs": {
             "type": "object",
             "description": "Package policy inputs (see integration documentation to know what inputs are available)",
+            "example": {
+              "nginx-logfile": {
+                "enabled": true,
+                "streams": {
+                  "nginx.access": {
+                    "enabled": true,
+                    "vars": {
+                      "paths": [
+                        "/var/log/nginx/access.log*"
+                      ],
+                      "tags": [
+                        "nginx-access"
+                      ],
+                      "preserve_original_event": false,
+                      "ignore_older": "72h"
+                    }
+                  }
+                }
+              }
+            },
             "additionalProperties": {
               "type": "object",
               "properties": {
@@ -5769,99 +6360,6 @@
             "$ref": "#/components/schemas/full_agent_policy_input"
           }
         }
-      },
-      "update_package_policy": {
-        "title": "Update package policy",
-        "type": "object",
-        "description": "",
-        "properties": {
-          "version": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "package": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "version": {
-                "type": "string"
-              },
-              "title": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "name",
-              "title",
-              "version"
-            ]
-          },
-          "namespace": {
-            "type": "string"
-          },
-          "output_id": {
-            "type": "string",
-            "description": "Not supported output can be set at the agent policy level only",
-            "deprecated": true
-          },
-          "inputs": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string"
-                },
-                "enabled": {
-                  "type": "boolean"
-                },
-                "processors": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "streams": {
-                  "type": "array",
-                  "items": {}
-                },
-                "config": {
-                  "type": "object"
-                },
-                "vars": {
-                  "type": "object"
-                }
-              },
-              "required": [
-                "type",
-                "enabled",
-                "streams"
-              ]
-            }
-          },
-          "policy_id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "force": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "name",
-          "namespace",
-          "policy_id",
-          "enabled"
-        ]
       },
       "output": {
         "title": "Output",
