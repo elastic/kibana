@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createMockDatasource } from '../mocks';
+import { createMockDatasource, createMockVisualization } from '../mocks';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { Filter } from '@kbn/es-query';
 import { DatasourcePublicAPI } from '../types';
@@ -21,6 +21,8 @@ describe('getLayerMetaInfo', () => {
       getLayerMetaInfo(
         createMockDatasource('testDatasource'),
         {},
+        createMockVisualization('testVisualization'),
+        {},
         undefined,
         {},
         undefined,
@@ -29,15 +31,16 @@ describe('getLayerMetaInfo', () => {
     ).toBe('Visualization has no data available to show');
   });
 
-  it('should return error in case of multiple layers', () => {
+  it('should return error in case of multiple data layers', () => {
+    const mockDatasource = createMockDatasource('testDatasource');
+    mockDatasource.getLayers.mockReturnValue(['layer1', 'layer2']);
     expect(
       getLayerMetaInfo(
-        createMockDatasource('testDatasource'),
+        mockDatasource,
         {},
-        {
-          datatable1: { type: 'datatable', columns: [], rows: [] },
-          datatable2: { type: 'datatable', columns: [], rows: [] },
-        },
+        createMockVisualization('testVisualization'),
+        { layers: [{}, {}] },
+        {},
         {},
         undefined,
         capabilities
@@ -46,15 +49,56 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should return error in case of missing activeDatasource', () => {
-    expect(getLayerMetaInfo(undefined, {}, undefined, {}, undefined, capabilities).error).toBe(
-      'Visualization has no data available to show'
-    );
+    expect(
+      getLayerMetaInfo(
+        undefined,
+        {},
+        createMockVisualization('testVisualization'),
+        {},
+        undefined,
+        {},
+        undefined,
+        capabilities
+      ).error
+    ).toBe('Visualization has no data available to show');
   });
 
   it('should return error in case of missing configuration/state', () => {
     expect(
       getLayerMetaInfo(
         createMockDatasource('testDatasource'),
+        undefined,
+        createMockVisualization('testVisualization'),
+        {},
+        {},
+        {},
+        undefined,
+        capabilities
+      ).error
+    ).toBe('Visualization has no data available to show');
+  });
+
+  it('should return error in case of missing activeVisualization', () => {
+    expect(
+      getLayerMetaInfo(
+        createMockDatasource('testDatasource'),
+        {},
+        undefined,
+        {},
+        undefined,
+        {},
+        undefined,
+        capabilities
+      ).error
+    ).toBe('Visualization has no data available to show');
+  });
+
+  it('should return error in case of missing visualization configuration/state', () => {
+    expect(
+      getLayerMetaInfo(
+        createMockDatasource('testDatasource'),
+        {},
+        createMockVisualization('testVisualization'),
         undefined,
         {},
         {},
@@ -88,8 +132,16 @@ describe('getLayerMetaInfo', () => {
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, {}, undefined, capabilities)
-        .error
+      getLayerMetaInfo(
+        createMockDatasource('testDatasource'),
+        {},
+        createMockVisualization('testVisualization'),
+        {},
+        {},
+        {},
+        undefined,
+        capabilities
+      ).error
     ).toBe('Visualization has no data available to show');
   });
 
@@ -111,6 +163,8 @@ describe('getLayerMetaInfo', () => {
       getLayerMetaInfo(
         mockDatasource,
         {}, // the publicAPI has been mocked, so no need for a state here
+        createMockVisualization('testVisualization'),
+        {},
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
@@ -140,6 +194,8 @@ describe('getLayerMetaInfo', () => {
       getLayerMetaInfo(
         mockDatasource,
         {},
+        createMockVisualization('testVisualization'),
+        {},
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
@@ -154,6 +210,8 @@ describe('getLayerMetaInfo', () => {
     expect(
       getLayerMetaInfo(
         mockDatasource,
+        {},
+        createMockVisualization('testVisualization'),
         {},
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
@@ -194,6 +252,8 @@ describe('getLayerMetaInfo', () => {
     const { error, meta } = getLayerMetaInfo(
       mockDatasource,
       {}, // the publicAPI has been mocked, so no need for a state here
+      createMockVisualization('testVisualization'),
+      {},
       {
         datatable1: { type: 'datatable', columns: [], rows: [] },
       },
@@ -245,6 +305,8 @@ describe('getLayerMetaInfo', () => {
     const { meta } = getLayerMetaInfo(
       mockDatasource,
       {}, // the publicAPI has been mocked, so no need for a state here
+      createMockVisualization('testVisualization'),
+      {},
       {
         datatable1: { type: 'datatable', columns: [], rows: [] },
       },
