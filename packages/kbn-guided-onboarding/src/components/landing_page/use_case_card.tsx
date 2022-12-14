@@ -101,11 +101,14 @@ export const UseCaseCard = ({
         <EuiImage
           src={getImageUrl(constants[useCase].imageUrlPrefix)}
           alt={constants[useCase].logAltText}
+          size={200}
+          margin="s"
         />
       }
       title={titleElement}
       description={description}
       footer={footer}
+      paddingSize="l"
       betaBadgeProps={{
         label: constants[useCase].betaBadgeLabel,
       }}

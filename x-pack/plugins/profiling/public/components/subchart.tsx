@@ -187,6 +187,8 @@ export const SubChart: React.FC<SubChartProps> = ({
               <EuiLink onClick={() => onShowMoreClick?.()}>
                 <EuiText size="s">{label}</EuiText>
               </EuiLink>
+            ) : category === OTHER_BUCKET_LABEL ? (
+              <EuiText size="s">{label}</EuiText>
             ) : (
               <EuiLink href={href}>
                 <EuiText size="s">{label}</EuiText>

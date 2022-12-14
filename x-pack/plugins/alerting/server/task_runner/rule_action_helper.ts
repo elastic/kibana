@@ -17,13 +17,23 @@ export const isSummaryAction = (action: RuleAction) => {
   return action.frequency?.summary || false;
 };
 
-export const hasActionFrequencyThrottled = (action: RuleAction) => {
+export const isSummaryActionOnInterval = (action: RuleAction) => {
   if (!action.frequency) {
     return false;
   }
   return (
     action.frequency.notifyWhen === RuleNotifyWhenTypeValues[2] &&
     typeof action.frequency.throttle === 'string'
+  );
+};
+
+export const isSummaryActionPerRuleRun = (action: RuleAction) => {
+  if (!action.frequency) {
+    return false;
+  }
+  return (
+    action.frequency.notifyWhen === RuleNotifyWhenTypeValues[1] &&
+    typeof action.frequency.throttle !== 'string'
   );
 };
 
@@ -36,7 +46,7 @@ export const isSummaryActionThrottled = ({
   summaryActions?: ThrottledActions;
   logger: Logger;
 }) => {
-  if (!hasActionFrequencyThrottled(action)) {
+  if (!isSummaryActionOnInterval(action)) {
     return false;
   }
   if (!summaryActions) {

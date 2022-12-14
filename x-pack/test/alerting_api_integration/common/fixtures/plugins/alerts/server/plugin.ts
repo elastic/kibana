@@ -21,8 +21,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { defineRoutes } from './routes';
 import { defineActionTypes } from './action_types';
 import { defineAlertTypes } from './alert_types';
@@ -148,22 +147,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
     });
 
-    const { ruleDataService } = ruleRegistry;
-    ruleDataService.initializeService();
-    const ruleDataClient = ruleDataService.initializeIndex({
-      feature: AlertConsumers.OBSERVABILITY,
-      registrationContext: 'observability.test.alerts',
-      dataset: Dataset.alerts,
-      componentTemplateRefs: [],
-      componentTemplates: [
-        {
-          name: 'mappings',
-        },
-      ],
-    });
-
     defineActionTypes(core, { actions });
-    defineAlertTypes(core, { alerting }, this.logger, ruleDataClient);
+    defineAlertTypes(core, { alerting, ruleRegistry }, this.logger);
     defineRoutes(core, this.taskManagerStart, { logger: this.logger });
   }
 
