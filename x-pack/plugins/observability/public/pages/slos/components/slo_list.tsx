@@ -75,17 +75,19 @@ export function SloList() {
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
-          <EuiFlexItem>
-            <EuiPagination
-              pageCount={total / perPage}
-              activePage={activePage}
-              onPageClick={handlePageClick}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      {slos.length ? (
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
+            <EuiFlexItem>
+              <EuiPagination
+                pageCount={total / perPage}
+                activePage={activePage}
+                onPageClick={handlePageClick}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 }
