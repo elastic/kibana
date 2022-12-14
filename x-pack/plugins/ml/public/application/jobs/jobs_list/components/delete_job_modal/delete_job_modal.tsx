@@ -62,6 +62,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
     setHasManagedJob(jobs.some((job) => isManagedJob(job)));
     setModalVisible(true);
     setDeleting(false);
+    setDeleteUserAnnotations(false);
   }, []);
 
   const closeModal = useCallback(() => {

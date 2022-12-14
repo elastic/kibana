@@ -63,6 +63,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
 
     setModalVisible(true);
     setResetting(false);
+    setDeleteUserAnnotations(false);
   }, []);
 
   const closeModal = useCallback(() => {
