@@ -45,7 +45,6 @@ describe('filter manager utilities', () => {
               "meta": Object {
                 "alias": null,
                 "disabled": false,
-                "index": "logstash-*",
                 "key": "bytes",
                 "negate": false,
                 "params": Object {
