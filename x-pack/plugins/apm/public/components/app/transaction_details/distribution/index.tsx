@@ -7,7 +7,7 @@
 
 import { XYBrushEvent } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
@@ -75,6 +75,30 @@ export function TransactionDistribution({
     totalDocCount,
   } = useTransactionDistributionChartData();
 
+  const onShowCriticalPathChange = useCallback(
+    (nextShowCriticalPath: boolean) => {
+      push(history, {
+        query: {
+          showCriticalPath: nextShowCriticalPath ? 'true' : 'false',
+        },
+      });
+    },
+    [history]
+  );
+
+  const onTabClick = useCallback(
+    (tab: TransactionTab) => {
+      history.replace({
+        ...history.location,
+        search: fromQuery({
+          ...toQuery(history.location.search),
+          detailTab: tab,
+        }),
+      });
+    },
+    [history]
+  );
+
   return (
     <HeightRetainer>
       <div data-test-subj="apmTransactionDistributionTabContent">
@@ -104,15 +128,7 @@ export function TransactionDistribution({
               }),
             });
           }}
-          onTabClick={(tab) => {
-            history.replace({
-              ...history.location,
-              search: fromQuery({
-                ...toQuery(history.location.search),
-                detailTab: tab,
-              }),
-            });
-          }}
+          onTabClick={onTabClick}
           serviceName={serviceName}
           waterfallItemId={waterfallItemId}
           detailTab={detailTab as TransactionTab | undefined}
@@ -120,13 +136,7 @@ export function TransactionDistribution({
           traceSamplesFetchStatus={traceSamplesFetchResult.status}
           traceSamples={traceSamplesFetchResult.data?.traceSamples}
           showCriticalPath={showCriticalPath}
-          onShowCriticalPathChange={(nextShowCriticalPath) => {
-            push(history, {
-              query: {
-                showCriticalPath: nextShowCriticalPath ? 'true' : 'false',
-              },
-            });
-          }}
+          onShowCriticalPathChange={onShowCriticalPathChange}
         />
       </div>
     </HeightRetainer>
