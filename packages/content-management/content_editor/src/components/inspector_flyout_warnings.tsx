@@ -16,7 +16,7 @@ const getI18nTexts = () => ({
   }),
 });
 
-export const InspectorFlyoutWarningsCallOut = ({
+export const ContentEditorFlyoutWarningsCallOut = ({
   warningMessages,
 }: {
   warningMessages?: string[];

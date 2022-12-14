@@ -10,21 +10,21 @@ import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
 import { useServices } from './services';
 
-import { InspectorLoader } from './components';
-import type { InspectorFlyoutContentContainerProps } from './components';
+import { ContentEditorLoader } from './components';
+import type { ContentEditorFlyoutContentContainerProps } from './components';
 
-export type OpenInspectorParams = Pick<
-  InspectorFlyoutContentContainerProps,
+export type OpenContentEditorParams = Pick<
+  ContentEditorFlyoutContentContainerProps,
   'item' | 'onSave' | 'isReadonly' | 'entityName' | 'customValidators'
 >;
 
-export function useOpenInspector() {
+export function useOpenContentEditor() {
   const services = useServices();
   const { openFlyout } = services;
   const flyout = useRef<OverlayRef | null>(null);
 
   return useCallback(
-    (args: OpenInspectorParams) => {
+    (args: OpenContentEditorParams) => {
       // Validate arguments
       if (args.isReadonly === false && args.onSave === undefined) {
         throw new Error(`A value for [onSave()] must be provided when [isReadonly] is false.`);
@@ -35,7 +35,7 @@ export function useOpenInspector() {
       };
 
       flyout.current = openFlyout(
-        <InspectorLoader {...args} onCancel={closeFlyout} services={services} />,
+        <ContentEditorLoader {...args} onCancel={closeFlyout} services={services} />,
         {
           maxWidth: 600,
           size: 'm',

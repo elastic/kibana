@@ -31,7 +31,7 @@ import type { CustomValidators } from './use_metadata_form';
 
 const getI18nTexts = ({ entityName }: { entityName: string }) => ({
   title: i18n.translate('contentManagement.inspector.flyoutTitle', {
-    defaultMessage: 'Inspector',
+    defaultMessage: 'ContentEditor',
   }),
   saveButtonLabel: i18n.translate('contentManagement.inspector.saveButtonLabel', {
     defaultMessage: 'Update {entityName}',
@@ -59,7 +59,7 @@ export interface Props {
   onCancel: () => void;
 }
 
-export const InspectorFlyoutContent: FC<Props> = ({
+export const ContentEditorFlyoutContent: FC<Props> = ({
   item,
   entityName,
   isReadonly = true,

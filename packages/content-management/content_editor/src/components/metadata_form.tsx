@@ -11,7 +11,7 @@ import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiFieldText, EuiTextArea, EuiSpacer } from '@elastic/eui';
 
-import { InspectorFlyoutWarningsCallOut } from './inspector_flyout_warnings';
+import { ContentEditorFlyoutWarningsCallOut } from './inspector_flyout_warnings';
 import type { MetadataFormState, Field } from './use_metadata_form';
 import type { SavedObjectsReference, Services } from '../services';
 
@@ -49,7 +49,7 @@ export const MetadataForm: FC<Props> = ({
 
   return (
     <EuiForm isInvalid={isSubmitted && !isValid} error={getErrors()} data-test-subj="metadataForm">
-      <InspectorFlyoutWarningsCallOut warningMessages={getWarnings()} />
+      <ContentEditorFlyoutWarningsCallOut warningMessages={getWarnings()} />
 
       <EuiFormRow
         label={i18n.translate('contentManagement.inspector.metadataForm.nameInputLabel', {

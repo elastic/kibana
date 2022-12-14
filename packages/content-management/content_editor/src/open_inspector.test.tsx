@@ -11,20 +11,20 @@ import { registerTestBed } from '@kbn/test-jest-helpers';
 import { WithServices, getMockServices } from './__jest__';
 import type { Services } from './services';
 import type { Item } from './types';
-import { InspectorLoader } from './components';
-import { useOpenInspector } from './open_inspector';
+import { ContentEditorLoader } from './components';
+import { useOpenContentEditor } from './open_inspector';
 
-describe('useOpenInspector() hook', () => {
+describe('useOpenContentEditor() hook', () => {
   const savedObjectItem: Item = { id: 'id', title: 'Foo', tags: [] };
 
   const TestComp = () => {
-    const openInspector = useOpenInspector();
+    const openContentEditor = useOpenContentEditor();
     return (
       <button
         onClick={() => {
-          openInspector({ item: savedObjectItem, entityName: 'Foo' });
+          openContentEditor({ item: savedObjectItem, entityName: 'Foo' });
         }}
-        data-test-subj="openInspectorButton"
+        data-test-subj="openContentEditorButton"
       >
         Open inspector
       </button>
@@ -41,11 +41,11 @@ describe('useOpenInspector() hook', () => {
   test('should call the "openFlyout" provided', () => {
     const { find } = setup();
 
-    find('openInspectorButton').simulate('click');
+    find('openContentEditorButton').simulate('click');
 
     expect(openFlyout).toHaveBeenCalled();
     const args = openFlyout.mock.calls[0][0] as any;
-    expect(args?.type).toBe(InspectorLoader);
+    expect(args?.type).toBe(ContentEditorLoader);
     expect(args?.props.item).toBe(savedObjectItem);
     expect(args?.props.services).toEqual(mockedServices);
   });

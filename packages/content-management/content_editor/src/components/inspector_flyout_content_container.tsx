@@ -8,16 +8,16 @@
 import React from 'react';
 import type { FC } from 'react';
 
-import { InspectorFlyoutContent } from './inspector_flyout_content';
-import type { Props as InspectorFlyoutContentProps } from './inspector_flyout_content';
+import { ContentEditorFlyoutContent } from './inspector_flyout_content';
+import type { Props as ContentEditorFlyoutContentProps } from './inspector_flyout_content';
 
 type CommonProps = Pick<
-  InspectorFlyoutContentProps,
+  ContentEditorFlyoutContentProps,
   'item' | 'isReadonly' | 'services' | 'onSave' | 'onCancel' | 'entityName' | 'customValidators'
 >;
 
 export type Props = CommonProps;
 
-export const InspectorFlyoutContentContainer: FC<Props> = (props) => {
-  return <InspectorFlyoutContent {...props} />;
+export const ContentEditorFlyoutContentContainer: FC<Props> = (props) => {
+  return <ContentEditorFlyoutContent {...props} />;
 };

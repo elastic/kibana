@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { InspectorProvider, InspectorKibanaProvider, useOpenInspector } from './src';
-export type { OpenInspectorParams } from './src';
+export { ContentEditorProvider, ContentEditorKibanaProvider, useOpenContentEditor } from './src';
+export type { OpenContentEditorParams } from './src';

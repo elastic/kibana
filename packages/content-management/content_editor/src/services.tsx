@@ -36,19 +36,19 @@ export interface Services {
   TagSelector?: React.FC<TagSelectorProps>;
 }
 
-const InspectorContext = React.createContext<Services | null>(null);
+const ContentEditorContext = React.createContext<Services | null>(null);
 
 /**
  * Abstract external service Provider.
  */
-export const InspectorProvider: FC<Services> = ({ children, ...services }) => {
-  return <InspectorContext.Provider value={services}>{children}</InspectorContext.Provider>;
+export const ContentEditorProvider: FC<Services> = ({ children, ...services }) => {
+  return <ContentEditorContext.Provider value={services}>{children}</ContentEditorContext.Provider>;
 };
 
 /**
  * Kibana-specific service types.
  */
-export interface InspectorKibanaDependencies {
+export interface ContentEditorKibanaDependencies {
   /** CoreStart contract */
   core: {
     overlays: {
@@ -97,7 +97,7 @@ export interface InspectorKibanaDependencies {
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const InspectorKibanaProvider: FC<InspectorKibanaDependencies> = ({
+export const ContentEditorKibanaProvider: FC<ContentEditorKibanaDependencies> = ({
   children,
   ...services
 }) => {
@@ -124,7 +124,7 @@ export const InspectorKibanaProvider: FC<InspectorKibanaDependencies> = ({
   );
 
   return (
-    <InspectorProvider
+    <ContentEditorProvider
       openFlyout={openFlyout}
       notifyError={(title, text) => {
         core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
@@ -133,7 +133,7 @@ export const InspectorKibanaProvider: FC<InspectorKibanaDependencies> = ({
       TagSelector={savedObjectsTagging?.ui.components.SavedObjectSaveModalTagSelector}
     >
       {children}
-    </InspectorProvider>
+    </ContentEditorProvider>
   );
 };
 
@@ -141,11 +141,11 @@ export const InspectorKibanaProvider: FC<InspectorKibanaDependencies> = ({
  * React hook for accessing pre-wired services.
  */
 export function useServices() {
-  const context = useContext(InspectorContext);
+  const context = useContext(ContentEditorContext);
 
   if (!context) {
     throw new Error(
-      'InspectorContext is missing. Ensure your component or React root is wrapped with <InspectorProvider /> or <InspectorKibanaProvider />.'
+      'ContentEditorContext is missing. Ensure your component or React root is wrapped with <ContentEditorProvider /> or <ContentEditorKibanaProvider />.'
     );
   }
 
