@@ -402,17 +402,20 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       if (contentEditor.enabled !== false) {
         actions.push({
           name: (item) => {
-            return i18n.translate('contentManagement.tableList.listing.table.inspectActionName', {
-              defaultMessage: 'Inspect {itemDescription}',
-              values: {
-                itemDescription: get(item, 'attributes.title'),
-              },
-            });
+            return i18n.translate(
+              'contentManagement.tableList.listing.table.viewDetailsActionName',
+              {
+                defaultMessage: 'View {itemTitle} details',
+                values: {
+                  itemTitle: get(item, 'attributes.title'),
+                },
+              }
+            );
           },
           description: i18n.translate(
-            'contentManagement.tableList.listing.table.inspectActionDescription',
+            'contentManagement.tableList.listing.table.viewDetailsActionDescription',
             {
-              defaultMessage: 'Inspect',
+              defaultMessage: 'View details',
             }
           ),
           icon: 'inspect',
