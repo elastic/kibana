@@ -55,6 +55,8 @@ import {
   TOASTER_ERROR_BTN,
   MODAL_CONFIRMATION_CANCEL_BTN,
   MODAL_CONFIRMATION_BODY,
+  RULE_SEARCH_FIELD,
+  RULE_DETAILS_BACK_TO_ALL_RULES,
 } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import { ALL_ACTIONS } from '../screens/rule_details';
@@ -162,12 +164,28 @@ export const exportFirstRule = () => {
   cy.get(EXPORT_ACTION_BTN).should('not.exist');
 };
 
+export const filterBySearchTerm = (term: string) => {
+  cy.log(`Filter rules by search term: "${term}"`);
+  cy.get(RULE_SEARCH_FIELD)
+    .type(term, { waitForAnimations: true })
+    .trigger('search', { waitForAnimations: true });
+};
+
+export const filterByElasticRules = () => {
+  cy.get(ELASTIC_RULES_BTN).click();
+  waitForRulesTableToBeRefreshed();
+};
+
 export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click({ force: true });
 };
 
 export const goToRuleDetails = () => {
   cy.get(RULE_NAME).first().click({ force: true });
+};
+
+export const goBackFromRuleDetails = () => {
+  cy.get(RULE_DETAILS_BACK_TO_ALL_RULES).click({ force: true });
 };
 
 export const goToTheRuleDetailsOf = (ruleName: string) => {
@@ -346,6 +364,22 @@ export const importRules = (rulesFile: string) => {
   cy.get(INPUT_FILE).should('not.exist');
 };
 
+export const expectNumberOfRules = (expectedNumber: number) => {
+  cy.get(RULES_TABLE).then(($table) => {
+    const rulesRow = cy.wrap($table.find(RULES_ROW));
+
+    rulesRow.should('have.length', expectedNumber);
+  });
+};
+
+export const expectToContainRule = (ruleName: string) => {
+  cy.get(RULES_TABLE).then(($table) => {
+    const rulesRow = cy.wrap($table.find(RULES_ROW));
+
+    rulesRow.should('include.text', ruleName);
+  });
+};
+
 const selectOverwriteRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX)
     .pipe(($el) => $el.trigger('click'))
@@ -412,11 +446,6 @@ export const mockGlobalClock = () => {
    */
 
   cy.clock(Date.now(), ['setInterval', 'clearInterval', 'Date']);
-};
-
-export const switchToElasticRules = () => {
-  cy.get(ELASTIC_RULES_BTN).click();
-  waitForRulesTableToBeRefreshed();
 };
 
 export const bulkExportRules = () => {
