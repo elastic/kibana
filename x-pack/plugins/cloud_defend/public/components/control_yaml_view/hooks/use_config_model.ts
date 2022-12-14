@@ -55,7 +55,7 @@ export const useConfigModel = (configuration: string) => {
                 type: 'object',
                 required: ['name'],
                 additionalProperties: false,
-                oneOf: [
+                anyOf: [
                   { required: ['activity'] },
                   { required: ['containerImageName'] },
                   { required: ['containerImageTag'] },
