@@ -10,7 +10,7 @@ import { RuleAction } from '../types';
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,
-  hasActionFrequencyThrottled,
+  isSummaryActionOnInterval,
   isSummaryAction,
   isSummaryActionThrottled,
 } from './rule_action_helper';
@@ -64,14 +64,14 @@ describe('rule_action_helper', () => {
     });
   });
 
-  describe('hasActionFrequencyThrottled', () => {
+  describe('isSummaryActionOnInterval', () => {
     test('should return false if the action does not have frequency field', () => {
-      const result = hasActionFrequencyThrottled(mockOldAction);
+      const result = isSummaryActionOnInterval(mockOldAction);
       expect(result).toBe(false);
     });
 
     test('should return false if notifyWhen is not onThrottleInterval', () => {
-      const result = hasActionFrequencyThrottled({
+      const result = isSummaryActionOnInterval({
         ...mockAction,
         frequency: { ...mockAction.frequency, notifyWhen: 'onActiveAlert' },
       } as RuleAction);
@@ -79,7 +79,7 @@ describe('rule_action_helper', () => {
     });
 
     test('should return false if throttle is not a valid interval string', () => {
-      const result = hasActionFrequencyThrottled({
+      const result = isSummaryActionOnInterval({
         ...mockAction,
         frequency: { ...mockAction.frequency, throttle: null },
       } as RuleAction);
@@ -87,7 +87,7 @@ describe('rule_action_helper', () => {
     });
 
     test('should return true if the action is a throttling action', () => {
-      const result = hasActionFrequencyThrottled(mockSummaryAction);
+      const result = isSummaryActionOnInterval(mockSummaryAction);
       expect(result).toBe(true);
     });
   });

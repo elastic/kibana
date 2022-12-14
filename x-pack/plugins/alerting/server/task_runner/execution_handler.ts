@@ -34,9 +34,10 @@ import {
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,
-  hasActionFrequencyThrottled,
+  isSummaryActionOnInterval,
   isSummaryAction,
   isSummaryActionThrottled,
+  isSummaryActionPerRuleRun,
 } from './rule_action_helper';
 
 enum Reasons {
@@ -126,10 +127,7 @@ export class ExecutionHandler<
   }
 
   public async run(
-    alerts: Record<
-      string,
-      Alert<State, Context, ActionGroupIds> | Alert<State, Context, RecoveryActionGroupId>
-    >
+    alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
   ): Promise<RunResult> {
     const executables = this.generateExecutables(alerts);
     const throttledActions: ThrottledActions = getSummaryActionsFromTaskState({
@@ -200,6 +198,9 @@ export class ExecutionHandler<
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
         if (isSummaryAction(action)) {
+          if (isSummaryActionPerRuleRun(action) && !this.hasAlerts(alerts)) {
+            continue;
+          }
           const summarizedAlerts = await this.getSummarizedAlerts({ action, spaceId, ruleId });
           const actionToRun = {
             ...action,
@@ -227,7 +228,7 @@ export class ExecutionHandler<
             bulkActions,
           });
 
-          if (hasActionFrequencyThrottled(action)) {
+          if (isSummaryActionOnInterval(action)) {
             throttledActions[generateActionHash(action)] = { date: new Date() };
           }
 
@@ -282,7 +283,7 @@ export class ExecutionHandler<
           if (this.isRecoveredAlert(actionGroup)) {
             executableAlert.scheduleActions(action.group as ActionGroupIds);
           } else {
-            if (hasActionFrequencyThrottled(action)) {
+            if (isSummaryActionOnInterval(action)) {
               executableAlert.updateLastScheduledActions(
                 action.group as ActionGroupIds,
                 generateActionHash(action)
@@ -308,6 +309,12 @@ export class ExecutionHandler<
       }
     }
     return { throttledActions };
+  }
+
+  private hasAlerts(
+    alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
+  ) {
+    return Object.keys(alerts).length > 0;
   }
 
   private isAlertMuted(alertId: string) {
@@ -510,7 +517,7 @@ export class ExecutionHandler<
   }) {
     let options;
 
-    if (hasActionFrequencyThrottled(action)) {
+    if (isSummaryActionOnInterval(action)) {
       const throttleMills = parseDuration(action.frequency!.throttle!);
       const start = new Date(Date.now() - throttleMills);
 

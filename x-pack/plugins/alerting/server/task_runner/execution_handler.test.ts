@@ -866,7 +866,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.run({});
+    await executionHandler.run(generateAlert({ id: 1 }));
 
     expect(getSummarizedAlertsMock).toHaveBeenCalledWith({
       executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -905,6 +905,45 @@ describe('Execution Handler', () => {
             ],
           ]
       `);
+  });
+
+  test('skips summary actions (per rule run) when there is no alerts', async () => {
+    getSummarizedAlertsMock.mockResolvedValue({
+      new: {
+        count: 1,
+        alerts: [mockAAD],
+      },
+      ongoing: { count: 0, alerts: [] },
+      recovered: { count: 0, alerts: [] },
+    });
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions: [
+            {
+              id: '1',
+              group: null,
+              actionTypeId: 'testActionTypeId',
+              frequency: {
+                summary: true,
+                notifyWhen: 'onActiveAlert',
+                throttle: null,
+              },
+              params: {
+                message:
+                  'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    await executionHandler.run({});
+
+    expect(getSummarizedAlertsMock).not.toHaveBeenCalled();
+    expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
   });
 
   test('triggers summary actions (custom interval)', async () => {
