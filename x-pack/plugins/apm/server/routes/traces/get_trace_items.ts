@@ -55,6 +55,7 @@ import { getSpanLinksCountById } from '../span_links/get_linked_children';
 
 export interface TraceItems {
   exceedsMax: boolean;
+  totalItems: number;
   traceDocs: Array<WaterfallTransaction | WaterfallSpan>;
   errorDocs: WaterfallError[];
   spanLinksCountById: Record<string, number>;
@@ -166,6 +167,7 @@ export async function getTraceItems(
 
   return {
     exceedsMax,
+    totalItems: traceResponse.hits.total.value,
     traceDocs,
     errorDocs,
     spanLinksCountById,

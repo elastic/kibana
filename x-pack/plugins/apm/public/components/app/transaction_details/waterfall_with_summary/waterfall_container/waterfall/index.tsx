@@ -77,6 +77,8 @@ function getWaterfallMaxLevel(waterfall: IWaterfall) {
   countLevels(entryId, 1);
   return maxLevel;
 }
+// level starts with 0
+const maxLevelOpen = 2;
 
 export function Waterfall({
   waterfall,
@@ -114,7 +116,8 @@ export function Waterfall({
           iconType="alert"
           title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
             defaultMessage:
-              'Number of items in this trace exceed what is displayed',
+              'Number of items ({value}) in this trace exceed what is displayed.',
+            values: { value: waterfall.totalItems },
           })}
         />
       )}
@@ -150,6 +153,7 @@ export function Waterfall({
                 toggleFlyout({ history, item })
               }
               showCriticalPath={showCriticalPath}
+              maxLevelOpen={maxLevelOpen}
             />
           )}
         </WaterfallItemsContainer>
