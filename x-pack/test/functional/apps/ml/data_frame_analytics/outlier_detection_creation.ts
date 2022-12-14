@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
             // markers
             { color: '#5078AA', percentage: 15 },
             // grey boilerplate
-            { color: '#69707D', percentage: 25 },
+            { color: '#69707D', percentage: 12 },
           ],
           scatterplotMatrixColorStatsResults: [
             // outlier markers
@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
             // regular markers
             { color: '#6496BE', percentage: 15 },
             // tick/grid/axis
-            { color: '#69707D', percentage: 25 },
+            { color: '#69707D', percentage: 12 },
             { color: '#D2DCE6', percentage: 10 },
             // anti-aliasing
             { color: '#F5F7FA', percentage: 35 },
