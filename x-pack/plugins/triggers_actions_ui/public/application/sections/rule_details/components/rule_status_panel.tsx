@@ -37,14 +37,18 @@ export interface RuleStatusPanelProps {
 
 type ComponentOpts = Pick<
   RuleApis,
-  'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule' | 'loadExecutionLogAggregations'
+  | 'bulkDisableRules'
+  | 'bulkEnableRules'
+  | 'snoozeRule'
+  | 'unsnoozeRule'
+  | 'loadExecutionLogAggregations'
 > &
   RuleStatusPanelProps;
 
 export const RuleStatusPanel: React.FC<ComponentOpts> = ({
   rule,
-  disableRule,
-  enableRule,
+  bulkEnableRules,
+  bulkDisableRules,
   snoozeRule,
   unsnoozeRule,
   requestRefresh,
@@ -117,8 +121,12 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <RuleStatusDropdown
-              disableRule={async () => await disableRule(rule)}
-              enableRule={async () => await enableRule(rule)}
+              disableRule={async () => {
+                await bulkDisableRules({ ids: [rule.id] });
+              }}
+              enableRule={async () => {
+                await bulkEnableRules({ ids: [rule.id] });
+              }}
               snoozeRule={async () => {}}
               unsnoozeRule={async () => {}}
               rule={rule}
