@@ -8,6 +8,8 @@
 import { getNewRule } from '../../objects/rule';
 import {
   CONTROL_FRAMES,
+  DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU,
+  DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
@@ -15,13 +17,22 @@ import {
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
-import { ALERTS_URL, DASHBOARDS_URL } from '../../urls/navigation';
-import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../common/constants';
+import { ALERTS_URL } from '../../urls/navigation';
+import { APP_ID, DEFAULT_DETECTION_PAGE_FILTERS } from '../../../common/constants';
 import { formatPageFilterSearchParam } from '../../../common/utils/format_page_filter_search_param';
-import { markAcknowledgedFirstAlert, selectCountTable, waitForAlerts } from '../../tasks/alerts';
+import {
+  markAcknowledgedFirstAlert,
+  selectCountTable,
+  waitForAlerts,
+  waitForPageFilters,
+} from '../../tasks/alerts';
 import { ALERTS_COUNT } from '../../screens/alerts';
+import { navigateFromHeaderTo } from '../../tasks/security_header';
+import { ALERTS, CASES } from '../../screens/security_header';
 
 const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_PAGE_FILTERS) => {
+  cy.log(JSON.stringify({ filterObject }));
+
   cy.get(CONTROL_FRAMES).should((sub) => {
     expect(sub.length).eq(4);
   });
@@ -43,6 +54,12 @@ const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_P
   });
 };
 
+const resetFilters = () => {
+  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click({ force: true });
+  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click({ force: true });
+  waitForPageFilters();
+};
+
 describe('Detections : Page Filters', () => {
   before(() => {
     cleanKibana();
@@ -50,6 +67,12 @@ describe('Detections : Page Filters', () => {
     createCustomRuleEnabled(getNewRule(), 'custom_rule_filters');
     visit(ALERTS_URL);
     waitForAlerts();
+    waitForPageFilters();
+  });
+
+  afterEach(() => {
+    cy.clearLocalStorage(`${APP_ID}.pageFilters`);
+    resetFilters();
   });
 
   it('Default page filters are populated when nothing is provided in the URL', () => {
@@ -104,35 +127,24 @@ describe('Detections : Page Filters', () => {
     });
   });
 
-  it('URL is updated when ever page filters are loaded', () => {
-    cy.visit(DASHBOARDS_URL);
-
-    // to rest the URL params from last test
-    cy.visit(ALERTS_URL);
-
-    waitForAlerts();
-
-    cy.get(OPTION_LIST_VALUES).eq(0).click();
-
-    // unselect status open
-    cy.get(OPTION_SELECTABLE(0, 'open')).trigger('click', { force: true });
-
-    cy.url().should((url) => {
-      const currURL = new URL(url);
-
-      const pageFilterString = currURL.searchParams.get('pageFilters');
+  it('URL is updated when ever page filters are loaded', (done) => {
+    cy.on('url:changed', () => {
       const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
         if (filter.title === 'Status') {
           filter.selectedOptions = [];
         }
         return filter;
       });
-
-      expect(pageFilterString).eq(formatPageFilterSearchParam(NEW_FILTERS));
+      cy.url().should('have.text', formatPageFilterSearchParam(NEW_FILTERS));
+      done();
     });
+    cy.get(OPTION_LIST_VALUES).eq(0).click();
+
+    // unselect status open
+    cy.get(OPTION_SELECTABLE(0, 'open')).trigger('click', { force: true });
   });
 
-  it(`Filters are updated when the alerts are updated`, () => {
+  it(`Alert list is updated when the alerts are updated`, () => {
     // mark status of one alert to be acknowledged
     selectCountTable();
     cy.get(ALERTS_COUNT)
@@ -146,11 +158,47 @@ describe('Detections : Page Filters', () => {
     waitForAlerts();
     cy.get(OPTION_LIST_VALUES).eq(0).click();
     cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible');
-    selectCountTable();
     cy.get(ALERTS_COUNT)
       .invoke('text')
       .should((noOfAlerts) => {
         expect(noOfAlerts.split(' ')[0]).eq('1');
       });
+  });
+
+  it(`URL is updated when filters are updated`, (done) => {
+    const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
+      if (filter.title === 'Severity') {
+        filter.selectedOptions = ['high'];
+      }
+      return filter;
+    });
+
+    cy.on('url:changed', () => {
+      // we want assertion to run only once URL Changes.
+      cy.url().should('have.text', formatPageFilterSearchParam(NEW_FILTERS));
+      done();
+    });
+    cy.get(OPTION_LIST_VALUES).eq(1).click();
+    cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
+    cy.get(OPTION_SELECTABLE(1, 'high')).click({ force: true });
+  });
+
+  it(`Filters are restored from localstorage when user navigates back to the page.`, () => {
+    // change severity filter to high
+    cy.get(OPTION_LIST_VALUES).eq(1).click();
+    cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
+    cy.get(OPTION_SELECTABLE(1, 'high')).click({ force: true });
+
+    // high should be scuccessfully selected.
+    cy.get(OPTION_LIST_VALUES).eq(1).contains('high');
+
+    navigateFromHeaderTo(CASES); // navigate away from alert page
+
+    navigateFromHeaderTo(ALERTS); // navigate back to alert page
+
+    waitForPageFilters();
+
+    cy.get(OPTION_LIST_VALUES).eq(0).contains('open'); // status should be Open as previously selected
+    cy.get(OPTION_LIST_VALUES).eq(1).contains('high'); // severity should be low as previously selected
   });
 });

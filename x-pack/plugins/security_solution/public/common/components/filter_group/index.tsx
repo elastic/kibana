@@ -10,6 +10,7 @@ import type {
   ControlGroupContainer,
   controlGroupInputBuilder,
   ControlGroupOutput,
+  OptionsListEmbeddableInput,
 } from '@kbn/controls-plugin/public';
 import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { PropsWithChildren } from 'react';
@@ -29,10 +30,13 @@ import type { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { cloneDeep, debounce } from 'lodash';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
-import type { FilterContextType, FilterGroupProps, FilterUrlFormat } from './types';
+import type { FilterContextType, FilterGroupProps, FilterItemObj } from './types';
 import { useFilterUpdatesToUrlSync } from './hooks/use_filter_update_to_url_sync';
+import './index.scss';
+import { APP_ID } from '../../../../common/constants';
 
 type ControlGroupBuilder = typeof controlGroupInputBuilder;
 
@@ -68,12 +72,11 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
-  const [controlGroupInputUpdates, setControlGroupInputUpdates] = useState<
+  const [controlGroupInputUpdates, setControlGroupInputUpdates] = useLocalStorage<
     ControlGroupInput | undefined
-  >();
+  >(`${APP_ID}.${URL_PARAM_KEY.pageFilter}`, undefined);
 
-  const [initialUrlParam, setInitialUrlParam] =
-    useState<Array<FilterUrlFormat[keyof FilterUrlFormat]>>();
+  const [initialUrlParam, setInitialUrlParam] = useState<FilterItemObj[]>();
 
   const urlDataApplied = useRef<boolean>(false);
 
@@ -83,7 +86,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     setIsContextMenuVisible((prev) => !prev);
   }, []);
 
-  const onUrlParamInit = (param: Array<FilterUrlFormat[keyof FilterUrlFormat]> | null) => {
+  const onUrlParamInit = (param: FilterItemObj[] | null) => {
     if (param == null) return;
     try {
       setInitialUrlParam(param);
@@ -129,9 +132,12 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     [handleFilterUpdates]
   );
 
-  const handleInputUpdates = useCallback((newInput: ControlGroupInput) => {
-    setControlGroupInputUpdates(newInput);
-  }, []);
+  const handleInputUpdates = useCallback(
+    (newInput: ControlGroupInput) => {
+      setControlGroupInputUpdates(newInput);
+    },
+    [setControlGroupInputUpdates]
+  );
 
   const debouncedInputUpdatesHandler = useMemo(
     () => debounce(handleInputUpdates, 500),
@@ -154,6 +160,78 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     setControlGroup(controlGroupContainer);
   }, []);
 
+  const selectControlsWithPriority = useCallback(() => {
+    /*
+     *
+     * Below is the priority of how controls are fetched.
+     *  1. URL
+     *  2. If not found in URL, see in Localstorage
+     *  3. If not found in Localstorage, defaultControls are assigned
+     *
+     * */
+
+    const localInitialControls = cloneDeep(initialControls);
+
+    let overridingControls = initialUrlParam;
+    if (!initialUrlParam && controlGroupInputUpdates) {
+      // if nothing is found in URL Param.. read from local storage
+      const urlParamsFromLocalStorage: FilterItemObj[] = Object.keys(
+        controlGroupInputUpdates?.panels
+      ).map((panelIdx) => {
+        const panel = controlGroupInputUpdates?.panels[panelIdx];
+
+        const { fieldName, title, selectedOptions, existsSelected, exclude } =
+          panel.explicitInput as OptionsListEmbeddableInput;
+        return {
+          fieldName,
+          title,
+          selectedOptions,
+          existsSelected,
+          exclude,
+        };
+      });
+
+      overridingControls = urlParamsFromLocalStorage;
+    }
+
+    // if initialUrlParam Exists... replace localInitialControls with what was provided in the Url
+    if (overridingControls && !urlDataApplied.current) {
+      let maxInitialControlIdx = localInitialControls.length - 1;
+      for (let counter = overridingControls.length - 1; counter >= 0; counter--) {
+        const urlControl = overridingControls[counter];
+        const idx = localInitialControls.findIndex(
+          (item) => item.fieldName === urlControl.fieldName
+        );
+
+        if (idx !== -1) {
+          // if index found, replace that with what was provided in the Url
+          localInitialControls[idx] = {
+            ...localInitialControls[idx],
+            fieldName: urlControl.fieldName,
+            title: urlControl.title ?? urlControl.fieldName,
+            selectedOptions: urlControl.selectedOptions ?? [],
+            existsSelected: urlControl.existsSelected ?? false,
+            exclude: urlControl.exclude ?? false,
+          };
+        } else {
+          // if url param is not available in initialControl, start replacing the last slot in the
+          // initial Control with the last `not found` element in the Url Param
+          //
+          localInitialControls[maxInitialControlIdx] = {
+            fieldName: urlControl.fieldName,
+            selectedOptions: urlControl.selectedOptions ?? [],
+            title: urlControl.title ?? urlControl.fieldName,
+            existsSelected: urlControl.existsSelected ?? false,
+            exclude: urlControl.exclude ?? false,
+          };
+          maxInitialControlIdx--;
+        }
+      }
+    }
+
+    return localInitialControls;
+  }, [initialUrlParam, initialControls, controlGroupInputUpdates]);
+
   const setOptions = useCallback(
     async (
       defaultInput: Partial<ControlGroupInput>,
@@ -169,57 +247,21 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
         chainingSystem,
       };
 
-      // we want minimum of 4 fields to be dispayed in that particular order
-      const localInitialControls = cloneDeep(initialControls);
-      if (localInitialControls && localInitialControls.length >= 4) {
-        // if initialUrlParam Exists... replace localInitialControls with what was provided in the Url
-        if (initialUrlParam && !urlDataApplied.current) {
-          let maxInitialControlIdx = localInitialControls.length - 1;
-          for (let counter = initialUrlParam.length - 1; counter >= 0; counter--) {
-            const urlControl = initialUrlParam[counter];
-            const idx = localInitialControls.findIndex(
-              (item) => item.fieldName === urlControl.fieldName
-            );
+      const finalControls = selectControlsWithPriority();
 
-            if (idx !== -1) {
-              // if index found, replace that with what was provided in the Url
-              localInitialControls[idx] = {
-                ...localInitialControls[idx],
-                fieldName: urlControl.fieldName,
-                title: urlControl.title ?? urlControl.fieldName,
-                selectedOptions: urlControl.selectedOptions ?? [],
-                existsSelected: urlControl.existsSelected ?? false,
-                exclude: urlControl.exclude ?? false,
-              };
-            } else {
-              // if url param is not available in initialControl, start replacing the last slot in the
-              // initial Control with the last `not found` element in the Url Param
-              //
-              localInitialControls[maxInitialControlIdx] = {
-                fieldName: urlControl.fieldName,
-                selectedOptions: urlControl.selectedOptions ?? [],
-                title: urlControl.title ?? urlControl.fieldName,
-                existsSelected: urlControl.existsSelected ?? false,
-                exclude: urlControl.exclude ?? false,
-              };
-              maxInitialControlIdx--;
-            }
-          }
-        }
+      urlDataApplied.current = true;
 
-        urlDataApplied.current = true;
-
-        localInitialControls.forEach((control, idx) => {
-          addOptionsListControl(initialInput, {
-            controlId: String(idx),
-            dataViewId,
-            ...control,
-          });
+      finalControls.forEach((control, idx) => {
+        addOptionsListControl(initialInput, {
+          controlId: String(idx),
+          dataViewId,
+          ...control,
         });
-      }
+      });
+
       return initialInput;
     },
-    [initialControls, dataViewId, timeRange, filters, chainingSystem, query, initialUrlParam]
+    [dataViewId, timeRange, filters, chainingSystem, query, selectControlsWithPriority]
   );
 
   useFilterUpdatesToUrlSync({
@@ -248,6 +290,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
         selectedOptions: initialControls[idx].selectedOptions ?? [],
         existsSelected: false,
         exclude: false,
+        title: initialControls[idx].title ?? initialControls[idx].fieldName,
+        fieldName: initialControls[idx].fieldName,
       });
     });
   }, [controlGroupInputUpdates, controlGroup, initialControls]);
@@ -301,13 +345,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
             <EuiContextMenuPanel items={contextMenuItems} />
           </EuiPopover>
         </EuiFlexItem>
-        {/*
-         *<EuiFlexItem grow={false}>
-         *  <EuiButton iconType="plusInCircle" onClick={clearSelection}>
-         *    {`Add Filter`}
-         *  </EuiButton>
-         *</EuiFlexItem>
-         */}
       </EuiFlexGroup>
       {props.children}
     </FilterWrapper>

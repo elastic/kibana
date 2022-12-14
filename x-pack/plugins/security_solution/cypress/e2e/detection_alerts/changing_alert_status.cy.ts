@@ -97,6 +97,8 @@ describe('Changing alert status', () => {
               goToOpenedAlerts();
               waitForAlerts();
 
+              selectCountTable();
+
               cy.get(ALERTS_COUNT).should(
                 'have.text',
                 `${numberOfOpenedAlerts + numberOfAlertsToBeOpened} alerts`.toString()

@@ -12,10 +12,10 @@ import type {
 } from '@kbn/controls-plugin/common';
 import { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { formatPageFilterSearchParam } from '../../../../../common/utils/format_page_filter_search_param';
 import { URL_PARAM_KEY } from '../../../hooks/use_url_state';
 import { updateUrlParam } from '../../../store/global_url_param/actions';
-import { encodeRisonUrlState } from '../../../utils/global_query_string/helpers';
-import type { FilterUrlFormat } from '../types';
+import type { FilterItemObj } from '../types';
 
 export interface UseFilterUrlSyncParams {
   controlGroupInput: ControlGroupInput | undefined;
@@ -24,15 +24,14 @@ export interface UseFilterUrlSyncParams {
 export const useFilterUpdatesToUrlSync = ({ controlGroupInput }: UseFilterUrlSyncParams) => {
   const dispatch = useDispatch();
 
-  const formattedFilters: FilterUrlFormat | undefined = useMemo(() => {
+  const formattedFilters: FilterItemObj[] | undefined = useMemo(() => {
     if (!controlGroupInput) return;
     const { panels } = controlGroupInput;
-    const result: FilterUrlFormat = {};
-    Object.keys(panels).forEach((panelId) => {
+    return Object.keys(panels).map((panelId) => {
       const {
         explicitInput: { fieldName, selectedOptions, title, existsSelected, exclude },
       } = panels[panelId] as ControlPanelState<OptionsListEmbeddableInput>;
-      result[panelId] = {
+      return {
         fieldName: fieldName as string,
         selectedOptions: selectedOptions ?? [],
         title,
@@ -40,8 +39,6 @@ export const useFilterUpdatesToUrlSync = ({ controlGroupInput }: UseFilterUrlSyn
         exclude,
       };
     });
-
-    if (Object.keys(result).length > 0) return result;
   }, [controlGroupInput]);
 
   useEffect(() => {
@@ -49,7 +46,7 @@ export const useFilterUpdatesToUrlSync = ({ controlGroupInput }: UseFilterUrlSyn
     dispatch(
       updateUrlParam({
         key: URL_PARAM_KEY.pageFilter,
-        value: encodeRisonUrlState(Object.values(formattedFilters)),
+        value: formatPageFilterSearchParam(formattedFilters),
       })
     );
   }, [formattedFilters, dispatch]);

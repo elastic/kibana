@@ -30,7 +30,6 @@ export const useLocalStorage = <T,>({
 
   const readValueFromLocalStorage = useCallback(() => {
     const value = storage.get(`${plugin}.${key}`);
-
     const valueAndDefaultTypesAreDifferent = typeof value !== typeof defaultValue;
     const valueIsInvalid = isInvalidDefault != null && isInvalidDefault(value);
 

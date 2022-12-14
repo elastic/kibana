@@ -44,10 +44,17 @@ import {
   USER_DETAILS_LINK,
 } from '../screens/alerts_details';
 import { FIELD_INPUT } from '../screens/exceptions';
-import { OPTION_LIST_VALUES, OPTION_SELECTABLE } from '../screens/common/filter_group';
+import {
+  DETECTION_PAGE_FILTERS_LOADING,
+  DETECTION_PAGE_FILTER_GROUP_LOADING,
+  DETECTION_PAGE_FILTER_GROUP_WRAPPER,
+  OPTION_LISTS_LOADING,
+  OPTION_LIST_VALUES,
+  OPTION_SELECTABLE,
+} from '../screens/common/filter_group';
 
 export const addExceptionFromFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+  expandFirstAlertActions();
   cy.root()
     .pipe(($el) => {
       $el.find(ADD_EXCEPTION_BTN).trigger('click');
@@ -57,7 +64,7 @@ export const addExceptionFromFirstAlert = () => {
 };
 
 export const openAddEndpointExceptionFromFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+  expandFirstAlertActions();
   cy.root()
     .pipe(($el) => {
       $el.find(ADD_ENDPOINT_EXCEPTION_BTN).trigger('click');
@@ -85,11 +92,7 @@ export const openAddExceptionFromAlertDetails = () => {
 };
 
 export const closeFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN)
-    .first()
-    .pipe(($el) => $el.trigger('click'))
-    .should('be.visible');
-
+  expandFirstAlertActions();
   cy.get(CLOSE_ALERT_BTN)
     .pipe(($el) => $el.trigger('click'))
     .should('not.exist');
@@ -107,8 +110,12 @@ export const closeAlerts = () => {
 };
 
 export const expandFirstAlertActions = () => {
+  // Adding wait time because.. something is loading in the background
+  // which is preventing the popup to open upon button click below.
+  // Currently not sure what
+  cy.wait(500);
   cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.visible');
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click('center');
 };
 
 export const expandFirstAlert = () => {
@@ -139,11 +146,11 @@ export const setEnrichmentDates = (from?: string, to?: string) => {
 export const refreshAlertPageFilter = (filterIndex: number) => {
   cy.get(OPTION_LIST_VALUES).eq(filterIndex).click({ force: true });
   cy.get(OPTION_SELECTABLE(filterIndex, 'exists')).click({ force: true });
+  waitForAlerts();
 };
 
 export const selectPageFilterValue = (filterIndex: number, value: string) => {
   refreshAlertPageFilter(filterIndex);
-  cy.get(OPTION_LIST_VALUES).eq(filterIndex).click({ force: true });
   cy.get(OPTION_SELECTABLE(filterIndex, value)).click({ force: true });
 };
 
@@ -165,9 +172,8 @@ export const goToOpenedAlerts = () => {
 };
 
 export const openFirstAlert = () => {
-  cy.wait(500);
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
-  cy.get(OPEN_ALERT_BTN).click();
+  expandFirstAlertActions();
+  cy.get(OPEN_ALERT_BTN).should('be.visible').click({ force: true });
 };
 
 export const openAlerts = () => {
@@ -193,7 +199,7 @@ export const goToAcknowledgedAlerts = () => {
 };
 
 export const markAcknowledgedFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+  expandFirstAlertActions();
   cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
 };
 
@@ -219,6 +225,7 @@ export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: n
 export const waitForAlerts = () => {
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
+  waitForPageFilters();
 };
 
 export const waitForAlertsPanelToBeLoaded = () => {
@@ -242,4 +249,11 @@ export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
 
 export const openUserDetailsFlyout = () => {
   cy.get(CELL_EXPANSION_POPOVER).find(USER_DETAILS_LINK).click();
+};
+
+export const waitForPageFilters = () => {
+  cy.get(DETECTION_PAGE_FILTER_GROUP_WRAPPER).should('exist');
+  cy.get(DETECTION_PAGE_FILTER_GROUP_LOADING).should('not.exist');
+  cy.get(DETECTION_PAGE_FILTERS_LOADING).should('not.exist');
+  cy.get(OPTION_LISTS_LOADING).should('have.lengthOf', 0);
 };
