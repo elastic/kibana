@@ -7,6 +7,8 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
+import type { FleetAuthzRouter } from '../../services/security';
+
 import type {
   DeletePackageResponse,
   GetInfoResponse,
@@ -32,7 +34,6 @@ import {
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
 } from '../../types';
-import type { FleetAuthzRouter } from '../security';
 
 import {
   getCategoriesHandler,
