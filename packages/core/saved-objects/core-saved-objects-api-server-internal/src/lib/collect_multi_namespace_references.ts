@@ -304,6 +304,9 @@ async function optionallyUseSecurity(
     // Is the user authorized to access this object in this space?
     let isAuthorizedForObject = true;
     try {
+      // ToDo: this is the only remaining call to enforceAuthorization outside of the security extension
+      // This was a bit complicated to change now, but can ultimately be removed when authz logic is
+      // migrated from the repo level to the extension level.
       securityExtension.enforceAuthorization({
         typesAndSpaces: new Map([[type, new Set([namespaceString])]]),
         action,
