@@ -143,8 +143,7 @@ const expectedParamsTransformResult = (withBraces: boolean = false) => [
   },
 ];
 
-// FAILING: https://github.com/elastic/kibana/issues/147573
-describe.skip('transformActionVariables', () => {
+describe('transformActionVariables', () => {
   test('should return correct variables when no state, no context, no params provided', async () => {
     const alertType = getAlertType({ context: [], state: [], params: [] });
     expect(transformActionVariables(alertType.actionVariables)).toEqual(expectedTransformResult);
