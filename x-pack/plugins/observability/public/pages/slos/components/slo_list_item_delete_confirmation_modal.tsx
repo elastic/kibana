@@ -9,45 +9,46 @@ import { EuiConfirmModal } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../utils/kibana_react';
-import { deleteSlos } from '../../../hooks/slo/delete_slos';
+import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 import { SLO } from '../../../typings';
 
 export interface DeleteConfirmationPropsModal {
   slo: SLO;
   onCancel: () => void;
+  onDeleting: () => void;
   onDeleted: () => void;
 }
 
 export function DeleteConfirmationModal({
   slo: { id, name },
   onCancel,
+  onDeleting,
   onDeleted,
 }: DeleteConfirmationPropsModal) {
   const {
-    http,
     notifications: { toasts },
   } = useKibana().services;
 
   const [isVisible, setIsVisible] = useState(true);
 
-  const handleConfirm = async () => {
-    if (id) {
-      setIsVisible(false);
-      const { successes, errors } = await deleteSlos({ http, ids: [id] });
+  const { deleteSlo, success, loading, error } = useDeleteSlo();
 
-      const hasSucceeded = Boolean(successes.length);
-      const hasErrored = Boolean(errors.length);
+  if (loading) {
+    onDeleting();
+  }
 
-      if (hasSucceeded) {
-        toasts.addSuccess(getDeleteSuccesfulMessage(name));
-      }
+  if (success) {
+    toasts.addSuccess(getDeleteSuccesfulMessage(name));
+    onDeleted();
+  }
 
-      if (hasErrored) {
-        toasts.addDanger(getDeleteFailMessage(name));
-      }
+  if (error) {
+    toasts.addDanger(getDeleteFailMessage(name));
+  }
 
-      onDeleted();
-    }
+  const handleConfirm = () => {
+    setIsVisible(false);
+    deleteSlo(id);
   };
 
   return isVisible ? (

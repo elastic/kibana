@@ -29,10 +29,11 @@ import { isSloHealthy } from '../helpers/is_slo_healthy';
 
 export interface SloListItemProps {
   slo: SLO;
-  onDelete: () => void;
+  onDeleted: () => void;
+  onDeleting: () => void;
 }
 
-export function SloListItem({ slo, onDelete }: SloListItemProps) {
+export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -63,7 +64,7 @@ export function SloListItem({ slo, onDelete }: SloListItemProps) {
 
   const handleDeleteSuccess = () => {
     setDeleteConfirmationModalOpen(false);
-    onDelete();
+    onDeleted();
   };
 
   return (
@@ -144,6 +145,7 @@ export function SloListItem({ slo, onDelete }: SloListItemProps) {
         <DeleteConfirmationModal
           slo={slo}
           onCancel={handleDeleteCancel}
+          onDeleting={onDeleting}
           onDeleted={handleDeleteSuccess}
         />
       ) : null}

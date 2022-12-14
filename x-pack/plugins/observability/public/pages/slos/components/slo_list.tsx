@@ -18,6 +18,7 @@ export function SloList() {
   const [activePage, setActivePage] = useState(0);
   const [query, setQuery] = useState('');
 
+  const [deleting, setIsDeleting] = useState(false);
   const [shouldReload, setShouldReload] = useState(false);
 
   const {
@@ -28,11 +29,16 @@ export function SloList() {
   useEffect(() => {
     if (shouldReload) {
       setShouldReload(false);
+      setIsDeleting(false);
     }
   }, [shouldReload]);
 
-  const handleDelete = () => {
+  const handleDeleted = () => {
     setShouldReload(true);
+  };
+
+  const handleDeleting = () => {
+    setIsDeleting(true);
   };
 
   const handlePageClick = (pageNumber: number) => {
@@ -53,7 +59,7 @@ export function SloList() {
       <EuiFlexItem grow>
         <EuiFieldSearch
           fullWidth
-          isLoading={loading}
+          isLoading={loading || deleting}
           onChange={handleChange}
           placeholder={i18n.translate('observability.slos.list.search', {
             defaultMessage: 'Search',
@@ -66,7 +72,7 @@ export function SloList() {
           {slos.length ? (
             slos.map((slo) => (
               <EuiFlexItem key={slo.id}>
-                <SloListItem slo={slo} onDelete={handleDelete} />
+                <SloListItem slo={slo} onDeleted={handleDeleted} onDeleting={handleDeleting} />
               </EuiFlexItem>
             ))
           ) : !loading ? (
