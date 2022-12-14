@@ -28,9 +28,9 @@ export class HomePageObject extends FtrService {
   }
 
   async openSampleDataAccordion() {
-    let accordionButton = await this.testSubjects.find('showSampleDataButton');
+    const accordionButton = await this.testSubjects.find('showSampleDataButton');
     let expandedAttribute = await accordionButton.getAttribute('aria-expanded');
-    let expanded = expandedAttribute.toLocaleLowerCase().includes('true')
+    let expanded = expandedAttribute.toLocaleLowerCase().includes('true');
     this.log.debug(`Sample data accordion expanded: ${expanded}`);
 
     if (!expanded) {
@@ -106,7 +106,7 @@ export class HomePageObject extends FtrService {
         await this.testSubjects.click(`removeSampleDataSet${id}`);
         await this.common.sleep(1010);
         await this._waitForSampleDataLoadingAction(id);
-        return !await this.isSampleDataSetInstalled(id);
+        return !(await this.isSampleDataSetInstalled(id));
       });
     }
   }
