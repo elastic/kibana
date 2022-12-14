@@ -22,7 +22,7 @@ export const renderApp = async (
   const dataViews = await data.dataViews.find('kibana_sample_data_logs');
   const examples = dataViews.length > 0 ? (
     <>
-      <SearchExample navigation={navigation} dataView={dataViews[0]} />
+      <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
       <BasicReduxExample dataViewId={dataViews[0].id} />
     </>
   ) : (
