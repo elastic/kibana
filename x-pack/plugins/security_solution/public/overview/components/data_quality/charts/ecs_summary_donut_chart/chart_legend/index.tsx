@@ -48,7 +48,7 @@ const ChartLegendComponent: React.FC<Props> = ({ partitionedFieldMetadata, setSe
       {partitionedFieldMetadata.notEcsCompliant.length > 0 && (
         <EuiFlexItem grow={false}>
           <ChartLegendItem
-            color={getNotEcsCompliantColor(partitionedFieldMetadata)}
+            color={getNotEcsCompliantColor()}
             count={partitionedFieldMetadata.notEcsCompliant.length}
             onClick={showNotEcsCompliantTab}
             text={i18n.NOT_ECS_COMPLIANT}

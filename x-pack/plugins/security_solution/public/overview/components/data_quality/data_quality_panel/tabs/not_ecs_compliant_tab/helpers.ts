@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-theme';
-
 import { getMarkdownComment } from '../../index_properties/markdown/helpers';
 import { getFillColor } from '../summary_tab/helpers';
 import * as i18n from '../../index_properties/translations';
-import type { EnrichedFieldMetadata, PartitionedFieldMetadata } from '../../../types';
+import type { EnrichedFieldMetadata } from '../../../types';
 
 export const getNotEcsCompliantMarkdownComment = ({
   enrichedFieldMetadata,
   indexName,
+  version,
 }: {
   enrichedFieldMetadata: EnrichedFieldMetadata[];
   indexName: string;
+  version: string;
 }): string =>
   getMarkdownComment({
     enrichedFieldMetadata,
     indexName,
-    suggestedAction: `${i18n.NOT_ECS_COMPLIANT_CALLOUT(enrichedFieldMetadata.length)}
+    suggestedAction: `${i18n.NOT_ECS_COMPLIANT_CALLOUT({
+      fieldCount: enrichedFieldMetadata.length,
+      version,
+    })}
     ${i18n.MAPPINGS_THAT_CONFLICT_WITH_ECS}
     ${i18n.DETECTION_ENGINE_RULES_WONT_WORK}
     ${i18n.PAGES_WONT_DISPLAY_EVENTS}
@@ -34,9 +37,4 @@ export const showNotEcsCompliantCallout = (
   enrichedFieldMetadata: EnrichedFieldMetadata[]
 ): boolean => enrichedFieldMetadata.length > 0;
 
-export const getNotEcsCompliantColor = (
-  partitionedFieldMetadata: PartitionedFieldMetadata
-): string =>
-  showNotEcsCompliantCallout(partitionedFieldMetadata.notEcsCompliant)
-    ? getFillColor('not-ecs-compliant')
-    : euiThemeVars.euiTextColor;
+export const getNotEcsCompliantColor = (): string => getFillColor('not-ecs-compliant');

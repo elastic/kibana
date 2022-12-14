@@ -11,6 +11,7 @@ import * as yaml from 'js-yaml';
 import * as i18n from '../translations';
 import type { EcsMetadata } from '../types';
 
+// TODO: use the production endpoint when it's implemented
 const ECS_METADATA_ENDPOINT =
   'https://raw.githubusercontent.com/elastic/ecs/main/generated/ecs/ecs_flat.yml';
 
@@ -26,25 +27,40 @@ export const useEcsMetadata = (): UseEcsMetadata => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     async function fetchData() {
       try {
-        const response = await fetch(ECS_METADATA_ENDPOINT);
+        const response = await fetch(ECS_METADATA_ENDPOINT, {
+          method: 'GET',
+          signal: abortController.signal,
+        });
 
         if (response.ok) {
           const metadataYaml = await response.text();
 
-          setEcsMetadata(yaml.safeLoad(metadataYaml));
+          if (!abortController.signal.aborted) {
+            setEcsMetadata(yaml.safeLoad(metadataYaml));
+          }
         } else {
           throw new Error(response.statusText);
         }
       } catch (e) {
-        setError(i18n.ERROR_LOADING_ECS_METADATA(e));
+        if (!abortController.signal.aborted) {
+          setError(i18n.ERROR_LOADING_ECS_METADATA(e));
+        }
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
 
     fetchData();
+
+    return () => {
+      abortController.abort();
+    };
   }, [setError]);
 
   return { ecsMetadata, error, loading };

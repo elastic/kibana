@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { has } from 'lodash/fp';
 
 import type {
@@ -15,9 +15,8 @@ import type {
   PartitionedFieldMetadataStats,
 } from './types';
 
-export const getIndexNames = (
-  mappings: Record<string, IndicesGetMappingIndexMappingRecord> | null
-) => (mappings != null ? Object.keys(mappings) : []);
+export const getIndexNames = (stats: Record<string, IndicesStatsIndicesStats> | null) =>
+  stats != null ? Object.keys(stats) : [];
 
 export interface FieldType {
   field: string;
@@ -150,3 +149,11 @@ export const hasValidTimestampMapping = (enrichedFieldMetadata: EnrichedFieldMet
   enrichedFieldMetadata.some(
     (x) => x.indexFieldName === '@timestamp' && x.indexFieldType === 'date'
   );
+
+export const getDocsCount = ({
+  indexName,
+  stats,
+}: {
+  indexName: string;
+  stats: Record<string, IndicesStatsIndicesStats> | null;
+}): number => (stats && stats[indexName]?.total?.docs?.count) ?? 0;

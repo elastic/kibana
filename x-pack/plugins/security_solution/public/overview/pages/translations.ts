@@ -69,6 +69,12 @@ export const ENTITY_ANALYTICS_LICENSE_DESC = i18n.translate(
   }
 );
 
+export const SECURITY_SOLUTION_DEFAULT_INDEX_TOOLTIP = (settingName: string) =>
+  i18n.translate('xpack.securitySolution.dataQuality.securitySolutionDefaultIndexTooltip', {
+    values: { settingName },
+    defaultMessage: `Indices and patterns from the {settingName} setting`,
+  });
+
 export const TECHNICAL_PREVIEW = i18n.translate(
   'xpack.securitySolution.entityAnalytics.technicalPreviewLabel',
   {

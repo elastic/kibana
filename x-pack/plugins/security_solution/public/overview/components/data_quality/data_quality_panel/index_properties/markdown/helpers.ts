@@ -97,12 +97,14 @@ ${enrichedFieldMetadata.length > 0 ? getMarkdownTableRows(enrichedFieldMetadata)
 `;
 
 export const getCaseSummaryMarkdownComment = ({
+  docsCount,
   ecsFieldReferenceUrl,
   ecsReferenceUrl,
   indexName,
   updateMappingUrl,
   version,
 }: {
+  docsCount: number;
   ecsFieldReferenceUrl: string;
   ecsReferenceUrl: string;
   indexName: string;
@@ -125,6 +127,8 @@ ${i18n.CASE_SUMMARY_MARKDOWN_DESCRIPTION({
 \`\`\`
 ${escape(indexName)}
 \`\`\`
+
+\`${docsCount}\` ${i18n.DOCS}
 
 ### ${i18n.ECS_VERSION_MARKDOWN_COMMENT}
 

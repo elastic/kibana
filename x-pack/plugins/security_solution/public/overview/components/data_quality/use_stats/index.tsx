@@ -5,24 +5,21 @@
  * 2.0.
  */
 
-import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
 
 import * as i18n from '../translations';
 
-const API_CONSOLE_ENDPOINT = '/internal/data_quality/mappings';
+const STATS_ENDPOINT = '/internal/data_quality/stats';
 
-interface UseMappings {
-  indexes: Record<string, IndicesGetMappingIndexMappingRecord> | null;
+interface UseStats {
+  stats: Record<string, IndicesStatsIndicesStats> | null;
   error: string | null;
   loading: boolean;
 }
 
-export const useMappings = (pattern: string | null): UseMappings => {
-  const [indexes, setIndexes] = useState<Record<
-    string,
-    IndicesGetMappingIndexMappingRecord
-  > | null>(null);
+export const useStats = (pattern: string | null): UseStats => {
+  const [stats, setStats] = useState<Record<string, IndicesStatsIndicesStats> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -37,7 +34,7 @@ export const useMappings = (pattern: string | null): UseMappings => {
       try {
         const encodedIndexName = encodeURIComponent(`${pattern}`);
 
-        const response = await fetch(`${API_CONSOLE_ENDPOINT}/${encodedIndexName}`, {
+        const response = await fetch(`${STATS_ENDPOINT}/${encodedIndexName}`, {
           method: 'GET',
           signal: abortController.signal,
         });
@@ -46,14 +43,14 @@ export const useMappings = (pattern: string | null): UseMappings => {
           const json = await response.json();
 
           if (!abortController.signal.aborted) {
-            setIndexes(json);
+            setStats(json);
           }
         } else {
           throw new Error(response.statusText);
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          setError(i18n.ERROR_LOADING_MAPPINGS(e));
+          setError(i18n.ERROR_LOADING_STATS(e));
         }
       } finally {
         if (!abortController.signal.aborted) {
@@ -69,5 +66,5 @@ export const useMappings = (pattern: string | null): UseMappings => {
     };
   }, [pattern, setError]);
 
-  return { indexes, error, loading };
+  return { stats, error, loading };
 };

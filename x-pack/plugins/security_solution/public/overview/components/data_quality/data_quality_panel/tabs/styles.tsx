@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import { EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 
 export const CalloutItem = styled.div`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
+export const CopyToClipboardButton = styled(EuiButtonEmpty)`
+  margin-left: ${({ theme }) => theme.eui.euiSizeXS};
 `;

@@ -5,31 +5,33 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiComboBox, EuiLink, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { SecurityPageName } from '../../app/types';
 import { DataQualityPanel } from '../components/data_quality';
 import { ECS_REFERENCE_URL } from '../components/data_quality/data_quality_panel/index_properties/markdown/helpers';
-import { DATA_QUALITY_SUBTITLE } from '../components/data_quality/translations';
+import {
+  DATA_QUALITY_SUBTITLE,
+  INDEXES,
+  INDEXES_PLACEHOLDER,
+} from '../components/data_quality/translations';
 import { HeaderPage } from '../../common/components/header_page';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { SiemSearchBar } from '../../common/components/search_bar';
-import { SECURITY_DEFAULT_DATA_VIEW_LABEL } from '../../common/components/sourcerer/translations';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { InputsModelId } from '../../common/store/inputs/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as i18n from './translations';
 
+const SECURITY_SOLUTION_DEFAULT_INDEX_SETTING = 'securitySolution:defaultIndex';
+
+interface Options {
+  label: string;
+}
+
 const DataQualityComponent: React.FC = () => {
-  const {
-    indicesExist,
-    indexPattern,
-    loading: isSourcererLoading,
-    selectedPatterns,
-  } = useSourcererDataView();
+  const { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
   const { signalIndexName } = useSignalIndex();
   const alertsAndSelectedPatterns = useMemo(
     () => [`${signalIndexName}`, ...selectedPatterns],
@@ -48,31 +50,36 @@ const DataQualityComponent: React.FC = () => {
     []
   );
 
+  const options: Options[] = useMemo(
+    () => alertsAndSelectedPatterns.map((pattern) => ({ label: pattern })),
+    [alertsAndSelectedPatterns]
+  );
+
   return (
     <>
       {indicesExist ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="dataQualityPage">
             <HeaderPage subtitle={subtitle} title={i18n.DATA_QUALITY_TITLE}>
-              <SiemSearchBar
-                id={InputsModelId.global}
-                indexPattern={indexPattern}
-                hideFilterBar
-                hideQueryInput
-              />
+              <EuiToolTip
+                content={i18n.SECURITY_SOLUTION_DEFAULT_INDEX_TOOLTIP(
+                  SECURITY_SOLUTION_DEFAULT_INDEX_SETTING
+                )}
+              >
+                <EuiComboBox
+                  aria-label={INDEXES}
+                  isDisabled={true}
+                  placeholder={INDEXES_PLACEHOLDER}
+                  options={options}
+                  selectedOptions={options}
+                />
+              </EuiToolTip>
             </HeaderPage>
 
             {isSourcererLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="dataQualityLoader" />
             ) : (
-              <EuiFlexGroup direction="column" data-test-subj="dataQualitySections">
-                <EuiFlexItem>
-                  <DataQualityPanel
-                    patterns={alertsAndSelectedPatterns}
-                    title={SECURITY_DEFAULT_DATA_VIEW_LABEL}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <DataQualityPanel patterns={alertsAndSelectedPatterns} />
             )}
           </SecuritySolutionPageWrapper>
         </>

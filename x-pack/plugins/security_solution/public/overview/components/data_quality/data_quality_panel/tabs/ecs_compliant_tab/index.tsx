@@ -30,6 +30,7 @@ const EmptyPromptContainer = styled.div`
 
 interface Props {
   addToNewCaseDisabled: boolean;
+  docsCount: number;
   enrichedFieldMetadata: EnrichedFieldMetadata[];
   indexName: string;
   onAddToNewCase: (markdownComments: string[]) => void;
@@ -38,6 +39,7 @@ interface Props {
 
 const EcsCompliantTabComponent: React.FC<Props> = ({
   addToNewCaseDisabled,
+  docsCount,
   enrichedFieldMetadata,
   indexName,
   onAddToNewCase,
@@ -46,6 +48,7 @@ const EcsCompliantTabComponent: React.FC<Props> = ({
   const onClick = useCallback(() => {
     onAddToNewCase([
       getCaseSummaryMarkdownComment({
+        docsCount,
         ecsFieldReferenceUrl: ECS_FIELD_REFERENCE_URL,
         ecsReferenceUrl: ECS_REFERENCE_URL,
         indexName,
@@ -57,7 +60,7 @@ const EcsCompliantTabComponent: React.FC<Props> = ({
         indexName,
       }),
     ]);
-  }, [enrichedFieldMetadata, indexName, onAddToNewCase, version]);
+  }, [docsCount, enrichedFieldMetadata, indexName, onAddToNewCase, version]);
   const emptyPromptBody = useMemo(() => <EmptyPromptBody body={i18n.ECS_COMPLIANT_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.ECS_COMPLIANT_EMPTY_TITLE} />, []);
 

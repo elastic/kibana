@@ -15,15 +15,22 @@ import { CalloutItem } from '../../styles';
 interface Props {
   children?: React.ReactNode;
   enrichedFieldMetadata: EnrichedFieldMetadata[];
+  version: string;
 }
 
-const NotEcsCompliantCalloutComponent: React.FC<Props> = ({ children, enrichedFieldMetadata }) => (
+const NotEcsCompliantCalloutComponent: React.FC<Props> = ({
+  children,
+  enrichedFieldMetadata,
+  version,
+}) => (
   <EuiCallOut
     color="danger"
     size="s"
     title={i18n.NOT_ECS_COMPLIANT_CALLOUT_TITLE(enrichedFieldMetadata.length)}
   >
-    <div>{i18n.NOT_ECS_COMPLIANT_CALLOUT(enrichedFieldMetadata.length)}</div>
+    <div>
+      {i18n.NOT_ECS_COMPLIANT_CALLOUT({ fieldCount: enrichedFieldMetadata.length, version })}
+    </div>
     <CalloutItem>{i18n.MAPPINGS_THAT_CONFLICT_WITH_ECS}</CalloutItem>
     <CalloutItem>{i18n.DETECTION_ENGINE_RULES_WONT_WORK}</CalloutItem>
     <CalloutItem>{i18n.PAGES_WONT_DISPLAY_EVENTS}</CalloutItem>

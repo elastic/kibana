@@ -12,7 +12,7 @@ export const fetchMappings = async (
   client: IScopedClusterClient,
   indexName: string
 ): Promise<Record<string, IndicesGetMappingIndexMappingRecord>> =>
-  await client.asCurrentUser.indices.getMapping({
+  client.asCurrentUser.indices.getMapping({
     expand_wildcards: ['open'],
     index: indexName,
   });

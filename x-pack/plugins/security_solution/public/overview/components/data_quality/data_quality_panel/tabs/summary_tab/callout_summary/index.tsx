@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { MissingTimestampCallout } from '../../callouts/missing_timestamp_callout';
@@ -21,11 +21,13 @@ import {
 } from '../../../index_properties/markdown/helpers';
 import { showNotEcsCompliantCallout } from '../../not_ecs_compliant_tab/helpers';
 import { showNonEcsCallout } from '../../non_ecs_tab/helpers';
+import { CopyToClipboardButton } from '../../styles';
 import * as i18n from '../../../index_properties/translations';
 import type { PartitionedFieldMetadata } from '../../../../types';
 
 interface Props {
   addToNewCaseDisabled: boolean;
+  docsCount: number;
   indexName: string;
   onAddToNewCase: (markdownComment: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
@@ -34,14 +36,16 @@ interface Props {
 
 const CalloutSummaryComponent: React.FC<Props> = ({
   addToNewCaseDisabled,
+  docsCount,
   indexName,
   onAddToNewCase,
   partitionedFieldMetadata,
   version,
 }) => {
-  const markdownComments = useMemo(
+  const markdownComments: string[] = useMemo(
     () => [
       getCaseSummaryMarkdownComment({
+        docsCount,
         ecsFieldReferenceUrl: ECS_FIELD_REFERENCE_URL,
         ecsReferenceUrl: ECS_REFERENCE_URL,
         indexName,
@@ -51,11 +55,13 @@ const CalloutSummaryComponent: React.FC<Props> = ({
       ...getMarkdownComments({
         indexName,
         partitionedFieldMetadata,
+        version,
       }),
     ],
-    [indexName, partitionedFieldMetadata, version]
+    [docsCount, indexName, partitionedFieldMetadata, version]
   );
-  const onClick = useCallback(
+
+  const onClickAddToCase = useCallback(
     () => onAddToNewCase(markdownComments),
     [markdownComments, onAddToNewCase]
   );
@@ -66,13 +72,17 @@ const CalloutSummaryComponent: React.FC<Props> = ({
         <>
           <NotEcsCompliantCallout
             enrichedFieldMetadata={partitionedFieldMetadata.notEcsCompliant}
+            version={version}
           />
           <EuiSpacer size="s" />
         </>
       )}
       {showNonEcsCallout(partitionedFieldMetadata.nonEcs) && (
         <>
-          <NonEcsCallout enrichedFieldMetadata={partitionedFieldMetadata.nonEcs} />
+          <NonEcsCallout
+            enrichedFieldMetadata={partitionedFieldMetadata.nonEcs}
+            version={version}
+          />
           <EuiSpacer size="s" />
         </>
       )}
@@ -84,9 +94,24 @@ const CalloutSummaryComponent: React.FC<Props> = ({
       )}
       {markdownComments.length > 0 && (
         <>
-          <EuiButton disabled={addToNewCaseDisabled} onClick={onClick}>
-            {i18n.ADD_TO_CASE}
-          </EuiButton>
+          <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiButton disabled={addToNewCaseDisabled} onClick={onClickAddToCase}>
+                {i18n.ADD_TO_CASE}
+              </EuiButton>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiCopy textToCopy={markdownComments.join('\n')}>
+                {(copy) => (
+                  <CopyToClipboardButton onClick={copy}>
+                    {i18n.COPY_TO_CLIPBOARD}
+                  </CopyToClipboardButton>
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
           <EuiSpacer size="s" />
         </>
       )}

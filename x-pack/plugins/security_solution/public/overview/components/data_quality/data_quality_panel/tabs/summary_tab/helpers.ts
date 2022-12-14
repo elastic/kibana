@@ -87,9 +87,11 @@ const isString = (x: string | null): x is string => typeof x === 'string';
 export const getMarkdownComments = ({
   indexName,
   partitionedFieldMetadata,
+  version,
 }: {
   indexName: string;
   partitionedFieldMetadata: PartitionedFieldMetadata;
+  version: string;
 }): string[] => {
   const notEcsCompliantMarkdownComment = showNotEcsCompliantCallout(
     partitionedFieldMetadata.notEcsCompliant
@@ -97,6 +99,7 @@ export const getMarkdownComments = ({
     ? getNotEcsCompliantMarkdownComment({
         enrichedFieldMetadata: partitionedFieldMetadata.notEcsCompliant,
         indexName,
+        version,
       })
     : null;
 
@@ -104,6 +107,7 @@ export const getMarkdownComments = ({
     ? getNonEcsMarkdownComment({
         enrichedFieldMetadata: partitionedFieldMetadata.nonEcs,
         indexName,
+        version,
       })
     : null;
 

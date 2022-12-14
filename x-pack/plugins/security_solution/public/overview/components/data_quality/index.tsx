@@ -5,68 +5,51 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
 import { Body } from './data_quality_panel/body';
-import { Header } from './data_quality_panel/header';
-import { PanelSubtitle } from './data_quality_panel/panel_subtitle';
+import { ErrorEmptyPrompt } from './data_quality_panel/error_empty_prompt';
+import { LoadingEmptyPrompt } from './data_quality_panel/loading_empty_prompt';
 import * as i18n from './translations';
 import { useEcsMetadata } from './use_ecs_metadata';
 import { useEcsVersion } from './use_ecs_version';
 
 interface Props {
   patterns: string[];
-  title?: string;
 }
 
-const DataQualityPanelComponent: React.FC<Props> = ({
-  patterns,
-  title = i18n.DEFAULT_PANEL_TITLE,
-}) => {
-  const { ecsMetadata, error, loading } = useEcsMetadata();
-  const { loading: versionLoading, version } = useEcsVersion();
-  const [collapsed, setCollapsed] = useState<boolean>(false);
-  const subtitle = useMemo(
-    () => (
-      <PanelSubtitle
-        error={error}
-        loading={loading}
-        version={version}
-        versionLoading={versionLoading}
-      />
-    ),
-    [error, loading, version, versionLoading]
-  );
+const DataQualityPanelComponent: React.FC<Props> = ({ patterns }) => {
+  const { ecsMetadata, error: ecsMetadataError, loading: ecsMetadataLoading } = useEcsMetadata();
+  const { error: versionError, loading: versionLoading, version } = useEcsVersion();
 
-  return (
-    <EuiPanel data-test-subj="data-quality-panel" hasBorder>
-      <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexItem grow={false}>
-          <Header
-            collapsed={collapsed}
-            patterns={patterns}
-            setCollapsed={setCollapsed}
-            subtitle={subtitle}
-            title={title}
+  const loading = ecsMetadataLoading || versionLoading;
+  const error = ecsMetadataError ?? versionError;
+
+  if (!loading && error != null) {
+    return (
+      <>
+        {ecsMetadataError != null && (
+          <ErrorEmptyPrompt
+            error={ecsMetadataError}
+            title={i18n.ERROR_LOADING_ECS_METADATA_TITLE}
           />
-        </EuiFlexItem>
-
-        {!collapsed && (
-          <EuiFlexItem grow={false}>
-            <Body
-              ecsMetadata={ecsMetadata}
-              error={error}
-              loading={loading}
-              patterns={patterns}
-              version={version}
-              versionLoading={versionLoading}
-            />
-          </EuiFlexItem>
         )}
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
+        <EuiSpacer />
+        {versionError != null && (
+          <ErrorEmptyPrompt error={versionError} title={i18n.ERROR_LOADING_ECS_VERSION_TITLE} />
+        )}
+      </>
+    );
+  }
+
+  if (loading) {
+    return <LoadingEmptyPrompt loading={i18n.LOADING_ECS_METADATA} />;
+  }
+
+  return ecsMetadata != null && version != null ? (
+    <Body ecsMetadata={ecsMetadata} patterns={patterns} version={version} />
+  ) : null;
 };
 
 DataQualityPanelComponent.displayName = 'DataQualityPanelComponent';

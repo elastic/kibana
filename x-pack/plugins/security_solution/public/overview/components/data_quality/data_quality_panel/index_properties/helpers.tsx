@@ -27,6 +27,7 @@ export const SUMMARY_TAB_ID = 'summaryTab';
 
 export const getTabs = ({
   addToNewCaseDisabled,
+  docsCount,
   indexName,
   onAddToNewCase,
   partitionedFieldMetadata,
@@ -34,6 +35,7 @@ export const getTabs = ({
   version,
 }: {
   addToNewCaseDisabled: boolean;
+  docsCount: number;
   indexName: string;
   onAddToNewCase: (markdownComments: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
@@ -44,6 +46,7 @@ export const getTabs = ({
     content: (
       <SummaryTab
         addToNewCaseDisabled={addToNewCaseDisabled}
+        docsCount={docsCount}
         indexName={indexName}
         onAddToNewCase={onAddToNewCase}
         partitionedFieldMetadata={partitionedFieldMetadata}
@@ -56,13 +59,14 @@ export const getTabs = ({
   },
   {
     append: (
-      <EuiBadge color={getNotEcsCompliantColor(partitionedFieldMetadata)}>
+      <EuiBadge color={getNotEcsCompliantColor()}>
         {partitionedFieldMetadata.notEcsCompliant.length}
       </EuiBadge>
     ),
     content: (
       <NotEcsCompliantTab
         addToNewCaseDisabled={addToNewCaseDisabled}
+        docsCount={docsCount}
         enrichedFieldMetadata={partitionedFieldMetadata.notEcsCompliant}
         indexName={indexName}
         onAddToNewCase={onAddToNewCase}
@@ -81,6 +85,7 @@ export const getTabs = ({
     content: (
       <NonEcsTab
         addToNewCaseDisabled={addToNewCaseDisabled}
+        docsCount={docsCount}
         enrichedFieldMetadata={partitionedFieldMetadata.nonEcs}
         indexName={indexName}
         onAddToNewCase={onAddToNewCase}
@@ -99,6 +104,7 @@ export const getTabs = ({
     content: (
       <EcsCompliantTab
         addToNewCaseDisabled={addToNewCaseDisabled}
+        docsCount={docsCount}
         enrichedFieldMetadata={partitionedFieldMetadata.ecsCompliant}
         indexName={indexName}
         onAddToNewCase={onAddToNewCase}

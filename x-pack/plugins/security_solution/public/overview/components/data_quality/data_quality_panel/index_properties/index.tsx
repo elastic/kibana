@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import type { MappingProperty, PropertyName } from '@elastic/elasticsearch/lib/api/types';
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { sortBy } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useMappings } from '../../use_mappings';
 
+import { ErrorEmptyPrompt } from '../error_empty_prompt';
 import {
   getEnrichedFieldMetadata,
   getFieldTypes,
   getPartitionedFieldMetadata,
 } from '../../helpers';
 import { getTabs, SUMMARY_TAB_ID } from './helpers';
+import { LoadingEmptyPrompt } from '../loading_empty_prompt';
+import * as i18n from './translations';
 import type { EcsMetadata, PartitionedFieldMetadata } from '../../types';
 import { useAddToNewCase } from '../../use_add_to_new_case';
 
 interface Props {
+  docsCount: number;
   ecsMetadata: Record<string, EcsMetadata> | null;
   indexName: string;
-  mappingsProperties: Record<PropertyName, MappingProperty> | undefined;
   version: string;
 }
 
@@ -34,11 +37,20 @@ const EMPTY_METADATA: PartitionedFieldMetadata = {
 };
 
 const IndexPropertiesComponent: React.FC<Props> = ({
+  docsCount,
   ecsMetadata,
   indexName,
-  mappingsProperties,
   version,
 }) => {
+  const { error, indexes, loading } = useMappings(indexName);
+  const mappingsProperties = useMemo(() => {
+    if (indexes != null) {
+      return indexes[indexName].mappings.properties;
+    } else {
+      return null;
+    }
+  }, [indexName, indexes]);
+
   const partitionedFieldMetadata: PartitionedFieldMetadata = useMemo(() => {
     if (ecsMetadata == null || mappingsProperties == null) {
       return EMPTY_METADATA;
@@ -60,13 +72,14 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     () =>
       getTabs({
         addToNewCaseDisabled,
+        docsCount,
         indexName,
         onAddToNewCase,
         partitionedFieldMetadata,
         setSelectedTabId,
         version,
       }),
-    [addToNewCaseDisabled, indexName, onAddToNewCase, partitionedFieldMetadata, version]
+    [addToNewCaseDisabled, docsCount, indexName, onAddToNewCase, partitionedFieldMetadata, version]
   );
   const onSelectedTabChanged = useCallback((id: string) => {
     setSelectedTabId(id);
@@ -81,25 +94,40 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     [selectedTabId, tabs]
   );
 
-  const renderTabs = () => {
-    return tabs.map((tab, index) => (
-      <EuiTab
-        append={tab.append}
-        isSelected={tab.id === selectedTabId}
-        key={index}
-        onClick={() => onSelectedTabChanged(tab.id)}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
-  };
+  const renderTabs = useCallback(
+    () =>
+      tabs.map((tab, index) => (
+        <EuiTab
+          append={tab.append}
+          isSelected={tab.id === selectedTabId}
+          key={index}
+          onClick={() => onSelectedTabChanged(tab.id)}
+        >
+          {tab.name}
+        </EuiTab>
+      )),
+    [onSelectedTabChanged, selectedTabId, tabs]
+  );
 
-  return (
+  if (error != null) {
+    return (
+      <ErrorEmptyPrompt
+        error={i18n.ERROR_LOADING_MAPPINGS_BODY(error)}
+        title={i18n.ERROR_LOADING_MAPPINGS_TITLE}
+      />
+    );
+  }
+
+  if (loading) {
+    return <LoadingEmptyPrompt loading={i18n.LOADING_MAPPINGS} />;
+  }
+
+  return indexes != null ? (
     <>
       <EuiTabs>{renderTabs()}</EuiTabs>
       {selectedTabContent}
     </>
-  );
+  ) : null;
 };
 
 IndexPropertiesComponent.displayName = 'IndexPropertiesComponent';

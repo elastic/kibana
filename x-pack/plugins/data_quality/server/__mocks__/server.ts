@@ -66,6 +66,7 @@ class MockServer {
     return getRoute(this.router);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private maybeValidate(part: any, validator?: any): any {
     return typeof validator === 'function' ? validator(part, this.resultMock) : part;
   }

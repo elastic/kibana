@@ -50,7 +50,7 @@ export const ALL_EMPTY_TITLE = i18n.translate(
 export const CASE_SUMMARY_MARKDOWN_TITLE = i18n.translate(
   'xpack.securitySolution.dataQuality.indexProperties.caseSummaryMarkdownTitle',
   {
-    defaultMessage: 'Data quality case',
+    defaultMessage: 'Data quality',
   }
 );
 
@@ -72,9 +72,16 @@ export const CASE_SUMMARY_MARKDOWN_DESCRIPTION = ({
     {
       values: { ecsFieldReferenceUrl, ecsReferenceUrl, indexName, updateMappingUrl, version },
       defaultMessage:
-        'This case contains recommendations for [updating field mappings]({updateMappingUrl}) in the `{indexName}` index, because they are different than the [Elastic Common Schema]({ecsReferenceUrl}) (ECS) version `{version}` [definitions]({ecsFieldReferenceUrl}).',
+        'This contains recommendations for [updating field mappings]({updateMappingUrl}) in the `{indexName}` index, because they are different than the [Elastic Common Schema]({ecsReferenceUrl}) (ECS) version `{version}` [definitions]({ecsFieldReferenceUrl}).',
     }
   );
+
+export const COPY_TO_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.dataQuality.indexProperties.copyToClipboardButton',
+  {
+    defaultMessage: 'Copy to clipboard',
+  }
+);
 
 export const CUSTOM_DETECTION_ENGINE_RULES_WORK = i18n.translate(
   'xpack.securitySolution.dataQuality.indexProperties.custonDetectionEngineRulesWorkMessage',
@@ -82,6 +89,10 @@ export const CUSTOM_DETECTION_ENGINE_RULES_WORK = i18n.translate(
     defaultMessage: '✅ Custom detection engine rules work',
   }
 );
+
+export const DOCS = i18n.translate('xpack.securitySolution.dataQuality.indexProperties.docsLabel', {
+  defaultMessage: 'Docs',
+});
 
 export const ECS_COMPLIANT = i18n.translate(
   'xpack.securitySolution.dataQuality.indexProperties.ecsCompliantTab',
@@ -140,6 +151,26 @@ export const ECS_COMPLIANT_MAPPINGS_ARE_FULLY_SUPPORTED = i18n.translate(
   }
 );
 
+export const ERROR_LOADING_MAPPINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.dataQuality.emptyErrorPrompt.errorLoadingMappingsTitle',
+  {
+    defaultMessage: 'Unable to load index mappings',
+  }
+);
+
+export const ERROR_LOADING_MAPPINGS_BODY = (error: string) =>
+  i18n.translate('xpack.securitySolution.dataQuality.emptyErrorPrompt.errorLoadingMappingsBody', {
+    values: { error },
+    defaultMessage: 'There was a problem loading mappings: {error}',
+  });
+
+export const LOADING_MAPPINGS = i18n.translate(
+  'xpack.securitySolution.dataQuality.emptyLoadingPrompt.loadingMappingsPrompt',
+  {
+    defaultMessage: 'Loading mappings',
+  }
+);
+
 export const SUMMARY = i18n.translate(
   'xpack.securitySolution.dataQuality.indexProperties.summaryTab',
   {
@@ -169,11 +200,11 @@ export const NON_ECS = i18n.translate(
   }
 );
 
-export const NON_ECS_CALLOUT = (fieldCount: number) =>
+export const NON_ECS_CALLOUT = ({ fieldCount, version }: { fieldCount: number; version: string }) =>
   i18n.translate('xpack.securitySolution.dataQuality.indexProperties.nonEcsCallout', {
-    values: { fieldCount },
+    values: { fieldCount, version },
     defaultMessage:
-      '{fieldCount, plural, =1 {This field is not} other {These fields are not}} defined by the Elastic Common Schema (ECS). An index may contain non ECS fields, however:',
+      '{fieldCount, plural, =1 {This field is not} other {These fields are not}} defined by the Elastic Common Schema (ECS) version {version}. An index may contain non ECS fields, however:',
   });
 
 export const NON_ECS_CALLOUT_TITLE = (fieldCount: number) =>
@@ -204,11 +235,17 @@ export const NOT_ECS_COMPLIANT = i18n.translate(
   }
 );
 
-export const NOT_ECS_COMPLIANT_CALLOUT = (fieldCount: number) =>
+export const NOT_ECS_COMPLIANT_CALLOUT = ({
+  fieldCount,
+  version,
+}: {
+  fieldCount: number;
+  version: string;
+}) =>
   i18n.translate('xpack.securitySolution.dataQuality.indexProperties.notEcsCompliantCallout', {
-    values: { fieldCount },
+    values: { fieldCount, version },
     defaultMessage:
-      'Consider updating the {fieldCount, plural, =1 {mapping} other {mappings}} for {fieldCount, plural, =1 {this field} other {these fields}} to match {fieldCount, plural, =1 {its Elastic Common Schema (ECS) type} other {their Elastic Common Schema (ECS) types}}, because:',
+      'Consider updating the {fieldCount, plural, =1 {mapping} other {mappings}} for {fieldCount, plural, =1 {this field} other {these fields}} to match {fieldCount, plural, =1 {its Elastic Common Schema (ECS) version {version} type} other {their Elastic Common Schema (ECS) version {version} types}}, because:',
   });
 
 export const NOT_ECS_COMPLIANT_CALLOUT_TITLE = (fieldCount: number) =>

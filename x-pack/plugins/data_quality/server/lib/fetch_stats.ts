@@ -12,7 +12,7 @@ export const fetchStats = async (
   client: IScopedClusterClient,
   indexName: string
 ): Promise<IndicesStatsResponse> =>
-  await client.asCurrentUser.indices.stats({
+  client.asCurrentUser.indices.stats({
     expand_wildcards: ['open'],
     index: indexName,
   });

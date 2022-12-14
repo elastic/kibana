@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 
 import * as i18n from '../translations';
 
+// TODO: use the production endpoint when it's implemented
 const ECS_VERSION_ENDPOINT = 'https://raw.githubusercontent.com/elastic/ecs/main/version';
 
 interface UseEcsVersion {
@@ -23,25 +24,40 @@ export const useEcsVersion = (): UseEcsVersion => {
   const [version, setVersion] = useState<string | null>(null);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     async function fetchData() {
       try {
-        const response = await fetch(ECS_VERSION_ENDPOINT);
+        const response = await fetch(ECS_VERSION_ENDPOINT, {
+          method: 'GET',
+          signal: abortController.signal,
+        });
 
         if (response.ok) {
           const ecsVersion = await response.text();
 
-          setVersion(ecsVersion);
+          if (!abortController.signal.aborted) {
+            setVersion(ecsVersion);
+          }
         } else {
           throw new Error(response.statusText);
         }
       } catch (e) {
-        setError(i18n.ERROR_LOADING_ECS_VERSION(e));
+        if (!abortController.signal.aborted) {
+          setError(i18n.ERROR_LOADING_ECS_VERSION(e));
+        }
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
 
     fetchData();
+
+    return () => {
+      abortController.abort();
+    };
   }, [setError]);
 
   return { error, loading, version };

@@ -27,7 +27,7 @@ export const DATA_QUALITY_DESCRIPTION = i18n.translate(
 export const DATA_QUALITY_SUBTITLE = i18n.translate(
   'xpack.securitySolution.dataQuality.dataQualitySubtitle',
   {
-    defaultMessage: 'Check the quality of your data by comparing it with the',
+    defaultMessage: 'Select an index to compare its mappings and data with the',
   }
 );
 
@@ -59,16 +59,36 @@ export const ERROR_LOADING_ECS_METADATA = (details: string) =>
     defaultMessage: 'Error loading ECS metadata: {details}',
   });
 
+export const ERROR_LOADING_ECS_METADATA_TITLE = i18n.translate(
+  'xpack.securitySolution.dataQuality.emptyErrorPrompt.errorLoadingEcsMetadataTitle',
+  {
+    defaultMessage: 'Unable to load ECS metadata',
+  }
+);
+
 export const ERROR_LOADING_ECS_VERSION = (details: string) =>
   i18n.translate('xpack.securitySolution.dataQuality.errorLoadingEcsVersionLabel', {
     values: { details },
     defaultMessage: 'Error loading ECS version: {details}',
   });
 
+export const ERROR_LOADING_ECS_VERSION_TITLE = i18n.translate(
+  'xpack.securitySolution.dataQuality.emptyErrorPrompt.errorLoadingEcsVersionTitle',
+  {
+    defaultMessage: 'Unable to load ECS version',
+  }
+);
+
 export const ERROR_LOADING_MAPPINGS = (details: string) =>
   i18n.translate('xpack.securitySolution.dataQuality.errorLoadingMappingsLabel', {
     values: { details },
     defaultMessage: 'Error loading mappings: {details}',
+  });
+
+export const ERROR_LOADING_STATS = (details: string) =>
+  i18n.translate('xpack.securitySolution.dataQuality.errorLoadingStatsLabel', {
+    values: { details },
+    defaultMessage: 'Error loading stats: {details}',
   });
 
 export const FIELDS = i18n.translate('xpack.securitySolution.dataQuality.fieldsLabel', {
@@ -79,6 +99,10 @@ export const INDEXES = i18n.translate('xpack.securitySolution.dataQuality.indexe
   defaultMessage: 'Indexes',
 });
 
+export const INDEX_NAME = i18n.translate('xpack.securitySolution.dataQuality.indexNameLabel', {
+  defaultMessage: 'Index name',
+});
+
 export const INDEXES_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.dataQuality.indexesPlaceholder',
   {
@@ -86,10 +110,17 @@ export const INDEXES_PLACEHOLDER = i18n.translate(
   }
 );
 
+export const LOADING_ECS_METADATA = i18n.translate(
+  'xpack.securitySolution.dataQuality.emptyLoadingPrompt.loadingEcsMetadataPrompt',
+  {
+    defaultMessage: 'Loading ECS metadata',
+  }
+);
+
 export const SELECT_AN_INDEX = i18n.translate(
   'xpack.securitySolution.dataQuality.selectAnIndexPrompt',
   {
-    defaultMessage: 'Select an index to compare against ECS version',
+    defaultMessage: 'Select an index to compare it against ECS version',
   }
 );
 

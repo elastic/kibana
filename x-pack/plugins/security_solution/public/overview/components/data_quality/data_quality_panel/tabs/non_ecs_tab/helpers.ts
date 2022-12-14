@@ -15,14 +15,16 @@ import type { EnrichedFieldMetadata, PartitionedFieldMetadata } from '../../../t
 export const getNonEcsMarkdownComment = ({
   enrichedFieldMetadata,
   indexName,
+  version,
 }: {
   enrichedFieldMetadata: EnrichedFieldMetadata[];
   indexName: string;
+  version: string;
 }): string =>
   getMarkdownComment({
     enrichedFieldMetadata,
     indexName,
-    suggestedAction: `${i18n.NON_ECS_CALLOUT(enrichedFieldMetadata.length)}
+    suggestedAction: `${i18n.NON_ECS_CALLOUT({ fieldCount: enrichedFieldMetadata.length, version })}
 ${i18n.PRE_BUILT_DETECTION_ENGINE_RULES_WONT_WORK}
 ${i18n.PAGES_MAY_NOT_DISPLAY_EVENTS}
 ${i18n.TIMELINE_AND_TEMPLATES_MAY_NOT_OPERATE_PROPERLY}
