@@ -211,6 +211,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       SAVED_OBJECT_TYPE,
       {
         ...packagePolicy,
+        ...(packagePolicy.package
+          ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
+          : {}),
         inputs,
         elasticsearch,
         revision: 1,
@@ -285,6 +288,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           id: packagePolicyId,
           attributes: {
             ...pkgPolicyWithoutId,
+            ...(packagePolicy.package
+              ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
+              : {}),
             inputs,
             elasticsearch,
             policy_id: agentPolicyId,
@@ -526,6 +532,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       id,
       {
         ...restOfPackagePolicy,
+        ...(restOfPackagePolicy.package
+          ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
+          : {}),
         inputs,
         elasticsearch,
         revision: oldPackagePolicy.revision + 1,
@@ -537,14 +546,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     );
 
-    // Bump revision of associated agent policy
-    await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
-      user: options?.user,
-    });
-
     const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
 
-    await updatePackagePolicyVersion(packagePolicyUpdate, soClient, currentVersion);
+    // Bump revision of associated agent policy
+    const bumpPromise = agentPolicyService.bumpRevision(
+      soClient,
+      esClient,
+      packagePolicy.policy_id,
+      {
+        user: options?.user,
+      }
+    );
+    const assetRemovePromise = removeOldAssets({
+      soClient,
+      pkgName: newPolicy.package!.name,
+      currentVersion: newPolicy.package!.version,
+    });
+    await Promise.all([bumpPromise, assetRemovePromise]);
+
+    sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], currentVersion);
 
     return newPolicy;
   }
@@ -567,7 +587,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const packageInfos = await getPackageInfoForPackagePolicies(packagePolicyUpdates, soClient);
 
-    await soClient.bulkUpdate<PackagePolicySOAttributes>(
+    const { saved_objects: newPolicies } = await soClient.bulkUpdate<PackagePolicySOAttributes>(
       await pMap(packagePolicyUpdates, async (packagePolicyUpdate) => {
         const id = packagePolicyUpdate.id;
         const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
@@ -609,6 +629,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           id,
           attributes: {
             ...restOfPackagePolicy,
+            ...(restOfPackagePolicy.package
+              ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
+              : {}),
             inputs,
             elasticsearch,
             revision: oldPackagePolicy.revision + 1,
@@ -622,26 +645,44 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const agentPolicyIds = new Set(packagePolicyUpdates.map((p) => p.policy_id));
 
-    await pMap(agentPolicyIds, async (agentPolicyId) => {
+    const bumpPromise = pMap(agentPolicyIds, async (agentPolicyId) => {
       // Bump revision of associated agent policy
       await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
         user: options?.user,
       });
     });
 
-    const newPolicies = await this.getByIDs(
-      soClient,
-      packagePolicyUpdates.map((p) => p.id)
-    );
+    const pkgVersions: Record<string, { name: string; version: string }> = {};
+    packagePolicyUpdates.forEach(({ package: pkg }) => {
+      if (pkg) {
+        pkgVersions[pkg.name + '-' + pkg.version] = {
+          name: pkg.name,
+          version: pkg.version,
+        };
+      }
+    });
 
-    await pMap(
-      packagePolicyUpdates,
-      async (packagePolicy) =>
-        await updatePackagePolicyVersion(packagePolicy, soClient, currentVersion),
-      { concurrency: 50 }
-    );
+    const removeAssetPromise = pMap(Object.keys(pkgVersions), async (pkgVersion) => {
+      const { name, version } = pkgVersions[pkgVersion];
+      await removeOldAssets({
+        soClient,
+        pkgName: name,
+        currentVersion: version,
+      });
+    });
 
-    return newPolicies;
+    await Promise.all([bumpPromise, removeAssetPromise]);
+
+    sendUpdatePackagePolicyTelemetryEvent(soClient, packagePolicyUpdates, currentVersion);
+
+    return newPolicies.map(
+      (soPolicy) =>
+        ({
+          id: soPolicy.id,
+          version: soPolicy.version,
+          ...soPolicy.attributes,
+        } as PackagePolicy)
+    );
   }
 
   public async delete(
@@ -1886,35 +1927,32 @@ async function validateIsNotHostedPolicy(
   }
 }
 
-export async function updatePackagePolicyVersion(
-  packagePolicy: (NewPackagePolicy & { version?: string; id: string }) | UpdatePackagePolicy,
+export function sendUpdatePackagePolicyTelemetryEvent(
   soClient: SavedObjectsClientContract,
+  updatedPkgPolicies: UpdatePackagePolicy[],
   currentVersion?: string
 ) {
-  if (packagePolicy.package) {
-    await removeOldAssets({
-      soClient,
-      pkgName: packagePolicy.package.name,
-      currentVersion: packagePolicy.package.version,
-    });
-
-    if (packagePolicy.package.version !== currentVersion) {
-      const upgradeTelemetry: PackageUpdateEvent = {
-        packageName: packagePolicy.package.name,
-        currentVersion: currentVersion || 'unknown',
-        newVersion: packagePolicy.package.version,
-        status: 'success',
-        eventType: 'package-policy-upgrade' as UpdateEventType,
-      };
-      sendTelemetryEvents(
-        appContextService.getLogger(),
-        appContextService.getTelemetryEventsSender(),
-        upgradeTelemetry
-      );
-      appContextService.getLogger().info(`Package policy upgraded successfully`);
-      appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
+  updatedPkgPolicies.forEach((updatedPkgPolicy) => {
+    if (updatedPkgPolicy.package) {
+      const { name, version } = updatedPkgPolicy.package;
+      if (version !== currentVersion) {
+        const upgradeTelemetry: PackageUpdateEvent = {
+          packageName: name,
+          currentVersion: currentVersion || 'unknown',
+          newVersion: version,
+          status: 'success',
+          eventType: 'package-policy-upgrade' as UpdateEventType,
+        };
+        sendTelemetryEvents(
+          appContextService.getLogger(),
+          appContextService.getTelemetryEventsSender(),
+          upgradeTelemetry
+        );
+        appContextService.getLogger().info(`Package policy upgraded successfully`);
+        appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
+      }
     }
-  }
+  });
 }
 
 function deepMergeVars(original: any, override: any, keepOriginalValue = false): any {
