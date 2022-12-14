@@ -14,9 +14,10 @@ import { RuleAlertsSummaryProps } from '.';
 import { AlertSummaryWidgetError, AlertsSummaryWidgetUI } from './components';
 
 export const RuleAlertsSummary = ({
-  rule,
+  filter,
   filteredRuleTypes,
   onClick,
+  rule,
   timeRange,
 }: RuleAlertsSummaryProps) => {
   const [features, setFeatures] = useState<string>('');
@@ -28,8 +29,8 @@ export const RuleAlertsSummary = ({
     isLoadingRuleAlertsAggs,
     errorRuleAlertsAggs,
   } = useLoadRuleAlertsAggs({
-    ruleId: rule.id,
     features,
+    filter,
     timeRange,
   });
 

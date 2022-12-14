@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
@@ -19,8 +20,8 @@ export interface AlertSummaryTimeRange {
 
 interface UseLoadRuleAlertsAggs {
   features: string;
-  ruleId: string;
   timeRange: AlertSummaryTimeRange;
+  filter?: estypes.QueryDslQueryContainer;
 }
 interface RuleAlertsAggs {
   active: number;
@@ -41,7 +42,7 @@ interface IndexName {
   index: string;
 }
 
-export function useLoadRuleAlertsAggs({ features, ruleId, timeRange }: UseLoadRuleAlertsAggs) {
+export function useLoadRuleAlertsAggs({ features, timeRange, filter }: UseLoadRuleAlertsAggs) {
   const { http } = useKibana().services;
   const [ruleAlertsAggs, setRuleAlertsAggs] = useState<LoadRuleAlertsAggs>({
     isLoadingRuleAlertsAggs: true,
@@ -62,9 +63,9 @@ export function useLoadRuleAlertsAggs({ features, ruleId, timeRange }: UseLoadRu
       const { active, recovered, error } = await fetchRuleAlertsAggByTimeRange({
         http,
         index,
-        ruleId,
         signal: abortCtrlRef.current.signal,
         timeRange,
+        filter,
       });
       if (error) throw error;
       if (!isCancelledRef.current) {
@@ -88,7 +89,7 @@ export function useLoadRuleAlertsAggs({ features, ruleId, timeRange }: UseLoadRu
         }
       }
     }
-  }, [features, http, ruleId, timeRange]);
+  }, [features, filter, http, timeRange]);
   useEffect(() => {
     loadRuleAlertsAgg();
   }, [loadRuleAlertsAgg]);
@@ -114,15 +115,15 @@ async function fetchIndexNameAPI({
 async function fetchRuleAlertsAggByTimeRange({
   http,
   index,
-  ruleId,
   signal,
   timeRange: { utcFrom, utcTo },
+  filter,
 }: {
   http: HttpSetup;
   index: string;
-  ruleId: string;
   signal: AbortSignal;
   timeRange: AlertSummaryTimeRange;
+  filter?: estypes.QueryDslQueryContainer;
 }): Promise<RuleAlertsAggs> {
   try {
     const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
@@ -132,12 +133,7 @@ async function fetchRuleAlertsAggByTimeRange({
         size: 0,
         query: {
           bool: {
-            must: [
-              {
-                term: {
-                  'kibana.alert.rule.uuid': ruleId,
-                },
-              },
+            filter: [
               {
                 range: {
                   '@timestamp': {
@@ -162,6 +158,7 @@ async function fetchRuleAlertsAggByTimeRange({
                   ],
                 },
               },
+              ...(filter ? [filter] : []),
             ],
           },
         },

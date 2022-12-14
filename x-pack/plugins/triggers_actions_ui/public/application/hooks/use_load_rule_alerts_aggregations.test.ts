@@ -25,7 +25,6 @@ describe('useLoadRuleAlertsAggs', () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLoadRuleAlertsAggs({
         features: ALERTS_FEATURE_ID,
-        ruleId: 'c95bc120-1d56-11ed-9cc7-e7214ada1128',
         timeRange: mockAlertSummaryTimeRange,
       })
     );
@@ -46,16 +45,26 @@ describe('useLoadRuleAlertsAggs', () => {
   it('should have the correct query body sent to Elasticsearch', async () => {
     const ruleId = 'c95bc120-1d56-11ed-9cc7-e7214ada1128';
     const { utcFrom, utcTo } = mockAlertSummaryTimeRange;
+    const filter = {
+      term: {
+        'kibana.alert.rule.uuid': ruleId,
+      },
+    };
     const { waitForNextUpdate } = renderHook(() =>
       useLoadRuleAlertsAggs({
         features: ALERTS_FEATURE_ID,
-        ruleId,
         timeRange: mockAlertSummaryTimeRange,
+        filter,
       })
     );
 
     await waitForNextUpdate();
-    const body = `{"index":"mock_index","size":0,"query":{"bool":{"must":[{"term":{"kibana.alert.rule.uuid":"${ruleId}"}},{"range":{"@timestamp":{"gte":"${utcFrom}","lt":"${utcTo}"}}},{"bool":{"should":[{"term":{"kibana.alert.status":"active"}},{"term":{"kibana.alert.status":"recovered"}}]}}]}},"aggs":{"total":{"filters":{"filters":{"totalActiveAlerts":{"term":{"kibana.alert.status":"active"}},"totalRecoveredAlerts":{"term":{"kibana.alert.status":"recovered"}}}}}}}`;
+    const body =
+      `{"index":"mock_index","size":0,` +
+      `"query":{"bool":{"filter":[{"range":{"@timestamp":{"gte":"${utcFrom}","lt":"${utcTo}"}}},` +
+      `{"bool":{"should":[{"term":{"kibana.alert.status":"active"}},{"term":{"kibana.alert.status":"recovered"}}]}},` +
+      `{"term":{"kibana.alert.rule.uuid":"c95bc120-1d56-11ed-9cc7-e7214ada1128"}}]}},` +
+      `"aggs":{"total":{"filters":{"filters":{"totalActiveAlerts":{"term":{"kibana.alert.status":"active"}},"totalRecoveredAlerts":{"term":{"kibana.alert.status":"recovered"}}}}}}}`;
 
     expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
       '/internal/rac/alerts/find',
