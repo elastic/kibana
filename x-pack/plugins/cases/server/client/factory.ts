@@ -25,6 +25,8 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -53,10 +55,11 @@ interface CasesClientFactoryArgs {
   actionsPluginStart: ActionsPluginStart;
   licensingPluginStart: LicensingPluginStart;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+  notifications: NotificationsPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
-  notifications: NotificationsPluginStart;
 }
 
 /**
@@ -127,6 +130,7 @@ export class CasesClientFactory {
     });
 
     const userInfo = await this.getUserInfo(request);
+    const alertsClient = await this.options.ruleRegistry.getRacClientWithRequest(request);
 
     return createCasesClient({
       services,
@@ -141,6 +145,7 @@ export class CasesClientFactory {
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
       spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
+      alertsClient,
     });
   }
 

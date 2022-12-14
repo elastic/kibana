@@ -32,7 +32,8 @@
      "management",
      "spaces",
      "security",
-     "notifications"
+     "notifications",
+     "ruleRegistry"
   ],
   "requiredBundles": [
     "savedObjects"
