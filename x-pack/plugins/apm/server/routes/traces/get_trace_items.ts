@@ -55,10 +55,11 @@ import { getSpanLinksCountById } from '../span_links/get_linked_children';
 
 export interface TraceItems {
   exceedsMax: boolean;
-  totalItems: number;
   traceDocs: Array<WaterfallTransaction | WaterfallSpan>;
   errorDocs: WaterfallError[];
   spanLinksCountById: Record<string, number>;
+  traceItemCount: number;
+  maxTraceItems: number;
 }
 
 export async function getTraceItems(
@@ -161,15 +162,17 @@ export async function getTraceItems(
     getSpanLinksCountById({ traceId, apmEventClient, start, end }),
   ]);
 
-  const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
+  const traceItemCount = traceResponse.hits.total.value;
+  const exceedsMax = traceItemCount > maxTraceItems;
   const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);
   const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
 
   return {
     exceedsMax,
-    totalItems: traceResponse.hits.total.value,
     traceDocs,
     errorDocs,
     spanLinksCountById,
+    traceItemCount,
+    maxTraceItems,
   };
 }

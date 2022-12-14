@@ -116,8 +116,11 @@ export function Waterfall({
           iconType="alert"
           title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
             defaultMessage:
-              'Number of items ({value}) in this trace exceed what is displayed.',
-            values: { value: waterfall.totalItems },
+              'The number of items in this trace is {traceItemCount} which is higher than the current limit of {maxTraceItems}. Please increase the limit to see the full trace',
+            values: {
+              traceItemCount: waterfall.traceItemCount,
+              maxTraceItems: waterfall.maxTraceItems,
+            },
           })}
         />
       )}

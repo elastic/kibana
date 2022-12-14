@@ -46,7 +46,8 @@ export interface IWaterfall {
   errorItems: IWaterfallError[];
   exceedsMax: boolean;
   totalErrorsCount: number;
-  totalItems: number;
+  traceItemCount: number;
+  maxTraceItems: number;
 }
 
 interface IWaterfallItemBase<TDocument, TDoctype> {
@@ -426,7 +427,8 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
       getErrorCount: () => 0,
       exceedsMax: false,
       totalErrorsCount: 0,
-      totalItems: 0,
+      traceItemCount: 0,
+      maxTraceItems: 0,
     };
   }
 
@@ -474,6 +476,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     getErrorCount: (parentId: string) => errorCountByParentId[parentId] ?? 0,
     exceedsMax: traceItems.exceedsMax,
     totalErrorsCount: traceItems.errorDocs.length,
-    totalItems: traceItems.totalItems,
+    traceItemCount: traceItems.traceItemCount,
+    maxTraceItems: traceItems.maxTraceItems,
   };
 }

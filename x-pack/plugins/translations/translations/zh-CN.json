@@ -8275,7 +8275,6 @@
     "xpack.apm.views.storageExplorer.title": "Storage Explorer",
     "xpack.apm.views.traceOverview.title": "追溯",
     "xpack.apm.views.transactions.title": "事务",
-    "xpack.apm.waterfall.exceedsMax": "此跟踪中的项目数超过显示的项目数",
     "xpack.apm.waterfall.showCriticalPath": "显示关键路径",
     "xpack.banners.settings.backgroundColor.description": "设置横幅广告的背景色。{subscriptionLink}",
     "xpack.banners.settings.placement.description": "在 Elastic 页眉上显示此工作区的顶部横幅广告。{subscriptionLink}",
