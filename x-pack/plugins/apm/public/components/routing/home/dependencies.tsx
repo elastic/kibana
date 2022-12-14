@@ -12,7 +12,7 @@ import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import qs from 'query-string';
-import { page } from '.';
+import { page } from './page_template';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { DependencyDetailOperations } from '../../app/dependency_detail_operations';
 import { DependencyDetailOverview } from '../../app/dependency_detail_overview';

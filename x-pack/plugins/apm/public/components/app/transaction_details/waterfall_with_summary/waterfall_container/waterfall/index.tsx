@@ -67,7 +67,7 @@ export function Waterfall({
 
   const { duration } = waterfall;
 
-  const agentMarks = getAgentMarks(waterfall.entryWaterfallTransaction?.doc);
+  const agentMarks = getAgentMarks(waterfall.entryTransaction);
   const errorMarks = getErrorMarks(waterfall.errorItems);
 
   // Calculate the left margin relative to the deepest level, or 100px, whichever
@@ -82,7 +82,7 @@ export function Waterfall({
 
   return (
     <Container>
-      {waterfall.apiResponse.exceedsMax && (
+      {waterfall.exceedsMax && (
         <EuiCallOut
           color="warning"
           size="s"

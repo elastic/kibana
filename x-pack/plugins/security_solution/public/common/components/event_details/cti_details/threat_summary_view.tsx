@@ -28,7 +28,7 @@ import type {
 } from '../../../../../common/search_strategy';
 import { RiskSummary } from './risk_summary';
 import { EnrichmentSummary } from './enrichment_summary';
-import type { HostRisk, UserRisk } from '../../../../risk_score/containers';
+import type { HostRisk, UserRisk } from '../../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 
 const UppercaseEuiTitle = styled(EuiTitle)`

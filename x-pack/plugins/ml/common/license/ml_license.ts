@@ -28,12 +28,8 @@ export class MlLicense {
   private _isMinimumLicense: boolean = false;
   private _isFullLicense: boolean = false;
   private _isTrialLicense: boolean = false;
-  private _initialized: boolean = false;
 
-  public setup(
-    license$: Observable<ILicense>,
-    postInitFunctions?: Array<(lic: MlLicense) => void>
-  ) {
+  public setup(license$: Observable<ILicense>, callback?: (lic: MlLicense) => void) {
     this._licenseSubscription = license$.subscribe(async (license) => {
       const { isEnabled: securityIsEnabled } = license.getFeature('security');
 
@@ -45,10 +41,9 @@ export class MlLicense {
       this._isFullLicense = isFullLicense(this._license);
       this._isTrialLicense = isTrialLicense(this._license);
 
-      if (this._initialized === false && postInitFunctions !== undefined) {
-        postInitFunctions.forEach((f) => f(this));
+      if (callback !== undefined) {
+        callback(this);
       }
-      this._initialized = true;
     });
   }
 
