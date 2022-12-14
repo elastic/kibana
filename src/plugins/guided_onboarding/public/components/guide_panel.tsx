@@ -355,8 +355,8 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
                           fill
                           // data-test-subj used for FS tracking and testing
                           data-test-subj={`onboarding--completeGuideButton--${
-                        guideConfig!.telemetryId
-                      }`}
+                            guideConfig!.telemetryId
+                          }`}
                         >
                           {i18n.translate('guidedOnboarding.dropdownPanel.elasticButtonLabel', {
                             defaultMessage: 'Continue using Elastic',
