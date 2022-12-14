@@ -23,7 +23,7 @@ import { AlertsSummaryWidgetUIProps } from './types';
 export const AlertsSummaryWidgetUI = ({
   active,
   recovered,
-  timeRange,
+  timeRangeTitle,
   onClick,
 }: AlertsSummaryWidgetUIProps) => {
   const handleClick = (
@@ -56,11 +56,11 @@ export const AlertsSummaryWidgetUI = ({
                   />
                 </h5>
               </EuiTitle>
-              {!!timeRange && (
+              {!!timeRangeTitle && (
                 <>
                   <EuiSpacer size="s" />
-                  <EuiText size="s" color="subdued">
-                    {timeRange}
+                  <EuiText size="s" color="subdued" data-test-subj="timeRangeTitle">
+                    {timeRangeTitle}
                   </EuiText>
                 </>
               )}
