@@ -21,7 +21,7 @@
     "@types/mocha": "^7.0.2",
     "@types/node": "^15.12.2",
     "chai": "^4.2.0",
-    "mocha": "^8.2.1",
+    "mocha": "^10.2.0",
     "nock": "^12.0.2",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.4"
