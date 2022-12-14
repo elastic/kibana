@@ -339,7 +339,6 @@ export const EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS = [
   'process.session_leader.group.name',
   'process.session_leader.interactive',
   'process.session_leader.name',
-  'process.session_leader.start',
   'process.session_leader.user.id',
   'process.session_leader.user.name',
   'process.session_leader.working_directory',
