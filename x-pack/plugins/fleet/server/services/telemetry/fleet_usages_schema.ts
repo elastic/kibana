@@ -106,11 +106,13 @@ export const fleetUsagesSchema: RootSchema<any> = {
       },
     },
   },
-  agent_versions: {
+  agents_per_version: {
     type: 'array',
     items: {
-      type: 'keyword',
-      _meta: { description: 'The agent versions enrolled in this deployment.' },
+      properties: {
+        version: { type: 'keyword' },
+        count: { type: 'long' },
+      },
     },
   },
   agents_per_policy: {

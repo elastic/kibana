@@ -244,6 +244,8 @@ export interface RegistryStream {
   [RegistryStreamKeys.template_path]: string;
 }
 
+export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };
+
 export type RequirementVersion = string;
 export type RequirementVersionRange = string;
 export interface ServiceRequirements {
