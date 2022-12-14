@@ -9,6 +9,7 @@
 import React, { useMemo, useState } from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   EuiPanel,
   EuiSpacer,
@@ -23,6 +24,10 @@ interface Props {
 }
 
 export const SearchExample = ({ dataView, navigation }: Props) => {
+  const [filters, setFilters] = useState<Filter[]>([]);
+  const [query, setQuery] = useState<Query>();
+  const [timeRange, setTimeRange] = useState<TimeRange>();
+
   return (
     <>
       <EuiTitle>
@@ -37,9 +42,16 @@ export const SearchExample = ({ dataView, navigation }: Props) => {
       <EuiPanel hasBorder={true}>
         <navigation.ui.TopNavMenu
           appName={PLUGIN_ID}
+          filters={filters}
+          indexPatterns={[dataView]}
+          onFiltersUpdated={setFilters}
+          onQuerySubmit={({ dateRange, query }) => {
+            setQuery(query);
+            setTimeRange(dateRange);
+          }}
+          query={query}
           showSearchBar={true}
           useDefaultBehaviors={true}
-          indexPatterns={[dataView]}
         />
       </EuiPanel>
     </>
