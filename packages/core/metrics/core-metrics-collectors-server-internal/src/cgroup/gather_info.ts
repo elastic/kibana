@@ -27,7 +27,10 @@ async function readProcSelf(): Promise<string[]> {
   return data.split(/\n/).filter((line) => line.trim().length > 0);
 }
 
-type Result = [data: Record<string, string>, v2: boolean];
+interface Result {
+  data: Record<string, string>;
+  v2: boolean;
+}
 
 export async function gatherInfo(): Promise<Result> {
   const lines = await readProcSelf();
@@ -35,16 +38,16 @@ export async function gatherInfo(): Promise<Result> {
   if (isCgroups2(lines)) {
     // eslint-disable-next-line prettier/prettier
     const [/* '0' */, /* '' */, path] = lines[0].trim().split(':');
-    return [
-      {
+    return {
+      data: {
         [GROUP_CPU]: path,
         [GROUP_CPUACCT]: path,
       },
-      true,
-    ];
+      v2: true,
+    };
   }
 
-  const groups = lines.reduce((acc, line) => {
+  const data = lines.reduce((acc, line) => {
     const matches = line.match(CONTROL_GROUP_RE);
 
     if (matches !== null) {
@@ -57,5 +60,5 @@ export async function gatherInfo(): Promise<Result> {
     return acc;
   }, {} as Record<string, string>);
 
-  return [groups, false];
+  return { data, v2: false };
 }

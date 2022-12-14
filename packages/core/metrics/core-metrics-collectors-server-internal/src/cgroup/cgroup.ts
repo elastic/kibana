@@ -67,8 +67,8 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
   private async initializePaths(): Promise<void> {
     if (this.hasPaths()) return;
 
-    const [cgroups, isV2] = await gatherInfo();
-    this.isCgroup2 = isV2;
+    const { data: cgroups, v2 } = await gatherInfo();
+    this.isCgroup2 = v2;
     this.cpuPath = this.options.cpuPath || cgroups[GROUP_CPU];
     this.cpuAcctPath = this.options.cpuAcctPath || cgroups[GROUP_CPUACCT];
 
