@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KNOWN_FIELD_TYPES } from './field_types';
 
@@ -17,7 +16,7 @@ const UNKNOWN_FIELD_TYPE_DESC = i18n.translate(
   }
 );
 
-export function getFieldTypeDescription(type: string, docLinks: DocLinksStart) {
+export function getFieldTypeDescription(type: string) {
   const knownType: KNOWN_FIELD_TYPES = type as KNOWN_FIELD_TYPES;
   switch (knownType) {
     case KNOWN_FIELD_TYPES.DOCUMENT:
@@ -42,26 +41,7 @@ export function getFieldTypeDescription(type: string, docLinks: DocLinksStart) {
       });
     case KNOWN_FIELD_TYPES.DATE_RANGE:
       return i18n.translate('unifiedFieldList.fieldNameDescription.dateRangeField', {
-        defaultMessage: 'Range of {dateFieldTypeLink} values. {viewSupportedDateFormatsLink}',
-        values: {
-          dateFieldTypeLink:
-            `<a href=${docLinks.links.discover.dateFieldTypeDocs}
-          target="_blank" rel="noopener">` +
-            i18n.translate('unifiedFieldList.fieldNameDescription.dateRangeFieldLinkText', {
-              defaultMessage: 'date',
-            }) +
-            '</a>',
-          viewSupportedDateFormatsLink:
-            `<a href=${docLinks.links.discover.dateFormatsDocs}
-          target="_blank" rel="noopener">` +
-            i18n.translate(
-              'unifiedFieldList.fieldNameDescription.viewSupportedDateFormatsLinkText',
-              {
-                defaultMessage: 'View supported date formats.',
-              }
-            ) +
-            '</a>',
-        },
+        defaultMessage: 'Range of date values.',
       });
     case KNOWN_FIELD_TYPES.GAUGE:
       return i18n.translate('unifiedFieldList.fieldNameDescription.gaugeField', {
@@ -114,16 +94,7 @@ export function getFieldTypeDescription(type: string, docLinks: DocLinksStart) {
       });
     case KNOWN_FIELD_TYPES.VERSION:
       return i18n.translate('unifiedFieldList.fieldNameDescription.versionField', {
-        defaultMessage: 'Software versions. Supports {SemanticVersioningLink} precedence rules.',
-        values: {
-          SemanticVersioningLink:
-            `<a href="https://semver.org/"
-            target="_blank" rel="noopener">` +
-            i18n.translate('unifiedFieldList.fieldNameDescription.versionFieldSemantic', {
-              defaultMessage: 'Semantic Versioning',
-            }) +
-            '</a>',
-        },
+        defaultMessage: 'Software versions. Supports "Semantic Versioning" precedence rules.',
       });
     default:
       // If you see a typescript error here, that's a sign that there are missing switch cases ^^

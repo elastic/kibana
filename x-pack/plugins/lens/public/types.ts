@@ -565,7 +565,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   showNoDataPopover: () => void;
   core: Pick<
     CoreStart,
-    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'application'
+    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'application' | 'docLinks'
   >;
   query: Query;
   dateRange: DateRange;

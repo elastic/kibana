@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -22,7 +23,10 @@ import {
   EuiPopoverTitle,
   EuiPopoverFooter,
   EuiNotificationBadge,
+  EuiIconTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
@@ -30,12 +34,14 @@ import { FieldIcon } from '../field_icon';
 import {
   getFieldIconType,
   getFieldTypeName,
+  getFieldTypeDescription,
   isKnownFieldType,
   KNOWN_FIELD_TYPE_LIST,
 } from '../../utils/field_types';
 import type { FieldListItem, FieldTypeKnown, GetCustomFieldType } from '../../types';
 
 export interface FieldTypeFilterProps<T extends FieldListItem> {
+  docLinks: CoreStart['docLinks'];
   allFields: T[] | null;
   getCustomFieldType?: GetCustomFieldType<T>;
   selectedFieldTypes: FieldTypeKnown[];
@@ -44,9 +50,9 @@ export interface FieldTypeFilterProps<T extends FieldListItem> {
 }
 
 // TODO: refactor test-subj and className
-// TODO: add icon and type name components
 
 export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
+  docLinks,
   allFields,
   getCustomFieldType,
   selectedFieldTypes,
@@ -55,6 +61,15 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
 }: FieldTypeFilterProps<T>) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [typeCounts, setTypeCounts] = useState<Map<string, number>>();
+
+  const { euiTheme } = useEuiTheme();
+
+  const itemStyle = useMemo(
+    () => css`
+      padding: 0 ${euiTheme.size.xs};
+    `,
+    [euiTheme.size.xs]
+  );
 
   useEffect(() => {
     // calculate counts only if user opened the popover
@@ -134,12 +149,23 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                   );
                 }}
               >
-                <EuiFlexGroup responsive={false} gutterSize="s">
+                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center" css={itemStyle}>
                   <EuiFlexItem grow={false}>
                     <FieldIcon type={type} />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiText size="s">{getFieldTypeName(type)}</EuiText>
+                    <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">{getFieldTypeName(type)}</EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="questionInCircle"
+                          color="subdued"
+                          content={getFieldTypeDescription(type)}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiNotificationBadge color="subdued" size="m">
@@ -167,11 +193,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                   defaultMessage: 'Learn more about',
                 })}
                 &nbsp;
-                <EuiLink
-                  href={/* docLinks.links.discover.fieldTypeHelp */ '#'} // TODO: fix the link
-                  target="_blank"
-                  external
-                >
+                <EuiLink href={docLinks.links.discover.fieldTypeHelp} target="_blank" external>
                   <FormattedMessage
                     id="discover.fieldTypesPopover.fieldTypesDocLinkLabel"
                     defaultMessage="field types"

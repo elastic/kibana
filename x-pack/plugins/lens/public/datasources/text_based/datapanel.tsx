@@ -101,6 +101,9 @@ export function TextBasedDataPanel({
   const fieldListFilters = useFieldFilters<DatatableColumn>({
     allFields: visibleAllFields,
     getCustomFieldType,
+    services: {
+      core,
+    },
   });
   const fieldListGroupedProps = useGroupedFields<DatatableColumn>({
     dataViewId: null,

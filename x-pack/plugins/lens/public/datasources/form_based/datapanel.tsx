@@ -275,6 +275,9 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   const fieldListFilters = useFieldFilters<IndexPatternField>({
     allFields,
     onSupportedFieldFilter,
+    services: {
+      core,
+    },
   });
   const fieldListGroupedProps = useGroupedFields<IndexPatternField>({
     dataViewId: currentIndexPatternId,
