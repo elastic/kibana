@@ -34,7 +34,7 @@ echo "--- Creating scalability dataset in ${OUTPUT_REL}"
 mkdir -p "${OUTPUT_DIR}"
 echo "--- Copying ES traces to ${ES_OUTPUT_REL}"
 mkdir -p "${ES_OUTPUT_DIR}"
-mv "${KIBANA_DIR}/target/scalability-traces/es/" "${ES_OUTPUT_DIR}"
+mv "${KIBANA_DIR}/target/scalability-traces/es/*" "${ES_OUTPUT_DIR}"
 
 echo "--- Archiving kibana scalability trace and uploading as build artifact"
 tar -czf "${OUTPUT_DIR}/scalability_traces.tar.gz" -C target "scalability-traces/kibana"
