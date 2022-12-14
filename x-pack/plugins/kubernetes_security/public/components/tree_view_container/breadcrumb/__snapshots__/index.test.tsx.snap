@@ -12,8 +12,7 @@ Object {
           class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
-            style="flex-direction: row; align-items: center;"
+            class="euiFlexItem emotion-EuiFlexItem"
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -149,8 +148,7 @@ Object {
         class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
       >
         <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
-          style="flex-direction: row; align-items: center;"
+          class="euiFlexItem emotion-EuiFlexItem"
         >
           <span
             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -343,8 +341,7 @@ Object {
           class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
-            style="flex-direction: row; align-items: center;"
+            class="euiFlexItem emotion-EuiFlexItem"
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -480,8 +477,7 @@ Object {
         class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
       >
         <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
-          style="flex-direction: row; align-items: center;"
+          class="euiFlexItem emotion-EuiFlexItem"
         >
           <span
             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -674,8 +670,7 @@ Object {
           class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
-            style="flex-direction: row; align-items: center;"
+            class="euiFlexItem emotion-EuiFlexItem"
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -832,8 +827,7 @@ Object {
         class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
       >
         <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
-          style="flex-direction: row; align-items: center;"
+          class="euiFlexItem emotion-EuiFlexItem"
         >
           <span
             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -1047,8 +1041,7 @@ Object {
           class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
-            style="flex-direction: row; align-items: center;"
+            class="euiFlexItem emotion-EuiFlexItem"
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -1164,8 +1157,7 @@ Object {
         class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
       >
         <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
-          style="flex-direction: row; align-items: center;"
+          class="euiFlexItem emotion-EuiFlexItem"
         >
           <span
             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
