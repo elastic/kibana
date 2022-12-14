@@ -27,8 +27,8 @@ import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { Direction } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export type OptionsListSortBy = '_count' | '_key';
-export type OptionsListSortByOrder = 'asc' | 'desc';
+export type OptionsListSortBy = '_key';
+export type OptionsListOrder = 'asc' | 'desc';
 
 export const DEFAULT_SORT: SortingType = { by: '_key', direction: 'desc' };
 
@@ -39,14 +39,14 @@ export interface SortingType {
   direction: SortDirection;
 }
 
-export const getCompatibleSortingTypes = (): OptionsListSortBy[] => ['_key', '_count'];
-export const getCompatibleSortingTypesByOrder = (): OptionsListSortByOrder[] => ['asc', 'desc'];
+export const getCompatibleSortingTypes = (): OptionsListSortBy[] => ['_key'];
+export const getCompatibleSortingTypesByOrder = (): OptionsListOrder[] => ['asc', 'desc'];
 
 type SortByItem = EuiSelectableOption & {
   data: { sortBy: OptionsListSortBy };
 };
 type SortOrderItem = EuiSelectableOption & {
-  data: { sortBy: OptionsListSortByOrder };
+  data: { order: OptionsListOrder };
 };
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
@@ -72,11 +72,17 @@ export function DataViewsList({
 }: DataViewsListProps) {
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
 
-  const hadnleAlphabeticalSorting = (dataViews: DataViewListItemEnhanced[]) => {
-    return dataViews.sort((a, b) => (a.name ?? a.title).localeCompare(b.name ?? b.title));
+  const hadnleAlphabeticalSorting = (
+    dataViews: DataViewListItemEnhanced[],
+    direction?: SortDirection
+  ) => {
+    const sortedDataViews = dataViews.sort((a, b) =>
+      (a.name ?? a.title).localeCompare(b.name ?? b.title)
+    );
+    return direction === 'asc' ? sortedDataViews : sortedDataViews.reverse();
   };
   const [sortedDataViewsList, setSortedDataViewsList] = useState(
-    hadnleAlphabeticalSorting(dataViewsList)
+    hadnleAlphabeticalSorting(dataViewsList, 'asc')
   );
 
   const editorAndPopover = {
@@ -117,7 +123,6 @@ export function DataViewsList({
   const [sortByOptions, setSortByOptions] = useState<SortByItem[]>(() => {
     return getCompatibleSortingTypes().map((key) => {
       return {
-        onFocusBadge: false,
         data: { sortBy: key },
         checked: key === DEFAULT_SORT.by ? 'on' : undefined,
         label: editorAndPopover.sortBy[key].getSortByLabel(),
@@ -128,8 +133,7 @@ export function DataViewsList({
   const [sortOrderOptions, setSortOrderOptions] = useState<SortOrderItem[]>(() => {
     return getCompatibleSortingTypesByOrder().map((key) => {
       return {
-        onFocusBadge: false,
-        data: { sortBy: key },
+        data: { order: key },
         checked: key === DEFAULT_SORT.direction ? 'on' : undefined,
         label: editorAndPopover.sortOrder[key].getSortOrderLabel(),
       } as SortOrderItem;
@@ -138,17 +142,12 @@ export function DataViewsList({
 
   const onSortByChange = (updatedOptions: SortByItem[]) => {
     setSortByOptions(updatedOptions);
-    const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
-    if (selectedOption) {
-      // setSort({ by: selectedOption.data.sortBy });
-    }
   };
 
   const handleOrderChangesDataViewList = (selectedOption?: SortOrderItem) => {
-    const sortedDataViews = sortedDataViewsList.sort((a, b) =>
-      (a.title || '').localeCompare(b.title)
+    setSortedDataViewsList((currentDataViewsList) =>
+      hadnleAlphabeticalSorting(currentDataViewsList, selectedOption?.data?.order)
     );
-    setSortedDataViewsList(sortedDataViews);
   };
 
   const onSortByOrder = (updatedOptions: SortOrderItem[]) => {
@@ -240,7 +239,7 @@ export function DataViewsList({
                         defaultMessage: 'Sort by',
                       })}
                     </EuiPopoverTitle>
-                    <div style={{ width: 180 }}>
+                    <div style={{ width: 200 }}>
                       <EuiSelectable
                         options={sortByOptions}
                         singleSelection="always"
@@ -254,7 +253,7 @@ export function DataViewsList({
                       </EuiSelectable>
                     </div>
                     <EuiHorizontalRule margin="none" />
-                    <div style={{ width: 180 }}>
+                    <div style={{ width: 200 }}>
                       <EuiPopoverTitle paddingSize="s">
                         {i18n.translate('controls.optionsList.popover.sortTitle', {
                           defaultMessage: 'Order',
