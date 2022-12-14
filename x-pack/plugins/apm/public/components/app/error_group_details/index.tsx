@@ -21,14 +21,14 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
+// import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { DetailView } from './detail_view';
+// import { DetailView } from './detail_view';
 import { ErrorDistribution } from './distribution';
 import { TopErroneousTransactions } from './top_erroneous_transactions';
 
@@ -107,7 +107,7 @@ function ErrorGroupHeader({
 }
 
 export function ErrorGroupDetails() {
-  const { urlParams } = useLegacyUrlParams();
+  // const { urlParams } = useLegacyUrlParams();
 
   const { serviceName } = useApmServiceContext();
 
@@ -196,11 +196,10 @@ export function ErrorGroupDetails() {
 
   // If there are 0 occurrences, show only distribution chart w. empty message
   const showDetails = errorGroupData.occurrencesCount !== 0;
-  const logMessage = errorGroupData.error?.error.log?.message;
-  const excMessage = errorGroupData.error?.error.exception?.[0].message;
-  const culprit = errorGroupData.error?.error.culprit;
-  const isUnhandled =
-    errorGroupData.error?.error.exception?.[0].handled === false;
+  const logMessage = errorGroupData.error?.log?.message;
+  const excMessage = errorGroupData.error?.exception?.[0].message;
+  const culprit = errorGroupData.error?.culprit;
+  const isUnhandled = errorGroupData.error?.exception?.[0].handled === false;
 
   return (
     <>
@@ -274,13 +273,13 @@ export function ErrorGroupDetails() {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      {showDetails && (
+      {/* {showDetails && (
         <DetailView
           errorGroup={errorGroupData}
           urlParams={urlParams}
           kuery={kuery}
         />
-      )}
+      )} */}
     </>
   );
 }

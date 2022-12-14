@@ -11,7 +11,7 @@ import {
 } from '../../utils/test_helpers';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
-import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
+import { getErrorGroupSample } from './get_error_groups/get_error_group_summary';
 
 describe('error queries', () => {
   let mock: SearchParamsMock;

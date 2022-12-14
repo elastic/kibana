@@ -9,19 +9,21 @@ import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
+  ERROR_GROUP_ID,
   ERROR_ID,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { getTransaction } from '../../transactions/get_transaction';
+
+const ERROR_SAMPLES_SIZE = 10000;
 
 export async function getErrorGroupSummary({
   environment,
   kuery,
   serviceName,
-  errorId,
+  groupId,
   apmEventClient,
   start,
   end,
@@ -29,7 +31,7 @@ export async function getErrorGroupSummary({
   environment: string;
   kuery: string;
   serviceName: string;
-  errorId: string;
+  groupId: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
@@ -40,12 +42,12 @@ export async function getErrorGroupSummary({
     },
     body: {
       track_total_hits: true,
-      size: 1,
+      size: 0,
       query: {
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [ERROR_ID]: errorId } },
+            { term: { [ERROR_GROUP_ID]: groupId } },
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
@@ -57,28 +59,21 @@ export async function getErrorGroupSummary({
         { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
         { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
       ] as const),
+      aggs: {
+        errorSamples: {
+          terms: {
+            field: ERROR_ID,
+            size: ERROR_SAMPLES_SIZE,
+          },
+        },
+      },
     },
   };
 
-  const resp = await apmEventClient.search('get_error_group_sample', params);
-  const error = resp.hits.hits[0]?._source;
-  const transactionId = error?.transaction?.id;
-  const traceId = error?.trace?.id;
-
-  let transaction;
-  if (transactionId && traceId) {
-    transaction = await getTransaction({
-      transactionId,
-      traceId,
-      apmEventClient,
-      start,
-      end,
-    });
-  }
+  const resp = await apmEventClient.search('get_error_group_samples', params);
+  const errorSamples = resp.aggregations?.errorSamples.buckets;
 
   return {
-    transaction,
-    error,
-    occurrencesCount: resp.hits.total.value,
+    errorSamples,
   };
 }

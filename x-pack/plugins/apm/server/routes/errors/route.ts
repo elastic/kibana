@@ -12,10 +12,12 @@ import { getErrorDistribution } from './distribution/get_distribution';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
 import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
-import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
+import { getErrorGroupSummary } from './get_error_groups/get_error_group_summary';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getTopErroneousTransactionsPeriods } from './erroneous_transactions/get_top_erroneous_transactions';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { Exception, Log } from '../../../typings/es_schemas/raw/error_raw';
+import { Page } from '../../../typings/es_schemas/raw/fields/page';
 
 const errorsMainStatisticsRoute = createApmServerRoute({
   endpoint:
@@ -200,10 +202,17 @@ const errorGroupsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    transaction:
-      | import('./../../../typings/es_schemas/ui/transaction').Transaction
+    error:
+      | {
+          id: string;
+          culprit?: string;
+          grouping_key: string;
+          exception?: Exception[];
+          page?: Page;
+          log?: Log;
+          custom?: Record<string, unknown>;
+        }
       | undefined;
-    error: import('./../../../typings/es_schemas/ui/apm_error').APMError;
     occurrencesCount: number;
   }> => {
     const { params } = resources;
@@ -211,7 +220,7 @@ const errorGroupsRoute = createApmServerRoute({
     const { serviceName, groupId } = params.path;
     const { environment, kuery, start, end } = params.query;
 
-    return getErrorGroupSample({
+    return getErrorGroupSummary({
       environment,
       groupId,
       kuery,
