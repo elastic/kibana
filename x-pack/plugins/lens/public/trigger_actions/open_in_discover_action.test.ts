@@ -6,7 +6,7 @@
  */
 
 import { DataViewsService } from '@kbn/data-views-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import {  DiscoverStart } from '@kbn/discover-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { DOC_TYPE } from '../../common';
@@ -93,7 +93,7 @@ describe('open in discover action', () => {
 
   it('navigates to discover when executed', async () => {
     const viewUnderlyingDataArgs = {
-      indexPatternId: 'index-pattern-id',
+      dataViewSpec: { id: 'index-pattern-id' },
       timeRange: {},
       filters: [],
       query: undefined,
@@ -115,8 +115,13 @@ describe('open in discover action', () => {
     globalThis.open = jest.fn();
 
     await createOpenInDiscoverAction(
-      discover,
-      { get: () => ({ isTimeBased: () => true }) } as unknown as DataViewsService,
+      discover.locator,
+      {
+        get: () => ({
+          isTimeBased: () => true,
+          toSpec: () => ({ id: 'index-pattern-id' }),
+        }),
+      } as unknown as DataViewsService,
       true
     ).execute({
       embeddable,
