@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+
   const { dashboardControls, discover, timePicker, common, dashboard } = getPageObjects([
     'dashboardControls',
     'discover',
@@ -52,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    describe('create and delete', async () => {
+    describe('create, edit, and delete', async () => {
       before(async () => {
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
@@ -62,11 +63,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Oct 22, 2018 @ 00:00:00.000',
           'Dec 3, 2018 @ 00:00:00.000'
         );
+        await dashboard.saveDashboard('test time slider control', { exitFromEditMode: false });
       });
 
       it('can create a new time slider control from a blank state', async () => {
         await dashboardControls.createTimeSliderControl();
         expect(await dashboardControls.getControlsCount()).to.be(1);
+        await dashboard.clearUnsavedChanges();
       });
 
       it('can not add a second time slider control', async () => {
@@ -87,11 +90,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.validateRange('placeholder', secondId, '100', '1200');
       });
 
-      it('applies filter from the first control on the second control', async () => {
+      it('making changes to time slice causes unsaved changes', async () => {
         await dashboardControls.gotoNextTimeSlice();
+        await dashboard.clearUnsavedChanges();
+      });
+
+      it('applies filter from the first control on the second control', async () => {
         await dashboardControls.rangeSliderWaitForLoading();
         const secondId = (await dashboardControls.getAllControlIds())[1];
         await dashboardControls.validateRange('placeholder', secondId, '101', '1000');
+      });
+
+      it('discarded changes are reflected in popover', async () => {
+        const valueBefore = await dashboardControls.getTimeSliceFromTimeSlider(false);
+        await dashboardControls.gotoNextTimeSlice(false);
+        const valueAfter = await dashboardControls.getTimeSliceFromTimeSlider();
+        expect(valueBefore).to.not.equal(valueAfter);
+
+        await dashboard.clickCancelOutOfEditMode();
+        const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
+        expect(valueNow).to.equal(valueBefore);
+      });
+
+      it('does not load with unsaved changes when discarded', async () => {
+        await dashboard.switchToEditMode();
+        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
       });
 
       it('deletes an existing control', async () => {
@@ -118,9 +141,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should display document count for timeslice when timeslice is selected', async () => {
-          await dashboardControls.gotoNextTimeSlice(); // first slice is just partial slice with no data
-          await dashboardControls.gotoNextTimeSlice();
-          await dashboardControls.closeTimeSliderPopover(); // close popover so its not blocking panel
+          await dashboardControls.gotoNextTimeSlice(false); // first slice is just partial slice with no data
+          await dashboardControls.gotoNextTimeSlice(); // close popover so its not blocking panel
           await dashboard.waitForRenderComplete();
           expect(await discover.getSavedSearchDocumentCount()).to.be('16 documents');
         });

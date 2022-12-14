@@ -617,8 +617,11 @@ export class DashboardPageControls extends FtrService {
   }
 
   // Time slider functions
-  public async gotoNextTimeSlice() {
+  public async gotoNextTimeSlice(closePopover: boolean = true) {
     await this.testSubjects.click('timeSlider-nextTimeWindow');
+    if (closePopover) {
+      this.closeTimeSliderPopover();
+    }
   }
 
   public async closeTimeSliderPopover() {
@@ -626,5 +629,25 @@ export class DashboardPageControls extends FtrService {
     if (isOpen) {
       await this.testSubjects.click('timeSlider-popoverToggleButton');
     }
+  }
+
+  public async getTimeSliceFromTimeSlider(closePopover: boolean = true) {
+    const isOpen = await this.testSubjects.exists('timeSlider-popoverContents');
+    if (!isOpen) {
+      await this.testSubjects.click('timeSlider-popoverToggleButton');
+      await this.retry.try(async () => {
+        await this.testSubjects.existOrFail('timeSlider-popoverContents');
+      });
+    }
+    const popover = await this.testSubjects.find('timeSlider-popoverContents');
+    const dualRangeSlider = await this.find.descendantDisplayedByCssSelector(
+      '.euiRangeDraggable',
+      popover
+    );
+    const value = await dualRangeSlider.getAttribute('aria-valuetext');
+    if (closePopover) {
+      this.closeTimeSliderPopover();
+    }
+    return value;
   }
 }
