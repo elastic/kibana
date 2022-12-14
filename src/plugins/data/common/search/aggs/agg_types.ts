@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import {FieldFormatsStartCommon} from '@kbn/field-formats-plugin/common';
 
 import * as buckets from './buckets';
+import {BUCKET_TYPES, CalculateBoundsFn} from './buckets';
 import * as metrics from './metrics';
-
-import { BUCKET_TYPES, CalculateBoundsFn } from './buckets';
-import { METRIC_TYPES } from './metrics';
+import {METRIC_TYPES} from './metrics';
 
 export interface AggTypesDependencies {
   calculateBounds: CalculateBoundsFn;
@@ -71,6 +70,7 @@ export const getAggTypes = () => ({
     { name: BUCKET_TYPES.GEOTILE_GRID, fn: buckets.getGeoTitleBucketAgg },
     { name: BUCKET_TYPES.SAMPLER, fn: buckets.getSamplerBucketAgg },
     { name: BUCKET_TYPES.DIVERSIFIED_SAMPLER, fn: buckets.getDiversifiedSamplerBucketAgg },
+    { name: BUCKET_TYPES.TIME_SERIES, fn: buckets.getTimeSeriesBucketAgg },
   ],
 });
 
@@ -88,6 +88,7 @@ export const getAggTypesFunctions = () => [
   buckets.aggHistogram,
   buckets.aggDateHistogram,
   buckets.aggTerms,
+  buckets.aggTimeSeries,
   buckets.aggMultiTerms,
   buckets.aggRareTerms,
   buckets.aggSampler,

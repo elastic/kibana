@@ -53,7 +53,7 @@ export const counterRateOperation: OperationDefinition<
   requiredReferences: [
     {
       input: ['field', 'managedReference'],
-      specificOperations: ['max'],
+      specificOperations: ['max', 'min', 'avg'],
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],

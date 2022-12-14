@@ -110,11 +110,13 @@ import {
   AggParamsMovingAvgSerialized,
   AggParamsSerialDiffSerialized,
   AggParamsTopHitSerialized,
+  AggParamsTimeSeries,
 } from '.';
 import { AggParamsSampler } from './buckets/sampler';
 import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
 import { AggParamsSignificantText } from './buckets/significant_text';
 import { aggTopMetrics } from './metrics/top_metrics_fn';
+import {aggTimeSeries} from "@kbn/data-plugin/common/search/aggs/buckets/time_series_fn";
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
 export type { CreateAggConfigParams, IAggConfigs, AggConfigsOptions } from './agg_configs';
@@ -183,6 +185,7 @@ interface SerializedAggParamsMapping {
   [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;
   [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTermsSerialized;
+  [BUCKET_TYPES.TIME_SERIES]: AggParamsTimeSeries;
   [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTermsSerialized;
   [BUCKET_TYPES.RARE_TERMS]: AggParamsRareTerms;
   [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
@@ -229,6 +232,7 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;
   [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTerms;
+  [BUCKET_TYPES.TIME_SERIES]: AggParamsTimeSeries;
   [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTerms;
   [BUCKET_TYPES.RARE_TERMS]: AggParamsRareTerms;
   [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
@@ -276,6 +280,7 @@ export interface AggFunctionsMapping {
   aggHistogram: ReturnType<typeof aggHistogram>;
   aggDateHistogram: ReturnType<typeof aggDateHistogram>;
   aggTerms: ReturnType<typeof aggTerms>;
+  aggTimeSeries: ReturnType<typeof aggTimeSeries>;
   aggMultiTerms: ReturnType<typeof aggMultiTerms>;
   aggRareTerms: ReturnType<typeof aggRareTerms>;
   aggAvg: ReturnType<typeof aggAvg>;
