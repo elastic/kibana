@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.validateRange('placeholder', secondId, '101', '1000');
       });
 
-      it('discarded changes are reflected in popover', async () => {
+      it('changes to time slice can be discarded', async () => {
         const valueBefore = await dashboardControls.getTimeSliceFromTimeSlider(false);
         await dashboardControls.gotoNextTimeSlice(false);
         const valueAfter = await dashboardControls.getTimeSliceFromTimeSlider();
@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(valueNow).to.equal(valueBefore);
       });
 
-      it('does not load with unsaved changes when discarded', async () => {
+      it('dashboard does not load with unsaved changes when changes are discarded', async () => {
         await dashboard.switchToEditMode();
         await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
       });
