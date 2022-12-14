@@ -15,7 +15,7 @@ import {
 import { Logger } from '@kbn/core/server';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import { SavedServiceGroup } from '../../../common/service_groups';
-import { ApmAlertsClient } from './get_apm_alerts_client';
+import { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 
 export async function getServiceGroupAlerts({
   serviceGroups,
