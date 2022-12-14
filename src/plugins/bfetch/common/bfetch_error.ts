@@ -27,7 +27,7 @@ export class BfetchRequestError extends Error {
             defaultMessage: 'Please check your network connection and try again. Code {code}',
             values: { code },
           });
-    // const message = `Bfetch request failed with code ${code}`;
+
     super(message);
     this.name = 'BfetchRequestError';
     this.code = code;

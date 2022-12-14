@@ -16,6 +16,7 @@ export const normalizeError = <E extends ErrorLike = ErrorLike>(err: any): E => 
     } as E;
   }
   if (err instanceof BfetchRequestError) {
+    // ignoring so we can return the error as is
     // @ts-expect-error
     return err;
   }

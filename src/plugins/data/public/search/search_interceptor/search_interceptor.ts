@@ -31,6 +31,7 @@ import {
 } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
+import { BfetchRequestError } from '@kbn/bfetch-plugin/common';
 
 import {
   ApplicationStart,
@@ -46,7 +47,6 @@ import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
-import { BfetchRequestError } from './bfetch_error';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -195,8 +195,8 @@ export class SearchInterceptor {
       // The timeout error is shown any time a request times out, or once per session, if the request is part of a session.
       this.showTimeoutError(err, options?.sessionId);
       return err;
-    } else if (e instanceof AbortError) {
-      // In the case an application initiated abort, throw the existing AbortError.
+    } else if (e instanceof AbortError || e instanceof BfetchRequestError) {
+      // In the case an application initiated abort, throw the existing AbortError, same with BfetchRequestErrors
       return e;
     } else if (isEsError(e)) {
       if (isPainlessError(e)) {
@@ -204,8 +204,6 @@ export class SearchInterceptor {
       } else {
         return new EsError(e);
       }
-    } else if (e.constructor.name === 'BfetchRequestError') {
-      return new BfetchRequestError(e.message);
     } else {
       return e instanceof Error ? e : new Error(e.message);
     }
@@ -527,10 +525,7 @@ export class SearchInterceptor {
         }),
         text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
       });
-    } else if (
-      e.constructor.name === 'HttpFetchError' ||
-      e.constructor.name === 'BfetchRequestError'
-    ) {
+    } else if (e.constructor.name === 'HttpFetchError' || e instanceof BfetchRequestError) {
       const defaultMsg = i18n.translate('data.errors.fetchError', {
         defaultMessage: 'Please check your network connection and try again.',
       });
