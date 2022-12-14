@@ -86,7 +86,7 @@ export function SloList() {
           <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
             <EuiFlexItem>
               <EuiPagination
-                pageCount={total / perPage}
+                pageCount={Math.ceil(total / perPage)}
                 activePage={activePage}
                 onPageClick={handlePageClick}
               />
