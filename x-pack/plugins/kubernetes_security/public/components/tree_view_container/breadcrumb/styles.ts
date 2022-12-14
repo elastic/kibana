@@ -42,11 +42,16 @@ export const useStyles = () => {
       marginRight: size.xs,
     };
 
+    const breadcrumbIconColor = (color: string): CSSObject => ({
+      color,
+    });
+
     return {
       breadcrumb,
       breadcrumbButton,
       breadcrumbButtonBold,
       breadcrumbRightIcon,
+      breadcrumbIconColor,
     };
   }, [euiTheme]);
 
