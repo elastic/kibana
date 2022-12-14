@@ -60,7 +60,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     searchSource,
     stateContainer,
     searchSessionManager,
-    savedDataViewList,
     updateDataViewList,
   } = useDiscoverState({
     services,
@@ -94,6 +93,14 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     addHelpMenuToAppChrome(chrome, docLinks);
   }, [stateContainer, chrome, docLinks]);
 
+  /**
+   * Set initial data view list
+   * Can be removed once the state container work was completed
+   */
+  useEffect(() => {
+    stateContainer.internalState.transitions.setDataViewList(dataViewList);
+  }, [stateContainer, dataViewList]);
+
   const resetCurrentSavedSearch = useCallback(() => {
     resetSavedSearch(savedSearch.id);
   }, [resetSavedSearch, savedSearch]);
@@ -118,7 +125,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
         persistDataView={persistDataView}
         updateAdHocDataViewId={updateAdHocDataViewId}
         searchSessionManager={searchSessionManager}
-        savedDataViewList={savedDataViewList}
         updateDataViewList={updateDataViewList}
       />
     </DiscoverMainProvider>

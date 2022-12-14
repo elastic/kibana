@@ -129,6 +129,10 @@ export interface DiscoverStateContainer {
      */
     setDataView: (dataView: DataView) => void;
     /**
+     * Load current list of data views, add them to internal state
+     */
+    loadDataViewList: () => Promise<void>;
+    /**
      * Set new adhoc data view list
      */
     setAdHocDataViews: (dataViews: DataView[]) => void;
@@ -241,6 +245,11 @@ export function getDiscoverStateContainer({
   const removeAdHocDataViewById = (id: string) =>
     internalStateContainer.transitions.removeAdHocDataViewById(id);
 
+  const loadDataViewList = async () => {
+    const dataViewList = await services.dataViews.getIdsWithTitle(true);
+    internalStateContainer.transitions.setDataViewList(dataViewList);
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
     appState: appStateContainerModified,
@@ -322,6 +331,7 @@ export function getDiscoverStateContainer({
     },
     actions: {
       setDataView,
+      loadDataViewList,
       setAdHocDataViews,
       appendAdHocDataViews,
       replaceAdHocDataViewWithId,

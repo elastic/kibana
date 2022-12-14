@@ -7,7 +7,7 @@
  */
 
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -35,6 +35,5 @@ export interface DiscoverLayoutProps {
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   searchSessionManager: DiscoverSearchSessionManager;
-  savedDataViewList: DataViewListItem[];
   updateDataViewList: (newAdHocDataViews: DataView[]) => void;
 }
