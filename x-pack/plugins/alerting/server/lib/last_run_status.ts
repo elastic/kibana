@@ -8,11 +8,7 @@
 import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import {
-  ActionsCompletion,
-  RuleExecutionStatusErrorReasons,
-  RuleLastRunOutcomes,
-} from '../../common';
+import { ActionsCompletion, RuleLastRunOutcomes } from '../../common';
 import {
   RuleLastRunOutcomeValues,
   RuleExecutionStatusWarningReasons,
@@ -42,7 +38,6 @@ export const lastRunFromState = (
 
   if (warnings.length > 0) {
     outcome = RuleLastRunOutcomeValues[1];
-    warning = RuleExecutionStatusErrorReasons.Execute;
   }
 
   // We only have a single warning field so prioritizing the alert circuit breaker over the actions circuit breaker
