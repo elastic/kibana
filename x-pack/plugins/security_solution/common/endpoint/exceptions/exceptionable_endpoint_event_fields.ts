@@ -203,6 +203,8 @@ export const EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS = [
   'network.protocol',
   'network.transport',
   'network.type',
+  'orchestrator.cluster.id',
+  'orchestrator.cluster.name',
   'orchestrator.resource.ip',
   'orchestrator.resource.name',
   'orchestrator.resource.parent.type',
