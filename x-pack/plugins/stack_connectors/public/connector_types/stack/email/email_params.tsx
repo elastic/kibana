@@ -16,6 +16,8 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EmailActionParams } from '../../types';
 
+const noop = () => {};
+
 export const EmailParamsFields = ({
   actionParams,
   editAction,
@@ -25,6 +27,7 @@ export const EmailParamsFields = ({
   defaultMessage,
   isLoading,
   isDisabled,
+  onBlur = noop,
   showEmailSubjectAndMessage = true,
 }: ActionParamsProps<EmailActionParams>) => {
   const { to, cc, bcc, subject, message } = actionParams;
@@ -114,6 +117,7 @@ export const EmailParamsFields = ({
             if (!to) {
               editAction('to', [], index);
             }
+            onBlur('to');
           }}
         />
       </EuiFormRow>
@@ -156,6 +160,7 @@ export const EmailParamsFields = ({
               if (!cc) {
                 editAction('cc', [], index);
               }
+              onBlur('cc');
             }}
           />
         </EuiFormRow>
@@ -199,6 +204,7 @@ export const EmailParamsFields = ({
               if (!bcc) {
                 editAction('bcc', [], index);
               }
+              onBlur('bcc');
             }}
           />
         </EuiFormRow>
