@@ -10,7 +10,7 @@ import React from 'react';
 
 import { TabNavigationComponent } from '.';
 import { navTabs } from '../../../app/home/home_navigations';
-import { HostsTableType } from '../../../hosts/store/model';
+import { HostsTableType } from '../../../explore/hosts/store/model';
 import type { RouteSpyState } from '../../utils/route/types';
 import type { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
 import { SecurityPageName } from '../../../app/types';

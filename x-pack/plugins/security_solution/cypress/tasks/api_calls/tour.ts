@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { siemGuideId } from '../../../common/guided_onboarding/siem_guide_config';
+
 const alertsGuideActiveState = {
   isActive: true,
   status: 'in_progress',
@@ -13,7 +15,7 @@ const alertsGuideActiveState = {
     { id: 'rules', status: 'complete' },
     { id: 'alertsCases', status: 'active' },
   ],
-  guideId: 'security',
+  guideId: siemGuideId,
 };
 
 export const startAlertsCasesTour = () =>
