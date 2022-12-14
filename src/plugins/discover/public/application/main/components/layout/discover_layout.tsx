@@ -191,9 +191,8 @@ export function DiscoverLayout({
       if (nextDataView.id) {
         onChangeDataView(nextDataView.id);
       }
-      savedSearchRefetch$.next('reset');
     },
-    [onChangeDataView, savedSearchRefetch$, stateContainer]
+    [onChangeDataView, stateContainer]
   );
 
   const savedSearchTitle = useRef<HTMLHeadingElement>(null);
