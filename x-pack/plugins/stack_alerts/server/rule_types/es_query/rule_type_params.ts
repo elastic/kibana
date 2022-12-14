@@ -53,6 +53,12 @@ const EsQueryRuleParamsSchemaProperties = {
   searchType: schema.oneOf([schema.literal('searchSource'), schema.literal('esQuery')], {
     defaultValue: 'esQuery',
   }),
+  timeField: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('esQuery'),
+    schema.string({ minLength: 1 }),
+    schema.maybe(schema.string({ minLength: 1 }))
+  ),
   // searchSource rule param only
   searchConfiguration: schema.conditional(
     schema.siblingRef('searchType'),
@@ -71,12 +77,6 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.siblingRef('searchType'),
     schema.literal('esQuery'),
     schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-    schema.never()
-  ),
-  timeField: schema.conditional(
-    schema.siblingRef('searchType'),
-    schema.literal('esQuery'),
-    schema.string({ minLength: 1 }),
     schema.never()
   ),
 };

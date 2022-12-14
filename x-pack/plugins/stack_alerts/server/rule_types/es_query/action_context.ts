@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
-import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
+import { EsQueryRuleParams } from './rule_type_params';
 import { Comparator } from '../../../common/comparator_types';
 import { getHumanReadableComparator } from '../../../common';
 
@@ -37,7 +37,7 @@ export interface EsQueryRuleActionContext extends AlertInstanceContext {
 interface AddMessagesOpts {
   ruleName: string;
   baseContext: EsQueryRuleActionContext;
-  params: OnlyEsQueryRuleParams | OnlySearchSourceRuleParams;
+  params: EsQueryRuleParams;
   group?: string;
   isRecovered?: boolean;
 }

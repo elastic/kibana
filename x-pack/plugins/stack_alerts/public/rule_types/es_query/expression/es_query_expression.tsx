@@ -11,10 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { DocLinksStart, HttpSetup } from '@kbn/core/public';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
@@ -33,13 +32,9 @@ import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
+import { useTriggerUiActionServices } from '../util';
 
 const { useXJsonMode } = XJson;
-
-interface KibanaDeps {
-  http: HttpSetup;
-  docLinks: DocLinksStart;
-}
 
 export const EsQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>
@@ -90,7 +85,8 @@ export const EsQueryExpression: React.FC<
     [setRuleParams]
   );
 
-  const { http, docLinks } = useKibana<KibanaDeps>().services;
+  const services = useTriggerUiActionServices();
+  const { http, docLinks } = services;
 
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
@@ -114,15 +110,11 @@ export const EsQueryExpression: React.FC<
     setEsFields(currentEsFields);
   };
 
-  const hasValidationErrors = useCallback(() => {
-    return hasExpressionValidationErrors(currentRuleParams);
-  }, [currentRuleParams]);
-
   const onTestQuery = useCallback(async () => {
     const isGroupAgg = isGroupAggregation(termField);
     const isCountAgg = isCountAggregation(aggType);
     const window = `${timeWindowSize}${timeWindowUnit}`;
-    if (hasValidationErrors()) {
+    if (hasExpressionValidationErrors(currentRuleParams)) {
       return {
         testResults: { results: [], truncated: false },
         isGrouped: isGroupAgg,
@@ -166,13 +158,13 @@ export const EsQueryExpression: React.FC<
       timeWindow: window,
     };
   }, [
-    data.search,
-    esQuery,
-    index,
-    timeField,
     timeWindowSize,
     timeWindowUnit,
-    hasValidationErrors,
+    currentRuleParams,
+    esQuery,
+    data.search,
+    index,
+    timeField,
     aggType,
     aggField,
     termField,
@@ -333,7 +325,7 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         errors={errors}
-        hasValidationErrors={hasValidationErrors()}
+        hasValidationErrors={hasExpressionValidationErrors(currentRuleParams)}
         onTestFetch={onTestQuery}
         excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={useCallback(

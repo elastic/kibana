@@ -10,8 +10,7 @@ import {
   addMessages,
   getContextConditionsDescription,
 } from './action_context';
-import { EsQueryRuleParamsSchema } from './rule_type_params';
-import { OnlyEsQueryRuleParams } from './types';
+import { EsQueryRuleParams, EsQueryRuleParamsSchema } from './rule_type_params';
 import { Comparator } from '../../../common/comparator_types';
 
 describe('addMessages', () => {
@@ -28,7 +27,7 @@ describe('addMessages', () => {
       searchType: 'esQuery',
       aggType: 'count',
       groupBy: 'all',
-    }) as OnlyEsQueryRuleParams;
+    }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       value: 42,
@@ -61,7 +60,7 @@ describe('addMessages', () => {
       searchType: 'esQuery',
       aggType: 'count',
       groupBy: 'all',
-    }) as OnlyEsQueryRuleParams;
+    }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       value: 42,
@@ -99,7 +98,7 @@ describe('addMessages', () => {
       searchType: 'esQuery',
       aggType: 'count',
       groupBy: 'all',
-    }) as OnlyEsQueryRuleParams;
+    }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       value: 4,
@@ -134,7 +133,7 @@ describe('addMessages', () => {
       groupBy: 'top',
       termField: 'host.name',
       termSize: 5,
-    }) as OnlyEsQueryRuleParams;
+    }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       value: 42,

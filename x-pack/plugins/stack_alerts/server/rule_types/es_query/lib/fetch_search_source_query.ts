@@ -75,9 +75,9 @@ export function updateSearchSource(
   alertLimit?: number
 ) {
   const isGroupAgg = isGroupAggregation(params.termField);
-  const index = searchSource.getField('index');
+  const index = searchSource.getField('index')!;
+  const timeFieldName = params.timeField || index.timeFieldName;
 
-  const timeFieldName = index?.timeFieldName;
   if (!timeFieldName) {
     throw new Error('Invalid data view without timeFieldName.');
   }

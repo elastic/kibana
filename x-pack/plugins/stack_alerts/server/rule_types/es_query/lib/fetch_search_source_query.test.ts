@@ -40,6 +40,7 @@ const defaultParams: OnlySearchSourceRuleParams = {
   excludeHitsFromPreviousRun: true,
   aggType: 'count',
   groupBy: 'all',
+  timeField: 'time',
 };
 
 describe('fetchSearchSourceQuery', () => {
