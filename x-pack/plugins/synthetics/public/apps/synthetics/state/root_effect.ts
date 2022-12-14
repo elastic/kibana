@@ -6,6 +6,12 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
+import {
+  fetchAlertConnectorsEffect,
+  fetchDynamicSettingsEffect,
+  setDynamicSettingsEffect,
+} from './settings/effects';
+import { fetchAgentPoliciesEffect } from './private_locations';
 import { fetchNetworkEventsEffect } from './network_events/effects';
 import { fetchSyntheticsMonitorEffect } from './monitor_details';
 import { fetchIndexStatusEffect } from './index_status';
@@ -29,5 +35,10 @@ export const rootEffect = function* root(): Generator {
     fork(fetchOverviewStatusEffect),
     fork(fetchNetworkEventsEffect),
     fork(fetchPingStatusesEffect),
+    fork(fetchAgentPoliciesEffect),
+    fork(fetchDynamicSettingsEffect),
+    fork(setDynamicSettingsEffect),
+    fork(fetchAgentPoliciesEffect),
+    fork(fetchAlertConnectorsEffect),
   ]);
 };

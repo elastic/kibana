@@ -1,0 +1,37 @@
+
+get:
+  summary: Agent policy - Get full policy
+  operationId: agent-policy-full
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                oneOf:
+                  - type: string
+                  - $ref: ../components/schemas/agent_policy_full.yaml
+parameters:
+  - schema:
+      type: string
+    name: agentPolicyId
+    in: path
+    required: true
+  - schema:
+      type: string
+    name: download
+    in: query
+    required: false
+  - schema:
+      type: string
+    name: standalone
+    in: query
+    required: false
+  - schema:
+      type: string
+    name: kubernetes
+    in: query
+    required: false

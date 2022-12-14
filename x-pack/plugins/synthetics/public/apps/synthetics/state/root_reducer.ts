@@ -7,6 +7,8 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
+import { dynamicSettingsReducer, DynamicSettingsState } from './settings';
+import { agentPoliciesReducer, AgentPoliciesState } from './private_locations';
 import { networkEventsReducer, NetworkEventsState } from './network_events';
 import { monitorDetailsReducer, MonitorDetailsState } from './monitor_details';
 import { uiReducer, UiState } from './ui';
@@ -30,6 +32,8 @@ export interface SyntheticsAppState {
   browserJourney: BrowserJourneyState;
   networkEvents: NetworkEventsState;
   pingStatus: PingStatusState;
+  agentPolicies: AgentPoliciesState;
+  dynamicSettings: DynamicSettingsState;
 }
 
 export const rootReducer = combineReducers<SyntheticsAppState>({
@@ -43,4 +47,6 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   browserJourney: browserJourneyReducer,
   networkEvents: networkEventsReducer,
   pingStatus: pingStatusReducer,
+  agentPolicies: agentPoliciesReducer,
+  dynamicSettings: dynamicSettingsReducer,
 });

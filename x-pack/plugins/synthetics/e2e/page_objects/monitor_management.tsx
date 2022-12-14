@@ -34,10 +34,13 @@ export function monitorManagementPageProvider({
     }),
     ...utilsPageProvider({ page }),
 
-    async navigateToMonitorManagement() {
+    async navigateToMonitorManagement(doLogin = false) {
       await page.goto(monitorManagement, {
         waitUntil: 'networkidle',
       });
+      if (doLogin) {
+        await this.loginToKibana();
+      }
       await this.waitForMonitorManagementLoadingToFinish();
     },
 

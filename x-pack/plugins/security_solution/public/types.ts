@@ -47,9 +47,9 @@ import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
-import type { Hosts } from './hosts';
-import type { Users } from './users';
-import type { Network } from './network';
+import type { Hosts } from './explore/hosts';
+import type { Users } from './explore/users';
+import type { Network } from './explore/network';
 import type { Kubernetes } from './kubernetes';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
@@ -104,6 +104,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 export type StartServices = CoreStart &
   StartPlugins & {
     storage: Storage;
+    sessionStorage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
     onAppLeave: (handler: AppLeaveHandler) => void;
