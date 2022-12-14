@@ -69,5 +69,7 @@ export async function searchStackTraces({
   filter: ProjectTimeQuery;
   sampleSize: number;
 }) {
-  return client.profilingStacktraces({ query: filter, sampleSize });
+  const response = await client.profilingStacktraces({ query: filter, sampleSize });
+
+  return decodeStackTraceResponse(response);
 }

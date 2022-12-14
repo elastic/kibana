@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { decodeStackTraceResponse, StackTraceResponse } from './search_stacktraces';
+import { decodeStackTraceResponse } from './search_stacktraces';
+import { StackTraceResponse } from '../../common/stack_traces';
 
 describe('Stack trace response operations', () => {
   test('empty stack trace response', () => {
