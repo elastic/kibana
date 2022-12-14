@@ -12,7 +12,7 @@ import { RawRule } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
-  retryIfBulkDisableConflicts,
+  retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
 } from '../common';
@@ -41,12 +41,15 @@ export const bulkDisableRules = async (context: RulesClientContext, options: Bul
     action: 'DISABLE',
   });
 
-  const { errors, rules, taskIdsToDisable, taskIdsToDelete } = await retryIfBulkDisableConflicts(
-    context.logger,
-    (filterKueryNode: KueryNode | null) =>
+  const { errors, rules, accListSpecificForBulkOperation } = await retryIfBulkOperationConflicts({
+    action: 'DISABLE',
+    logger: context.logger,
+    bulkOperation: (filterKueryNode: KueryNode | null) =>
       bulkDisableRulesWithOCC(context, { filter: filterKueryNode }),
-    kueryNodeFilterWithAuth
-  );
+    filter: kueryNodeFilterWithAuth,
+  });
+
+  const [taskIdsToDisable, taskIdsToDelete] = accListSpecificForBulkOperation;
 
   if (taskIdsToDisable.length > 0) {
     try {
@@ -223,5 +226,9 @@ const bulkDisableRulesWithOCC = async (
     }
   });
 
-  return { errors, rules: disabledRules, taskIdsToDisable, taskIdsToDelete };
+  return {
+    errors,
+    rules: disabledRules,
+    accListSpecificForBulkOperation: [taskIdsToDisable, taskIdsToDelete],
+  };
 };
