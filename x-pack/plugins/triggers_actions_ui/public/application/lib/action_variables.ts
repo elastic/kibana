@@ -160,7 +160,8 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   result.push({
     name: AlertProvidedActionVariables.alertFlapping,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertFlappingLabel', {
-      defaultMessage: 'A flag on the alert that indicates whether the alert is flapping.',
+      defaultMessage:
+        'A flag on the alert that indicates whether the alert status is changing repeatedly.',
     }),
   });
 
