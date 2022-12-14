@@ -8,12 +8,13 @@
 import type { GuideConfig } from '@kbn/guided-onboarding-plugin/common';
 import { i18n } from '@kbn/i18n';
 
-export const securityGuideId = 'security';
-export const securityGuideConfig: GuideConfig = {
+export const siemGuideId = 'siem';
+export const siemGuideConfig: GuideConfig = {
   title: i18n.translate('xpack.securitySolution.guideConfig.title', {
     defaultMessage: 'Elastic Security guided setup',
   }),
   guideName: 'Security',
+  telemetryId: 'siem',
   completedGuideRedirectLocation: {
     appID: 'securitySolutionUI',
     path: '/dashboards',
