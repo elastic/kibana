@@ -107,8 +107,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       );
 
       if (versionMigrationIsComplete) {
-        const targetIndex = `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`;
-
         return {
           ...stateP,
           // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
@@ -118,12 +116,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // Source is a none because we didn't do any migration from a source
           // index
           sourceIndex: Option.none,
-          targetIndex,
+          targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
           sourceIndexMappings: indices[source!].mappings,
-          targetIndexMappings: mergeMigrationMappingPropertyHashes(
-            stateP.targetIndexMappings,
-            indices[source!].mappings
-          ),
+          // in this scenario, a .kibana_X.Y.Z_001 index exists that matches the current kibana version
+          // aka we are NOT upgrading to a newer version
+          // we inject the target index's current mappings in the state, to check them later
+          targetIndexCurrentMappings: indices[source!].mappings,
           versionIndexReadyActions: Option.none,
         };
       }

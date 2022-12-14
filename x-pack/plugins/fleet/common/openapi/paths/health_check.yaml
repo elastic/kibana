@@ -1,0 +1,29 @@
+post:
+  summary: Fleet Server Health Check
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              status:
+                type: string
+              host:
+                type: string
+  operationId: fleet-server-health-check
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            host:
+              type: string

@@ -6,8 +6,7 @@
  */
 
 import { EsQueryRuleActionContext, addMessages } from './action_context';
-import { EsQueryRuleParamsSchema } from './rule_type_params';
-import { OnlyEsQueryRuleParams } from './types';
+import { EsQueryRuleParams, EsQueryRuleParamsSchema } from './rule_type_params';
 
 describe('ActionContext', () => {
   it('generates expected properties', async () => {
@@ -21,7 +20,7 @@ describe('ActionContext', () => {
       thresholdComparator: '>',
       threshold: [4],
       searchType: 'esQuery',
-    }) as OnlyEsQueryRuleParams;
+    }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       value: 42,
@@ -52,7 +51,7 @@ describe('ActionContext', () => {
       thresholdComparator: '>',
       threshold: [4],
       searchType: 'esQuery',
-    }) as OnlyEsQueryRuleParams;
+    }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       value: 42,
@@ -83,7 +82,7 @@ describe('ActionContext', () => {
       thresholdComparator: 'between',
       threshold: [4, 5],
       searchType: 'esQuery',
-    }) as OnlyEsQueryRuleParams;
+    }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       value: 4,
