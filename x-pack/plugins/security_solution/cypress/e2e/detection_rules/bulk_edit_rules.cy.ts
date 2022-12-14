@@ -37,7 +37,7 @@ import {
   testTagsBadge,
   testMultipleSelectedRulesLabel,
   loadPrebuiltDetectionRulesFromHeaderBtn,
-  switchToElasticRules,
+  filterByElasticRules,
   clickErrorToastBtn,
   unselectRuleByName,
   cancelConfirmationModal,
@@ -87,7 +87,7 @@ import {
   createNewTermsRule,
 } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 
 import {
   getEqlRule,
@@ -132,6 +132,8 @@ describe('Detection rules, bulk edit', () => {
     login();
   });
   beforeEach(() => {
+    // Make sure persisted rules table state is cleared
+    resetRulesTableState();
     deleteAlertsAndRules();
     esArchiverResetKibana();
     createCustomRule(
@@ -169,7 +171,7 @@ describe('Detection rules, bulk edit', () => {
       loadPrebuiltDetectionRulesFromHeaderBtn();
 
       // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
-      switchToElasticRules();
+      filterByElasticRules();
       selectNumberOfRules(expectedNumberOfSelectedRules);
       clickApplyTimelineTemplatesMenuItem();
 

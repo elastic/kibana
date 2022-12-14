@@ -57,7 +57,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
       Object {
         "action": "7858e6d5a9f231bf23f6f2e57328eb0095b26735",
         "action_task_params": "bbd38cbfd74bf6713586fe078e3fa92db2234299",
-        "alert": "eefada4a02ce05962387c0679d7b292771a931c4",
+        "alert": "d95e8ef645ae9f797b93a9a64d8ab9d35d484064",
         "api_key_pending_invalidation": "9b4bc1235337da9a87ef05a1d1f4858b2a3b77c6",
         "apm-indices": "ceb0870f3a74e2ffc3a1cd3a3c73af76baca0999",
         "apm-server-schema": "2bfd2998d3873872e1366458ce553def85418f91",
@@ -76,6 +76,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cases-telemetry": "16e261e7378a72acd0806f18df92525dd1da4f37",
         "cases-user-actions": "3973dfcaacbe6ae147d7331699cfc25d2a27ca30",
         "config": "e3f0408976dbdd453641f5699927b28b188f6b8c",
+        "config-global": "b8f559884931609a349e129c717af73d23e7bc76",
         "connector_token": "fa5301aa5a2914795d3b1b82d0a49939444009da",
         "core-usage-stats": "f40a213da2c597b0de94e364a4326a5a1baa4ca9",
         "csp-rule-template": "3679c5f2431da8153878db79c78a4e695357fb61",
