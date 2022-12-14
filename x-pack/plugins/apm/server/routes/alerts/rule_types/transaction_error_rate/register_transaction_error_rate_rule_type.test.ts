@@ -6,7 +6,7 @@
  */
 
 import { registerTransactionErrorRateRuleType } from './register_transaction_error_rate_rule_type';
-import { createRuleTypeMocks } from '../../test_utils';
+import { createRuleTypeMocks, MOCK_ALERT_LIMIT } from '../../test_utils';
 
 describe('Transaction error rate alert', () => {
   it("doesn't send an alert when rate is less than threshold", async () => {
@@ -40,6 +40,7 @@ describe('Transaction error rate alert', () => {
         total: 1,
       },
     });
+    services.alertFactory.alertLimit.getValue.mockReturnValue(MOCK_ALERT_LIMIT);
 
     await executor({ params });
     expect(services.alertFactory.create).not.toBeCalled();
@@ -106,6 +107,7 @@ describe('Transaction error rate alert', () => {
         total: 1,
       },
     });
+    services.alertFactory.alertLimit.getValue.mockReturnValue(MOCK_ALERT_LIMIT);
 
     const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
 

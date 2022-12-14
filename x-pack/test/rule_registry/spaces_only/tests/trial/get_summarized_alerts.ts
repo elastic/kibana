@@ -166,7 +166,10 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           producer: 'observability.test',
         },
         services: {
-          alertFactory: { create: sinon.stub() },
+          alertFactory: {
+            create: sinon.stub(),
+            alertLimit: { getValue: sinon.stub().returns(100) },
+          },
           shouldWriteAlerts: sinon.stub().returns(true),
         },
       } as unknown as RuleExecutorOptions<

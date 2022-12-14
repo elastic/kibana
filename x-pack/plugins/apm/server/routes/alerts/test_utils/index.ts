@@ -14,6 +14,7 @@ import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alertin
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '../../..';
 
+export const MOCK_ALERT_LIMIT = 100;
 export const createRuleTypeMocks = () => {
   let alertExecutor: (...args: any[]) => Promise<any>;
 
@@ -43,7 +44,11 @@ export const createRuleTypeMocks = () => {
     savedObjectsClient: {
       get: () => ({ attributes: { consumer: APM_SERVER_FEATURE_ID } }),
     },
-    alertFactory: { create: jest.fn(() => ({ scheduleActions })), done: {} },
+    alertFactory: {
+      create: jest.fn(() => ({ scheduleActions })),
+      alertLimit: { getValue: jest.fn() },
+      done: {},
+    },
     alertWithLifecycle: jest.fn(),
     logger: loggerMock,
     shouldWriteAlerts: () => true,
