@@ -137,6 +137,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     };
                   })
                   .filter((_, idx) => response.body.items[idx].create?.status === 201);
+                console.log(`persistence alerts ${createdAlerts.length}`);
 
                 createdAlerts.forEach((alert) =>
                   options.services.alertFactory.create(alert._id).scheduleActions('default', {})

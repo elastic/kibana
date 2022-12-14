@@ -476,7 +476,7 @@ export const convertPatchAPIToInternalSchema = (
             frequency: {
               summary: throttle !== null,
               notifyWhen,
-              throttle,
+              throttle: throttle === '1h' ? '5m' : throttle,
             },
           };
         })
@@ -546,7 +546,7 @@ export const convertCreateAPIToInternalSchema = (
           frequency: {
             summary: throttle !== null,
             notifyWhen,
-            throttle,
+            throttle: throttle === '1h' ? '5m' : throttle,
           },
         };
       }) ?? [],

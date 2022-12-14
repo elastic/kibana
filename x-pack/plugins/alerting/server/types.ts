@@ -196,6 +196,12 @@ export interface RuleType<
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
   getSummarizedAlerts?: GetSummarizedAlertsFn;
+
+  /**
+   * Determines whether framework should
+   * automatically make recovery determination. Defaults to true.
+   */
+  autoRecoverAlerts?: boolean;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

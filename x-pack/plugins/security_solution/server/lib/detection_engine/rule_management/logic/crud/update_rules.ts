@@ -87,7 +87,7 @@ export const updateRules = async ({
               frequency: {
                 summary: throttle !== null,
                 notifyWhen,
-                throttle,
+                throttle: throttle === '1h' ? '5m' : throttle,
               },
             };
           })
