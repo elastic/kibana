@@ -10,10 +10,9 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import { EuiButton, EuiCode, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public'
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
-
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { DataPanel } from '../../../../../shared/data_panel/data_panel';
 import { CrawlerLogic } from '../crawler_logic';
@@ -25,19 +24,31 @@ interface KibanaDeps {
 }
 
 const CRAWLER_LOGS_DISCOVER_RECORD = {
+  columns: [
+    '@timestamp',
+    'crawler.crawl.id',
+    'url.domain',
+    'url.path',
+    'event.action',
+    'http.response.status_code',
+  ],
   dataViewSpec: {
-    name: i18n.translate('xpack.enterpriseSearch.crawler.crawlRequestsPanel.discoverCrawlerLogsTitle', {
-      defaultMessage: 'All Crawler Logs',
-    }),
+    name: i18n.translate(
+      'xpack.enterpriseSearch.crawler.crawlRequestsPanel.discoverCrawlerLogsTitle',
+      {
+        defaultMessage: 'All Crawler Logs',
+      }
+    ),
     title: 'logs-elastic_crawler-default',
   },
-  columns: ['@timestamp', 'crawler.crawl.id', 'url.domain', 'url.path', 'event.action', 'http.response.status_code'],
-  sort: [['@timestamp','desc']], 
-}
+  sort: [['@timestamp', 'desc']],
+};
 
 export const CrawlRequestsPanel: React.FC = () => {
   const { data } = useValues(CrawlerLogic);
-  const { services: { discover } } = useKibana<KibanaDeps>();
+  const {
+    services: { discover },
+  } = useKibana<KibanaDeps>();
 
   return (
     <DataPanel
