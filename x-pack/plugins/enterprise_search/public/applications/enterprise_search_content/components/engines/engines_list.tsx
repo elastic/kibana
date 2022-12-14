@@ -13,8 +13,6 @@ import { EuiButton, EuiFieldSearch, EuiLink, EuiSpacer, EuiText } from '@elastic
 
 import { i18n } from '@kbn/i18n';
 
-import { i18n } from '@kbn/i18n';
-
 import { DataPanel } from '../../../shared/data_panel/data_panel';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
