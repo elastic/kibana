@@ -116,6 +116,7 @@ export const createStoreFactory = async (
         ...subPlugins.exceptions.storageDataTables!.tableById,
         ...subPlugins.explore.exploreDataTables!.hosts.tableById,
         ...subPlugins.explore.exploreDataTables!.network.tableById,
+        ...subPlugins.explore.exploreDataTables!.users.tableById,
         /* eslint-enable @typescript-eslint/no-non-null-assertion */
       },
     },

@@ -44,6 +44,9 @@ export class Explore {
             TableId.hostsPageSessions,
           ]),
         },
+        users: {
+          tableById: getDataTablesInStorageByIds(storage, [TableId.usersPageEvents]),
+        },
       },
       store: {
         initialState: {

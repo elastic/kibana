@@ -52,6 +52,7 @@ export interface SecuritySubPlugin {
   exploreDataTables?: {
     network: Pick<TableState, 'tableById'>;
     hosts: Pick<TableState, 'tableById'>;
+    users: Pick<TableState, 'tableById'>;
   };
 }
 
