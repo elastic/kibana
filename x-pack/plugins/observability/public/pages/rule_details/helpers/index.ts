@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { OptInExampleFlyout } from '@kbn/telemetry-management-section-plugin/public';
-
-// required for lazy loading
-// eslint-disable-next-line import/no-default-export
-export default OptInExampleFlyout;
+export { getDefaultAlertSummaryTimeRange } from './get_alert_summary_time_range';
