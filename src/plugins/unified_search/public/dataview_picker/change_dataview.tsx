@@ -101,7 +101,7 @@ export function ChangeDataView({
       const dataViewsRefs: DataViewListItemEnhanced[] = savedDataViews
         ? savedDataViews
         : await data.dataViews.getIdsWithTitle();
-      if (adHocDataViews?.length && !isTextBasedLangSelected) {
+      if (adHocDataViews?.length) {
         adHocDataViews.forEach((adHocDataView) => {
           if (adHocDataView.id) {
             dataViewsRefs.push({

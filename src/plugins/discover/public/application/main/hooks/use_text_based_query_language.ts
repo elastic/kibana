@@ -75,17 +75,12 @@ export function useTextBasedQueryLanguage({
           const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
           if (
             !isEqual(firstRowColumns, prev.current.columns) &&
-            !isEqual(query, prev.current.query) &&
-            dataViewObj
+            !isEqual(query, prev.current.query)
           ) {
             prev.current = { columns: firstRowColumns, query };
             nextColumns = firstRowColumns;
           }
 
-          if (!isEqual(query, prev.current.query) && !dataViewObj) {
-            prev.current = { columns: firstRowColumns, query };
-            nextColumns = firstRowColumns;
-          }
           if (firstRowColumns && initialFetch) {
             prev.current = { columns: firstRowColumns, query };
           }
@@ -104,7 +99,7 @@ export function useTextBasedQueryLanguage({
 
           const nextState = {
             ...(addDataViewToState && { index: dataViewObj.id }),
-            ...(addColumnsToState && { columns: nextColumns }),
+            columns: nextColumns,
           };
           stateContainer.replaceUrlAppState(nextState);
         } else {
@@ -122,22 +117,11 @@ export function useTextBasedQueryLanguage({
             dataView.timeFieldName = dateFields[0].name;
           }
 
-          const addColumnsToState = Boolean(
-            nextColumns.length && (!initialFetch || !stateColumns?.length)
-          );
           const addDataViewToState = Boolean(dataView.id !== index);
-
-          if (initialFetch && addDataViewToState) {
-            stateContainer.replaceUrlAppState({ index: dataView.id });
-          }
-
-          if (!addColumnsToState) {
-            return;
-          }
 
           const nextState = {
             ...(addDataViewToState && { index: dataView.id }),
-            ...(addColumnsToState && { columns: nextColumns }),
+            columns: nextColumns,
           };
           stateContainer.replaceUrlAppState(nextState);
         }
