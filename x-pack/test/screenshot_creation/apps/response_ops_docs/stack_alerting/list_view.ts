@@ -6,14 +6,16 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { getTestRuleData } from '../../../../functional/services/rules/test_resources';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const commonScreenshots = getService('commonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
   const pageObjects = getPageObjects(['common', 'header']);
   const actions = getService('actions');
+  const supertest = getService('supertest');
 
-  describe('list view', function () {
+  describe.only('list view', function () {
     let serverLogConnectorId: string;
 
     before(async () => {
@@ -37,6 +39,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('rules list screenshot', async () => {
+      await supertest
+      .post(`/api/alerting/rule`)
+      .set('kbn-xsrf', 'foo')
+      .send(getTestRuleData())
+      .expect(200);
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot(
