@@ -7,6 +7,7 @@
  */
 
 import { ErrorLike } from '../batch';
+import { BfetchRequestError } from '..';
 
 export const normalizeError = <E extends ErrorLike = ErrorLike>(err: any): E => {
   if (!err) {
@@ -14,7 +15,8 @@ export const normalizeError = <E extends ErrorLike = ErrorLike>(err: any): E => 
       message: 'Unknown error.',
     } as E;
   }
-  if (err.constructor.name === 'BfetchRequestError') {
+  if (err instanceof BfetchRequestError) {
+    // @ts-expect-error
     return err;
   }
   if (err instanceof Error) {

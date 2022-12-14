@@ -61,7 +61,6 @@ import {
 import { SearchUsageCollector } from '../collectors';
 import {
   EsError,
-  getHttpError,
   isEsError,
   isPainlessError,
   PainlessError,
@@ -532,12 +531,17 @@ export class SearchInterceptor {
       e.constructor.name === 'HttpFetchError' ||
       e.constructor.name === 'BfetchRequestError'
     ) {
-      const msg = e.message === 'Unknown error.' ? '' : e.message;
+      const defaultMsg = i18n.translate('data.errors.fetchError', {
+        defaultMessage: 'Please check your network connection and try again.',
+      });
+
       this.deps.toasts.addDanger({
         title: i18n.translate('data.search.httpErrorTitle', {
           defaultMessage: 'Unable to connect to the Kibana server',
         }),
-        text: toMountPoint(getHttpError(msg), { theme$: this.deps.theme.theme$ }),
+        text: toMountPoint(e.message || defaultMsg, {
+          theme$: this.deps.theme.theme$,
+        }),
       });
     } else {
       this.deps.toasts.addError(e, {

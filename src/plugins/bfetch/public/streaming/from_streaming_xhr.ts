@@ -7,8 +7,7 @@
  */
 
 import { Observable, Subject } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import { BfetchRequestError } from './bfetch_error';
+import { BfetchRequestError } from '../../common';
 
 /**
  * Creates observable from streaming XMLHttpRequest, where each event
@@ -63,14 +62,7 @@ export const fromStreamingXhr = (
       if (signal) signal.removeEventListener('abort', onBatchAbort);
 
       if (isErrorStatus()) {
-        const errorMsg =
-          xhr.status === 0
-            ? undefined
-            : i18n.translate('bfetch.networkErrorWithStatus', {
-                defaultMessage: 'Code {status}',
-                values: { status: xhr.status },
-              });
-        subject.error(new BfetchRequestError(errorMsg));
+        subject.error(new BfetchRequestError(xhr.status));
       } else {
         subject.complete();
       }
