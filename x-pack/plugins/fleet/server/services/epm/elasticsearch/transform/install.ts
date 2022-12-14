@@ -501,7 +501,7 @@ const installTransformsAssets = async (
             logger.debug(`Created aliases for destination index: ${index}`);
           }
         } catch (err) {
-          logger.debug(
+          logger.error(
             `Error creating destination index: ${JSON.stringify({
               index,
               aliases: transformsSpecifications
@@ -635,7 +635,7 @@ async function deleteAliasFromIndices({
       logger.debug(`Deleted alias: '${alias}' matching indices ${indicesMatchingAlias}`);
     }
   } catch (err) {
-    logger.debug(`Error deleting alias: ${alias}`);
+    logger.error(`Error deleting alias: ${alias}`);
   }
 }
 async function handleTransformInstall({
