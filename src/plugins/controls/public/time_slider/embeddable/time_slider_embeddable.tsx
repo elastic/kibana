@@ -141,8 +141,8 @@ export class TimeSliderControlEmbeddable extends Embeddable<
           timeRangeBounds: nextBounds,
         })
       );
-      this.syncWithTimeRange();
     }
+    this.syncWithTimeRange();
   }
 
   private syncWithTimeRange() {
