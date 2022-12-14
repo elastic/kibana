@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import { getRouteRequiredAuthz } from '../../services/security';
+
+import type { FleetAuthzRouter } from '../../services/security';
+
+import type { FleetAuthz } from '../../../common';
 import { PACKAGE_POLICY_API_ROUTES } from '../../constants';
 import {
   GetPackagePoliciesRequestSchema,
@@ -17,7 +22,7 @@ import {
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
 } from '../../types';
-import type { FleetAuthzRouter } from '../security';
+import { calculateRouteAuthz } from '../../services/security/security';
 
 import {
   getPackagePoliciesHandler,
@@ -38,20 +43,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
       validate: GetPackagePoliciesRequestSchema,
-      fleetAuthz: {
-        integrations: { readIntegrationPolicies: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(
+          fleetAuthz,
+          getRouteRequiredAuthz('get', PACKAGE_POLICY_API_ROUTES.LIST_PATTERN)
+        ).granted,
     },
     getPackagePoliciesHandler
   );
 
+  // Get bulk
   router.post(
     {
       path: PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN,
       validate: BulkGetPackagePoliciesRequestSchema,
-      fleetAuthz: {
-        integrations: { readIntegrationPolicies: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(
+          fleetAuthz,
+          getRouteRequiredAuthz('post', PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN)
+        ).granted,
     },
     bulkGetPackagePoliciesHandler
   );
@@ -61,9 +71,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
       validate: GetOnePackagePolicyRequestSchema,
-      fleetAuthz: {
-        integrations: { readIntegrationPolicies: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(
+          fleetAuthz,
+          getRouteRequiredAuthz('get', PACKAGE_POLICY_API_ROUTES.INFO_PATTERN)
+        ).granted,
     },
     getOnePackagePolicyHandler
   );
@@ -93,14 +105,16 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN,
       validate: UpdatePackagePolicyRequestSchema,
-      fleetAuthz: {
-        integrations: { writeIntegrationPolicies: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(
+          fleetAuthz,
+          getRouteRequiredAuthz('put', PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN)
+        ).granted,
     },
     updatePackagePolicyHandler
   );
 
-  // Delete
+  // Delete (bulk)
   router.post(
     {
       path: PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN,
