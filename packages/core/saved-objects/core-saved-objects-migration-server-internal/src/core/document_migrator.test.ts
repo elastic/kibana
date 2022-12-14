@@ -203,19 +203,19 @@ describe('DocumentMigrator', () => {
       );
     });
 
-    it('validates convertToMultiNamespaceTypeVersion is not greater than the current Kibana version', () => {
+    it('validates convertToMultiNamespaceTypeVersion is not greater than 8.0.0', () => {
       const invalidDefinition = {
-        kibanaVersion: '3.2.3',
+        kibanaVersion: '8.7.0',
         typeRegistry: createRegistry({
           name: 'foo',
-          convertToMultiNamespaceTypeVersion: '3.2.4',
+          convertToMultiNamespaceTypeVersion: '8.7.0',
           namespaceType: 'multiple',
         }),
         minimumConvertVersion: '0.0.0',
         log: mockLogger,
       };
       expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be greater than the current Kibana version '3.2.3'.`
+        `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '8.7.0' cannot be greater than '8.0.0'.`
       );
     });
 
@@ -784,9 +784,9 @@ describe('DocumentMigrator', () => {
             name: 'ccc',
             namespaceType: 'multiple',
             migrations: {
-              '9.0.0': (doc: SavedObjectUnsanitizedDoc) => doc,
+              '7.0.0': (doc: SavedObjectUnsanitizedDoc) => doc,
             },
-            convertToMultiNamespaceTypeVersion: '11.0.0', // this results in reference transforms getting added to other types, but does not increase the migrationVersion of those types
+            convertToMultiNamespaceTypeVersion: '8.0.0', // this results in reference transforms getting added to other types, but does not increase the migrationVersion of those types
           }
         ),
       });
@@ -794,7 +794,7 @@ describe('DocumentMigrator', () => {
       expect(migrator.migrationVersion).toEqual({
         aaa: '10.4.0',
         bbb: '3.2.3',
-        ccc: '11.0.0',
+        ccc: '8.0.0',
         [LEGACY_URL_ALIAS_TYPE]: '0.1.2',
       });
     });

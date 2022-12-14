@@ -325,9 +325,9 @@ function validateMigrationDefinition(
       throw new Error(
         `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Value '${convertToMultiNamespaceTypeVersion}' cannot be less than '${minimumConvertVersion}'.`
       );
-    } else if (Semver.gt(convertToMultiNamespaceTypeVersion, kibanaVersion)) {
+    } else if (Semver.gt(convertToMultiNamespaceTypeVersion, '8.0.0')) {
       throw new Error(
-        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Value '${convertToMultiNamespaceTypeVersion}' cannot be greater than the current Kibana version '${kibanaVersion}'.`
+        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Value '${convertToMultiNamespaceTypeVersion}' cannot be greater than '8.0.0'.`
       );
     } else if (Semver.patch(convertToMultiNamespaceTypeVersion)) {
       throw new Error(
