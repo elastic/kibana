@@ -366,15 +366,13 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
                 }
                 ruleActions = applyBulkEditOperation(operation, ruleActions);
                 if (operation.syncFrequency) {
-                  const frequency = operation.value[0].frequency;
-                  if (!frequency)
-                    throw Error(
-                      `Cannot sync frequency of existing actions when new bulk edit action has no frequency`
-                    );
-                  ruleActions.actions = ruleActions.actions.map((action) => ({
-                    ...action,
-                    frequency,
-                  }));
+                  const frequency = operation.value[0]?.frequency;
+                  if (frequency) {
+                    ruleActions.actions = ruleActions.actions.map((action) => ({
+                      ...action,
+                      frequency,
+                    }));
+                  }
                 }
                 break;
               case 'snoozeSchedule':
