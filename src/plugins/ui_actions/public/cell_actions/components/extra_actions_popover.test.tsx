@@ -12,11 +12,12 @@ import { CellActionExecutionContext } from './cell_actions';
 import { makeAction } from '../mocks/helpers';
 import { ExtraActionsPopOver, ExtraActionsPopOverWithAnchor } from './extra_actions_popover';
 
+const actionContext = { field: { name: 'fieldName' } } as CellActionExecutionContext;
 describe('ExtraActionsPopOver', () => {
   it('renders', () => {
     const { queryByTestId } = render(
       <ExtraActionsPopOver
-        actionContext={{} as CellActionExecutionContext}
+        actionContext={actionContext}
         isOpen={false}
         closePopOver={() => {}}
         actions={[]}
@@ -33,7 +34,7 @@ describe('ExtraActionsPopOver', () => {
     const action = { ...makeAction('test-action'), execute: executeAction };
     const { getByLabelText } = render(
       <ExtraActionsPopOver
-        actionContext={{} as CellActionExecutionContext}
+        actionContext={actionContext}
         isOpen={true}
         closePopOver={closePopOver}
         actions={[action]}
@@ -57,7 +58,7 @@ describe('ExtraActionsPopOverWithAnchor', () => {
   it('renders', () => {
     const { queryByTestId } = render(
       <ExtraActionsPopOverWithAnchor
-        actionContext={{} as CellActionExecutionContext}
+        actionContext={actionContext}
         isOpen={false}
         closePopOver={() => {}}
         actions={[]}
@@ -74,7 +75,7 @@ describe('ExtraActionsPopOverWithAnchor', () => {
     const action = { ...makeAction('test-action'), execute: executeAction };
     const { getByLabelText } = render(
       <ExtraActionsPopOverWithAnchor
-        actionContext={{} as CellActionExecutionContext}
+        actionContext={actionContext}
         isOpen={true}
         closePopOver={closePopOver}
         actions={[action]}

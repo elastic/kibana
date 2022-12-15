@@ -14,7 +14,10 @@ import { HoverActionsPopover } from './hover_actions_popover';
 import { CellActionsContextProvider } from './cell_actions_context';
 
 describe('HoverActionsPopover', () => {
-  const actionContext = { trigger: { id: 'triggerId' } } as CellActionExecutionContext;
+  const actionContext = {
+    trigger: { id: 'triggerId' },
+    field: { name: 'fieldName' },
+  } as CellActionExecutionContext;
   const TestComponent = () => <span data-test-subj="test-component" />;
   jest.useFakeTimers();
 
