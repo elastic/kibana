@@ -6,7 +6,7 @@
  */
 
 import { DataViewsService } from '@kbn/data-views-plugin/public';
-import {  DiscoverStart } from '@kbn/discover-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { DOC_TYPE } from '../../common';
