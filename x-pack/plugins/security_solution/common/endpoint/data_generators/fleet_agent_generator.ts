@@ -239,10 +239,6 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
         fleetServerAgent.upgraded_at = undefined;
         break;
 
-      case 'warning':
-        // NOt able to find anything in fleet
-        break;
-
       // default is `online`, which is also the default returned by `generateEsHit()`
     }
 
