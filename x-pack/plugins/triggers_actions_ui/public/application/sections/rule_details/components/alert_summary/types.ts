@@ -7,7 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { AlertStatus } from '@kbn/rule-data-utils';
-import { AlertSummaryTimeRange } from '../../../../hooks/use_load_rule_alerts_aggregations';
+import { AlertSummaryTimeRange } from '../../../../hooks/use_load_alert_summary';
 import { Rule } from '../../../../../types';
 
 export interface RuleAlertsSummaryProps {
