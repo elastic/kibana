@@ -177,7 +177,9 @@ const getDefaultAwsType = (input: Props['input']): AwsCredentialsType =>
 export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) => {
   const awsCredentialsType = getDefaultAwsType(input);
   const awsCredentialVars = getAwsCredentialVars(input, AWS_FIELDS[awsCredentialsType] || []);
-  const awsCredentialVarsKeys = Object.keys(awsCredentialVars);
+  const awsCredentialVarsKeys = Object.keys(awsCredentialVars) as Array<
+    Fields[keyof Fields][number]
+  >;
 
   return (
     <>
@@ -196,14 +198,14 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
         }}
       />
       <EuiSpacer size="m" />
-      {AWS_VARS_INFO?.[awsCredentialsType]}
+      {AWS_VARS_INFO[awsCredentialsType]}
       <EuiSpacer />
       <AwsInputVarFields
         onChange={(key, value) => updatePolicy(getPolicyWithInputVars(newPolicy, key, value))}
         fields={awsCredentialVarsKeys.map((field) => ({
           id: field,
           value: awsCredentialVars[field].value,
-          label: AWS_FIELD_LABEL?.[field as keyof typeof AWS_FIELD_LABEL],
+          label: AWS_FIELD_LABEL[field],
         }))}
       />
       <EuiSpacer />

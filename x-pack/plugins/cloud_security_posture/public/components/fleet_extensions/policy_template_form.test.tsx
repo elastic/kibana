@@ -45,25 +45,25 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   it('renders KSPM input selector', () => {
-    const { getByText } = render(<WrappedComponent newPolicy={getMockPolicyK8s()} />);
+    const { getByLabelText } = render(<WrappedComponent newPolicy={getMockPolicyK8s()} />);
 
-    const option1 = getByText('Self-Managed/Vanilla Kubernetes', { selector: 'button span' });
-    const option2 = getByText('EKS (Elastic Kubernetes Service)', { selector: 'button span' });
+    const option1 = getByLabelText('Self-Managed/Vanilla Kubernetes');
+    const option2 = getByLabelText('EKS (Elastic Kubernetes Service)');
 
     expect(option1).toBeInTheDocument();
     expect(option2).toBeInTheDocument();
-    expect(option1.parentElement).toBeEnabled();
-    expect(option2.parentElement).toBeEnabled();
-    expect(option1.querySelector('input')).toBeChecked();
+    expect(option1).toBeEnabled();
+    expect(option2).toBeEnabled();
+    expect(option1).toBeChecked();
   });
 
   it('updates selected KSPM input', () => {
     const k8sPolicy = getMockPolicyK8s();
     const eksPolicy = getMockPolicyEKS();
 
-    const { getByText } = render(<WrappedComponent newPolicy={k8sPolicy} />);
-    const span = getByText('EKS (Elastic Kubernetes Service)', { selector: 'button span' });
-    userEvent.click(span);
+    const { getByLabelText } = render(<WrappedComponent newPolicy={k8sPolicy} />);
+    const option = getByLabelText('EKS (Elastic Kubernetes Service)');
+    userEvent.click(option);
 
     // Listen to the 2nd triggered by the test.
     // The 1st is done on mount to ensure initial state is valid.
@@ -74,48 +74,52 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   it('renders CSPM input selector', () => {
-    const { getByText } = render(<WrappedComponent newPolicy={getMockPolicyAWS()} />);
+    const { getByLabelText } = render(<WrappedComponent newPolicy={getMockPolicyAWS()} />);
 
-    const option1 = getByText('Amazon Web Services', { selector: 'button span' });
-    const option2 = getByText('GCP', { selector: 'button span' });
-    const option3 = getByText('Azure', { selector: 'button span' });
+    const option1 = getByLabelText('Amazon Web Services');
+    const option2 = getByLabelText('GCP');
+    const option3 = getByLabelText('Azure');
 
     expect(option1).toBeInTheDocument();
     expect(option2).toBeInTheDocument();
     expect(option3).toBeInTheDocument();
     expect(option1).toBeEnabled();
-    expect(option2.parentElement).toBeDisabled();
-    expect(option3.parentElement).toBeDisabled();
-    expect(option1.querySelector('input')).toBeChecked();
+    expect(option2).toBeDisabled();
+    expect(option3).toBeDisabled();
+    expect(option1).toBeChecked();
   });
 
   it('renders disabled KSPM input when editing', () => {
-    const { getByText } = render(<WrappedComponent newPolicy={getMockPolicyK8s()} edit={true} />);
+    const { getByLabelText } = render(
+      <WrappedComponent newPolicy={getMockPolicyK8s()} edit={true} />
+    );
 
-    const option1 = getByText('Self-Managed/Vanilla Kubernetes', { selector: 'button span' });
-    const option2 = getByText('EKS (Elastic Kubernetes Service)', { selector: 'button span' });
+    const option1 = getByLabelText('Self-Managed/Vanilla Kubernetes');
+    const option2 = getByLabelText('EKS (Elastic Kubernetes Service)');
 
     expect(option1).toBeInTheDocument();
     expect(option2).toBeInTheDocument();
-    expect(option1.parentElement).toBeDisabled();
-    expect(option2.parentElement).toBeDisabled();
-    expect(option1.querySelector('input')).toBeChecked();
+    expect(option1).toBeDisabled();
+    expect(option2).toBeDisabled();
+    expect(option1).toBeChecked();
   });
 
   it('renders disabled CSPM input when editing', () => {
-    const { getByText } = render(<WrappedComponent newPolicy={getMockPolicyAWS()} edit={true} />);
+    const { getByLabelText } = render(
+      <WrappedComponent newPolicy={getMockPolicyAWS()} edit={true} />
+    );
 
-    const option1 = getByText('Amazon Web Services', { selector: 'button span' });
-    const option2 = getByText('GCP', { selector: 'button span' });
-    const option3 = getByText('Azure', { selector: 'button span' });
+    const option1 = getByLabelText('Amazon Web Services');
+    const option2 = getByLabelText('GCP');
+    const option3 = getByLabelText('Azure');
 
     expect(option1).toBeInTheDocument();
     expect(option2).toBeInTheDocument();
     expect(option3).toBeInTheDocument();
-    expect(option1.parentElement).toBeDisabled();
-    expect(option2.parentElement).toBeDisabled();
-    expect(option3.parentElement).toBeDisabled();
-    expect(option1.querySelector('input')).toBeChecked();
+    expect(option1).toBeDisabled();
+    expect(option2).toBeDisabled();
+    expect(option3).toBeDisabled();
+    expect(option1).toBeChecked();
   });
 
   /**
@@ -131,10 +135,10 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getPolicy();
       policy = getPolicyWithInputVars(policy, 'aws.credentials.type', 'assume_role');
 
-      const { getByText, getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
-      const button = getByText('Assume role', { selector: 'button span' });
+      const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
+      const option = getByLabelText('Assume role');
 
-      expect(button.querySelector('input')).toBeChecked();
+      expect(option).toBeChecked();
       expect(getByLabelText('Role ARN')).toBeInTheDocument();
     });
 
@@ -157,10 +161,10 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy: NewPackagePolicy = getPolicy();
       policy = getPolicyWithInputVars(policy, 'aws.credentials.type', 'direct_access_keys');
 
-      const { getByText, getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
-      const button = getByText('Direct access keys', { selector: 'button span' });
+      const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
+      const option = getByLabelText('Direct access keys');
 
-      expect(button.querySelector('input')).toBeChecked();
+      expect(option).toBeChecked();
       expect(getByLabelText('Access Key ID')).toBeInTheDocument();
       expect(getByLabelText('Secret Access Key')).toBeInTheDocument();
     });
@@ -194,10 +198,10 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy: NewPackagePolicy = getPolicy();
       policy = getPolicyWithInputVars(policy, 'aws.credentials.type', 'temporary_keys');
 
-      const { getByText, getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
-      const button = getByText('Temporary keys', { selector: 'button span' });
+      const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
+      const option = getByLabelText('Temporary keys');
 
-      expect(button.querySelector('input')).toBeChecked();
+      expect(option).toBeChecked();
       expect(getByLabelText('Access Key ID')).toBeInTheDocument();
       expect(getByLabelText('Secret Access Key')).toBeInTheDocument();
       expect(getByLabelText('Session Token')).toBeInTheDocument();
@@ -242,10 +246,10 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy: NewPackagePolicy = getPolicy();
       policy = getPolicyWithInputVars(policy, 'aws.credentials.type', 'shared_credentials');
 
-      const { getByText, getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
-      const button = getByText('Shared credentials', { selector: 'button span' });
+      const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
+      const option = getByLabelText('Shared credentials');
 
-      expect(button.querySelector('input')).toBeChecked();
+      expect(option).toBeChecked();
       expect(getByLabelText('Shared Credential File')).toBeInTheDocument();
       expect(getByLabelText('Credential Profile Name')).toBeInTheDocument();
     });
