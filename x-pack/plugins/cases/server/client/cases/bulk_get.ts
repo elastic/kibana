@@ -18,7 +18,9 @@ import {
   excess,
   throwErrors,
   getTypeForCertainFieldsFromArray,
+  CaseResponseRt,
 } from '../../../common/api';
+import { getTypeProps } from '../../../common/api/runtime_types';
 import { createCaseError } from '../../common/error';
 import { asArray, flattenCaseSavedObject } from '../../common/utils';
 import { Operations } from '../../authorization';
@@ -48,6 +50,8 @@ export const bulkGet = async (
       excess(CasesBulkGetRequestRt).decode({ ...params, fields }),
       fold(throwErrors(Boom.badRequest), identity)
     );
+
+    throwIfFieldsAreInvalid(fields);
 
     const finalFields = fields?.length ? [...fields, 'id', 'version'] : fields;
     const cases = await caseService.getCases({ caseIds: request.ids, fields: finalFields });
@@ -97,5 +101,20 @@ export const bulkGet = async (
       error,
       logger,
     });
+  }
+};
+
+const throwIfFieldsAreInvalid = (fields?: string[]) => {
+  if (!fields || fields.length === 0) {
+    return;
+  }
+
+  const typeProps = getTypeProps(CaseResponseRt) ?? {};
+  const validFields = Object.keys(typeProps);
+
+  for (const field of fields) {
+    if (!validFields.includes(field)) {
+      throw Boom.badRequest(`Field: ${field} is not supported`);
+    }
   }
 };
