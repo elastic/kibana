@@ -66,7 +66,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
   } = request.query;
 
   // not available to get request
-  const filter = request.body?.index_filter;
+  const indexFilter = request.body?.index_filter;
 
   let parsedFields: string[] = [];
   try {
@@ -85,7 +85,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
         allow_no_indices: allowNoIndex || false,
         includeUnmapped,
       },
-      filter,
+      indexFilter,
     });
 
     return response.ok({
