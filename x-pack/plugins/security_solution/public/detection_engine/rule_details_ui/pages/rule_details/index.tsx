@@ -172,7 +172,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = () => 
       navigateToApp,
       capabilities: { actions },
     },
-    timelines: timelinesUi,
     spaces: spacesApi,
   } = useKibana().services;
 
