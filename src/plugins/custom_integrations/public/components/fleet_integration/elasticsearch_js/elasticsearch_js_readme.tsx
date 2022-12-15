@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
@@ -63,8 +63,6 @@ const TopFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export const ElasticsearchJsClientReadme = () => {
-  const [apiKey, setApiKey] = useState<string | null>(null);
-
   return (
     <>
       <FixedHeader>
