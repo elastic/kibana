@@ -12,7 +12,7 @@ import { CellActions, CellActionsMode } from './cell_actions';
 import { CellActionsContextProvider } from './cell_actions_context';
 
 const TRIGGER_ID = 'test-trigger-id';
-const CONFIG = { field: 'name', value: '123', fieldType: 'text' };
+const FIELD = { name: 'name', value: '123', type: 'text' };
 
 describe('CellActions', () => {
   it('renders', async () => {
@@ -21,7 +21,7 @@ describe('CellActions', () => {
 
     const { queryByTestId } = render(
       <CellActionsContextProvider getCompatibleActions={getActions}>
-        <CellActions mode={CellActionsMode.ALWAYS_VISIBLE} triggerId={TRIGGER_ID} config={CONFIG}>
+        <CellActions mode={CellActionsMode.ALWAYS_VISIBLE} triggerId={TRIGGER_ID} field={FIELD}>
           Field value
         </CellActions>
       </CellActionsContextProvider>
@@ -40,7 +40,7 @@ describe('CellActions', () => {
 
     const { queryByTestId } = render(
       <CellActionsContextProvider getCompatibleActions={getActions}>
-        <CellActions mode={CellActionsMode.ALWAYS_VISIBLE} triggerId={TRIGGER_ID} config={CONFIG}>
+        <CellActions mode={CellActionsMode.ALWAYS_VISIBLE} triggerId={TRIGGER_ID} field={FIELD}>
           Field value
         </CellActions>
       </CellActionsContextProvider>
@@ -59,7 +59,7 @@ describe('CellActions', () => {
 
     const { queryByTestId } = render(
       <CellActionsContextProvider getCompatibleActions={getActions}>
-        <CellActions mode={CellActionsMode.HOVER_POPOVER} triggerId={TRIGGER_ID} config={CONFIG}>
+        <CellActions mode={CellActionsMode.HOVER_POPOVER} triggerId={TRIGGER_ID} field={FIELD}>
           Field value
         </CellActions>
       </CellActionsContextProvider>

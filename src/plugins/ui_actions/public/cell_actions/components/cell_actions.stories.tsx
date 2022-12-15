@@ -14,7 +14,7 @@ import { CellActions, CellActionsMode, CellActionsProps } from './cell_actions';
 
 const TRIGGER_ID = 'testTriggerId';
 
-const CONFIG = { field: 'name', value: '123', fieldType: 'text' };
+const FIELD = { name: 'name', value: '123', type: 'text' };
 
 const getCompatibleActions = () =>
   Promise.resolve([
@@ -60,18 +60,18 @@ DefaultWithControls.args = {
   showTooltip: true,
   mode: CellActionsMode.ALWAYS_VISIBLE,
   triggerId: TRIGGER_ID,
-  config: CONFIG,
+  field: FIELD,
   showMoreActionsFrom: 3,
 };
 
 export const CellActionInline = ({}: {}) => (
-  <CellActions mode={CellActionsMode.ALWAYS_VISIBLE} triggerId={TRIGGER_ID} config={CONFIG}>
+  <CellActions mode={CellActionsMode.ALWAYS_VISIBLE} triggerId={TRIGGER_ID} field={FIELD}>
     Field value
   </CellActions>
 );
 
 export const CellActionHoverPopup = ({}: {}) => (
-  <CellActions mode={CellActionsMode.HOVER_POPOVER} triggerId={TRIGGER_ID} config={CONFIG}>
+  <CellActions mode={CellActionsMode.HOVER_POPOVER} triggerId={TRIGGER_ID} field={FIELD}>
     Hover me
   </CellActions>
 );

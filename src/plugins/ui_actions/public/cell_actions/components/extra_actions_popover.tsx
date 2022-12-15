@@ -127,7 +127,7 @@ const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
   return (
     <>
       <EuiScreenReaderOnly>
-        <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field)}</p>
+        <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field.name)}</p>
       </EuiScreenReaderOnly>
       <EuiContextMenuPanel size="s" items={items} />
     </>

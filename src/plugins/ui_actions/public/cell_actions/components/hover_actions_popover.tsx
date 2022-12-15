@@ -130,7 +130,7 @@ export const HoverActionsPopover = React.memo<Props>(
             {showHoverContent ? (
               <div css={hoverContentWrapperCSS}>
                 <EuiScreenReaderOnly>
-                  <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field)}</p>
+                  <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field.name)}</p>
                 </EuiScreenReaderOnly>
                 {visibleActions.map((action) => (
                   <ActionItem

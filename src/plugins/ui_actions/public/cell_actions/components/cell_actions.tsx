@@ -6,20 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { orderBy } from 'lodash/fp';
-import React, { useCallback, useContext, useMemo, useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import type { ActionExecutionContext } from '../../actions';
-import { CellActionsContext } from './cell_actions_context';
 import { InlineActions } from './inline_actions';
 import { HoverActionsPopover } from './hover_actions_popover';
 
-export interface CellActionConfig {
-  field: string;
-  fieldType: string;
+export interface CellActionField {
+  /**
+   * Field name.
+   * Example: 'host.name'
+   */
+  name: string;
+  /**
+   * Field type.
+   * Example: 'keyword'
+   */
+  type: string;
+  /**
+   * Field value.
+   * Example: 'My-Laptop'
+   */
   value: string;
 }
 
-export interface CellActionExecutionContext extends CellActionConfig, ActionExecutionContext {
+export interface CellActionExecutionContext extends ActionExecutionContext {
   /**
    * Ref to a DOM node where the action can add custom HTML.
    */
@@ -34,6 +44,8 @@ export interface CellActionExecutionContext extends CellActionConfig, ActionExec
    * Extra configurations for actions.
    */
   metadata?: Record<string, unknown>;
+
+  field: CellActionField;
 }
 
 export enum CellActionsMode {
@@ -45,7 +57,7 @@ export interface CellActionsProps {
   /**
    * Common set of properties used by most actions.
    */
-  config: CellActionConfig;
+  field: CellActionField;
   /**
    * The trigger in which the actions are registered.
    */
@@ -72,7 +84,7 @@ export interface CellActionsProps {
 }
 
 export const CellActions: React.FC<CellActionsProps> = ({
-  config,
+  field,
   triggerId,
   children,
   mode,
@@ -84,8 +96,14 @@ export const CellActions: React.FC<CellActionsProps> = ({
   const nodeRef = useRef<HTMLDivElement | null>(null);
 
   const actionContext: CellActionExecutionContext = useMemo(
-    () => ({ ...config, trigger: { id: triggerId }, extraContentNodeRef, nodeRef, metadata }),
-    [config, triggerId, metadata]
+    () => ({
+      field,
+      trigger: { id: triggerId },
+      extraContentNodeRef,
+      nodeRef,
+      metadata,
+    }),
+    [field, triggerId, metadata]
   );
 
   if (mode === CellActionsMode.HOVER_POPOVER) {
