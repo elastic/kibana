@@ -69,6 +69,7 @@ TYPES_DEPS = [
   "@npm//@emotion/react",
   "@npm//@emotion/css",
   "@npm//@elastic/eui",
+  "//packages/kbn-ambient-ui-types:npm_module_types",
 ]
 
 jsts_transpiler(

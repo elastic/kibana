@@ -35,3 +35,15 @@ declare module '*.mdx' {
   // eslint-disable-next-line import/no-default-export
   export default MDXComponent;
 }
+
+import { SerializedStyles } from '@emotion/react';
+
+// Sourced from @emotion/react/types/css-prop
+declare module 'react' {
+  interface Attributes {
+    /*
+      Since Kibana is using `css` from `@emotion/react` which returns `SerializedStyles`... doesn't it make sense to override and restrict the type specifically to its result?
+    */
+    css?: SerializedStyles;
+  }
+}

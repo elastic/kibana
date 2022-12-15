@@ -7,7 +7,6 @@
     "declarationMap": true,
     "types": [
       "node",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
     ]
   },
