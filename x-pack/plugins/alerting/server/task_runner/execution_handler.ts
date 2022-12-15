@@ -225,9 +225,7 @@ export class ExecutionHandler<
           alertGroup: action.group,
         });
 
-        if (this.isRecoveredAlert(actionGroup)) {
-          alert.scheduleActions(action.group as ActionGroupIds);
-        } else {
+        if (!this.isRecoveredAlert(actionGroup)) {
           if (action.frequency?.throttle) {
             alert.updateLastScheduledActions(
               action.group as ActionGroupIds,
