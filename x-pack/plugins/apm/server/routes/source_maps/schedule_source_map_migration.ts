@@ -48,7 +48,9 @@ export async function scheduleSourceMapMigration({
       timeout: '1h',
       maxAttempts: 5,
       maxConcurrency: 1,
-      createTaskRunner(context) {
+      createTaskRunner() {
+        const taskState: TaskState = { isAborted: false };
+
         return {
           async run() {
             logger.debug(`Run task: "${TASK_TYPE}"`);
@@ -65,6 +67,7 @@ export async function scheduleSourceMapMigration({
             const fleet = await fleetStartPromise;
             if (fleet) {
               await runFleetSourcemapArtifactsMigration({
+                taskState,
                 fleet,
                 internalESClient,
                 logger,
@@ -73,6 +76,7 @@ export async function scheduleSourceMapMigration({
           },
 
           async cancel() {
+            taskState.isAborted = true;
             logger.debug(`Task cancelled: "${TASK_TYPE}"`);
           },
         };
@@ -95,11 +99,15 @@ export async function scheduleSourceMapMigration({
   }
 }
 
+type TaskState = { isAborted: boolean };
+
 export async function runFleetSourcemapArtifactsMigration({
+  taskState,
   fleet,
   internalESClient,
   logger,
 }: {
+  taskState: TaskState;
   fleet: FleetStartContract;
   internalESClient: ElasticsearchClient;
   logger: Logger;
@@ -113,6 +121,7 @@ export async function runFleetSourcemapArtifactsMigration({
       : '';
 
     await paginateArtifacts({
+      taskState,
       page: 1,
       apmArtifactClient: getApmArtifactClient(fleet),
       kuery: `type: sourcemap${createdDateFilter}`,
@@ -149,18 +158,24 @@ async function getArtifactsForPage({
 }
 
 async function paginateArtifacts({
+  taskState,
   page,
   apmArtifactClient,
   kuery,
   logger,
   internalESClient,
 }: {
+  taskState: TaskState;
   page: number;
   apmArtifactClient: FleetArtifactsClient;
   kuery: string;
   logger: Logger;
   internalESClient: ElasticsearchClient;
 }) {
+  if (taskState.isAborted) {
+    return;
+  }
+
   const { total, items: artifacts } = await getArtifactsForPage({
     page,
     apmArtifactClient,
@@ -180,6 +195,7 @@ async function paginateArtifacts({
   const hasMorePages = total > migratedCount;
   if (hasMorePages) {
     await paginateArtifacts({
+      taskState,
       page: page + 1,
       apmArtifactClient,
       kuery,
