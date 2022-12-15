@@ -27,9 +27,5 @@ export const getTimeSeriesBucketAgg = () =>
     name: BUCKET_TYPES.TIME_SERIES,
     expressionName: aggTimeSeriesFnName,
     title: timeSeriesTitle,
-    makeLabel(agg) {
-      return 'rate';
-    },
-    createFilter: createFilterTerms,
     params: [],
   });
