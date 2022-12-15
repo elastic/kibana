@@ -130,12 +130,28 @@ export default function (providerContext: FtrProviderContext) {
           refreshCache: true,
         })
         .expect(200);
+      //   + expected - actual
 
+      //   {
+      //     "healthy": 3
+      //  -  "inactive": 1
+      //  -  "offline": 0
+      //  +  "offline": 1
+      //     "total_all_statuses": 8
+      //     "total_enrolled": 8
+      //  -  "unenrolled": 0
+      //  -  "unhealthy": 4
+      //  -  "updating": 0
+      //  +  "unhealthy": 3
+      //  +  "updating": 1
+      //   }
       expect(apiResponse.stack_stats.kibana.plugins.fleet.agents).eql({
         total_enrolled: 8,
         healthy: 3,
         unhealthy: 3,
-        offline: 1,
+        offline: 0,
+        unenrolled: 0,
+        inactive: 1,
         updating: 1,
         total_all_statuses: 8,
       });
