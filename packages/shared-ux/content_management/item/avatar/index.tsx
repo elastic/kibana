@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './context';
-export * from './use_content';
-export * from './use_content_item';
+export * from './avatar';
+export * from './avatar_ui';

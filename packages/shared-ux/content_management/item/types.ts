@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './context';
-export * from './use_content';
-export * from './use_content_item';
+import type { EuiAvatarProps } from '@elastic/eui';
+
+export type TSize = EuiAvatarProps['size'];

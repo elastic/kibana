@@ -14,21 +14,3 @@ export interface ContentContextValue {
 }
 
 export const context = React.createContext<ContentContextValue | null>(null);
-
-export const useContent = (): ContentContextValue => {
-  const contextValue = React.useContext(context);
-
-  if (!contextValue) {
-    throw new Error('Content context is not available');
-  }
-
-  return contextValue;
-}
-
-export const useContentItem = (id: string): CmItem => {
-  const { cache } = useContent();
-  const item = cache.item(id);
-  // const [data, setData] = React.useState<CmItem | undefined>(undefined);
-
-  // return item.data$;
-};
