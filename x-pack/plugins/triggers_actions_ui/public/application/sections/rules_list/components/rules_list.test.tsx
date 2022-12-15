@@ -6,14 +6,21 @@
  */
 
 import * as React from 'react';
-import { fireEvent, act, render, screen, waitFor } from '@testing-library/react';
+import {
+  fireEvent,
+  act,
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { percentileFields, RulesList } from './rules_list';
 import { Percentiles, RuleTypeModel } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-
+import { asyncForEach } from '@kbn/std';
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IToasts } from '@kbn/core/public';
@@ -428,7 +435,7 @@ describe('rules_list ', () => {
       });
     });
 
-    describe.only('rules_list component with items', () => {
+    describe('rules_list component with items', () => {
       describe('render table of rules', () => {
         it('should render basic table and its row', async () => {
           const { queryAllByTestId } = renderWithProviders(<RulesList />);
@@ -553,14 +560,17 @@ describe('rules_list ', () => {
           expect(getAllByTestId('ruleStatus-succeeded').length).toEqual(2);
           expect(getAllByTestId('ruleStatus-failed').length).toEqual(2);
           expect(getAllByTestId('ruleStatus-warning').length).toEqual(1);
+          fireEvent.mouseOver(getAllByTestId('ruleStatus-failed')[0]);
+          await waitFor(() => {
+            expect(getAllByTestId('ruleStatus-error-tooltip')[0].textContent).toEqual(
+              'Error: test'
+            );
+          });
+          expect(getAllByTestId('rulesListAutoRefresh').length).toBeGreaterThan(0);
           expect(getAllByTestId('ruleStatus-error-license-fix').length).toEqual(1);
           expect(getAllByTestId('ruleStatus-failed')[0].textContent).toEqual('Failed');
           const failedElements = getAllByTestId('ruleStatus-failed');
           expect(failedElements[failedElements.length - 1].textContent).toEqual('License Error'); // last element
-
-          // TODO: review why these are failing
-          expect(getAllByTestId('ruleStatus-error-tooltip').length).toEqual(2);
-          expect(getAllByTestId('rulesListAutoRefresh').length).toBeGreater(0);
         });
 
         it('Status control column', async () => {
@@ -591,47 +601,64 @@ describe('rules_list ', () => {
         });
 
         it('P50 column is rendered initially', async () => {
-          const { getByTestId, queryAllByTestId } = renderWithProviders(<RulesList />);
+          const { getByTestId, findByText, container } = renderWithProviders(<RulesList />);
           await waitFor(() =>
             expect(getByTestId(`rulesTable-${Percentiles.P50}ColumnName`)).toBeDefined()
           );
 
           let percentiles: HTMLElement[] = [];
           await waitFor(() => {
-            percentiles = queryAllByTestId('rule-duration-format-value');
+            percentiles = Array.from(
+              container.querySelectorAll(
+                '[data-test-subj="rulesTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]'
+              )
+            );
             return expect(percentiles.length).toBeGreaterThan(0);
           });
 
-          mockedRulesData.forEach((rule, index) => {
+          const assertions = async (rule: any, index: number) => {
+            fireEvent.mouseOver(percentiles[index]);
             if (typeof rule.monitoring?.run.calculated_metrics.p50 === 'number') {
-              // Ensure the table cells are getting the correct values
               expect(percentiles[index].textContent).toEqual(
                 getFormattedDuration(rule.monitoring.run.calculated_metrics.p50)
               );
-              // Ensure the tooltip is showing the correct content
-              expect(queryAllByTestId('rule-duration-format-tooltip')[index].textContent).toEqual(
-                getFormattedMilliseconds(rule.monitoring.run.calculated_metrics.p50)
-              );
+              expect(
+                await findByText(
+                  getFormattedMilliseconds(rule.monitoring.run.calculated_metrics.p50)
+                )
+              ).toBeInTheDocument();
             } else {
               expect(percentiles[index].textContent).toEqual('N/A');
             }
-          });
+          };
+
+          await asyncForEach(mockedRulesData, assertions);
         });
 
-        it('Click column to sort by P50', async () => {
-          const { getByTestId, queryAllByTestId, getAllByRole } = renderWithProviders(
-            <RulesList />
+        it.only('Click column to sort by P50', async () => {
+          const {
+            getByTestId,
+            debug,
+            queryAllByTestId,
+            findByTestId,
+            getAllByRole,
+            container,
+            getByRole,
+          } = renderWithProviders(<RulesList />);
+          const percentileEl: HTMLElement = await findByTestId(
+            `rulesTable-${Percentiles.P50}ColumnName`
           );
-          await waitFor(() => getByTestId(`rulesTable-${Percentiles.P50}ColumnName`));
-          fireEvent.click(queryAllByTestId(`rulesTable-${Percentiles.P50}ColumnName`)[0]);
-
-          await waitFor(() =>
-            expect(
-              queryAllByTestId(`rulesTable-${Percentiles.P50}ColumnName`).length
-            ).toBeGreaterThan(0)
+          expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              sort: {
+                field: 'name',
+                direction: 'asc',
+              },
+            })
           );
 
-          expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
+          fireEvent.click(percentileEl);
+          expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
             expect.objectContaining({
               sort: {
                 field: percentileFields[Percentiles.P50],
@@ -641,9 +668,10 @@ describe('rules_list ', () => {
           );
 
           // Click column again to reverse sort by P50
-          fireEvent.click(queryAllByTestId('rulesTable-${Percentiles.P50}ColumnName')[0]);
+          fireEvent.click(percentileEl);
 
-          expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
+          // broken because the table is rerendering on first and second   filter change
+          expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
             expect.objectContaining({
               sort: {
                 field: percentileFields[Percentiles.P50],
@@ -889,6 +917,7 @@ describe('rules_list ', () => {
           hasExecuteActionsCapability.mockReturnValue(true);
         });
 
+        // This might be repeated later
         describe('rules_list component empty with show only capability', () => {
           beforeEach(() => {
             (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
@@ -1248,5 +1277,5 @@ describe('rules_list with show only capability', () => {
       wrapper.find('[data-test-subj="rulesListNotifyBadge-unsnoozed"]').first().simulate('click');
       expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
     });
-  // });
+  });
 });
