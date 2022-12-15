@@ -44,21 +44,24 @@ export const ControlsContent: React.FC<Props> = ({
     if (!controlGroup) {
       return;
     }
-    if (
-      !isEqual(controlGroup.getInput().timeRange, timeRange) ||
-      !compareFilters(controlGroup.getInput().filters ?? [], filters) ||
-      !isEqual(controlGroup.getInput().query, query)
-    ) {
-      controlGroup.updateInput({
-        timeRange,
-        query,
-        filters,
-      });
-    }
-  }, [query, filters, controlGroup, timeRange]);
+    const filtersSubscription = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
+      setPanelFilters([...newFilters]);
+    });
+    const inputSubscrption = controlGroup.getInput$().subscribe(({ panels, filters: currentFilters }) => {
+      setControlPanels(panels);
+      if (currentFilters?.length === 0) {
+        setPanelFilters([]);
+      }
+    });
+    return () => {
+      filtersSubscription.unsubscribe();
+      inputSubscrption.unsubscribe();
+    };
+  }, [controlGroup]);
 
   return (
     <LazyControlsRenderer
+      filters={filters}
       getInitialInput={async () => ({
         id: dataViewId,
         type: CONTROL_GROUP_TYPE,
@@ -74,16 +77,9 @@ export const ControlsContent: React.FC<Props> = ({
       })}
       onLoadComplete={(newControlGroup) => {
         setControlGroup(newControlGroup);
-        newControlGroup.onFiltersPublished$.subscribe((newFilters) => {
-          setPanelFilters([...newFilters]);
-        });
-        newControlGroup.getInput$().subscribe(({ panels, filters: currentFilters }) => {
-          setControlPanels(panels);
-          if (currentFilters?.length === 0) {
-            setPanelFilters([]);
-          }
-        });
       }}
+      query={query}
+      timeRange={timeRange}
     />
   );
 };
