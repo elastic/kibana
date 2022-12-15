@@ -175,7 +175,9 @@ jest.mock('react-beautiful-dnd', () => {
   };
 });
 
-describe('Body', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/145187
+// FLAKY: https://github.com/elastic/kibana/issues/147222
+describe.skip('Body', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getWrapper = async (childrenComponent: JSX.Element, store?: any) => {
     const wrapper = mount(childrenComponent, {
@@ -210,8 +212,7 @@ describe('Body', () => {
     trailingControlColumns: [],
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/145187
-  describe.skip('rendering', () => {
+  describe('rendering', () => {
     beforeEach(() => {
       mockDispatch.mockClear();
     });
