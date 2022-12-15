@@ -42,13 +42,14 @@ export interface DashboardSavedObjectRequiredServices {
   savedObjectsTagging: DashboardSavedObjectsTaggingService;
   dashboardSessionStorage: DashboardSessionStorageServiceType;
 }
+
 export interface DashboardSavedObjectService {
   loadDashboardStateFromSavedObject: (
-    props: Pick<LoadDashboardFromSavedObjectProps, 'id'>
+    props: Pick<LoadDashboardFromSavedObjectProps, 'id' | 'getScopedHistory'>
   ) => Promise<LoadDashboardFromSavedObjectReturn>;
 
   saveDashboardStateToSavedObject: (
-    props: Pick<SaveDashboardProps, 'currentState' | 'saveOptions' | 'lastSavedId'>
+    props: Pick<SaveDashboardProps, 'currentState' | 'redirectTo' | 'saveOptions'>
   ) => Promise<SaveDashboardReturn>;
   findDashboards: {
     findSavedObjects: (
@@ -63,5 +64,3 @@ export interface DashboardSavedObjectService {
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
   savedObjectsClient: SavedObjectsClientContract;
 }
-
-export type { SaveDashboardReturn };

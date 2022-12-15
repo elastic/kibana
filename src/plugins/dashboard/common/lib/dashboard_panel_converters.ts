@@ -8,8 +8,7 @@
 
 import { omit } from 'lodash';
 import { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
-
-import { DashboardPanelMap, DashboardPanelState, SavedDashboardPanel } from '..';
+import { DashboardPanelMap, DashboardPanelState, SavedDashboardPanel } from '../types';
 
 export function convertSavedDashboardPanelToPanelState<
   TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput

@@ -147,8 +147,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.saveVisualizationExpectSuccess('Wildvis', {
         redirectToOrigin: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
 
       // ensure that the unsaved listing exists
       await PageObjects.dashboard.gotoDashboardLandingPage();

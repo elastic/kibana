@@ -7,18 +7,16 @@
  */
 
 import {
-  AnyAction,
   configureStore,
   createSlice,
   Draft,
-  Middleware,
   PayloadAction,
   SliceCaseReducers,
 } from '@reduxjs/toolkit';
 import React, { ReactNode, PropsWithChildren } from 'react';
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
-import { Embeddable } from '@kbn/embeddable-plugin/public';
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import {
   EmbeddableReducers,
@@ -38,14 +36,12 @@ export const createReduxEmbeddableTools = <
   reducers,
   embeddable,
   syncSettings,
-  additionalMiddleware,
   initialComponentState,
 }: {
-  embeddable: Embeddable<
+  embeddable: IEmbeddable<
     ReduxEmbeddableStateType['explicitInput'],
     ReduxEmbeddableStateType['output']
   >;
-  additionalMiddleware?: Array<Middleware<AnyAction>>;
   initialComponentState?: ReduxEmbeddableStateType['componentState'];
   syncSettings?: ReduxEmbeddableSyncSettings;
   reducers: ReducerType;
@@ -82,22 +78,27 @@ export const createReduxEmbeddableTools = <
     reducers: { ...reducers, ...genericReducers },
   });
 
-  const store = configureStore({
-    reducer: slice.reducer,
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(...(additionalMiddleware ?? [])),
-  });
+  const store = configureStore({ reducer: slice.reducer });
 
   // create the context which will wrap this embeddable's react components to allow access to update and read from the store.
   const context = {
-    embeddableInstance: embeddable,
-
     actions: slice.actions as ReduxEmbeddableContext<
       ReduxEmbeddableStateType,
       typeof reducers
     >['actions'],
     useEmbeddableDispatch: () => useDispatch<typeof store.dispatch>(),
     useEmbeddableSelector: useSelector as TypedUseSelectorHook<ReduxEmbeddableStateType>,
+
+    // populate container actions for embeddables which are Containers
+    containerActions: embeddable.getIsContainer()
+      ? {
+          untilEmbeddableLoaded: embeddable.untilEmbeddableLoaded.bind(embeddable),
+          updateInputForChild: embeddable.updateInputForChild.bind(embeddable),
+          removeEmbeddable: embeddable.removeEmbeddable.bind(embeddable),
+          addNewEmbeddable: embeddable.addNewEmbeddable.bind(embeddable),
+          replaceEmbeddable: embeddable.replaceEmbeddable.bind(embeddable),
+        }
+      : undefined,
   };
 
   const Wrapper: React.FC<PropsWithChildren<{}>> = ({ children }: { children?: ReactNode }) => (
@@ -119,7 +120,6 @@ export const createReduxEmbeddableTools = <
     actions: context.actions,
     dispatch: store.dispatch,
     getState: store.getState,
-    onStateChange: store.subscribe,
     cleanup: () => stopReduxEmbeddableSync?.(),
   };
 };

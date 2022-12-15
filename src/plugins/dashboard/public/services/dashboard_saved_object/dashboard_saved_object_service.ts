@@ -15,8 +15,8 @@ import {
   findDashboardSavedObjects,
   findDashboardSavedObjectsByIds,
 } from './lib/find_dashboard_saved_objects';
-import { saveDashboardStateToSavedObject } from './lib/save_dashboard_state_to_saved_object';
 import { loadDashboardStateFromSavedObject } from './lib/load_dashboard_state_from_saved_object';
+import { saveDashboardStateToSavedObject } from './lib/save_dashboard_state_to_saved_object';
 import type { DashboardSavedObjectRequiredServices, DashboardSavedObjectService } from './types';
 
 export type DashboardSavedObjectServiceFactory = KibanaPluginServiceFactory<
@@ -34,16 +34,17 @@ export const dashboardSavedObjectServiceFactory: DashboardSavedObjectServiceFact
   } = coreStart;
 
   return {
-    loadDashboardStateFromSavedObject: ({ id }) =>
+    loadDashboardStateFromSavedObject: ({ id, getScopedHistory }) =>
       loadDashboardStateFromSavedObject({
         id,
+        getScopedHistory,
         savedObjectsClient,
         ...requiredServices,
       }),
-    saveDashboardStateToSavedObject: ({ currentState, saveOptions, lastSavedId }) =>
+    saveDashboardStateToSavedObject: ({ currentState, redirectTo, saveOptions }) =>
       saveDashboardStateToSavedObject({
+        redirectTo,
         saveOptions,
-        lastSavedId,
         currentState,
         savedObjectsClient,
         ...requiredServices,

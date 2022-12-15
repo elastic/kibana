@@ -8,8 +8,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/public';
 
-import { DashboardAttributes } from '../../../../common';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../dashboard_constants';
+import { DashboardConstants } from '../../..';
+import type { DashboardAttributes } from '../../../application';
 
 export interface DashboardDuplicateTitleCheckProps {
   title: string;
@@ -49,7 +49,7 @@ export async function checkForDuplicateDashboardTitle(
     fields: ['title'],
     search: `"${title}"`,
     searchFields: ['title'],
-    type: DASHBOARD_SAVED_OBJECT_TYPE,
+    type: DashboardConstants.DASHBOARD_SAVED_OBJECT_TYPE,
   });
   const duplicate = response.savedObjects.find(
     (obj) => obj.get('title').toLowerCase() === title.toLowerCase()

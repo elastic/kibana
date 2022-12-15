@@ -97,6 +97,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
       cleanEmptyKeys({
         query: state.query,
         filters: state.filters?.filter((f) => !isFilterPinned(f)),
+        savedQuery: state.savedQuery,
       }),
       { useHash: false, storeInHashQuery: true },
       location.path
