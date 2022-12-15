@@ -10,26 +10,24 @@ import { Subject } from 'rxjs';
 
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { HttpSetup } from '@kbn/core-http-browser';
-
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { SettingsStart, SettingsSetup } from '@kbn/core-ui-settings-browser';
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
+import { UiSettingsGlobalClient } from './ui_settings_global_client';
 
-export interface UiSettingsServiceDeps {
+export interface SettingsServiceDeps {
   http: HttpSetup;
   injectedMetadata: InternalInjectedMetadataSetup;
 }
 
-/**
- * @Internal
- * @Deprecated
- **/
-export class UiSettingsService {
+/** @internal */
+export class SettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
+  private uiSettingsGlobalClient?: UiSettingsGlobalClient;
   private done$ = new Subject();
 
-  public setup({ http, injectedMetadata }: UiSettingsServiceDeps): IUiSettingsClient {
+  public setup({ http, injectedMetadata }: SettingsServiceDeps): SettingsSetup {
     this.uiSettingsApi = new UiSettingsApi(http);
     http.addLoadingCountSource(this.uiSettingsApi.getLoadingCount$());
 
@@ -43,11 +41,27 @@ export class UiSettingsService {
       done$: this.done$,
     });
 
-    return this.uiSettingsClient;
+    this.uiSettingsGlobalClient = new UiSettingsGlobalClient({
+      api: this.uiSettingsApi,
+      defaults: legacyMetadata.globalUiSettings.defaults,
+      initialSettings: legacyMetadata.globalUiSettings.user,
+      done$: this.done$,
+    });
+
+    return {
+      client: this.uiSettingsClient,
+      globalClient: this.uiSettingsGlobalClient,
+    };
   }
 
-  public start(): IUiSettingsClient {
-    return this.uiSettingsClient!;
+  public start(): SettingsStart {
+    if (!this.uiSettingsClient || !this.uiSettingsGlobalClient) {
+      throw new Error('#setup must be called before start');
+    }
+    return {
+      client: this.uiSettingsClient,
+      globalClient: this.uiSettingsGlobalClient,
+    };
   }
 
   public stop() {
