@@ -2617,7 +2617,7 @@ describe('migrations v2 model', () => {
               '.kibana': {},
               '.kibana_7.11.0': {},
             },
-            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            mappings: indexMapping,
             settings: {},
           },
         });
