@@ -34,10 +34,6 @@ export async function fetchSearchSourceQuery(
   const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
   const index = initialSearchSource.getField('index') as DataView;
-  if (!isTimeBasedDataView(index)) {
-    throw new Error('Invalid data view without timeFieldName.');
-  }
-
   const { searchSource, dateStart, dateEnd } = updateSearchSource(
     initialSearchSource,
     index,
@@ -79,7 +75,6 @@ export function updateSearchSource(
   params: OnlySearchSourceRuleParams,
   latestTimestamp?: string
 ) {
-  const index = searchSource.getField('index')!;
   const timeFieldName = params.timeField || index.timeFieldName;
   if (!timeFieldName) {
     throw new Error('Invalid data view without timeFieldName.');
@@ -115,8 +110,4 @@ export function updateSearchSource(
     dateStart,
     dateEnd,
   };
-}
-
-function isTimeBasedDataView(index?: DataView) {
-  return index?.timeFieldName;
 }
