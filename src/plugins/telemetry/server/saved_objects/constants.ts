@@ -6,9 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { getTelemetryChannelEndpoint } from './get_telemetry_channel_endpoint';
-export type {
-  GetTelemetryChannelEndpointConfig,
-  ChannelName,
-  TelemetryEnv,
-} from './get_telemetry_channel_endpoint';
+export const TELEMETRY_SAVED_OBJECT_TYPE = 'telemetry';
+export const TELEMETRY_SAVED_OBJECT_ID = 'telemetry';

@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-export default function ({ loadTestFile }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Telemetry', () => {
     loadTestFile(require.resolve('./opt_in'));
+    loadTestFile(require.resolve('./telemetry_config'));
     loadTestFile(require.resolve('./telemetry_last_reported'));
     loadTestFile(require.resolve('./telemetry_optin_notice_seen'));
   });

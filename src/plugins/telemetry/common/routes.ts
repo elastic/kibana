@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { getTelemetrySavedObject } from './get_telemetry_saved_object';
-export { updateTelemetrySavedObject } from './update_telemetry_saved_object';
-export type {
-  TelemetrySavedObject,
-  TelemetrySavedObjectAttributes,
-} from '../../common/telemetry_config/types';
+/**
+ * Fetch Telemetry Config
+ */
+export const FetchTelemetryConfigRoute = '/api/telemetry/v2/config';
+export interface FetchTelemetryConfigResponse {
+  allowChangingOptInStatus: boolean;
+  optIn: boolean | null;
+  sendUsageFrom: 'server' | 'browser';
+  telemetryNotifyUserAboutOptInDefault: boolean;
+}

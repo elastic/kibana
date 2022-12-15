@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TelemetrySavedObject } from './types';
+import type { TelemetrySavedObject } from '../saved_objects';
 
 interface GetTelemetryUsageFetcherConfig {
   configTelemetrySendUsageFrom: 'browser' | 'server';

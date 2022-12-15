@@ -24,7 +24,7 @@ describe('getNotifyUserAboutOptInDefault: get a flag that describes if the user 
     expect(
       getNotifyUserAboutOptInDefault({
         allowChangingOptInStatus: false,
-        telemetrySavedObject: null,
+        telemetrySavedObject: {},
         telemetryOptedIn: false,
         configTelemetryOptIn: false,
       })
@@ -33,7 +33,7 @@ describe('getNotifyUserAboutOptInDefault: get a flag that describes if the user 
     expect(
       getNotifyUserAboutOptInDefault({
         allowChangingOptInStatus: false,
-        telemetrySavedObject: null,
+        telemetrySavedObject: {},
         telemetryOptedIn: true,
         configTelemetryOptIn: true,
       })

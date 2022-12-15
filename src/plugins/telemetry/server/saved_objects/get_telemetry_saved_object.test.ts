@@ -11,24 +11,24 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 describe('getTelemetrySavedObject', () => {
-  it('returns null when saved object not found', async () => {
+  it('returns {} when saved object not found', async () => {
     const params = getCallGetTelemetrySavedObjectParams({
       savedObjectNotFound: true,
     });
 
     const result = await callGetTelemetrySavedObject(params);
 
-    expect(result).toBe(null);
+    expect(result).toStrictEqual({});
   });
 
-  it('returns false when saved object forbidden', async () => {
+  it('throws when saved object forbidden', async () => {
     const params = getCallGetTelemetrySavedObjectParams({
       savedObjectForbidden: true,
     });
 
-    const result = await callGetTelemetrySavedObject(params);
-
-    expect(result).toBe(false);
+    await expect(callGetTelemetrySavedObject(params)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"savedObjectForbidden"`
+    );
   });
 
   it('throws an error on unexpected saved object error', async () => {
@@ -36,15 +36,7 @@ describe('getTelemetrySavedObject', () => {
       savedObjectOtherError: true,
     });
 
-    let threw = false;
-    try {
-      await callGetTelemetrySavedObject(params);
-    } catch (err) {
-      threw = true;
-      expect(err.message).toBe(SavedObjectOtherErrorMessage);
-    }
-
-    expect(threw).toBe(true);
+    await expect(callGetTelemetrySavedObject(params)).rejects.toThrow(SavedObjectOtherErrorMessage);
   });
 });
 

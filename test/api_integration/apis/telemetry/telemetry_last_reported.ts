@@ -25,10 +25,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
     });
 
     it('GET should return undefined when there is no stored telemetry.lastReported value', async () => {
-      await supertest
-        .get('/api/telemetry/v2/last_reported')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200, { lastReported: undefined });
+      await supertest.get('/api/telemetry/v2/last_reported').set('kbn-xsrf', 'xxx').expect(200, {});
     });
 
     it('PUT should update telemetry.lastReported to now', async () => {

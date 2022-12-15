@@ -7,7 +7,7 @@
  */
 
 import { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';
-import { TelemetrySavedObject } from './types';
+import type { TelemetrySavedObject } from '../saved_objects';
 
 describe('getTelemetrySendUsageFrom', () => {
   it('returns kibana.yml config when saved object not found', () => {
@@ -21,20 +21,9 @@ describe('getTelemetrySendUsageFrom', () => {
     expect(result).toBe('browser');
   });
 
-  it('returns kibana.yml config when saved object forbidden', () => {
-    const params: CallGetTelemetryUsageFetcherParams = {
-      savedObjectForbidden: true,
-      configSendUsageFrom: 'browser',
-    };
-
-    const result = callGetTelemetryUsageFetcher(params);
-
-    expect(result).toBe('browser');
-  });
-
   it('returns kibana.yml config when saved object sendUsageFrom is undefined', () => {
     const params: CallGetTelemetryUsageFetcherParams = {
-      savedSendUsagefrom: undefined,
+      savedSendUsageFrom: undefined,
       configSendUsageFrom: 'server',
     };
 
@@ -46,8 +35,7 @@ describe('getTelemetrySendUsageFrom', () => {
 
 interface CallGetTelemetryUsageFetcherParams {
   savedObjectNotFound?: boolean;
-  savedObjectForbidden?: boolean;
-  savedSendUsagefrom?: 'browser' | 'server';
+  savedSendUsageFrom?: 'browser' | 'server';
   configSendUsageFrom: 'browser' | 'server';
 }
 
@@ -60,15 +48,12 @@ function callGetTelemetryUsageFetcher(params: CallGetTelemetryUsageFetcherParams
 function getMockTelemetrySavedObject(
   params: CallGetTelemetryUsageFetcherParams
 ): TelemetrySavedObject {
-  const { savedObjectNotFound, savedObjectForbidden } = params;
-  if (savedObjectForbidden) {
-    return false;
-  }
+  const { savedObjectNotFound } = params;
   if (savedObjectNotFound) {
-    return null;
+    return {};
   }
 
   return {
-    sendUsageFrom: params.savedSendUsagefrom,
+    sendUsageFrom: params.savedSendUsageFrom,
   };
 }

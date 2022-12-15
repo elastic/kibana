@@ -6,24 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { TelemetrySavedObject } from './types';
+import type { TelemetrySavedObject } from '../saved_objects';
 
 interface GetTelemetryAllowChangingOptInStatus {
   configTelemetryAllowChangingOptInStatus: boolean;
-  telemetrySavedObject: TelemetrySavedObject;
+  telemetrySavedObject?: TelemetrySavedObject;
 }
 
 export function getTelemetryAllowChangingOptInStatus({
   telemetrySavedObject,
   configTelemetryAllowChangingOptInStatus,
 }: GetTelemetryAllowChangingOptInStatus) {
-  if (!telemetrySavedObject) {
-    return configTelemetryAllowChangingOptInStatus;
-  }
-
-  if (typeof telemetrySavedObject.allowChangingOptInStatus === 'undefined') {
-    return configTelemetryAllowChangingOptInStatus;
-  }
-
-  return telemetrySavedObject.allowChangingOptInStatus;
+  return telemetrySavedObject?.allowChangingOptInStatus ?? configTelemetryAllowChangingOptInStatus;
 }

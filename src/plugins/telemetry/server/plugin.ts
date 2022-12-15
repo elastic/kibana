@@ -40,6 +40,12 @@ import type {
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
+import {
+  type TelemetrySavedObject,
+  getTelemetrySavedObject,
+  registerTelemetrySavedObject,
+  TELEMETRY_SAVED_OBJECT_TYPE,
+} from './saved_objects';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
 import {
@@ -48,9 +54,9 @@ import {
 } from './collectors';
 import type { TelemetryConfigLabels, TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
-import { getTelemetrySavedObject, TelemetrySavedObject } from './telemetry_repository';
 import { OPT_IN_POLL_INTERVAL_MS } from '../common/constants';
-import { getTelemetryOptIn, getTelemetryChannelEndpoint } from '../common/telemetry_config';
+import { getTelemetryChannelEndpoint } from '../common/telemetry_config';
+import { getTelemetryOptIn } from './telemetry_config';
 
 interface TelemetryPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
@@ -87,8 +93,6 @@ export interface TelemetryPluginStart {
   getIsOptedIn: () => Promise<boolean>;
 }
 
-type SavedObjectsRegisterType = CoreSetup['savedObjects']['registerType'];
-
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
   private readonly logger: Logger;
   private readonly currentKibanaVersion: string;
@@ -111,9 +115,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
    *
    * Using the internal client in all cases ensures the permissions to interact the document.
    */
-  private savedObjectsInternalClient$ = new ReplaySubject<SavedObjectsClient>(1);
+  private readonly savedObjectsInternalClient$ = new ReplaySubject<SavedObjectsClient>(1);
 
-  private pluginStop$ = new ReplaySubject<void>(1);
+  private readonly pluginStop$ = new ReplaySubject<void>(1);
 
   private security?: SecurityPluginStart;
 
@@ -189,7 +193,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       getSecurity: () => this.security,
     });
 
-    this.registerMappings((opts) => savedObjects.registerType(opts));
+    registerTelemetrySavedObject((opts) => savedObjects.registerType(opts));
     this.registerUsageCollectors(usageCollection);
 
     return {
@@ -213,7 +217,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     this.isOptedIn$.subscribe((enabled) => analytics.optIn({ global: { enabled } }));
 
-    const savedObjectsInternalRepository = savedObjects.createInternalRepository();
+    const savedObjectsInternalRepository = savedObjects.createInternalRepository([
+      TELEMETRY_SAVED_OBJECT_TYPE,
+    ]);
     this.savedObjectsInternalRepository = savedObjectsInternalRepository;
     this.savedObjectsInternalClient$.next(new SavedObjectsClient(savedObjectsInternalRepository));
 
@@ -244,10 +250,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       telemetrySavedObject = await getTelemetrySavedObject(internalRepositoryClient);
     } catch (err) {
       this.logger.debug('Failed to check telemetry opt-in status: ' + err.message);
-    }
-
-    // If we can't get the saved object due to permissions or other error other than 404, skip this round.
-    if (typeof telemetrySavedObject === 'undefined' || telemetrySavedObject === false) {
+      // If we can't get the saved object due to any error other than 404, skip this round.
       return;
     }
 
@@ -271,44 +274,8 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     core: CoreStart,
     telemetryCollectionManager: TelemetryCollectionManagerPluginStart
   ) {
-    // We start the fetcher having updated everything we need to using the config settings
+    // We start the fetcher having updated everything we need to use the config settings
     this.fetcherTask.start(core, { telemetryCollectionManager });
-  }
-
-  private registerMappings(registerType: SavedObjectsRegisterType) {
-    registerType({
-      name: 'telemetry',
-      hidden: false,
-      namespaceType: 'agnostic',
-      mappings: {
-        properties: {
-          enabled: {
-            type: 'boolean',
-          },
-          sendUsageFrom: {
-            type: 'keyword',
-          },
-          lastReported: {
-            type: 'date',
-          },
-          lastVersionChecked: {
-            type: 'keyword',
-          },
-          userHasSeenNotice: {
-            type: 'boolean',
-          },
-          reportFailureCount: {
-            type: 'integer',
-          },
-          reportFailureVersion: {
-            type: 'keyword',
-          },
-          allowChangingOptInStatus: {
-            type: 'boolean',
-          },
-        },
-      },
-    });
   }
 
   private registerUsageCollectors(usageCollection: UsageCollectionSetup) {

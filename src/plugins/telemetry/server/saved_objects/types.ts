@@ -17,4 +17,4 @@ export interface TelemetrySavedObjectAttributes {
   reportFailureVersion?: string;
 }
 
-export type TelemetrySavedObject = TelemetrySavedObjectAttributes | null | false;
+export type TelemetrySavedObject = TelemetrySavedObjectAttributes;
