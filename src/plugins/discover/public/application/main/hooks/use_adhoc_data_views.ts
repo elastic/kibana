@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { isOfAggregateQueryType, AggregateQuery, Query } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
@@ -32,6 +33,7 @@ export const useAdHocDataViews = ({
   dataViews,
   toastNotifications,
   trackUiMetric,
+  query,
 }: {
   dataView: DataView;
   savedSearch: SavedSearch;
@@ -41,20 +43,29 @@ export const useAdHocDataViews = ({
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
   trackUiMetric?: (metricType: string, eventName: string | string[], count?: number) => void;
+  query?: Query | AggregateQuery;
 }) => {
   const [adHocDataViewList, setAdHocDataViewList] = useState<DataView[]>(
     !dataView.isPersisted() ? [dataView] : []
   );
 
   useEffect(() => {
-    if (!dataView.isPersisted()) {
+    const isTextBasedMode = query && isOfAggregateQueryType(query);
+    if (!dataView.isPersisted() && !isTextBasedMode) {
       setAdHocDataViewList((prev) => {
         const existing = prev.find((prevDataView) => prevDataView.id === dataView.id);
         return existing ? prev : [...prev, dataView];
       });
       trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
-  }, [dataView, trackUiMetric]);
+
+    if (!dataView.isPersisted() && isTextBasedMode) {
+      setAdHocDataViewList((prev) => {
+        const existing = prev.find((prevDataView) => prevDataView.id === dataView.id);
+        return existing ? prev : [dataView];
+      });
+    }
+  }, [dataView, query, trackUiMetric]);
 
   /**
    * Takes care of checking data view id references in filters
@@ -125,5 +136,6 @@ export const useAdHocDataViews = ({
     persistDataView,
     updateAdHocDataViewId,
     onAddAdHocDataViews,
+    setAdHocDataViewList,
   };
 };

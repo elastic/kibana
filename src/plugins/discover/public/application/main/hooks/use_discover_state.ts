@@ -135,6 +135,7 @@ export function useDiscoverState({
       filterManager,
       toastNotifications,
       trackUiMetric,
+      query: state?.query,
     });
 
   const [savedDataViewList, setSavedDataViewList] = useState(initialDataViewList);
