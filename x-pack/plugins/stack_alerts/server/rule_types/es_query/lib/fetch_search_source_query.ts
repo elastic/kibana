@@ -79,7 +79,12 @@ export function updateSearchSource(
   params: OnlySearchSourceRuleParams,
   latestTimestamp?: string
 ) {
-  const timeFieldName = index.timeFieldName!;
+  const index = searchSource.getField('index')!;
+  const timeFieldName = params.timeField || index.timeFieldName;
+  if (!timeFieldName) {
+    throw new Error('Invalid data view without timeFieldName.');
+  }
+
   searchSource.setField('size', params.size);
 
   const timeRange = {

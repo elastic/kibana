@@ -38,6 +38,7 @@ const defaultParams: OnlySearchSourceRuleParams = {
   searchConfiguration: {},
   searchType: 'searchSource',
   excludeHitsFromPreviousRun: true,
+  timeField: 'time',
 };
 
 describe('fetchSearchSourceQuery', () => {
