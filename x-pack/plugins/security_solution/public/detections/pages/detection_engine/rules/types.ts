@@ -169,6 +169,12 @@ export interface DefineStepRule {
   historyWindowSize: string;
   shouldLoadQueryDynamically: boolean;
   groupByFields: string[];
+  groupByDuration: Duration;
+}
+
+export interface Duration {
+  value?: number;
+  unit: string;
 }
 
 export interface ScheduleStepRule {

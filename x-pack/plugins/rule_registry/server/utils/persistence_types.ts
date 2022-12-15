@@ -18,6 +18,7 @@ import { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import { IRuleDataClient } from '../rule_data_client';
 import { BulkResponseErrorAggregation } from './utils';
 import { AlertWithCommonFieldsLatest } from '../../common/schemas';
+import { SuppressionFields } from '../../common/schemas/8.7.0';
 
 export type PersistenceAlertService = <T>(
   alerts: Array<{
@@ -40,6 +41,21 @@ export type PersistenceAlertService = <T>(
   >
 ) => Promise<PersistenceAlertServiceResult<T>>;
 
+export type SuppressedAlertService = <T extends SuppressionFields>(
+  alerts: Array<{
+    _id: string;
+    _source: T;
+    instanceId: string;
+  }>,
+  refresh: boolean | 'wait_for',
+  suppressionWindow: string,
+  enrichAlerts?: <TAlert extends { _source: T }>(
+    alerts: TAlert[],
+    params: { spaceId: string }
+  ) => Promise<TAlert[]>,
+  currentTimeOverride?: Date
+) => Promise<Omit<PersistenceAlertServiceResult<T>, 'alertsWereTruncated'>>;
+
 export interface PersistenceAlertServiceResult<T> {
   createdAlerts: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: BulkResponseErrorAggregation;
@@ -48,6 +64,7 @@ export interface PersistenceAlertServiceResult<T> {
 
 export interface PersistenceServices {
   alertWithPersistence: PersistenceAlertService;
+  alertWithSuppression: SuppressedAlertService;
 }
 
 export type PersistenceAlertType<

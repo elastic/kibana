@@ -365,6 +365,7 @@ export const convertAlertSuppressionToCamel = (
   input
     ? {
         groupBy: input.group_by,
+        duration: input.duration,
       }
     : undefined;
 
@@ -374,5 +375,6 @@ export const convertAlertSuppressionToSnake = (
   input
     ? {
         group_by: input.groupBy,
+        duration: input.duration,
       }
     : undefined;

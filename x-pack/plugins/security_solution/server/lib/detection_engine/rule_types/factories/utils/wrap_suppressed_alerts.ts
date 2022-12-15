@@ -13,6 +13,7 @@ import {
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_START,
+  ALERT_INSTANCE_ID,
 } from '@kbn/rule-data-utils';
 import type {
   BaseFieldsLatest,
@@ -32,6 +33,12 @@ export interface SuppressionBuckets {
   end: Date;
   terms: Array<{ field: string; value: string | number | null }>;
 }
+
+export const createSuppressedAlertInstanceId = (
+  terms: Array<{ field: string; value: string | number | null }>
+): string => {
+  return objectHash(terms);
+};
 
 export const wrapSuppressedAlerts = ({
   suppressionBuckets,
@@ -60,6 +67,7 @@ export const wrapSuppressedAlerts = ({
       bucket.start,
       bucket.end,
     ]);
+    const instanceId = createSuppressedAlertInstanceId(bucket.terms);
     const baseAlert: BaseFieldsLatest = buildBulkBody(
       spaceId,
       completeRule,
@@ -81,6 +89,7 @@ export const wrapSuppressedAlerts = ({
         [ALERT_SUPPRESSION_END]: bucket.end,
         [ALERT_SUPPRESSION_DOCS_COUNT]: bucket.count - 1,
         [ALERT_UUID]: id,
+        [ALERT_INSTANCE_ID]: instanceId,
       },
     };
   });

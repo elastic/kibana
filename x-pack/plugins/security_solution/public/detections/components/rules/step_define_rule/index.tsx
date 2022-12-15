@@ -83,6 +83,7 @@ import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { GroupByFields } from '../group_by_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { minimumLicenseForSuppression } from '../../../../../common/detection_engine/rule_schema';
+import { DurationInput } from '../duration_input';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -143,7 +144,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
-    options: { stripEmptyFields: false },
+    options: { stripEmptyFields: true },
     schema,
   });
 
@@ -169,6 +170,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'historyWindowSize',
       'shouldLoadQueryDynamically',
       'groupByFields',
+      'groupByDuration.value',
+      'groupByDuration.unit',
     ],
     onChange: (data: DefineStepRule) => {
       if (onRuleDataChange) {
@@ -201,6 +204,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     dataSourceType: formDataSourceType,
     newTermsFields,
     shouldLoadQueryDynamically: formShouldLoadQueryDynamically,
+    groupByFields,
   } = formData;
 
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
@@ -487,6 +491,22 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       threatIndexPatterns,
       threatIndexPatternsLoading,
     ]
+  );
+
+  const GroupByChildren = useCallback(
+    ({ groupByDurationUnit, groupByDurationValue }) => (
+      <DurationInput
+        durationValueField={groupByDurationValue}
+        durationUnitField={groupByDurationUnit}
+        isDisabled={
+          !license.isAtLeast(minimumLicenseForSuppression) ||
+          groupByFields == null ||
+          groupByFields.length === 0
+        }
+        minimumValue={1}
+      />
+    ),
+    [license, groupByFields]
   );
 
   const dataViewIndexPatternToggleButtonOptions: EuiButtonGroupOptionProps[] = useMemo(
@@ -807,6 +827,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   initialState.groupByFields.length === 0,
               }}
             />
+          </RuleTypeEuiFormRow>
+          <RuleTypeEuiFormRow $isVisible={isQueryRule(ruleType)}>
+            <UseMultiFields
+              fields={{
+                groupByDurationValue: {
+                  path: 'groupByDuration.value',
+                },
+                groupByDurationUnit: {
+                  path: 'groupByDuration.unit',
+                },
+              }}
+            >
+              {GroupByChildren}
+            </UseMultiFields>
           </RuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>

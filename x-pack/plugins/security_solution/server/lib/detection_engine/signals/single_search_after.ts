@@ -79,11 +79,10 @@ export const singleSearchAfter = async <
       });
 
       const start = performance.now();
-      const { body: nextSearchAfterResult } =
-        await services.scopedClusterClient.asCurrentUser.search<SignalSource, TAggregations>(
-          searchAfterQuery as estypes.SearchRequest,
-          { meta: true }
-        );
+      const nextSearchAfterResult = await services.scopedClusterClient.asCurrentUser.search<
+        SignalSource,
+        TAggregations
+      >(searchAfterQuery as estypes.SearchRequest);
       const end = performance.now();
 
       const searchErrors = createErrorsFromShard({

@@ -24,6 +24,7 @@ import {
   threat_query,
   threatIndicatorPathOrUndefined,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import {
   SIGNALS_ID,
   EQL_RULE_TYPE_ID,
@@ -39,6 +40,7 @@ import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import {
   AlertsIndex,
   AlertsIndexNamespace,
+  AlertSuppressionDuration,
   AlertSuppressionGroupBy,
   BuildingBlockType,
   DataViewId,
@@ -87,11 +89,18 @@ import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/detec
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 
 export type AlertSuppressionCamel = t.TypeOf<typeof AlertSuppressionCamel>;
-const AlertSuppressionCamel = t.exact(
-  t.type({
-    groupBy: AlertSuppressionGroupBy,
-  })
-);
+const AlertSuppressionCamel = t.intersection([
+  t.exact(
+    t.type({
+      groupBy: AlertSuppressionGroupBy,
+    })
+  ),
+  t.exact(
+    t.partial({
+      duration: AlertSuppressionDuration,
+    })
+  ),
+]);
 
 export const baseRuleParams = t.exact(
   t.type({

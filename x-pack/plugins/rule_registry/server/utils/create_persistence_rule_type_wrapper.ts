@@ -5,13 +5,22 @@
  * 2.0.
  */
 
+import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { chunk } from 'lodash';
-import { ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
+import { chunk, partition } from 'lodash';
+import {
+  ALERT_INSTANCE_ID,
+  ALERT_SUPPRESSION_DOCS_COUNT,
+  ALERT_SUPPRESSION_END,
+  ALERT_UUID,
+  TIMESTAMP,
+  VERSION,
+} from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
 import { createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
+import { SuppressionFields } from '../../common/schemas/8.7.0';
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient }) =>
@@ -58,6 +67,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                       aggs: {
                         uuids: {
                           terms: {
+                            // TODO: we can probably use `include` here instead of the query above on `ids`
                             field: ALERT_UUID,
                             size: CHUNK_SIZE,
                           },
@@ -94,7 +104,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                       spaceId: options.spaceId,
                     });
                   } catch (e) {
-                    logger.debug('Enrichemnts failed');
+                    logger.debug('Enrichments failed');
                   }
                 }
 
@@ -140,6 +150,191 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     .filter((_, idx) => response.body.items[idx].create?.status === 201),
                   errors: errorAggregator(response.body, [409]),
                   alertsWereTruncated,
+                };
+              } else {
+                logger.debug('Writing is disabled.');
+                return { createdAlerts: [], errors: {}, alertsWereTruncated: false };
+              }
+            },
+            alertWithSuppression: async (
+              alerts,
+              refresh,
+              suppressionWindow,
+              enrichAlerts,
+              currentTimeOverride
+            ) => {
+              const ruleDataClientWriter = await ruleDataClient.getWriter({
+                namespace: options.spaceId,
+              });
+
+              // Only write alerts if:
+              // - writing is enabled
+              //   AND
+              //   - rule execution has not been cancelled due to timeout
+              //     OR
+              //   - if execution has been cancelled due to timeout, if feature flags are configured to write alerts anyway
+              const writeAlerts =
+                ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
+
+              if (writeAlerts && alerts.length > 0) {
+                const commonRuleFields = getCommonAlertFields(options);
+
+                // TODO: proper error handling if suppressionWindowStart is undefined
+                const suppressionWindowStart = dateMath.parse(suppressionWindow, {
+                  forceNow: currentTimeOverride,
+                });
+                if (!suppressionWindowStart) {
+                  throw new Error('Failed to parse suppression window');
+                }
+
+                const suppressionAlertSearchRequest = {
+                  body: {
+                    size: alerts.length,
+                    query: {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              [TIMESTAMP]: {
+                                gte: suppressionWindowStart.toISOString(),
+                              },
+                            },
+                          },
+                          {
+                            term: {
+                              [ALERT_INSTANCE_ID]: alerts.map((alert) => alert.instanceId),
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    collapse: {
+                      field: ALERT_INSTANCE_ID,
+                    },
+                    sort: [
+                      {
+                        '@timestamp': {
+                          order: 'desc' as const,
+                        },
+                      },
+                    ],
+                    /*aggs: {
+                      suppressionAlerts: {
+                        terms: {
+                          field: ALERT_INSTANCE_ID,
+                          size: alerts.length,
+                          include: alerts.map((alert) => alert.instanceId),
+                        },
+                        aggs: {
+                          docs: {
+                            top_hits: {
+                              sort: [
+                                {
+                                  [TIMESTAMP]: {
+                                    order: 'desc' as const,
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                    },*/
+                  },
+                };
+
+                const response = await ruleDataClient
+                  .getReader({ namespace: options.spaceId })
+                  .search<typeof suppressionAlertSearchRequest, SuppressionFields>(
+                    suppressionAlertSearchRequest
+                  );
+
+                if (!response.aggregations) {
+                  throw new Error(
+                    'Expected to find aggregations on suppression alert search response'
+                  );
+                }
+
+                const existingAlertsByInstanceId = response.hits.hits.reduce<
+                  Record<string, estypes.SearchHit<SuppressionFields>>
+                >((acc, hit) => {
+                  acc[hit._source['kibana.alert.instance.id']] = hit;
+                  return acc;
+                }, {});
+
+                const [duplicateAlerts, newAlerts] = partition(
+                  alerts,
+                  (alert) => existingAlertsByInstanceId[alert.instanceId] != null
+                );
+
+                const duplicateAlertUpdates = duplicateAlerts.flatMap((alert) => {
+                  const existingAlert = existingAlertsByInstanceId[alert.instanceId];
+                  const existingDocsCount =
+                    existingAlert._source?.[ALERT_SUPPRESSION_DOCS_COUNT] ?? 0;
+                  return [
+                    { update: { _id: existingAlert._id } },
+                    {
+                      doc: {
+                        // TODO: add last detected at based on now or currentTimeOverride
+                        [ALERT_SUPPRESSION_END]: alert._source[ALERT_SUPPRESSION_END],
+                        [ALERT_SUPPRESSION_DOCS_COUNT]:
+                          existingDocsCount + alert._source[ALERT_SUPPRESSION_DOCS_COUNT] + 1,
+                      },
+                    },
+                  ];
+                });
+
+                let enrichedAlerts = newAlerts;
+
+                if (enrichAlerts) {
+                  try {
+                    enrichedAlerts = await enrichAlerts(enrichedAlerts, {
+                      spaceId: options.spaceId,
+                    });
+                  } catch (e) {
+                    logger.debug('Enrichments failed');
+                  }
+                }
+
+                const augmentedAlerts = enrichedAlerts.map((alert) => {
+                  return {
+                    ...alert,
+                    _source: {
+                      [VERSION]: ruleDataClient.kibanaVersion,
+                      ...commonRuleFields,
+                      ...alert._source,
+                    },
+                  };
+                });
+
+                const newAlertCreates = augmentedAlerts.flatMap((alert) => [
+                  { create: { _id: alert._id } },
+                  alert._source,
+                ]);
+
+                const bulkResponse = await ruleDataClientWriter.bulk({
+                  body: [...duplicateAlertUpdates, ...newAlertCreates],
+                  refresh,
+                });
+
+                if (bulkResponse == null) {
+                  return { createdAlerts: [], errors: {} };
+                }
+
+                return {
+                  createdAlerts: augmentedAlerts
+                    .map((alert, idx) => {
+                      const responseItem =
+                        bulkResponse.body.items[idx + duplicateAlertUpdates.length].create;
+                      return {
+                        _id: responseItem?._id ?? '',
+                        _index: responseItem?._index ?? '',
+                        ...alert._source,
+                      };
+                    })
+                    .filter((_, idx) => bulkResponse.body.items[idx].create?.status === 201),
+                  // updatedAlerts: TODO: add updated alerts in response and to context
+                  errors: errorAggregator(bulkResponse.body, [409]),
                 };
               } else {
                 logger.debug('Writing is disabled.');

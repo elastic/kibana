@@ -144,6 +144,10 @@ export const stepDefineDefaultValue: DefineStepRule = {
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
   groupByFields: [],
+  groupByDuration: {
+    value: undefined,
+    unit: 'm',
+  },
 };
 
 export const stepAboutDefaultValue: AboutStepRule = {

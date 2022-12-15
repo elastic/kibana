@@ -50,6 +50,7 @@ import type {
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
 import type { LicenseService } from '../../../../../common/license';
+import type { Duration } from '../../../pages/detection_engine/rules/types';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
@@ -537,6 +538,40 @@ export const buildAlertSuppressionDescription = (
       )}
     </EuiFlexGroup>
   );
+
+  const title = (
+    <>
+      {label}
+      <EuiBetaBadge
+        label={i18n.ALERT_SUPPRESSION_TECHNICAL_PREVIEW}
+        style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+        size="s"
+      />
+      {!license.isAtLeast(minimumLicenseForSuppression) && (
+        <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
+          <EuiIcon type={'alert'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
+        </EuiToolTip>
+      )}
+    </>
+  );
+  return [
+    {
+      title,
+      description,
+    },
+  ];
+};
+
+export const buildAlertSuppressionWindowDescription = (
+  label: string,
+  value: Duration,
+  license: LicenseService
+): ListItems[] => {
+  console.log(typeof value.value);
+  if (value.value == null) {
+    return [];
+  }
+  const description = `${value.value}${value.unit}`;
 
   const title = (
     <>
