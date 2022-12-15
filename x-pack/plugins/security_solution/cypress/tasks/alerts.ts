@@ -49,6 +49,7 @@ import {
   DETECTION_PAGE_FILTER_GROUP_LOADING,
   DETECTION_PAGE_FILTER_GROUP_WRAPPER,
   OPTION_LISTS_LOADING,
+  OPTION_LIST_ACTIVE_CLEAR_SELECTION,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
 } from '../screens/common/filter_group';
@@ -143,15 +144,30 @@ export const setEnrichmentDates = (from?: string, to?: string) => {
   cy.get(UPDATE_ENRICHMENT_RANGE_BUTTON).click();
 };
 
-export const refreshAlertPageFilter = (filterIndex: number) => {
-  cy.get(OPTION_LIST_VALUES).eq(filterIndex).click({ force: true });
-  cy.get(OPTION_SELECTABLE(filterIndex, 'exists')).click({ force: true });
+export const refreshAlertPageFilter = () => {
+  // currently there is no consistent way to refresh the filters.
+  // Have raised this with the kibana presentation team who provided this filter group plugin
+  cy.reload();
   waitForAlerts();
 };
 
-export const selectPageFilterValue = (filterIndex: number, value: string) => {
-  refreshAlertPageFilter(filterIndex);
-  cy.get(OPTION_SELECTABLE(filterIndex, value)).click({ force: true });
+export const togglePageFilterPopover = (filterIndex: number) => {
+  cy.get(OPTION_LIST_VALUES).eq(filterIndex).click({ force: true });
+};
+
+export const clearAllSelections = () => {
+  cy.get(OPTION_LIST_ACTIVE_CLEAR_SELECTION).click({ force: true });
+};
+
+export const selectPageFilterValue = (filterIndex: number, ...values: string[]) => {
+  refreshAlertPageFilter();
+  togglePageFilterPopover(filterIndex);
+  clearAllSelections();
+  values.forEach((value) => {
+    cy.get(OPTION_SELECTABLE(filterIndex, value)).click({ force: true });
+  });
+  waitForAlerts();
+  togglePageFilterPopover(filterIndex);
 };
 
 export const goToClosedAlerts = () => {

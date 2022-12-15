@@ -30,8 +30,9 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-
-import { FILTER_OPEN, TableId } from '../../../../../common/types';
+import type { Filter } from '@kbn/es-query';
+import { DetectionPageFilterSet } from '../../../../detections/components/detection_page_filters';
+import { TableId } from '../../../../../common/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -63,7 +64,6 @@ import { StepDefineRule } from '../../../../detections/components/rules/step_def
 import { StepScheduleRule } from '../../../../detections/components/rules/step_schedule_rule';
 import {
   buildAlertsFilter,
-  buildAlertStatusFilter,
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
@@ -122,8 +122,6 @@ import { MissingPrivilegesCallOut } from '../../../../detections/components/call
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
@@ -167,11 +165,7 @@ export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
-const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
-  clearEventsDeleted,
-  clearEventsLoading,
-  clearSelected,
-}) => {
+const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = () => {
   const {
     data,
     application: {
@@ -188,12 +182,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).graphEventId
   );
-  const updatedAt = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).updated
-  );
+
   const isAlertsLoading = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
   );
+
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -219,11 +212,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
-  const {
-    indexPattern,
-    runtimeMappings,
-    loading: isLoadingIndexPattern,
-  } = useSourcererDataView(SourcererScopeName.detections);
+  const { indexPattern, runtimeMappings, dataViewId } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{
     detailName: string;
@@ -301,12 +292,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     };
     fetchDataViewTitle();
   }, [data.dataViews, defineRuleData?.dataViewId]);
+
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
   const { globalFullScreen } = useGlobalFullScreen();
-  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+
+  const [detectionPageFilters, setDetectionPageFilters] = useState<Filter[]>();
 
   const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(rule?.saved_id, {
     ruleType: rule?.type,
@@ -424,11 +417,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     setTabs(tabs);
   }, [hasIndexRead, rule, ruleDetailTabs, ruleExecutionSettings]);
 
-  const showUpdating = useMemo(
-    () => isLoadingIndexPattern || isAlertsLoading || loading,
-    [isLoadingIndexPattern, isAlertsLoading, loading]
-  );
-
   const title = useMemo(
     () => (
       <>
@@ -488,17 +476,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [rule, ruleLoading]
   );
 
-  // Callback for when open/closed filter changes
-  const onFilterGroupChangedCallback = useCallback(
-    (newFilterGroup: Status) => {
-      const tableId = TableId.alertsOnRuleDetailsPage;
-      clearEventsLoading({ id: tableId });
-      clearEventsDeleted({ id: tableId });
-      clearSelected({ id: tableId });
-      setFilterGroup(newFilterGroup);
-    },
-    [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
-  );
+  const pageFiltersUpdateHandler = useCallback((newFilters: Filter[]) => {
+    setDetectionPageFilters(newFilters);
+  }, []);
 
   // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
   useEffect(() => {
@@ -509,10 +489,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     () => [
       ...buildAlertsFilter(rule?.rule_id ?? ''),
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-      ...buildAlertStatusFilter(filterGroup),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+      ...(detectionPageFilters ?? []),
     ],
-    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
+    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, detectionPageFilters]
   );
 
   const alertsTableDefaultFilters = useMemo(
@@ -520,8 +500,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       ...buildAlertsFilter(rule?.rule_id ?? ''),
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+      ...(detectionPageFilters ?? []),
     ],
-    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, detectionPageFilters]
   );
 
   const alertMergedFilters = useMemo(
@@ -622,6 +603,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       }
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
+  );
+
+  const isAlertTableLoading = useMemo(
+    () => loading || isAlertsLoading || !Array.isArray(detectionPageFilters),
+    [loading, detectionPageFilters, isAlertsLoading]
   );
 
   const {
@@ -817,18 +803,19 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                   <>
                     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                      <EuiFlexItem grow={false}>
-                        <AlertsTableFilterGroup
-                          status={filterGroup}
-                          onFilterGroupChanged={onFilterGroupChangedCallback}
+                      <EuiFlexItem grow={true}>
+                        <DetectionPageFilterSet
+                          dataViewId={dataViewId as string}
+                          onFilterChange={pageFiltersUpdateHandler}
+                          filters={filters}
+                          query={query}
+                          timeRange={{
+                            from,
+                            to,
+                            mode: 'absolute',
+                          }}
+                          chainingSystem="HIERARCHICAL"
                         />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        {updatedAt &&
-                          timelinesUi.getLastUpdated({
-                            updatedAt: updatedAt || Date.now(),
-                            showUpdating,
-                          })}
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiSpacer size="l" />
@@ -845,13 +832,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <AlertsTable
-                        filterGroup={filterGroup}
                         tableId={TableId.alertsOnRuleDetailsPage}
                         defaultFilters={alertsTableDefaultFilters}
                         hasIndexWrite={hasIndexWrite ?? false}
                         hasIndexMaintenance={hasIndexMaintenance ?? false}
                         from={from}
-                        loading={loading}
+                        loading={isAlertTableLoading}
                         showBuildingBlockAlerts={showBuildingBlockAlerts}
                         showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
                         onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}

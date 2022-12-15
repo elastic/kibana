@@ -317,7 +317,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                   to,
                   mode: 'absolute',
                 }}
-                chainingSystem="HIERARCHICAL"
+                chainingSystem="NONE"
               />
 
               <EuiSpacer size="m" />

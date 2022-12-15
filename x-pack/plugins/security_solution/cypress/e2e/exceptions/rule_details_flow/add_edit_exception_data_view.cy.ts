@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { OPTION_SELECTABLE } from '../../../screens/common/filter_group';
 import { getNewRule } from '../../../objects/rule';
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
+import { ALERTS_COUNT, NUMBER_OF_ALERTS } from '../../../screens/alerts';
 import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { goToClosedAlerts, goToOpenedAlerts } from '../../../tasks/alerts';
+import { goToClosedAlerts, goToOpenedAlerts, togglePageFilterPopover } from '../../../tasks/alerts';
 import {
   editException,
   editExceptionFlyoutItemName,
@@ -100,15 +101,17 @@ describe('Add exception using data views from rule details', () => {
     // new exception item displays
     cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
 
-    // Alerts table should now be empty from having added exception and closed
-    // matching alert
-    goToAlertsTab();
-    cy.get(EMPTY_ALERT_TABLE).should('exist');
-
+    // Empty table check is not needed and we can simply check that all alerts are closed.
     // Closed alert should appear in table
+    goToAlertsTab();
     goToClosedAlerts();
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
+
+    // Open Status should not be selectable since there is not open Alerts
+    togglePageFilterPopover(0); // open status filter
+    cy.get(OPTION_SELECTABLE(0, 'open')).should('not.exist');
+    togglePageFilterPopover(0);
 
     // Remove the exception and load an event that would have matched that exception
     // to show that said exception now starts to show up again
