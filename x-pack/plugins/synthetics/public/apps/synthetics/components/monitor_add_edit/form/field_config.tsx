@@ -814,6 +814,42 @@ export const FIELD: Record<string, FieldMeta> = {
       defaultMessage: 'Monitor script is required',
     }),
   },
+  [ConfigKey.PARAMS]: {
+    fieldKey: ConfigKey.PARAMS,
+    label: i18n.translate('xpack.synthetics.monitorConfig.params.label', {
+      defaultMessage: 'Parameters',
+    }),
+    component: JSONEditor,
+    props: ({ setValue }) => ({
+      id: 'syntheticsMonitorConfigParams',
+      height: '100px',
+      onChange: (json: string) => {
+        setValue(ConfigKey.PARAMS, json);
+      },
+    }),
+    error: i18n.translate('xpack.synthetics.monitorConfig.params.error', {
+      defaultMessage: 'Invalid JSON format',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.synthetics.monitorConfig.params.helpText"
+        defaultMessage="Use JSON to define parameters that can be referenced in your script with {paramsValue}"
+        values={{
+          paramsValue: <EuiCode>params.value</EuiCode>,
+        }}
+      />
+    ),
+    validation: () => ({
+      validate: (value) => {
+        const validateFn = validate[DataStream.BROWSER][ConfigKey.PARAMS];
+        if (validateFn) {
+          return !validateFn({
+            [ConfigKey.PARAMS]: value,
+          });
+        }
+      },
+    }),
+  },
   isTLSEnabled: {
     fieldKey: 'isTLSEnabled',
     component: EuiSwitch,
@@ -1055,6 +1091,50 @@ export const FIELD: Record<string, FieldMeta> = {
             [ConfigKey.PLAYWRIGHT_OPTIONS]: value,
           });
         }
+      },
+    }),
+  },
+  [ConfigKey.IGNORE_HTTPS_ERRORS]: {
+    fieldKey: ConfigKey.IGNORE_HTTPS_ERRORS,
+    component: EuiSwitch,
+    controlled: true,
+    helpText: (
+      <span>
+        {i18n.translate('xpack.synthetics.monitorConfig.ignoreHttpsErrors.helpText', {
+          defaultMessage:
+            'Turns off TLS/SSL validation in the synthetics browser. This is useful for testing sites that use self-signed certificates.',
+        })}
+      </span>
+    ),
+    props: ({ setValue }) => ({
+      id: 'syntheticsMontiorConfigIgnoreHttpsErrors',
+      label: i18n.translate('xpack.synthetics.monitorConfig.ignoreHttpsErrors.label', {
+        defaultMessage: 'Ignore HTTPS errors',
+      }),
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(ConfigKey.IGNORE_HTTPS_ERRORS, !!event.target.checked);
+      },
+    }),
+  },
+  [ConfigKey.SYNTHETICS_ARGS]: {
+    fieldKey: ConfigKey.SYNTHETICS_ARGS,
+    component: EuiFieldText,
+    controlled: true,
+    label: i18n.translate('xpack.synthetics.monitorConfig.syntheticsArgs.label', {
+      defaultMessage: 'Synthetics args',
+    }),
+    helpText: (
+      <span>
+        {i18n.translate('xpack.synthetics.monitorConfig.syntheticsArgs.helpText', {
+          defaultMessage:
+            'Extra arguments to pass to the synthetics agent package. Takes a list of strings. This is useful in rare scenarios, and should not ordinarily need to be set.',
+        })}
+      </span>
+    ),
+    props: ({ setValue }) => ({
+      id: 'syntheticsMontiorConfigSyntheticsArgs',
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(ConfigKey.SYNTHETICS_ARGS, event.target.value);
       },
     }),
   },

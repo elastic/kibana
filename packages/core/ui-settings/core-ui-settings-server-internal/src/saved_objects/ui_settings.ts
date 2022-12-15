@@ -46,7 +46,7 @@ export const uiSettingsType: SavedObjectsType = {
 
 export const uiSettingsGlobalType: SavedObjectsType = {
   name: 'config-global',
-  hidden: true,
+  hidden: false,
   namespaceType: 'agnostic',
   mappings: {
     dynamic: false,
