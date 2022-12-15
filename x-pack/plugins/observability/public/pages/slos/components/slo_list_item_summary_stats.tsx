@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { asPercent } from '../../../../common/utils/formatters';
+import { asPercentWithTwoDecimals } from '../../../../common/utils/formatters';
 import { SLO } from '../../../typings';
 import { isSloHealthy } from '../helpers/is_slo_healthy';
 import { getSloDifference } from '../helpers/get_slo_difference';
@@ -28,7 +28,7 @@ export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
           description={i18n.translate('xpack.observability.slos.slo.stats.observedValue', {
             defaultMessage: 'Observed value',
           })}
-          title={asPercent(slo.summary.sliValue, 1, 'n/a')}
+          title={asPercentWithTwoDecimals(slo.summary.sliValue, 1, 'n/a')}
           titleColor={isHealthy ? '' : 'danger'}
           titleSize="m"
           reverse
@@ -39,7 +39,7 @@ export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
           description={i18n.translate('xpack.observability.slos.slo.stats.slo', {
             defaultMessage: 'SLO',
           })}
-          title={asPercent(slo.objective.target, 1, 'n/a')}
+          title={asPercentWithTwoDecimals(slo.objective.target, 1, 'n/a')}
           titleSize="m"
           reverse
         />
@@ -60,7 +60,7 @@ export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
           description={i18n.translate('xpack.observability.slos.slo.stats.budgetRemaining', {
             defaultMessage: 'Budget remaining',
           })}
-          title={asPercent(slo.summary.errorBudget.remaining, 1, 'n/a')}
+          title={asPercentWithTwoDecimals(slo.summary.errorBudget.remaining, 1, 'n/a')}
           titleColor={isHealthy ? '' : 'danger'}
           titleSize="m"
           reverse
