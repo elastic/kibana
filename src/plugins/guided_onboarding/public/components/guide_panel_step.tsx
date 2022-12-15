@@ -46,7 +46,6 @@ const renderDescription = (description: string | StepDescriptionWithLink) => {
       <EuiLink
         data-test-subj="guidePanelStepDescriptionLink"
         href={linkUrl}
-        external={isLinkExternal}
         target={isLinkExternal ? '_blank' : ''}
       >
         {linkText}
