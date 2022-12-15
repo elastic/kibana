@@ -1331,10 +1331,10 @@ describe('Task Runner', () => {
       getSummarizedAlertsMock.mockResolvedValue({
         new: {
           count: 1,
-          alerts: [mockAAD],
+          data: [mockAAD],
         },
-        ongoing: { count: 1, alerts: [] },
-        recovered: { count: 0, alerts: [] },
+        ongoing: { count: 1, data: [] },
+        recovered: { count: 0, data: [] },
       });
 
       const taskRunner = new TaskRunner(
@@ -1405,10 +1405,10 @@ describe('Task Runner', () => {
       getSummarizedAlertsMock.mockResolvedValue({
         new: {
           count: 1,
-          alerts: [mockAAD],
+          data: [mockAAD],
         },
-        ongoing: { count: 1, alerts: [] },
-        recovered: { count: 0, alerts: [] },
+        ongoing: { count: 1, data: [] },
+        recovered: { count: 0, data: [] },
       });
 
       const taskRunner = new TaskRunner(

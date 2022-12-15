@@ -837,10 +837,10 @@ describe('Execution Handler', () => {
     getSummarizedAlertsMock.mockResolvedValue({
       new: {
         count: 1,
-        alerts: [mockAAD],
+        data: [mockAAD],
       },
-      ongoing: { count: 0, alerts: [] },
-      recovered: { count: 0, alerts: [] },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
     });
     const executionHandler = new ExecutionHandler(
       generateExecutionParams({
@@ -911,10 +911,10 @@ describe('Execution Handler', () => {
     getSummarizedAlertsMock.mockResolvedValue({
       new: {
         count: 1,
-        alerts: [mockAAD],
+        data: [mockAAD],
       },
-      ongoing: { count: 0, alerts: [] },
-      recovered: { count: 0, alerts: [] },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
     });
     const executionHandler = new ExecutionHandler(
       generateExecutionParams({
@@ -950,10 +950,10 @@ describe('Execution Handler', () => {
     getSummarizedAlertsMock.mockResolvedValue({
       new: {
         count: 1,
-        alerts: [mockAAD],
+        data: [mockAAD],
       },
-      ongoing: { count: 0, alerts: [] },
-      recovered: { count: 0, alerts: [] },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
     });
     const executionHandler = new ExecutionHandler(
       generateExecutionParams({
@@ -1075,9 +1075,9 @@ describe('Execution Handler', () => {
 
   test('removes the obsolete actions from the task state', async () => {
     getSummarizedAlertsMock.mockResolvedValue({
-      new: { count: 0, alerts: [] },
-      ongoing: { count: 0, alerts: [] },
-      recovered: { count: 0, alerts: [] },
+      new: { count: 0, data: [] },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
     });
     const executionHandler = new ExecutionHandler(
       generateExecutionParams({

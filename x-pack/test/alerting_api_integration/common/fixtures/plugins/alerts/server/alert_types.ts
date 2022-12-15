@@ -17,7 +17,6 @@ import {
   RuleTypeState,
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
-import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import { ES_TEST_INDEX_NAME } from '../../../../lib';
@@ -654,7 +653,7 @@ function getAlwaysFiringAlertAsDataRuleType(
   const ruleDataClient = ruleRegistry.ruleDataService.initializeIndex({
     feature: AlertConsumers.OBSERVABILITY,
     registrationContext: 'observability.test.alerts',
-    dataset: Dataset.alerts,
+    dataset: ruleRegistry.dataset.alerts,
     componentTemplateRefs: [],
     componentTemplates: [
       {

@@ -38,7 +38,7 @@ const constants: UseCaseConstants = {
         defaultMessage: 'observe',
       }
     ),
-    imageUrlPrefix: '/plugins/home/assets/solution_logos/observability',
+    imageUrlPrefix: '/plugins/home/assets/solution_logos/kubernetes',
   },
   infrastructure: {
     logAltText: i18n.translate('guidedOnboardingPackage.gettingStarted.infrastructure.iconName', {
