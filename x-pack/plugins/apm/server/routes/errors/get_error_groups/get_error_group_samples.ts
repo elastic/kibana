@@ -19,7 +19,7 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 
 const ERROR_SAMPLES_SIZE = 10000;
 
-export async function getErrorGroupSummary({
+export async function getErrorGroupSamples({
   environment,
   kuery,
   serviceName,
@@ -41,8 +41,8 @@ export async function getErrorGroupSummary({
       events: [ProcessorEvent.error as const],
     },
     body: {
-      track_total_hits: true,
-      size: 0,
+      track_total_hits: ERROR_SAMPLES_SIZE,
+      size: ERROR_SAMPLES_SIZE,
       query: {
         bool: {
           filter: [
@@ -55,23 +55,16 @@ export async function getErrorGroupSummary({
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
         },
       },
+      _source: [ERROR_ID],
       sort: asMutableArray([
         { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
         { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
       ] as const),
-      aggs: {
-        errorSamples: {
-          terms: {
-            field: ERROR_ID,
-            size: ERROR_SAMPLES_SIZE,
-          },
-        },
-      },
     },
   };
 
   const resp = await apmEventClient.search('get_error_group_samples', params);
-  const errorSamples = resp.aggregations?.errorSamples.buckets;
+  const errorSamples = resp.hits.hits.map((item) => item._source.error.id);
 
   return {
     errorSamples,

@@ -20,6 +20,8 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
+const HITS_LIMIT = 10000;
+
 export async function getErrorGroupSummary({
   environment,
   kuery,
@@ -42,8 +44,8 @@ export async function getErrorGroupSummary({
       events: [ProcessorEvent.error as const],
     },
     body: {
-      track_total_hits: true,
-      size: 0,
+      track_total_hits: HITS_LIMIT,
+      size: 1,
       query: {
         bool: {
           filter: [
@@ -56,38 +58,21 @@ export async function getErrorGroupSummary({
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
         },
       },
+      _source: [
+        ERROR_EXC_MESSAGE,
+        ERROR_EXC_HANDLED,
+        ERROR_LOG_MESSAGE,
+        ERROR_CULPRIT,
+      ],
       sort: asMutableArray([
         { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
         { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
       ] as const),
     },
-    aggs: {
-      grouping_key: {
-        terms: {
-          field: 'error.grouping_key',
-          size: 1,
-        },
-        aggs: {
-          error: {
-            top_hits: {
-              _source: {
-                includes: [
-                  ERROR_EXC_MESSAGE,
-                  ERROR_EXC_HANDLED,
-                  ERROR_LOG_MESSAGE,
-                  ERROR_CULPRIT,
-                ],
-              },
-            },
-          },
-        },
-      },
-    },
   };
 
   const resp = await apmEventClient.search('get_error_group_summary', params);
-  const error =
-    resp.aggregations?.grouping_key.buckets[0].error.hits.hits[0]._source.error;
+  const error = resp.hits.hits[0]._source.error;
 
   return {
     error,
