@@ -11,8 +11,6 @@ export { loadRuleAggregations, loadRuleTags } from './aggregate';
 export { createRule } from './create';
 export { cloneRule } from './clone';
 export { deleteRules } from './delete';
-export { disableRule, disableRules } from './disable';
-export { enableRule, enableRules } from './enable';
 export { loadRule } from './get_rule';
 export { loadRuleSummary } from './rule_summary';
 export { muteAlertInstance } from './mute_alert';
