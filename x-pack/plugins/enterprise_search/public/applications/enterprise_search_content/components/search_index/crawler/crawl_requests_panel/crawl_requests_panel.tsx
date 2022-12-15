@@ -33,6 +33,7 @@ const CRAWLER_LOGS_DISCOVER_RECORD = {
     'http.response.status_code',
   ],
   dataViewSpec: {
+    timeFieldName: '@timestamp',
     name: i18n.translate(
       'xpack.enterpriseSearch.crawler.crawlRequestsPanel.discoverCrawlerLogsTitle',
       {
