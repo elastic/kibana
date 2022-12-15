@@ -15,6 +15,7 @@ import {
   EuiHealth,
   EuiIcon,
   EuiInMemoryTable,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -36,9 +37,13 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
-import type { APIKeysAPIClient, CreateApiKeyResponse } from '../api_keys_api_client';
+import type {
+  APIKeysAPIClient,
+  CreateApiKeyResponse,
+  UpdateApiKeyResponse,
+} from '../api_keys_api_client';
+import { ApiKeyFlyout } from './api_key_flyout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
-import { CreateApiKeyFlyout } from './create_api_key_flyout';
 import type { InvalidateApiKeys } from './invalidate_provider';
 import { InvalidateProvider } from './invalidate_provider';
 import { NotEnabled } from './not_enabled';
@@ -61,6 +66,8 @@ interface State {
   selectedItems: ApiKey[];
   error: any;
   createdApiKey?: CreateApiKeyResponse;
+  selectedApiKey?: ApiKey;
+  isUpdateFlyoutVisible: boolean;
 }
 
 const DATE_FORMAT = 'MMMM Do YYYY HH:mm:ss';
@@ -81,6 +88,8 @@ export class APIKeysGridPage extends Component<Props, State> {
       apiKeys: undefined,
       selectedItems: [],
       error: undefined,
+      selectedApiKey: undefined,
+      isUpdateFlyoutVisible: false,
     };
   }
 
@@ -90,6 +99,7 @@ export class APIKeysGridPage extends Component<Props, State> {
 
   public render() {
     return (
+      // Flyout to create new ApiKey
       <>
         <Route path="/create">
           <Breadcrumb
@@ -98,16 +108,44 @@ export class APIKeysGridPage extends Component<Props, State> {
             })}
             href="/create"
           >
-            <CreateApiKeyFlyout
-              onSuccess={(apiKey) => {
+            <ApiKeyFlyout
+              onSuccess={(createApiKeyResponse) => {
                 this.props.history.push({ pathname: '/' });
+
                 this.reloadApiKeys();
-                this.setState({ createdApiKey: apiKey });
+
+                this.setState({
+                  createdApiKey: createApiKeyResponse,
+                });
               }}
-              onCancel={() => this.props.history.push({ pathname: '/' })}
+              onCancel={() => {
+                this.props.history.push({ pathname: '/' });
+                this.setState({ selectedApiKey: undefined });
+              }}
             />
           </Breadcrumb>
         </Route>
+
+        {
+          // Flyout to update or view ApiKey
+          this.state.isUpdateFlyoutVisible && (
+            <ApiKeyFlyout
+              onSuccess={(createApiKeyResponse, updateApiKeyResponse) => {
+                this.reloadApiKeys();
+                this.displayUpdatedApiKeyToast(updateApiKeyResponse);
+                this.setState({
+                  selectedApiKey: undefined,
+                  isUpdateFlyoutVisible: false,
+                });
+              }}
+              onCancel={() => {
+                this.setState({ selectedApiKey: undefined, isUpdateFlyoutVisible: false });
+              }}
+              apiKey={this.state.selectedApiKey}
+              readonly={this.props.readOnly}
+            />
+          )
+        }
         {this.renderContent()}
       </>
     );
@@ -162,6 +200,7 @@ export class APIKeysGridPage extends Component<Props, State> {
               fill
               iconType="plusInCircleFilled"
               data-test-subj="apiKeysCreatePromptButton"
+              href={'/'}
             >
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.createButton"
@@ -475,6 +514,20 @@ export class APIKeysGridPage extends Component<Props, State> {
           defaultMessage: 'Name',
         }),
         sortable: true,
+        render: (name: string, recordAP: ApiKey) => {
+          return (
+            <EuiText color="subdued" size="s">
+              <EuiLink
+                data-test-subj={`roleRowName-${recordAP.name}`}
+                onClick={() => {
+                  this.setState({ selectedApiKey: recordAP, isUpdateFlyoutVisible: true });
+                }}
+              >
+                {name}
+              </EuiLink>
+            </EuiText>
+          );
+        },
       },
     ]);
 
@@ -657,21 +710,21 @@ export class APIKeysGridPage extends Component<Props, State> {
       return (
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-          defaultMessage="View and delete API keys. An API key sends requests on behalf of a user."
+          defaultMessage="View and delete API keys, which send requests on behalf of a user."
         />
       );
     } else if (readOnly) {
       return (
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.apiKeysReadOnlyDescription"
-          defaultMessage="View your API keys. An API key sends requests on your behalf."
+          defaultMessage="View your API keys, which send requests on your behalf."
         />
       );
     } else {
       return (
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.apiKeysOwnDescription"
-          defaultMessage="View and delete your API keys. An API key sends requests on your behalf."
+          defaultMessage="View and delete your API keys, which send requests on your behalf."
         />
       );
     }
@@ -692,6 +745,18 @@ export class APIKeysGridPage extends Component<Props, State> {
           defaultMessage="You only have permission to manage your own API keys."
         />
       );
+    }
+  }
+
+  private displayUpdatedApiKeyToast(updateApiKeyResponse?: UpdateApiKeyResponse) {
+    if (updateApiKeyResponse) {
+      this.props.notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.security.management.apiKeys.updateSuccessMessage', {
+          defaultMessage: "Updated API key '{name}'",
+          values: { name: this.state.selectedApiKey?.name },
+        }),
+        'data-test-subj': 'updateApiKeySuccessToast',
+      });
     }
   }
 }
