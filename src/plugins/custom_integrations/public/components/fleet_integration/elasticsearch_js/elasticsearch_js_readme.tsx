@@ -149,7 +149,7 @@ const { Client } = require('@elastic/elasticsearch');
 
 // Instantiate the client with an API key
 const client = new Client({
-  auth: { apiKey: '${apiKey || 'YOUR_API_KEY'}' }
+  auth: { apiKey: 'YOUR_API_KEY' }
 })
 
           `}
