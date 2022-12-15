@@ -9,13 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 
+import styled from 'styled-components';
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
 import type { Ecs } from '../../../../../../common/ecs';
 import type { ColumnRenderer } from './column_renderer';
 import { EVENT_SUMMARY_FIELD_NAME } from './constants';
 import { getRowRenderer } from './get_row_renderer';
 import { defaultRowRenderers } from '.';
-import styled from 'styled-components';
 const EventRenderedFlexItem = styled(EuiFlexItem)`
   div:first-child {
     padding-left: 0px;
