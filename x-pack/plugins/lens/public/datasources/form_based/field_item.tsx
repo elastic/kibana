@@ -34,7 +34,6 @@ import { DatasourceDataPanelProps } from '../../types';
 import { DOCUMENT_FIELD_NAME } from '../../../common';
 import type { IndexPattern, IndexPatternField } from '../../types';
 import type { LensAppServices } from '../../app_plugin/types';
-import { debouncedComponent } from '../../debounced_component';
 import { APP_ID } from '../../../common/constants';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
 
@@ -269,7 +268,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   );
 };
 
-export const FieldItem = debouncedComponent(InnerFieldItem);
+export const FieldItem = React.memo(InnerFieldItem);
 
 function FieldItemPopoverContents(
   props: FieldItemProps & {

@@ -19,7 +19,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   FieldListFilters,
   FieldIcon,
-  useFieldFilters,
   GetCustomFieldType,
   wrapFieldNameOnDot,
   FieldListGrouped,
@@ -97,28 +96,20 @@ export function TextBasedDataPanel({
     }
   }, []);
 
-  const visibleAllFields = dataHasLoaded ? fieldList : null;
-  const fieldListFilters = useFieldFilters<DatatableColumn>({
-    allFields: visibleAllFields,
-    getCustomFieldType,
-    services: {
-      core,
-    },
-  });
-  const fieldListGroupedProps = useGroupedFields<DatatableColumn>({
+  const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<DatatableColumn>({
     dataViewId: null,
-    allFields: visibleAllFields,
+    allFields: dataHasLoaded ? fieldList : null,
     services: {
       dataViews,
+      core,
     },
-    onFilterField: fieldListFilters.onFilterField,
+    getCustomFieldType,
     onSelectedFieldFilter,
     onOverrideFieldGroupDetails,
   });
 
-  const fieldNameHighlight = fieldListFilters.fieldNameHighlight;
   const renderFieldItem: FieldListGroupedProps<DatatableColumn>['renderFieldItem'] = useCallback(
-    ({ field, itemIndex }) => {
+    ({ field, itemIndex, fieldSearchHighlight }) => {
       if (!field) {
         return <></>;
       }
@@ -139,7 +130,7 @@ export function TextBasedDataPanel({
             onClick={() => {}}
             fieldIcon={<FieldIcon type={getCustomFieldType(field)} />}
             fieldName={
-              <EuiHighlight search={wrapFieldNameOnDot(fieldNameHighlight)}>
+              <EuiHighlight search={wrapFieldNameOnDot(fieldSearchHighlight)}>
                 {wrapFieldNameOnDot(field.name)}
               </EuiHighlight>
             }
@@ -147,7 +138,7 @@ export function TextBasedDataPanel({
         </DragDrop>
       );
     },
-    [fieldNameHighlight]
+    []
   );
 
   return (
@@ -165,7 +156,7 @@ export function TextBasedDataPanel({
         >
           <EuiFlexItem grow={false}>
             <FieldListFilters
-              {...fieldListFilters.fieldListFiltersProps}
+              {...fieldListFiltersProps}
               fieldSearchDescriptionId={fieldSearchDescriptionId}
               data-test-subj="lnsTextBasedLanguages"
             />

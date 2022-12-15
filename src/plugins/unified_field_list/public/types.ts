@@ -60,6 +60,7 @@ export interface FieldsGroupDetails {
 export interface FieldsGroup<T extends FieldListItem> extends FieldsGroupDetails {
   fields: T[];
   fieldCount: number;
+  fieldSearchHighlight?: string;
 }
 
 export type FieldListGroups<T extends FieldListItem> = {

@@ -19,14 +19,12 @@ import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
-  FieldsGroupNames,
+  FieldListFilters,
   FieldListGrouped,
   type FieldListGroupedProps,
+  FieldsGroupNames,
   useExistingFieldsFetcher,
   useGroupedFields,
-  useExistingFieldsReader,
-  FieldListFilters,
-  useFieldFilters,
 } from '@kbn/unified-field-list-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
@@ -37,7 +35,6 @@ import type {
 } from '../../types';
 import { ChildDragDropProvider, DragContextState } from '../../drag_drop';
 import type { FormBasedPrivateState } from './types';
-import { fieldContainsData } from '../../shared_components';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { FieldItem } from './field_item';
 
@@ -229,7 +226,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       }
     },
   });
-  const fieldsExistenceReader = useExistingFieldsReader();
 
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {
@@ -272,22 +268,14 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [core.uiSettings]
   );
 
-  const fieldListFilters = useFieldFilters<IndexPatternField>({
-    allFields,
-    onSupportedFieldFilter,
-    services: {
-      core,
-    },
-  });
-  const fieldListGroupedProps = useGroupedFields<IndexPatternField>({
+  const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<IndexPatternField>({
     dataViewId: currentIndexPatternId,
     allFields,
     services: {
       dataViews,
+      core,
     },
-    fieldsExistenceReader,
     isAffectedByGlobalFilter: Boolean(filters.length),
-    onFilterField: fieldListFilters.onFilterField,
     onSupportedFieldFilter,
     onSelectedFieldFilter,
     onOverrideFieldGroupDetails,
@@ -392,16 +380,11 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     ]
   );
 
-  const fieldNameHighlight = fieldListFilters.fieldNameHighlight;
   const renderFieldItem: FieldListGroupedProps<IndexPatternField>['renderFieldItem'] = useCallback(
-    ({ field, itemIndex, groupIndex, hideDetails }) => (
+    ({ field, itemIndex, groupIndex, groupName, hideDetails, fieldSearchHighlight }) => (
       <FieldItem
         field={field}
-        exists={fieldContainsData(
-          field.name,
-          currentIndexPattern,
-          fieldsExistenceReader.hasFieldData
-        )}
+        exists={groupName !== FieldsGroupNames.EmptyFields}
         hideDetails={hideDetails || field.type === 'document'}
         itemIndex={itemIndex}
         groupIndex={groupIndex}
@@ -413,7 +396,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         core={core}
         fieldFormats={fieldFormats}
         indexPattern={currentIndexPattern}
-        highlight={fieldNameHighlight}
+        highlight={fieldSearchHighlight}
         dateRange={dateRange}
         query={query}
         filters={filters}
@@ -427,9 +410,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       dateRange,
       query,
       filters,
-      fieldNameHighlight,
       charts.theme,
-      fieldsExistenceReader.hasFieldData,
       dropOntoWorkspace,
       hasSuggestionForField,
       editField,
@@ -449,7 +430,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         {isProcessing && <EuiProgress size="xs" color="accent" position="absolute" />}
         <EuiFlexItem grow={false}>
           <FieldListFilters
-            {...fieldListFilters.fieldListFiltersProps}
+            {...fieldListFiltersProps}
             fieldSearchDescriptionId={fieldSearchDescriptionId}
             data-test-subj="lnsIndexPattern"
           />

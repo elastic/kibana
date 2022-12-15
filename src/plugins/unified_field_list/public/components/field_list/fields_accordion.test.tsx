@@ -30,7 +30,11 @@ describe('UnifiedFieldList <FieldsAccordion />', () => {
       isFiltered: false,
       paginatedFields,
       renderCallout: () => <div id="lens-test-callout">Callout</div>,
-      renderFieldItem: ({ field }) => <EuiText key={field.name}>{field.name}</EuiText>,
+      renderFieldItem: ({ field, fieldSearchHighlight }) => (
+        <EuiText key={field.name} data-highlight={fieldSearchHighlight}>
+          {field.name}
+        </EuiText>
+      ),
     };
   });
 
@@ -59,5 +63,15 @@ describe('UnifiedFieldList <FieldsAccordion />', () => {
   it('renders spinner if has not loaded', () => {
     const wrapper = mountWithIntl(<FieldsAccordion {...defaultProps} hasLoaded={false} />);
     expect(wrapper.find(EuiLoadingSpinner).length).toEqual(1);
+  });
+
+  it('renders items with the provided highlight', () => {
+    const wrapperWithHighlight = mountWithIntl(
+      <FieldsAccordion {...defaultProps} fieldSearchHighlight="test-highlight" />
+    );
+    expect(wrapperWithHighlight.find(EuiText).last().prop('data-highlight')).toBe('test-highlight');
+
+    const wrapperWithoutHighlight = mountWithIntl(<FieldsAccordion {...defaultProps} />);
+    expect(wrapperWithoutHighlight.find(EuiText).last().prop('data-highlight')).toBeUndefined();
   });
 });

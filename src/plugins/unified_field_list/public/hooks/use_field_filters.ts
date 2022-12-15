@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
@@ -23,9 +23,9 @@ export interface FieldFiltersParams<T extends FieldListItem> {
 }
 
 export interface FieldFiltersResult<T extends FieldListItem> {
-  fieldNameHighlight: string;
+  fieldSearchHighlight: string;
   fieldListFiltersProps: Omit<FieldListFiltersProps<T>, 'fieldSearchDescriptionId'>;
-  onFilterField: (field: T) => boolean;
+  onFilterField?: (field: T) => boolean;
 }
 
 export function useFieldFilters<T extends FieldListItem = DataViewField>({
@@ -38,50 +38,45 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
   const [nameFilter, setNameFilter] = useState<string>('');
   const docLinks = services.core.docLinks;
 
-  const fieldListFiltersProps: FieldListFiltersProps<T> = useMemo(
-    () => ({
-      docLinks,
-      selectedFieldTypes,
-      allFields,
-      getCustomFieldType,
-      onSupportedFieldFilter,
-      onChangeFieldTypes: setSelectedFieldTypes,
-      nameFilter,
-      onChangeNameFilter: setNameFilter,
-      // TODO: add aria id
-    }),
-    [
-      docLinks,
-      selectedFieldTypes,
-      allFields,
-      getCustomFieldType,
-      onSupportedFieldFilter,
-      setSelectedFieldTypes,
-      nameFilter,
-      setNameFilter,
-    ]
-  );
-
-  const onFilterField = useCallback(
-    (field: T) => {
-      if (
-        nameFilter.length &&
-        !field.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
-        !field.displayName?.toLowerCase().includes(nameFilter.toLowerCase())
-      ) {
-        return false;
-      }
-      if (selectedFieldTypes.length > 0) {
-        return selectedFieldTypes.includes(getFieldIconType(field, getCustomFieldType));
-      }
-      return true;
-    },
-    [selectedFieldTypes, nameFilter, getCustomFieldType]
-  );
-
-  return {
-    fieldNameHighlight: nameFilter.toLowerCase(),
-    fieldListFiltersProps,
-    onFilterField,
-  };
+  return useMemo(() => {
+    const fieldSearchHighlight = nameFilter.toLowerCase();
+    return {
+      fieldSearchHighlight,
+      fieldListFiltersProps: {
+        docLinks,
+        selectedFieldTypes,
+        allFields,
+        getCustomFieldType,
+        onSupportedFieldFilter,
+        onChangeFieldTypes: setSelectedFieldTypes,
+        nameFilter,
+        onChangeNameFilter: setNameFilter,
+      },
+      onFilterField:
+        fieldSearchHighlight?.length || selectedFieldTypes.length > 0
+          ? (field: T) => {
+              if (
+                fieldSearchHighlight?.length &&
+                !field.name.toLowerCase().includes(fieldSearchHighlight) &&
+                !field.displayName?.toLowerCase().includes(fieldSearchHighlight)
+              ) {
+                return false;
+              }
+              if (selectedFieldTypes.length > 0) {
+                return selectedFieldTypes.includes(getFieldIconType(field, getCustomFieldType));
+              }
+              return true;
+            }
+          : undefined,
+    };
+  }, [
+    docLinks,
+    selectedFieldTypes,
+    allFields,
+    getCustomFieldType,
+    onSupportedFieldFilter,
+    setSelectedFieldTypes,
+    nameFilter,
+    setNameFilter,
+  ]);
 }

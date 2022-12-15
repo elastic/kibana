@@ -14,6 +14,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ReactWrapper } from 'enzyme';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import FieldListGrouped, { type FieldListGroupedProps } from './field_list_grouped';
 import { ExistenceFetchStatus } from '../../types';
 import { FieldsAccordion } from './fields_accordion';
@@ -35,6 +36,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     const dataViews = dataViewPluginMocks.createStartContract();
     mockedServices = {
       dataViews,
+      core: coreMock.createStart(),
     };
 
     dataViews.get.mockImplementation(async (id: string) => {
@@ -65,7 +67,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
 
   async function mountGroupedList({ listProps, hookParams }: WrapperProps): Promise<ReactWrapper> {
     const Wrapper: React.FC<WrapperProps> = (props) => {
-      const { fieldGroups } = useGroupedFields({
+      const {
+        fieldListGroupedProps: { fieldGroups },
+      } = useGroupedFields({
         ...props.hookParams,
         services: mockedServices,
       });
