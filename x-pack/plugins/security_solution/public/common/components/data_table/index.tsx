@@ -125,7 +125,8 @@ export const DataTableComponent = React.memo<DataTableProps>(
     } = useKibana().services;
     const memoizedColumnHeaders: (
       headers: ColumnHeaderOptions[],
-      browserFields: BrowserFields
+      browserFields: BrowserFields,
+      isEventRenderedView: boolean,
     ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
     const getDataTable = dataTableSelectors.getTableByIdSelector();
@@ -133,38 +134,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
     const { columns, selectedEventIds, showCheckboxes, sort, isLoading, defaultColumns } =
       dataTable;
 
-    const viewColumns = isEventRenderedView
-      ? [
-        {
-          columnHeaderType: defaultColumnHeaderType,
-          id: '@timestamp',
-          initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH + 50,
-        },
-        {
-          columnHeaderType: defaultColumnHeaderType,
-          displayAsText: i18n.translate(
-            'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.ruleTitle',
-            {
-              defaultMessage: 'Rule',
-            }
-          ),
-          id: 'kibana.alert.rule.name',
-          initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH + 100,
-          linkField: 'kibana.alert.rule.uuid',
-        },
-          {
-            columnHeaderType: defaultColumnHeaderType,
-            id: 'eventSummary',
-            displayAsText: i18n.translate(
-              'xpack.securitySolution.EventRenderedView.eventSummary.column',
-              {
-                defaultMessage: 'Event Summary',
-              }
-            ),
-          },
-        ]
-      : columns;
-    const columnHeaders = memoizedColumnHeaders(viewColumns, browserFields);
+    const columnHeaders = memoizedColumnHeaders(columns, browserFields, isEventRenderedView);
 
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
@@ -332,6 +302,9 @@ export const DataTableComponent = React.memo<DataTableProps>(
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
         columnHeaders.map((header) => {
+          if (isEventRenderedView) {
+            return header;
+          }
           const buildAction = (dataTableCellAction: DataTableCellAction) =>
             dataTableCellAction({
               browserFields,

@@ -45,7 +45,7 @@ export const reasonColumnRenderer: ColumnRenderer = {
     truncate?: boolean;
     values: string[] | undefined | null;
   }) => {
-    if (values && ecsData && rowRenderers && (columnName === 'kibana.alert.reason' || isDetails)) {
+    if (isDetails && values && ecsData && rowRenderers) {
       return values.map((value, i) => (
         <ReasonCell
           ecsData={ecsData}

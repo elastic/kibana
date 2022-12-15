@@ -48,10 +48,12 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     fieldName: header.id,
   });
 
+  console.log(header.id)
+
   const styledContentClassName = isDetails
     ? 'eui-textBreakWord'
     : 'eui-displayInlineBlock eui-textTruncate';
-  return header.id !== 'eventSummary' ? (
+  return header.id.length ? (
     <>
       <StyledContent className={styledContentClassName} $isDetails={isDetails}>
         {getColumnRenderer(header.id, columnRenderers, data).renderColumn({

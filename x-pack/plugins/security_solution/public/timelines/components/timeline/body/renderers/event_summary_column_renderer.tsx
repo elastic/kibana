@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 
@@ -51,9 +51,11 @@ export const eventSummaryColumnRenderer: ColumnRenderer = {
           ? getRowRenderer({ data: ecsData, rowRenderers: defaultRowRenderers })
           : defaultRowRenderers.find((x) => x.isInstance(ecsData)) ?? null;
       return (
-        <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
+        <EuiPanel className="eui-xScroll" data-test-subj="reason-cell-renderer">
+          
+        
           {rowRenderer != null ? (
-            <EventRenderedFlexItem className="eui-xScroll">
+            
               <div className="eui-displayInlineBlock">
                 {rowRenderer &&
                   rowRenderer.renderRow({
@@ -62,11 +64,11 @@ export const eventSummaryColumnRenderer: ColumnRenderer = {
                     scopeId,
                   })}
               </div>
-            </EventRenderedFlexItem>
+            
           ) : (
             <>{values && <EuiFlexItem data-test-subj="plain-text-reason">{values}</EuiFlexItem>}</>
           )}
-        </EuiFlexGroup>
+        </EuiPanel>
       );
     }
   },

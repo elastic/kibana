@@ -12,7 +12,6 @@ import {
   HOST_NAME_FIELD_NAME,
   REFERENCE_URL_FIELD_NAME,
   RULE_REFERENCE_FIELD_NAME,
-  SIGNAL_RULE_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { INDICATOR_REFERENCE } from '../../../../common/cti/constants';
