@@ -67,12 +67,10 @@ export const lastRunFromState = (
     outcome = RuleLastRunOutcomeValues[2];
   }
 
-  // Optionally merge outcome messages reported by
-  // rule execution to the Framework's outcome message
-  if (outcomeMsg.length > 0 && outcomeMessage.length > 0) {
-    outcomeMsg = `${outcomeMsg} - ${outcomeMessage}`;
-  } else if (outcomeMessage.length > 0) {
-    outcomeMsg = outcomeMessage;
+  // Optionally push outcome message reported by
+  // rule execution to the Framework's outcome message array
+  if (outcomeMessage) {
+    outcomeMsg.push(outcomeMessage);
   }
 
   return {

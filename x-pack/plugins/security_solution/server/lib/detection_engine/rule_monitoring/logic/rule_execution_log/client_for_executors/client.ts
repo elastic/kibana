@@ -43,8 +43,8 @@ export const createClientForExecutors = (
   eventLog: IEventLogWriter,
   logger: Logger,
   context: RuleExecutionContext,
-  ruleMonitoringService: PublicRuleMonitoringService,
-  ruleLastRunService: PublicRuleLastRunService
+  ruleMonitoringService?: PublicRuleMonitoringService,
+  ruleLastRunService?: PublicRuleLastRunService
 ): IRuleExecutionLogForExecutors => {
   const baseCorrelationIds = getCorrelationIds(context);
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
@@ -171,27 +171,27 @@ export const createClientForExecutors = (
     } = metrics ?? {};
 
     if (newStatus === RuleExecutionStatus.failed) {
-      ruleLastRunService.addLastRunError(message);
+      ruleLastRunService?.addLastRunError(message);
     }
 
     if (newStatus === RuleExecutionStatus['partial failure']) {
-      ruleLastRunService.addLastRunWarning(message);
+      ruleLastRunService?.addLastRunWarning(message);
     }
 
     if (newStatus === RuleExecutionStatus.succeeded) {
-      ruleLastRunService.addLastRunOutcomeMessage(message);
+      ruleLastRunService?.setLastRunOutcomeMessage(message);
     }
 
     if (totalSearchDurationMs) {
-      ruleMonitoringService.setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs);
+      ruleMonitoringService?.setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs);
     }
 
     if (totalIndexingDurationMs) {
-      ruleMonitoringService.setLastRunMetricsTotalIndexingDurationMs(totalIndexingDurationMs);
+      ruleMonitoringService?.setLastRunMetricsTotalIndexingDurationMs(totalIndexingDurationMs);
     }
 
     if (executionGapDurationS) {
-      ruleMonitoringService.setLastRunMetricsGapDurationS(executionGapDurationS);
+      ruleMonitoringService?.setLastRunMetricsGapDurationS(executionGapDurationS);
     }
   };
 

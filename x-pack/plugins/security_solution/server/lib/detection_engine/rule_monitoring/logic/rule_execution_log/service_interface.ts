@@ -35,7 +35,7 @@ export interface ClientForRoutesParams {
 
 export interface ClientForExecutorsParams {
   savedObjectsClient: SavedObjectsClientContract;
-  ruleMonitoringService: PublicRuleMonitoringService;
-  ruleLastRunService: PublicRuleLastRunService;
+  ruleMonitoringService?: PublicRuleMonitoringService;
+  ruleLastRunService?: PublicRuleLastRunService;
   context: RuleExecutionContext;
 }

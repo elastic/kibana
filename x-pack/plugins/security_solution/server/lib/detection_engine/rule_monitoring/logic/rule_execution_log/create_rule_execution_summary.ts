@@ -10,7 +10,6 @@ import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/
 import type { RuleExecutionSummary } from '../../../../../../common/detection_engine/rule_monitoring';
 import {
   ruleLastRunOutcomeToExecutionStatus,
-  RuleExecutionStatus,
   ruleExecutionStatusToNumber,
 } from '../../../../../../common/detection_engine/rule_monitoring';
 import type { RuleParams } from '../../../rule_schema';
@@ -18,9 +17,11 @@ import type { RuleParams } from '../../../rule_schema';
 export const createRuleExecutionSummary = (
   rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>
 ): RuleExecutionSummary | null => {
-  const ruleExecutionStatus = ruleLastRunOutcomeToExecutionStatus(
-    rule.lastRun?.outcome ?? RuleExecutionStatus.failed
-  );
+  if (!rule.lastRun) {
+    return null;
+  }
+
+  const ruleExecutionStatus = ruleLastRunOutcomeToExecutionStatus(rule.lastRun?.outcome);
 
   return {
     last_execution: {
