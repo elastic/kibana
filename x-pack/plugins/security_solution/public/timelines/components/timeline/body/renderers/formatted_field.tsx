@@ -7,6 +7,7 @@
 
 /* eslint-disable complexity */
 
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
@@ -48,8 +49,7 @@ const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 const FormattedFieldValueComponent: React.FC<{
   asPlainText?: boolean;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Component?: any;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
   eventId: string;
   isAggregatable?: boolean;

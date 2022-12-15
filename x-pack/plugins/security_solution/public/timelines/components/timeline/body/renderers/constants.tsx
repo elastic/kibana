@@ -19,3 +19,4 @@ export const SIGNAL_RULE_NAME_FIELD_NAME = 'kibana.alert.rule.name';
 export const SIGNAL_STATUS_FIELD_NAME = 'kibana.alert.workflow_status';
 export const AGENT_STATUS_FIELD_NAME = 'agent.status';
 export const REASON_FIELD_NAME = 'kibana.alert.reason';
+export const EVENT_SUMMARY_FIELD_NAME = 'eventSummary';

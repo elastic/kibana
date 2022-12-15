@@ -47,13 +47,13 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     data,
     fieldName: header.id,
   });
-  /*const styledContentClassName = isDetails
+
+  const styledContentClassName = isDetails
     ? 'eui-textBreakWord'
-    : 'eui-displayInlineBlock eui-textTruncate';*/
-  const styledContentClassName = 'eui-textBreakWord';
-  return (
+    : 'eui-displayInlineBlock eui-textTruncate';
+  return header.id !== 'eventSummary' ? (
     <>
-      <StyledContent className={styledContentClassName} $isDetails={true}>
+      <StyledContent className={styledContentClassName} $isDetails={isDetails}>
         {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
           asPlainText, // we want to render value with links as plain text but keep other formatters like badge.
           columnName: header.id,
@@ -78,6 +78,23 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           closeCellPopover={closeCellPopover}
         />
       )}
+    </>
+  ) : (
+    <>
+      {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
+        asPlainText, // we want to render value with links as plain text but keep other formatters like badge.
+        columnName: header.id,
+        ecsData,
+        eventId,
+        field: header,
+        isDetails,
+        isDraggable,
+        linkValues,
+        rowRenderers,
+        scopeId,
+        truncate,
+        values,
+      })}
     </>
   );
 };

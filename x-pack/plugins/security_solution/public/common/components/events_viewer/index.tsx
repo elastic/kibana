@@ -16,7 +16,6 @@ import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/c
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
   ControlColumnProps,
@@ -60,7 +59,6 @@ import { TableContext, EmptyTable, TableLoading } from './shared';
 import { DataTableComponent } from '../data_table';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import type { AlertWorkflowStatus } from '../../types';
-import { EventRenderedView } from '../event_rendered_view';
 import { useQueryInspector } from '../page/manage_query';
 import type { SetQuery } from '../../containers/use_global_time/types';
 import { defaultHeaders } from '../../store/data_table/defaults';
@@ -72,6 +70,7 @@ import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
+import { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 
 const storage = new Storage(localStorage);
 
@@ -502,6 +501,14 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     [totalCountMinusDeleted, unit]
   );
 
+  let rowHeightsOptions: EuiDataGridRowHeightsOptions | undefined;
+  if (tableView === 'eventRenderedView') {
+    rowHeightsOptions = {
+      defaultHeight: 'auto' as const,
+      scrollAnchorRow: 'start',
+    };
+  }
+
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -541,53 +548,33 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                     >
                       <ScrollableFlexItem grow={1}>
                         <StatefulEventContext.Provider value={activeStatefulEventContext}>
-                          {tableView === 'gridView' && (
-                            <DataTableComponent
-                              additionalControls={alertBulkActions}
-                              unitCountText={unitCountText}
-                              browserFields={browserFields}
-                              data={nonDeletedEvents}
-                              disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
-                              id={tableId}
-                              loadPage={loadPage}
-                              renderCellValue={renderCellValue}
-                              rowRenderers={rowRenderers}
-                              totalItems={totalCountMinusDeleted}
-                              bulkActions={bulkActions}
-                              fieldBrowserOptions={fieldBrowserOptions}
-                              defaultCellActions={defaultCellActions}
-                              hasCrudPermissions={hasCrudPermissions}
-                              filters={filters}
-                              leadingControlColumns={transformedLeadingControlColumns}
-                              pagination={{
-                                pageIndex: pageInfo.activePage,
-                                pageSize: itemsPerPage,
-                                pageSizeOptions: itemsPerPageOptions,
-                                onChangeItemsPerPage,
-                                onChangePage,
-                              }}
-                            />
-                          )}
-                          {tableView === 'eventRenderedView' && (
-                            <EventRenderedView
-                              events={nonDeletedEvents}
-                              getRowRenderer={getRowRenderer}
-                              leadingControlColumns={transformedLeadingControlColumns}
-                              pagination={{
-                                pageIndex: pageInfo.activePage,
-                                pageSize: itemsPerPage,
-                                totalItemCount: totalCountMinusDeleted,
-                                pageSizeOptions: itemsPerPageOptions,
-                                showPerPageOptions: true,
-                              }}
-                              rowRenderers={rowRenderers}
-                              scopeId={tableId}
-                              onChangePage={onChangePage}
-                              onChangeItemsPerPage={onChangeItemsPerPage}
-                              additionalControls={alertBulkActions}
-                              unitCountText={unitCountText}
-                            />
-                          )}
+                          <DataTableComponent
+                            additionalControls={alertBulkActions}
+                            unitCountText={unitCountText}
+                            browserFields={browserFields}
+                            data={nonDeletedEvents}
+                            disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
+                            id={tableId}
+                            loadPage={loadPage}
+                            renderCellValue={renderCellValue}
+                            rowRenderers={rowRenderers}
+                            totalItems={totalCountMinusDeleted}
+                            bulkActions={bulkActions}
+                            fieldBrowserOptions={fieldBrowserOptions}
+                            defaultCellActions={defaultCellActions}
+                            hasCrudPermissions={hasCrudPermissions}
+                            filters={filters}
+                            leadingControlColumns={transformedLeadingControlColumns}
+                            pagination={{
+                              pageIndex: pageInfo.activePage,
+                              pageSize: itemsPerPage,
+                              pageSizeOptions: itemsPerPageOptions,
+                              onChangeItemsPerPage,
+                              onChangePage,
+                            }}
+                            isEventRenderedView={tableView === 'eventRenderedView'}
+                            rowHeightsOptions={rowHeightsOptions}
+                          />
                         </StatefulEventContext.Provider>
                       </ScrollableFlexItem>
                     </FullWidthFlexGroupTable>
