@@ -38,7 +38,7 @@ export const FieldStatsFlyout: FC = () => {
             <h3 id={pushedFlyoutTitleId}>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.fieldContextFlyoutTitle"
-                defaultMessage="FieldStatistics"
+                defaultMessage="Field statistics"
               />
             </h3>
           </EuiTitle>
