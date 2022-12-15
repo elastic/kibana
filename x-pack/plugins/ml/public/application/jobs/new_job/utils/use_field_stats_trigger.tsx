@@ -6,78 +6,40 @@
  */
 
 import React, { ReactNode, useCallback, useContext } from 'react';
-import {
-  EuiButtonIcon,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHighlight,
-  EuiToolTip,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field';
-import { EVENT_RATE_FIELD_ID, Field } from '../../../../../common/types/fields';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { FieldStatsInfoButton } from '../common/components/field_stats_info_button';
+import { Field } from '../../../../../common/types/fields';
 import { MLJobWizardFieldStatsFlyoutContext } from '../pages/components/pick_fields_step/components/field_stats_flyout/field_stats_flyout';
-import { getKbnFieldIconType } from '../../../../../common/util/get_field_icon_types';
 
 interface Option extends EuiComboBoxOptionOption<string> {
   field: Field;
 }
 export const useFieldStatsTrigger = () => {
   const { setIsFlyoutVisible, setFieldName } = useContext(MLJobWizardFieldStatsFlyoutContext);
+  const handleFieldStatsButtonClick = useCallback(
+    (field: Field, label: string, searchValue: string) => {
+      if (typeof field.id === 'string') {
+        setFieldName(field.id);
+        setIsFlyoutVisible(true);
+      }
+    },
+    [setFieldName, setIsFlyoutVisible]
+  );
+
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption, searchValue: string): ReactNode => {
       const field = (option as Option).field;
       return option.isGroupLabelOption || !field ? (
         option.label
       ) : (
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltip',
-                {
-                  defaultMessage: 'Inspect field statistics',
-                }
-              )}
-            >
-              <EuiButtonIcon
-                disabled={field.id === EVENT_RATE_FIELD_ID}
-                size="xs"
-                iconType="inspect"
-                onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                  if (ev.type === 'click') {
-                    ev.currentTarget.focus();
-                  }
-                  ev.preventDefault();
-                  ev.stopPropagation();
-
-                  if (typeof field.id === 'string') {
-                    setFieldName(field.id);
-                    setIsFlyoutVisible(true);
-                  }
-                }}
-                aria-label={i18n.translate(
-                  'xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltipArialabel',
-                  {
-                    defaultMessage: 'Inspect field statistics',
-                  }
-                )}
-                data-test-subj={'mlAggSelectFieldStatsPopoverButton'}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <FieldIcon type={getKbnFieldIconType(field.type)} fill="none" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FieldStatsInfoButton
+          field={field}
+          label={option.label}
+          onButtonClick={handleFieldStatsButtonClick}
+        />
       );
     },
-    [setIsFlyoutVisible, setFieldName]
+    [handleFieldStatsButtonClick]
   );
-  return { renderOption, setIsFlyoutVisible, setFieldName };
+  return { renderOption, setIsFlyoutVisible, setFieldName, handleFieldStatsButtonClick };
 };

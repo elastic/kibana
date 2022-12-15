@@ -109,7 +109,7 @@ export class JobCreator {
     return this._indexPattern;
   }
   public get dataViewId(): string | undefined {
-    return this._indexPattern?.id;
+    return this._indexPattern.id;
   }
 
   public get indexPatternTitle(): string {
