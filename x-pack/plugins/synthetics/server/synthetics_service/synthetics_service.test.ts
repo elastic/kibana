@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-jest.mock('axios', () => jest.fn());
-
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { SyntheticsService } from './synthetics_service';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -14,13 +12,48 @@ import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import axios, { AxiosResponse } from 'axios';
 import times from 'lodash/times';
 import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
+import { formatLocationObjects } from './get_service_locations';
+import { syntheticsServiceAPIKeySavedObject } from '../legacy_uptime/lib/saved_objects/service_api_key';
 
-const taskManagerSetup = taskManagerMock.createSetup();
+jest.mock('axios');
+
+const mockLocation = {
+  throttling: {
+    download: 20,
+    upload: 10,
+    latency: 5000,
+  },
+  locations: {
+    us_central: {
+      url: 'https://location.dev.com',
+      geo: {
+        name: 'North America - US Central',
+        location: {
+          lat: 414.25,
+          lon: -333.86,
+        },
+      },
+      status: 'ga',
+    },
+    us_central_qa: {
+      geo: {
+        location: {
+          lat: 353.25,
+          lon: -444.86,
+        },
+        name: 'US Central QA',
+      },
+      status: 'ga',
+      url: 'https://location.qa.com',
+    },
+  },
+} as any;
 
 describe('SyntheticsService', () => {
   const mockEsClient = {
     search: jest.fn(),
   };
+  const taskManagerSetup = taskManagerMock.createSetup();
 
   const logger = loggerMock.create();
 
@@ -37,6 +70,7 @@ describe('SyntheticsService', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
+    taskManagerSetup,
   } as unknown as UptimeServerSetup;
 
   const getMockedService = (locationsNum: number = 1) => {
@@ -87,13 +121,15 @@ describe('SyntheticsService', () => {
 
   beforeEach(() => {
     (axios as jest.MockedFunction<typeof axios>).mockReset();
+    serverMock.taskManagerSetup = taskManagerMock.createSetup();
+    serverMock.taskManagerStart = taskManagerMock.createStart();
   });
 
   afterEach(() => jest.restoreAllMocks());
 
   it('setup properly', async () => {
     const service = new SyntheticsService(serverMock);
-    service.setup(taskManagerSetup);
+    service.setup();
 
     expect(service.isAllowed).toEqual(false);
     expect(service.locations).toEqual([]);
@@ -102,9 +138,8 @@ describe('SyntheticsService', () => {
 
   it('setup properly with basic auth', async () => {
     const service = new SyntheticsService(serverMock);
-
-    await service.setup(taskManagerSetup);
-
+    await service.setup();
+    await service.initCloudSetup();
     expect(service.isAllowed).toEqual(true);
   });
 
@@ -118,7 +153,8 @@ describe('SyntheticsService', () => {
     };
     const service = new SyntheticsService(serverMock);
 
-    await service.setup(taskManagerSetup);
+    await service.setup();
+    await service.initCloudSetup();
 
     expect(service.isAllowed).toEqual(true);
     expect(service.locations).toEqual([
@@ -135,6 +171,73 @@ describe('SyntheticsService', () => {
         status: LocationStatus.EXPERIMENTAL,
       },
     ]);
+  });
+
+  it('setup properly with locations with manifest url', async () => {
+    serverMock.config = {
+      service: {
+        manifestUrl: 'http://localhost:8080/api/manifest',
+      },
+    };
+    const service = new SyntheticsService(serverMock);
+
+    // @ts-ignore
+    axios.get.mockImplementation((opts) => {
+      if (opts.includes('allowed')) {
+        return Promise.resolve({ data: { allowed: true } } as AxiosResponse);
+      }
+      return Promise.resolve({
+        data: mockLocation,
+      } as AxiosResponse);
+    });
+
+    await service.setup();
+    await service.enableSyntheticsService();
+
+    expect(service.isAllowed).toEqual(true);
+    expect(service.locations).toEqual(
+      formatLocationObjects(Object.entries(mockLocation.locations))
+    );
+
+    expect(serverMock.taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+    expect(serverMock.taskManagerStart.ensureScheduled).toHaveBeenCalledTimes(1);
+  });
+
+  it('resume task after kibana start', async () => {
+    serverMock.config = {
+      service: {
+        manifestUrl: 'http://localhost:8080/api/manifest',
+      },
+    };
+    const service = new SyntheticsService(serverMock);
+
+    // @ts-ignore
+    axios.get.mockImplementation((opts) => {
+      if (opts.includes('allowed')) {
+        return Promise.resolve({ data: { allowed: true } } as AxiosResponse);
+      }
+      return Promise.resolve({
+        data: mockLocation,
+      } as AxiosResponse);
+    });
+
+    await service.setup();
+
+    syntheticsServiceAPIKeySavedObject.get = async () => ({
+      apiKey: '12345',
+      id: '12345',
+      name: '12345',
+    });
+
+    await service.resumeServiceTaskIfEnabled();
+
+    expect(service.isAllowed).toEqual(true);
+    expect(service.locations).toEqual(
+      formatLocationObjects(Object.entries(mockLocation.locations))
+    );
+
+    expect(serverMock.taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+    expect(serverMock.taskManagerStart.ensureScheduled).toHaveBeenCalledTimes(1);
   });
 
   describe('addConfig', () => {

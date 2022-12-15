@@ -67,6 +67,8 @@ export interface UptimeServerSetup {
   basePath: IBasePath;
   isDev?: boolean;
   coreStart: CoreStart;
+  taskManagerSetup: TaskManagerSetupContract;
+  taskManagerStart: TaskManagerStartContract;
 }
 
 export interface UptimeCorePluginsSetup {

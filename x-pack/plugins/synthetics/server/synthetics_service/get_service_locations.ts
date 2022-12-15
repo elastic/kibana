@@ -51,17 +51,7 @@ export async function getServiceLocations(server: UptimeServerSetup) {
             return location.status === LocationStatus.GA;
           });
 
-    availableLocations.forEach(([locationId, location]) => {
-      locations.push({
-        id: locationId,
-        label: location.geo.name,
-        geo: location.geo.location,
-        url: location.url,
-        isServiceManaged: true,
-        status: location.status,
-        isInvalid: false,
-      });
-    });
+    locations.push(...formatLocationObjects(availableLocations));
 
     const throttling = pick(
       data.throttling,
@@ -75,3 +65,20 @@ export async function getServiceLocations(server: UptimeServerSetup) {
     return { locations: [] };
   }
 }
+
+export const formatLocationObjects = (availableLocations: Array<[string, ManifestLocation]>) => {
+  const locations: PublicLocations = [];
+  availableLocations.forEach(([locationId, location]) => {
+    locations.push({
+      id: locationId,
+      label: location.geo.name,
+      geo: location.geo.location,
+      url: location.url,
+      isServiceManaged: true,
+      status: location.status,
+      isInvalid: false,
+    });
+  });
+
+  return locations;
+};

@@ -116,10 +116,9 @@ export class ServiceAPIClient {
 
       if (httpsAgent) {
         try {
-          const { data } = await axios(
+          const { data } = await axios.get(
+            url + '/allowed',
             this.addVersionHeader({
-              method: 'GET',
-              url: url + '/allowed',
               httpsAgent,
             })
           );

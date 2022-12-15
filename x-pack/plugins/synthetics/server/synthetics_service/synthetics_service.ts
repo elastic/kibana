@@ -8,12 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { Logger, SavedObject } from '@kbn/core/server';
-import {
-  ConcreteTaskInstance,
-  TaskInstance,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 import { Subject } from 'rxjs';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
@@ -38,6 +33,7 @@ import {
 import { getServiceLocations } from './get_service_locations';
 
 import { normalizeSecrets } from './utils/secrets';
+import { syntheticsServiceAPIKeySavedObject } from '../legacy_uptime/lib/saved_objects/service_api_key';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -79,21 +75,35 @@ export class SyntheticsService {
     this.locations = [];
   }
 
-  public async setup(taskManager: TaskManagerSetupContract) {
-    this.registerSyncTask(taskManager);
+  public setup() {
+    this.registerSyncTask();
+  }
+
+  public async enableSyntheticsService() {
+    if (this.config?.manifestUrl) {
+      await this.initCloudSetup();
+    }
+
+    // need to do for both cloud and private
+    await this.setupIndexTemplates();
+  }
+
+  public async initCloudSetup() {
+    await this.scheduleSyncTask();
 
     await this.registerServiceLocations();
+    await this.checkAccess();
+  }
 
+  public async disableScheduledTask() {
+    await this.server.taskManagerStart.removeIfExists(SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID);
+    this.logger.info(`Removed scheduled task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}`);
+  }
+
+  async checkAccess() {
     const { allowed, signupUrl } = await this.apiClient.checkAccountAccessStatus();
     this.isAllowed = allowed;
     this.signupUrl = signupUrl;
-  }
-
-  public start(taskManager: TaskManagerStartContract) {
-    if (this.config?.manifestUrl) {
-      this.scheduleSyncTask(taskManager);
-    }
-    this.setupIndexTemplates();
   }
 
   public async setupIndexTemplates() {
@@ -141,10 +151,11 @@ export class SyntheticsService {
     }
   }
 
-  public registerSyncTask(taskManager: TaskManagerSetupContract) {
+  public registerSyncTask() {
     const service = this;
+    const taskManagerSetup = this.server.taskManagerSetup;
 
-    taskManager.registerTaskDefinitions({
+    taskManagerSetup.registerTaskDefinitions({
       [SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE]: {
         title: 'Synthetics Service - Sync Saved Monitors',
         description: 'This task periodically pushes saved monitors to Synthetics Service.',
@@ -156,7 +167,11 @@ export class SyntheticsService {
             // Perform the work of the task. The return value should fit the TaskResult interface.
             async run() {
               const { state } = taskInstance;
+
+              service.logger.info('Running Synthetics Service sync task');
               try {
+                // no need to wait here, we'll just try again next time
+                service.setupIndexTemplates();
                 await service.registerServiceLocations();
 
                 const { allowed, signupUrl } = await service.apiClient.checkAccountAccessStatus();
@@ -164,7 +179,6 @@ export class SyntheticsService {
                 service.signupUrl = signupUrl;
 
                 if (service.isAllowed) {
-                  service.setupIndexTemplates();
                   await service.pushConfigs();
                 }
               } catch (e) {
@@ -190,14 +204,13 @@ export class SyntheticsService {
     });
   }
 
-  public async scheduleSyncTask(
-    taskManager: TaskManagerStartContract
-  ): Promise<TaskInstance | null> {
+  public async scheduleSyncTask(): Promise<TaskInstance | null> {
+    const taskManagerStart = this.server.taskManagerStart;
     const interval = this.config.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
 
     try {
-      await taskManager.removeIfExists(SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID);
-      const taskInstance = await taskManager.ensureScheduled({
+      await taskManagerStart.removeIfExists(SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID);
+      const taskInstance = await taskManagerStart.ensureScheduled({
         id: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID,
         taskType: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE,
         schedule: {
@@ -229,6 +242,19 @@ export class SyntheticsService {
       );
 
       return null;
+    }
+  }
+
+  async resumeServiceTaskIfEnabled() {
+    try {
+      if (this.config.manifestUrl) {
+        const apiKey = await syntheticsServiceAPIKeySavedObject.get(this.server);
+        if (apiKey) {
+          await this.enableSyntheticsService();
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
     }
   }
 
