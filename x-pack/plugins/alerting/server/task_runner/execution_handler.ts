@@ -540,21 +540,10 @@ export class ExecutionHandler<
 
     const total = alerts.new.count + alerts.ongoing.count + alerts.recovered.count;
     return {
-      new: {
-        count: alerts.new.count,
-        data: alerts.new.alerts,
-      },
-      ongoing: {
-        count: alerts.ongoing.count,
-        data: alerts.ongoing.alerts,
-      },
-      recovered: {
-        count: alerts.recovered.count,
-        data: alerts.recovered.alerts,
-      },
+      ...alerts,
       all: {
         count: total,
-        data: [...alerts.new.alerts, ...alerts.ongoing.alerts, ...alerts.recovered.alerts],
+        data: [...alerts.new.data, ...alerts.ongoing.data, ...alerts.recovered.data],
       },
     };
   }

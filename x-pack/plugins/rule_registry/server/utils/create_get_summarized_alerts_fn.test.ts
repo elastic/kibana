@@ -243,7 +243,7 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(summarizedAlerts.new.count).toEqual(2);
     expect(summarizedAlerts.ongoing.count).toEqual(3);
     expect(summarizedAlerts.recovered.count).toEqual(1);
-    expect(summarizedAlerts.new.alerts).toEqual([
+    expect(summarizedAlerts.new.data).toEqual([
       {
         '@timestamp': '2020-01-01T12:00:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -261,7 +261,7 @@ describe('createGetSummarizedAlertsFn', () => {
         [ALERT_UUID]: 'uuid2',
       },
     ]);
-    expect(summarizedAlerts.ongoing.alerts).toEqual([
+    expect(summarizedAlerts.ongoing.data).toEqual([
       {
         '@timestamp': '2020-01-01T12:00:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -287,7 +287,7 @@ describe('createGetSummarizedAlertsFn', () => {
         [ALERT_UUID]: 'uuid5',
       },
     ]);
-    expect(summarizedAlerts.recovered.alerts).toEqual([
+    expect(summarizedAlerts.recovered.data).toEqual([
       {
         '@timestamp': '2020-01-01T12:00:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -517,7 +517,7 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(summarizedAlerts.new.count).toEqual(3);
     expect(summarizedAlerts.ongoing.count).toEqual(2);
     expect(summarizedAlerts.recovered.count).toEqual(1);
-    expect(summarizedAlerts.new.alerts).toEqual([
+    expect(summarizedAlerts.new.data).toEqual([
       {
         [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -546,7 +546,7 @@ describe('createGetSummarizedAlertsFn', () => {
         alert_type: 'new',
       },
     ]);
-    expect(summarizedAlerts.ongoing.alerts).toEqual([
+    expect(summarizedAlerts.ongoing.data).toEqual([
       {
         [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -566,7 +566,7 @@ describe('createGetSummarizedAlertsFn', () => {
         alert_type: 'ongoing',
       },
     ]);
-    expect(summarizedAlerts.recovered.alerts).toEqual([
+    expect(summarizedAlerts.recovered.data).toEqual([
       {
         [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -683,7 +683,7 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(summarizedAlerts.new.count).toEqual(6);
     expect(summarizedAlerts.ongoing.count).toEqual(0);
     expect(summarizedAlerts.recovered.count).toEqual(0);
-    expect(summarizedAlerts.new.alerts).toEqual([
+    expect(summarizedAlerts.new.data).toEqual([
       {
         '@timestamp': '2020-01-01T12:00:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -728,8 +728,8 @@ describe('createGetSummarizedAlertsFn', () => {
         [ALERT_UUID]: 'uuid6',
       },
     ]);
-    expect(summarizedAlerts.ongoing.alerts).toEqual([]);
-    expect(summarizedAlerts.recovered.alerts).toEqual([]);
+    expect(summarizedAlerts.ongoing.data).toEqual([]);
+    expect(summarizedAlerts.recovered.data).toEqual([]);
   });
 
   it('creates function that correctly returns non-lifecycle alerts using time range', async () => {
@@ -838,7 +838,7 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(summarizedAlerts.new.count).toEqual(6);
     expect(summarizedAlerts.ongoing.count).toEqual(0);
     expect(summarizedAlerts.recovered.count).toEqual(0);
-    expect(summarizedAlerts.new.alerts).toEqual([
+    expect(summarizedAlerts.new.data).toEqual([
       {
         [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -882,8 +882,8 @@ describe('createGetSummarizedAlertsFn', () => {
         [ALERT_UUID]: 'uuid6',
       },
     ]);
-    expect(summarizedAlerts.ongoing.alerts).toEqual([]);
-    expect(summarizedAlerts.recovered.alerts).toEqual([]);
+    expect(summarizedAlerts.ongoing.data).toEqual([]);
+    expect(summarizedAlerts.recovered.data).toEqual([]);
   });
 
   it('throws error if search throws error', async () => {
