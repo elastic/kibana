@@ -60,7 +60,7 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
                 defaultMessage="Showing {partOne} of {partTwo}"
                 values={{
                   partOne: (
-                    <StyledText>{`1-${Math.min(
+                    <StyledText>{`${pagination.totalItemCount === 0 ? '0' : '1'}-${Math.min(
                       pagination.pageSize,
                       pagination.totalItemCount
                     )}`}</StyledText>

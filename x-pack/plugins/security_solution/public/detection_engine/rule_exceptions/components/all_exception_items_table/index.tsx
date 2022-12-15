@@ -45,7 +45,7 @@ const StyledText = styled(EuiText)`
   font-style: italic;
 `;
 
-const STATES_SEARCH_HIDDEN: ViewerState[] = ['error', 'empty'];
+const STATES_FILTERS_HIDDEN: ViewerState[] = ['error'];
 const STATES_PAGINATION_UTILITY_HIDDEN: ViewerState[] = [
   'loading',
   'empty_search',
@@ -299,6 +299,24 @@ const ExceptionsViewerComponent = ({
     ]
   );
 
+  const totalExceptionCount = useMemo(async () => {
+    const abortCtrl = new AbortController();
+
+    if (exceptionListsToQuery.length === 0) {
+      return 0;
+    }
+
+    const { total } = await fetchExceptionListsItemsByListIds({
+      filter: undefined,
+      http: services.http,
+      listIds: exceptionListsToQuery.map((list) => list.list_id),
+      namespaceTypes,
+      pagination: {},
+      signal: abortCtrl.signal,
+    });
+    return total;
+  }, [exceptionListsToQuery, namespaceTypes, services.http]);
+
   const handleGetExceptionListItems = useCallback(
     async (options?: GetExceptionItemProps) => {
       try {
@@ -314,7 +332,9 @@ const ExceptionsViewerComponent = ({
           },
         });
 
-        setViewerState(total > 0 ? null : 'empty');
+        setViewerState(
+          total > 0 ? null : (await totalExceptionCount) > 0 ? 'empty_search' : 'empty'
+        );
       } catch (e) {
         setViewerState('error');
 
@@ -324,7 +344,7 @@ const ExceptionsViewerComponent = ({
         });
       }
     },
-    [handleFetchItems, setExceptions, setViewerState, toasts]
+    [handleFetchItems, setExceptions, setViewerState, toasts, totalExceptionCount]
   );
 
   const handleSearch = useCallback(
@@ -485,27 +505,25 @@ const ExceptionsViewerComponent = ({
             {isEndpointSpecified ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT : i18n.EXCEPTIONS_TAB_ABOUT}
           </StyledText>
           <EuiSpacer size="l" />
-          {!STATES_SEARCH_HIDDEN.includes(viewerState) && (
-            <ExceptionsViewerSearchBar
-              canAddException={isReadOnly}
-              isEndpoint={isEndpointSpecified}
-              isSearching={viewerState === 'searching'}
-              onSearch={handleSearch}
-              onAddExceptionClick={handleAddException}
-            />
-          )}
-          {!STATES_PAGINATION_UTILITY_HIDDEN.includes(viewerState) && (
+          {!STATES_FILTERS_HIDDEN.includes(viewerState) && (
             <>
-              <EuiSpacer size="l" />
-
               <ExceptionsViewerUtility
                 pagination={pagination}
                 exceptionsToShow={exceptionsToShow}
                 onChangeExceptionsToShow={handleExceptionsToShow}
                 lastUpdated={lastUpdated}
               />
+              <EuiSpacer size="l" />
+              <ExceptionsViewerSearchBar
+                canAddException={isReadOnly}
+                isEndpoint={isEndpointSpecified}
+                isSearching={viewerState === 'searching'}
+                onSearch={handleSearch}
+                onAddExceptionClick={handleAddException}
+              />
             </>
           )}
+          <EuiSpacer size="l" />
 
           <ExceptionsViewerItems
             isReadOnly={isReadOnly}
