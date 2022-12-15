@@ -6,7 +6,7 @@
  */
 
 import { lastRunFromState } from './last_run_status';
-import { ActionsCompletion, RuleExecutionStatusErrorReasons } from '../../common';
+import { ActionsCompletion } from '../../common';
 import { RuleRunMetrics } from './rule_run_metrics_store';
 import { RuleLastRunResults, RuleLastRunService } from '../monitoring/rule_last_run_service';
 
@@ -72,7 +72,7 @@ describe('lastRunFromState', () => {
 
     expect(result.lastRun.outcome).toEqual('warning');
     expect(result.lastRun.outcomeMsg).toEqual('Rule execution reported a warning');
-    expect(result.lastRun.warning).toEqual(RuleExecutionStatusErrorReasons.Execute);
+    expect(result.lastRun.warning).toEqual(null);
 
     expect(result.lastRun.alertsCount).toEqual({
       active: 10,
