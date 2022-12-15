@@ -25,8 +25,41 @@ export enum ControlResponseAction {
   'block',
 }
 
+export enum ControlSelectorActivity {
+  'createExecutable',
+  'modifyExecutable',
+}
+
+export enum ControlSelectorCondition {
+  activity = 'activity',
+  containerImageName = 'containerImageName',
+  containerImageTag = 'containerImageTag',
+  filePath = 'filePath',
+  orchestratorClusterId = 'orchestratorClusterId',
+  orchestratorClusterName = 'orchestratorClusterName',
+  orchestratorNamespace = 'orchestratorNamespace',
+  orchestratorResourceLabel = 'orchestratorResourceLabel',
+  orchestratorResourceName = 'orchestratorResourceName',
+  orchestratorResourceType = 'orchestratorResourceType',
+  orchestratorType = 'orchestratorType',
+}
+
 export interface ControlSelector {
   name: string;
+  activity?: string[];
+  containerImageName?: string[];
+  containerImageTag?: string[];
+  filePath?: string[];
+  orchestratorClusterId?: string[];
+  orchestratorClusterName?: string[];
+  orchestratorNamespace?: string[];
+  orchestratorResourceLabel?: string[];
+  orchestratorResourceName?: string[];
+  orchestratorResourceType?: string[];
+  orchestratorType?: string[];
+
+  // ephemeral, used to track selector error state in UI
+  hasErrors?: boolean;
 }
 
 export interface ControlResponse {
@@ -48,13 +81,14 @@ export interface SettingsDeps {
 export interface ControlGeneralViewSelectorDeps {
   selector: ControlSelector;
   selectors: ControlSelector[];
-  onChange(errors: boolean, selector: ControlSelector): void;
+  onChange(selector: ControlSelector): void;
   onRemove(selector: ControlSelector): void;
   onDuplicate(selector: ControlSelector): void;
 }
 
 export interface ControlGeneralViewResponseDeps {
   response: ControlResponse;
+  selectors: ControlSelector[];
   onChange(response: ControlResponse): void;
   onRemove(response: ControlResponse): void;
   onDuplicate(response: ControlResponse): void;

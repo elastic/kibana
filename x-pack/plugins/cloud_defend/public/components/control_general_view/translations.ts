@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ControlSelectorCondition } from '../../types';
 
 export const duplicate = i18n.translate('xpack.cloudDefend.controlDuplicate', {
   defaultMessage: 'Duplicate',
@@ -32,6 +33,10 @@ export const responsesHelp = i18n.translate('xpack.cloudDefend.controlResponsesH
     'Responses are evaluated from top to bottom. At most, one set of actions will be performed.',
 });
 
+export const addSelectorCondition = i18n.translate('xpack.cloudDefend.addSelectorCondition', {
+  defaultMessage: 'Add condition',
+});
+
 export const name = i18n.translate('xpack.cloudDefend.name', {
   defaultMessage: 'Name',
 });
@@ -44,51 +49,47 @@ export const errorInvalidName = i18n.translate('xpack.cloudDefend.errorInvalidNa
   defaultMessage: 'Selector names must be alpha numeric and contain no spaces.',
 });
 
-export const activity = i18n.translate('xpack.cloudDefend.activity', {
-  defaultMessage: 'Activity',
-});
-
-export const containerImageName = i18n.translate('xpack.cloudDefend.containerImageName', {
-  defaultMessage: 'Container image name',
-});
-
-export const containerImageTag = i18n.translate('xpack.cloudDefend.containerImageTag', {
-  defaultMessage: 'Container image tag',
-});
-
-export const filePath = i18n.translate('xpack.cloudDefend.filePath', {
-  defaultMessage: 'File path',
-});
-
-export const orchestratorClusterId = i18n.translate('xpack.cloudDefend.orchestratorClusterId', {
-  defaultMessage: 'Orchestrator cluster ID',
-});
-
-export const orchestratorClusterName = i18n.translate('xpack.cloudDefend.orchestratorClusterName', {
-  defaultMessage: 'Orchestrator cluster name',
-});
-
-export const orchestratorNamespace = i18n.translate('xpack.cloudDefend.orchestratorNamespace', {
-  defaultMessage: 'Orchestrator namespace',
-});
-
-export const orchestratorResourceLabel = i18n.translate(
-  'xpack.cloudDefend.orchestratorResourceLabel',
-  {
-    defaultMessage: 'Orchestrator resource label',
+export const getConditionLabel = (prop: string) => {
+  switch (prop) {
+    case ControlSelectorCondition.activity:
+      return i18n.translate('xpack.cloudDefend.activity', {
+        defaultMessage: 'Activity',
+      });
+    case ControlSelectorCondition.containerImageName:
+      return i18n.translate('xpack.cloudDefend.containerImageName', {
+        defaultMessage: 'Container image name',
+      });
+    case ControlSelectorCondition.containerImageTag:
+      return i18n.translate('xpack.cloudDefend.containerImageTag', {
+        defaultMessage: 'Container image tag',
+      });
+    case ControlSelectorCondition.filePath:
+      return i18n.translate('xpack.cloudDefend.filePath', {
+        defaultMessage: 'File path',
+      });
+    case ControlSelectorCondition.orchestratorClusterId:
+      return i18n.translate('xpack.cloudDefend.orchestratorClusterId', {
+        defaultMessage: 'Orchestrator cluster ID',
+      });
+    case ControlSelectorCondition.orchestratorClusterName:
+      return i18n.translate('xpack.cloudDefend.orchestratorClusterName', {
+        defaultMessage: 'Orchestrator cluster name',
+      });
+    case ControlSelectorCondition.orchestratorNamespace:
+      return i18n.translate('xpack.cloudDefend.orchestratorNamespace', {
+        defaultMessage: 'Orchestrator namespace',
+      });
+    case ControlSelectorCondition.orchestratorResourceLabel:
+      return i18n.translate('xpack.cloudDefend.orchestratorResourceLabel', {
+        defaultMessage: 'Orchestrator resource label',
+      });
+    case ControlSelectorCondition.orchestratorResourceName:
+      return i18n.translate('xpack.cloudDefend.orchestratorResourceName', {
+        defaultMessage: 'Orchestrator resource name',
+      });
+    case ControlSelectorCondition.orchestratorResourceType:
+      return i18n.translate('xpack.cloudDefend.orchestratorResourceType', {
+        defaultMessage: 'Orchestrator resource type',
+      });
   }
-);
-
-export const orchestratorResourceName = i18n.translate(
-  'xpack.cloudDefend.orchestratorResourceName',
-  {
-    defaultMessage: 'Orchestrator resource name',
-  }
-);
-
-export const orchestratorResourceType = i18n.translate(
-  'xpack.cloudDefend.orchestratorResourceType',
-  {
-    defaultMessage: 'Orchestrator resource type',
-  }
-);
+};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiSwitch, EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CodeEditor, YamlLang } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
 import { INPUT_CONTROL } from '../../../common/constants';

@@ -7,17 +7,11 @@
 import React, { useMemo, useState, useCallback, FormEvent } from 'react';
 import {
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-  EuiAccordion,
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiForm,
-  EuiFormRow,
-  EuiFieldText,
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import type { ControlGeneralViewResponseDeps } from '../../types';

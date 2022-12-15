@@ -32,9 +32,15 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
   const onUpdateYaml = useCallback(
     (newSelectors: ControlSelector[], newResponses: ControlResponse[]) => {
       if (input?.vars?.configuration) {
+        const isValid = !newSelectors.find((selector) => selector.hasErrors);
+
+        // remove hasErrors prop prior to yaml conversion
+        newSelectors.forEach((selector) => delete selector.hasErrors);
+
         const yml = yaml.dump({ selectors: newSelectors, responses: newResponses });
         input.vars.configuration.value = yml;
-        onChange({ isValid: true, updatedPolicy: { ...policy } });
+
+        onChange({ isValid, updatedPolicy: { ...policy } });
       }
     },
     [input?.vars?.configuration, onChange, policy]
@@ -81,6 +87,22 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
     [onUpdateYaml, responses, selectors]
   );
 
+  const onSelectorChange = useCallback(
+    (updatedSelector: ControlSelector) => {
+      selectors[selectors.indexOf(updatedSelector)] = updatedSelector;
+      onUpdateYaml(selectors, responses);
+    },
+    [onUpdateYaml, responses, selectors]
+  );
+
+  const onResponseChange = useCallback(
+    (updatedResponse: ControlResponse) => {
+      responses[responses.indexOf(updatedResponse)] = updatedResponse;
+      onUpdateYaml(selectors, responses);
+    },
+    [onUpdateYaml, responses, selectors]
+  );
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -88,31 +110,40 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
           <h4>{i18n.selectors}</h4>
         </EuiTitle>
         <EuiText color="subdued">{i18n.selectorsHelp}</EuiText>
+      </EuiFlexItem>
 
-        {selectors.map((selector, i) => {
-          return (
+      {selectors.map((selector, i) => {
+        return (
+          <EuiFlexItem>
             <ControlGeneralViewSelector
               key={i}
               selector={selector}
               selectors={selectors}
               onDuplicate={onDuplicateSelector}
               onRemove={onRemoveSelector}
+              onChange={onSelectorChange}
             />
-          );
-        })}
+          </EuiFlexItem>
+        );
+      })}
 
+      <EuiFlexItem>
         <EuiTitle size="xs">
           <h4>{i18n.responses}</h4>
         </EuiTitle>
         <EuiText color="subdued">{i18n.responsesHelp}</EuiText>
+      </EuiFlexItem>
 
+      <EuiFlexItem>
         {responses.map((response, i) => {
           return (
             <ControlGeneralViewResponse
               key={i}
               response={response}
+              selectors={selectors}
               onRemove={onRemoveResponse}
               onDuplicate={onDuplicateResponse}
+              onChange={onResponseChange}
             />
           );
         })}
