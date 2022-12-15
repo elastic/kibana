@@ -7,26 +7,7 @@
 
 import { EuiToolTip, EuiLink } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LinkDescriptor, useLinkProps } from '@kbn/observability-plugin/public';
-
-const tooltipAnchorClassname = '_infra_truncate_tooltip_anchor_';
-
-const TooltipWrapper = euiStyled.div`
-  width: 100%;
-  .${tooltipAnchorClassname} {
-    width: 100% !important;
-    display: block !important;
-  }
-`;
-
-const StyledLink = euiStyled(EuiLink)`
-  display: block;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
 
 interface Props {
   text: string;
@@ -34,15 +15,22 @@ interface Props {
 }
 
 export function TruncateLinkWithTooltip(props: Props) {
-  const { text, linkProps, ...rest } = props;
+  const { text, linkProps } = props;
 
   const link = useLinkProps(linkProps);
 
   return (
-    <TooltipWrapper {...rest}>
-      <EuiToolTip delay="long" content={text} anchorClassName={tooltipAnchorClassname}>
-        <StyledLink {...link}>{text}</StyledLink>
+    <div className="eui-displayBlock eui-fullWidth">
+      <EuiToolTip
+        className="eui-fullWidth"
+        delay="long"
+        content={text}
+        anchorClassName="eui-fullWidth"
+      >
+        <EuiLink className="eui-displayBlock eui-textTruncate" {...link}>
+          {text}
+        </EuiLink>
       </EuiToolTip>
-    </TooltipWrapper>
+    </div>
   );
 }

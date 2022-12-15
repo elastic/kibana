@@ -41,9 +41,11 @@ export const CloudProviderIconWithTitle = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-textTruncate">
-        <EuiText size="relative" className="eui-textTruncate">
-          {title ?? text}
-        </EuiText>
+        {title ?? (
+          <EuiText size="relative" className="eui-textTruncate">
+            {text}
+          </EuiText>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
