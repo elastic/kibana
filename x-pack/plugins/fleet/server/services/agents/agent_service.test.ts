@@ -9,7 +9,7 @@ jest.mock('../security');
 jest.mock('./crud');
 jest.mock('./status');
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -105,6 +105,7 @@ describe('AgentService', () => {
     describe('with required privilege', () => {
       const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
       const mockSoClient = savedObjectsClientMock.create();
+
       const agentClient = new AgentServiceImpl(mockEsClient, mockSoClient).asScoped(
         httpServerMock.createKibanaRequest()
       );
@@ -134,7 +135,7 @@ describe('AgentService', () => {
         )
       );
 
-      expectApisToCallServicesSuccessfully(mockEsClient, agentClient);
+      expectApisToCallServicesSuccessfully(mockEsClient, mockSoClient, agentClient);
     });
   });
 
@@ -143,12 +144,13 @@ describe('AgentService', () => {
     const mockSoClient = savedObjectsClientMock.create();
     const agentClient = new AgentServiceImpl(mockEsClient, mockSoClient).asInternalUser;
 
-    expectApisToCallServicesSuccessfully(mockEsClient, agentClient);
+    expectApisToCallServicesSuccessfully(mockEsClient, mockSoClient, agentClient);
   });
 });
 
 function expectApisToCallServicesSuccessfully(
   mockEsClient: ElasticsearchClient,
+  mockSoClient: jest.Mocked<SavedObjectsClientContract>,
   agentClient: AgentClient
 ) {
   test('client.listAgents calls getAgentsByKuery and returns results', async () => {
@@ -156,7 +158,7 @@ function expectApisToCallServicesSuccessfully(
     await expect(agentClient.listAgents({ showInactive: true })).resolves.toEqual(
       'getAgentsByKuery success'
     );
-    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(mockEsClient, {
+    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(mockEsClient, mockSoClient, {
       showInactive: true,
     });
   });
@@ -182,6 +184,7 @@ function expectApisToCallServicesSuccessfully(
     );
     expect(mockGetAgentStatusForAgentPolicy).toHaveBeenCalledWith(
       mockEsClient,
+      mockSoClient,
       'foo-id',
       'foo-filter'
     );
