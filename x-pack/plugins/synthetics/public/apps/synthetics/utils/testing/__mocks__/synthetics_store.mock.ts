@@ -116,6 +116,9 @@ export const mockState: SyntheticsAppState = {
     error: null,
     data: null,
   },
+  dynamicSettings: {
+    loading: false,
+  },
 };
 
 function getBrowserJourneyMockSlice() {
