@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatAlertEvaluationValue } from './format_ alert_evaluation_value';
+import { formatAlertEvaluationValue } from './format_alert_evaluation_value';
 
 describe('formatAlertEvaluationValue', () => {
   it('it returns - when there is no evaluationValue passed', () => {

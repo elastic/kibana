@@ -28,7 +28,7 @@ import {
   ALERT_STATUS_RECOVERED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { formatAlertEvaluationValue } from '../../../utils/format_ alert_evaluation_value';
+import { formatAlertEvaluationValue } from '../../../utils/format_alert_evaluation_value';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSummaryProps } from '../types';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
