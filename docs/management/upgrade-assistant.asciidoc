@@ -8,11 +8,6 @@ To access the assistant, go to *{stack-manage-app} > Upgrade Assistant*.
 The assistant identifies deprecated settings in your configuration
 and guides you through the process of resolving issues if any deprecated features are enabled.
 
-//IMPORTANT: To upgrade to 8.0 or later, **you must first upgrade to 7.17**.
-
-//If you have indices that were created prior to 7.0,
-//you can use the assistant to reindex them so they can be accessed from 8.0. 
-
 [discrete]
 === Required permissions
 
@@ -31,4 +26,4 @@ The Upgrade assistant pulls information about deprecations from the following so
 * Elasticsearch deprecation logs
 * Kibana deprecations API
 
-The Upgrade assistant also provides <<upgrade-assistant-api, upgrade>> APIs to automate the process.
+For more information about the API's the Upgraed assistant provides, refer to <<upgrade-assistant-api, Upgrade Assistant APIs>>.
