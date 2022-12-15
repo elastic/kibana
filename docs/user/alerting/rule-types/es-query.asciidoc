@@ -32,8 +32,8 @@ image::user/alerting/images/rule-types-es-query-conditions.png[Eight clauses def
 Index:: Specifies an *index or data view* and a *time field* that is used for 
 the *time window*.
 {es} query:: Specifies the ES DSL query. Only the `query`, `fields`, `_source` and `runtime_mappings` fields are used, other DSL fields are not considered.
-When:: Specifies how the value to be compared to the threshold is calculated. The value is calculated by aggregating a numeric field a the *time window*. The aggregation options are: `count`, `average`, `sum`, `min`, and `max`. When using `count` the document count is used, and an aggregation field is not necessary. 
-Over/Grouped Over:: Specifies whether the aggregation is applied over all documents, or should be split into groups using a grouping field. If grouping is used, an  <<alerting-concepts-alerts, alert>> will be created for each group when it meets the condition. To limit the number of alerts on high cardinality fields, you must specify the number of groups to check against the threshold. Only the *top* groups are checked.
+When:: Specifies how the value to be compared to the threshold is calculated. The value is calculated by aggregating a numeric field within the *time window*. The aggregation options are: `count`, `average`, `sum`, `min`, and `max`. When using `count` the document count is used and an aggregation field is not necessary. 
+Over or Grouped Over:: Specifies whether the aggregation is applied over all documents or split into groups using a grouping field. If grouping is used, an <<alerting-concepts-alerts,alert>> will be created for each group when it meets the condition. To limit the number of alerts on high cardinality fields, you must specify the number of groups to check against the threshold. Only the *top* groups are checked.
 Threshold:: Defines a threshold value and a comparison operator  (`is above`, 
 `is above or equals`, `is below`, `is below or equals`, or `is between`). The value
 calculated by the aggregation is compared to this threshold.

@@ -46,7 +46,7 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
           <p>
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.thresholdHelp.threshold"
-              defaultMessage="Each time the rule runs, it checks whether the number of documents that match your query meets this threshold. If a group by is selected, it checks the condition for each group."
+              defaultMessage="Each time the rule runs, it checks whether the number of documents that match your query meets this threshold. If there is a grouped over clause, the rule checks the condition for the specified number of top groups."
             />
           </p>
           <p>
