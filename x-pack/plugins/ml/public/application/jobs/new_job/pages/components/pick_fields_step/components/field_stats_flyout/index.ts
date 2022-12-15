@@ -7,4 +7,8 @@
 
 export { FieldStatsFlyout } from './field_stats_flyout';
 export { FieldStatsContent } from './field_stats_content';
-export { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
+export { FieldStatsFlyoutProvider } from './field_stats_flyout_provider';
+export {
+  MLJobWizardFieldStatsFlyoutContext,
+  useFieldStatsFlyoutContext,
+} from './use_field_stats_flytout_context';

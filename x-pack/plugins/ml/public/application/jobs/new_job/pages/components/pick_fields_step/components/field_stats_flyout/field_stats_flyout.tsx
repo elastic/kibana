@@ -21,17 +21,8 @@ import {
 import { css } from '@emotion/react';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 import { FieldStatsContent } from './field_stats_content';
-interface MLJobWizardFieldStatsFlyoutProps {
-  isFlyoutVisible: boolean;
-  setIsFlyoutVisible: (v: boolean) => void;
-  toggleFlyoutVisible: () => void;
-  setFieldName: (v: string | undefined) => void;
-  fieldName?: string;
-  setFieldValue: (v: string) => void;
-  fieldValue?: string | number;
-}
 
-export const FieldStatsFlyout: FC<MLJobWizardFieldStatsFlyoutProps> = () => {
+export const FieldStatsFlyout: FC = () => {
   const { setIsFlyoutVisible, isFlyoutVisible, fieldName } = useFieldStatsFlyoutContext();
 
   const closeFlyout = useCallback(() => setIsFlyoutVisible(false), []); // eslint-disable-line react-hooks/exhaustive-deps

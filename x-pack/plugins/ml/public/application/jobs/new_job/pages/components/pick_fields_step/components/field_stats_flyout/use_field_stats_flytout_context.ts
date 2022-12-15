@@ -6,6 +6,15 @@
  */
 
 import { createContext, useContext } from 'react';
+interface MLJobWizardFieldStatsFlyoutProps {
+  isFlyoutVisible: boolean;
+  setIsFlyoutVisible: (v: boolean) => void;
+  toggleFlyoutVisible: () => void;
+  setFieldName: (v: string | undefined) => void;
+  fieldName?: string;
+  setFieldValue: (v: string) => void;
+  fieldValue?: string | number;
+}
 export const MLJobWizardFieldStatsFlyoutContext = createContext<MLJobWizardFieldStatsFlyoutProps>({
   isFlyoutVisible: false,
   setIsFlyoutVisible: () => {},

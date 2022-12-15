@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState, useCallback } from 'react';
+import React, { Fragment, FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiSpacer, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  FieldStatsFlyout,
-  MLJobWizardFieldStatsFlyoutContext,
-} from '../components/pick_fields_step/components/field_stats_flyout/field_stats_flyout';
+import { FieldStatsFlyoutProvider } from '../components/pick_fields_step/components/field_stats_flyout';
 import { WIZARD_STEPS } from '../components/step_types';
 
 import { TimeRangeStep } from '../components/time_range_step';
@@ -37,14 +34,6 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   // has to be stored at this level to ensure it's remembered on wizard step change
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const [additionalExpanded, setAdditionalExpanded] = useState(false);
-  const [isFieldStatsFlyoutVisible, setFieldStatsIsFlyoutVisible] = useState(false);
-  const [fieldName, setFieldName] = useState<string | undefined>();
-  const [fieldValue, setFieldValue] = useState<string | number | undefined>();
-
-  const toggleFieldStatsFlyoutVisible = useCallback(
-    () => setFieldStatsIsFlyoutVisible(!isFieldStatsFlyoutVisible),
-    [isFieldStatsFlyoutVisible]
-  );
   function getSummaryStepTitle() {
     if (mlContext.currentSavedSearch !== null) {
       return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleSavedSearch', {
@@ -92,35 +81,27 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
       )}
       {currentStep === WIZARD_STEPS.PICK_FIELDS && (
         <Fragment>
-          <MLJobWizardFieldStatsFlyoutContext.Provider
-            value={{
-              isFlyoutVisible: isFieldStatsFlyoutVisible,
-              setIsFlyoutVisible: setFieldStatsIsFlyoutVisible,
-              toggleFlyoutVisible: toggleFieldStatsFlyoutVisible,
-              setFieldName,
-              fieldName,
-              setFieldValue,
-              fieldValue,
-            }}
-          >
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <Title data-test-subj="mlJobWizardStepTitlePickFields">
-                  <FormattedMessage
-                    id="xpack.ml.newJob.wizard.stepComponentWrapper.pickFieldsTitle"
-                    defaultMessage="Pick fields"
-                  />
-                </Title>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <FieldStatsFlyout />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <PickFieldsStep
-              isCurrentStep={currentStep === WIZARD_STEPS.PICK_FIELDS}
-              setCurrentStep={setCurrentStep}
-            />
-          </MLJobWizardFieldStatsFlyoutContext.Provider>
+          <FieldStatsFlyoutProvider>
+            <>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <Title data-test-subj="mlJobWizardStepTitlePickFields">
+                    <FormattedMessage
+                      id="xpack.ml.newJob.wizard.stepComponentWrapper.pickFieldsTitle"
+                      defaultMessage="Pick fields"
+                    />
+                  </Title>
+                </EuiFlexItem>
+                {/* <EuiFlexItem>*/}
+                {/*  <FieldStatsFlyout />*/}
+                {/* </EuiFlexItem>*/}
+              </EuiFlexGroup>
+              <PickFieldsStep
+                isCurrentStep={currentStep === WIZARD_STEPS.PICK_FIELDS}
+                setCurrentStep={setCurrentStep}
+              />
+            </>
+          </FieldStatsFlyoutProvider>
         </Fragment>
       )}
       {currentStep === WIZARD_STEPS.JOB_DETAILS && (
