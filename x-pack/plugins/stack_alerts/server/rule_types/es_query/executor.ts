@@ -116,7 +116,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       ...(isGroupAgg ? { group: alertId } : {}),
     });
     const alert = alertFactory.create(
-      alertId === UngroupedGroupId ? ConditionMetAlertInstanceId : alertId
+      alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId
     );
     alert
       // store the params we would need to recreate the query that led to this alert instance

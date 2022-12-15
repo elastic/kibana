@@ -10,16 +10,7 @@ threshold condition is met.
 === Create the rule
 
 Fill in the <<defining-rules-general-details, rule details>>, then select 
-*{es} query*.
-
-[float]
-=== Select the query type
-
-{es} query rule can be defined using KQL/Lucene or Query DSL.
-
-[role="screenshot"]
-image::user/alerting/images/rule-types-es-query-query-type.png[Select KQL or DSL query type]
-
+*{es} query*. {es} query rule can be defined using KQL/Lucene or Query DSL.
 
 [float]
 === Define the conditions
