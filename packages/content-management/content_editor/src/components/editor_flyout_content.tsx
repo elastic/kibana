@@ -30,9 +30,6 @@ import { useMetadataForm } from './use_metadata_form';
 import type { CustomValidators } from './use_metadata_form';
 
 const getI18nTexts = ({ entityName }: { entityName: string }) => ({
-  title: i18n.translate('contentManagement.contentEditor.flyoutTitle', {
-    defaultMessage: 'ContentEditor',
-  }),
   saveButtonLabel: i18n.translate('contentManagement.contentEditor.saveButtonLabel', {
     defaultMessage: 'Update {entityName}',
     values: {
@@ -58,6 +55,8 @@ export interface Props {
   customValidators?: CustomValidators;
   onCancel: () => void;
 }
+
+const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
 
 export const ContentEditorFlyoutContent: FC<Props> = ({
   item,
@@ -113,13 +112,22 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
     margin-right: ${euiTheme.size.m};
   `;
 
+  const title = capitalize(
+    i18n.translate('contentManagement.contentEditor.flyoutTitle', {
+      defaultMessage: '{entityName} details',
+      values: {
+        entityName,
+      },
+    })
+  );
+
   return (
     <>
       <EuiFlyoutHeader>
         <EuiTitle data-test-subj="flyoutTitle">
           <h2>
             <EuiIcon type="inspect" css={iconCSS} size="l" />
-            <span>{i18nTexts.title}</span>
+            <span>{title}</span>
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
