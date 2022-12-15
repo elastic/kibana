@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('list view', function () {
     let serverLogConnectorId: string;
     let ruleId: string;
-    const esQueryRule = {
+    const indexThresholdRule = {
       consumer: 'alerts',
       name: 'my rule',
       notify_when: 'onActionGroupChange',
@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       const connectorName = `server-log-connector`;
       ({ id: serverLogConnectorId } = await createServerLogConnector(connectorName));
-      ({ id: ruleId } = await rules.api.createRule(esQueryRule));
+      ({ id: ruleId } = await rules.api.createRule(indexThresholdRule));
     });
 
     after(async () => {
