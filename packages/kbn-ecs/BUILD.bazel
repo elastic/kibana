@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "core-logging-server-internal"
-PKG_REQUIRE_NAME = "@kbn/core-logging-server-internal"
+PKG_DIRNAME = "kbn-ecs"
+PKG_REQUIRE_NAME = "@kbn/ecs"
 
 SOURCE_FILES = glob(
   [
@@ -16,6 +16,7 @@ SOURCE_FILES = glob(
     "**/*.stories.*",
     "**/__snapshots__/**",
     "**/integration_tests/**",
+    "**/mocks/**",
     "**/scripts/**",
     "**/storybook/**",
     "**/test_fixtures/**",
@@ -34,32 +35,11 @@ NPM_MODULE_EXTRA_FILES = [
   "package.json",
 ]
 
-RUNTIME_DEPS = [
-  "@npm//lodash",
-  "@npm//moment-timezone",
-  "@npm//chalk",
-  "@npm//elastic-apm-node",
-  "//packages/kbn-safer-lodash-set",
-  "//packages/kbn-config-schema",
-  "//packages/kbn-std",
-  "//packages/core/logging/core-logging-common-internal",
-]
+RUNTIME_DEPS = []
 
 TYPES_DEPS = [
   "@npm//@types/node",
-  "@npm//@types/jest",
-  "@npm//@types/lodash",
-  "@npm//rxjs",
-  "@npm//moment-timezone",
-  "@npm//elastic-apm-node",
-  "@npm//chalk",
-  "//packages/kbn-safer-lodash-set:npm_module_types",
-  "//packages/kbn-logging:npm_module_types",
-  "//packages/kbn-ecs:npm_module_types",
-  "//packages/kbn-config-schema:npm_module_types",
-  "//packages/core/base/core-base-server-internal:npm_module_types",
-  "//packages/core/logging/core-logging-common-internal:npm_module_types",
-  "//packages/core/logging/core-logging-server:npm_module_types",
+  "@npm//@types/jest"
 ]
 
 jsts_transpiler(
@@ -111,7 +91,9 @@ pkg_npm(
 
 filegroup(
   name = "build",
-  srcs = [":npm_module"],
+  srcs = [
+    ":npm_module",
+  ],
   visibility = ["//visibility:public"],
 )
 
