@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 
-import styled from 'styled-components';
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
 import type { Ecs } from '../../../../../../common/ecs';
 import type { ColumnRenderer } from './column_renderer';
 import { EVENT_SUMMARY_FIELD_NAME } from './constants';
 import { getRowRenderer } from './get_row_renderer';
 import { defaultRowRenderers } from '.';
+import styled from 'styled-components';
 const EventRenderedFlexItem = styled(EuiFlexItem)`
   div:first-child {
     padding-left: 0px;
@@ -51,11 +51,9 @@ export const eventSummaryColumnRenderer: ColumnRenderer = {
           ? getRowRenderer({ data: ecsData, rowRenderers: defaultRowRenderers })
           : defaultRowRenderers.find((x) => x.isInstance(ecsData)) ?? null;
       return (
-        <EuiPanel className="eui-xScroll" data-test-subj="reason-cell-renderer">
-          
-        
+        <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
           {rowRenderer != null ? (
-            
+            <EventRenderedFlexItem className="eui-xScroll">
               <div className="eui-displayInlineBlock">
                 {rowRenderer &&
                   rowRenderer.renderRow({
@@ -64,11 +62,11 @@ export const eventSummaryColumnRenderer: ColumnRenderer = {
                     scopeId,
                   })}
               </div>
-            
+            </EventRenderedFlexItem>
           ) : (
             <>{values && <EuiFlexItem data-test-subj="plain-text-reason">{values}</EuiFlexItem>}</>
           )}
-        </EuiPanel>
+        </EuiFlexGroup>
       );
     }
   },

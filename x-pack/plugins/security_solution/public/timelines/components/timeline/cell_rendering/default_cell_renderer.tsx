@@ -48,12 +48,10 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     fieldName: header.id,
   });
 
-  console.log(header.id)
-
   const styledContentClassName = isDetails
     ? 'eui-textBreakWord'
     : 'eui-displayInlineBlock eui-textTruncate';
-  return header.id.length ? (
+  return (
     <>
       <StyledContent className={styledContentClassName} $isDetails={isDetails}>
         {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
@@ -80,23 +78,6 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           closeCellPopover={closeCellPopover}
         />
       )}
-    </>
-  ) : (
-    <>
-      {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
-        asPlainText, // we want to render value with links as plain text but keep other formatters like badge.
-        columnName: header.id,
-        ecsData,
-        eventId,
-        field: header,
-        isDetails,
-        isDraggable,
-        linkValues,
-        rowRenderers,
-        scopeId,
-        truncate,
-        values,
-      })}
     </>
   );
 };

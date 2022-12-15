@@ -157,7 +157,7 @@ const eventRenderedViewColumns: ColumnHeaderOptions[] = [
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
     initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH + 50,
-    actions: false,
+    //actions: false,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -170,26 +170,24 @@ const eventRenderedViewColumns: ColumnHeaderOptions[] = [
     id: 'kibana.alert.rule.name',
     initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH + 50,
     linkField: 'kibana.alert.rule.uuid',
-    actions: false,
+    //actions: false,
   },
-    {
-      columnHeaderType: defaultColumnHeaderType,
-      id: 'eventSummary',
-      displayAsText: i18n.translate(
-        'xpack.securitySolution.EventRenderedView.eventSummary.column',
-        {
-          defaultMessage: 'Event Summary',
-        }
-      ),
-      actions: false,
-    },
-  ];
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'eventSummary',
+    displayAsText: i18n.translate('xpack.securitySolution.EventRenderedView.eventSummary.column', {
+      defaultMessage: 'Event Summary',
+    }),
+    actions: false,
+    isExpandable: false,
+  },
+];
 
 /** Enriches the column headers with field details from the specified browserFields */
 export const getColumnHeaders = (
   headers: ColumnHeaderOptions[],
   browserFields: BrowserFields,
-  isEventRenderedView: boolean,
+  isEventRenderedView: boolean
 ): ColumnHeaderOptions[] => {
   const browserFieldByName = getAllFieldsByName(browserFields);
   const headersToMap = isEventRenderedView ? eventRenderedViewColumns : headers;
