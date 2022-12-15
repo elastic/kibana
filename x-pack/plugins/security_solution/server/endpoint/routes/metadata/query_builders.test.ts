@@ -195,8 +195,16 @@ describe('query builder', () => {
 
   describe('buildUnitedIndexQuery', () => {
     it('correctly builds empty query', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 0,
+        page: 0,
+      });
+
       const query = await buildUnitedIndexQuery(
-        savedObjectsClientMock.create(),
+        soClient,
         { page: 1, pageSize: 10, hostStatuses: [], kuery: '' },
         []
       );
@@ -240,8 +248,16 @@ describe('query builder', () => {
     });
 
     it('correctly builds query', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 0,
+        page: 0,
+      });
+
       const query = await buildUnitedIndexQuery(
-        savedObjectsClientMock.create(),
+        soClient,
         {
           page: 1,
           pageSize: 10,
@@ -250,6 +266,9 @@ describe('query builder', () => {
         },
         ['test-endpoint-policy-id']
       );
+      console.log('---------------------');
+      console.log(JSON.stringify(query.body.query, null, 2));
+      console.log('---------------------');
       const expected = expectedCompleteUnitedIndexQuery;
       expect(query.body.query).toEqual(expected);
     });
