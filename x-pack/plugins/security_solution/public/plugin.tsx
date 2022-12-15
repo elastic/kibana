@@ -76,6 +76,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private appUpdater$ = new Subject<AppUpdater>();
 
   private storage = new Storage(localStorage);
+  private sessionStorage = new Storage(sessionStorage);
 
   /**
    * Lazily instantiated subPlugins.
@@ -132,6 +133,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
         storage: this.storage,
+        sessionStorage: this.sessionStorage,
         security: startPluginsDeps.security,
         onAppLeave: params.onAppLeave,
         securityLayout: {
@@ -345,9 +347,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         rules: new subPluginClasses.Rules(),
         exceptions: new subPluginClasses.Exceptions(),
         cases: new subPluginClasses.Cases(),
-        hosts: new subPluginClasses.Hosts(),
-        users: new subPluginClasses.Users(),
-        network: new subPluginClasses.Network(),
+        explore: new subPluginClasses.Explore(),
         kubernetes: new subPluginClasses.Kubernetes(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
@@ -375,9 +375,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       cases: subPlugins.cases.start(),
       rules: subPlugins.rules.start(storage),
       exceptions: subPlugins.exceptions.start(storage),
-      hosts: subPlugins.hosts.start(storage),
-      users: subPlugins.users.start(storage),
-      network: subPlugins.network.start(storage),
+      explore: subPlugins.explore.start(storage),
       timelines: subPlugins.timelines.start(),
       kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
@@ -406,7 +404,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
     if (startPlugins.timelines) {
-      startPlugins.timelines.setTGridEmbeddedStore(this._store);
+      startPlugins.timelines.setTimelineEmbeddedStore(this._store);
     }
     return this._store;
   }

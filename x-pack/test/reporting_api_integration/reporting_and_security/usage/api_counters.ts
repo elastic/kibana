@@ -12,8 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const supertest = getService('supertest');
-  const supertestUnauth = getService('supertestWithoutAuth');
+  const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const usageAPI = getService('usageAPI');
   const reportingAPI = getService('reportingAPI');
@@ -22,11 +21,13 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await reportingAPI.initEcommerce();
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
     });
 
     after(async () => {
       await reportingAPI.deleteAllReports();
       await reportingAPI.teardownEcommerce();
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
     });
 
     describe('server', function () {
@@ -43,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
       enum paths {
         LIST = '/api/reporting/jobs/list',
         COUNT = '/api/reporting/jobs/count',
-        INFO = '/api/reporting/jobs/info/{docId}',
+        INFO = '/api/reporting/jobs/info/kraz0qle154g0763b569zz83',
         ILM = '/api/reporting/ilm_policy_status',
         DIAG_BROWSER = '/api/reporting/diagnose/browser',
         DIAG_SCREENSHOT = '/api/reporting/diagnose/screenshot',
@@ -58,7 +59,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         await Promise.all(
           Object.keys(paths).map(async (key) => {
-            await Promise.all([...Array(CALL_COUNT)].map(() => supertest.get((paths as any)[key])));
+            await Promise.all(
+              [...Array(CALL_COUNT)].map(() =>
+                supertest.get(paths[key as keyof typeof paths]).auth('test_user', 'changeme')
+              )
+            );
           })
         );
 
@@ -80,30 +85,26 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('job info', async () => {
-        expect(getUsageCount(initialStats, `get ${paths.INFO}`)).to.be(0);
-        expect(getUsageCount(stats, `get ${paths.INFO}`)).to.be(CALL_COUNT);
+        expect(
+          getUsageCount(initialStats, `get /api/reporting/jobs/info/{docId}:printable_pdf`)
+        ).to.be(0);
+        expect(getUsageCount(stats, `get /api/reporting/jobs/info/{docId}:printable_pdf`)).to.be(
+          CALL_COUNT
+        );
       });
     });
 
     describe('downloading and deleting', () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
-      });
-
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
-      });
-
       it('downloading', async () => {
         try {
           await Promise.all([
-            supertestUnauth
+            supertest
               .get('/api/reporting/jobs/download/kraz0qle154g0763b569zz83')
               .auth('test_user', 'changeme'),
-            supertestUnauth
+            supertest
               .get('/api/reporting/jobs/download/kraz0vj4154g0763b5curq51')
               .auth('test_user', 'changeme'),
-            supertestUnauth
+            supertest
               .get('/api/reporting/jobs/download/k9a9rq1i0gpe1457b17s7yc6')
               .auth('test_user', 'changeme'),
           ]);
@@ -117,7 +118,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         log.info(`calling getUsageStats...`);
         expect(
-          getUsageCount(await usageAPI.getUsageStats(), `get /api/reporting/jobs/download/{docId}`)
+          getUsageCount(
+            await usageAPI.getUsageStats(),
+            `get /api/reporting/jobs/download/{docId}:printable_pdf`
+          )
         ).to.be(3);
       });
 
@@ -125,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
         log.info(`sending 1 delete request...`);
 
         try {
-          await supertestUnauth
+          await supertest
             .delete('/api/reporting/jobs/delete/krazcyw4156m0763b503j7f9')
             .auth('test_user', 'changeme')
             .set('kbn-xsrf', 'xxx');
@@ -140,7 +144,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         log.info(`calling getUsageStats...`);
         expect(
-          getUsageCount(await usageAPI.getUsageStats(), `delete /api/reporting/jobs/delete/{docId}`)
+          getUsageCount(
+            await usageAPI.getUsageStats(),
+            `delete /api/reporting/jobs/delete/{docId}:csv_searchsource`
+          )
         ).to.be(1);
       });
     });

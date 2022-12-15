@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { EuiButton, EuiProgress, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GuideId, GuideState } from '../../types';
-import { UseCase } from './use_case_card';
+import type { GuideCardUseCase } from './guide_card';
 
 const viewGuideLabel = i18n.translate(
   'guidedOnboardingPackage.gettingStarted.guideCard.startGuide.buttonLabel',
@@ -48,17 +48,23 @@ const progressBarLabelCss = css`
 
 export interface GuideCardFooterProps {
   guides: GuideState[];
-  useCase: UseCase;
-  activateGuide: (useCase: UseCase, guideState?: GuideState) => void;
+  useCase: GuideCardUseCase;
+  telemetryId: string;
+  activateGuide: (useCase: GuideCardUseCase, guideState?: GuideState) => void;
 }
-export const GuideCardFooter = ({ guides, useCase, activateGuide }: GuideCardFooterProps) => {
+export const GuideCardFooter = ({
+  guides,
+  useCase,
+  telemetryId,
+  activateGuide,
+}: GuideCardFooterProps) => {
   const guideState = guides.find((guide) => guide.guideId === (useCase as GuideId));
   const viewGuideButton = (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem grow={false}>
         <EuiButton
           // Used for FS tracking
-          data-test-subj={`onboarding--guideCard--view--${useCase}`}
+          data-test-subj={`onboarding--guideCard--view--${telemetryId}`}
           fill
           onClick={() => activateGuide(useCase, guideState)}
         >
@@ -117,7 +123,7 @@ export const GuideCardFooter = ({ guides, useCase, activateGuide }: GuideCardFoo
         <EuiFlexItem grow={false}>
           <EuiButton
             // Used for FS tracking
-            data-test-subj={`onboarding--guideCard--continue--${useCase}`}
+            data-test-subj={`onboarding--guideCard--continue--${telemetryId}`}
             fill
             onClick={() => activateGuide(useCase, guideState)}
           >

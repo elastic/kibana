@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
-import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
+import { EsQueryRuleParams } from './rule_type_params';
 
 // rule type context provided to actions
 export interface ActionContext extends EsQueryRuleActionContext {
@@ -35,7 +35,7 @@ export interface EsQueryRuleActionContext extends AlertInstanceContext {
 export function addMessages(
   ruleName: string,
   baseContext: EsQueryRuleActionContext,
-  params: OnlyEsQueryRuleParams | OnlySearchSourceRuleParams,
+  params: EsQueryRuleParams,
   isRecovered: boolean = false
 ): ActionContext {
   const title = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle', {
