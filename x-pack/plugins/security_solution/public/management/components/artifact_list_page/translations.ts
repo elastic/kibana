@@ -118,6 +118,7 @@ export type ArtifactListPageRequiredLabels = Pick<
   | 'flyoutEditSubmitSuccess'
   | 'flyoutDowngradedLicenseDocsInfo'
   | 'deleteActionSuccess'
+  | 'emptyStateTitleNoEntries'
   | 'emptyStateTitle'
   | 'emptyStateInfo'
   | 'emptyStatePrimaryButtonLabel'
