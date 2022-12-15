@@ -9,7 +9,6 @@
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import { CellActions, CellActionsMode } from './cell_actions';
-import { makeAction } from '../mocks/helpers';
 import { CellActionsContextProvider } from './cell_actions_context';
 
 const TRIGGER_ID = 'test-trigger-id';
@@ -71,30 +70,5 @@ describe('CellActions', () => {
     });
 
     expect(queryByTestId('hoverActionsPopover')).toBeInTheDocument();
-  });
-
-  it('sorts actions', async () => {
-    const getActionsPromise = Promise.resolve([
-      makeAction('action-2', 'icon', 2),
-      makeAction('action-1', 'icon', 1),
-    ]);
-    const getActions = () => getActionsPromise;
-
-    const { getAllByRole } = render(
-      <CellActionsContextProvider getCompatibleActions={getActions}>
-        <CellActions mode={CellActionsMode.ALWAYS_VISIBLE} triggerId={TRIGGER_ID} config={CONFIG}>
-          Field value
-        </CellActions>
-      </CellActionsContextProvider>
-    );
-
-    await act(async () => {
-      await getActionsPromise;
-    });
-
-    expect(getAllByRole('button').map((e) => e.getAttribute('aria-label'))).toEqual([
-      'action-1',
-      'action-2',
-    ]);
   });
 });

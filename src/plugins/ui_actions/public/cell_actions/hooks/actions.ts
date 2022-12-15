@@ -7,7 +7,6 @@
  */
 
 import { useMemo } from 'react';
-import useAsync from 'react-use/lib/useAsync';
 import { Action } from '../../actions';
 
 export const partitionActions = (actions: Action[], showMoreActionsFrom: number) => {
@@ -26,15 +25,10 @@ export interface PartitionedActions {
 }
 
 export const usePartitionActions = (
-  getActions: () => Promise<Action[]>,
+  allActions: Action[],
   showMoreActionsFrom: number
-): PartitionedActions & { loading: boolean } => {
-  const { value: allActions, loading } = useAsync(getActions, []);
-
+): PartitionedActions => {
   return useMemo(() => {
-    if (loading) {
-      return { extraActions: [], visibleActions: [], loading };
-    }
-    return { ...partitionActions(allActions ?? [], showMoreActionsFrom), loading };
-  }, [loading, allActions, showMoreActionsFrom]);
+    return partitionActions(allActions ?? [], showMoreActionsFrom);
+  }, [allActions, showMoreActionsFrom]);
 };

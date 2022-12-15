@@ -7,27 +7,29 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { Action } from '../../actions';
 import { ActionItem } from './cell_action_item';
 import { usePartitionActions } from '../hooks/actions';
 import { ExtraActionsPopOver } from './extra_actions_popover';
 import { ExtraActionsButton } from './extra_actions_button';
 import { CellActionExecutionContext } from './cell_actions';
+import { useLoadActions } from './cell_actions_context';
 
 interface InlineActionsProps {
-  getActions: () => Promise<Action[]>;
   actionContext: CellActionExecutionContext;
   showTooltip: boolean;
   showMoreActionsFrom: number;
 }
 
 export const InlineActions: React.FC<InlineActionsProps> = ({
-  getActions,
   actionContext,
   showTooltip,
   showMoreActionsFrom,
 }) => {
-  const { extraActions, visibleActions } = usePartitionActions(getActions, showMoreActionsFrom);
+  const { value: allActions } = useLoadActions(actionContext);
+  const { extraActions, visibleActions } = usePartitionActions(
+    allActions ?? [],
+    showMoreActionsFrom
+  );
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopOver = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
   const closePopOver = useCallback(() => setIsPopoverOpen(false), []);

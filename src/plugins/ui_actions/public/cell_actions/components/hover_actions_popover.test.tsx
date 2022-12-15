@@ -11,21 +11,24 @@ import React from 'react';
 import { CellActionExecutionContext } from './cell_actions';
 import { makeAction } from '../mocks/helpers';
 import { HoverActionsPopover } from './hover_actions_popover';
+import { CellActionsContextProvider } from './cell_actions_context';
 
 describe('HoverActionsPopover', () => {
+  const actionContext = { trigger: { id: 'triggerId' } } as CellActionExecutionContext;
   const TestComponent = () => <span data-test-subj="test-component" />;
   jest.useFakeTimers();
 
   it('renders', () => {
     const getActions = () => Promise.resolve([]);
     const { queryByTestId } = render(
-      <HoverActionsPopover
-        children={null}
-        getActions={getActions}
-        showMoreActionsFrom={4}
-        actionContext={{} as CellActionExecutionContext}
-        showTooltip={false}
-      />
+      <CellActionsContextProvider getCompatibleActions={getActions}>
+        <HoverActionsPopover
+          children={null}
+          showMoreActionsFrom={4}
+          actionContext={actionContext}
+          showTooltip={false}
+        />
+      </CellActionsContextProvider>
     );
     expect(queryByTestId('hoverActionsPopover')).toBeInTheDocument();
   });
@@ -36,14 +39,15 @@ describe('HoverActionsPopover', () => {
     const getActions = () => getActionsPromise;
 
     const { queryByLabelText, getByTestId } = render(
-      <HoverActionsPopover
-        getActions={getActions}
-        showMoreActionsFrom={4}
-        actionContext={{} as CellActionExecutionContext}
-        showTooltip={false}
-      >
-        <TestComponent />
-      </HoverActionsPopover>
+      <CellActionsContextProvider getCompatibleActions={getActions}>
+        <HoverActionsPopover
+          showMoreActionsFrom={4}
+          actionContext={actionContext}
+          showTooltip={false}
+        >
+          <TestComponent />
+        </HoverActionsPopover>
+      </CellActionsContextProvider>
     );
 
     await hoverElement(getByTestId('test-component'), async () => {
@@ -60,14 +64,15 @@ describe('HoverActionsPopover', () => {
     const getActions = () => getActionsPromise;
 
     const { queryByLabelText, getByTestId } = render(
-      <HoverActionsPopover
-        getActions={getActions}
-        showMoreActionsFrom={4}
-        actionContext={{} as CellActionExecutionContext}
-        showTooltip={false}
-      >
-        <TestComponent />
-      </HoverActionsPopover>
+      <CellActionsContextProvider getCompatibleActions={getActions}>
+        <HoverActionsPopover
+          showMoreActionsFrom={4}
+          actionContext={actionContext}
+          showTooltip={false}
+        >
+          <TestComponent />
+        </HoverActionsPopover>
+      </CellActionsContextProvider>
     );
 
     await hoverElement(getByTestId('test-component'), async () => {
@@ -89,14 +94,15 @@ describe('HoverActionsPopover', () => {
     const getActions = () => getActionsPromise;
 
     const { getByTestId } = render(
-      <HoverActionsPopover
-        getActions={getActions}
-        showMoreActionsFrom={1}
-        actionContext={{} as CellActionExecutionContext}
-        showTooltip={false}
-      >
-        <TestComponent />
-      </HoverActionsPopover>
+      <CellActionsContextProvider getCompatibleActions={getActions}>
+        <HoverActionsPopover
+          showMoreActionsFrom={1}
+          actionContext={actionContext}
+          showTooltip={false}
+        >
+          <TestComponent />
+        </HoverActionsPopover>
+      </CellActionsContextProvider>
     );
 
     await hoverElement(getByTestId('test-component'), async () => {
@@ -113,14 +119,15 @@ describe('HoverActionsPopover', () => {
     const getActions = () => getActionsPromise;
 
     const { getByTestId, getByLabelText } = render(
-      <HoverActionsPopover
-        getActions={getActions}
-        showMoreActionsFrom={1}
-        actionContext={{} as CellActionExecutionContext}
-        showTooltip={false}
-      >
-        <TestComponent />
-      </HoverActionsPopover>
+      <CellActionsContextProvider getCompatibleActions={getActions}>
+        <HoverActionsPopover
+          showMoreActionsFrom={1}
+          actionContext={actionContext}
+          showTooltip={false}
+        >
+          <TestComponent />
+        </HoverActionsPopover>
+      </CellActionsContextProvider>
     );
 
     await hoverElement(getByTestId('test-component'), async () => {
@@ -146,14 +153,15 @@ describe('HoverActionsPopover', () => {
     const getActions = () => getActionsPromise;
 
     const { getByTestId, queryByLabelText } = render(
-      <HoverActionsPopover
-        getActions={getActions}
-        showMoreActionsFrom={2}
-        actionContext={{} as CellActionExecutionContext}
-        showTooltip={false}
-      >
-        <TestComponent />
-      </HoverActionsPopover>
+      <CellActionsContextProvider getCompatibleActions={getActions}>
+        <HoverActionsPopover
+          showMoreActionsFrom={2}
+          actionContext={actionContext}
+          showTooltip={false}
+        >
+          <TestComponent />
+        </HoverActionsPopover>
+      </CellActionsContextProvider>
     );
 
     await hoverElement(getByTestId('test-component'), async () => {

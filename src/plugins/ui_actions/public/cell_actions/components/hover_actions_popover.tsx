@@ -11,14 +11,13 @@ import { EuiPopover, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
-import type { Action } from '../../actions';
 import { ActionItem } from './cell_action_item';
 import { ExtraActionsButton } from './extra_actions_button';
 import { ACTIONS_AREA_LABEL, YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 import { partitionActions } from '../hooks/actions';
 import { ExtraActionsPopOverWithAnchor } from './extra_actions_popover';
 import { CellActionExecutionContext } from './cell_actions';
+import { useLoadActionsFn } from './cell_actions_context';
 
 /** This class is added to the document body while dragging */
 export const IS_DRAGGING_CLASS_NAME = 'is-dragging';
@@ -37,20 +36,20 @@ const HOVER_INTENT_DELAY = 100; // ms
 
 interface Props {
   children: React.ReactNode;
-  getActions: () => Promise<Action[]>;
   showMoreActionsFrom: number;
   actionContext: CellActionExecutionContext;
   showTooltip: boolean;
 }
 
 export const HoverActionsPopover = React.memo<Props>(
-  ({ children, getActions, showMoreActionsFrom, actionContext, showTooltip }) => {
+  ({ children, showMoreActionsFrom, actionContext, showTooltip }) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
     const [showHoverContent, setShowHoverContent] = useState(false);
     const [, setHoverTimeout] = useState<number | undefined>(undefined);
     const popoverRef = useRef<EuiPopover>(null);
-    const [{ value: actions }, loadActions] = useAsyncFn(getActions, [getActions]);
+
+    const [{ value: actions }, loadActions] = useLoadActionsFn();
 
     const { visibleActions, extraActions } = useMemo(
       () => partitionActions(actions ?? [], showMoreActionsFrom),
@@ -81,7 +80,7 @@ export const HoverActionsPopover = React.memo<Props>(
 
       // memoize actions after the first call
       if (actions === undefined) {
-        loadActions();
+        loadActions(actionContext);
       }
 
       setHoverTimeout(
@@ -96,7 +95,7 @@ export const HoverActionsPopover = React.memo<Props>(
           }, HOVER_INTENT_DELAY)
         )
       );
-    }, [isExtraActionsPopoverOpen, actions, loadActions]);
+    }, [isExtraActionsPopoverOpen, actions, loadActions, actionContext]);
 
     const onMouseLeave = useCallback(() => {
       closePopover();

@@ -80,7 +80,6 @@ export const CellActions: React.FC<CellActionsProps> = ({
   showMoreActionsFrom = 3,
   metadata,
 }) => {
-  const context = useContext(CellActionsContext);
   const extraContentNodeRef = useRef<HTMLDivElement | null>(null);
   const nodeRef = useRef<HTMLDivElement | null>(null);
 
@@ -89,25 +88,10 @@ export const CellActions: React.FC<CellActionsProps> = ({
     [config, triggerId, metadata]
   );
 
-  const getActions = useCallback(() => {
-    if (!context.getCompatibleActions) {
-      // eslint-disable-next-line no-console
-      console.error(
-        'No CellActionsContext found. Please wrap the application with CellActionsContextProvider'
-      );
-      return Promise.resolve([]);
-    }
-
-    return context
-      .getCompatibleActions(triggerId, actionContext)
-      .then((actions) => orderBy(['order', 'id'], ['asc', 'asc'], actions));
-  }, [context, triggerId, actionContext]);
-
   if (mode === CellActionsMode.HOVER_POPOVER) {
     return (
       <div ref={nodeRef} data-test-subj={'cellActions'}>
         <HoverActionsPopover
-          getActions={getActions}
           actionContext={actionContext}
           showTooltip={showTooltip}
           showMoreActionsFrom={showMoreActionsFrom}
@@ -124,7 +108,6 @@ export const CellActions: React.FC<CellActionsProps> = ({
     <div ref={nodeRef} data-test-subj={'cellActions'}>
       {children}
       <InlineActions
-        getActions={getActions}
         actionContext={actionContext}
         showTooltip={showTooltip}
         showMoreActionsFrom={showMoreActionsFrom}

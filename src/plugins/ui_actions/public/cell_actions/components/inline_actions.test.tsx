@@ -11,18 +11,17 @@ import React from 'react';
 import { CellActionExecutionContext } from './cell_actions';
 import { makeAction } from '../mocks/helpers';
 import { InlineActions } from './inline_actions';
+import { CellActionsContextProvider } from '.';
 
 describe('InlineActions', () => {
+  const actionContext = { trigger: { id: 'triggerId' } } as CellActionExecutionContext;
   it('renders', async () => {
     const getActionsPromise = Promise.resolve([]);
     const getActions = () => getActionsPromise;
     const { queryByTestId } = render(
-      <InlineActions
-        getActions={getActions}
-        showMoreActionsFrom={5}
-        actionContext={{} as CellActionExecutionContext}
-        showTooltip={false}
-      />
+      <CellActionsContextProvider getCompatibleActions={getActions}>
+        <InlineActions showMoreActionsFrom={5} actionContext={actionContext} showTooltip={false} />
+      </CellActionsContextProvider>
     );
 
     await act(async () => {
@@ -42,12 +41,9 @@ describe('InlineActions', () => {
     ]);
     const getActions = () => getActionsPromise;
     const { queryAllByRole } = render(
-      <InlineActions
-        getActions={getActions}
-        showMoreActionsFrom={5}
-        actionContext={{} as CellActionExecutionContext}
-        showTooltip={false}
-      />
+      <CellActionsContextProvider getCompatibleActions={getActions}>
+        <InlineActions showMoreActionsFrom={5} actionContext={actionContext} showTooltip={false} />
+      </CellActionsContextProvider>
     );
 
     await act(async () => {
