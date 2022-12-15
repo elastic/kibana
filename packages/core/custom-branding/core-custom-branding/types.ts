@@ -29,3 +29,27 @@ export interface CustomBranding {
    */
   customizedLogo?: string;
 }
+
+/** @internal */
+export interface InternalCustomBrandingSetup extends Pick<CustomBrandingSetup, 'registerAppUpdater'> {
+  /**
+   * Register CustomBranding to the system.
+*/
+  register<>(
+ 
+  ): void;
+}
+
+/** @internal */
+export interface InternalCustomBrandingStart extends CustomBrandingStart {
+  // Internal APIs
+  getComponent(): JSX.Element | null;
+
+  /**
+   * The potential action menu set by the currently mounted app.
+   * Consumed by the chrome header.
+   *
+   * @internal
+   */
+  customBranding$: Map<string, Observable>| undefined;
+}

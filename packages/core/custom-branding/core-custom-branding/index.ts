@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { CustomBranding } from './custom_branding';
+export type { CustomBranding, InternalCustomBrandingStart, InternalCustomBrandingSetup } from './types';

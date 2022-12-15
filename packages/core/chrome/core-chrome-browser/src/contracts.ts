@@ -7,7 +7,6 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { CustomBranding } from '@kbn/core-custom-branding-internal';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -51,8 +50,6 @@ export interface ChromeStart {
   recentlyAccessed: ChromeRecentlyAccessed;
   /** {@inheritdoc ChromeDocTitle} */
   docTitle: ChromeDocTitle;
-  /**  */
-  customBranding: CustomBranding;
 
   /**
    * Get an observable of the current visibility state of the chrome.

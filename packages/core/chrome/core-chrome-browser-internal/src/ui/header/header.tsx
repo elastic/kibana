@@ -35,7 +35,7 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
-import { CustomBranding } from '@kbn/core-custom-branding';
+import { InternalCustomBrandingStart } from '@kbn/core-custom-branding';
 import { LoadingIndicator } from '../loading_indicator';
 import type { OnIsLockedUpdate } from './types';
 import { CollapsibleNav } from './collapsible_nav';
@@ -73,8 +73,7 @@ export interface HeaderProps {
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
-  logo$?: CustomBranding['logo'];
-  customizedLogo$?: CustomBranding['customizedLogo'];
+  CustomBrandingServiceStart: InternalCustomBrandingStart;
 }
 
 export function Header({
