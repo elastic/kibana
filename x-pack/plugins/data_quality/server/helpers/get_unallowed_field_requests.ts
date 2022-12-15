@@ -17,18 +17,16 @@ export const getMSearchRequestHeader = (indexName: string): MsearchMultisearchHe
 });
 
 export const getMSearchRequestBody = ({
+  indexName,
   indexFieldName,
   allowedValues,
-  from,
-  to,
 }: {
+  indexName: string;
   indexFieldName: string;
   allowedValues: AllowedValuesInputs;
-  from: string;
-  to: string;
 }): MsearchMultisearchBody => ({
   aggregations: {
-    unallowedValues: {
+    [indexName]: {
       terms: {
         field: indexFieldName,
         order: {
@@ -50,7 +48,7 @@ export const getMSearchRequestBody = ({
                 ? [
                     {
                       bool: {
-                        should: allowedValues.map(({ name: allowedValue }) => ({
+                        should: allowedValues.map((allowedValue) => ({
                           match_phrase: {
                             [indexFieldName]: allowedValue,
                           },
@@ -60,14 +58,6 @@ export const getMSearchRequestBody = ({
                     },
                   ]
                 : [],
-          },
-        },
-        {
-          range: {
-            '@timestamp': {
-              gte: from,
-              lte: to,
-            },
           },
         },
       ],

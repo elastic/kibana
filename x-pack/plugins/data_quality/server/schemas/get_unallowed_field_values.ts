@@ -7,12 +7,7 @@
 
 import * as t from 'io-ts';
 
-export const AllowedValues = t.array(
-  t.partial({
-    description: t.string,
-    name: t.string,
-  })
-);
+export const AllowedValues = t.array(t.string);
 
 export type AllowedValuesInputs = t.TypeOf<typeof AllowedValues>;
 
@@ -21,8 +16,6 @@ export const GetUnallowedFieldValuesBody = t.array(
     indexName: t.string,
     indexFieldName: t.string,
     allowedValues: AllowedValues,
-    from: t.string,
-    to: t.string,
   })
 );
 

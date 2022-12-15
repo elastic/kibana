@@ -22,15 +22,14 @@ describe('getMSearchRequest', () => {
   test('getMSearchRequestBody', () => {
     expect(
       getMSearchRequestBody({
-        from: '2022-12-14T00:00:00.000Z',
-        to: '2022-12-14T23:59:59.999Z',
+        indexName: 'auditbeat',
         indexFieldName: 'event.category',
-        allowedValues: [{ name: 'process' }],
+        allowedValues: ['process'],
       })
     ).toMatchInlineSnapshot(`
       Object {
         "aggregations": Object {
-          "unallowedValues": Object {
+          "auditbeat": Object {
             "terms": Object {
               "field": "event.category",
               "order": Object {
@@ -63,14 +62,6 @@ describe('getMSearchRequest', () => {
                   "should": Array [],
                 },
               },
-              Object {
-                "range": Object {
-                  "@timestamp": Object {
-                    "gte": "2022-12-14T00:00:00.000Z",
-                    "lte": "2022-12-14T23:59:59.999Z",
-                  },
-                },
-              },
             ],
           },
         },
@@ -83,15 +74,14 @@ describe('getMSearchRequest', () => {
   test('getMSearchRequestBody - without allowedValues', () => {
     expect(
       getMSearchRequestBody({
-        from: '2022-12-14T00:00:00.000Z',
-        to: '2022-12-14T23:59:59.999Z',
+        indexName: 'auditbeat',
         indexFieldName: 'event.category',
         allowedValues: [],
       })
     ).toMatchInlineSnapshot(`
       Object {
         "aggregations": Object {
-          "unallowedValues": Object {
+          "auditbeat": Object {
             "terms": Object {
               "field": "event.category",
               "order": Object {
@@ -109,14 +99,6 @@ describe('getMSearchRequest', () => {
                   "must": Array [],
                   "must_not": Array [],
                   "should": Array [],
-                },
-              },
-              Object {
-                "range": Object {
-                  "@timestamp": Object {
-                    "gte": "2022-12-14T00:00:00.000Z",
-                    "lte": "2022-12-14T23:59:59.999Z",
-                  },
                 },
               },
             ],

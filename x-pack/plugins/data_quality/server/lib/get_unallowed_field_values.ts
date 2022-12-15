@@ -18,10 +18,10 @@ export const getUnallowedFieldValues = (
   items: GetUnallowedFieldValuesInputs
 ) => {
   const searches: MsearchRequestItem[] = items.reduce<MsearchRequestItem[]>(
-    (acc, { indexName, indexFieldName, allowedValues, from, to }) =>
+    (acc, { indexName, indexFieldName, allowedValues }) =>
       acc.concat([
         getMSearchRequestHeader(indexName),
-        getMSearchRequestBody({ indexFieldName, allowedValues, from, to }),
+        getMSearchRequestBody({ indexName, indexFieldName, allowedValues }),
       ]),
     []
   );
