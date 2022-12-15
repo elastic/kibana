@@ -3577,6 +3577,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ecs@link:packages/kbn-ecs":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-archiver@link:packages/kbn-es-archiver":
   version "0.0.0"
   uid ""

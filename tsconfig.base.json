@@ -568,6 +568,8 @@
       "@kbn/docs-utils/*": ["packages/kbn-docs-utils/*"],
       "@kbn/ebt-tools": ["packages/kbn-ebt-tools"],
       "@kbn/ebt-tools/*": ["packages/kbn-ebt-tools/*"],
+      "@kbn/ecs": ["packages/kbn-ecs"],
+      "@kbn/ecs/*": ["packages/kbn-ecs/*"],
       "@kbn/elasticsearch-client-plugin": ["test/plugin_functional/plugins/elasticsearch_client_plugin"],
       "@kbn/elasticsearch-client-plugin/*": ["test/plugin_functional/plugins/elasticsearch_client_plugin/*"],
       "@kbn/elasticsearch-client-xpack-plugin": ["x-pack/test/plugin_api_integration/plugins/elasticsearch_client"],

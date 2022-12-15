@@ -7776,10 +7776,10 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.GetFieldsOptions.filter",
+            "id": "def-public.GetFieldsOptions.indexFilter",
             "type": "Object",
             "tags": [],
-            "label": "filter",
+            "label": "indexFilter",
             "description": [],
             "signature": [
               "QueryDslQueryContainer",
@@ -17022,7 +17022,7 @@
               "\n Get a list of field objects for an index pattern that may contain wildcards\n"
             ],
             "signature": [
-              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; filter?: ",
+              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
               " | undefined; }) => Promise<{ fields: ",
               {
@@ -17121,10 +17121,10 @@
                   },
                   {
                     "parentPluginId": "data",
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.filter",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.indexFilter",
                     "type": "Object",
                     "tags": [],
-                    "label": "filter",
+                    "label": "indexFilter",
                     "description": [],
                     "signature": [
                       "QueryDslQueryContainer",
@@ -26661,10 +26661,10 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.GetFieldsOptions.filter",
+            "id": "def-common.GetFieldsOptions.indexFilter",
             "type": "Object",
             "tags": [],
-            "label": "filter",
+            "label": "indexFilter",
             "description": [],
             "signature": [
               "QueryDslQueryContainer",

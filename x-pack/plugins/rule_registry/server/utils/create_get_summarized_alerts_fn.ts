@@ -24,7 +24,7 @@ import { ParsedTechnicalFields } from '../../common';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { IRuleDataClient, IRuleDataReader } from '../rule_data_client';
 
-const MAX_ALERT_DOCS_TO_RETURN = 1000;
+const MAX_ALERT_DOCS_TO_RETURN = 100;
 type AlertDocument = Partial<ParsedTechnicalFields & ParsedExperimentalFields>;
 
 interface CreateGetSummarizedAlertsFnOpts {
@@ -119,11 +119,11 @@ const getPersistentAlertsByExecutionUuid = async <TSearchRequest extends ESSearc
     new: getHitsWithCount(response),
     ongoing: {
       count: 0,
-      alerts: [],
+      data: [],
     },
     recovered: {
       count: 0,
-      alerts: [],
+      data: [],
     },
   };
 };
@@ -159,7 +159,7 @@ const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
 ) => {
   return {
     count: (response.hits.total as SearchTotalHits).value,
-    alerts: response.hits.hits.map((r) => r._source),
+    data: response.hits.hits.map((r) => r._source),
   };
 };
 
@@ -250,11 +250,11 @@ const getPersistentAlertsByTimeRange = async <TSearchRequest extends ESSearchReq
     new: getHitsWithCount(response),
     ongoing: {
       count: 0,
-      alerts: [],
+      data: [],
     },
     recovered: {
       count: 0,
-      alerts: [],
+      data: [],
     },
   };
 };
