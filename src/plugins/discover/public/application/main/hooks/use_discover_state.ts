@@ -89,40 +89,6 @@ export function useDiscoverState({
   }, [uiSettings, savedSearch.id, searchSessionManager, timefilter]);
 
   /**
-   * Function triggered when user changes data view in the sidebar
-   */
-  const onChangeDataView = useCallback(
-    async (id: string) => {
-      const nextDataView = await dataViews.get(id);
-      if (nextDataView && dataView) {
-        const nextAppState = getDataViewAppState(
-          dataView,
-          nextDataView,
-          state.columns || [],
-          (state.sort || []) as SortOrder[],
-          uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
-          uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
-          state.query
-        );
-        setUrlTracking(nextDataView);
-        stateContainer.setAppState(nextAppState);
-      }
-      setExpandedDoc(undefined);
-    },
-    [
-      setUrlTracking,
-      uiSettings,
-      dataView,
-      dataViews,
-      setExpandedDoc,
-      state.columns,
-      state.query,
-      state.sort,
-      stateContainer,
-    ]
-  );
-
-  /**
    * Adhoc data views functionality
    */
 
@@ -253,6 +219,42 @@ export function useDiscoverState({
     replaceUrlAppState,
     stateContainer,
   ]);
+
+  /**
+   * Function triggered when user changes data view in the sidebar
+   */
+  const onChangeDataView = useCallback(
+    async (id: string) => {
+      const nextDataView = await dataViews.get(id);
+      if (nextDataView && dataView) {
+        reset();
+        const nextAppState = getDataViewAppState(
+          dataView,
+          nextDataView,
+          state.columns || [],
+          (state.sort || []) as SortOrder[],
+          uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
+          uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
+          state.query
+        );
+        setUrlTracking(nextDataView);
+        stateContainer.setAppState(nextAppState);
+      }
+      setExpandedDoc(undefined);
+    },
+    [
+      setUrlTracking,
+      uiSettings,
+      dataView,
+      dataViews,
+      setExpandedDoc,
+      state.columns,
+      state.query,
+      state.sort,
+      stateContainer,
+      reset,
+    ]
+  );
 
   /**
    * function to revert any changes to a given saved search

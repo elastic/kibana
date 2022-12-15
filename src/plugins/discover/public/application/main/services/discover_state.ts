@@ -234,8 +234,9 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const setDataView = (dataView: DataView) =>
+  const setDataView = (dataView: DataView) => {
     internalStateContainer.transitions.setDataView(dataView);
+  };
   const setAdHocDataViews = (dataViews: DataView[]) =>
     internalStateContainer.transitions.setAdHocDataViews(dataViews);
   const appendAdHocDataViews = (dataViews: DataView | DataView[]) =>

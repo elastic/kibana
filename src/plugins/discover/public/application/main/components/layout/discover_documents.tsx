@@ -78,9 +78,19 @@ function DiscoverDocumentsComponent({
   onFieldEdited?: () => void;
 }) {
   const { capabilities, dataViews, uiSettings } = useDiscoverServices();
-  const [query, sort, rowHeight, rowsPerPage, grid, columns] = useAppStateSelector((state) => {
-    return [state.query, state.sort, state.rowHeight, state.rowsPerPage, state.grid, state.columns];
-  });
+  const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
+    (state) => {
+      return [
+        state.query,
+        state.sort,
+        state.rowHeight,
+        state.rowsPerPage,
+        state.grid,
+        state.columns,
+        state.index,
+      ];
+    }
+  );
 
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
@@ -89,6 +99,11 @@ function DiscoverDocumentsComponent({
 
   const documentState = useDataState(documents$);
   const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
+  // this is needed to prevent data view pushing onSort because there has been a state change with a new data view
+  // but the data view in internal state was not set. due to the change of the timefield, this can lead to a change
+  // of state, EuiDataGrid pushing an onSort event, because the next timefield is already used a sorting param
+  // but it's not an available column
+  const dataViewChanged = index !== dataView.id;
   const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
@@ -144,8 +159,9 @@ function DiscoverDocumentsComponent({
   );
 
   if (
-    (!documentState.result || documentState.result.length === 0) &&
-    documentState.fetchStatus === FetchStatus.LOADING
+    dataViewChanged ||
+    ((!documentState.result || documentState.result.length === 0) &&
+      documentState.fetchStatus === FetchStatus.LOADING)
   ) {
     return (
       <div className="dscDocuments__loading">
