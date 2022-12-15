@@ -22,6 +22,7 @@ import {
   ControlGeneralViewSelectorDeps,
   ControlFormErrorMap,
   ControlSelectorCondition,
+  ControlSelectorConditionUIOptions,
 } from '../../types';
 import { getControlSelectorValueForProp, setControlSelectorValueForProp } from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
@@ -104,9 +105,22 @@ export const ControlGeneralViewSelector = ({
   );
 
   const onChangeCondition = useCallback(
-    (key: string, values: string[]) => {
-      setControlSelectorValueForProp(key, values, selector);
+    (prop: string, values: string[]) => {
+      setControlSelectorValueForProp(prop, values, selector);
       onChange(selector);
+    },
+    [onChange, selector]
+  );
+
+  const onAddValueToCondition = useCallback(
+    (prop: string, searchValue: string) => {
+      const value = searchValue.trim();
+      const values = getControlSelectorValueForProp(prop, selector);
+
+      if (values && values.indexOf(value) === -1) {
+        setControlSelectorValueForProp(prop, [...values, value], selector);
+        onChange(selector);
+      }
     },
     [onChange, selector]
   );
@@ -168,13 +182,24 @@ export const ControlGeneralViewSelector = ({
               }) || [];
 
             const label = i18n.getConditionLabel(prop);
+            const restrictedValues =
+              ControlSelectorConditionUIOptions[prop as ControlSelectorCondition]?.values;
 
             return (
               <EuiFormRow label={label}>
                 <EuiComboBox
                   aria-label={label}
+                  onCreateOption={
+                    !restrictedValues
+                      ? (searchValue) => onAddValueToCondition(prop, searchValue)
+                      : undefined
+                  }
                   selectedOptions={selectedOptions}
-                  options={selectedOptions}
+                  options={
+                    restrictedValues
+                      ? restrictedValues.map((value: string) => ({ label: value, value }))
+                      : selectedOptions
+                  }
                   onChange={(options) =>
                     onChangeCondition(prop, options.map((option) => option.value) as string[])
                   }

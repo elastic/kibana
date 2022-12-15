@@ -44,6 +44,10 @@ export enum ControlSelectorCondition {
   orchestratorType = 'orchestratorType',
 }
 
+export const ControlSelectorConditionUIOptions = {
+  activity: { values: ['createExecutable', 'modifyExecutable'] },
+};
+
 export interface ControlSelector {
   name: string;
   activity?: string[];
