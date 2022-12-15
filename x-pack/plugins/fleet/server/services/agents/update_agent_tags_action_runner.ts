@@ -113,7 +113,7 @@ export async function updateTagsBatch(
     const extraFilters = [];
     if (options.tagsToAdd.length === 1 && options.tagsToRemove.length === 0) {
       extraFilters.push(`NOT (tags:${options.tagsToAdd[0]})`);
-    } else if (options.tagsToRemove.length === 1) {
+    } else if (options.tagsToRemove.length === 1 && options.tagsToAdd.length === 0) {
       extraFilters.push(`tags:${options.tagsToRemove[0]}`);
     }
     query = getElasticsearchQuery(options.kuery, false, false, hostedIds, extraFilters);
