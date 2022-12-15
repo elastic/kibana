@@ -243,13 +243,6 @@ export function sendGetActionStatus() {
   });
 }
 
-export function sendGetCurrentUpgrades() {
-  return sendRequest<GetCurrentUpgradesResponse>({
-    path: agentRouteService.getCurrentUpgradesPath(),
-    method: 'get',
-  });
-}
-
 export function sendPostCancelAction(actionId: string) {
   return sendRequest<GetCurrentUpgradesResponse>({
     path: agentRouteService.getCancelActionPath(actionId),

@@ -6,6 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import { MAX_GROUPS } from '@kbn/triggers-actions-ui-plugin/server';
 import type { Writable } from '@kbn/utility-types';
 import { Comparator } from '../../../common/comparator_types';
 import {
@@ -25,9 +26,11 @@ const DefaultParams: Writable<Partial<EsQueryRuleParams>> = {
   threshold: [0],
   searchType: 'esQuery',
   excludeHitsFromPreviousRun: true,
+  aggType: 'count',
+  groupBy: 'all',
 };
 
-describe('alertType Params validate()', () => {
+describe('ruleType Params validate()', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: any;
   beforeEach(() => {
@@ -126,6 +129,70 @@ describe('alertType Params validate()', () => {
     params.size = ES_QUERY_MAX_HITS_PER_EXECUTION + 1;
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
       `"[size]: Value must be equal to or lower than [10000]."`
+    );
+  });
+
+  it('fails for invalid aggType', async () => {
+    params.aggType = 42;
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[aggType]: expected value of type [string] but got [number]"`
+    );
+
+    params.aggType = '-not-a-valid-aggType-';
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[aggType]: invalid aggType: \\"-not-a-valid-aggType-\\""`
+    );
+  });
+
+  it('fails for invalid aggField', async () => {
+    params.aggField = 42;
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[aggField]: expected value of type [string] but got [number]"`
+    );
+
+    params.aggField = '';
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[aggField]: value has length [0] but it must have a minimum length of [1]."`
+    );
+  });
+
+  it('fails for invalid termField', async () => {
+    params.groupBy = 'top';
+    params.termField = 42;
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[termField]: expected value of type [string] but got [number]"`
+    );
+
+    params.termField = '';
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[termField]: value has length [0] but it must have a minimum length of [1]."`
+    );
+  });
+
+  it('fails for invalid termSize', async () => {
+    params.groupBy = 'top';
+    params.termField = 'fee';
+    params.termSize = 'foo';
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[termSize]: expected value of type [number] but got [string]"`
+    );
+
+    params.termSize = MAX_GROUPS + 1;
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[termSize]: must be less than or equal to 1000"`
+    );
+
+    params.termSize = 0;
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[termSize]: Value must be equal to or greater than [1]."`
+    );
+  });
+
+  it('fails for invalid aggType/aggField', async () => {
+    params.aggType = 'avg';
+    delete params.aggField;
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[aggField]: must have a value when [aggType] is \\"avg\\""`
     );
   });
 

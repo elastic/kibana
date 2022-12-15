@@ -14,6 +14,7 @@ import { useApmRouter } from '../../hooks/use_apm_router';
 import { AgentIcon } from './agent_icon';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { ApmRoutes } from '../routing/apm_route_config';
+import { isMobileAgentName } from '../../../common/agent_name';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
@@ -30,10 +31,14 @@ export function ServiceLink({
 }: ServiceLinkProps) {
   const { link } = useApmRouter();
 
+  const serviceLink = isMobileAgentName(agentName)
+    ? '/mobile-services/{serviceName}/overview'
+    : '/services/{serviceName}/overview';
+
   return (
     <StyledLink
       data-test-subj={`serviceLink_${agentName}`}
-      href={link('/services/{serviceName}/overview', {
+      href={link(serviceLink, {
         path: { serviceName },
         query,
       })}
