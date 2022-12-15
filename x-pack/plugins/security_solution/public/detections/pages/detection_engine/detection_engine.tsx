@@ -17,6 +17,7 @@ import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import type { DocLinks } from '@kbn/doc-links';
 import { TableId } from '../../../../common/types';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
@@ -41,7 +42,7 @@ import * as i18n from './translations';
 import { SecuritySolutionLinkButton } from '../../../common/components/links';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
-import { Display } from '../../../hosts/pages/display';
+import { Display } from '../../../explore/hosts/pages/display';
 import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,
@@ -60,7 +61,7 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
 import { useKibana } from '../../../common/lib/kibana';
-import { EmptyPage } from '../../../common/components/empty_page';
+import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { DetectionPageFilterSet } from '../../components/detection_page_filters';
@@ -124,7 +125,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   const {
     application: { navigateToUrl },
     data,
-    docLinks,
   } = useKibana().services;
 
   const { filterManager } = data.query;
@@ -228,18 +228,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const emptyPageActions = useMemo(
-    () => ({
-      feature: {
-        icon: 'documents',
-        label: i18n.GO_TO_DOCUMENTATION,
-        url: `${docLinks.links.siem.privileges}`,
-        target: '_blank',
-      },
-    }),
-    [docLinks]
-  );
-
   const pageFiltersUpdateHandler = useCallback((newFilters: Filter[]) => {
     setDetectionPageFilters(newFilters);
   }, []);
@@ -290,11 +278,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
       {!signalIndexNeedsInit && (hasIndexRead === false || canUserREAD === false) ? (
-        <EmptyPage
-          actions={emptyPageActions}
-          message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
-          data-test-subj="no_feature_permissions-alerts"
-          title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
+        <NoPrivileges
+          pageName={i18n.PAGE_TITLE.toLowerCase()}
+          docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges}
         />
       ) : !signalIndexNeedsInit && hasIndexRead && canUserREAD ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>

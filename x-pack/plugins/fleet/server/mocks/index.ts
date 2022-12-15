@@ -90,10 +90,9 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
       asCurrentUser: createPackagePolicyServiceMock(),
       asInternalUser: createPackagePolicyServiceMock(),
     },
-    epm: {
-      internalSoClient: savedObjectsClientMock.create(),
-    },
+    internalSoClient: savedObjectsClientMock.create(),
     spaceId: 'default',
+    limitedToPackages: undefined,
   };
 };
 
