@@ -96,7 +96,6 @@ export async function fetchAndCalculateFieldStats({
   fromDate,
   toDate,
   size,
-  fieldFormats,
 }: {
   searchHandler: SearchHandler;
   dataView: DataView;
@@ -127,7 +126,7 @@ export async function fetchAndCalculateFieldStats({
     return await getDateHistogram(searchHandler, field, { fromDate, toDate });
   }
   if (field.type === 'geo_point' || field.type === 'geo_shape') {
-    return await getSimpleExamples(searchHandler, field, dataView, fieldFormats);
+    return await getGeoExamples(searchHandler, field, dataView);
   }
 
   return await getStringSamples(searchHandler, field, size);
@@ -371,13 +370,15 @@ export async function getSimpleExamples(
     };
 
     const simpleExamplesResult = await search(simpleExamplesBody);
-    const fieldExampleBuckets = getFieldExampleBuckets({
-      hits: simpleExamplesResult.hits.hits,
-      field,
-      dataView,
-      count: DEFAULT_TOP_VALUES_SIZE,
-      formatter,
-    });
+    const fieldExampleBuckets = getFieldExampleBuckets(
+      {
+        hits: simpleExamplesResult.hits.hits,
+        field,
+        dataView,
+        count: DEFAULT_TOP_VALUES_SIZE,
+      },
+      formatter
+    );
 
     return {
       totalDocuments: getHitsTotal(simpleExamplesResult),
@@ -402,7 +403,7 @@ export async function getGeoExamples(
     const formatter = dataView.getFormatterForField(field);
     return await getSimpleExamples(search, field, dataView, formatter);
   } catch (e) {
-    console.error(error); // eslint-disable-line  no-console
+    console.error(e); // eslint-disable-line  no-console
     return {};
   }
 }
