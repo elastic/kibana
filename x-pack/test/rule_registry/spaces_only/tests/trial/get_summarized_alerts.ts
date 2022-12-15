@@ -168,7 +168,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         services: {
           alertFactory: {
             create: sinon.stub(),
-            alertLimit: { getValue: sinon.stub().returns(100) },
+            alertLimit: { trimRecovered: sinon.stub().returns([]) },
           },
           shouldWriteAlerts: sinon.stub().returns(true),
         },
