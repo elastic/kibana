@@ -13,13 +13,20 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
 import { isSloFeatureEnabled } from './helpers';
-import PageNotFound from '../404';
 import { SLOS_BREADCRUMB_TEXT, SLOS_PAGE_TITLE } from './translations';
+import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
+import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
+import PageNotFound from '../404';
 
 export function SlosPage() {
   const { http } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
+
+  const {
+    loading,
+    sloList: { total },
+  } = useFetchSloList({ refetch: false });
 
   useBreadcrumbs([
     {
@@ -30,6 +37,14 @@ export function SlosPage() {
 
   if (!isSloFeatureEnabled(config)) {
     return <PageNotFound />;
+  }
+
+  if (loading) {
+    return null;
+  }
+
+  if (total === 0) {
+    return <SloListWelcomePrompt />;
   }
 
   return (
