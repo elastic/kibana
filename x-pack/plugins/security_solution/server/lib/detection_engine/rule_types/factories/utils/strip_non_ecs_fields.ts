@@ -7,7 +7,7 @@
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 
-import { isObject, cloneDeep, unset } from 'lodash';
+import { isPlainObject, cloneDeep, unset } from 'lodash';
 
 import type { SearchTypes } from '../../../../../../common/detection_engine/types';
 
@@ -52,12 +52,12 @@ const computeIsEcsCompliant = (value: Record<string, SearchTypes> | SearchTypes,
     ['object', 'flattened'].includes(ecsField?.type) || ecsObjectFields[path];
 
   // if checked value is object but ECS field not, it's not compliant
-  if (isObject(value) && !isEcsFieldObject) {
+  if (isPlainObject(value) && !isEcsFieldObject) {
     return false;
   }
 
   // if checked value is not object but ECS field is, it's not compliant
-  if (!isObject(value) && isEcsFieldObject) {
+  if (!isPlainObject(value) && isEcsFieldObject) {
     return false;
   }
 
@@ -86,8 +86,8 @@ export const stripNonEcsFields = (doc: Record<string, SearchTypes>): StripNonEcs
       removed.push({ key: path, value: document });
     }
 
-    if (isObject(document)) {
-      Object.entries(document).forEach(([key, value]) => {
+    if (isPlainObject(document)) {
+      Object.entries(document as Record<string, SearchTypes>).forEach(([key, value]) => {
         const fullPath = path ? `${path}.${key}` : key;
 
         traverseAndDeleteInObj(value, fullPath);
