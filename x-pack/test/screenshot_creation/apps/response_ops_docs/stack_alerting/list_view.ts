@@ -18,11 +18,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('list view', function () {
     let serverLogConnectorId: string;
     let ruleId: string;
+    const esQueryRule = {
+      consumer: 'alerts',
+      name: 'my rule',
+      notify_when: 'onActionGroupChange',
+      params: {
+        index: ['.test-index'],
+        timeField: '@timestamp',
+        aggType: 'count',
+        groupBy: 'all',
+        timeWindowSize: 5,
+        timeWindowUnit: 'd',
+        thresholdComparator: '>',
+        threshold: [1000],
+      },
+      rule_type_id: '.index-threshold',
+      schedule: { interval: '1m' },
+      tags: [],
+    };
 
     before(async () => {
       const connectorName = `server-log-connector`;
       ({ id: serverLogConnectorId } = await createServerLogConnector(connectorName));
-      ({ id: ruleId } = await createEsQueryRule());
+      ({ id: ruleId } = await rules.api.createRule(esQueryRule));
     });
 
     after(async () => {
@@ -64,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('rule snooze screenshot', async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+      const snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
       await snoozeBadge.click();
       await commonScreenshots.takeScreenshot('snooze-panel', screenshotDirectories, 1400, 1024);
     });
@@ -76,26 +94,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       config: {},
       secrets: {},
       connectorTypeId: '.server-log',
-    });
-  };
-
-  const createEsQueryRule = async () => {
-    return rules.api.createRule({
-      consumer: 'alerts',
-      name: 'my alert',
-      notify_when: 'onActionGroupChange',
-      params: {
-        index: ['.test-index'],
-        timeField: '@timestamp',
-        aggType: 'count',
-        groupBy: 'all',
-        timeWindowSize: 5,
-        timeWindowUnit: 'd',
-        thresholdComparator: '>',
-        threshold: [1000],
-      },
-      rule_type_id: '.index-threshold',
-      schedule: { interval: '1m' },
     });
   };
 }
