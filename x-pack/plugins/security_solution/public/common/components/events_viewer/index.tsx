@@ -16,6 +16,7 @@ import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/c
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
   ControlColumnProps,
@@ -70,7 +71,6 @@ import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
-import { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 
 const storage = new Storage(localStorage);
 

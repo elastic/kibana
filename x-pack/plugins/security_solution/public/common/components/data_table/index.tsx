@@ -135,23 +135,23 @@ export const DataTableComponent = React.memo<DataTableProps>(
 
     const viewColumns = isEventRenderedView
       ? [
-        {
-          columnHeaderType: defaultColumnHeaderType,
-          id: '@timestamp',
-          initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH + 50,
-        },
-        {
-          columnHeaderType: defaultColumnHeaderType,
-          displayAsText: i18n.translate(
-            'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.ruleTitle',
-            {
-              defaultMessage: 'Rule',
-            }
-          ),
-          id: 'kibana.alert.rule.name',
-          initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH + 100,
-          linkField: 'kibana.alert.rule.uuid',
-        },
+          {
+            columnHeaderType: defaultColumnHeaderType,
+            id: '@timestamp',
+            initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH + 50,
+          },
+          {
+            columnHeaderType: defaultColumnHeaderType,
+            displayAsText: i18n.translate(
+              'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.ruleTitle',
+              {
+                defaultMessage: 'Rule',
+              }
+            ),
+            id: 'kibana.alert.rule.name',
+            initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH + 100,
+            linkField: 'kibana.alert.rule.uuid',
+          },
           {
             columnHeaderType: defaultColumnHeaderType,
             id: 'eventSummary',
