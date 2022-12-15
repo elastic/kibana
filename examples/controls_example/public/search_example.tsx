@@ -83,6 +83,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
     };
 
     search().catch((error) => {
+      setIsSearching(false);
       if (error.name === 'AbortError') {
         // ignore abort errors
       } else {
