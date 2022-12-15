@@ -118,12 +118,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           sourceIndex: Option.none,
           targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
           sourceIndexMappings: indices[source!].mappings,
+          targetIndexCurrentMappings: indices[source!].mappings,
           // in this scenario, a .kibana_X.Y.Z_001 index exists that matches the current kibana version
           // aka we are NOT upgrading to a newer version
           // we inject the target index's current mappings in the state, to check them later
           targetIndexMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetIndexMappings,
-            indices[aliases[stateP.currentAlias]!].mappings
+            indices[source!].mappings
           ),
           versionIndexReadyActions: Option.none,
         };
@@ -169,7 +170,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // the source exists
         Boolean(indices[source!]?.mappings?._meta?.migrationMappingPropertyHashes) &&
         // ...and mappings are unchanged
-        !diffMappings(stateP.targetIndexMappings, indices[source!].mappings);
+        !diffMappings(
+          /* actual */
+          indices[source!].mappings,
+          /* expected */
+          stateP.targetIndexMappings
+        );
 
       if (mappingsAreUnchanged) {
         const targetIndex = source!;
@@ -181,7 +187,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           sourceIndex: Option.none,
           targetIndex,
           sourceIndexMappings: indices[source!].mappings,
-          versionIndexReadyActions: Option.none,
+          // Setting this to "undefined" will trigger UPDATE_TARGET_MAPPINGS
+          // which we always want to do for new versions
+          targetIndexCurrentMappings: undefined,
+          targetIndexMappings: mergeMigrationMappingPropertyHashes(
+            stateP.targetIndexMappings,
+            indices[source!].mappings
+          ),
+          // Point the current and version alias to the same index
+          versionIndexReadyActions: Option.some<AliasAction[]>([
+            { add: { index: source!, alias: stateP.currentAlias } },
+            { add: { index: source!, alias: stateP.versionAlias } },
+          ]),
         };
       }
 
