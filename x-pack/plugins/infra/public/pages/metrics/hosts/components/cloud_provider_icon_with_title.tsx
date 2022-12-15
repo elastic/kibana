@@ -20,11 +20,11 @@ const cloudIcons: Record<CloudProviders, string> = {
 export const CloudProviderIconWithTitle = ({
   provider,
   title,
-  text
+  text,
 }: {
   provider?: CloudProviders | null;
   title?: React.ReactNode;
-  text: string
+  text: string;
 }) => {
   return (
     <EuiFlexGroup

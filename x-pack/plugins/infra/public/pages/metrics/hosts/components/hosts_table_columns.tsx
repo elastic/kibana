@@ -42,13 +42,19 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     sortable: true,
     truncateText: true,
     render: (title: HostNodeRow['title']) => (
-      <CloudProviderIconWithTitle provider={title?.cloudProvider} text={title.name} title={<TruncateLinkWithTooltip
+      <CloudProviderIconWithTitle
+        provider={title?.cloudProvider}
         text={title.name}
-        linkProps={{
-          app: 'metrics',
-          pathname: `/detail/host/${title.name}`,
-        }}
-      />} />
+        title={
+          <TruncateLinkWithTooltip
+            text={title.name}
+            linkProps={{
+              app: 'metrics',
+              pathname: `/detail/host/${title.name}`,
+            }}
+          />
+        }
+      />
     ),
   },
   {
