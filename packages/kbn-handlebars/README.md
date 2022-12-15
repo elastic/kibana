@@ -129,47 +129,14 @@ Output:
       },
       params: [],
       hash: undefined,
-      escaped: true,
-      strip: { open: false, close: false }
-    }
-  ],
-  strip: {}
-}
-```
-
-You can also filter which properties not to display, e.g:
-
-```sh
-./packages/kbn-handlebars/scripts/print_ast.js '{{#myBlock}}Hello {{name}}{{/myBlock}}' params,hash,loc,strip,data,depth,parts,inverse,openStrip,inverseStrip,closeStrip,blockParams,escaped
-```
-
-Output:
-
-```js
-{
-  type: 'Program',
-  body: [
-    {
-      type: 'BlockStatement',
-      path: { type: 'PathExpression', original: 'myBlock' },
-      program: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ContentStatement',
-            original: 'Hello ',
-            value: 'Hello '
-          },
-          {
-            type: 'MustacheStatement',
-            path: { type: 'PathExpression', original: 'name' }
-          }
-        ]
-      }
+      escaped: true
     }
   ]
 }
 ```
+
+By default certain properties will be hidden in the output.
+For more control over the output, check out the options by running the script without any arguments.
 
 ### Print generated code
 

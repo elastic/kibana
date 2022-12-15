@@ -310,7 +310,6 @@ export const getTopNavConfig = (
               );
               const updatedWithMeta = {
                 ...navigateToLensConfig,
-                savedObjectId: visInstance.vis.id,
                 embeddableId,
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
                 originatingApp,

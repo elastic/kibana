@@ -22,7 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardVisualizations = getService('dashboardVisualizations');
   const dashboardExpect = getService('dashboardExpect');
 
-  describe('create and add embeddables', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/147626
+  describe.skip('create and add embeddables', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(

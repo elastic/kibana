@@ -16,11 +16,10 @@ import type { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 import type { PluginState } from '../../common';
-import { API_BASE_PATH, testGuideConfig } from '../../common';
+import { API_BASE_PATH, testGuideConfig, testGuideId } from '../../common';
 import { apiService } from '../services/api';
 import type { GuidedOnboardingApi } from '../types';
 import {
-  testGuide,
   testGuideStep1ActiveState,
   testGuideStep1InProgressState,
   testGuideStep2InProgressState,
@@ -28,6 +27,7 @@ import {
   testGuideStep3ActiveState,
   readyToCompleteGuideState,
   mockPluginStateNotStarted,
+  mockPluginStateInProgress,
 } from '../services/api.mocks';
 import { GuidePanel } from './guide_panel';
 
@@ -35,7 +35,7 @@ const applicationMock = applicationServiceMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();
 
 const mockGetResponse = (path: string, pluginState: PluginState) => {
-  if (path === `${API_BASE_PATH}/configs/${testGuide}`) {
+  if (path === `${API_BASE_PATH}/configs/${testGuideId}`) {
     return Promise.resolve({
       config: testGuideConfig,
     });
@@ -83,11 +83,10 @@ describe('Guided setup', () => {
   describe('Button component', () => {
     describe('when a guide is active', () => {
       it('button is enabled', async () => {
-        const { exists, find } = await setupComponentWithPluginStateMock(httpClient, {
-          status: 'in_progress',
-          isActivePeriod: true,
-          activeGuide: testGuideStep1ActiveState,
-        });
+        const { exists, find } = await setupComponentWithPluginStateMock(
+          httpClient,
+          mockPluginStateInProgress
+        );
         expect(exists('guideButton')).toBe(true);
         expect(find('guideButton').text()).toEqual('Setup guide');
         expect(exists('guideButtonRedirect')).toBe(false);
@@ -226,16 +225,26 @@ describe('Guided setup', () => {
           expect(exists('guideButton')).toBe(false);
         });
       });
+
+      describe('when there is an error', function () {
+        test('displays the header button that toggles the panel', async () => {
+          const { exists } = await setupComponentWithPluginStateMock(httpClient, {
+            status: 'error',
+            isActivePeriod: false,
+          });
+          expect(exists('guideButtonRedirect')).toBe(false);
+          expect(exists('guideButton')).toBe(true);
+        });
+      });
     });
   });
 
   describe('Panel component', () => {
     test('if a guide is active, the button click opens the panel', async () => {
-      const { exists, find, component } = await setupComponentWithPluginStateMock(httpClient, {
-        status: 'in_progress',
-        isActivePeriod: true,
-        activeGuide: testGuideStep1ActiveState,
-      });
+      const { exists, find, component } = await setupComponentWithPluginStateMock(
+        httpClient,
+        mockPluginStateInProgress
+      );
       find('guideButton').simulate('click');
       component.update();
 
@@ -353,11 +362,7 @@ describe('Guided setup', () => {
             activeGuide: testGuideStep1InProgressState,
           },
         });
-        testBed = await setupComponentWithPluginStateMock(httpClient, {
-          status: 'in_progress',
-          isActivePeriod: true,
-          activeGuide: testGuideStep1ActiveState,
-        });
+        testBed = await setupComponentWithPluginStateMock(httpClient, mockPluginStateInProgress);
         const { exists, find, component } = testBed;
         find('guideButton').simulate('click');
         component.update();
@@ -437,11 +442,10 @@ describe('Guided setup', () => {
       });
 
       test('renders the step description list as an unordered list', async () => {
-        const { find, component } = await setupComponentWithPluginStateMock(httpClient, {
-          status: 'in_progress',
-          isActivePeriod: true,
-          activeGuide: testGuideStep1ActiveState,
-        });
+        const { find, component } = await setupComponentWithPluginStateMock(
+          httpClient,
+          mockPluginStateInProgress
+        );
         find('guideButton').simulate('click');
         component.update();
 
@@ -457,6 +461,18 @@ describe('Guided setup', () => {
             )
         ).toBe(true);
       });
+
+      it('renders a link in the step description', async () => {
+        const { find, exists, component } = await setupComponentWithPluginStateMock(httpClient, {
+          status: 'in_progress',
+          isActivePeriod: true,
+          activeGuide: testGuideStep2InProgressState,
+        });
+        find('guideButton').simulate('click');
+        component.update();
+
+        expect(exists('guidePanelStepDescriptionLink')).toBe(true);
+      });
     });
 
     describe('Quit guide modal', () => {
@@ -467,11 +483,7 @@ describe('Guided setup', () => {
             isActivePeriod: true,
           },
         });
-        testBed = await setupComponentWithPluginStateMock(httpClient, {
-          status: 'in_progress',
-          isActivePeriod: true,
-          activeGuide: testGuideStep1ActiveState,
-        });
+        testBed = await setupComponentWithPluginStateMock(httpClient, mockPluginStateInProgress);
 
         const { find, component, exists } = testBed;
         find('guideButton').simulate('click');
@@ -509,6 +521,35 @@ describe('Guided setup', () => {
 
         expect(exists('onboarding--quitGuideModal')).toBe(false);
         expect(exists('guideButton')).toBe(true);
+      });
+    });
+
+    describe('error state', () => {
+      it('plugin state is error', async () => {
+        const { exists, find, component } = await setupComponentWithPluginStateMock(httpClient, {
+          status: 'error',
+          isActivePeriod: false,
+        });
+        find('guideButton').simulate('click');
+        component.update();
+        expect(exists('guideErrorSection')).toBe(true);
+      });
+      const mockGuideConfigNotFound = (path: string, pluginState: PluginState) => {
+        if (path === `${API_BASE_PATH}/configs/${testGuideId}`) {
+          return Promise.reject('not found');
+        }
+        return Promise.resolve({ pluginState });
+      };
+      it('guide is active but no guide config', async () => {
+        httpClient.get.mockImplementation((path) =>
+          mockGuideConfigNotFound(path as unknown as string, mockPluginStateInProgress)
+        );
+        apiService.setup(httpClient, true);
+        const { exists, find, component } = await setupGuidePanelComponent(apiService);
+        find('guideButton').simulate('click');
+        component.update();
+
+        expect(exists('guideErrorSection')).toBe(true);
       });
     });
   });

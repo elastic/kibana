@@ -7,6 +7,9 @@
 
 import React from 'react';
 import { Redirect, useParams } from 'react-router-dom';
+import { EuiPanel } from '@elastic/eui';
+import { AlertDefaultsForm } from './alerting_defaults/alert_defaults_form';
+import { ProjectAPIKeys } from './project_api_keys/project_api_keys';
 import { SettingsTabId } from './page_header';
 import { DataRetentionTab } from './data_retention';
 import { useSettingsBreadcrumbs } from './use_settings_breadcrumbs';
@@ -19,12 +22,18 @@ export const SettingsPage = () => {
 
   const renderTab = () => {
     switch (tabId) {
+      case 'api-keys':
+        return <ProjectAPIKeys />;
       case 'private-locations':
         return <ManagePrivateLocations />;
       case 'data-retention':
         return <DataRetentionTab />;
       case 'alerting':
-        return <div>TODO: Alerting</div>;
+        return (
+          <EuiPanel hasShadow={false} hasBorder={true}>
+            <AlertDefaultsForm />
+          </EuiPanel>
+        );
       default:
         return <Redirect to="/settings/alerting" />;
     }
