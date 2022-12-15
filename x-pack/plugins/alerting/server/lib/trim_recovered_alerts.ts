@@ -33,13 +33,13 @@ export function trimRecoveredAlerts<
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupIds>
   >
 ): TrimmedRecoveredAlertsResult<State, Context, RecoveryActionGroupIds> {
-  const ra = map(recoveredAlerts, (value, key) => {
+  const alerts = map(recoveredAlerts, (value, key) => {
     return {
       index: key,
       flappingHistory: value.getFlappingHistory() || [],
     };
   });
-  const earlyRecoveredAlerts = alertFactory.alertLimit.trimRecovered(ra);
+  const earlyRecoveredAlerts = alertFactory.alertLimit.trimRecovered(alerts);
   // Dropping the "early recovered" alerts for now.
   // In #143445 we will want to recover these alerts and set flapping to false
   earlyRecoveredAlerts.forEach((alert) => {

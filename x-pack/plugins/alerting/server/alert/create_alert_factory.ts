@@ -11,7 +11,7 @@ import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert, PublicAlert } from './alert';
 import { processAlerts } from '../lib';
 
-export interface RecoveredTrimOpts {
+export interface TrimRecoveredOpts {
   index: number | string;
   flappingHistory: boolean[];
   trackedEvents?: boolean;
@@ -27,7 +27,7 @@ export interface AlertFactory<
     getValue: () => number;
     setLimitReached: (reached: boolean) => void;
     checkLimitUsage: () => void;
-    trimRecovered: (recoveredAlerts: RecoveredTrimOpts[]) => RecoveredTrimOpts[];
+    trimRecovered: (recoveredAlerts: TrimRecoveredOpts[]) => TrimRecoveredOpts[];
   };
   hasReachedAlertLimit: () => boolean;
   done: () => AlertFactoryDoneUtils<State, Context, ActionGroupIds>;
@@ -123,8 +123,8 @@ export function createAlertFactory<
           );
         }
       },
-      trimRecovered: (recoveredAlerts: RecoveredTrimOpts[]) => {
-        let earlyRecoveredAlerts: RecoveredTrimOpts[] = [];
+      trimRecovered: (recoveredAlerts: TrimRecoveredOpts[]) => {
+        let earlyRecoveredAlerts: TrimRecoveredOpts[] = [];
         if (recoveredAlerts.length > maxAlerts) {
           recoveredAlerts.sort((a, b) => {
             return a.flappingHistory.length - b.flappingHistory.length;
@@ -187,7 +187,7 @@ export function getPublicAlertFactory<
     alertLimit: {
       getValue: (): number => alertFactory.alertLimit.getValue(),
       setLimitReached: (...args): void => alertFactory.alertLimit.setLimitReached(...args),
-      trimRecovered: (...args): RecoveredTrimOpts[] =>
+      trimRecovered: (...args): TrimRecoveredOpts[] =>
         alertFactory.alertLimit.trimRecovered(...args),
     },
     done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => alertFactory.done(),
