@@ -527,7 +527,7 @@ export class SearchInterceptor {
       });
     } else if (e.constructor.name === 'HttpFetchError' || e instanceof BfetchRequestError) {
       const defaultMsg = i18n.translate('data.errors.fetchError', {
-        defaultMessage: 'Please check your network connection and try again.',
+        defaultMessage: 'Check your network connection and try again.',
       });
 
       this.deps.toasts.addDanger({
