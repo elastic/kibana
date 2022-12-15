@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const finalChangePointGroups = [
+import type { ChangePointGroup } from '@kbn/ml-agg-utils';
+
+export const finalChangePointGroups: ChangePointGroup[] = [
   {
     id: '2038579476',
     group: [
