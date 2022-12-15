@@ -211,12 +211,6 @@ export interface ActionVariable {
   description: string;
   deprecated?: boolean;
   useWithTripleBracesInTemplates?: boolean;
-
-  // If this callback function is defined, this
-  // action variable will be available for summary
-  // alerts and will be generated from the list of summary
-  // alerts
-  summaryBuilder?: (alerts: SummarizedAlertsWithAll) => unknown;
 }
 
 export interface RuleMonitoringHistory extends SavedObjectAttributes {
