@@ -6,17 +6,22 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { debounce } from 'lodash';
-import { i18n } from '@kbn/i18n';
 
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
+import { SloListSearchFilterSortBar, SortItem, SortType } from './slo_list_search_filter_sort_bar';
 import { SloListItem } from './slo_list_item';
 import { SloListEmpty } from './slo_list_empty';
+import { sortSlos } from '../helpers/sort_slos';
+import { filterSlos } from '../helpers/filter_slos';
 
 export function SloList() {
   const [activePage, setActivePage] = useState(0);
+
   const [query, setQuery] = useState('');
+  const [sort, setSort] = useState<SortType | undefined>();
+  const [filters, setFilters] = useState<SortItem[]>([]);
 
   const [deleting, setIsDeleting] = useState(false);
   const [shouldReload, setShouldReload] = useState(false);
@@ -46,7 +51,7 @@ export function SloList() {
     setShouldReload(true);
   };
 
-  const handleChange = useMemo(
+  const handleChangeQuery = useMemo(
     () =>
       debounce((e: React.ChangeEvent<HTMLInputElement>) => {
         setQuery(e.target.value);
@@ -54,27 +59,36 @@ export function SloList() {
     []
   );
 
+  const handleChangeSort = (newSort: SortType) => {
+    setSort(newSort);
+  };
+
+  const handleChangeFilter = (newFilters: SortItem[]) => {
+    setFilters(newFilters);
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
-        <EuiFieldSearch
-          fullWidth
-          isLoading={loading || deleting}
-          onChange={handleChange}
-          placeholder={i18n.translate('xpack.observability.slos.list.search', {
-            defaultMessage: 'Search',
-          })}
+        <SloListSearchFilterSortBar
+          loading={loading || deleting}
+          onChangeQuery={handleChangeQuery}
+          onChangeSort={handleChangeSort}
+          onChangeStatusFilter={handleChangeFilter}
         />
       </EuiFlexItem>
 
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="s">
           {slos.length ? (
-            slos.map((slo) => (
-              <EuiFlexItem key={slo.id}>
-                <SloListItem slo={slo} onDeleted={handleDeleted} onDeleting={handleDeleting} />
-              </EuiFlexItem>
-            ))
+            slos
+              .filter(filterSlos(filters))
+              .sort(sortSlos(sort))
+              .map((slo) => (
+                <EuiFlexItem key={slo.id}>
+                  <SloListItem slo={slo} onDeleted={handleDeleted} onDeleting={handleDeleting} />
+                </EuiFlexItem>
+              ))
           ) : !loading ? (
             <SloListEmpty />
           ) : null}
