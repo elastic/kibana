@@ -20,9 +20,11 @@ const cloudIcons: Record<CloudProviders, string> = {
 export const CloudProviderIconWithTitle = ({
   provider,
   title,
+  text,
 }: {
   provider?: CloudProviders | null;
-  title: string;
+  title?: React.ReactNode;
+  text: string;
 }) => {
   return (
     <EuiFlexGroup
@@ -35,13 +37,15 @@ export const CloudProviderIconWithTitle = ({
         <EuiIcon
           type={(provider && cloudIcons[provider]) || cloudIcons.unknownProvider}
           size="m"
-          title={title}
+          title={text}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-textTruncate">
-        <EuiText size="relative" className="eui-textTruncate">
-          {title}
-        </EuiText>
+        {title ?? (
+          <EuiText size="relative" className="eui-textTruncate">
+            {text}
+          </EuiText>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -2460,7 +2460,6 @@
     "discover.viewAlert.documentsMayVaryInfoTitle": "显示的文档可能有所不同",
     "discover.viewAlert.searchSourceErrorTitle": "提取搜索源时出错",
     "discover.viewModes.document.label": "文档",
-    "discover.viewModes.fieldStatistics.betaTitle": "公测版",
     "discover.viewModes.fieldStatistics.label": "字段统计信息",
     "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} 已添加",
     "embeddableApi.attributeService.saveToLibraryError": "保存时出错。错误：{errorMessage}",
