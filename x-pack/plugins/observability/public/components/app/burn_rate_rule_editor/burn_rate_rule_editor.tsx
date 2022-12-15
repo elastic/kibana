@@ -9,13 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
 
+import { toMinutes } from '../../../utils/slo/duration';
 import { useFetchSloDetails } from '../../../pages/slo_details/hooks/use_fetch_slo_details';
 import { BurnRateRuleParams, Duration, DurationUnit, SLO } from '../../../typings';
 import { SloSelector } from './slo_selector';
 import { BurnRate } from './burn_rate';
 import { LongWindowDuration } from './long_window_duration';
 import { ValidationBurnRateRuleResult } from './validation';
-import { toMinutes } from '@kbn/observability-plugin/public/utils/slo/duration';
 
 type Props = Pick<
   RuleTypeParamsExpressionProps<BurnRateRuleParams>,

@@ -16,8 +16,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { toMinutes } from '@kbn/observability-plugin/public/utils/slo/duration';
 import React, { ChangeEvent, useState } from 'react';
+import { toMinutes } from '../../../utils/slo/duration';
 
 import { Duration, DurationUnit } from '../../../typings';
 
