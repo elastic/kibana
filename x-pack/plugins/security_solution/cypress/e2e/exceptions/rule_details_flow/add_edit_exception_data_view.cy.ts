@@ -9,11 +9,19 @@ import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
 import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { goToClosedAlerts, goToOpenedAlerts } from '../../../tasks/alerts';
 import {
+  addExceptionFromFirstAlert,
+  goToClosedAlerts,
+  goToOpenedAlerts,
+} from '../../../tasks/alerts';
+import {
+  addExceptionConditions,
+  addExceptionFlyoutItemName,
   editException,
   editExceptionFlyoutItemName,
+  selectBulkCloseAlerts,
   submitEditedExceptionItem,
+  submitNewExceptionItem,
 } from '../../../tasks/exceptions';
 import {
   esArchiverLoad,
@@ -80,6 +88,48 @@ describe('Add exception using data views from rule details', () => {
 
   afterEach(() => {
     esArchiverUnload('exceptions_2');
+  });
+
+  it('Creates an exception item from alert actions overflow menu', () => {
+    goToAlertsTab();
+    addExceptionFromFirstAlert();
+    addExceptionFlyoutItemName(ITEM_NAME);
+    addExceptionConditions({
+      field: 'agent.name',
+      operator: 'is',
+      values: ['foo'],
+    });
+    selectBulkCloseAlerts();
+    submitNewExceptionItem();
+
+    // Alerts table should now be empty from having added exception and closed
+    // matching alert
+    cy.get(EMPTY_ALERT_TABLE).should('exist');
+
+    // Closed alert should appear in table
+    goToClosedAlerts();
+    cy.get(ALERTS_COUNT).should('exist');
+    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
+
+    // Remove the exception and load an event that would have matched that exception
+    // to show that said exception now starts to show up again
+    goToExceptionsTab();
+
+    // when removing exception and again, no more exist, empty screen shows again
+    removeException();
+    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
+
+    // load more docs
+    esArchiverLoad('exceptions_2');
+
+    // now that there are no more exceptions, the docs should match and populate alerts
+    goToAlertsTab();
+    goToOpenedAlerts();
+    waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
+
+    cy.get(ALERTS_COUNT).should('exist');
+    cy.get(NUMBER_OF_ALERTS).should('have.text', '2 alerts');
   });
 
   it('Creates an exception item', () => {

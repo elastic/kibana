@@ -48,13 +48,12 @@ import {
 import { FIELD_INPUT } from '../screens/exceptions';
 
 export const addExceptionFromFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
-  cy.root()
-    .pipe(($el) => {
-      $el.find(ADD_EXCEPTION_BTN).trigger('click');
-      return $el.find(FIELD_INPUT);
-    })
-    .should('be.visible');
+  expandFirstAlertActions();
+  cy.wait(500);
+  cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).should('be.visible');
+  cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).first().click({ force: true });
+  cy.wait(500);
+  cy.get('[data-test-subj="addExceptionFlyout"]', { timeout: 10000 }).should('be.visible');
 };
 
 export const openAddEndpointExceptionFromFirstAlert = () => {
@@ -108,8 +107,9 @@ export const closeAlerts = () => {
 };
 
 export const expandFirstAlertActions = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.visible');
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+  cy.get(TIMELINE_CONTEXT_MENU_BTN, { timeout: 10000 }).should('be.visible');
+  cy.get(TIMELINE_CONTEXT_MENU_BTN, { timeout: 10000 }).first().click({ force: true });
+  cy.wait(500);
 };
 
 export const expandFirstAlert = () => {
