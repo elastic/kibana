@@ -514,4 +514,24 @@ export const generalSettings: RawSettingDefinition[] = [
     ),
     includeAgents: ['java'],
   },
+
+  {
+    key: 'log_sending',
+    type: 'boolean',
+    defaultValue: 'false',
+    label: i18n.translate('xpack.apm.agentConfig.logSending.label', {
+      defaultMessage: 'Log sending (experimental)',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.logSending.description',
+      {
+        defaultMessage:
+          'Experimental, requires latest version of the Java agent.\n' +
+          '\n' +
+          'If set to `true`,\n' +
+          'agent will send logs directly to APM server.'
+      }
+    ),
+    includeAgents: ['java'],
+  },
 ];
