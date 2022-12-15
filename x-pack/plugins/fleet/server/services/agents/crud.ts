@@ -155,7 +155,8 @@ export function getElasticsearchQuery(
   kuery: string,
   showInactive = false,
   includeHosted = false,
-  hostedPolicies: string[] = []
+  hostedPolicies: string[] = [],
+  extraFilters: string[] = []
 ): estypes.QueryDslQueryContainer | undefined {
   const filters = [];
 
@@ -170,6 +171,8 @@ export function getElasticsearchQuery(
   if (!includeHosted && hostedPolicies.length > 0) {
     filters.push('NOT (policy_id:{policyIds})'.replace('{policyIds}', hostedPolicies.join(',')));
   }
+
+  filters.push(...extraFilters);
 
   const kueryNode = _joinFilters(filters);
   return kueryNode ? toElasticsearchQuery(kueryNode) : undefined;

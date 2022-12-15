@@ -63,6 +63,7 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
         actionId: this.actionParams.actionId,
         total: this.actionParams.total,
         kuery: this.actionParams.kuery,
+        isRetry: !!this.retryParams.retryCount,
       }
     );
 
@@ -82,6 +83,7 @@ export async function updateTagsBatch(
     actionId?: string;
     total?: number;
     kuery?: string;
+    isRetry?: boolean;
   }
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
@@ -108,7 +110,13 @@ export async function updateTagsBatch(
     });
     const hostedIds = hostedPolicies.items.map((item) => item.id);
 
-    query = getElasticsearchQuery(options.kuery, false, false, hostedIds);
+    const extraFilters = [];
+    if (options.tagsToAdd.length === 1 && options.tagsToRemove.length === 0) {
+      extraFilters.push(`NOT (tags:${options.tagsToAdd[0]})`);
+    } else if (options.tagsToRemove.length === 1) {
+      extraFilters.push(`tags:${options.tagsToRemove[0]}`);
+    }
+    query = getElasticsearchQuery(options.kuery, false, false, hostedIds, extraFilters);
   } else {
     query = {
       terms: {
@@ -150,7 +158,7 @@ export async function updateTagsBatch(
           updatedAt: new Date().toISOString(),
         },
       },
-      conflicts: 'abort', // relying on the task to retry in case of conflicts
+      conflicts: 'proceed', // relying on the task to retry in case of conflicts - retry only conflicted agents
     });
   } catch (error) {
     throw new Error('Caught error: ' + JSON.stringify(error).slice(0, 1000));
@@ -161,14 +169,17 @@ export async function updateTagsBatch(
   const actionId = options.actionId ?? uuid();
   const total = options.total ?? givenAgents.length;
 
-  // creating an action doc so that update tags  shows up in activity
-  await createAgentAction(esClient, {
-    id: actionId,
-    agents: options.kuery === undefined ? agentIds : [],
-    created_at: new Date().toISOString(),
-    type: 'UPDATE_TAGS',
-    total,
-  });
+  if (!options.isRetry) {
+    // creating an action doc so that update tags  shows up in activity
+    await createAgentAction(esClient, {
+      id: actionId,
+      agents: options.kuery === undefined ? agentIds : [],
+      created_at: new Date().toISOString(),
+      type: 'UPDATE_TAGS',
+      // for kuery cases, the total can be less than the initial selection, as we filter out tags that are already added/removed
+      total: options.kuery === undefined ? total : res.total,
+    });
+  }
 
   // creating unique 0...n ids to use as agentId, as we don't have all agent ids in case of action by kuery
   const getArray = (count: number) => [...Array(count).keys()];
@@ -198,17 +209,19 @@ export async function updateTagsBatch(
   }
 
   // writing hosted agent errors - hosted agents filtered out
-  if ((res.total ?? total) < total) {
+  if (options.kuery === undefined && hostedAgentIds.length > 0) {
     await bulkCreateAgentActionResults(
       esClient,
-      (options.kuery === undefined ? hostedAgentIds : getArray(total - (res.total ?? total))).map(
-        (id) => ({
-          agentId: id + '',
-          actionId,
-          error: hostedAgentError,
-        })
-      )
+      hostedAgentIds.map((id) => ({
+        agentId: id + '',
+        actionId,
+        error: hostedAgentError,
+      }))
     );
+  }
+
+  if (res.version_conflicts ?? 0 > 0) {
+    throw new Error(`version conflict of ${res.version_conflicts} agents`);
   }
 
   return { actionId, updated: res.updated, took: res.took };

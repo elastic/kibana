@@ -10,6 +10,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 
 import { createClientMock } from './action.mock';
 import { updateAgentTags } from './update_agent_tags';
+import { updateTagsBatch } from './update_agent_tags_action_runner';
 
 jest.mock('../app_context', () => {
   return {
@@ -28,6 +29,7 @@ jest.mock('../agent_policy', () => {
   return {
     agentPolicyService: {
       getByIDs: jest.fn().mockResolvedValue([{ id: 'hosted-agent-policy', is_managed: true }]),
+      list: jest.fn().mockResolvedValue({ items: [] }),
     },
   };
 });
@@ -73,7 +75,7 @@ describe('update_agent_tags', () => {
 
     expect(esClient.updateByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        conflicts: 'abort',
+        conflicts: 'proceed',
         index: '.fleet-agents',
         query: { terms: { _id: ['agent1'] } },
         script: expect.objectContaining({
@@ -152,6 +154,19 @@ describe('update_agent_tags', () => {
     expect(errorResults.body[1].error).toEqual('error reason');
   });
 
+  it('should throw error on version conflicts', async () => {
+    esClient.updateByQuery.mockReset();
+    esClient.updateByQuery.mockResolvedValue({
+      failures: [],
+      updated: 0,
+      version_conflicts: 100,
+    } as any);
+
+    await expect(
+      updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], [])
+    ).rejects.toThrowError('version conflict of 100 agents');
+  });
+
   it('should run add tags async when actioning more agents than batch size', async () => {
     esClient.search.mockResolvedValue({
       hits: {
@@ -179,5 +194,80 @@ describe('update_agent_tags', () => {
     await updateAgentTags(soClient, esClient, { kuery: '', batchSize: 2 }, ['newName'], []);
 
     expect(mockRunAsync).toHaveBeenCalled();
+  });
+
+  it('should add tags filter if only one tag to add', async () => {
+    await updateTagsBatch(
+      soClient,
+      esClient,
+      [],
+      {},
+      {
+        tagsToAdd: ['new'],
+        tagsToRemove: [],
+        kuery: '',
+      }
+    );
+
+    const updateByQuery = esClient.updateByQuery.mock.calls[0][0] as any;
+    expect(updateByQuery.query).toEqual({
+      bool: {
+        filter: [
+          { bool: { minimum_should_match: 1, should: [{ match: { active: true } }] } },
+          {
+            bool: {
+              must_not: { bool: { minimum_should_match: 1, should: [{ match: { tags: 'new' } }] } },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('should add tags filter if only one tag to remove', async () => {
+    await updateTagsBatch(
+      soClient,
+      esClient,
+      [],
+      {},
+      {
+        tagsToAdd: [],
+        tagsToRemove: ['remove'],
+        kuery: '',
+      }
+    );
+
+    const updateByQuery = esClient.updateByQuery.mock.calls[0][0] as any;
+    expect(JSON.stringify(updateByQuery.query)).toContain(
+      '{"bool":{"should":[{"match":{"tags":"remove"}}],"minimum_should_match":1}}'
+    );
+  });
+
+  it('should write total from updateByQuery result if query returns less results', async () => {
+    esClient.updateByQuery.mockReset();
+    esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 0, total: 50 } as any);
+
+    await updateTagsBatch(
+      soClient,
+      esClient,
+      [],
+      {},
+      {
+        tagsToAdd: ['new'],
+        tagsToRemove: [],
+        kuery: '',
+        total: 100,
+      }
+    );
+
+    const agentAction = esClient.create.mock.calls[0][0] as any;
+    expect(agentAction?.body).toEqual(
+      expect.objectContaining({
+        action_id: expect.anything(),
+        agents: [],
+        type: 'UPDATE_TAGS',
+        total: 50,
+      })
+    );
   });
 });
