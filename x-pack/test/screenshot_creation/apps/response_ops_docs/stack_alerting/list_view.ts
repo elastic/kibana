@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         thresholdComparator: '>',
         threshold: [1000],
       },
-      rule_type_id: '.index-threshold',
+      ruleTypeId: '.index-threshold',
       schedule: { interval: '1m' },
       tags: [],
     };
