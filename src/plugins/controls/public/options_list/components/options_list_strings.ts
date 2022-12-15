@@ -48,6 +48,12 @@ export const OptionsListStrings = {
         defaultMessage: 'Popover for {fieldName} control',
         values: { fieldName },
       }),
+    getSuggestionAriaLabel: (key: string, documentCount: number) =>
+      i18n.translate('controls.optionsList.popover.suggestionsAriaLabel', {
+        defaultMessage:
+          '{key}, which appears in {documentCount} {documentCount, plural, one {document} other {documents}}.',
+        values: { key, documentCount },
+      }),
     getLoadingMessage: () =>
       i18n.translate('controls.optionsList.popover.loading', {
         defaultMessage: 'Loading options',
@@ -126,7 +132,7 @@ export const OptionsListStrings = {
       }),
     getSortDisabledTooltip: () =>
       i18n.translate('controls.optionsList.popover.sortDisabledTooltip', {
-        defaultMessage: 'Ignore sorting when “Show only selected” is true.',
+        defaultMessage: 'Sorting is ignored when “Show only selected” is true.',
       }),
     getDocumentCountTooltip: (documentCount: number) =>
       i18n.translate('controls.optionsList.popover.documentCountTooltip', {

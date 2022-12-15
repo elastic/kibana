@@ -13,7 +13,7 @@ import {
   ControlWidth,
 } from '@kbn/controls-plugin/common';
 import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
-import { SortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
+import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 import { FtrService } from '../ftr_provider_context';
@@ -25,7 +25,7 @@ const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
 };
 
 interface OptionsListAdditionalSettings {
-  defaultSortType?: SortingType;
+  defaultSortType?: OptionsListSortingType;
   ignoreTimeout?: boolean;
   allowMultiple?: boolean;
   hideExclude?: boolean;
@@ -394,7 +394,7 @@ export class DashboardPageControls extends FtrService {
     await this.find.clickByCssSelector('.euiFormControlLayoutClearButton');
   }
 
-  public async optionsListPopoverSetSort(sort: SortingType) {
+  public async optionsListPopoverSetSort(sort: OptionsListSortingType) {
     this.log.debug(`select sorting type for suggestions`);
     await this.optionsListPopoverAssertOpen();
 

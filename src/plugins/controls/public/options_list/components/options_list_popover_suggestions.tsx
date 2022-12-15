@@ -48,7 +48,6 @@ export const OptionsListPopoverSuggestions = ({
   const hideExists = select((state) => state.explicitInput.hideExists);
 
   const loading = select((state) => state.output.loading);
-  console.log(invalidSelections, availableOptions);
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
   const invalidSelectionsSet = useMemo(
@@ -122,10 +121,14 @@ export const OptionsListPopoverSuggestions = ({
               ? 'optionsList__selectionInvalid'
               : undefined
           }
+          aria-label={OptionsListStrings.popover.getSuggestionAriaLabel(
+            key,
+            availableOptions?.[key].doc_count ?? 0
+          )}
         >
           <EuiFlexGroup>
             <EuiFlexItem>{`${key}`}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} tabIndex={-1}>
               {availableOptions && availableOptions[key] && (
                 <EuiToolTip
                   content={OptionsListStrings.popover.getDocumentCountTooltip(
@@ -133,7 +136,7 @@ export const OptionsListPopoverSuggestions = ({
                   )}
                   position={'right'}
                 >
-                  <EuiBadge title={undefined} tabIndex={0} className="eui-textNumber">
+                  <EuiBadge title={undefined} className="eui-textNumber">
                     {`${availableOptions[key].doc_count}`}
                   </EuiBadge>
                 </EuiToolTip>
