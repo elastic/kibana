@@ -86,6 +86,7 @@ describe('PluginsService', () => {
         plugin: createManifest('pluginC', { required: ['pluginA'], optional: ['nonexist'] }),
       },
     ];
+    // @ts-expect-error
     mockSetupDeps = {
       analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
       application: applicationServiceMock.createInternalSetupContract(),
@@ -103,6 +104,7 @@ describe('PluginsService', () => {
       getStartServices: expect.any(Function),
       injectedMetadata: pick(mockSetupDeps.injectedMetadata, 'getInjectedVar'),
     };
+    // @ts-expect-error
     mockStartDeps = {
       analytics: analyticsServiceMock.createAnalyticsServiceStart(),
       application: applicationServiceMock.createInternalStartContract(),
