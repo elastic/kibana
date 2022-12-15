@@ -81,13 +81,13 @@ const renderCellAction = (
   if (!cellActions?.[index]) {
     return null;
   }
-  const cellAction = (
-    cellActions[index] as (props: EuiDataGridColumnCellActionProps) => ReactNode
-  )({
-    rowIndex: 0,
-    columnId: 'a',
-    Component: () => <></>,
-  } as unknown as EuiDataGridColumnCellActionProps);
+  const cellAction = (cellActions[index] as (props: EuiDataGridColumnCellActionProps) => ReactNode)(
+    {
+      rowIndex: 0,
+      columnId: 'a',
+      Component: () => <></>,
+    } as unknown as EuiDataGridColumnCellActionProps
+  );
   return shallow(<div>{cellAction}</div>);
 };
 
@@ -159,7 +159,9 @@ describe('getContentData', () => {
         columnCellValueActions: [[cellValueAction]],
       });
       const wrapper = renderCellAction(cellActions, 2);
-      expect(wrapper?.find('Component').prop('data-test-subj')).toEqual('lensDatatableCellAction-test');
+      expect(wrapper?.find('Component').prop('data-test-subj')).toEqual(
+        'lensDatatableCellAction-test'
+      );
     });
   });
 });
