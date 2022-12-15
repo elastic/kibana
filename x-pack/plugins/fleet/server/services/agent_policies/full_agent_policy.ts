@@ -214,6 +214,7 @@ export function transformOutputToFullPolicyOutput(
     compression_level,
     queue_flush_timeout,
     max_batch_bytes,
+    mem_queue_events,
   } = output;
   /* eslint-enable @typescript-eslint/naming-convention */
 
@@ -225,12 +226,16 @@ export function transformOutputToFullPolicyOutput(
   if (!isShipperDisabled) {
     shipperDiskQueueData = buildShipperQueueData(output);
   }
-
+  /*
+    TODO: Once the Elastic-Shipper is ready,
+    Verify that these parameters have the correct names and structure
+  */
   const generalShipperData = {
     loadbalance,
     compression_level,
     queue_flush_timeout,
     max_batch_bytes,
+    mem_queue_events,
   };
 
   const newOutput: FullAgentPolicyOutput = {
@@ -302,12 +307,6 @@ function buildShipperQueueData(output: Output) {
     disk_queue_compression_enabled,
   } = output;
   if (!disk_queue_enabled) return {};
-  /*
-    TODO: Add following parameters once the shipper work is completed:
-    mem_queue_events
-    queue_flush_timeout
-    max_batch_bytes
-  */
 
   return {
     shipper: {
