@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import uuid from 'uuid/v4';
 import { lastValueFrom } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -30,7 +30,7 @@ const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 interface Props {
   data: DataPublicPluginStart;
-  dataView: DataViewSpec;
+  dataView: DataView;
   navigation: NavigationPublicPluginStart;
 }
 
@@ -66,7 +66,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
         ...filters,
         ...controlFilters,
         data.query.timefilter.timefilter.createFilter(dataView, timeRange),
-      ]);
+      ] as Filter[]);
       searchSource.setField('query', query);
       const { rawResponse: resp } = await lastValueFrom(
         searchSource.fetch$({
@@ -75,8 +75,9 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           legacyHitsTotal: false,
         })
       );
-      if (resp.hits?.total?.value !== undefined) {
-        setHits(resp.hits.total.value);
+      const total = resp.hits?.total as undefined | { relation: string; value: number };
+      if (total !== undefined) {
+        setHits(total.value);
       }
       setIsSearching(false);
     };
@@ -86,7 +87,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
         // ignore abort errors
       } else {
         // eslint-disable-next-line no-console
-        console.error(err);
+        console.error(error);
       }
     });
 
@@ -127,14 +128,14 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           filters={filters}
           getInitialInput={async (initialInput, builder) => {
             await builder.addDataControlFromField(initialInput, {
-              dataViewId: dataView.id,
+              dataViewId: dataView.id!,
               title: 'Destintion country',
               fieldName: 'geo.dest',
               width: 'medium',
               grow: false,
             });
             await builder.addDataControlFromField(initialInput, {
-              dataViewId: dataView.id,
+              dataViewId: dataView.id!,
               fieldName: 'bytes',
               width: 'medium',
               grow: true,

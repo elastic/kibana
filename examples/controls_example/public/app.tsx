@@ -26,7 +26,7 @@ export const renderApp = async (
       <>
         <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
         <EuiSpacer size="xl" />
-        <BasicReduxExample dataViewId={dataViews[0].id} />
+        <BasicReduxExample dataViewId={dataViews[0].id!} />
       </>
     ) : (
       <div>{'Install web logs sample data to run controls examples.'}</div>
