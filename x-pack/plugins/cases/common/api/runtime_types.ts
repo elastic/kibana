@@ -123,3 +123,33 @@ export const jsonArrayRt: rt.Type<JsonArray> = rt.recursion('JsonArray', () =>
 export const jsonObjectRt: rt.Type<JsonObject> = rt.recursion('JsonObject', () =>
   rt.record(rt.string, jsonValueRt)
 );
+
+type Type = rt.InterfaceType<rt.Props> | GenericIntersectionC;
+
+export const getTypeForCertainFields = (type: Type, fields: string[] = []): Type => {
+  if (fields.length === 0) {
+    return type;
+  }
+
+  const codecProps = getProps(type) ?? {};
+  const typeProps: rt.Props = {};
+
+  for (const field of fields) {
+    if (codecProps[field]) {
+      typeProps[field] = codecProps[field];
+    }
+  }
+
+  return rt.type(typeProps);
+};
+
+export const getTypeForCertainFieldsFromArray = (
+  type: rt.ArrayType<Type>,
+  fields: string[] = []
+): rt.ArrayType<Type> => {
+  if (fields.length === 0) {
+    return type;
+  }
+
+  return rt.array(getTypeForCertainFields(type.type, fields));
+};

@@ -9,13 +9,21 @@ import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { pick } from 'lodash';
 
 import type { CasesBulkGetRequest, CaseResponse } from '../../../common/api';
-import { CasesBulkGetRequestRt, CasesResponseRt, excess, throwErrors } from '../../../common/api';
+import {
+  CasesBulkGetRequestRt,
+  CasesResponseRt,
+  excess,
+  throwErrors,
+  getTypeForCertainFieldsFromArray,
+} from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { asArray, flattenCaseSavedObject } from '../../common/utils';
 import { Operations } from '../../authorization';
 import type { CasesClientArgs } from '../types';
+import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 
 /**
  * Retrieves multiple cases by ids.
@@ -34,15 +42,15 @@ export const bulkGet = async (
   } = clientArgs;
 
   try {
-    const fields = asArray(params.fields);
+    const fields = includeFieldsRequiredForAuthentication(asArray(params.fields));
 
     const request = pipe(
       excess(CasesBulkGetRequestRt).decode({ ...params, fields }),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const cases = await caseService.getCases({ caseIds: request.ids, fields });
-
+    const finalFields = fields?.length ? [...fields, 'id', 'version'] : fields;
+    const cases = await caseService.getCases({ caseIds: request.ids, fields: finalFields });
     const validCases = cases.saved_objects.filter((caseInfo) => caseInfo.error === undefined);
 
     await authorization.ensureAuthorized({
@@ -50,10 +58,16 @@ export const bulkGet = async (
       entities: validCases.map((theCase) => ({ id: theCase.id, owner: theCase.attributes.owner })),
     });
 
-    const commentTotals = await attachmentService.getCaseCommentStats({
-      unsecuredSavedObjectsClient,
-      caseIds: validCases.map((theCase) => theCase.id),
-    });
+    const requestForTotals = ['totalComment', 'totalAlerts'].some((totalKey) =>
+      fields?.includes(totalKey)
+    );
+
+    const commentTotals = requestForTotals
+      ? await attachmentService.getCaseCommentStats({
+          unsecuredSavedObjectsClient,
+          caseIds: validCases.map((theCase) => theCase.id),
+        })
+      : new Map();
 
     const flattenedCases = validCases.map((theCase) => {
       const { alerts, userComments } = commentTotals.get(theCase.id) ?? {
@@ -61,14 +75,22 @@ export const bulkGet = async (
         userComments: 0,
       };
 
-      return flattenCaseSavedObject({
+      const flattenedCase = flattenCaseSavedObject({
         savedObject: theCase,
         totalComment: userComments,
         totalAlerts: alerts,
       });
+
+      if (!finalFields?.length) {
+        return flattenedCase;
+      }
+
+      return pick(flattenedCase, finalFields);
     });
 
-    return CasesResponseRt.encode(flattenedCases);
+    const typeToEncode = getTypeForCertainFieldsFromArray(CasesResponseRt, fields);
+
+    return typeToEncode.encode(flattenedCases);
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk get cases: ${params.ids.join(', ')}: ${error}`,
