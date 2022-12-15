@@ -105,3 +105,6 @@ export interface SettingsStart {
   client: IUiSettingsClient;
   globalClient: IUiSettingsClient;
 }
+
+/** @public */
+export type SettingsSetup = SettingsStart;

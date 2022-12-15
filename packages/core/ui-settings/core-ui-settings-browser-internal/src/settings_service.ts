@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { SettingsStart, SettingsSetup } from '@kbn/core-ui-settings-browser';
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
 import { UiSettingsGlobalClient } from './ui_settings_global_client';
@@ -27,7 +27,7 @@ export class SettingsService {
   private uiSettingsGlobalClient?: UiSettingsGlobalClient;
   private done$ = new Subject();
 
-  public setup({ http, injectedMetadata }: SettingsServiceDeps): SettingsStart {
+  public setup({ http, injectedMetadata }: SettingsServiceDeps): SettingsSetup {
     this.uiSettingsApi = new UiSettingsApi(http);
     http.addLoadingCountSource(this.uiSettingsApi.getLoadingCount$());
 
