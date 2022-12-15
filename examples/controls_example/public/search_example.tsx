@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import uuid from 'uuid/v4';
 import { lastValueFrom } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -22,25 +22,19 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  LazyControlGroupRenderer,
-  ControlGroupContainer,
-  useControlGroupContainerContext,
-  ControlStyle,
-} from '@kbn/controls-plugin/public';
+import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { PLUGIN_ID } from './constants';
 
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 interface Props {
-  data: DataPublicPluginStart; 
+  data: DataPublicPluginStart;
   dataView: DataViewSpec;
   navigation: NavigationPublicPluginStart;
 }
 
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
-  const [abortController, setAbortController] = useState(null);
   const [controlFilters, setControlFilters] = useState<Filter[]>([]);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
   const [hits, setHits] = useState(0);
@@ -58,42 +52,48 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
     });
     return () => {
       subscription.unsubscribe();
-    }
+    };
   }, [controlGroup]);
 
-  async function search() {
-    setIsSearching(true);
-    if (abortController) {
-      abortController.abort();
-      setAbortController(null);
-    }
-    const searchSource = await data.search.searchSource.create();
-    searchSource.setField('index', dataView);
-    searchSource.setField('size', 0);
-    searchSource.setField('filter', [
-      ...filters,
-      ...controlFilters,
-      data.query.timefilter.timefilter.createFilter(dataView, timeRange),
-    ]);
-    searchSource.setField('query', query);
-    const searchAbortController = new AbortController();
-    setAbortController(searchAbortController);
-    const { rawResponse: resp } = await lastValueFrom(
-      searchSource.fetch$({
-        abortSignal: searchAbortController.signal,
-        sessionId: uuid(),
-        legacyHitsTotal: false,
-      })
-    );
-    if (resp.hits?.total?.value !== undefined) {
-      setHits(resp.hits.total.value);
-    }
-    setIsSearching(false);
-  }
-
   useEffect(() => {
-    search();
-  }, [controlFilters, filters, query, timeRange]);
+    const abortController = new AbortController();
+    const search = async () => {
+      setIsSearching(true);
+      const searchSource = await data.search.searchSource.create();
+      searchSource.setField('index', dataView);
+      searchSource.setField('size', 0);
+      searchSource.setField('filter', [
+        ...filters,
+        ...controlFilters,
+        data.query.timefilter.timefilter.createFilter(dataView, timeRange),
+      ]);
+      searchSource.setField('query', query);
+      const { rawResponse: resp } = await lastValueFrom(
+        searchSource.fetch$({
+          abortSignal: abortController.signal,
+          sessionId: uuid(),
+          legacyHitsTotal: false,
+        })
+      );
+      if (resp.hits?.total?.value !== undefined) {
+        setHits(resp.hits.total.value);
+      }
+      setIsSearching(false);
+    };
+
+    search().catch((error) => {
+      if (error.name === 'AbortError') {
+        // ignore abort errors
+      } else {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
+    });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [controlFilters, data, dataView, filters, query, timeRange]);
 
   return (
     <>
@@ -102,7 +102,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
       </EuiTitle>
       <EuiText>
         <p>
-          Pass filters, query, and time range to narrow controls. Combine search bar filters with controls filters to narrow results.
+          Pass filters, query, and time range to narrow controls. Combine search bar filters with
+          controls filters to narrow results.
         </p>
       </EuiText>
       <EuiSpacer size="m" />
@@ -114,8 +115,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           filters={filters}
           indexPatterns={[dataView]}
           onFiltersUpdated={setFilters}
-          onQuerySubmit={({ dateRange, query }) => {
-            setQuery(query);
+          onQuerySubmit={({ dateRange, query: newQuery }) => {
+            setQuery(newQuery);
             setTimeRange(dateRange);
           }}
           query={query}
@@ -150,17 +151,14 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           query={query}
           timeRange={timeRange}
         />
-        {isSearching
-          ? <EuiLoadingSpinner size="l" />
-          : <EuiCallOut
-              title="Search results"
-            >
-              <p>
-                Hits: {hits}
-              </p>
-            </EuiCallOut>
-        }
+        {isSearching ? (
+          <EuiLoadingSpinner size="l" />
+        ) : (
+          <EuiCallOut title="Search results">
+            <p>Hits: {hits}</p>
+          </EuiCallOut>
+        )}
       </EuiPanel>
     </>
   );
-}
+};

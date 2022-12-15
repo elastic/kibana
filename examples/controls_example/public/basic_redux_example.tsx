@@ -15,15 +15,7 @@ import {
   ControlStyle,
 } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import {
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
@@ -74,10 +66,7 @@ export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
         <h2>Redux example</h2>
       </EuiTitle>
       <EuiText>
-        <p>
-          Use the redux context from the control group to
-          set layout style.
-        </p>
+        <p>Use the redux context from the control group to set layout style.</p>
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>

@@ -21,23 +21,23 @@ export const renderApp = async (
   { element }: AppMountParameters
 ) => {
   const dataViews = await data.dataViews.find('kibana_sample_data_logs');
-  const examples = dataViews.length > 0 ? (
-    <>
-      <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
-      <EuiSpacer size="xl" />
-      <BasicReduxExample dataViewId={dataViews[0].id} />
-    </>
-  ) : (
-    <div>{'Install web logs sample data to run controls examples.'}</div>
-  );
+  const examples =
+    dataViews.length > 0 ? (
+      <>
+        <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
+        <EuiSpacer size="xl" />
+        <BasicReduxExample dataViewId={dataViews[0].id} />
+      </>
+    ) : (
+      <div>{'Install web logs sample data to run controls examples.'}</div>
+    );
 
   ReactDOM.render(
-    (
-      <KibanaPageTemplate>
-        <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
-        <KibanaPageTemplate.Section>{examples}</KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
-    ),
-    element);
+    <KibanaPageTemplate>
+      <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
+      <KibanaPageTemplate.Section>{examples}</KibanaPageTemplate.Section>
+    </KibanaPageTemplate>,
+    element
+  );
   return () => ReactDOM.unmountComponentAtNode(element);
 };
