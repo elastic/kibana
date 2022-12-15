@@ -11,7 +11,7 @@ import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsTable } from './latest_findings_table';
 import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
-import type { EcsEvent } from '@kbn/logging';
+import type { EcsEvent } from '@kbn/ecs';
 import { TestProvider } from '../../../test/test_provider';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 

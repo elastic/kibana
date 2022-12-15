@@ -7,16 +7,33 @@
 
 import { defaultsDeep, isNil } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ValidationResult, builtInComparators } from '@kbn/triggers-actions-ui-plugin/public';
-import { EsQueryRuleParams, ExpressionErrors } from './types';
+import {
+  ValidationResult,
+  builtInComparators,
+  builtInAggregationTypes,
+  builtInGroupByTypes,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { EsQueryRuleParams, SearchType } from './types';
 import { isSearchSourceRule } from './util';
-import { EXPRESSION_ERRORS } from './constants';
+import {
+  COMMON_EXPRESSION_ERRORS,
+  ONLY_ES_QUERY_EXPRESSION_ERRORS,
+  SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS,
+} from './constants';
 
-export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationResult => {
-  const { size, threshold, timeWindowSize, thresholdComparator } = ruleParams;
-  const validationResult = { errors: {} };
-  const errors: ExpressionErrors = defaultsDeep({}, EXPRESSION_ERRORS);
-  validationResult.errors = errors;
+const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
+  const {
+    size,
+    threshold,
+    timeWindowSize,
+    thresholdComparator,
+    aggType,
+    aggField,
+    groupBy,
+    termSize,
+    termField,
+  } = ruleParams;
+  const errors: typeof COMMON_EXPRESSION_ERRORS = defaultsDeep({}, COMMON_EXPRESSION_ERRORS);
 
   if (!('index' in ruleParams) && !ruleParams.searchType) {
     errors.searchType.push(
@@ -25,7 +42,41 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
       })
     );
 
-    return validationResult;
+    return errors;
+  }
+
+  if (aggType && builtInAggregationTypes[aggType].fieldRequired && !aggField) {
+    errors.aggField.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredAggFieldText', {
+        defaultMessage: 'Aggregation field is required.',
+      })
+    );
+  }
+
+  if (
+    groupBy &&
+    builtInGroupByTypes[groupBy] &&
+    builtInGroupByTypes[groupBy].sizeRequired &&
+    !termSize
+  ) {
+    errors.termSize.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermSizedText', {
+        defaultMessage: 'Term size is required.',
+      })
+    );
+  }
+
+  if (
+    groupBy &&
+    builtInGroupByTypes[groupBy].validNormalizedTypes &&
+    builtInGroupByTypes[groupBy].validNormalizedTypes.length > 0 &&
+    !termField
+  ) {
+    errors.termField.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermFieldText', {
+        defaultMessage: 'Term field is required.',
+      })
+    );
   }
 
   if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
@@ -79,42 +130,53 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
     );
   }
 
-  /**
-   * Skip esQuery and index params check if it is search source rule,
-   * since it should contain searchConfiguration instead of esQuery and index.
-   */
-  const isSearchSource = isSearchSourceRule(ruleParams);
-  if (isSearchSource) {
-    if (!ruleParams.searchConfiguration) {
-      errors.searchConfiguration.push(
-        i18n.translate(
-          'xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchConfiguration',
-          {
-            defaultMessage: 'Search source configuration is required.',
-          }
-        )
-      );
-    } else if (!ruleParams.searchConfiguration.index) {
-      errors.index.push(
-        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewText', {
-          defaultMessage: 'Data view is required.',
-        })
-      );
-    } else if (
-      typeof ruleParams.searchConfiguration.index === 'object' &&
-      !Object.hasOwn(ruleParams.searchConfiguration.index, 'timeFieldName')
-    ) {
-      errors.index.push(
-        i18n.translate(
-          'xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewTimeFieldText',
-          {
-            defaultMessage: 'Data view should have a time field.',
-          }
-        )
-      );
-    }
-    return validationResult;
+  return errors;
+};
+
+const validateSearchSourceParams = (ruleParams: EsQueryRuleParams<SearchType.searchSource>) => {
+  const errors: typeof SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS = defaultsDeep(
+    {},
+    SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS
+  );
+
+  if (!ruleParams.searchConfiguration) {
+    errors.searchConfiguration.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchConfiguration', {
+        defaultMessage: 'Search source configuration is required.',
+      })
+    );
+    return errors;
   }
+
+  if (!ruleParams.searchConfiguration.index) {
+    errors.searchConfiguration.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewText', {
+        defaultMessage: 'Data view is required.',
+      })
+    );
+    return errors;
+  }
+
+  if (!ruleParams.timeField) {
+    errors.timeField.push(
+      i18n.translate(
+        'xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewTimeFieldText',
+        {
+          defaultMessage: 'Data view should have a time field.',
+        }
+      )
+    );
+    return errors;
+  }
+
+  return errors;
+};
+
+const validateEsQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esQuery>) => {
+  const errors: typeof ONLY_ES_QUERY_EXPRESSION_ERRORS = defaultsDeep(
+    {},
+    ONLY_ES_QUERY_EXPRESSION_ERRORS
+  );
 
   if (!ruleParams.index || ruleParams.index.length === 0) {
     errors.index.push(
@@ -156,7 +218,33 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
       );
     }
   }
+  return errors;
+};
 
+export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationResult => {
+  const validationResult = { errors: {} };
+
+  const commonErrors = validateCommonParams(ruleParams);
+  validationResult.errors = commonErrors;
+
+  /**
+   * Skip esQuery and index params check if it is search source rule,
+   * since it should contain searchConfiguration instead of esQuery and index.
+   *
+   * It's important to report searchSource rule related errors only into errors.searchConfiguration prop.
+   * For example errors.index is a mistake to report searchSource rule related errors. It will lead to issues.
+   */
+  const isSearchSource = isSearchSourceRule(ruleParams);
+  if (isSearchSource) {
+    validationResult.errors = {
+      ...validationResult.errors,
+      ...validateSearchSourceParams(ruleParams),
+    };
+    return validationResult;
+  }
+
+  const esQueryErrors = validateEsQueryParams(ruleParams as EsQueryRuleParams<SearchType.esQuery>);
+  validationResult.errors = { ...validationResult.errors, ...esQueryErrors };
   return validationResult;
 };
 

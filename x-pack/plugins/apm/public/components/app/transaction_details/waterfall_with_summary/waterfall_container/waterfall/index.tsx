@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Timeline } from '../../../../../shared/charts/timeline';
@@ -55,6 +55,31 @@ interface Props {
   showCriticalPath: boolean;
 }
 
+function getWaterfallMaxLevel(waterfall: IWaterfall) {
+  const entryId = waterfall.entryWaterfallTransaction?.id;
+  if (!entryId) {
+    return 0;
+  }
+  let maxLevel = 1;
+  function countLevels(id: string, currentLevel: number) {
+    const children = waterfall.childrenByParentId[id] || [];
+    if (children.length) {
+      children.forEach((child) => {
+        countLevels(child.id, currentLevel + 1);
+      });
+    } else {
+      if (maxLevel < currentLevel) {
+        maxLevel = currentLevel;
+      }
+    }
+  }
+
+  countLevels(entryId, 1);
+  return maxLevel;
+}
+// level starts with 0
+const maxLevelOpen = 2;
+
 export function Waterfall({
   waterfall,
   waterfallItemId,
@@ -67,29 +92,35 @@ export function Waterfall({
 
   const { duration } = waterfall;
 
-  const agentMarks = getAgentMarks(waterfall.entryWaterfallTransaction?.doc);
+  const agentMarks = getAgentMarks(waterfall.entryTransaction);
   const errorMarks = getErrorMarks(waterfall.errorItems);
 
-  // Calculate the left margin relative to the deepest level, or 100px, whichever
-  // is more.
-  const [maxLevel, setMaxLevel] = useState(0);
-  const timelineMargins = {
-    top: 40,
-    left: Math.max(100, maxLevel * 10),
-    right: 50,
-    bottom: 0,
-  };
+  const timelineMargins = useMemo(() => {
+    // Calculate the left margin relative to the deepest level, or 100px, whichever
+    // is more.
+    const maxLevel = getWaterfallMaxLevel(waterfall);
+    return {
+      top: 40,
+      left: Math.max(100, maxLevel * 10),
+      right: 50,
+      bottom: 0,
+    };
+  }, [waterfall]);
 
   return (
     <Container>
-      {waterfall.apiResponse.exceedsMax && (
+      {waterfall.exceedsMax && (
         <EuiCallOut
           color="warning"
           size="s"
           iconType="alert"
           title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
             defaultMessage:
-              'Number of items in this trace exceed what is displayed',
+              'The number of items in this trace is {traceItemCount} which is higher than the current limit of {maxTraceItems}. Please increase the limit to see the full trace',
+            values: {
+              traceItemCount: waterfall.traceItemCount,
+              maxTraceItems: waterfall.maxTraceItems,
+            },
           })}
         />
       )}
@@ -117,7 +148,6 @@ export function Waterfall({
               isOpen={isAccordionOpen}
               item={waterfall.entryWaterfallTransaction}
               level={0}
-              setMaxLevel={setMaxLevel}
               waterfallItemId={waterfallItemId}
               duration={duration}
               waterfall={waterfall}
@@ -126,6 +156,7 @@ export function Waterfall({
                 toggleFlyout({ history, item })
               }
               showCriticalPath={showCriticalPath}
+              maxLevelOpen={maxLevelOpen}
             />
           )}
         </WaterfallItemsContainer>
