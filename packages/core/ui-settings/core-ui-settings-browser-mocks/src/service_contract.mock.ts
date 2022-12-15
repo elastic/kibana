@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { uiSettingsServiceMock } from './src/ui_settings_service.mock';
-export { settingsServiceMock } from './src/settings_service.mock';
+export const serviceContractMock = (): jest.Mocked<any> => {
+  return {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+};

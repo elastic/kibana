@@ -67,7 +67,7 @@ describe('useEnterpriseSearchContentNav', () => {
             name: 'Collections',
           },
         ],
-        name: 'Analytics',
+        name: 'Behavorial Analytics',
       },
       {
         id: 'search',
