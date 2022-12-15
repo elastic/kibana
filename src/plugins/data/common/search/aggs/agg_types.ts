@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import {FieldFormatsStartCommon} from '@kbn/field-formats-plugin/common';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 import * as buckets from './buckets';
-import {BUCKET_TYPES, CalculateBoundsFn} from './buckets';
+import { BUCKET_TYPES, CalculateBoundsFn } from './buckets';
 import * as metrics from './metrics';
-import {METRIC_TYPES} from './metrics';
+import { METRIC_TYPES } from './metrics';
 
 export interface AggTypesDependencies {
   calculateBounds: CalculateBoundsFn;

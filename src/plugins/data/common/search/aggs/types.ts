@@ -8,6 +8,7 @@
 
 import { Assign } from '@kbn/utility-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { aggTimeSeries } from './buckets/time_series_fn';
 import {
   aggAvg,
   aggBucketAvg,
@@ -116,7 +117,6 @@ import { AggParamsSampler } from './buckets/sampler';
 import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
 import { AggParamsSignificantText } from './buckets/significant_text';
 import { aggTopMetrics } from './metrics/top_metrics_fn';
-import {aggTimeSeries} from "@kbn/data-plugin/common/search/aggs/buckets/time_series_fn";
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
 export type { CreateAggConfigParams, IAggConfigs, AggConfigsOptions } from './agg_configs';
