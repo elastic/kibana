@@ -50,6 +50,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           traceDocs: [],
           errorDocs: [],
           spanLinksCountById: {},
+          traceItemCount: 0,
+          maxTraceItems: 1000,
         },
       });
     });
