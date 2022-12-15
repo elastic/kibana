@@ -283,6 +283,23 @@ export class ApiService implements GuidedOnboardingApi {
   }
 
   /**
+   * An observable with the boolean value if the step is ready_to_complete (i.e., user needs to click the "Mark done" button).
+   * Returns true, if the passed params identify the guide step that is currently ready_to_complete.
+   * Returns false otherwise.
+   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
+   * @param {GuideStepIds} stepId the id of the step in the guide
+   * @return {Observable} an observable with the boolean value
+   */
+  public isGuideStepReadyToComplete$(guideId: GuideId, stepId: GuideStepIds): Observable<boolean> {
+    return this.fetchPluginState$().pipe(
+      map((pluginState) => {
+        if (!isGuideActive(pluginState, guideId)) return false;
+        return isStepReadyToComplete(pluginState!.activeGuide, guideId, stepId);
+      })
+    );
+  }
+
+  /**
    * Updates the selected step to 'in_progress' state.
    * This is useful for the dropdown panel, when the user clicks the "Start" button for the active step.
    * @param {GuideId} guideId the id of the guide (one of search, observability, security)
