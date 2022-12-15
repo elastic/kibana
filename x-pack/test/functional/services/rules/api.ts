@@ -24,7 +24,7 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
       name: string;
       notifyWhen: string;
       params: Record<string, unknown>;
-      rule_type_id: string;
+      ruleTypeId: string;
       schedule: Record<string, unknown>;
     }) {
       log.debug(`Create basic rule...`);
