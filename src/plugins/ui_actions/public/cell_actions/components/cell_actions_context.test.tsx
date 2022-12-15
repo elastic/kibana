@@ -99,4 +99,30 @@ describe('CellActionsContextProvider', () => {
 
     expect(result.current.value).toEqual([firstAction, secondAction]);
   });
+
+  it('sorts actions by id when order is undefined', async () => {
+    const firstAction = makeAction('action-1');
+    const secondAction = makeAction('action-2');
+
+    const getActionsPromise = Promise.resolve([secondAction, firstAction]);
+    const getActions = () => getActionsPromise;
+
+    const { result } = renderHook(
+      () => useLoadActions(actionContext),
+
+      {
+        wrapper: ({ children }) => (
+          <CellActionsContextProvider getCompatibleActions={getActions}>
+            {children}
+          </CellActionsContextProvider>
+        ),
+      }
+    );
+
+    await act(async () => {
+      await getActionsPromise;
+    });
+
+    expect(result.current.value).toEqual([firstAction, secondAction]);
+  });
 });

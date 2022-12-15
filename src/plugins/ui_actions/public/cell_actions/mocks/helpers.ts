@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const makeAction = (actionsName: string, icon: string = 'icon', order: number = 0) => ({
+export const makeAction = (actionsName: string, icon: string = 'icon', order?: number) => ({
   id: actionsName,
   type: actionsName,
   order,
