@@ -86,7 +86,7 @@ const errorSection = (
             iconType="refresh"
             color="danger"
           >
-            {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionRefreshButton', {
+            {i18n.translate('guidedOnboarding.dropdownPanel.errorSectionReloadButton', {
               defaultMessage: 'Reload',
             })}
           </EuiButton>
