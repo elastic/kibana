@@ -19,7 +19,7 @@ describe('open in discover action', () => {
       const embeddable = { type: 'NOT_LENS' } as IEmbeddable;
 
       const isCompatible = await createOpenInDiscoverAction(
-        {} as DiscoverStart,
+        {} as unknown as Pick<DiscoverStart, 'locator'>,
         {} as DataViewsService,
         true
       ).isCompatible({
@@ -37,7 +37,7 @@ describe('open in discover action', () => {
       // make sure it would work if we had access to Discover
       expect(
         await createOpenInDiscoverAction(
-          {} as DiscoverStart,
+          {} as unknown as Pick<DiscoverStart, 'locator'>,
           {} as DataViewsService,
           hasDiscoverAccess
         ).isCompatible({
@@ -49,7 +49,7 @@ describe('open in discover action', () => {
       hasDiscoverAccess = false;
       expect(
         await createOpenInDiscoverAction(
-          {} as DiscoverStart,
+          {} as unknown as Pick<DiscoverStart, 'locator'>,
           {} as DataViewsService,
           hasDiscoverAccess
         ).isCompatible({
@@ -65,7 +65,7 @@ describe('open in discover action', () => {
       embeddable.canViewUnderlyingData = jest.fn(() => Promise.resolve(false));
       expect(
         await createOpenInDiscoverAction(
-          {} as DiscoverStart,
+          {} as unknown as Pick<DiscoverStart, 'locator'>,
           {} as DataViewsService,
           true
         ).isCompatible({
@@ -79,7 +79,7 @@ describe('open in discover action', () => {
       embeddable.canViewUnderlyingData = jest.fn(() => Promise.resolve(true));
       expect(
         await createOpenInDiscoverAction(
-          {} as DiscoverStart,
+          {} as unknown as Pick<DiscoverStart, 'locator'>,
           {} as DataViewsService,
           true
         ).isCompatible({
@@ -115,7 +115,7 @@ describe('open in discover action', () => {
     globalThis.open = jest.fn();
 
     await createOpenInDiscoverAction(
-      discover.locator,
+      discover as unknown as Pick<DiscoverStart, 'locator'>,
       {
         get: () => ({
           isTimeBased: () => true,
