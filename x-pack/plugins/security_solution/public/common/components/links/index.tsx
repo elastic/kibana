@@ -41,8 +41,8 @@ import {
   LinkButton,
   ReputationLinksOverflow,
 } from './helpers';
-import type { HostsTableType } from '../../../hosts/store/model';
-import type { UsersTableType } from '../../../users/store/model';
+import type { HostsTableType } from '../../../explore/hosts/store/model';
+import type { UsersTableType } from '../../../explore/users/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
