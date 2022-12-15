@@ -256,6 +256,7 @@ export interface AggParamsMapping {
   [METRIC_TYPES.MOVING_FN]: AggParamsMovingAvg;
   [METRIC_TYPES.PERCENTILE_RANKS]: AggParamsPercentileRanks;
   [METRIC_TYPES.PERCENTILES]: AggParamsPercentiles;
+  [METRIC_TYPES.RATE]: AggParamsRate;
   [METRIC_TYPES.SERIAL_DIFF]: AggParamsSerialDiff;
   [METRIC_TYPES.TOP_HITS]: AggParamsTopHit;
   [METRIC_TYPES.TOP_METRICS]: AggParamsTopMetrics;
