@@ -28,24 +28,19 @@ export const useLensProps = ({
   attributes: TypedLensByValueInput['attributes'];
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }) => {
-  const getLensProps = useCallback(
-    () => ({
-      id: 'unifiedHistogramLensComponent',
-      viewMode: ViewMode.VIEW,
-      timeRange: getTimeRange(),
-      attributes,
-      noPadding: true,
-      searchSessionId: request?.searchSessionId,
-      executionContext: {
-        description: 'fetch chart data and total hits',
-      },
-      onLoad,
-    }),
+  const buildLensProps = useCallback(
+    () =>
+      getLensProps({
+        searchSessionId: request?.searchSessionId,
+        getTimeRange,
+        attributes,
+        onLoad,
+      }),
     [attributes, getTimeRange, onLoad, request?.searchSessionId]
   );
 
-  const [lensProps, setLensProps] = useState(getLensProps());
-  const updateLensProps = useStableCallback(() => setLensProps(getLensProps()));
+  const [lensProps, setLensProps] = useState(buildLensProps());
+  const updateLensProps = useStableCallback(() => setLensProps(buildLensProps()));
 
   useEffect(() => {
     const subscription = refetch$.subscribe(updateLensProps);
@@ -54,3 +49,26 @@ export const useLensProps = ({
 
   return lensProps;
 };
+
+export const getLensProps = ({
+  searchSessionId,
+  getTimeRange,
+  attributes,
+  onLoad,
+}: {
+  searchSessionId?: string;
+  getTimeRange: () => TimeRange;
+  attributes: TypedLensByValueInput['attributes'];
+  onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
+}) => ({
+  id: 'unifiedHistogramLensComponent',
+  viewMode: ViewMode.VIEW,
+  timeRange: getTimeRange(),
+  attributes,
+  noPadding: true,
+  searchSessionId,
+  executionContext: {
+    description: 'fetch chart data and total hits',
+  },
+  onLoad,
+});

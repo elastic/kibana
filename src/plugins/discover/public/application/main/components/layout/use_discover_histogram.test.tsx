@@ -9,11 +9,12 @@ import React, { ReactElement } from 'react';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import {
   AvailableFields$,
   DataDocuments$,
+  DataFetch$,
   DataMain$,
   DataTotalHits$,
   RecordRawType,
@@ -145,6 +146,8 @@ describe('useDiscoverHistogram', () => {
       fields: [] as string[],
     }) as AvailableFields$;
 
+    const savedSearchFetch$: DataFetch$ = new Subject();
+
     const savedSearchData$ = {
       main$,
       documents$,
@@ -161,6 +164,7 @@ describe('useDiscoverHistogram', () => {
     const initialProps = {
       stateContainer,
       savedSearchData$,
+      savedSearchFetch$,
       dataView: dataViewWithTimefieldMock,
       savedSearch: savedSearchMock,
       isTimeBased,
@@ -364,7 +368,7 @@ describe('useDiscoverHistogram', () => {
       } = await renderUseDiscoverHistogram({ inspectorAdapters });
       expect(inspectorAdapters.lensRequests).toBeUndefined();
       act(() => {
-        result.current?.onChartLoad({ complete: true, adapters: { requests: lensRequests } });
+        result.current?.onChartLoad({ adapters: { requests: lensRequests } });
       });
       expect(inspectorAdapters.lensRequests).toBeDefined();
     });

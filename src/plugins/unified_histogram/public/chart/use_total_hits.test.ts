@@ -7,14 +7,14 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { UnifiedHistogramFetchStatus } from '../types';
+import { UnifiedHistogramFetchStatus, UnifiedHistogramInput$ } from '../types';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { useTotalHits } from './use_total_hits';
 import { useEffect as mockUseEffect } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { waitFor } from '@testing-library/dom';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataViewType, SearchSourceSearchOptions } from '@kbn/data-plugin/common';
@@ -26,6 +26,8 @@ jest.mock('react-use/lib/useDebounce', () => {
 });
 
 describe('useTotalHits', () => {
+  const timeRange = { from: 'now-15m', to: 'now' };
+  const refetch$: UnifiedHistogramInput$ = new Subject();
   const getDeps = () => ({
     services: { data: dataPluginMock.createStartContract() } as any,
     dataView: dataViewWithTimefieldMock,
@@ -42,8 +44,8 @@ describe('useTotalHits', () => {
     breakdown: undefined,
     filters: [],
     query: { query: '', language: 'kuery' },
-    timeRange: { from: 'now-15m', to: 'now' },
-    refetchId: 0,
+    getTimeRange: () => timeRange,
+    refetch$,
     onTotalHitsChange: jest.fn(),
   });
 
@@ -67,7 +69,6 @@ describe('useTotalHits', () => {
       });
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     const data = dataPluginMock.createStartContract();
-    const timeRange = { from: 'now-15m', to: 'now' };
     jest
       .spyOn(data.query.timefilter.timefilter, 'createFilter')
       .mockClear()
@@ -85,7 +86,7 @@ describe('useTotalHits', () => {
         },
         query,
         filters,
-        timeRange,
+        refetch$,
         onTotalHitsChange,
       })
     );
@@ -127,11 +128,11 @@ describe('useTotalHits', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it('should not fetch a second time if fetchId is the same', async () => {
+  it('should not fetch a second time if refetch$ is not triggered', async () => {
     const onTotalHitsChange = jest.fn();
     const fetchSpy = jest.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
-    const options = { ...getDeps(), refetchId: 0, onTotalHitsChange };
+    const options = { ...getDeps(), onTotalHitsChange };
     const { rerender } = renderHook(() => useTotalHits(options));
     expect(onTotalHitsChange).toBeCalledTimes(1);
     expect(setFieldSpy).toHaveBeenCalled();
@@ -145,12 +146,12 @@ describe('useTotalHits', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should fetch a second time if fetchId is different', async () => {
+  it('should fetch a second time if refetch$ is triggered', async () => {
     const abortSpy = jest.spyOn(AbortController.prototype, 'abort').mockClear();
     const onTotalHitsChange = jest.fn();
     const fetchSpy = jest.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
-    const options = { ...getDeps(), refetchId: 0, onTotalHitsChange };
+    const options = { ...getDeps(), onTotalHitsChange };
     const { rerender } = renderHook(() => useTotalHits(options));
     expect(onTotalHitsChange).toBeCalledTimes(1);
     expect(setFieldSpy).toHaveBeenCalled();
@@ -158,7 +159,7 @@ describe('useTotalHits', () => {
     await waitFor(() => {
       expect(onTotalHitsChange).toBeCalledTimes(2);
     });
-    options.refetchId = 1;
+    refetch$.next({ type: 'refetch' });
     rerender();
     expect(abortSpy).toHaveBeenCalled();
     expect(onTotalHitsChange).toBeCalledTimes(3);
@@ -189,7 +190,6 @@ describe('useTotalHits', () => {
       .mockClear();
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     const data = dataPluginMock.createStartContract();
-    const timeRange = { from: 'now-15m', to: 'now' };
     jest
       .spyOn(data.query.timefilter.timefilter, 'createFilter')
       .mockClear()
