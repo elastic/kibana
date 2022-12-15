@@ -11,10 +11,7 @@ import { debounce } from 'lodash';
 
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { SloListSearchFilterSortBar, SortItem, SortType } from './slo_list_search_filter_sort_bar';
-import { SloListItem } from './slo_list_item';
-import { SloListEmpty } from './slo_list_empty';
-import { sortSlos } from '../helpers/sort_slos';
-import { filterSlos } from '../helpers/filter_slos';
+import { SloListItems } from './slo_list_items';
 
 export function SloList() {
   const [activePage, setActivePage] = useState(0);
@@ -28,6 +25,7 @@ export function SloList() {
 
   const {
     loading,
+    error,
     sloList: { results: slos = [], total, perPage },
   } = useFetchSloList({ page: activePage + 1, name: query, refetch: shouldReload });
 
@@ -79,20 +77,15 @@ export function SloList() {
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {slos.length ? (
-            slos
-              .filter(filterSlos(filters))
-              .sort(sortSlos(sort))
-              .map((slo) => (
-                <EuiFlexItem key={slo.id}>
-                  <SloListItem slo={slo} onDeleted={handleDeleted} onDeleting={handleDeleting} />
-                </EuiFlexItem>
-              ))
-          ) : !loading ? (
-            <SloListEmpty />
-          ) : null}
-        </EuiFlexGroup>
+        <SloListItems
+          sort={sort}
+          filters={filters}
+          slos={slos}
+          loading={loading}
+          error={error}
+          onDeleting={handleDeleting}
+          onDeleted={handleDeleted}
+        />
       </EuiFlexItem>
 
       {slos.length ? (
