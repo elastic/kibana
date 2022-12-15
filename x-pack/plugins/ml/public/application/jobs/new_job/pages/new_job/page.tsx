@@ -21,6 +21,7 @@ import {
   isAdvancedJobCreator,
   isCategorizationJobCreator,
   isRareJobCreator,
+  isGeoJobCreator,
 } from '../../common/job_creator';
 import {
   JOB_TYPE,
@@ -28,9 +29,11 @@ import {
   DEFAULT_BUCKET_SPAN,
 } from '../../../../../../common/constants/new_job';
 import { ChartLoader } from '../../common/chart_loader';
+import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useMlContext } from '../../../../contexts/ml';
+import { useMlKibana } from '../../../../contexts/kibana';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
@@ -50,6 +53,9 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const mlContext = useMlContext();
+  const {
+    services: { maps: mapsPlugin },
+  } = useMlKibana();
 
   const chartInterval = useTimeBuckets();
 
@@ -184,6 +190,9 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       const rare = newJobCapsService.getAggById('rare');
       const freqRare = newJobCapsService.getAggById('freq_rare');
       jobCreator.setDefaultDetectorProperties(rare, freqRare);
+    } else if (isGeoJobCreator(jobCreator)) {
+      const geo = newJobCapsService.getAggById('lat_long');
+      jobCreator.setDefaultDetectorProperties(geo);
     }
   }
 
@@ -194,6 +203,11 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const chartLoader = useMemo(
     () => new ChartLoader(mlContext.currentDataView, jobCreator.query),
     [mlContext.currentDataView, jobCreator.query]
+  );
+
+  const mapLoader = useMemo(
+    () => new MapLoader(mlContext.currentDataView, jobCreator.query, mapsPlugin),
+    [mlContext.currentDataView, jobCreator.query, mapsPlugin]
   );
 
   const resultsLoader = useMemo(
@@ -230,6 +244,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
         <Wizard
           jobCreator={jobCreator}
           chartLoader={chartLoader}
+          mapLoader={mapLoader}
           resultsLoader={resultsLoader}
           chartInterval={chartInterval}
           jobValidator={jobValidator}

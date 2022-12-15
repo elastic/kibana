@@ -96,7 +96,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
 function buildFilterKuery(criteria: Criteria): string | undefined {
   const filters: string[] = [];
   if (!!criteria.name) {
-    filters.push(`slo.attributes.name: ${criteria.name}`);
+    filters.push(`slo.attributes.name: ${addWildcardIfAbsent(criteria.name)}`);
   }
   return filters.length > 0 ? filters.join(' and ') : undefined;
 }
@@ -112,4 +112,10 @@ function toSLO(storedSLO: StoredSLO): SLO {
       throw new Error('Invalid Stored SLO');
     }, t.identity)
   );
+}
+
+const WILDCARD_CHAR = '*';
+function addWildcardIfAbsent(value: string): string {
+  if (value.substring(value.length - 1) === WILDCARD_CHAR) return value;
+  return `${value}${WILDCARD_CHAR}`;
 }
