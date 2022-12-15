@@ -57,8 +57,6 @@ import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../commo
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { RulesListFiltersBar } from './rules_list_filters_bar';
 import {
-  disableRule,
-  enableRule,
   snoozeRule,
   unsnoozeRule,
   bulkUpdateAPIKey,
@@ -497,13 +495,19 @@ export const RulesList = ({
     );
   };
 
-  const onDisableRule = (rule: RuleTableItem) => {
-    return disableRule({ http, id: rule.id });
-  };
+  const onDisableRule = useCallback(
+    async (rule: RuleTableItem) => {
+      await bulkDisableRules({ http, ids: [rule.id] });
+    },
+    [bulkDisableRules]
+  );
 
-  const onEnableRule = (rule: RuleTableItem) => {
-    return enableRule({ http, id: rule.id });
-  };
+  const onEnableRule = useCallback(
+    async (rule: RuleTableItem) => {
+      await bulkEnableRules({ http, ids: [rule.id] });
+    },
+    [bulkEnableRules]
+  );
 
   const onSnoozeRule = (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => {
     return snoozeRule({ http, id: rule.id, snoozeSchedule });
@@ -784,11 +788,9 @@ export const RulesList = ({
   const onEnable = async () => {
     setIsEnablingRules(true);
 
-    const { errors, total } = await bulkEnableRules({
-      ...(isAllSelected ? { filter: getFilter() } : {}),
-      ...(isAllSelected ? {} : { ids: selectedIds }),
-      http,
-    });
+    const { errors, total } = isAllSelected
+      ? await bulkEnableRules({ http, filter: getFilter() })
+      : await bulkEnableRules({ http, ids: selectedIds });
 
     setIsEnablingRules(false);
     showToast({ action: 'ENABLE', errors, total });
@@ -799,11 +801,9 @@ export const RulesList = ({
   const onDisable = async () => {
     setIsDisablingRules(true);
 
-    const { errors, total } = await bulkDisableRules({
-      ...(isAllSelected ? { filter: getFilter() } : {}),
-      ...(isAllSelected ? {} : { ids: selectedIds }),
-      http,
-    });
+    const { errors, total } = isAllSelected
+      ? await bulkDisableRules({ http, filter: getFilter() })
+      : await bulkDisableRules({ http, ids: selectedIds });
 
     setIsDisablingRules(false);
     showToast({ action: 'DISABLE', errors, total });

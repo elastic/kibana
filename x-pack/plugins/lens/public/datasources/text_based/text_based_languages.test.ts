@@ -473,6 +473,27 @@ describe('Textbased Data Source', () => {
         layerId: 'newid',
       });
     });
+
+    it('should not return suggestions if no query is given', () => {
+      const state = {
+        layers: {},
+        initialContext: {
+          contextualFields: ['bytes', 'dest'],
+          dataViewSpec: {
+            title: 'foo',
+            id: '1',
+            name: 'Foo',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+      const suggestions = TextBasedDatasource.getDatasourceSuggestionsForVisualizeField(
+        state,
+        '1',
+        '',
+        indexPatterns
+      );
+      expect(suggestions).toEqual([]);
+    });
   });
 
   describe('#getErrorMessages', () => {

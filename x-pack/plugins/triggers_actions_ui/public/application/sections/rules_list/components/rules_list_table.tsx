@@ -284,7 +284,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
   );
 
   const renderRuleStatusDropdown = useCallback(
-    (ruleEnabled: boolean | undefined, rule: RuleTableItem) => {
+    (rule: RuleTableItem) => {
       return (
         <RuleStatusDropdown
           hideSnoozeOption
@@ -701,7 +701,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '10%',
         'data-test-subj': 'rulesTableCell-status',
         render: (_enabled: boolean | undefined, rule: RuleTableItem) => {
-          return renderRuleStatusDropdown(rule.enabled, rule);
+          return renderRuleStatusDropdown(rule);
         },
       },
       {
