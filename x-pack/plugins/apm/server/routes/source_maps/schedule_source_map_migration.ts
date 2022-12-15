@@ -49,8 +49,6 @@ export async function scheduleSourceMapMigration({
       maxAttempts: 5,
       maxConcurrency: 1,
       createTaskRunner(context) {
-        // const { state } = context.taskInstance;
-        // logger.debug({ state });
         return {
           async run() {
             logger.debug(`Run task: "${TASK_TYPE}"`);
