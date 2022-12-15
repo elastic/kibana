@@ -7,6 +7,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { useFieldStatsTrigger } from '../../../../../utils/use_field_stats_trigger';
 import { Field } from '../../../../../../../../../common/types/fields';
 
 interface DropDownLabel {
@@ -32,6 +33,7 @@ export const GeoFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField
       ),
     [fields]
   );
+  const { renderOption } = useFieldStatsTrigger();
 
   const selection: EuiComboBoxOptionOption[] = useMemo(() => {
     const selectedOptions: EuiComboBoxOptionOption[] = [];
@@ -61,6 +63,7 @@ export const GeoFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField
       onChange={onChange}
       isClearable={true}
       data-test-subj="mlGeoFieldNameSelect"
+      renderOption={renderOption}
     />
   );
 };

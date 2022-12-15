@@ -264,8 +264,8 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   if (!dataView) {
     return null;
   }
-
   const formatter = dataView.getFormatterForField(field);
+
   let title = <></>;
 
   function combineWithTitleAndFooter(el: React.ReactElement) {

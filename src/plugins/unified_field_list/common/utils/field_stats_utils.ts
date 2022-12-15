@@ -10,6 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESSearchResponse } from '@kbn/es-types';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldStatsResponse } from '../types';
 import { getFieldExampleBuckets, canProvideExamplesForField } from './field_examples_calculator';
 
@@ -95,6 +96,7 @@ export async function fetchAndCalculateFieldStats({
   fromDate,
   toDate,
   size,
+  fieldFormats,
 }: {
   searchHandler: SearchHandler;
   dataView: DataView;
@@ -124,6 +126,9 @@ export async function fetchAndCalculateFieldStats({
   if (field.type === 'date') {
     return await getDateHistogram(searchHandler, field, { fromDate, toDate });
   }
+  if (field.type === 'geo_point' || field.type === 'geo_shape') {
+    return await getSimpleExamples(searchHandler, field, dataView, fieldFormats);
+  }
 
   return await getStringSamples(searchHandler, field, size);
 }
@@ -132,8 +137,6 @@ function canProvideAggregatedStatsForField(field: DataViewField): boolean {
   return !(
     field.type === 'document' ||
     field.type.includes('range') ||
-    field.type === 'geo_point' ||
-    field.type === 'geo_shape' ||
     field.type === 'murmur3' ||
     field.type === 'attachment'
   );
@@ -356,7 +359,8 @@ export async function getDateHistogram(
 export async function getSimpleExamples(
   search: SearchHandler,
   field: DataViewField,
-  dataView: DataView
+  dataView: DataView,
+  formatter?: FieldFormat
 ): Promise<FieldStatsResponse<string | number>> {
   try {
     const fieldRef = getFieldRef(field);
@@ -367,12 +371,12 @@ export async function getSimpleExamples(
     };
 
     const simpleExamplesResult = await search(simpleExamplesBody);
-
     const fieldExampleBuckets = getFieldExampleBuckets({
       hits: simpleExamplesResult.hits.hits,
       field,
       dataView,
       count: DEFAULT_TOP_VALUES_SIZE,
+      formatter,
     });
 
     return {
@@ -389,6 +393,19 @@ export async function getSimpleExamples(
   }
 }
 
+export async function getGeoExamples(
+  search: SearchHandler,
+  field: DataViewField,
+  dataView: DataView
+): Promise<FieldStatsResponse<string | number>> {
+  try {
+    const formatter = dataView.getFormatterForField(field);
+    return await getSimpleExamples(search, field, dataView, formatter);
+  } catch (e) {
+    console.error(error); // eslint-disable-line  no-console
+    return {};
+  }
+}
 function getFieldRef(field: DataViewField) {
   return field.scripted
     ? {
