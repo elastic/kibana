@@ -61,7 +61,6 @@ const getProgress = (state?: GuideState): number => {
 };
 
 const errorSection = (
-  <EuiFlyoutBody>
     <EuiEmptyPrompt
       data-test-subj="guideErrorSection"
       iconType="alert"
@@ -77,13 +76,23 @@ const errorSection = (
         <>
           <EuiText color="subdued">
             {i18n.translate('guidedOnboarding.dropdownPanel.errorSectionDescription', {
-              defaultMessage: `The guide couldn't be loaded. Wait a moment and try reloading the page.`,
+              defaultMessage: `Wait a moment and try again. If the problem persists, contact your administrator.`,
             })}
           </EuiText>
+          <EuiSpacer />
+          <EuiButton
+            iconSide="right"
+            onClick={() => window.location.reload()}
+            iconType="refresh"
+            color="danger"
+          >
+            {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionRefreshButton', {
+              defaultMessage: 'Reload',
+            })}
+          </EuiButton>
         </>
       }
     />
-  </EuiFlyoutBody>
 );
 
 export const GuidePanel = ({ api, application, notifications }: GuidePanelProps) => {
@@ -210,6 +219,17 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
   const stepsCompleted = getProgress(pluginState?.activeGuide);
   const isGuideReadyToComplete = pluginState?.activeGuide?.status === 'ready_to_complete';
 
+  const backToGuidesButton = <EuiButtonEmpty
+    onClick={navigateToLandingPage}
+    iconSide="left"
+    iconType="arrowLeft"
+    flush="left"
+    color="text"
+  >
+    {i18n.translate('guidedOnboarding.dropdownPanel.backToGuidesLink', {
+      defaultMessage: 'Back to guides',
+    })}
+  </EuiButtonEmpty>;
   return (
     <>
       <div css={styles.setupButton}>
@@ -236,18 +256,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
           {guideConfig && pluginState && pluginState.status !== 'error' ? (
             <>
               <EuiFlyoutHeader>
-                <EuiButtonEmpty
-                  onClick={navigateToLandingPage}
-                  iconSide="left"
-                  iconType="arrowLeft"
-                  flush="left"
-                  color="text"
-                >
-                  {i18n.translate('guidedOnboarding.dropdownPanel.backToGuidesLink', {
-                    defaultMessage: 'Back to guides',
-                  })}
-                </EuiButtonEmpty>
-
+                {backToGuidesButton}
                 <EuiTitle size="m">
                   <h2 data-test-subj="guideTitle">
                     {isGuideReadyToComplete
@@ -435,8 +444,10 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
               </EuiFlyoutFooter>
             </>
           ) : (
-            // if there is an error with the plugin state or guide config, display error section
-            errorSection
+            <EuiFlyoutBody>
+              {backToGuidesButton}
+              {errorSection}
+            </EuiFlyoutBody>
           )}
         </EuiFlyout>
       )}
