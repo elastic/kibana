@@ -46,7 +46,7 @@ export const ControlsContent: React.FC<Props> = ({
     const filtersSubscription = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
       setPanelFilters([...newFilters]);
     });
-    const inputSubscrption = controlGroup
+    const inputSubscription = controlGroup
       .getInput$()
       .subscribe(({ panels, filters: currentFilters }) => {
         setControlPanels(panels);
@@ -56,7 +56,7 @@ export const ControlsContent: React.FC<Props> = ({
       });
     return () => {
       filtersSubscription.unsubscribe();
-      inputSubscrption.unsubscribe();
+      inputSubscription.unsubscribe();
     };
   }, [controlGroup, setControlPanels, setPanelFilters]);
 
