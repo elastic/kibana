@@ -117,7 +117,7 @@ access tokens. All subsequent requests to {es} APIs on behalf of users will be a
 
 Prior to configuring {kib}, ensure that the PKI realm is enabled in {es} and configured to permit delegation. See {ref}/configuring-pki-realm.html[Configuring a PKI realm] for more information.
 
-To enable the PKI authentication provider in {kib}, you must first <<configuring-tls,configure {kib} to encrypt communications between the browser and {kib} server>>. You must also enable TLS client authentication and include the certificate authority (CA) used to sign client certificates into a list of CAs trusted by {kib} in your `kibana.yml`:
+To enable the PKI authentication provider in {kib}, you must first {ref}/security-basic-setup-https.html#encrypt-kibana-http[configure {kib} to encrypt communications between the browser and {kib} server]. You must also enable TLS client authentication and include the certificate authority (CA) used to sign client certificates into a list of CAs trusted by {kib} in your `kibana.yml`:
 
 NOTE: You can configure only one PKI provider per {kib} instance.
 

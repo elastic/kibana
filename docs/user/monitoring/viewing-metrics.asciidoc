@@ -56,7 +56,7 @@ If these settings are omitted, {kib} uses the `elasticsearch.username` and
 information, see {kibana-ref}/using-kibana-with-security.html[Configuring security in {kib}].
 
 . (Optional) Configure {kib} to encrypt communications between the {kib} server
-and the monitoring cluster. See <<configuring-tls>>.
+and the monitoring cluster. For more information, check {ref}/security-basic-setup-https.html#encrypt-kibana-http[Encrypt HTTP client communications for {kib}].
 
 . If the Elastic {security-features} are enabled on the {kib} server, only users
 that have the authority to access {kib} indices and to read the monitoring indices
