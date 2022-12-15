@@ -44,5 +44,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_handle_version_conflict'));
     loadTestFile(require.resolve('./_handle_not_found'));
     loadTestFile(require.resolve('./_data_view_relationships'));
+    loadTestFile(require.resolve('./_edit_field'));
   });
 }
