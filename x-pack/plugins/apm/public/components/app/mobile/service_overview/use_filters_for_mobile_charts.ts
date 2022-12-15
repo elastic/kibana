@@ -29,7 +29,7 @@ export function useFiltersForMobileCharts() {
       appVersion,
       netConnectionType,
     },
-  } = useApmParams('/services/{serviceName}/overview');
+  } = useApmParams('/mobile-services/{serviceName}/overview');
 
   return useMemo(
     () =>

@@ -69,6 +69,13 @@ export function getActiveDatasourceIdFromDoc(doc?: Document) {
   return firstDatasourceFromDoc || null;
 }
 
+export function getActiveVisualizationIdFromDoc(doc?: Document) {
+  if (!doc) {
+    return null;
+  }
+  return doc.visualizationType || null;
+}
+
 export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: Document) => {
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
 };
