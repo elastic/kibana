@@ -10,18 +10,14 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import { EuiButton, EuiCode, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { KibanaDeps } from '../../../../../../../common/types';
 import { DataPanel } from '../../../../../shared/data_panel/data_panel';
 import { CrawlerLogic } from '../crawler_logic';
 
 import { CrawlRequestsTable } from './crawl_requests_table';
-
-interface KibanaDeps {
-  discover: DiscoverStart;
-}
 
 const CRAWLER_LOGS_DISCOVER_RECORD = {
   columns: [
@@ -33,13 +29,13 @@ const CRAWLER_LOGS_DISCOVER_RECORD = {
     'http.response.status_code',
   ],
   dataViewSpec: {
-    timeFieldName: '@timestamp',
     name: i18n.translate(
       'xpack.enterpriseSearch.crawler.crawlRequestsPanel.discoverCrawlerLogsTitle',
       {
         defaultMessage: 'All Crawler Logs',
       }
     ),
+    timeFieldName: '@timestamp',
     title: 'logs-elastic_crawler-default',
   },
   sort: [['@timestamp', 'desc']],
