@@ -32,7 +32,7 @@ export const getOsqueryQueriesFromNote = (note: string): OsqueryNoteQuery[] => {
 
 export const getResponseActionsFromNote = (
   osqueryQueries: OsqueryNoteQuery[],
-  defaultResponseActions: RuleResponseAction[]
+  defaultResponseActions: RuleResponseAction[] = []
 ) => {
   return reduce(
     osqueryQueries,
