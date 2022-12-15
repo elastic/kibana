@@ -134,6 +134,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     setHasAgentPolicyError,
     validationResults,
     hasAgentPolicyError,
+    isInitialized,
   } = useOnSubmit({
     agentCount,
     packageInfo,
@@ -272,7 +273,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const stepConfigurePackagePolicy = useMemo(
     () =>
-      isPackageInfoLoading ? (
+      isPackageInfoLoading || !isInitialized ? (
         <Loading />
       ) : packageInfo ? (
         <>
@@ -312,6 +313,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         <div />
       ),
     [
+      isInitialized,
       isPackageInfoLoading,
       agentPolicy,
       packageInfo,

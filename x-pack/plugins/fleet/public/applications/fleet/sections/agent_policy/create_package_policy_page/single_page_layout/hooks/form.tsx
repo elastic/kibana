@@ -193,7 +193,6 @@ export function useOnSubmit({
       });
       const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
-      setIsInitalized(true);
       updatePackagePolicy(
         packageToPackagePolicy(
           packageInfo,
@@ -204,6 +203,7 @@ export function useOnSubmit({
           integrationToEnable
         )
       );
+      setIsInitalized(true);
     }
     init();
   }, [packageInfo, agentPolicy, isInitialized, updatePackagePolicy, integrationToEnable]);
@@ -354,6 +354,7 @@ export function useOnSubmit({
     setValidationResults,
     hasAgentPolicyError,
     setHasAgentPolicyError,
+    isInitialized,
     // TODO check
     navigateAddAgent,
     navigateAddAgentHelp,
