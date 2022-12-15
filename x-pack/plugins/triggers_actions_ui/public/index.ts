@@ -134,7 +134,6 @@ export { loadExecutionLogAggregations } from './application/lib/rule_api/load_ex
 export { loadActionErrorLog } from './application/lib/rule_api/load_action_error_log';
 export { loadRuleTypes } from './application/lib/rule_api/rule_types';
 export { loadRuleSummary } from './application/lib/rule_api/rule_summary';
-export { deleteRules } from './application/lib/rule_api/delete';
 export { muteRule } from './application/lib/rule_api/mute';
 export { unmuteRule } from './application/lib/rule_api/unmute';
 export { snoozeRule } from './application/lib/rule_api/snooze';

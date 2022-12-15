@@ -25,7 +25,6 @@ import {
   BulkOperationAttributesWithoutHttp,
 } from '../../../../types';
 import {
-  deleteRules,
   muteRules,
   unmuteRules,
   muteRule,
@@ -64,18 +63,10 @@ import { useKibana } from '../../../../common/lib/kibana';
 export interface ComponentOpts {
   muteRules: (rules: Rule[]) => Promise<void>;
   unmuteRules: (rules: Rule[]) => Promise<void>;
-  deleteRules: (rules: Rule[]) => Promise<{
-    successes: string[];
-    errors: string[];
-  }>;
   muteRule: (rule: Rule) => Promise<void>;
   unmuteRule: (rule: Rule) => Promise<void>;
   muteAlertInstance: (rule: Rule, alertInstanceId: string) => Promise<void>;
   unmuteAlertInstance: (rule: Rule, alertInstanceId: string) => Promise<void>;
-  deleteRule: (rule: Rule) => Promise<{
-    successes: string[];
-    errors: string[];
-  }>;
   loadRule: (id: Rule['id']) => Promise<Rule>;
   loadRuleState: (id: Rule['id']) => Promise<RuleTaskState>;
   loadRuleSummary: (id: Rule['id'], numberOfExecutions?: number) => Promise<RuleSummary>;
@@ -124,9 +115,6 @@ export function withBulkRuleOperations<T>(
         unmuteRules={async (items: Rule[]) =>
           unmuteRules({ http, ids: items.filter(isRuleMuted).map((item) => item.id) })
         }
-        deleteRules={async (items: Rule[]) =>
-          deleteRules({ http, ids: items.map((item) => item.id) })
-        }
         muteRule={async (rule: Rule) => {
           if (!isRuleMuted(rule)) {
             return await muteRule({ http, id: rule.id });
@@ -147,7 +135,6 @@ export function withBulkRuleOperations<T>(
             return unmuteAlertInstance({ http, id: rule.id, instanceId });
           }
         }}
-        deleteRule={async (rule: Rule) => deleteRules({ http, ids: [rule.id] })}
         loadRule={async (ruleId: Rule['id']) => loadRule({ http, ruleId })}
         loadRuleState={async (ruleId: Rule['id']) => loadRuleState({ http, ruleId })}
         loadRuleSummary={async (ruleId: Rule['id'], numberOfExecutions?: number) =>
