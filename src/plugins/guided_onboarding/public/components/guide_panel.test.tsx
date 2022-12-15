@@ -456,6 +456,18 @@ describe('Guided setup', () => {
             )
         ).toBe(true);
       });
+
+      it('renders a link in the step description', async () => {
+        const { find, exists, component } = await setupComponentWithPluginStateMock(httpClient, {
+          status: 'in_progress',
+          isActivePeriod: true,
+          activeGuide: testGuideStep2InProgressState,
+        });
+        find('guideButton').simulate('click');
+        component.update();
+
+        expect(exists('guidePanelStepDescriptionLink')).toBe(true);
+      });
     });
 
     describe('Quit guide modal', () => {
