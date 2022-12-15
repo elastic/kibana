@@ -8,10 +8,12 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const superTestWithoutAuth = getService('supertestWithoutAuth');
   const dockerServers = getService('dockerServers');
 
   const server = dockerServers.get('registry');
@@ -96,6 +98,22 @@ export default function (providerContext: FtrProviderContext) {
         await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`).expect(200);
       });
 
+      it('should return 403 for requests with authenticated role but not allowed packages', async function () {
+        await superTestWithoutAuth
+          .get(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            testUsers.any_integr_read_policy_read.username,
+            testUsers.any_integr_read_policy_read.password
+          )
+          .expect(403, {
+            statusCode: 403,
+            error: 'Forbidden',
+            message:
+              "Authorization denied to [package.name=filetest]. Allowed package.name's: endpoint",
+          });
+      });
+
       it('should return a 404 with an invalid id', async function () {
         await supertest.get(`/api/fleet/package_policies/IS_NOT_PRESENT`).expect(404);
       });
@@ -174,6 +192,23 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ ids: ['invalid-id-i-do-not-exists'] })
           .expect(404);
+      });
+
+      it('should return 403 without allowed package names', async function () {
+        await superTestWithoutAuth
+          .post(`/api/fleet/package_policies/_bulk_get`)
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            testUsers.any_integr_read_policy_read.username,
+            testUsers.any_integr_read_policy_read.password
+          )
+          .send({ ids: [packagePolicyId] })
+          .expect(403, {
+            error: 'Forbidden',
+            message:
+              "Authorization denied to [package.name=filetest]. Allowed package.name's: endpoint",
+            statusCode: 403,
+          });
       });
 
       it('should succeed with mixed valid ids and invalid ids and ignoreMissing flag ', async function () {
