@@ -173,6 +173,32 @@ export function userLogoutEvent({
   };
 }
 
+export function userSessionConcurrentLimitLogoutEvent({
+  username,
+  provider,
+  userProfileId,
+}: UserLogoutParams): AuditEvent {
+  return {
+    message: `User [${username}] is logging out due to exceeded concurrent sessions limit for ${provider.type} provider [name=${provider.name}]`,
+    event: {
+      action: 'user_logout',
+      category: ['authentication'],
+      outcome: 'unknown',
+    },
+    user:
+      userProfileId || username
+        ? {
+            id: userProfileId,
+            name: username,
+          }
+        : undefined,
+    kibana: {
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
 export interface SessionCleanupParams {
   sessionId: string;
   usernameHash?: string;
@@ -202,7 +228,7 @@ export function sessionCleanupEvent({
   };
 }
 
-export function sessionConcurrentLimitEvent({
+export function sessionCleanupConcurrentLimitEvent({
   usernameHash,
   sessionId,
   provider,
@@ -210,7 +236,7 @@ export function sessionConcurrentLimitEvent({
   return {
     message: `Removing session for user [hash=${usernameHash}] due to exceeded concurrent sessions limit`,
     event: {
-      action: 'session_concurrent_limit',
+      action: 'session_cleanup',
       category: ['authentication'],
       outcome: 'unknown',
     },

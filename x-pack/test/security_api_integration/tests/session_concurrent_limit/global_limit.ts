@@ -70,9 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(302);
 
-    const cookie = parseCookie(authenticationResponse.headers['set-cookie'][0])!;
-    await checkSessionCookie(cookie, 'a@b.c', samlProvider);
-    return cookie;
+    return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
   }
 
   async function loginWithBasic(credentials: { username: string; password: string }) {
@@ -87,9 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(200);
 
-    const cookie = parseCookie(authenticationResponse.headers['set-cookie'][0])!;
-    await checkSessionCookie(cookie, credentials.username, basicProvider);
-    return cookie;
+    return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
   }
 
   describe('Session Global Concurrent Limit', () => {
@@ -153,13 +149,33 @@ export default function ({ getService }: FtrProviderContext) {
       await checkSessionCookie(basicSessionCookieFive, adminTestUser.username, basicProvider);
       await checkSessionCookie(basicSessionCookieSix, adminTestUser.username, basicProvider);
 
-      // Onlt the oldest session of the ordinary user should be displaced.
+      // Only the oldest session of the ordinary user should be displaced.
       const basicSessionCookieSeven = await loginWithBasic(testUser);
       await checkSessionCookieInvalid(basicSessionCookieOne);
       await checkSessionCookie(basicSessionCookieTwo, testUser.username, basicProvider);
       await checkSessionCookie(basicSessionCookieFive, adminTestUser.username, basicProvider);
       await checkSessionCookie(basicSessionCookieSix, adminTestUser.username, basicProvider);
       await checkSessionCookie(basicSessionCookieSeven, testUser.username, basicProvider);
+    });
+
+    it('should properly enforce session limit even for multiple concurrent logins', async function () {
+      const basicSessionCookies = await Promise.all(
+        Array.from({ length: 10 }).map(() => loginWithBasic(testUser))
+      );
+
+      // Since logins were concurrent we cannot know upfront their `createdAt` timestamps and
+      // hence which specific sessions will be outside the limit.
+      const statusCodes = [];
+      for (const basicSessionCookie of basicSessionCookies) {
+        const { statusCode } = await supertest
+          .get('/internal/security/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', basicSessionCookie.cookieString());
+        statusCodes.push(statusCode);
+      }
+
+      expect(statusCodes.filter((statusCode) => statusCode === 200)).to.have.length(2);
+      expect(statusCodes.filter((statusCode) => statusCode === 401)).to.have.length(8);
     });
 
     it('should properly enforce session limit with multiple providers', async function () {
