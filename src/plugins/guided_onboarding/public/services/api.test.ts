@@ -28,6 +28,7 @@ import {
   mockPluginStateInProgress,
   mockPluginStateNotStarted,
   testGuideStep3ActiveState,
+  testGuideStep2ReadyToCompleteState,
 } from './api.mocks';
 
 describe('GuidedOnboarding ApiService', () => {
@@ -213,7 +214,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('returns undefined if the selected guide is not active', async () => {
-      const completedState = await apiService.completeGuide('observability'); // not active
+      const completedState = await apiService.completeGuide('kubernetes'); // not active
       expect(completedState).not.toBeDefined();
     });
 
@@ -250,6 +251,7 @@ describe('GuidedOnboarding ApiService', () => {
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
       });
 
+      apiService.setup(httpClient, true);
       subscription = apiService
         .isGuideStepActive$(testGuideId, testGuideFirstStep)
         .subscribe((isStepActive) => {
@@ -272,6 +274,65 @@ describe('GuidedOnboarding ApiService', () => {
     });
   });
 
+  describe('isGuideStepReadyToComplete$', () => {
+    it('returns true if the step is ready to complete', (done) => {
+      httpClient.get.mockResolvedValueOnce({
+        pluginState: {
+          ...mockPluginStateInProgress,
+          activeGuide: testGuideStep2ReadyToCompleteState,
+        },
+      });
+      apiService.setup(httpClient, true);
+
+      subscription = apiService
+        .isGuideStepReadyToComplete$(testGuideId, testGuideManualCompletionStep)
+        .subscribe((isStepReadyToComplete) => {
+          if (isStepReadyToComplete) {
+            subscription.unsubscribe();
+            done();
+          }
+        });
+    });
+
+    it('returns false if the step has not been started', (done) => {
+      httpClient.get.mockResolvedValueOnce({
+        pluginState: {
+          ...mockPluginStateInProgress,
+          activeGuide: testGuideStep2ActiveState,
+        },
+      });
+      apiService.setup(httpClient, true);
+
+      subscription = apiService
+        .isGuideStepReadyToComplete$(testGuideId, testGuideManualCompletionStep)
+        .subscribe((isStepActive) => {
+          if (!isStepActive) {
+            subscription.unsubscribe();
+            done();
+          }
+        });
+    });
+
+    it('returns false if the step has been completed', (done) => {
+      httpClient.get.mockResolvedValueOnce({
+        pluginState: {
+          ...mockPluginStateInProgress,
+          activeGuide: testGuideStep3ActiveState,
+        },
+      });
+      apiService.setup(httpClient, true);
+
+      subscription = apiService
+        .isGuideStepReadyToComplete$(testGuideId, testGuideManualCompletionStep)
+        .subscribe((isStepActive) => {
+          if (!isStepActive) {
+            subscription.unsubscribe();
+            done();
+          }
+        });
+    });
+  });
+
   describe('startGuideStep', () => {
     it('updates the selected step and marks it as in_progress', async () => {
       await apiService.startGuideStep(testGuideId, testGuideFirstStep);
@@ -282,7 +343,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('returns undefined if the selected guide is not active', async () => {
-      const startState = await apiService.startGuideStep('observability', 'add_data'); // not active
+      const startState = await apiService.startGuideStep('kubernetes', 'add_data'); // not active
       expect(startState).not.toBeDefined();
     });
   });
@@ -400,7 +461,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('returns undefined if the selected guide is not active', async () => {
-      const startState = await apiService.completeGuideStep('observability', 'add_data'); // not active
+      const startState = await apiService.completeGuideStep('kubernetes', 'add_data'); // not active
       expect(startState).not.toBeDefined();
     });
   });
