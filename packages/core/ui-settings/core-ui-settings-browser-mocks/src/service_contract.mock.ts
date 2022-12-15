@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { TelemetryManagementSectionPlugin } from './plugin';
-
-export { LazyOptInExampleFlyout, type LazyOptInExampleFlyoutProps } from './components';
-
-export function plugin() {
-  return new TelemetryManagementSectionPlugin();
-}
+export const serviceContractMock = (): jest.Mocked<any> => {
+  return {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+};
