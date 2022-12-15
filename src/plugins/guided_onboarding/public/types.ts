@@ -23,6 +23,10 @@ export interface AppPluginStartDependencies {
   cloud?: CloudStart;
 }
 
+export interface ClientConfigType {
+  ui: boolean;
+}
+
 export interface GuidedOnboardingApi {
   setup: (httpClient: HttpSetup, isCloudEnabled: boolean) => void;
   fetchPluginState$: () => Observable<PluginState | undefined>;

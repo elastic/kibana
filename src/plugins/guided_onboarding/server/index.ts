@@ -15,3 +15,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export type { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
 export { testGuideConfig } from '../common/test_guide_config';
+
+export { config } from './config';
