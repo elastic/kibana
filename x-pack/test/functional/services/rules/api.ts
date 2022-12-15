@@ -17,7 +17,7 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
       name,
       notifyWhen,
       params,
-      rule_type_id,
+      ruleTypeId,
       schedule,
     }: {
       consumer: string;
