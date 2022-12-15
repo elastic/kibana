@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import React from 'react';
@@ -64,17 +65,30 @@ export const SubFeatureForm = (props: Props) => {
   if (groupsWithPrivileges.length === 0) {
     return null;
   }
-
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiText size="s">
-          {props.subFeature.name} {getTooltip()}
-          {props.subFeature.description}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{props.subFeature.name}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {props.subFeature.description && (
+                <EuiIconTip type="iInCircle" content={props.subFeature.description} />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {props.subFeature.description && (
+            <EuiText color={'subdued'} size={'xs'}>
+              {props.subFeature.description}
+            </EuiText>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
+      </EuiFlexGroup>
+      {props.subFeature.description && <EuiSpacer size="s" />}
+    </>
   );
 
   function renderPrivilegeGroup(privilegeGroup: SubFeaturePrivilegeGroup, index: number) {
