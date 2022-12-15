@@ -18,12 +18,9 @@ import { EngineListDetails } from '../../types';
 
 export const ENGINE_NAME: EuiTableFieldDataColumnType<EngineListDetails> = {
   field: 'name',
-  name: i18n.translate(
-    'xpack.enterpriseSearch.enterprise_search_content.enginesList.table.column.name',
-    {
-      defaultMessage: 'Engine Name',
-    }
-  ),
+  name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.name', {
+    defaultMessage: 'Engine Name',
+  }),
   width: '30%',
   truncateText: true,
   mobileOptions: {
@@ -35,49 +32,37 @@ export const ENGINE_NAME: EuiTableFieldDataColumnType<EngineListDetails> = {
 
 export const DOCUMENTS: EuiTableFieldDataColumnType<EngineListDetails> = {
   field: 'document_count',
-  name: i18n.translate(
-    'xpack.enterpriseSearch.enterprise_search_content.enginesList.table.column.documents',
-    {
-      defaultMessage: 'Documents',
-    }
-  ),
+  name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.documents', {
+    defaultMessage: 'Documents',
+  }),
   dataType: 'number',
   render: (number: number) => <FormattedNumber value={number} />,
 };
 export const LAST_UPDATED_COLUMN: EuiTableFieldDataColumnType<EngineListDetails> = {
   field: 'last_updated',
-  name: i18n.translate(
-    'xpack.enterpriseSearch.enterprise_search_content.enginesList.table.column.lastUpdated',
-    {
-      defaultMessage: 'Last updated',
-    }
-  ),
+  name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.lastUpdated', {
+    defaultMessage: 'Last updated',
+  }),
   dataType: 'string',
 };
 
 export const INDICES_COUNT_COLUMN: EuiTableFieldDataColumnType<EngineListDetails> = {
   field: 'indices.index_count',
-  name: i18n.translate(
-    'xpack.enterpriseSearch.enterprise_search_content.enginesList.table.column.indices',
-    {
-      defaultMessage: 'Indices',
-    }
-  ),
+  name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.indices', {
+    defaultMessage: 'Indices',
+  }),
   datatype: 'number',
 };
 
 export const ACTIONS_COLUMN: EuiTableActionsColumnType<EngineListDetails> = {
-  name: i18n.translate(
-    'xpack.enterpriseSearch.enterprise_search_content.enginesList.table.column.actions',
-    {
-      defaultMessage: 'Actions',
-    }
-  ),
+  name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.actions', {
+    defaultMessage: 'Actions',
+  }),
   actions: [
     {
       name: MANAGE_BUTTON_LABEL,
       description: i18n.translate(
-        'xpack.enterpriseSearch.enterprise_search_content.enginesList.table.column.action.manage.buttonDescription',
+        'xpack.enterpriseSearch.content.enginesList.table.column.action.manage.buttonDescription',
         {
           defaultMessage: 'Manage this engine',
         }
@@ -89,7 +74,7 @@ export const ACTIONS_COLUMN: EuiTableActionsColumnType<EngineListDetails> = {
     {
       name: DELETE_BUTTON_LABEL,
       description: i18n.translate(
-        'xpack.enterpriseSearch.enterprise_search_content.enginesList.table.column.action.delete.buttonDescription',
+        'xpack.enterpriseSearch.content.enginesList.table.column.action.delete.buttonDescription',
         {
           defaultMessage: 'Delete this engine',
         }

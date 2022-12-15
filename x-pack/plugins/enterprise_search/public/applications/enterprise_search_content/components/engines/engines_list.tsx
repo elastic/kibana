@@ -32,17 +32,14 @@ export const EnginesList = () => {
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
-        i18n.translate('xpack.enterpriseSearch.enterprise_search_content.engines.breadcrumb', {
+        i18n.translate('xpack.enterpriseSearch.content.engines.breadcrumb', {
           defaultMessage: 'Engines',
         }),
       ]}
       pageHeader={{
-        pageTitle: i18n.translate(
-          'xpack.enterpriseSearch.enterprise_search_content.engines.title',
-          {
-            defaultMessage: 'Engines',
-          }
-        ),
+        pageTitle: i18n.translate('xpack.enterpriseSearch.content.engines.title', {
+          defaultMessage: 'Engines',
+        }),
         rightSideItems: [
           <EuiButton
             fill
@@ -60,18 +57,15 @@ export const EnginesList = () => {
       isLoading={false}
     >
       <EuiText>
-        {i18n.translate('xpack.enterpriseSearch.enterprise_search_content.engines.description', {
+        {i18n.translate('xpack.enterpriseSearch.content.engines.description', {
           defaultMessage:
             'Engines allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how engines work in Enterprise search ',
         })}
 
         <EuiLink data-test-subj="documentationLink" href="TODO" target="_blank">
-          {i18n.translate(
-            'xpack.enterpriseSearch.enterprise_search_content.engines.documentation',
-            {
-              defaultMessage: 'explore our Engines documentation',
-            }
-          )}
+          {i18n.translate('xpack.enterpriseSearch.content.engines.documentation', {
+            defaultMessage: 'explore our Engines documentation',
+          })}
         </EuiLink>
       </EuiText>
       <EuiSpacer />
@@ -94,7 +88,7 @@ export const EnginesList = () => {
       <DataPanel
         title={
           <h2>
-            {i18n.translate('xpack.enterpriseSearch.enterprise_search_content.engines.title', {
+            {i18n.translate('xpack.enterpriseSearch.content.engines.title', {
               defaultMessage: 'Engines',
             })}
           </h2>
