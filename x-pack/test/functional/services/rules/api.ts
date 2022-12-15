@@ -22,7 +22,7 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
     }: {
       consumer: string;
       name: string;
-      notify_when: string;
+      notifyWhen: string;
       params: Record<string, unknown>;
       rule_type_id: string;
       schedule: Record<string, unknown>;
