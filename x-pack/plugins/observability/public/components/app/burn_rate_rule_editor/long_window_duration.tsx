@@ -10,10 +10,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIcon,
   EuiSelect,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { toMinutes } from '@kbn/observability-plugin/public/utils/slo/duration';
 import React, { ChangeEvent, useState } from 'react';
 
 import { Duration, DurationUnit } from '../../../typings';
@@ -29,12 +32,18 @@ const durationUnitOptions: DurationUnitOption[] = [
 ];
 
 interface Props {
+  shortWindowDuration: Duration;
   initialDuration?: Duration;
   errors?: string[];
   onChange: (duration: Duration) => void;
 }
 
-export function LongWindowDuration({ initialDuration, onChange, errors }: Props) {
+export function LongWindowDuration({
+  shortWindowDuration,
+  initialDuration,
+  onChange,
+  errors,
+}: Props) {
   const selectId = useGeneratedHtmlId({ prefix: 'durationUnitSelect' });
   const [durationValue, setDurationValue] = useState<number>(initialDuration?.value ?? 1);
   const [durationUnit, setDurationUnit] = useState<DurationUnit>(
@@ -56,7 +65,7 @@ export function LongWindowDuration({ initialDuration, onChange, errors }: Props)
 
   return (
     <EuiFormRow
-      label={rowLabel}
+      label={getRowLabel(shortWindowDuration)}
       fullWidth
       isInvalid={hasError}
       error={hasError ? errors[0] : undefined}
@@ -88,9 +97,23 @@ export function LongWindowDuration({ initialDuration, onChange, errors }: Props)
   );
 }
 
-const rowLabel = i18n.translate('xpack.observability.slo.rules.longWindow.rowLabel', {
-  defaultMessage: 'Long window',
-});
+const getRowLabel = (shortWindowDuration: Duration) => (
+  <>
+    {i18n.translate('xpack.observability.slo.rules.longWindow.rowLabel', {
+      defaultMessage: 'Long window',
+    })}{' '}
+    <EuiToolTip position="top" content={getTooltipText(shortWindowDuration)}>
+      <EuiIcon tabIndex={0} type="iInCircle" />
+    </EuiToolTip>
+  </>
+);
+
+const getTooltipText = (shortWindowDuration: Duration) =>
+  i18n.translate('xpack.observability.slo.rules.longWindowDuration.tooltip', {
+    defaultMessage:
+      'Duration period to compute the burn rate over, and define the short window as {shortWindowDuration} minutes (1/12th)',
+    values: { shortWindowDuration: toMinutes(shortWindowDuration) },
+  });
 
 const valueLabel = i18n.translate('xpack.observability.slo.rules.longWindow.valueLabel', {
   defaultMessage: 'Enter a duration value for the long window',

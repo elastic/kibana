@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { assertNever } from '@kbn/std';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
 
@@ -16,6 +15,7 @@ import { SloSelector } from './slo_selector';
 import { BurnRate } from './burn_rate';
 import { LongWindowDuration } from './long_window_duration';
 import { ValidationBurnRateRuleResult } from './validation';
+import { toMinutes } from '@kbn/observability-plugin/public/utils/slo/duration';
 
 type Props = Pick<
   RuleTypeParamsExpressionProps<BurnRateRuleParams>,
@@ -92,6 +92,7 @@ export function BurnRateRuleEditor(props: Props) {
         <EuiFlexItem>
           <LongWindowDuration
             initialDuration={longWindowDuration}
+            shortWindowDuration={shortWindowDuration}
             onChange={onLongWindowDurationChange}
             errors={errors.longWindow}
           />
@@ -109,23 +110,4 @@ export function BurnRateRuleEditor(props: Props) {
       <EuiSpacer size="m" />
     </EuiFlexGroup>
   );
-}
-
-function toMinutes(duration: Duration) {
-  switch (duration.unit) {
-    case 'm':
-      return duration.value;
-    case 'h':
-      return duration.value * 60;
-    case 'd':
-      return duration.value * 24 * 60;
-    case 'w':
-      return duration.value * 7 * 24 * 60;
-    case 'M':
-      return duration.value * 30 * 24 * 60;
-    case 'Y':
-      return duration.value * 365 * 24 * 60;
-  }
-
-  assertNever(duration.unit);
 }
