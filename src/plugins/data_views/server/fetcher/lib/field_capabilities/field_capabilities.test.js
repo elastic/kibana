@@ -35,7 +35,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
     callCluster: undefined,
     indices: undefined,
     fieldCapsOptions: undefined,
-    filter: undefined,
+    indexFilter: undefined,
     ...args,
   });
 

@@ -54,9 +54,8 @@ export function updateSearchSource(
   params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined
 ) {
-  const index = searchSource.getField('index');
-
-  const timeFieldName = index?.timeFieldName;
+  const index = searchSource.getField('index')!;
+  const timeFieldName = params.timeField || index.timeFieldName;
   if (!timeFieldName) {
     throw new Error('Invalid data view without timeFieldName.');
   }

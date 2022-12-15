@@ -110,7 +110,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
         >
           <FormattedMessage
             id="telemetry.callout.errorLoadingClusterStatisticsDescription"
-            defaultMessage="An unexpected error occured while attempting to fetch the cluster statistics.
+            defaultMessage="An unexpected error occurred while attempting to fetch the cluster statistics.
               This can occur because Elasticsearch failed, Kibana failed, or there is a network error.
               Check Kibana, then reload the page and try again."
           />
@@ -118,7 +118,11 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
       );
     }
 
-    return <EuiCodeBlock language="js">{JSON.stringify(data, null, 2)}</EuiCodeBlock>;
+    return (
+      <EuiCodeBlock language="json" isCopyable={true}>
+        {JSON.stringify(data, null, 2)}
+      </EuiCodeBlock>
+    );
   }
 
   render() {
