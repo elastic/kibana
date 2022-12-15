@@ -50,7 +50,6 @@ ts_config(
   src = "tsconfig.json",
   deps = [
     "//:tsconfig.base.json",
-    "//:tsconfig.bazel.json",
   ],
 )
 
