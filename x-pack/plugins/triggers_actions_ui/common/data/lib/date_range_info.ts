@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { parseDuration } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { times } from 'lodash';
-import { parseDuration } from '@kbn/alerting-plugin/server';
-import { MAX_INTERVALS } from '..';
+
+export const MAX_INTERVALS = 1000;
 
 // dates as numbers are epoch millis
 // dates as strings are ISO
