@@ -24,7 +24,7 @@ export const CmAvatarEmpty: React.FC<CmAvatarEmptyProps> = (props) => {
   return (
     <CmAvatarUi
       {...props}
-      title="?"
+      title={''}
       color={euiTheme.colors.lightestShade}
     />
   );
