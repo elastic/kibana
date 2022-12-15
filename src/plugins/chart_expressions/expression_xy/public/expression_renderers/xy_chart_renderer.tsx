@@ -26,8 +26,8 @@ import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 
 import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
-import type { XYChartProps } from '../../common';
-import type { BrushEvent, CellValueAction, FilterEvent, LayerCellValueActions } from '../types';
+import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';
+import type { BrushEvent, FilterEvent, GetCompatibleCellValueActions } from '../types';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { extractContainerType, extractVisualizationType } from '../../../common';
 
@@ -157,6 +157,28 @@ const extractCounterEvents = (
   }
 };
 
+/**
+ * Retrieves the compatible CELL_VALUE_TRIGGER actions indexed by layer
+ **/
+const getLayerCellValueActions = async (
+  layers: CommonXYDataLayerConfig[],
+  getCompatibleCellValueActions?: GetCompatibleCellValueActions
+) => {
+  if (!layers || !getCompatibleCellValueActions) {
+    return [];
+  }
+  return await Promise.all(
+    layers.map((layer) => {
+      const data =
+        layer.splitAccessors?.map((accessor) => {
+          const column = layer.table.columns.find(({ id }) => id === accessor);
+          return { columnMeta: column?.meta };
+        }) ?? [];
+      return getCompatibleCellValueActions(data);
+    })
+  );
+};
+
 export const getXyChartRenderer = ({
   getStartDeps,
 }: XyChartRendererDeps): ExpressionRenderDefinition<XYChartProps> => ({
@@ -184,21 +206,10 @@ export const getXyChartRenderer = ({
       handlers.event({ name: 'brush', data });
     };
 
-    const { getCompatibleCellValueActions } = handlers;
-
-    let layerCellValueActions: LayerCellValueActions = [];
-    if (getCompatibleCellValueActions) {
-      layerCellValueActions = await Promise.all(
-        getDataLayers(config.args.layers).map((layer) => {
-          const data =
-            layer.splitAccessors?.map((accessor) => {
-              const column = layer.table.columns.find(({ id }) => id === accessor);
-              return { columnMeta: column?.meta };
-            }) ?? [];
-          return getCompatibleCellValueActions(data) as Promise<CellValueAction[]>;
-        })
-      );
-    }
+    const layerCellValueActions = await getLayerCellValueActions(
+      getDataLayers(config.args.layers),
+      handlers.getCompatibleCellValueActions as GetCompatibleCellValueActions | undefined
+    );
 
     const renderComplete = () => {
       const executionContext = handlers.getExecutionContext();
