@@ -502,7 +502,7 @@ export class DataViewsService {
       type: options.type,
       rollupIndex: options.rollupIndex,
       allowNoIndex: options.allowNoIndex,
-      filter: options.filter,
+      indexFilter: options.indexFilter,
     });
     return fields;
   };
@@ -543,7 +543,7 @@ export class DataViewsService {
       type: options.type,
       rollupIndex: options.rollupIndex,
       allowNoIndex: options.allowNoIndex,
-      filter: options.filter,
+      indexFilter: options.indexFilter,
     });
   };
 

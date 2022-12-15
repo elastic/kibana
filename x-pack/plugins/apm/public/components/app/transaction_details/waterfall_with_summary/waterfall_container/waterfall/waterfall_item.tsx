@@ -322,6 +322,7 @@ function RelatedErrors({
   const theme = useTheme();
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
     '/traces/explorer',
     '/dependencies/operation'
   );
