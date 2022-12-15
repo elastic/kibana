@@ -26,9 +26,8 @@ import { useHistory } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { GuideState, GuideId } from '@kbn/guided-onboarding';
+import type { GuideState, GuideId, GuideCardUseCase } from '@kbn/guided-onboarding';
 import { GuideCard, InfrastructureLinkCard } from '@kbn/guided-onboarding';
-import type { GuideCardUseCase } from '@kbn/guided-onboarding';
 
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
@@ -114,18 +113,21 @@ export const GettingStarted = () => {
   `;
 
   const isDarkTheme = uiSettings.get<boolean>('theme:darkMode');
-  const activateGuide = async (useCase: GuideCardUseCase, guideState?: GuideState) => {
-    try {
-      await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
-    } catch (err) {
-      getServices().toastNotifications.addDanger({
-        title: i18n.translate('home.guidedOnboarding.gettingStarted.activateGuide.errorMessage', {
-          defaultMessage: 'Unable to start the guide. Wait a moment and try again.',
-        }),
-        text: err.message,
-      });
-    }
-  };
+  const activateGuide = useCallback(
+    async (useCase: GuideCardUseCase, guideState?: GuideState) => {
+      try {
+        await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
+      } catch (err) {
+        getServices().toastNotifications.addDanger({
+          title: i18n.translate('home.guidedOnboarding.gettingStarted.activateGuide.errorMessage', {
+            defaultMessage: 'Unable to start the guide. Wait a moment and try again.',
+          }),
+          text: err.message,
+        });
+      }
+    },
+    [guidedOnboardingService]
+  );
 
   if (isLoading) {
     return (
