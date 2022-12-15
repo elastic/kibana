@@ -53,9 +53,21 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       });
-      // 1 agent upgrading
+      // 1 agents inactive
       await es.update({
         id: 'agent4',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            policy_revision_idx: 1,
+            last_checkin: new Date(Date.now() - 1000 * 60 * 11).toISOString(), // 10m default inactive timeout + 1 min
+          },
+        },
+      });
+      // 1 agent upgrading
+      await es.create({
+        id: 'agent5',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         body: {
@@ -68,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       // 1 agent reassigned to a new policy
       await es.create({
-        id: 'agent5',
+        id: 'agent6',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         document: {
@@ -84,9 +96,9 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      // 1 agent inactive
+      // 1 agent unenrolled
       await es.create({
-        id: 'agent6',
+        id: 'agent7',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         document: {
@@ -98,11 +110,69 @@ export default function ({ getService }: FtrProviderContext) {
           local_metadata: { host: { hostname: 'host6' } },
           user_provided_metadata: {},
           enrolled_at: '2022-06-21T12:17:25Z',
+          unenrolled_at: '2022-06-21T12:29:29Z',
           last_checkin: '2022-06-27T12:29:29Z',
+        },
+      });
+      // 1 agent error
+      await es.create({
+        id: 'agent8',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        document: {
+          active: true,
+          access_api_key_id: 'api-key-4',
+          policy_id: 'policy1',
+          type: 'PERMANENT',
+          policy_revision_idx: 1,
+          local_metadata: { host: { hostname: 'host6' } },
+          user_provided_metadata: {},
+          enrolled_at: '2022-06-21T12:17:25Z',
+          last_checkin: new Date().toISOString(),
+          last_checkin_status: 'ERROR',
+        },
+      });
+      // 1 agent degraded (error category)
+      await es.create({
+        id: 'agent9',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        document: {
+          active: true,
+          access_api_key_id: 'api-key-4',
+          policy_id: 'policy1',
+          type: 'PERMANENT',
+          policy_revision_idx: 1,
+          local_metadata: { host: { hostname: 'host6' } },
+          user_provided_metadata: {},
+          enrolled_at: '2022-06-21T12:17:25Z',
+          last_checkin: new Date().toISOString(),
+          last_checkin_status: 'DEGRADED',
         },
       });
     });
     after(async () => {
+      // delete agents 1 to 9
+      await es.deleteByQuery({
+        index: AGENTS_INDEX,
+        body: {
+          query: {
+            terms: {
+              _id: [
+                'agent1',
+                'agent2',
+                'agent3',
+                'agent4',
+                'agent5',
+                'agent6',
+                'agent7',
+                'agent8',
+                'agent9',
+              ],
+            },
+          },
+        },
+      });
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
@@ -111,13 +181,14 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse).to.eql({
         results: {
           events: 0,
-          total: 5,
+          other: 0,
+          total: 8,
           online: 2,
-          error: 0,
+          error: 2,
           offline: 1,
           updating: 2,
-          other: 3,
           inactive: 1,
+          unenrolled: 1,
         },
       });
     });
