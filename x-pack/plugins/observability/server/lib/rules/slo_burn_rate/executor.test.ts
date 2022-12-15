@@ -255,6 +255,7 @@ function someRuleParams(params: Partial<BurnRateRuleParams> = {}): BurnRateRuleP
   return {
     sloId: uuid(),
     burnRateThreshold: 2,
+    maxBurnRateThreshold: 720,
     longWindow: { value: 1, unit: 'h' },
     shortWindow: { value: 5, unit: 'm' },
     ...params,
