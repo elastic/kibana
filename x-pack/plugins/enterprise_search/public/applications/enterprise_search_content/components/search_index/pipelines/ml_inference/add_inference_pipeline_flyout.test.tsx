@@ -27,10 +27,11 @@ import {
   AddInferencePipelineFooter,
 } from './add_inference_pipeline_flyout';
 import { ConfigurePipeline } from './configure_pipeline';
-import { AddInferencePipelineSteps, EMPTY_PIPELINE_CONFIGURATION } from './ml_inference_logic';
+import { EMPTY_PIPELINE_CONFIGURATION } from './ml_inference_logic';
 import { NoModelsPanel } from './no_models';
 import { ReviewPipeline } from './review_pipeline';
 import { TestPipeline } from './test_pipeline';
+import { AddInferencePipelineSteps } from './types';
 
 const supportedMLModels: TrainedModelConfigResponse[] = [
   {

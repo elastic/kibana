@@ -228,7 +228,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
       }
       goInspectObject={[Function]}
       isSearching={false}
-      itemId="id"
+      itemId={[Function]}
       items={
         Array [
           Object {
