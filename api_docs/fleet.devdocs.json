@@ -10590,7 +10590,8 @@
             "label": "fleet",
             "description": [],
             "signature": [
-              "{ hosts: string[]; proxy_url?: string | undefined; proxy_headers?: any; ssl?: { verification_mode?: string | undefined; certificate_authorities?: string[] | undefined; renegotiation?: string | undefined; } | undefined; } | { kibana: ",
+              "FullAgentPolicyFleetConfig",
+              " | { kibana: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -12114,6 +12115,20 @@
             "type": "number",
             "tags": [],
             "label": "unenroll_timeout",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.inactivity_timeout",
+            "type": "number",
+            "tags": [],
+            "label": "inactivity_timeout",
             "description": [],
             "signature": [
               "number | undefined"
@@ -17605,28 +17620,12 @@
             "label": "getCheckPermissionsPath",
             "description": [],
             "signature": [
-              "(fleetServerSetup?: boolean | undefined) => string"
+              "() => string"
             ],
             "path": "x-pack/plugins/fleet/common/services/routes.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "fleet",
-                "id": "def-common.appRoutesService.getCheckPermissionsPath.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "fleetServerSetup",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/plugins/fleet/common/services/routes.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
+            "children": [],
             "returnComment": []
           },
           {

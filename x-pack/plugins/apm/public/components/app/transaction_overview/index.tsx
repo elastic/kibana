@@ -15,11 +15,7 @@ import { AggregatedTransactionsBadge } from '../../shared/aggregated_transaction
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
-import {
-  isMobileAgentName,
-  isServerlessAgent,
-} from '../../../../common/agent_name';
-import { MobileTransactionCharts } from '../../shared/charts/transaction_charts/mobile_transaction_charts';
+import { isServerlessAgent } from '../../../../common/agent_name';
 
 export function TransactionOverview() {
   const {
@@ -36,13 +32,8 @@ export function TransactionOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const {
-    transactionType,
-    serviceName,
-    fallbackToTransactions,
-    runtimeName,
-    agentName,
-  } = useApmServiceContext();
+  const { transactionType, fallbackToTransactions, runtimeName } =
+    useApmServiceContext();
 
   const history = useHistory();
 
@@ -51,14 +42,7 @@ export function TransactionOverview() {
     replace(history, { query: { transactionType } });
   }
 
-  // TODO: improve urlParams typings.
-  // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
-  if (!serviceName) {
-    return null;
-  }
-
   const isServerless = isServerlessAgent(runtimeName);
-  const isMobileAgent = isMobileAgentName(agentName);
 
   return (
     <>
@@ -72,24 +56,15 @@ export function TransactionOverview() {
           <EuiSpacer size="s" />
         </>
       )}
-      {isMobileAgent ? (
-        <MobileTransactionCharts
-          kuery={kuery}
-          environment={environment}
-          start={start}
-          end={end}
-        />
-      ) : (
-        <TransactionCharts
-          kuery={kuery}
-          environment={environment}
-          start={start}
-          end={end}
-          isServerlessContext={isServerless}
-          comparisonEnabled={comparisonEnabled}
-          offset={offset}
-        />
-      )}
+      <TransactionCharts
+        kuery={kuery}
+        environment={environment}
+        start={start}
+        end={end}
+        isServerlessContext={isServerless}
+        comparisonEnabled={comparisonEnabled}
+        offset={offset}
+      />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
         <TransactionsTable

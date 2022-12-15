@@ -313,7 +313,7 @@ export interface GetFieldsOptions {
   metaFields?: string[];
   rollupIndex?: string;
   allowNoIndex?: boolean;
-  filter?: QueryDslQueryContainer;
+  indexFilter?: QueryDslQueryContainer;
   includeUnmapped?: boolean;
 }
 

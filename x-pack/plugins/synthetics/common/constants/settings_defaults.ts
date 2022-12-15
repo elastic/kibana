@@ -12,4 +12,9 @@ export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
   certAgeThreshold: 730,
   certExpirationThreshold: 30,
   defaultConnectors: [],
+  defaultEmail: {
+    to: [],
+    cc: [],
+    bcc: [],
+  },
 };

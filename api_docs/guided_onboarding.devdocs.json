@@ -950,6 +950,17 @@
           },
           {
             "parentPluginId": "guidedOnboarding",
+            "id": "def-server.testGuideConfig.telemetryId",
+            "type": "string",
+            "tags": [],
+            "label": "telemetryId",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
             "id": "def-server.testGuideConfig.completedGuideRedirectLocation",
             "type": "Object",
             "tags": [],
@@ -1184,6 +1195,17 @@
             "type": "string",
             "tags": [],
             "label": "guideName",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.GuideConfig.telemetryId",
+            "type": "string",
+            "tags": [],
+            "label": "telemetryId",
             "description": [],
             "path": "src/plugins/guided_onboarding/common/types.ts",
             "deprecated": false,
@@ -1465,7 +1487,7 @@
             "section": "def-common.GuideConfig",
             "text": "GuideConfig"
           },
-          "; security: ",
+          "; kubernetes: ",
           {
             "pluginId": "guidedOnboarding",
             "scope": "common",
@@ -1473,7 +1495,7 @@
             "section": "def-common.GuideConfig",
             "text": "GuideConfig"
           },
-          "; observability: ",
+          "; siem: ",
           {
             "pluginId": "guidedOnboarding",
             "scope": "common",
@@ -1551,7 +1573,7 @@
         "label": "testGuideId",
         "description": [],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"testGuide\""
+          "\"search\" | \"kubernetes\" | \"siem\" | \"testGuide\""
         ],
         "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
         "deprecated": false,
@@ -1599,6 +1621,17 @@
             "type": "string",
             "tags": [],
             "label": "guideName",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.testGuideConfig.telemetryId",
+            "type": "string",
+            "tags": [],
+            "label": "telemetryId",
             "description": [],
             "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
             "deprecated": false,
