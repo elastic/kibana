@@ -6,7 +6,7 @@
     "outDir": "target/types",
     "types": [ "node"],
   },
-  "references": [
+  "kbn_references": [
     {
       "path": "../../apm/tsconfig.json",
     },

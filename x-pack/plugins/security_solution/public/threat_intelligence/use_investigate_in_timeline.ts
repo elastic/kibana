@@ -54,7 +54,7 @@ export const useInvestigateInTimeline = ({
   const { startTransaction } = useStartTransaction();
 
   const filterManagerBackup = useMemo(() => query.filterManager, [query.filterManager]);
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
     getManageTimeline(state, TimelineId.active ?? '')
   );

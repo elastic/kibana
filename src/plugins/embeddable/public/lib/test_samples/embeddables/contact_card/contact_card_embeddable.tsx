@@ -47,7 +47,7 @@ export class ContactCardEmbeddable extends Embeddable<
 
   constructor(
     initialInput: ContactCardEmbeddableInput,
-    private readonly options: ContactCardEmbeddableOptions,
+    protected readonly options: ContactCardEmbeddableOptions,
     parent?: Container
   ) {
     super(
@@ -77,7 +77,7 @@ export class ContactCardEmbeddable extends Embeddable<
     );
   }
 
-  public renderError?(node: HTMLElement, error: ErrorLike) {
+  public catchError?(error: ErrorLike, node: HTMLElement) {
     ReactDom.render(<div data-test-subj="error">{error.message}</div>, node);
 
     return () => ReactDom.unmountComponentAtNode(node);

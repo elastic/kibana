@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EcsEventOutcome } from '@kbn/core/server';
-import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
-import { DATABASE_CATEGORY, ECS_OUTCOMES, isWriteOperation, OperationDetails } from '.';
-import { OwnerEntity } from './types';
+import type { EcsEventOutcome } from '@kbn/core/server';
+import type { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
+import type { OperationDetails } from '.';
+import { DATABASE_CATEGORY, ECS_OUTCOMES, isWriteOperation } from '.';
+import type { OwnerEntity } from './types';
 
 interface CreateAuditMsgParams {
   operation: OperationDetails;
@@ -20,9 +21,9 @@ interface CreateAuditMsgParams {
  * Audit logger for authorization operations
  */
 export class AuthorizationAuditLogger {
-  private readonly auditLogger?: AuditLogger;
+  private readonly auditLogger: AuditLogger;
 
-  constructor(logger?: AuditLogger) {
+  constructor(logger: AuditLogger) {
     this.auditLogger = logger;
   }
 
@@ -96,6 +97,6 @@ export class AuthorizationAuditLogger {
    * Logs an audit event based on the status of an operation.
    */
   public log(auditMsgParams: CreateAuditMsgParams) {
-    this.auditLogger?.log(AuthorizationAuditLogger.createAuditMsg(auditMsgParams));
+    this.auditLogger.log(AuthorizationAuditLogger.createAuditMsg(auditMsgParams));
   }
 }

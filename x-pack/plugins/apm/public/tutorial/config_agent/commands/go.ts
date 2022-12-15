@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const goVariables = {
+  apmServiceName: 'ELASTIC_APM_SERVICE_NAME',
+  secretToken: 'ELASTIC_APM_SECRET_TOKEN',
+  apmServerUrl: 'ELASTIC_APM_SERVER_URL',
+  apmEnvironment: 'ELASTIC_APM_ENVIRONMENT',
+};
+
 export const go = `# ${i18n.translate(
   'xpack.apm.tutorial.goClient.configure.commands.initializeUsingEnvironmentVariablesComment',
   {
@@ -28,7 +35,15 @@ export const go = `# ${i18n.translate(
       'If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.',
   }
 )}
-export ELASTIC_APM_SERVICE_NAME=
+export ${goVariables.apmServiceName}={{{apmServiceName}}}
+
+# ${i18n.translate(
+  'xpack.apm.tutorial.goClient.configure.commands.useIfApmRequiresTokenComment',
+  {
+    defaultMessage: 'Use if APM Server requires a secret token',
+  }
+)}
+export ${goVariables.secretToken}={{{secretToken}}}
 
 # ${i18n.translate(
   'xpack.apm.tutorial.goClient.configure.commands.setCustomApmServerUrlComment',
@@ -38,15 +53,7 @@ export ELASTIC_APM_SERVICE_NAME=
     values: { defaultApmServerUrl: 'http://localhost:8200' },
   }
 )}
-export ELASTIC_APM_SERVER_URL={{{apmServerUrl}}}
-
-# ${i18n.translate(
-  'xpack.apm.tutorial.goClient.configure.commands.useIfApmRequiresTokenComment',
-  {
-    defaultMessage: 'Use if APM Server requires a secret token',
-  }
-)}
-export ELASTIC_APM_SECRET_TOKEN={{{secretToken}}}
+export ${goVariables.apmServerUrl}={{{apmServerUrl}}}
 
 # ${i18n.translate(
   'xpack.apm.tutorial.goClient.configure.commands.setServiceEnvironment',
@@ -54,5 +61,5 @@ export ELASTIC_APM_SECRET_TOKEN={{{secretToken}}}
     defaultMessage: 'Set the service environment',
   }
 )}
-export ELASTIC_APM_ENVIRONMENT=
+export ${goVariables.apmEnvironment}={{{apmEnvironment}}}
 `;

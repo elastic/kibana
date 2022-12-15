@@ -24,7 +24,8 @@ const getPackagePolicies = sendGetEndpointSpecificPackagePolicies as jest.Mock;
 
 const mockedSendBulkGetAgentPolicies = sendBulkGetAgentPolicyList as jest.Mock;
 
-describe('When on the policy list page', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/143436
+describe.skip('When on the policy list page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];

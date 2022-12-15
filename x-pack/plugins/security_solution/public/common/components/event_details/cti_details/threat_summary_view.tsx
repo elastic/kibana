@@ -28,7 +28,7 @@ import type {
 } from '../../../../../common/search_strategy';
 import { RiskSummary } from './risk_summary';
 import { EnrichmentSummary } from './enrichment_summary';
-import type { HostRisk, UserRisk } from '../../../../risk_score/containers';
+import type { HostRisk, UserRisk } from '../../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 
 const UppercaseEuiTitle = styled(EuiTitle)`
@@ -126,7 +126,7 @@ const ThreatSummaryViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
   enrichments: CtiEnrichment[];
   eventId: string;
-  timelineId: string;
+  scopeId: string;
   hostRisk: HostRisk;
   userRisk: UserRisk;
   isDraggable?: boolean;
@@ -136,7 +136,7 @@ const ThreatSummaryViewComponent: React.FC<{
   data,
   enrichments,
   eventId,
-  timelineId,
+  scopeId,
   hostRisk,
   userRisk,
   isDraggable,
@@ -180,7 +180,7 @@ const ThreatSummaryViewComponent: React.FC<{
           browserFields={browserFields}
           data={data}
           enrichments={enrichments}
-          timelineId={timelineId}
+          scopeId={scopeId}
           eventId={eventId}
           isDraggable={isDraggable}
           isReadOnly={isReadOnly}

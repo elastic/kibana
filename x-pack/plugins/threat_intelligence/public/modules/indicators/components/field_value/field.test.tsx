@@ -8,8 +8,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { IndicatorFieldValue } from '.';
-import { generateMockIndicator } from '../../../../../common/types/indicator';
-import { EMPTY_VALUE } from '../../../../../common/constants';
+import {
+  generateMockIndicator,
+  generateMockIndicatorWithTlp,
+} from '../../../../../common/types/indicator';
+import { EMPTY_VALUE } from '../../../../common/constants';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 
 const mockIndicator = generateMockIndicator();
@@ -19,23 +22,37 @@ describe('<IndicatorField />', () => {
 
   it('should return non formatted value', () => {
     const mockField = 'threat.indicator.ip';
-    const component = render(<IndicatorFieldValue indicator={mockIndicator} field={mockField} />);
-    expect(component).toMatchSnapshot();
+    const { asFragment } = render(
+      <IndicatorFieldValue indicator={mockIndicator} field={mockField} />
+    );
+    expect(asFragment()).toMatchSnapshot();
   });
 
   it(`should return ${EMPTY_VALUE}`, () => {
     const mockField = 'abc';
-    const component = render(<IndicatorFieldValue indicator={mockIndicator} field={mockField} />);
-    expect(component).toMatchSnapshot();
+    const { asFragment } = render(
+      <IndicatorFieldValue indicator={mockIndicator} field={mockField} />
+    );
+    expect(asFragment()).toMatchSnapshot();
   });
 
   it('should return date-formatted value', () => {
     const mockField = 'threat.indicator.first_seen';
-    const component = render(
+    const { asFragment } = render(
       <TestProvidersComponent>
         <IndicatorFieldValue indicator={mockIndicator} field={mockField} />
       </TestProvidersComponent>
     );
-    expect(component).toMatchSnapshot();
+    expect(asFragment()).toMatchSnapshot();
+  });
+
+  it('should render tlp marking badge', () => {
+    const mockField = 'threat.indicator.marking.tlp';
+    const { asFragment } = render(
+      <TestProvidersComponent>
+        <IndicatorFieldValue indicator={generateMockIndicatorWithTlp()} field={mockField} />
+      </TestProvidersComponent>
+    );
+    expect(asFragment()).toMatchSnapshot();
   });
 });

@@ -13,7 +13,7 @@ import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { uiSettingsServiceMock, settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
@@ -40,6 +40,7 @@ export function createCoreSetupMock({
     http: httpServiceMock.createSetupContract({ basePath }),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
+    settings: settingsServiceMock.createSetupContract(),
     deprecations: deprecationsServiceMock.createSetupContract(),
     injectedMetadata: {
       getInjectedVar: injectedMetadataServiceMock.createSetupContract().getInjectedVar,

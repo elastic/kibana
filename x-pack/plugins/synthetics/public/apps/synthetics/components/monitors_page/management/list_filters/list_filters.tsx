@@ -5,40 +5,16 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import useDebounce from 'react-use/lib/useDebounce';
-import { i18n } from '@kbn/i18n';
-import { useGetUrlParams, useUrlParams } from '../../../../hooks';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FilterGroup } from './filter_group';
+import { SearchField } from '../../common/search_field';
 
 export function ListFilters() {
-  const { query } = useGetUrlParams();
-  const updateUrlParams = useUrlParams()[1];
-
-  const [search, setSearch] = useState(query || '');
-
-  useDebounce(
-    () => {
-      updateUrlParams({ query: search });
-    },
-    300,
-    [search]
-  );
-
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={2}>
-        <EuiFieldSearch
-          fullWidth
-          placeholder={PLACEHOLDER_TEXT}
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-          }}
-          isClearable={true}
-          aria-label={PLACEHOLDER_TEXT}
-        />
+        <SearchField />
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
         <FilterGroup />
@@ -46,7 +22,3 @@ export function ListFilters() {
     </EuiFlexGroup>
   );
 }
-
-const PLACEHOLDER_TEXT = i18n.translate('xpack.synthetics.monitorManagement.filter.placeholder', {
-  defaultMessage: `Search by name, url, tag or location`,
-});

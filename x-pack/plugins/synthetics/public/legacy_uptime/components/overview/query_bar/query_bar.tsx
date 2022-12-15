@@ -43,6 +43,7 @@ export const QueryBar = () => {
     docLinks,
     uiSettings,
     data,
+    dataViews,
     unifiedSearch,
     storage,
     usageCollection,
@@ -100,6 +101,7 @@ export const QueryBar = () => {
           docLinks,
           uiSettings,
           data,
+          dataViews,
           storage,
           usageCollection,
         }}

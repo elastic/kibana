@@ -33,6 +33,7 @@ function mockProps() {
     customNavLink$: new BehaviorSubject(undefined),
     recentlyAccessed$: new BehaviorSubject([]),
     forceAppSwitcherNavigation$: new BehaviorSubject(false),
+    globalHelpExtensionMenuLinks$: new BehaviorSubject([]),
     helpExtension$: new BehaviorSubject(undefined),
     helpSupportUrl$: new BehaviorSubject(''),
     navControlsLeft$: new BehaviorSubject([]),

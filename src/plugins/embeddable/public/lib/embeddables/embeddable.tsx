@@ -14,7 +14,7 @@ import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
-import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { EmbeddableError, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 
@@ -23,8 +23,9 @@ function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
 }
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-  TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
-> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput>
+  TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput,
+  TNode = any
+> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput, TNode>
 {
   static runtimeId: number = 0;
 
@@ -33,6 +34,7 @@ export abstract class Embeddable<
   public readonly parent?: IContainer;
   public readonly isContainer: boolean = false;
   public readonly deferEmbeddableLoad: boolean = false;
+  public catchError?(error: EmbeddableError, domNode: HTMLElement | Element): TNode | (() => void);
 
   public abstract readonly type: string;
   public readonly id: string;
@@ -209,14 +211,13 @@ export abstract class Embeddable<
     }
   }
 
-  public render(el: HTMLElement): void {
+  public render(el: HTMLElement): TNode | void {
     this.renderComplete.setEl(el);
     this.renderComplete.setTitle(this.output.title || '');
 
     if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }
-    return;
   }
 
   /**

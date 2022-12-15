@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -91,11 +92,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
     });
 
+    it('should visualize correctly using breakdown field', async () => {
+      await PageObjects.discover.chooseBreakdownField('extension.raw');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('unifiedHistogramEditVisualization');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        const breakdownLabel = await testSubjects.find(
+          'lnsDragDrop_draggable-Top 3 values of extension.raw'
+        );
+
+        const lnsWorkspace = await testSubjects.find('lnsWorkspace');
+        const list = await lnsWorkspace.findAllByClassName('echLegendItem__label');
+        const values = await Promise.all(
+          list.map((elem: WebElementWrapper) => elem.getVisibleText())
+        );
+
+        expect(await breakdownLabel.getVisibleText()).to.eql('Top 3 values of extension.raw');
+        expect(values).to.eql(['Other', 'png', 'css', 'jpg']);
+      });
+    });
+
     it('should visualize correctly using adhoc data view', async () => {
       await PageObjects.discover.createAdHocDataView('logst', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await testSubjects.click('discoverEditVisualization');
+      await testSubjects.click('unifiedHistogramEditVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.try(async () => {

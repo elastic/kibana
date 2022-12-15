@@ -8,11 +8,11 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import { UserProfileUserInfo } from '@kbn/user-profile-components';
+import type { UserProfileUserInfo } from '@kbn/user-profile-components';
 import { CaseUserAvatar } from './user_avatar';
 import { getName } from './display_name';
 import * as i18n from './translations';
-import { UserInfoWithAvatar } from './types';
+import type { UserInfoWithAvatar } from './types';
 
 const UserFullInformation: React.FC<{ userInfo?: UserInfoWithAvatar }> = React.memo(
   ({ userInfo }) => {

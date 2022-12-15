@@ -7,7 +7,7 @@ exports[`threatMatchRowRenderer #renderRow renders correctly against snapshot 1`
   >
     <styled.div>
       <ThreatMatchRow
-        contextId="threat-match-row-test-1-0"
+        contextId="threat-match-row-timeline-test-1-0"
         data={
           Object {
             "matched": Object {

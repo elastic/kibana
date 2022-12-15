@@ -18,9 +18,9 @@ import {
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import type { HttpSetup } from '@kbn/core/public';
-import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../rule_management/logic/types';
 import * as i18n from '../../utils/translations';
-import { useDissasociateExceptionList } from '../../../../detections/containers/detection_engine/rules/use_dissasociate_exception_list';
+import { useDisassociateExceptionList } from '../../../rule_management/logic/use_disassociate_exception_list';
 
 export interface ErrorInfo {
   reason: string | null;
@@ -54,7 +54,7 @@ const ErrorCalloutComponent = ({
     onSuccess(listToDelete != null ? listToDelete.id : '');
   }, [onSuccess, listToDelete]);
 
-  const [isDissasociatingList, handleDissasociateExceptionList] = useDissasociateExceptionList({
+  const [isDisassociatingList, handleDisassociateExceptionList] = useDisassociateExceptionList({
     http,
     ruleRuleId: rule != null ? rule.rule_id : '',
     onSuccess: handleOnSuccess,
@@ -66,8 +66,8 @@ const ErrorCalloutComponent = ({
       errorInfo.code === 404 &&
       rule != null &&
       listToDelete != null &&
-      handleDissasociateExceptionList != null,
-    [errorInfo.code, listToDelete, handleDissasociateExceptionList, rule]
+      handleDisassociateExceptionList != null,
+    [errorInfo.code, listToDelete, handleDisassociateExceptionList, rule]
   );
 
   useEffect((): void => {
@@ -80,23 +80,23 @@ const ErrorCalloutComponent = ({
     setErrorTitle(`${errorInfo.reason}${errorInfo.code != null ? ` (${errorInfo.code})` : ''}`);
   }, [errorInfo.reason, errorInfo.code, listToDelete, canDisplay404Actions]);
 
-  const handleDissasociateList = useCallback((): void => {
+  const handleDisassociateList = useCallback((): void => {
     // Yes, it's redundant, unfortunately typescript wasn't picking up
-    // that `handleDissasociateExceptionList` and `list` are checked in
+    // that `handleDisassociateExceptionList` and `list` are checked in
     // canDisplay404Actions
     if (
       canDisplay404Actions &&
       rule != null &&
       listToDelete != null &&
-      handleDissasociateExceptionList != null
+      handleDisassociateExceptionList != null
     ) {
       const exceptionLists = (rule.exceptions_list ?? []).filter(
         ({ id }) => id !== listToDelete.id
       );
 
-      handleDissasociateExceptionList(exceptionLists);
+      handleDisassociateExceptionList(exceptionLists);
     }
-  }, [handleDissasociateExceptionList, listToDelete, canDisplay404Actions, rule]);
+  }, [handleDisassociateExceptionList, listToDelete, canDisplay404Actions, rule]);
 
   useEffect((): void => {
     if (errorInfo.code === 404 && rule != null && rule.exceptions_list != null) {
@@ -144,16 +144,16 @@ const ErrorCalloutComponent = ({
       <EuiButtonEmpty
         data-test-subj="errorCalloutCancelButton"
         color="danger"
-        isDisabled={isDissasociatingList}
+        isDisabled={isDisassociatingList}
         onClick={onCancel}
       >
         {i18n.CANCEL}
       </EuiButtonEmpty>
       {canDisplay404Actions && (
         <EuiButton
-          data-test-subj="errorCalloutDissasociateButton"
-          isLoading={isDissasociatingList}
-          onClick={handleDissasociateList}
+          data-test-subj="errorCalloutDisassociateButton"
+          isLoading={isDisassociatingList}
+          onClick={handleDisassociateList}
           color="danger"
         >
           {i18n.CLEAR_EXCEPTIONS_LABEL}

@@ -51,8 +51,10 @@ export interface FormBasedLayer {
   columns: Record<string, GenericIndexPatternColumn>;
   // Each layer is tied to the index pattern that created it
   indexPatternId: string;
+  linkToLayers?: string[];
   // Partial columns represent the temporary invalid states
   incompleteColumns?: Record<string, IncompleteColumn>;
+  sampling?: number;
 }
 
 export interface FormBasedPersistedState {

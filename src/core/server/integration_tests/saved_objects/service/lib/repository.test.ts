@@ -6,14 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { InternalCoreStart } from '../../../../internal_types';
-import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
-import { Root } from '../../../../root';
+import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
+import { Root } from '@kbn/core-root-server-internal';
 
-const { startES } = kbnTestServer.createTestServers({
+const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
 });
-let esServer: kbnTestServer.TestElasticsearchUtils;
+let esServer: TestElasticsearchUtils;
 
 describe('SavedObjectsRepository', () => {
   let root: Root;
@@ -21,7 +25,7 @@ describe('SavedObjectsRepository', () => {
 
   beforeAll(async () => {
     esServer = await startES();
-    root = kbnTestServer.createRootWithCorePlugins({
+    root = createRootWithCorePlugins({
       server: {
         basePath: '/hello',
       },

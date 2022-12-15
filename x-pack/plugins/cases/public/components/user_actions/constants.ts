@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash';
 import { ActionTypes } from '../../../common/api';
-import { SupportedUserActionTypes } from './types';
+import type { SupportedUserActionTypes } from './types';
 
 export const DRAFT_COMMENT_STORAGE_ID = 'xpack.cases.commentDraft';
 

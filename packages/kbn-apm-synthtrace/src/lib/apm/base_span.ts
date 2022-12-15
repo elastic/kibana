@@ -88,4 +88,10 @@ export class BaseSpan extends Serializable<ApmFields> {
     });
     return this;
   }
+
+  override timestamp(timestamp: number) {
+    const ret = super.timestamp(timestamp);
+    this.fields['timestamp.us'] = timestamp * 1000;
+    return ret;
+  }
 }

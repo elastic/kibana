@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useDeleteAction } from './use_delete_action';
 

@@ -20,8 +20,12 @@ import {
   ApmTransactionErrorRateTransformGenerator,
   TransformGenerator,
 } from './transform_generators';
-import { SLO, IndicatorTypes } from '../../types/models';
-import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
+import { SLO, IndicatorTypes } from '../../domain/models';
+import {
+  createAPMTransactionDurationIndicator,
+  createAPMTransactionErrorRateIndicator,
+  createSLO,
+} from './fixtures/slo';
 
 describe('TransformManager', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -37,44 +41,25 @@ describe('TransformManager', () => {
       it('throws when no generator exists for the slo indicator type', async () => {
         // @ts-ignore defining only a subset of the possible SLI
         const generators: Record<IndicatorTypes, TransformGenerator> = {
-          'slo.apm.transaction_duration': new DummyTransformGenerator(),
+          'sli.apm.transaction_duration': new DummyTransformGenerator(),
         };
         const service = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
         await expect(
-          service.install(
-            createSLO({
-              type: 'slo.apm.transaction_error_rate',
-              params: {
-                environment: 'irrelevant',
-                service: 'irrelevant',
-                transaction_name: 'irrelevant',
-                transaction_type: 'irrelevant',
-              },
-            })
-          )
-        ).rejects.toThrowError('Unsupported SLO type: slo.apm.transaction_error_rate');
+          service.install(createSLO({ indicator: createAPMTransactionErrorRateIndicator() }))
+        ).rejects.toThrowError('Unsupported SLI type: sli.apm.transaction_error_rate');
       });
 
       it('throws when transform generator fails', async () => {
         // @ts-ignore defining only a subset of the possible SLI
         const generators: Record<IndicatorTypes, TransformGenerator> = {
-          'slo.apm.transaction_duration': new FailTransformGenerator(),
+          'sli.apm.transaction_duration': new FailTransformGenerator(),
         };
         const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
         await expect(
           transformManager.install(
-            createSLO({
-              type: 'slo.apm.transaction_duration',
-              params: {
-                environment: 'irrelevant',
-                service: 'irrelevant',
-                transaction_name: 'irrelevant',
-                transaction_type: 'irrelevant',
-                'threshold.us': 250000,
-              },
-            })
+            createSLO({ indicator: createAPMTransactionDurationIndicator() })
           )
         ).rejects.toThrowError('Some error');
       });
@@ -83,10 +68,10 @@ describe('TransformManager', () => {
     it('installs the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
       const generators: Record<IndicatorTypes, TransformGenerator> = {
-        'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+        'sli.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
-      const slo = createSLO(createAPMTransactionErrorRateIndicator());
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
 
       const transformId = await transformManager.install(slo);
 
@@ -99,7 +84,7 @@ describe('TransformManager', () => {
     it('starts the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
       const generators: Record<IndicatorTypes, TransformGenerator> = {
-        'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+        'sli.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
@@ -113,7 +98,7 @@ describe('TransformManager', () => {
     it('stops the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
       const generators: Record<IndicatorTypes, TransformGenerator> = {
-        'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+        'sli.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
@@ -127,7 +112,7 @@ describe('TransformManager', () => {
     it('uninstalls the transform', async () => {
       // @ts-ignore defining only a subset of the possible SLI
       const generators: Record<IndicatorTypes, TransformGenerator> = {
-        'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+        'sli.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
@@ -142,7 +127,7 @@ describe('TransformManager', () => {
       );
       // @ts-ignore defining only a subset of the possible SLI
       const generators: Record<IndicatorTypes, TransformGenerator> = {
-        'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
+        'sli.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
@@ -153,13 +138,13 @@ describe('TransformManager', () => {
   });
 });
 
-class DummyTransformGenerator implements TransformGenerator {
+class DummyTransformGenerator extends TransformGenerator {
   getTransformParams(slo: SLO): TransformPutTransformRequest {
     return {} as TransformPutTransformRequest;
   }
 }
 
-class FailTransformGenerator implements TransformGenerator {
+class FailTransformGenerator extends TransformGenerator {
   getTransformParams(slo: SLO): TransformPutTransformRequest {
     throw new Error('Some error');
   }

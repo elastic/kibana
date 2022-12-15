@@ -163,7 +163,6 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   const {
     services: { api },
   } = useAppContext();
-
   const { data } = api.useLoadMlUpgradeMode();
   const mlUpgradeModeEnabled = !!data?.mlUpgradeModeEnabled;
 

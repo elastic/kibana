@@ -240,6 +240,7 @@ describe('test endpoint routes', () => {
 
         expect(esSearchMock).toHaveBeenCalledTimes(2);
         expect(esSearchMock.mock.calls[0][0]?.index).toEqual(METADATA_UNITED_INDEX);
+        // @ts-expect-error size not defined as top level property when using typesWithBodyKey
         expect(esSearchMock.mock.calls[0][0]?.size).toEqual(1);
         expect(esSearchMock.mock.calls[1][0]?.index).toEqual(METADATA_UNITED_INDEX);
         // @ts-expect-error partial definition
@@ -365,6 +366,30 @@ describe('test endpoint routes', () => {
                                                 {
                                                   match: {
                                                     'united.agent.last_checkin_status': 'degraded',
+                                                  },
+                                                },
+                                              ],
+                                              minimum_should_match: 1,
+                                            },
+                                          },
+                                          {
+                                            bool: {
+                                              should: [
+                                                {
+                                                  match: {
+                                                    'united.agent.last_checkin_status': 'DEGRADED',
+                                                  },
+                                                },
+                                              ],
+                                              minimum_should_match: 1,
+                                            },
+                                          },
+                                          {
+                                            bool: {
+                                              should: [
+                                                {
+                                                  match: {
+                                                    'united.agent.last_checkin_status': 'ERROR',
                                                   },
                                                 },
                                               ],

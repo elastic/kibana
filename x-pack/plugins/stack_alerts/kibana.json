@@ -15,6 +15,7 @@
     "kibanaReact",
     "savedObjects",
     "data",
+    "dataViews",
     "kibanaUtils"
   ],
   "configPath": ["xpack", "stack_alerts"],

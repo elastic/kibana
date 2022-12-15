@@ -32,3 +32,16 @@ export enum BUCKET_TYPES {
   TERMS = 'terms',
   FILTERS = 'filters',
 }
+
+export enum BASIC_AGGS_TYPES {
+  COUNT = 'count',
+  AVG = 'avg',
+  MIN = 'min',
+  MAX = 'max',
+  SUM = 'sum',
+  STD_DEV = 'std_deviation',
+  SUM_OF_SQUARES = 'sum_of_squares',
+  VARIANCE = 'variance',
+  CARDINALITY = 'cardinality',
+  VALUE_COUNT = 'value_count',
+}

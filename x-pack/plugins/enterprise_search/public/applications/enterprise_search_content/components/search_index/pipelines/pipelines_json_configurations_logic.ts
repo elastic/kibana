@@ -25,9 +25,9 @@ interface IndexPipelinesConfigurationsActions {
   selectPipeline: (pipeline: string) => { pipeline: string };
 }
 
-interface IndexPipelinesConfigurationsValues {
+export interface IndexPipelinesConfigurationsValues {
   indexName: string;
-  indexPipelinesData: FetchCustomPipelineApiLogicResponse;
+  indexPipelinesData: FetchCustomPipelineApiLogicResponse | undefined;
   pipelineNames: string[];
   pipelines: Record<string, IngestPipeline>;
   selectedPipeline: IngestPipeline | undefined;

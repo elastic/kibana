@@ -8,9 +8,26 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'cypress';
 
+const CI = process.env.BUILDKITE === 'true';
+
+/**
+ * Converts seconds to milliseconds
+ * @param s Seconds
+ * @returns milliseconds
+ */
+const sToMs = (s: number) => s * 1000;
+
+const LOCAL_CONFIG: Cypress.ConfigOptions<any> = {
+  defaultCommandTimeout: sToMs(10),
+};
+
+const CI_CONFIG: Cypress.ConfigOptions<any> = {
+  defaultCommandTimeout: sToMs(120),
+};
+
 // eslint-disable-next-line import/no-default-export
 export default defineConfig({
-  defaultCommandTimeout: 120000,
+  ...(CI ? CI_CONFIG : LOCAL_CONFIG),
   execTimeout: 120000,
   pageLoadTimeout: 120000,
   retries: {

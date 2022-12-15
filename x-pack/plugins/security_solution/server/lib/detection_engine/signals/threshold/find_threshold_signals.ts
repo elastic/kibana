@@ -17,8 +17,7 @@ import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type {
   ThresholdNormalized,
   TimestampOverride,
-  TimestampOverrideOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../common/detection_engine/rule_schema';
 import { singleSearchAfter } from '../single_search_after';
 import {
   buildThresholdMultiBucketAggregation,
@@ -43,7 +42,7 @@ interface FindThresholdSignalsParams {
   threshold: ThresholdNormalized;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: TimestampOverride;
-  secondaryTimestamp: TimestampOverrideOrUndefined;
+  secondaryTimestamp: TimestampOverride | undefined;
   aggregatableTimestampField: string;
 }
 

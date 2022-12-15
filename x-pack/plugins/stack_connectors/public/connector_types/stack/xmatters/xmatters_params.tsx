@@ -78,7 +78,24 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
         },
         index
       );
+    } else {
+      if (!actionParams.signalId) {
+        editAction('signalId', 'test-alert', index);
+      }
+      if (!actionParams.alertActionGroupName) {
+        editAction('alertActionGroupName', 'test-rule:test-alert', index);
+      }
+      if (!actionParams.ruleName) {
+        editAction('ruleName', 'Test Rule', index);
+      }
+      if (!actionParams.date) {
+        editAction('date', new Date().toISOString(), index);
+      }
+      if (!actionParams.spaceId) {
+        editAction('spaceId', 'test-space', index);
+      }
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionParams]);
   return (

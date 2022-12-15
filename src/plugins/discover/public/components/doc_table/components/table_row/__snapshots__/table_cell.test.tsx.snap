@@ -34,32 +34,122 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
           display="inlineBlock"
           position="bottom"
         >
-          <span
-            className="euiToolTipAnchor"
+          <EuiToolTipAnchor
+            display="inlineBlock"
+            id="generated-id"
+            isVisible={false}
+            onBlur={[Function]}
+            onFocus={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
-            <button
-              aria-label="Filter for value"
-              className="kbnDocTableRowFilterButton"
-              data-test-subj="docTableCellFilter"
-              onBlur={[Function]}
-              onClick={[Function]}
-              onFocus={[Function]}
+            <span
+              css="unknown styles"
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
             >
-              <EuiIcon
-                color="primary"
-                size="s"
-                type="plusInCircle"
+              <Insertion
+                cache={
+                  Object {
+                    "insert": [Function],
+                    "inserted": Object {
+                      "jcaat8-euiToolTipAnchor-inlineBlock": true,
+                    },
+                    "key": "css",
+                    "nonce": undefined,
+                    "registered": Object {},
+                    "sheet": StyleSheet {
+                      "_alreadyInsertedOrderInsensitiveRule": true,
+                      "_insertTag": [Function],
+                      "before": null,
+                      "container": <head>
+                        <style
+                          data-styled="active"
+                          data-styled-version="5.1.0"
+                        />
+                        <style
+                          data-styled="active"
+                          data-styled-version="5.1.0"
+                        />
+                        <style
+                          data-emotion="css"
+                          data-s=""
+                        >
+                          
+                          .emotion-euiToolTipAnchor-inlineBlock{display:inline-block;}
+                        </style>
+                        <style
+                          data-emotion="css"
+                          data-s=""
+                        >
+                          
+                          .emotion-euiToolTipAnchor-inlineBlock *[disabled]{pointer-events:none;}
+                        </style>
+                      </head>,
+                      "ctr": 2,
+                      "insertionPoint": undefined,
+                      "isSpeedy": false,
+                      "key": "css",
+                      "nonce": undefined,
+                      "prepend": undefined,
+                      "tags": Array [
+                        <style
+                          data-emotion="css"
+                          data-s=""
+                        >
+                          
+                          .emotion-euiToolTipAnchor-inlineBlock{display:inline-block;}
+                        </style>,
+                        <style
+                          data-emotion="css"
+                          data-s=""
+                        >
+                          
+                          .emotion-euiToolTipAnchor-inlineBlock *[disabled]{pointer-events:none;}
+                        </style>,
+                      ],
+                    },
+                  }
+                }
+                isStringTag={true}
+                serialized={
+                  Object {
+                    "map": undefined,
+                    "name": "jcaat8-euiToolTipAnchor-inlineBlock",
+                    "next": undefined,
+                    "styles": "*[disabled]{pointer-events:none;};label:euiToolTipAnchor;;;display:inline-block;label:inlineBlock;;;",
+                    "toString": [Function],
+                  }
+                }
+              />
+              <span
+                className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
               >
-                <span
-                  color="primary"
-                  data-euiicon-type="plusInCircle"
-                  size="s"
-                />
-              </EuiIcon>
-            </button>
-          </span>
+                <button
+                  aria-label="Filter for value"
+                  className="kbnDocTableRowFilterButton"
+                  data-test-subj="docTableCellFilter"
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                >
+                  <EuiIcon
+                    color="primary"
+                    size="s"
+                    type="plusInCircle"
+                  >
+                    <span
+                      color="primary"
+                      data-euiicon-type="plusInCircle"
+                      size="s"
+                    />
+                  </EuiIcon>
+                </button>
+              </span>
+            </span>
+          </EuiToolTipAnchor>
         </EuiToolTip>
         <EuiToolTip
           className="kbnDocTableCell__filterButton"
@@ -68,32 +158,122 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
           display="inlineBlock"
           position="bottom"
         >
-          <span
-            className="euiToolTipAnchor"
+          <EuiToolTipAnchor
+            display="inlineBlock"
+            id="generated-id"
+            isVisible={false}
+            onBlur={[Function]}
+            onFocus={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
-            <button
-              aria-label="Filter out value"
-              className="kbnDocTableRowFilterButton"
-              data-test-subj="docTableCellFilterNegate"
-              onBlur={[Function]}
-              onClick={[Function]}
-              onFocus={[Function]}
+            <span
+              css="unknown styles"
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
             >
-              <EuiIcon
-                color="primary"
-                size="s"
-                type="minusInCircle"
+              <Insertion
+                cache={
+                  Object {
+                    "insert": [Function],
+                    "inserted": Object {
+                      "jcaat8-euiToolTipAnchor-inlineBlock": true,
+                    },
+                    "key": "css",
+                    "nonce": undefined,
+                    "registered": Object {},
+                    "sheet": StyleSheet {
+                      "_alreadyInsertedOrderInsensitiveRule": true,
+                      "_insertTag": [Function],
+                      "before": null,
+                      "container": <head>
+                        <style
+                          data-styled="active"
+                          data-styled-version="5.1.0"
+                        />
+                        <style
+                          data-styled="active"
+                          data-styled-version="5.1.0"
+                        />
+                        <style
+                          data-emotion="css"
+                          data-s=""
+                        >
+                          
+                          .emotion-euiToolTipAnchor-inlineBlock{display:inline-block;}
+                        </style>
+                        <style
+                          data-emotion="css"
+                          data-s=""
+                        >
+                          
+                          .emotion-euiToolTipAnchor-inlineBlock *[disabled]{pointer-events:none;}
+                        </style>
+                      </head>,
+                      "ctr": 2,
+                      "insertionPoint": undefined,
+                      "isSpeedy": false,
+                      "key": "css",
+                      "nonce": undefined,
+                      "prepend": undefined,
+                      "tags": Array [
+                        <style
+                          data-emotion="css"
+                          data-s=""
+                        >
+                          
+                          .emotion-euiToolTipAnchor-inlineBlock{display:inline-block;}
+                        </style>,
+                        <style
+                          data-emotion="css"
+                          data-s=""
+                        >
+                          
+                          .emotion-euiToolTipAnchor-inlineBlock *[disabled]{pointer-events:none;}
+                        </style>,
+                      ],
+                    },
+                  }
+                }
+                isStringTag={true}
+                serialized={
+                  Object {
+                    "map": undefined,
+                    "name": "jcaat8-euiToolTipAnchor-inlineBlock",
+                    "next": undefined,
+                    "styles": "*[disabled]{pointer-events:none;};label:euiToolTipAnchor;;;display:inline-block;label:inlineBlock;;;",
+                    "toString": [Function],
+                  }
+                }
+              />
+              <span
+                className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
               >
-                <span
-                  color="primary"
-                  data-euiicon-type="minusInCircle"
-                  size="s"
-                />
-              </EuiIcon>
-            </button>
-          </span>
+                <button
+                  aria-label="Filter out value"
+                  className="kbnDocTableRowFilterButton"
+                  data-test-subj="docTableCellFilterNegate"
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                >
+                  <EuiIcon
+                    color="primary"
+                    size="s"
+                    type="minusInCircle"
+                  >
+                    <span
+                      color="primary"
+                      data-euiicon-type="minusInCircle"
+                      size="s"
+                    />
+                  </EuiIcon>
+                </button>
+              </span>
+            </span>
+          </EuiToolTipAnchor>
         </EuiToolTip>
       </span>
     </TableCellActions>

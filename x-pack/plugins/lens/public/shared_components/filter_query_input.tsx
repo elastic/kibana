@@ -95,6 +95,7 @@ export function FilterQueryInput({
             closePopover={onClosePopup}
             anchorClassName="eui-fullWidth"
             panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
+            initialFocus={dataTestSubj ? `textarea[data-test-subj='${dataTestSubj}']` : undefined}
             button={
               <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -129,7 +130,11 @@ export function FilterQueryInput({
               data-test-subj="indexPattern-filter-by-input"
             >
               <QueryInput
-                indexPatternTitle={indexPattern.title}
+                indexPattern={
+                  indexPattern.id
+                    ? { type: 'id', value: indexPattern.id }
+                    : { type: 'title', value: indexPattern.title }
+                }
                 disableAutoFocus={true}
                 value={queryInput}
                 onChange={setQueryInput}

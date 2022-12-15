@@ -67,7 +67,7 @@ Object {
         "legendSize": Array [
           "large",
         ],
-        "metric": Array [
+        "metrics": Array [
           Object {
             "chain": Array [
               Object {

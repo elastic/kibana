@@ -16,6 +16,14 @@ export const SnapshotNodePathRT = rt.intersection([
   }),
   rt.partial({
     ip: rt.union([rt.string, rt.null]),
+    os: rt.union([rt.string, rt.null]),
+    cloudProvider: rt.union([
+      rt.literal('gcp'),
+      rt.literal('aws'),
+      rt.literal('azure'),
+      rt.literal('unknownProvider'),
+      rt.null,
+    ]),
   }),
 ]);
 

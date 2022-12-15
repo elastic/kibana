@@ -22,6 +22,7 @@ export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
 export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]';
 
 export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
+export const CONFIRM_DUPLICATE_RULE = '[data-test-subj="confirmModalConfirmButton"]';
 
 export const ENABLE_RULE_BULK_BTN = '[data-test-subj="enableRuleBulk"]';
 
@@ -30,6 +31,8 @@ export const DISABLE_RULE_BULK_BTN = '[data-test-subj="disableRuleBulk"]';
 export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
 export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
+
+export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
 export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"]';
 
@@ -57,8 +60,6 @@ export const RULES_TABLE_REFRESH_INDICATOR = '[data-test-subj="loading-spinner"]
 export const RULES_TABLE_AUTOREFRESH_INDICATOR = '[data-test-subj="loadingRulesInfoProgress"]';
 
 export const RISK_SCORE = '[data-test-subj="riskScore"]';
-
-export const RELOAD_PREBUILT_RULES_BTN = '[data-test-subj="reloadPrebuiltRulesBtn"]';
 
 export const SECOND_RULE = 1;
 
@@ -142,3 +143,5 @@ export const REFRESH_SETTINGS_SWITCH = '[data-test-subj="refreshSettingsSwitch"]
 export const REFRESH_SETTINGS_SELECTION_NOTE = '[data-test-subj="refreshSettingsSelectionNote"]';
 
 export const REFRESH_RULES_STATUS = '[data-test-subj="refreshRulesStatus"]';
+
+export const RULE_DETAILS_BACK_TO_ALL_RULES = '[data-test-subj="ruleDetailsBackToAllRules"]';

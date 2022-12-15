@@ -8,11 +8,14 @@
 import { TRANSFORMS_URL } from '../../urls/risk_score';
 import { RiskScoreEntity } from './common';
 import { getLatestTransformIndex, getPivotTransformIndex } from './indices';
-import { getLegacyIngestPipelineName } from './ingest_pipelines';
+import { getIngestPipelineName, getLegacyIngestPipelineName } from './ingest_pipelines';
 import {
   getLegacyRiskScoreInitScriptId,
   getLegacyRiskScoreMapScriptId,
   getLegacyRiskScoreReduceScriptId,
+  getRiskScoreInitScriptId,
+  getRiskScoreMapScriptId,
+  getRiskScoreReduceScriptId,
 } from './stored_scripts';
 
 const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
@@ -111,13 +114,18 @@ export const deleteTransforms = (transformIds: string[]) => {
 
 export const getCreateLegacyMLHostPivotTransformOptions = ({
   spaceId = 'default',
+  version = '8.4',
 }: {
   spaceId?: string;
+  version?: '8.3' | '8.4';
 }) => {
   const options = {
     dest: {
       index: getPivotTransformIndex(RiskScoreEntity.host, spaceId),
-      pipeline: getLegacyIngestPipelineName(RiskScoreEntity.host),
+      pipeline:
+        version === '8.4'
+          ? getLegacyIngestPipelineName(RiskScoreEntity.host)
+          : getIngestPipelineName(RiskScoreEntity.host, spaceId),
     },
     frequency: '1h',
     pivot: {
@@ -131,10 +139,16 @@ export const getCreateLegacyMLHostPivotTransformOptions = ({
           scripted_metric: {
             combine_script: 'return state',
             init_script: {
-              id: getLegacyRiskScoreInitScriptId(RiskScoreEntity.host),
+              id:
+                version === '8.4'
+                  ? getLegacyRiskScoreInitScriptId(RiskScoreEntity.host)
+                  : getRiskScoreInitScriptId(RiskScoreEntity.host, spaceId),
             },
             map_script: {
-              id: getLegacyRiskScoreMapScriptId(RiskScoreEntity.host),
+              id:
+                version === '8.4'
+                  ? getLegacyRiskScoreMapScriptId(RiskScoreEntity.host)
+                  : getRiskScoreMapScriptId(RiskScoreEntity.host, spaceId),
             },
             params: {
               lookback_time: 72,
@@ -162,7 +176,10 @@ export const getCreateLegacyMLHostPivotTransformOptions = ({
               zeta_constant: 2.612,
             },
             reduce_script: {
-              id: getLegacyRiskScoreReduceScriptId(RiskScoreEntity.host),
+              id:
+                version === '8.4'
+                  ? getLegacyRiskScoreReduceScriptId(RiskScoreEntity.host)
+                  : getRiskScoreReduceScriptId(RiskScoreEntity.host, spaceId),
             },
           },
         },
@@ -204,13 +221,18 @@ export const getCreateLegacyMLHostPivotTransformOptions = ({
 
 export const getCreateLegacyMLUserPivotTransformOptions = ({
   spaceId = 'default',
+  version = '8.4',
 }: {
   spaceId?: string;
+  version?: '8.3' | '8.4';
 }) => {
   const options = {
     dest: {
       index: getPivotTransformIndex(RiskScoreEntity.user, spaceId),
-      pipeline: getLegacyIngestPipelineName(RiskScoreEntity.user),
+      pipeline:
+        version === '8.4'
+          ? getLegacyIngestPipelineName(RiskScoreEntity.user)
+          : getIngestPipelineName(RiskScoreEntity.user),
     },
     frequency: '1h',
     pivot: {
@@ -225,7 +247,10 @@ export const getCreateLegacyMLUserPivotTransformOptions = ({
             combine_script: 'return state',
             init_script: 'state.rule_risk_stats = new HashMap();',
             map_script: {
-              id: getLegacyRiskScoreMapScriptId(RiskScoreEntity.user),
+              id:
+                version === '8.4'
+                  ? getLegacyRiskScoreMapScriptId(RiskScoreEntity.user)
+                  : getRiskScoreMapScriptId(RiskScoreEntity.user),
             },
             params: {
               max_risk: 100,
@@ -233,7 +258,10 @@ export const getCreateLegacyMLUserPivotTransformOptions = ({
               zeta_constant: 2.612,
             },
             reduce_script: {
-              id: getLegacyRiskScoreReduceScriptId(RiskScoreEntity.user),
+              id:
+                version === '8.4'
+                  ? getLegacyRiskScoreReduceScriptId(RiskScoreEntity.user)
+                  : getRiskScoreReduceScriptId(RiskScoreEntity.user),
             },
           },
         },

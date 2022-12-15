@@ -11,7 +11,7 @@ import type {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { Alert } from '@kbn/alerting-plugin/server/alert';
-import type { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../rule_schema';
 
 export const alertInstanceFactoryStub = <
   TParams extends RuleParams,

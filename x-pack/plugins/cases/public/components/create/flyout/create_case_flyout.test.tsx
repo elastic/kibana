@@ -10,7 +10,8 @@ import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { CreateCaseFlyout } from './create_case_flyout';
-import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -42,5 +43,25 @@ describe('CreateCaseFlyout', () => {
       userEvent.click(getByTestId('euiFlyoutCloseButton'));
     });
     expect(onClose).toBeCalled();
+  });
+
+  it('renders headerContent when passed', async () => {
+    const headerContent = <p data-test-subj="testing123" />;
+    const { getByTestId } = mockedContext.render(
+      <CreateCaseFlyout {...defaultProps} headerContent={headerContent} />
+    );
+
+    await act(async () => {
+      expect(getByTestId('testing123')).toBeTruthy();
+      expect(getByTestId('create-case-flyout-header').children.length).toEqual(2);
+    });
+  });
+
+  it('does not render headerContent when undefined', async () => {
+    const { getByTestId } = mockedContext.render(<CreateCaseFlyout {...defaultProps} />);
+
+    await act(async () => {
+      expect(getByTestId('create-case-flyout-header').children.length).toEqual(1);
+    });
   });
 });

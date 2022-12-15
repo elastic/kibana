@@ -207,7 +207,7 @@ describe('UpdateConnector renders', () => {
     const wrapper = mountUpdateConnector();
 
     await act(async () => {
-      wrapper.find('[data-test-subj="snUpdateInstallationSubmit"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="snUpdateInstallationSubmit"]').first().simulate('click');
       wrapper.update();
     });
 

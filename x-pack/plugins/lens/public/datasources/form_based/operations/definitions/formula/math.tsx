@@ -46,6 +46,8 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
           name: [column.label],
           expression: [astToString(column.params.tinymathAst)],
           onError: ['null'],
+          // cast everything into number
+          castColumns: column.references,
         },
       },
     ];
@@ -77,6 +79,11 @@ const optimizableFnsMap: Record<string, string> = {
   subtract: '-',
   multiply: '*',
   divide: '/',
+  lt: '<',
+  gt: '>',
+  eq: '==',
+  lte: '<=',
+  gte: '>=',
 };
 
 function astToString(ast: TinymathAST | string): string | number {

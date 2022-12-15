@@ -9,14 +9,14 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { Authorization, Operations } from '.';
-import { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { AuthorizationAuditLogger } from './audit_logger';
-import { KibanaRequest } from '@kbn/core/server';
-import { KibanaFeature } from '@kbn/features-plugin/common';
-import { AuditLogger, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
+import type { AuditLogger, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 const createSpacesDisabledFeaturesMock = (disabledFeatures: string[] = []) => {
   const spacesStart: jest.Mocked<SpacesPluginStart> = spacesMock.createStart();
@@ -61,7 +61,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -81,7 +81,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -140,7 +140,7 @@ describe('authorization', () => {
         request,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -266,7 +266,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -295,7 +295,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -322,7 +322,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 

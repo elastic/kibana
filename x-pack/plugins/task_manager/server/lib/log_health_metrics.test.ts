@@ -31,6 +31,7 @@ describe('logHealthMetrics', () => {
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
         enabled: false,
+        level: 'debug',
         warn_delayed_task_start_in_seconds: 60,
       },
     });
@@ -66,6 +67,7 @@ describe('logHealthMetrics', () => {
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
         enabled: false,
+        level: 'debug',
         warn_delayed_task_start_in_seconds: 60,
       },
     });
@@ -88,6 +90,7 @@ describe('logHealthMetrics', () => {
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
         enabled: false,
+        level: 'debug',
         warn_delayed_task_start_in_seconds: 60,
       },
     });
@@ -107,6 +110,7 @@ describe('logHealthMetrics', () => {
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
         enabled: true,
+        level: 'debug',
         warn_delayed_task_start_in_seconds: 60,
       },
     });
@@ -120,11 +124,31 @@ describe('logHealthMetrics', () => {
     expect(firstDebug).toMatchObject(health);
   });
 
+  it('should log as info if status is OK and level is info', () => {
+    const logger = loggingSystemMock.create().get();
+    const config = getTaskManagerConfig({
+      monitored_stats_health_verbose_log: {
+        enabled: true,
+        level: 'info',
+        warn_delayed_task_start_in_seconds: 60,
+      },
+    });
+    const health = getMockMonitoredHealth();
+
+    logHealthMetrics(health, logger, config, true);
+
+    const firstInfo = JSON.parse(
+      (logger as jest.Mocked<Logger>).info.mock.calls[0][0].replace('Latest Monitored Stats: ', '')
+    );
+    expect(firstInfo).toMatchObject(health);
+  });
+
   it('should log as debug if status is OK even if not enabled', () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
         enabled: false,
+        level: 'debug',
         warn_delayed_task_start_in_seconds: 60,
       },
     });
@@ -143,6 +167,7 @@ describe('logHealthMetrics', () => {
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
         enabled: true,
+        level: 'debug',
         warn_delayed_task_start_in_seconds: 60,
       },
     });
@@ -168,6 +193,7 @@ describe('logHealthMetrics', () => {
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
         enabled: true,
+        level: 'debug',
         warn_delayed_task_start_in_seconds: 60,
       },
     });
@@ -191,6 +217,7 @@ describe('logHealthMetrics', () => {
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
         enabled: true,
+        level: 'debug',
         warn_delayed_task_start_in_seconds: 60,
       },
     });
@@ -234,6 +261,7 @@ describe('logHealthMetrics', () => {
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
         enabled: true,
+        level: 'debug',
         warn_delayed_task_start_in_seconds: 60,
       },
     });
@@ -277,6 +305,7 @@ describe('logHealthMetrics', () => {
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
         enabled: true,
+        level: 'debug',
         warn_delayed_task_start_in_seconds: 60,
       },
     });
@@ -301,6 +330,7 @@ describe('logHealthMetrics', () => {
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
         enabled: true,
+        level: 'debug',
         warn_delayed_task_start_in_seconds: 60,
       },
     });
@@ -337,6 +367,7 @@ describe('logHealthMetrics', () => {
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
         enabled: true,
+        level: 'debug',
         warn_delayed_task_start_in_seconds: 60,
       },
     });

@@ -271,6 +271,7 @@ describe('metric_visualization', () => {
             label: 'shazm',
             isStaticValue: false,
             hasTimeShift: false,
+            hasReducedTimeRange: false,
           };
         },
       };
@@ -367,7 +368,9 @@ describe('metric_visualization', () => {
                     "type": "expression",
                   },
                 ],
-                "palette": Array [],
+                "percentageMode": Array [
+                  false,
+                ],
                 "showLabels": Array [
                   true,
                 ],

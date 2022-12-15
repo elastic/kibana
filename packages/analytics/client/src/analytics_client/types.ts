@@ -216,7 +216,11 @@ export interface IAnalyticsClient {
    */
   readonly telemetryCounter$: Observable<TelemetryCounter>;
   /**
-   * Stops the client.
+   * Forces all shippers to send all their enqueued events and fulfills the returned promise.
    */
-  shutdown: () => void;
+  flush: () => Promise<void>;
+  /**
+   * Stops the client. Flushing any pending events in the process.
+   */
+  shutdown: () => Promise<void>;
 }

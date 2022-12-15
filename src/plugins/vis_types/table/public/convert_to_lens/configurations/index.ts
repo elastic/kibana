@@ -6,25 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { Column, PagingState, TableVisConfiguration } from '@kbn/visualizations-plugin/common';
+import {
+  CollapseFunction,
+  Column,
+  PagingState,
+  TableVisConfiguration,
+} from '@kbn/visualizations-plugin/common';
 import { TableVisParams } from '../../../common';
 
 const getColumns = (
   params: TableVisParams,
   metrics: string[],
-  buckets: string[],
   columns: Column[],
-  bucketCollapseFn?: Record<string, string | undefined>
+  bucketCollapseFn?: Record<CollapseFunction, string[]>
 ) => {
   const { showTotal, totalFunc } = params;
-  return columns.map(({ columnId }) => ({
-    columnId,
-    alignment: 'left' as const,
-    ...(showTotal && metrics.includes(columnId) ? { summaryRow: totalFunc } : {}),
-    ...(bucketCollapseFn && bucketCollapseFn[columnId]
-      ? { collapseFn: bucketCollapseFn[columnId] }
-      : {}),
-  }));
+  return columns.map(({ columnId }) => {
+    const collapseFn = bucketCollapseFn
+      ? (Object.keys(bucketCollapseFn).find((key) =>
+          bucketCollapseFn[key as CollapseFunction].includes(columnId)
+        ) as CollapseFunction)
+      : undefined;
+    return {
+      columnId,
+      alignment: 'left' as const,
+      ...(showTotal && metrics.includes(columnId) ? { summaryRow: totalFunc } : {}),
+      ...(collapseFn ? { collapseFn } : {}),
+    };
+  });
 };
 
 const getPagination = ({ perPage }: TableVisParams): PagingState => {
@@ -54,15 +63,18 @@ export const getConfiguration = (
     bucketCollapseFn,
   }: {
     metrics: string[];
-    buckets: string[];
+    buckets: {
+      all: string[];
+      customBuckets: Record<string, string>;
+    };
     columnsWithoutReferenced: Column[];
-    bucketCollapseFn?: Record<string, string | undefined>;
+    bucketCollapseFn?: Record<CollapseFunction, string[]>;
   }
 ): TableVisConfiguration => {
   return {
     layerId,
     layerType: 'data',
-    columns: getColumns(params, metrics, buckets, columnsWithoutReferenced, bucketCollapseFn),
+    columns: getColumns(params, metrics, columnsWithoutReferenced, bucketCollapseFn),
     paging: getPagination(params),
     ...getRowHeight(params),
   };

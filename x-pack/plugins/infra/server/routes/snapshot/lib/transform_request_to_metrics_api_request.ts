@@ -93,6 +93,17 @@ export const transformRequestToMetricsAPIRequest = async ({
   if (inventoryFields.ip) {
     metaAggregation.aggregations[META_KEY].top_metrics.metrics.push({ field: inventoryFields.ip });
   }
+
+  if (inventoryFields.os) {
+    metaAggregation.aggregations[META_KEY].top_metrics.metrics.push({ field: inventoryFields.os });
+  }
+
+  if (inventoryFields.cloudProvider) {
+    metaAggregation.aggregations[META_KEY].top_metrics.metrics.push({
+      field: inventoryFields.cloudProvider,
+    });
+  }
+
   metricsApiRequest.metrics.push(metaAggregation);
 
   if (filters.length) {

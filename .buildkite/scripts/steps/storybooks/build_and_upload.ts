@@ -31,7 +31,6 @@ const STORYBOOKS = [
   'expression_reveal_image',
   'expression_shape',
   'expression_tagcloud',
-  'files',
   'fleet',
   'home',
   'infra',
@@ -43,6 +42,7 @@ const STORYBOOKS = [
   'shared_ux',
   'triggers_actions_ui',
   'ui_actions_enhanced',
+  'language_documentation_popover',
   'unified_search',
 ];
 

@@ -37,7 +37,7 @@ import {
   testTagsBadge,
   testMultipleSelectedRulesLabel,
   loadPrebuiltDetectionRulesFromHeaderBtn,
-  switchToElasticRules,
+  filterByElasticRules,
   clickErrorToastBtn,
   unselectRuleByName,
   cancelConfirmationModal,
@@ -87,7 +87,7 @@ import {
   createNewTermsRule,
 } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 
 import {
   getEqlRule,
@@ -132,6 +132,8 @@ describe('Detection rules, bulk edit', () => {
     login();
   });
   beforeEach(() => {
+    // Make sure persisted rules table state is cleared
+    resetRulesTableState();
     deleteAlertsAndRules();
     esArchiverResetKibana();
     createCustomRule(
@@ -169,7 +171,7 @@ describe('Detection rules, bulk edit', () => {
       loadPrebuiltDetectionRulesFromHeaderBtn();
 
       // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
-      switchToElasticRules();
+      filterByElasticRules();
       selectNumberOfRules(expectedNumberOfSelectedRules);
       clickApplyTimelineTemplatesMenuItem();
 
@@ -289,6 +291,32 @@ describe('Detection rules, bulk edit', () => {
       checkTagsInTagsFilter(resultingTagsInFilter);
     });
 
+    it('Display success toast after adding tags', () => {
+      const tagsToBeAdded = ['tag-to-add-1', 'tag-to-add-2'];
+
+      // check if only pre-populated tags exist in the tags filter
+      checkTagsInTagsFilter(prePopulatedTags);
+
+      cy.get(EUI_FILTER_SELECT_ITEM)
+        .should('have.length', prePopulatedTags.length)
+        .each(($el, index) => {
+          cy.wrap($el).should('have.text', prePopulatedTags[index]);
+        });
+
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+
+      // open add tags form and add 2 new tags
+      openBulkEditAddTagsForm();
+      typeTags(tagsToBeAdded);
+      submitBulkEditForm();
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+
+      cy.get(TOASTER_BODY).should(
+        'have.text',
+        `You've successfully updated ${expectedNumberOfCustomRulesToBeEdited} rules`
+      );
+    });
+
     it('Overwrite tags in custom rules', () => {
       const tagsToOverwrite = ['overwrite-tag-1'];
 
@@ -390,6 +418,25 @@ describe('Detection rules, bulk edit', () => {
       // check if rule has been updated
       goToTheRuleDetailsOf(RULE_NAME);
       hasIndexPatterns(resultingIndexPatterns.join(''));
+    });
+
+    it('Display success toast after editing the index pattern', () => {
+      const indexPattersToBeAdded = ['index-to-add-1-*', 'index-to-add-2-*'];
+
+      // select only rules that are not ML
+      selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
+      unselectRuleByName(getMachineLearningRule().name);
+
+      openBulkEditAddIndexPatternsForm();
+      typeIndexPatterns(indexPattersToBeAdded);
+      submitBulkEditForm();
+
+      waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfNotMLRules });
+
+      cy.get(TOASTER_BODY).should(
+        'have.text',
+        `You've successfully updated ${expectedNumberOfNotMLRules} rules. If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.`
+      );
     });
 
     it('Overwrite index patterns in custom rules', () => {

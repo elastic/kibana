@@ -31,6 +31,7 @@ export type {
   TreemapVisExpressionFunctionDefinition,
   MosaicVisExpressionFunctionDefinition,
   WaffleVisExpressionFunctionDefinition,
+  PartitionLabelsExpressionFunctionDefinition,
 } from './types/expression_functions';
 
 export type {

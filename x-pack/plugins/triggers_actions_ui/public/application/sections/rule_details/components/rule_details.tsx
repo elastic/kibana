@@ -25,6 +25,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
+import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { bulkUpdateAPIKey, deleteRules } from '../../../lib/rule_api';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
@@ -50,7 +51,7 @@ import {
 import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
 import { RuleEdit } from '../../rule_form';
-import { routeToRuleDetails, routeToRules } from '../../../constants';
+import { routeToRules } from '../../../constants';
 import {
   rulesErrorReasonTranslationsMapping,
   rulesWarningReasonTranslationsMapping,
@@ -67,7 +68,10 @@ export type RuleDetailsProps = {
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
   refreshToken?: number;
-} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
+} & Pick<
+  BulkOperationsComponentOpts,
+  'bulkDisableRules' | 'bulkEnableRules' | 'snoozeRule' | 'unsnoozeRule'
+>;
 
 const ruleDetailStyle = {
   minWidth: 0,
@@ -77,8 +81,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
   ruleType,
   actionTypes,
-  disableRule,
-  enableRule,
+  bulkDisableRules,
+  bulkEnableRules,
   snoozeRule,
   unsnoozeRule,
   requestRefresh,
@@ -209,7 +213,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   }, [rule.schedule.interval, config.minimumScheduleInterval, toasts, hasEditButton]);
 
   const setRule = async () => {
-    history.push(routeToRuleDetails.replace(`:ruleId`, rule.id));
+    history.push(getRuleDetailsRoute(rule.id));
   };
 
   const goToRulesList = () => {
@@ -361,9 +365,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             }}
             onEnableDisable={async (enable) => {
               if (enable) {
-                await enableRule(rule);
+                await bulkEnableRules({ ids: [rule.id] });
               } else {
-                await disableRule(rule);
+                await bulkDisableRules({ ids: [rule.id] });
               }
               requestRefresh();
             }}

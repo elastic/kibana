@@ -20,9 +20,21 @@
         "description": [],
         "signature": [
           "(config: ",
-          "ElasticsearchClientConfig",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.ElasticsearchClientConfig",
+            "text": "ElasticsearchClientConfig"
+          },
           ", { logger, type, scoped, getExecutionContext, agentFactoryProvider, kibanaVersion, }: { logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "server",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
           "; type: string; scoped?: boolean | undefined; getExecutionContext?: (() => string | undefined) | undefined; agentFactoryProvider: ",
           "AgentFactoryProvider",
           "; kibanaVersion: string; }) => ",
@@ -40,7 +52,13 @@
             "label": "config",
             "description": [],
             "signature": [
-              "ElasticsearchClientConfig"
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClientConfig",
+                "text": "ElasticsearchClientConfig"
+              }
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
             "deprecated": false,
@@ -66,7 +84,13 @@
                 "label": "logger",
                 "description": [],
                 "signature": [
-                  "Logger"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "server",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-server.Logger",
+                    "text": "Logger"
+                  }
                 ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
                 "deprecated": false,
@@ -241,7 +265,13 @@
             "description": [],
             "signature": [
               "() => Set<",
-              "NetworkAgent",
+              {
+                "pluginId": "@kbn/core-elasticsearch-client-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
+                "section": "def-server.NetworkAgent",
+                "text": "NetworkAgent"
+              },
               ">"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
@@ -255,7 +285,25 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
+        "id": "def-server.NetworkAgent",
+        "type": "Type",
+        "tags": [],
+        "label": "NetworkAgent",
+        "description": [],
+        "signature": [
+          "Agent",
+          " | ",
+          "Agent"
+        ],
+        "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {

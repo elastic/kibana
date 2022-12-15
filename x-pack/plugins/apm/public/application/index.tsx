@@ -53,6 +53,7 @@ export const renderApp = ({
     observabilityRuleTypeRegistry,
     dataViews: pluginsStart.dataViews,
     unifiedSearch: pluginsStart.unifiedSearch,
+    lens: pluginsStart.lens,
   };
 
   // render APM feedback link in global help menu

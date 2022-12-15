@@ -9,8 +9,9 @@
 import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Filter, uniqFilters } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
+import _ from 'lodash';
 import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
@@ -39,10 +40,22 @@ import { ControlGroupStrings } from '../control_group_strings';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL, TIME_SLIDER_CONTROL } from '../..';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
-import { TIME_SLIDER_CONTROL } from '../../time_slider';
+import { getNextPanelOrder } from './control_group_helpers';
+import type {
+  AddDataControlProps,
+  AddOptionsListControlProps,
+  AddRangeSliderControlProps,
+} from '../control_group_input_builder';
+import {
+  getDataControlPanelState,
+  getOptionsListPanelState,
+  getRangeSliderPanelState,
+  getTimeSliderPanelState,
+} from '../control_group_input_builder';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -70,6 +83,9 @@ export class ControlGroupContainer extends Container<
     typeof controlGroupReducers
   >;
 
+  public onFiltersPublished$: Subject<Filter[]>;
+  public onControlRemoved$: Subject<string>;
+
   public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
     this.lastUsedDataViewId = lastUsedDataViewId;
   };
@@ -82,9 +98,33 @@ export class ControlGroupContainer extends Container<
     return this.lastUsedDataViewId ?? this.relevantDataViewId;
   };
 
+  public getReduxEmbeddableTools = () => {
+    return this.reduxEmbeddableTools;
+  };
+
   public closeAllFlyouts() {
     flyoutRef?.close();
     flyoutRef = undefined;
+  }
+
+  public async addDataControlFromField(controlProps: AddDataControlProps) {
+    const panelState = await getDataControlPanelState(this.getInput(), controlProps);
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
+
+  public addOptionsListControl(controlProps: AddOptionsListControlProps) {
+    const panelState = getOptionsListPanelState(this.getInput(), controlProps);
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
+
+  public addRangeSliderControl(controlProps: AddRangeSliderControlProps) {
+    const panelState = getRangeSliderPanelState(this.getInput(), controlProps);
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
+
+  public addTimeSliderControl() {
+    const panelState = getTimeSliderPanelState(this.getInput());
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
   }
 
   /**
@@ -110,7 +150,19 @@ export class ControlGroupContainer extends Container<
           updateDefaultGrow={(defaultControlGrow: boolean) =>
             this.updateInput({ defaultControlGrow })
           }
-          addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
+          addNewEmbeddable={(type, input) => {
+            if (type === OPTIONS_LIST_CONTROL) {
+              this.addOptionsListControl(input as AddOptionsListControlProps);
+              return;
+            }
+
+            if (type === RANGE_SLIDER_CONTROL) {
+              this.addRangeSliderControl(input as AddRangeSliderControlProps);
+              return;
+            }
+
+            this.addDataControlFromField(input as AddDataControlProps);
+          }}
           closePopover={closePopover}
           getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
           setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
@@ -127,7 +179,9 @@ export class ControlGroupContainer extends Container<
     });
     return (
       <CreateTimeSliderControlButton
-        addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
+        onCreate={() => {
+          this.addTimeSliderControl();
+        }}
         closePopover={closePopover}
         hasTimeSliderControl={hasTimeSliderControl}
       />
@@ -185,6 +239,8 @@ export class ControlGroupContainer extends Container<
     );
 
     this.recalculateFilters$ = new Subject();
+    this.onFiltersPublished$ = new Subject<Filter[]>();
+    this.onControlRemoved$ = new Subject<string>();
 
     // build redux embeddable tools
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
@@ -249,6 +305,10 @@ export class ControlGroupContainer extends Container<
     return Object.keys(this.getInput().panels).length;
   };
 
+  public updateFilterContext = (filters: Filter[]) => {
+    this.updateInput({ filters });
+  };
+
   private recalculateFilters = () => {
     const allFilters: Filter[] = [];
     let timeslice;
@@ -259,7 +319,14 @@ export class ControlGroupContainer extends Container<
         timeslice = childOutput.timeslice;
       }
     });
-    this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
+    // if filters are different, publish them
+    if (
+      !compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS) ||
+      !_.isEqual(this.output.timeslice, timeslice)
+    ) {
+      this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
+      this.onFiltersPublished$.next(allFilters);
+    }
   };
 
   private recalculateDataViews = () => {
@@ -276,19 +343,10 @@ export class ControlGroupContainer extends Container<
     partial: Partial<TEmbeddableInput> = {}
   ): ControlPanelState<TEmbeddableInput> {
     const panelState = super.createNewPanelState(factory, partial);
-    let nextOrder = 0;
-    if (Object.keys(this.getInput().panels).length > 0) {
-      nextOrder =
-        Object.values(this.getInput().panels).reduce((highestSoFar, panel) => {
-          if (panel.order > highestSoFar) highestSoFar = panel.order;
-          return highestSoFar;
-        }, 0) + 1;
-    }
     return {
-      order: nextOrder,
-      width:
-        panelState.type === TIME_SLIDER_CONTROL ? 'large' : this.getInput().defaultControlWidth,
-      grow: panelState.type === TIME_SLIDER_CONTROL ? true : this.getInput().defaultControlGrow,
+      order: getNextPanelOrder(this.getInput().panels),
+      width: this.getInput().defaultControlWidth,
+      grow: this.getInput().defaultControlGrow,
       ...panelState,
     } as ControlPanelState<TEmbeddableInput>;
   }
@@ -304,6 +362,7 @@ export class ControlGroupContainer extends Container<
         order: currentOrder - 1,
       };
     }
+    this.onControlRemoved$.next(idToRemove);
     return newPanels;
   }
 

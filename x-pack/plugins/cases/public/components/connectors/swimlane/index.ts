@@ -7,8 +7,9 @@
 
 import { lazy } from 'react';
 
-import { CaseConnector } from '../types';
-import { ConnectorTypes, SwimlaneFieldsType } from '../../../../common/api';
+import type { CaseConnector } from '../types';
+import type { SwimlaneFieldsType } from '../../../../common/api';
+import { ConnectorTypes } from '../../../../common/api';
 import * as i18n from './translations';
 
 export const getCaseConnector = (): CaseConnector<SwimlaneFieldsType> => {

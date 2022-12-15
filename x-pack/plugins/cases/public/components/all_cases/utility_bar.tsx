@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
@@ -16,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import * as i18n from './translations';
-import { Case } from '../../../common/ui/types';
+import type { Case } from '../../../common/ui/types';
 import { useRefreshCases } from './use_on_refresh_cases';
 import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';

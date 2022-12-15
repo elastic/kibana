@@ -484,7 +484,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       );
     });
 
-    it('8.5.0 doesnt reformat ES Query rules that dot have a runetime field on them', async () => {
+    it('8.5.0 doesnt reformat ES Query rules that dot have a runtime field on them', async () => {
       const response = await es.get<{
         alert: {
           params: {
@@ -520,6 +520,93 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       );
       expect(response.statusCode).to.eql(200);
       expect(response.body._source?.alert?.params?.esQuery).to.eql('{"query":}');
+    });
+
+    it('8.6.0 migrates executionStatus and monitoring', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:8370ffd2-f2db-49dc-9741-92c657189b9b',
+        },
+        { meta: true }
+      );
+      const alert = response.body._source?.alert;
+
+      expect(alert?.monitoring).to.eql({
+        run: {
+          history: [
+            {
+              duration: 60000,
+              success: true,
+              timestamp: '2022-08-24T19:05:49.817Z',
+            },
+          ],
+          calculated_metrics: {
+            success_ratio: 1,
+            p50: 0,
+            p95: 60000,
+            p99: 60000,
+          },
+          last_run: {
+            timestamp: '2022-08-24T19:05:49.817Z',
+            metrics: {
+              duration: 60000,
+            },
+          },
+        },
+      });
+
+      expect(alert?.lastRun).to.eql({
+        outcome: 'succeeded',
+        outcomeMsg: null,
+        warning: null,
+        alertsCount: {},
+      });
+
+      expect(alert?.nextRun).to.eql(undefined);
+    });
+
+    it('8.6 migrates executionStatus warnings and errors', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:c87707ac-7328-47f7-b212-2cb40a4fc9b9',
+        },
+        { meta: true }
+      );
+
+      const alert = response.body._source?.alert;
+
+      expect(alert?.lastRun?.outcome).to.eql('warning');
+      expect(alert?.lastRun?.warning).to.eql('warning reason');
+      expect(alert?.lastRun?.outcomeMsg).to.eql('warning message');
+    });
+
+    it('8.7.0 adds aggType and groupBy to ES query rules', async () => {
+      const response = await es.search<RawRule>(
+        {
+          index: '.kibana',
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'alert.alertTypeId': '.es-query',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      response.body.hits.hits.forEach((hit) => {
+        expect((hit?._source?.alert as RawRule)?.params?.aggType).to.eql('count');
+        expect((hit?._source?.alert as RawRule)?.params?.groupBy).to.eql('all');
+      });
     });
   });
 }

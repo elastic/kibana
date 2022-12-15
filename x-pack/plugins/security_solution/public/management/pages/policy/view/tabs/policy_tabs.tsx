@@ -53,7 +53,7 @@ import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../bloc
 import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
 import { useListArtifact } from '../../../../hooks/artifacts';
 
-const enum PolicyTabKeys {
+enum PolicyTabKeys {
   SETTINGS = 'settings',
   TRUSTED_APPS = 'trustedApps',
   EVENT_FILTERS = 'eventFilters',

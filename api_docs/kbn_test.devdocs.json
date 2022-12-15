@@ -259,7 +259,13 @@
                 "label": "log",
                 "description": [],
                 "signature": [
-                  "ToolingLog"
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "server",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-server.ToolingLog",
+                    "text": "ToolingLog"
+                  }
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                 "deprecated": false,
@@ -483,6 +489,22 @@
           },
           {
             "parentPluginId": "@kbn/test",
+            "id": "def-server.EsVersion.toJSON",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSON",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
             "id": "def-server.EsVersion.toString",
             "type": "Function",
             "tags": [],
@@ -601,7 +623,13 @@
                 "label": "log",
                 "description": [],
                 "signature": [
-                  "ToolingLog"
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "server",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-server.ToolingLog",
+                    "text": "ToolingLog"
+                  }
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
                 "deprecated": false,
@@ -1375,7 +1403,13 @@
                 "label": "log",
                 "description": [],
                 "signature": [
-                  "ToolingLog"
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "server",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-server.ToolingLog",
+                    "text": "ToolingLog"
+                  }
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts",
                 "deprecated": false,
@@ -2168,7 +2202,13 @@
         "description": [],
         "signature": [
           "(log: ",
-          "ToolingLog",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "server",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-server.ToolingLog",
+            "text": "ToolingLog"
+          },
           ", esVersion: ",
           {
             "pluginId": "@kbn/test",
@@ -2199,7 +2239,13 @@
             "label": "log",
             "description": [],
             "signature": [
-              "ToolingLog"
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              }
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config_loading.ts",
             "deprecated": false,
@@ -2388,7 +2434,13 @@
         ],
         "signature": [
           "(log: ",
-          "ToolingLog",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "server",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-server.ToolingLog",
+            "text": "ToolingLog"
+          },
           ", options: { configs: string[]; esVersion: ",
           {
             "pluginId": "@kbn/test",
@@ -2411,7 +2463,13 @@
             "label": "log",
             "description": [],
             "signature": [
-              "ToolingLog"
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              }
             ],
             "path": "packages/kbn-test/src/functional_tests/run_tests/run_tests.ts",
             "deprecated": false,
@@ -2464,6 +2522,54 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-server.setupJUnitReportGeneration",
+        "type": "Function",
+        "tags": [],
+        "label": "setupJUnitReportGeneration",
+        "description": [],
+        "signature": [
+          "(runner: any, options: {}) => void"
+        ],
+        "path": "packages/kbn-test/src/mocha/junit_report_generation.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.setupJUnitReportGeneration.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "runner",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test/src/mocha/junit_report_generation.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-server.setupJUnitReportGeneration.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{}"
+            ],
+            "path": "packages/kbn-test/src/mocha/junit_report_generation.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-server.startServers",
         "type": "Function",
         "tags": [],
@@ -2471,7 +2577,13 @@
         "description": [],
         "signature": [
           "(log: ",
-          "ToolingLog",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "server",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-server.ToolingLog",
+            "text": "ToolingLog"
+          },
           ", options: { config: string; esFrom: \"source\" | \"snapshot\" | undefined; esVersion: ",
           {
             "pluginId": "@kbn/test",
@@ -2494,7 +2606,13 @@
             "label": "log",
             "description": [],
             "signature": [
-              "ToolingLog"
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              }
             ],
             "path": "packages/kbn-test/src/functional_tests/start_servers/start_servers.ts",
             "deprecated": false,
@@ -2762,7 +2880,13 @@
             "label": "log",
             "description": [],
             "signature": [
-              "ToolingLog"
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              }
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
@@ -3212,7 +3336,13 @@
             "label": "log",
             "description": [],
             "signature": [
-              "ToolingLog"
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              }
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -3419,7 +3549,13 @@
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
-              "ToolingLog",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -3487,7 +3623,13 @@
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
-              "ToolingLog",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -3555,7 +3697,13 @@
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
-              "ToolingLog",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -3623,7 +3771,13 @@
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
-              "ToolingLog",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -3691,7 +3845,13 @@
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
-              "ToolingLog",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -3759,7 +3919,13 @@
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
-              "ToolingLog",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -3827,7 +3993,13 @@
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
-              "ToolingLog",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -4179,7 +4351,13 @@
             "label": "log",
             "description": [],
             "signature": [
-              "ToolingLog"
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              }
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false,
@@ -4788,13 +4966,10 @@
           {
             "parentPluginId": "@kbn/test",
             "id": "def-server.systemIndicesSuperuser.username",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "username",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-test/src/kbn/users.ts",
             "deprecated": false,
             "trackAdoption": false
