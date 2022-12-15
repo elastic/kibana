@@ -24,6 +24,7 @@ export interface NewAgentPolicy {
   is_managed?: boolean; // Optional when creating a policy
   monitoring_enabled?: MonitoringType;
   unenroll_timeout?: number;
+  inactivity_timeout?: number;
   is_preconfigured?: boolean;
   // Nullable to allow user to reset to default outputs
   data_output_id?: string | null;
@@ -167,4 +168,8 @@ export interface FleetServerPolicy {
    * Auto unenroll any Elastic Agents which have not checked in for this many seconds
    */
   unenroll_timeout?: number;
+  /**
+   * Mark agents as inactive if they have not checked in for this many seconds
+   */
+  inactivity_timeout?: number;
 }
