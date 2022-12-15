@@ -7,7 +7,7 @@
  */
 import type { App } from '@kbn/core-application-browser';
 import { BehaviorSubject } from 'rxjs';
-import { CustomBrandingService } from './custom_branding_service';
+import { CustomBrandingService } from './types';
 
 describe('CustomBrandingService', () => {
   let service: CustomBrandingService;

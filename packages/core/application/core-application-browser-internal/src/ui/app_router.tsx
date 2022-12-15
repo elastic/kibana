@@ -15,6 +15,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
+import { CustomBrandingServiceSetup } from '@kbn/core-custom-branding';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';
@@ -27,8 +28,7 @@ interface Props {
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   setIsMounting: (isMounting: boolean) => void;
-  customizedLogo$: Observable<string | undefined>;
-  logo$: Observable<string | undefined>;
+  customBranding: CustomBrandingServiceSetup;
 }
 
 interface Params {
@@ -43,8 +43,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   setAppActionMenu,
   appStatuses$,
   setIsMounting,
-  customizedLogo$,
-  logo$,
+  customBranding,
 }) => {
   const appStatuses = useObservable(appStatuses$, new Map());
   const createScopedHistory = useMemo(
@@ -72,8 +71,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                   setAppActionMenu,
                   setIsMounting,
                   theme$,
-                  customizedLogo$,
-                  logo$,
+                  customBranding,
                 }}
               />
             )}
@@ -102,8 +100,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                   setAppActionMenu,
                   setIsMounting,
                   theme$,
-                  customizedLogo$,
-                  logo$,
+                  customBranding,
                 }}
               />
             );
