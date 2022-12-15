@@ -64,7 +64,7 @@ import type {
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BrushTriggerEvent, ClickTriggerEvent, Warnings } from '@kbn/charts-plugin/public';
-import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { DataViewPersistableStateService, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -163,7 +163,7 @@ export interface LensEmbeddableDeps {
 }
 
 export interface ViewUnderlyingDataArgs {
-  indexPatternId: string;
+  dataViewSpec: DataViewSpec;
   timeRange: TimeRange;
   filters: Filter[];
   query: Query | AggregateQuery | undefined;
@@ -243,8 +243,10 @@ function getViewUnderlyingDataArgs({
     esQueryConfig
   );
 
+  const dataViewSpec = indexPatternsCache[meta.id]!.spec;
+
   return {
-    indexPatternId: meta.id,
+    dataViewSpec,
     timeRange,
     filters: newFilters,
     query: aggregateQuery.length > 0 ? aggregateQuery[0] : newQuery,
@@ -922,10 +924,10 @@ export class Embeddable
     const adHocDataviews = await Promise.all(
       Object.values(this.savedVis?.state.adHocDataViews || {})
         .map((persistedSpec) => {
-          return DataViewPersistableStateService.inject(
-            persistedSpec,
-            this.savedVis?.references || []
-          );
+          return DataViewPersistableStateService.inject(persistedSpec, [
+            ...(this.savedVis?.references || []),
+            ...(this.savedVis?.state.internalReferences || []),
+          ]);
         })
         .map((spec) => this.deps.dataViews.create(spec))
     );
