@@ -52,8 +52,6 @@ import { getPageRowIndex } from './pagination';
 import { UnitCount } from '../toolbar/unit';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { tableDefaults } from '../../store/data_table/defaults';
-import { defaultColumnHeaderType } from './column_headers/default_headers';
-import { DEFAULT_TABLE_COLUMN_MIN_WIDTH, DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH } from './constants';
 
 const DATA_TABLE_ARIA_LABEL = i18n.translate('xpack.securitySolution.dataTable.ariaLabel', {
   defaultMessage: 'Alerts',
@@ -126,7 +124,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
     const memoizedColumnHeaders: (
       headers: ColumnHeaderOptions[],
       browserFields: BrowserFields,
-      isEventRenderedView: boolean,
+      isEventRenderedView: boolean
     ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
     const getDataTable = dataTableSelectors.getTableByIdSelector();

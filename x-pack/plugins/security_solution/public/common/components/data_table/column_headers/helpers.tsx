@@ -9,6 +9,7 @@ import type { EuiDataGridColumnActions } from '@elastic/eui';
 import { keyBy } from 'lodash/fp';
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
 import type {
   BrowserField,
   BrowserFields,
@@ -16,7 +17,6 @@ import type {
 import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 import { DEFAULT_TABLE_COLUMN_MIN_WIDTH, DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import { defaultColumnHeaderType } from '../../../store/data_table/defaults';
-import { i18n } from '@kbn/i18n';
 
 const defaultActions: EuiDataGridColumnActions = {
   showSortAsc: true,
@@ -172,24 +172,21 @@ const eventRenderedViewColumns: ColumnHeaderOptions[] = [
     linkField: 'kibana.alert.rule.uuid',
     actions: false,
   },
-    {
-      columnHeaderType: defaultColumnHeaderType,
-      id: 'eventSummary',
-      displayAsText: i18n.translate(
-        'xpack.securitySolution.EventRenderedView.eventSummary.column',
-        {
-          defaultMessage: 'Event Summary',
-        }
-      ),
-      actions: false,
-    },
-  ];
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'eventSummary',
+    displayAsText: i18n.translate('xpack.securitySolution.EventRenderedView.eventSummary.column', {
+      defaultMessage: 'Event Summary',
+    }),
+    actions: false,
+  },
+];
 
 /** Enriches the column headers with field details from the specified browserFields */
 export const getColumnHeaders = (
   headers: ColumnHeaderOptions[],
   browserFields: BrowserFields,
-  isEventRenderedView: boolean,
+  isEventRenderedView: boolean
 ): ColumnHeaderOptions[] => {
   const browserFieldByName = getAllFieldsByName(browserFields);
   const headersToMap = isEventRenderedView ? eventRenderedViewColumns : headers;

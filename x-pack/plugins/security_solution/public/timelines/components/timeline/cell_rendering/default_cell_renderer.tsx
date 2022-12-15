@@ -48,7 +48,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     fieldName: header.id,
   });
 
-  console.log(header.id)
+  console.log(header.id);
 
   const styledContentClassName = isDetails
     ? 'eui-textBreakWord'
