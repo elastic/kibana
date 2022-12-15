@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText, EuiButtonGroup } from '@elastic/eui';
+import { EuiText, EuiButtonGroup, EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,6 +18,7 @@ import {
   UtilityBarText,
 } from '../../../../common/components/utility_bar';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
+import * as i18n from './translations';
 
 const StyledText = styled.span`
   font-weight: bold;
@@ -27,9 +28,8 @@ const MyUtilities = styled.div`
   height: 50px;
 `;
 
-const StyledCondition = styled.span`
-  display: inline-block !important;
-  vertical-align: middle !important;
+const StyledBarGroup = styled(EuiFlexGroup)`
+  align-items: center;
 `;
 
 interface ExceptionsViewerUtilityProps {
@@ -72,21 +72,14 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
           </UtilityBarGroup>
         </UtilityBarSection>
         <UtilityBarSection>
-          <UtilityBarGroup>
+          <StyledBarGroup>
             <UtilityBarText dataTestSubj="lastUpdated">
               <EuiText size="s" data-test-subj="exceptionsViewerLastUpdated">
                 <FormattedMessage
                   id="xpack.securitySolution.exceptions.viewer.lastUpdated"
                   defaultMessage="Updated {updated}"
                   values={{
-                    updated: (
-                      <StyledCondition>
-                        <FormattedRelativePreferenceDate
-                          value={lastUpdated}
-                          tooltipAnchorClassName="eui-textTruncate"
-                        />
-                      </StyledCondition>
-                    ),
+                    updated: <FormattedRelativePreferenceDate value={lastUpdated} />,
                   }}
                 />
               </EuiText>
@@ -96,18 +89,18 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
               options={[
                 {
                   id: `active`,
-                  label: 'Active Exceptions',
+                  label: i18n.ACTIVE_EXCEPTIONS,
                 },
                 {
                   id: `expired`,
-                  label: 'Expired Exceptions',
+                  label: i18n.EXPIRED_EXCEPTIONS,
                 },
               ]}
               idToSelectedMap={exceptionsToShow}
               onChange={onChangeExceptionsToShow}
               type="multi"
             />
-          </UtilityBarGroup>
+          </StyledBarGroup>
         </UtilityBarSection>
       </UtilityBar>
     </MyUtilities>

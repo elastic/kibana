@@ -219,17 +219,15 @@ const ExceptionsViewerComponent = ({
     }
   }, [isLoadingReferences, isFetchReferencesError, setViewerState, viewerState]);
 
-  useEffect(() => {
-    if (!exceptionsToShow.active && !exceptionsToShow.expired) {
-      setExceptionsToShow('active');
-    }
-  }, [exceptionsToShow, setExceptionsToShow]);
+  const namespaceTypes = useMemo(
+    () => exceptionListsToQuery.map((list) => list.namespace_type),
+    [exceptionListsToQuery]
+  );
 
   const exceptionListFilter = useMemo(() => {
     if (exceptionsToShow.active && exceptionsToShow.expired) {
       return undefined;
     }
-    const namespaceTypes = exceptionListsToQuery.map((list) => list.namespace_type);
     const savedObjectPrefix = getSavedObjectTypes({
       namespaceType: namespaceTypes,
     });
@@ -239,7 +237,7 @@ const ExceptionsViewerComponent = ({
     if (exceptionsToShow.expired) {
       return `(${savedObjectPrefix}.attributes.expire_time <= "${new Date().toISOString()}")`;
     }
-  }, [exceptionsToShow, exceptionListsToQuery]);
+  }, [exceptionsToShow, namespaceTypes]);
 
   const handleFetchItems = useCallback(
     async (options?: GetExceptionItemProps) => {
@@ -274,7 +272,7 @@ const ExceptionsViewerComponent = ({
         filter: exceptionListFilter,
         http: services.http,
         listIds: exceptionListsToQuery.map((list) => list.list_id),
-        namespaceTypes: exceptionListsToQuery.map((list) => list.namespace_type),
+        namespaceTypes,
         search: options?.search,
         pagination: newPagination,
         signal: abortCtrl.signal,
@@ -297,6 +295,7 @@ const ExceptionsViewerComponent = ({
       exceptionListsToQuery,
       services.http,
       exceptionListFilter,
+      namespaceTypes,
     ]
   );
 

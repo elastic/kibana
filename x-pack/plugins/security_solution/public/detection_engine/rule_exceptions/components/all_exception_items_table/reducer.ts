@@ -110,12 +110,18 @@ export const allExceptionItemsReducer =
         };
       }
       case 'setExceptionsToShow': {
+        const newExceptionsToShow = {
+          ...state.exceptionsToShow,
+          ...{ [action.optionId]: !state.exceptionsToShow[action.optionId] },
+        };
+
+        // Doesn't allow neither button to be selected
+        if (!newExceptionsToShow.active && !newExceptionsToShow.expired) {
+          return { ...state, exceptionsToShow: { active: true } };
+        }
         return {
           ...state,
-          exceptionsToShow: {
-            ...state.exceptionsToShow,
-            ...{ [action.optionId]: !state.exceptionsToShow[action.optionId] },
-          },
+          exceptionsToShow: newExceptionsToShow,
         };
       }
       default:
