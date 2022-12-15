@@ -18,11 +18,11 @@ import { isEqual } from 'lodash';
 export function setsAreEqual<T>(setA: Set<T>, setB: Set<T>) {
   if (setA.size !== setB.size) return false;
 
-  var NotEqualException = {};
+  const NotEqualException = {};
   try {
-    setA.forEach(element => {
+    setA.forEach((element) => {
       // End the loop early if we found an inequality
-      if(!setB.has(element)) throw NotEqualException;
+      if (!setB.has(element)) throw NotEqualException;
     });
   } catch (e) {
     if (e === NotEqualException) return false;
@@ -40,13 +40,12 @@ export function setsAreEqual<T>(setA: Set<T>, setB: Set<T>) {
  * @param mapB the second map to compare
  * @returns {boolean} True if map A is equal to map B
  */
-export function arrayMapsAreEqual<T>(
-  mapA: Map<T, T[] | undefined>,
-  mapB: Map<T, T[] | undefined>
-) {
+export function arrayMapsAreEqual<T>(mapA: Map<T, T[] | undefined>, mapB: Map<T, T[] | undefined>) {
   return (
     mapA.size === mapB.size &&
-    Array.from(mapA.keys()).every((key) => mapB.has(key) && isEqual(mapA.get(key)?.sort(), mapB.get(key)?.sort()))
+    Array.from(mapA.keys()).every(
+      (key) => mapB.has(key) && isEqual(mapA.get(key)?.sort(), mapB.get(key)?.sort())
+    )
   );
 }
 
@@ -64,6 +63,8 @@ export function setMapsAreEqual<T>(
 ) {
   return (
     mapA?.size === mapB?.size &&
-    Array.from(mapA!.keys()).every((key) => mapB?.has(key) && setsAreEqual(mapA!.get(key)!, mapB!.get(key)!))
+    Array.from(mapA!.keys()).every(
+      (key) => mapB?.has(key) && setsAreEqual(mapA!.get(key)!, mapB!.get(key)!)
+    )
   );
 }
