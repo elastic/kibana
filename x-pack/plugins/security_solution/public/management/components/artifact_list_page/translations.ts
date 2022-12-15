@@ -27,6 +27,12 @@ export const artifactListPageLabels = Object.freeze({
   // ------------------------------
   // EMPTY state labels
   // ------------------------------
+  emptyStateTitleNoEntries: i18n.translate(
+    'xpack.securitySolution.artifactListPage.emptyStateTitleNoEntries',
+    {
+      defaultMessage: 'There are no entries to display.',
+    }
+  ),
   emptyStateTitle: i18n.translate('xpack.securitySolution.artifactListPage.emptyStateTitle', {
     defaultMessage: 'Add your first artifact',
   }),

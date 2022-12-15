@@ -20,6 +20,7 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
 export const NoDataEmptyState = memo<{
   onAdd: () => void;
   titleLabel: string;
+  titleNoEntriesLabel: string;
   aboutInfo: string;
   primaryButtonLabel: string;
   canCreateItems?: boolean;
@@ -35,6 +36,7 @@ export const NoDataEmptyState = memo<{
     backComponent,
     'data-test-subj': dataTestSubj,
     titleLabel,
+    titleNoEntriesLabel,
     aboutInfo,
     primaryButtonLabel,
     secondaryAboutInfo,
@@ -46,18 +48,26 @@ export const NoDataEmptyState = memo<{
       <ManagementEmptyStateWrapper>
         <EmptyPrompt
           data-test-subj={dataTestSubj}
-          iconType="plusInCircle"
-          title={<h2 data-test-subj={getTestId('title')}>{titleLabel}</h2>}
+          iconType={canCreateItems ? 'plusInCircle' : undefined}
+          title={
+            canCreateItems ? (
+              <h2 data-test-subj={getTestId('title')}>{titleLabel}</h2>
+            ) : (
+              <h2 data-test-subj={getTestId('title-no-entries')}>{titleNoEntriesLabel}</h2>
+            )
+          }
           body={
-            <div data-test-subj={getTestId('aboutInfo')}>
-              {aboutInfo}
-              {secondaryAboutInfo ? (
-                <>
-                  <EuiSpacer size="m" />
-                  {secondaryAboutInfo}
-                </>
-              ) : undefined}
-            </div>
+            canCreateItems ? (
+              <div data-test-subj={getTestId('aboutInfo')}>
+                {aboutInfo}
+                {secondaryAboutInfo ? (
+                  <>
+                    <EuiSpacer size="m" />
+                    {secondaryAboutInfo}
+                  </>
+                ) : undefined}
+              </div>
+            ) : undefined
           }
           actions={
             canCreateItems
