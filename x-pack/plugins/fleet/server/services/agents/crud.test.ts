@@ -23,6 +23,7 @@ describe('Agents CRUD test', () => {
 
   beforeEach(() => {
     searchMock = jest.fn();
+    soClientMock.find = jest.fn().mockResolvedValue({ saved_objects: [] });
     esClientMock = {
       search: searchMock,
       openPointInTime: jest.fn().mockResolvedValue({ id: '1' }),
@@ -277,7 +278,7 @@ describe('Agents CRUD test', () => {
         showInactive: false,
       });
 
-      expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
+      expect(searchMock.mock.calls.at(-1)[0].sort).toEqual([
         { enrolled_at: { order: 'desc' } },
         { 'local_metadata.host.hostname.keyword': { order: 'asc' } },
       ]);
@@ -289,9 +290,7 @@ describe('Agents CRUD test', () => {
         showInactive: false,
         sortField: 'policy_id',
       });
-      expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
-        { policy_id: { order: 'desc' } },
-      ]);
+      expect(searchMock.mock.calls.at(-1)[0].sort).toEqual([{ policy_id: { order: 'desc' } }]);
     });
   });
 });
