@@ -5,17 +5,25 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandler, RouteConfig } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
-import type { AuthenticatedUser, CheckPrivilegesPayload } from '@kbn/security-plugin/server';
-import type { CheckPrivilegesResponse } from '@kbn/security-plugin/server/authorization/types';
 import type { CheckPrivilegesDynamically } from '@kbn/security-plugin/server/authorization/check_privileges_dynamically';
+import type { IRouter, RequestHandler, RouteConfig } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { createAppContextStartContractMock } from '../mocks';
-import { appContextService } from '../services';
-import type { FleetRequestHandlerContext } from '../types';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
-import { deserializeAuthzConfig, makeRouterWithFleetAuthz, serializeAuthzConfig } from './security';
+import { coreMock } from '@kbn/core/server/mocks';
+
+import type { CheckPrivilegesPayload } from '@kbn/security-plugin/server';
+
+import type { CheckPrivilegesResponse } from '@kbn/security-plugin/server/authorization/types';
+
+import type { FleetRequestHandlerContext } from '../..';
+import { createAppContextStartContractMock } from '../../mocks';
+import { appContextService } from '..';
+
+import { makeRouterWithFleetAuthz } from './fleet_router';
+
+const mockLogger = loggingSystemMock.createLogger();
 
 function getCheckPrivilegesMockedImplementation(kibanaRoles: string[]) {
   return (checkPrivileges: CheckPrivilegesPayload) => {
@@ -82,12 +90,11 @@ describe('FleetAuthzRouter', () => {
 
     appContextService.start(mockContext);
 
-    const { router: wrappedRouter, onPostAuthHandler } = makeRouterWithFleetAuthz(fakeRouter);
-    wrappedRouter.get({ ...routeConfig } as RouteConfig<any, any, any, any>, fakeHandler);
+    const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter, mockLogger);
+    fleetAuthzRouter.get({ ...routeConfig } as RouteConfig<any, any, any, any>, fakeHandler);
     const wrappedHandler = fakeRouter.get.mock.calls[0][1];
     const wrappedRouteConfig = fakeRouter.get.mock.calls[0][0];
     const resFactory = { forbidden: jest.fn(() => 'forbidden'), ok: jest.fn(() => 'ok') };
-    const fakeToolkit = { next: jest.fn(() => 'next') };
 
     const fakeReq = {
       route: {
@@ -96,11 +103,6 @@ describe('FleetAuthzRouter', () => {
         options: wrappedRouteConfig.options,
       },
     } as any;
-    const onPostRes = await onPostAuthHandler(fakeReq, resFactory as any, fakeToolkit as any);
-
-    if ((onPostRes as unknown) !== 'next') {
-      return onPostRes;
-    }
 
     const res = await wrappedHandler(
       {
@@ -195,82 +197,6 @@ describe('FleetAuthzRouter', () => {
           routeConfig,
         })
       ).toEqual('forbidden');
-    });
-  });
-});
-
-describe('serializeAuthzConfig', () => {
-  it('should serialize authz to tags', () => {
-    const res = serializeAuthzConfig({
-      fleetAuthz: {
-        fleet: {
-          readEnrollmentTokens: true,
-          setup: true,
-        },
-        integrations: {
-          readPackageInfo: true,
-          removePackages: true,
-        },
-        packagePrivileges: {
-          endpoint: {
-            actions: {
-              readPolicyManagement: {
-                executePackageAction: true,
-              },
-              readBlocklist: {
-                executePackageAction: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    expect(res).toEqual([
-      'fleet:authz:fleet:readEnrollmentTokens',
-      'fleet:authz:fleet:setup',
-      'fleet:authz:integrations:readPackageInfo',
-      'fleet:authz:integrations:removePackages',
-      'fleet:authz:packagePrivileges:endpoint:actions:readPolicyManagement:executePackageAction',
-      'fleet:authz:packagePrivileges:endpoint:actions:readBlocklist:executePackageAction',
-    ]);
-  });
-});
-
-describe('deserializeAuthzConfig', () => {
-  it('should deserialize tags to fleet authz', () => {
-    const res = deserializeAuthzConfig([
-      'fleet:authz:fleet:readEnrollmentTokens',
-      'fleet:authz:fleet:setup',
-      'fleet:authz:integrations:readPackageInfo',
-      'fleet:authz:integrations:removePackages',
-      'fleet:authz:packagePrivileges:endpoint:actions:readPolicyManagement:executePackageAction',
-      'fleet:authz:packagePrivileges:endpoint:actions:readBlocklist:executePackageAction',
-    ]);
-
-    expect(res).toEqual({
-      fleetAuthz: {
-        fleet: {
-          readEnrollmentTokens: true,
-          setup: true,
-        },
-        integrations: {
-          readPackageInfo: true,
-          removePackages: true,
-        },
-        packagePrivileges: {
-          endpoint: {
-            actions: {
-              readPolicyManagement: {
-                executePackageAction: true,
-              },
-              readBlocklist: {
-                executePackageAction: true,
-              },
-            },
-          },
-        },
-      },
     });
   });
 });

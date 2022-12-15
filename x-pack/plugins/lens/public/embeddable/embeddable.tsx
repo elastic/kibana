@@ -88,6 +88,7 @@ import { getLensInspectorService, LensInspector } from '../lens_inspector_servic
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
 import {
   getActiveDatasourceIdFromDoc,
+  getActiveVisualizationIdFromDoc,
   getIndexPatternsObjects,
   getSearchWarningMessages,
   inferTimeField,
@@ -183,6 +184,8 @@ const getExpressionFromDocument = async (
 function getViewUnderlyingDataArgs({
   activeDatasource,
   activeDatasourceState,
+  activeVisualization,
+  activeVisualizationState,
   activeData,
   dataViews,
   capabilities,
@@ -194,6 +197,8 @@ function getViewUnderlyingDataArgs({
 }: {
   activeDatasource: Datasource;
   activeDatasourceState: unknown;
+  activeVisualization: Visualization;
+  activeVisualizationState: unknown;
   activeData: TableInspectorAdapter | undefined;
   dataViews: DataViewBase[] | undefined;
   capabilities: LensEmbeddableDeps['capabilities'];
@@ -206,6 +211,8 @@ function getViewUnderlyingDataArgs({
   const { error, meta } = getLayerMetaInfo(
     activeDatasource,
     activeDatasourceState,
+    activeVisualization,
+    activeVisualizationState,
     activeData,
     indexPatternsCache,
     timeRange,
@@ -289,6 +296,8 @@ export class Embeddable
     activeData?: TableInspectorAdapter;
     activeDatasource?: Datasource;
     activeDatasourceState?: unknown;
+    activeVisualization?: Visualization;
+    activeVisualizationState?: unknown;
   } = {};
 
   private indexPatterns: DataView[] = [];
@@ -903,7 +912,14 @@ export class Embeddable
       return false;
     }
 
+    const activeVisualizationId = getActiveVisualizationIdFromDoc(this.savedVis);
+    if (!activeVisualizationId) {
+      return false;
+    }
+
     this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
+    this.activeDataInfo.activeVisualization = this.deps.visualizationMap[activeVisualizationId];
+
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
     const adHocDataviews = await Promise.all(
       Object.values(this.savedVis?.state.adHocDataViews || {})
@@ -936,9 +952,19 @@ export class Embeddable
       );
     }
 
+    if (!this.activeDataInfo.activeVisualizationState) {
+      this.activeDataInfo.activeVisualizationState =
+        this.activeDataInfo.activeVisualization.initialize(
+          () => '',
+          this.savedVis?.state.visualization
+        );
+    }
+
     const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
       activeDatasource: this.activeDataInfo.activeDatasource,
       activeDatasourceState: this.activeDataInfo.activeDatasourceState,
+      activeVisualization: this.activeDataInfo.activeVisualization,
+      activeVisualizationState: this.activeDataInfo.activeVisualizationState,
       activeData: this.activeDataInfo.activeData,
       dataViews: this.indexPatterns,
       capabilities: this.deps.capabilities,
