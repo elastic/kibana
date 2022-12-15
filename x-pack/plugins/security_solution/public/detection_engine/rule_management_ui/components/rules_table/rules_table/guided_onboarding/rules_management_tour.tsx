@@ -6,7 +6,7 @@
  */
 
 import type { EuiTourActions, EuiTourStepProps } from '@elastic/eui';
-import { EuiButton, EuiTourStep } from '@elastic/eui';
+import { EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import { noop } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -153,9 +153,9 @@ export const RulesManagementTour = () => {
           anchor={`#${SEARCH_FIRST_RULE_ANCHOR}`}
           anchorPosition="upCenter"
           footerAction={
-            <EuiButton size="s" color="success" onClick={findDemoRule}>
+            <EuiButtonEmpty size="xs" color="text" flush="right" onClick={findDemoRule}>
               {i18n.NEXT_BUTTON}
-            </EuiButton>
+            </EuiButtonEmpty>
           }
         />
       )}
@@ -170,9 +170,9 @@ export const RulesManagementTour = () => {
           anchor={`#${ruleSwitchAnchor}`}
           anchorPosition="upCenter"
           footerAction={
-            <EuiButton size="s" color="success" onClick={enableDemoRule}>
+            <EuiButtonEmpty size="xs" color="text" flush="right" onClick={enableDemoRule}>
               {i18n.NEXT_BUTTON}
-            </EuiButton>
+            </EuiButtonEmpty>
           }
         />
       )}
