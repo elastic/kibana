@@ -115,6 +115,7 @@ function mountComponent(
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     savedSearchData$,
+    savedSearchFetch$: new Subject(),
     savedSearchRefetch$: new Subject() as DataRefetch$,
     searchSource: searchSourceMock,
     state: { columns: [], query, hideChart: false, interval: 'auto' },

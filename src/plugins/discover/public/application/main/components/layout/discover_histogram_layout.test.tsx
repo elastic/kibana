@@ -125,6 +125,7 @@ const mountComponent = ({
     setExpandedDoc: jest.fn(),
     savedSearch,
     savedSearchData$,
+    savedSearchFetch$: new Subject(),
     savedSearchRefetch$: new Subject(),
     stateContainer,
     onFieldEdited: jest.fn(),
