@@ -37,7 +37,7 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
-      "kibana.alert.cases_ids": Object {
+      "kibana.alert.case_ids": Object {
         "array": true,
         "required": false,
         "type": "keyword",
