@@ -32312,7 +32312,6 @@
     "xpack.spaces.spacesTitle": "工作区",
     "xpack.spaces.uiApi.errorBoundaryToastMessage": "重新加载页面以继续。",
     "xpack.spaces.uiApi.errorBoundaryToastTitle": "无法加载 Kibana 资产",
-    "xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription": "匹配文档的数目为 {negation}{thresholdComparator} {threshold}",
     "xpack.stackAlerts.esQuery.alertTypeContextMessageDescription": "规则“{name}”为 {verb}：\n\n- 值：{value}\n- 满足的条件：{conditions} 超过 {window}\n- 时间戳：{date}\n- 链接：{link}",
     "xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle": "规则“{name}”{verb}",
     "xpack.stackAlerts.esQuery.invalidComparatorErrorMessage": "指定的 thresholdComparator 无效：{comparator}",
