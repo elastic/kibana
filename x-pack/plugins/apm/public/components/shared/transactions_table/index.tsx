@@ -104,7 +104,9 @@ export function TransactionsTable({
     },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions',
-    '/services/{serviceName}/overview'
+    '/services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/transactions',
+    '/mobile-services/{serviceName}/overview'
   );
 
   const [tableOptions, setTableOptions] = useState<{

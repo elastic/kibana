@@ -14,7 +14,6 @@ describe('APM service template', () => {
         { agentName: 'js-base' },
         { agentName: 'rum-js' },
         { agentName: 'opentelemetry/webjs' },
-        { agentName: 'ios/swift' },
         { runtimeName: 'aws_lambda' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
@@ -48,7 +47,7 @@ describe('APM service template', () => {
         { agentName: 'js-base' },
         { agentName: 'rum-js' },
         { agentName: 'opentelemetry/webjs' },
-        { agentName: 'ios/swift' },
+
         { runtimeName: 'aws_lambda' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
