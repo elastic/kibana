@@ -18,10 +18,9 @@ import type {
   SavedObjectsCollectMultiNamespaceReferencesOptions,
 } from '@kbn/core-saved-objects-api-server';
 import {
-  enforceMapsAreEqual,
+  setMapsAreEqual,
   SavedObjectsErrorHelpers,
   setsAreEqual,
-  typeMapsAreEqual,
 } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
@@ -537,7 +536,7 @@ describe('collectMultiNamespaceReferences', () => {
         const { spaces: actualSpaces, enforceMap: actualEnforceMap } =
           mockSecurityExt.performAuthorization.mock.calls[0][0];
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-        expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+        expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       });
 
       test(`in a non-default state`, async () => {
@@ -552,7 +551,7 @@ describe('collectMultiNamespaceReferences', () => {
         const { spaces: actualSpaces, enforceMap: actualEnforceMap } =
           mockSecurityExt.performAuthorization.mock.calls[0][0];
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-        expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+        expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       });
 
       test(`with purpose 'collectMultiNamespaceReferences'`, async () => {
@@ -611,7 +610,7 @@ describe('collectMultiNamespaceReferences', () => {
         const expectedTypesAndSpaces = new Map([[objects[0].type, new Set(['default'])]]);
         const { typesAndSpaces: actualTypesAndSpaces } =
           mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-        expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
+        expect(setMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
 
         // Redact is called once per object, but an additional time for object 1 because it has legacy URL aliases in another set of spaces
         expect(mockSecurityExt.redactNamespaces).toBeCalledTimes(resultObjects.length + 1);

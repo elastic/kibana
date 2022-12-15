@@ -8,7 +8,7 @@
 import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { AuditAction } from '@kbn/core-saved-objects-server';
-import { enforceMapsAreEqual, setsAreEqual } from '@kbn/core-saved-objects-utils-server';
+import { setMapsAreEqual, setsAreEqual } from '@kbn/core-saved-objects-utils-server';
 import type { EcsEventOutcome, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -759,7 +759,7 @@ describe('SecureSpacesClientWrapper', () => {
       expect(setsAreEqual(expectedActions, actualActions)).toBeTruthy();
       expect(setsAreEqual(expectedSpaces, actualSpaces)).toBeTruthy();
       expect(setsAreEqual(expectedTypes, actualTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(expectedEnforceMap, actualEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(expectedEnforceMap, actualEnforceMap)).toBeTruthy();
       expect(actualOptions).toBeUndefined();
     }
 
@@ -792,7 +792,7 @@ describe('SecureSpacesClientWrapper', () => {
           forbiddenError
         );
 
-        expectAuthorizationCheck(securityExtension!, aliases); // ['type-1', 'type-2'], ['space-1', 'space-2']);
+        expectAuthorizationCheck(securityExtension!, aliases);
         expectAuditEvents(securityExtension!, aliases, { error: true });
         expect(baseClient.disableLegacyUrlAliases).not.toHaveBeenCalled();
       });

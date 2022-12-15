@@ -19,7 +19,7 @@ import type {
   SavedObjectsBaseOptions,
 } from '@kbn/core-saved-objects-api-server';
 import {
-  enforceMapsAreEqual,
+  setMapsAreEqual,
   SavedObjectsErrorHelpers,
   SavedObjectsUtils,
   setsAreEqual,
@@ -517,7 +517,7 @@ describe('internalBulkResolve', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toBeUndefined();
     });
 

@@ -28,8 +28,8 @@ import {
   AuthorizationTypeEntry,
 } from '@kbn/core-saved-objects-server';
 import {
-  enforceMapsAreEqual,
-  namespaceMapsAreEqual,
+  setMapsAreEqual,
+  arrayMapsAreEqual,
   setsAreEqual,
 } from '@kbn/core-saved-objects-utils-server';
 import { kibanaMigratorMock } from '../mocks';
@@ -194,7 +194,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toBeUndefined();
     });
 
@@ -310,7 +310,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toBeUndefined();
     });
 
@@ -422,7 +422,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
     });
 
@@ -453,7 +453,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
     });
 
@@ -579,7 +579,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toBeUndefined();
     });
 
@@ -665,7 +665,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toBeUndefined();
     });
 
@@ -781,7 +781,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toBeUndefined();
     });
   });
@@ -921,7 +921,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(actualMap).toBeDefined();
       const expectedMap = new Map<string, string[] | undefined>();
       expectedMap.set(type, [namespace]);
-      expect(namespaceMapsAreEqual(actualMap, expectedMap)).toBeTruthy();
+      expect(arrayMapsAreEqual(actualMap, expectedMap)).toBeTruthy();
     });
 
     test(`returns result of es find when fully authorized`, async () => {
@@ -975,7 +975,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       const expectedMap = new Map<string, string[] | undefined>();
       expectedMap.set('foo', ['bar']); // this is what is hard-coded in authMap
 
-      expect(namespaceMapsAreEqual(actualMap, expectedMap)).toBeTruthy();
+      expect(arrayMapsAreEqual(actualMap, expectedMap)).toBeTruthy();
     });
 
     test(`returns result of es find when partially authorized`, async () => {
@@ -1209,7 +1209,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toBeUndefined();
     });
 
@@ -1245,7 +1245,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toBeUndefined();
     });
 
@@ -1388,7 +1388,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
     });
 
@@ -1436,7 +1436,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
     });
 
@@ -1483,7 +1483,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
     });
 
@@ -1615,7 +1615,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toBeUndefined();
     });
 
@@ -1654,7 +1654,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       expect(actualOptions).toBeUndefined();
     });
 
@@ -1811,7 +1811,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, exptectedSpaces)).toBeTruthy();
-      expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
     });
 
     test(`adds audit event per object when successful`, async () => {

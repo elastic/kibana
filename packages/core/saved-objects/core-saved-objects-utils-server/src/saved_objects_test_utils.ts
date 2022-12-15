@@ -16,60 +16,53 @@ import { isEqual } from 'lodash';
  * @returns {boolean} True if Set A is equal to Set B
  */
 export function setsAreEqual<T>(setA: Set<T>, setB: Set<T>) {
-  // console.log(`*** SET A: ${Array.from(setA)}`);
-  // console.log(`*** SET B: ${Array.from(setB)}`);
-  return isEqual(Array.from(setA).sort(), Array.from(setB).sort());
+  if (setA.size !== setB.size) return false;
+
+  var NotEqualException = {};
+  try {
+    setA.forEach(element => {
+      // End the loop early if we found an inequality
+      if(!setB.has(element)) throw NotEqualException;
+    });
+  } catch (NotEqualException) {
+    return false;
+  }
+
+  return true;
 }
 
 /**
- * Determines if a given type map is equal to another given type map.
+ * Determines if a given map of arrays is equal to another given map of arrays.
+ * Used for comparing namespace maps in saved object repo/security extension tests.
  *
- * @param mapA the first type map to compare
- * @param mapB the second type map to compare
- * @returns {boolean} True if type map A is equal to type map B
+ * @param mapA the first map to compare
+ * @param mapB the second map to compare
+ * @returns {boolean} True if map A is equal to map B
  */
-export function typeMapsAreEqual(mapA: Map<string, Set<string>>, mapB: Map<string, Set<string>>) {
+export function arrayMapsAreEqual<T>(
+  mapA: Map<T, T[] | undefined>,
+  mapB: Map<T, T[] | undefined>
+) {
   return (
     mapA.size === mapB.size &&
-    isEqual(Array.from(mapA!.keys()).sort(), Array.from(mapB!.keys()).sort()) &&
-    Array.from(mapA.keys()).every((key) => setsAreEqual(mapA.get(key)!, mapB.get(key)!))
+    Array.from(mapA.keys()).every((key) => mapB.has(key) && isEqual(mapA.get(key)?.sort(), mapB.get(key)?.sort()))
   );
 }
 
 /**
- * Determines if a given namespace map is equal to another given namespace map.
+ * Determines if a given Map of Sets is equal to another given Map of Sets.
+ * Used for comparing typeMaps and enforceMaps in saved object repo/security extension tests.
  *
- * @param mapA the first namespace map to compare
- * @param mapB the second namespace map to compare
- * @returns {boolean} True if namespace map A is equal to namespace map B
+ * @param mapA the first map to compare
+ * @param mapB the second map to compare
+ * @returns {boolean} True if map A is equal to map B
  */
-export function namespaceMapsAreEqual(
-  mapA: Map<string, string[] | undefined>,
-  mapB: Map<string, string[] | undefined>
+export function setMapsAreEqual<T>(
+  mapA: Map<T, Set<T>> | undefined,
+  mapB: Map<T, Set<T>> | undefined
 ) {
-  // console.log(`COMPARING MAPS: ${Array.from(mapA.keys())} --- ${Array.from(mapB.keys())}`);
-  return (
-    mapA.size === mapB.size &&
-    isEqual(Array.from(mapA!.keys()).sort(), Array.from(mapB!.keys()).sort()) &&
-    Array.from(mapA.keys()).every((key) => isEqual(mapA.get(key)?.sort(), mapB.get(key)?.sort()))
-  );
-}
-
-/**
- * Determines if a given enforce map is equal to another given enforce map.
- *
- * @param mapA the first enforce map to compare
- * @param mapB the second enforce map to compare
- * @returns {boolean} True if enforce map A is equal to enforce map B
- */
-export function enforceMapsAreEqual(
-  mapA: Map<string, Set<string>> | undefined,
-  mapB: Map<string, Set<string>> | undefined
-) {
-  // console.log(`COMPARING MAPS: ${mapA?.size}, ${mapB?.size}...`);
   return (
     mapA?.size === mapB?.size &&
-    isEqual(Array.from(mapA!.keys()).sort(), Array.from(mapB!.keys()).sort()) &&
-    Array.from(mapA!.keys()).every((key) => setsAreEqual(mapA!.get(key)!, mapB!.get(key)!))
+    Array.from(mapA!.keys()).every((key) => mapB?.has(key) && setsAreEqual(mapA!.get(key)!, mapB!.get(key)!))
   );
 }

@@ -21,7 +21,7 @@ import {
   SavedObjectsErrorHelpers,
   ALL_NAMESPACES_STRING,
   setsAreEqual,
-  enforceMapsAreEqual,
+  setMapsAreEqual,
 } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
@@ -785,7 +785,7 @@ describe('#updateObjectsSpaces', () => {
         expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
         expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-        expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+        expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
         expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
       });
 
@@ -857,7 +857,7 @@ describe('#updateObjectsSpaces', () => {
         expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
         expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-        expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+        expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
         expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
       });
 
@@ -889,7 +889,7 @@ describe('#updateObjectsSpaces', () => {
         expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
         expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-        expect(enforceMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+        expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
         expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
       });
     });

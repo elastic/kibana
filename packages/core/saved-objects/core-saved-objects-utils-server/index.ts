@@ -18,7 +18,6 @@ export {
 
 export {
   setsAreEqual,
-  typeMapsAreEqual,
-  namespaceMapsAreEqual,
-  enforceMapsAreEqual,
+  arrayMapsAreEqual,
+  setMapsAreEqual,
 } from './src/saved_objects_test_utils';
