@@ -62,6 +62,10 @@ useEffect(() => {
 }, [guidedOnboardingApi]);
 ```
 
+### isGuideStepReadyToComplete$(guideID: string, stepID: string): Observable\<boolean\>
+Similar to `isGuideStepActive$`, the observable `isGuideStepReadyToComplete$` can be used to track the state of a step that is configured for manual completion. The observable broadcasts `true` when the manual completion popover is displayed and the user can mark the step "done". In this state the step is not in progress anymore but is not yet fully completed. 
+
+
 ### completeGuideStep(guideID: string, stepID: string): Promise\<{ state: GuidedOnboardingState } | undefined\>
 The API service exposes an async function to mark a guide step as completed. 
 If the specified guide step is not currently active, the function is a noop. The return value is `undefined` in that case, 

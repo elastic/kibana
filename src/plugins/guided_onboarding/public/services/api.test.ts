@@ -28,6 +28,7 @@ import {
   mockPluginStateInProgress,
   mockPluginStateNotStarted,
   testGuideStep3ActiveState,
+  testGuideStep2ReadyToCompleteState,
 } from './api.mocks';
 
 describe('GuidedOnboarding ApiService', () => {
@@ -256,6 +257,7 @@ describe('GuidedOnboarding ApiService', () => {
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
       });
 
+      apiService.setup(httpClient, true);
       subscription = apiService
         .isGuideStepActive$(testGuideId, testGuideFirstStep)
         .subscribe((isStepActive) => {
@@ -269,6 +271,65 @@ describe('GuidedOnboarding ApiService', () => {
     it('returns false if the step is not been started', (done) => {
       subscription = apiService
         .isGuideStepActive$(testGuideId, testGuideFirstStep)
+        .subscribe((isStepActive) => {
+          if (!isStepActive) {
+            subscription.unsubscribe();
+            done();
+          }
+        });
+    });
+  });
+
+  describe('isGuideStepReadyToComplete$', () => {
+    it('returns true if the step is ready to complete', (done) => {
+      httpClient.get.mockResolvedValueOnce({
+        pluginState: {
+          ...mockPluginStateInProgress,
+          activeGuide: testGuideStep2ReadyToCompleteState,
+        },
+      });
+      apiService.setup(httpClient, true);
+
+      subscription = apiService
+        .isGuideStepReadyToComplete$(testGuideId, testGuideManualCompletionStep)
+        .subscribe((isStepReadyToComplete) => {
+          if (isStepReadyToComplete) {
+            subscription.unsubscribe();
+            done();
+          }
+        });
+    });
+
+    it('returns false if the step has not been started', (done) => {
+      httpClient.get.mockResolvedValueOnce({
+        pluginState: {
+          ...mockPluginStateInProgress,
+          activeGuide: testGuideStep2ActiveState,
+        },
+      });
+      apiService.setup(httpClient, true);
+
+      subscription = apiService
+        .isGuideStepReadyToComplete$(testGuideId, testGuideManualCompletionStep)
+        .subscribe((isStepActive) => {
+          if (!isStepActive) {
+            subscription.unsubscribe();
+            done();
+          }
+        });
+    });
+
+    it('returns false if the step has been completed', (done) => {
+      httpClient.get.mockResolvedValueOnce({
+        pluginState: {
+          ...mockPluginStateInProgress,
+          activeGuide: testGuideStep3ActiveState,
+        },
+      });
+      apiService.setup(httpClient, true);
+
+      subscription = apiService
+        .isGuideStepReadyToComplete$(testGuideId, testGuideManualCompletionStep)
         .subscribe((isStepActive) => {
           if (!isStepActive) {
             subscription.unsubscribe();
