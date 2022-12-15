@@ -15,7 +15,6 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
-  const archive = 'test/functional/fixtures/kbn_archiver/legacy.json';
 
   describe('datasource', function () {
     // there is an issue with FF not properly clicking on workpad elements
