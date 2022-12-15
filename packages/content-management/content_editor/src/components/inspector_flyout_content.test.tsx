@@ -53,17 +53,18 @@ describe('<ContentEditorFlyoutContent />', () => {
       }
     );
 
-    const waitForValidationResults = async () =>
-      await act(() => {
+    const waitForValidationResults = async () => {
+      await act(async () => {
         jest.advanceTimersByTime(550); // There is a 500ms delay to display input errors + async validation
       });
+    };
 
     test('should set the correct flyout title', async () => {
       await act(async () => {
         testBed = await setup();
       });
       const { find } = testBed!;
-      expect(find('flyoutTitle').text()).toBe('Inspector');
+      expect(find('flyoutTitle').text()).toBe('Foo details');
     });
 
     test('should render the form with the provided item', async () => {

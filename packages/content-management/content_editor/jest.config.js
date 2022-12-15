@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/packages/content-management/content-editor'],
+  roots: ['<rootDir>/packages/content-management/content_editor'],
 };

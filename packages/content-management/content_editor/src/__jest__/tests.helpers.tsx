@@ -9,7 +9,7 @@ import React from 'react';
 import type { ComponentType } from 'react';
 
 import { TagSelector, TagList } from '../mocks';
-import { InspectorProvider } from '../services';
+import { ContentEditorProvider } from '../services';
 import type { Services } from '../services';
 
 export const getMockServices = (overrides?: Partial<Services>) => {
@@ -31,9 +31,9 @@ export function WithServices<P>(Comp: ComponentType<P>, overrides: Partial<Servi
   return (props: P) => {
     const services = getMockServices(overrides);
     return (
-      <InspectorProvider {...services}>
+      <ContentEditorProvider {...services}>
         <Comp {...props} />
-      </InspectorProvider>
+      </ContentEditorProvider>
     );
   };
 }
