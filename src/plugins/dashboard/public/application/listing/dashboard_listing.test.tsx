@@ -60,7 +60,7 @@ function mountWith({ props: incomingProps }: { props?: DashboardListingProps }) 
             {
               ui: {
                 ...savedObjectsTagging,
-                parseSearchQuery: () => ({
+                parseSearchQuery: async () => ({
                   searchTerm: '',
                   tagReferences: [],
                   tagReferencesToExclude: [],
