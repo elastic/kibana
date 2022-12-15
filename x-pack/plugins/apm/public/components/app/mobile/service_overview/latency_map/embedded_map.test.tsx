@@ -31,7 +31,7 @@ describe('Embedded Map', () => {
     const { findByTestId } = render(
       <MemoryRouter
         initialEntries={[
-          '/services/{serviceName}/overview?rangeFrom=now-15m&rangeTo=now&',
+          '/mobile-services/{serviceName}/overview?rangeFrom=now-15m&rangeTo=now&',
         ]}
       >
         <MockApmPluginContextWrapper>

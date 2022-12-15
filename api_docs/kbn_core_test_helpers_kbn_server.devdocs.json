@@ -86,7 +86,7 @@
         "signature": [
           "(settings: {}, cliArgs: Partial<",
           "CliArgs",
-          ">) => ",
+          ">, customKibanaVersion: string | undefined) => ",
           {
             "pluginId": "@kbn/core-root-server-internal",
             "scope": "server",
@@ -132,6 +132,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-server.createRootWithCorePlugins.$3",
+            "type": "string",
+            "tags": [],
+            "label": "customKibanaVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -147,7 +162,7 @@
         "signature": [
           "(settings: Record<string, any>, cliArgs: Partial<",
           "CliArgs",
-          ">) => ",
+          ">, customKibanaVersion: string | undefined) => ",
           {
             "pluginId": "@kbn/core-root-server-internal",
             "scope": "server",
@@ -191,6 +206,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-server.createRootWithSettings.$3",
+            "type": "string",
+            "tags": [],
+            "label": "customKibanaVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
