@@ -21,18 +21,21 @@ export function useDeleteSlo(): UseDeleteSlo {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const deleteSlo = useCallback(async (id: string) => {
-    setLoading(true);
-    setError('');
-    setSuccess(false);
+  const deleteSlo = useCallback(
+    async (id: string) => {
+      setLoading(true);
+      setError('');
+      setSuccess(false);
 
-    try {
-      await http.delete<string>(`/api/observability/slos/${id}`);
-      setSuccess(true);
-    } catch (e) {
-      setError(e);
-    }
-  }, []);
+      try {
+        await http.delete<string>(`/api/observability/slos/${id}`);
+        setSuccess(true);
+      } catch (e) {
+        setError(e);
+      }
+    },
+    [http]
+  );
 
   return {
     loading,
