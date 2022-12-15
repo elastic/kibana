@@ -35,8 +35,8 @@ import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import type { FilterContextType, FilterGroupProps, FilterItemObj } from './types';
 import { useFilterUpdatesToUrlSync } from './hooks/use_filter_update_to_url_sync';
-import './index.scss';
 import { APP_ID } from '../../../../common/constants';
+import './index.scss';
 
 type ControlGroupBuilder = typeof controlGroupInputBuilder;
 
@@ -254,6 +254,9 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       finalControls.forEach((control, idx) => {
         addOptionsListControl(initialInput, {
           controlId: String(idx),
+          hideExclude: true,
+          hideSort: true,
+          hidePanelTitles: true,
           dataViewId,
           ...control,
         });
