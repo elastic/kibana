@@ -102,11 +102,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('changes to time slice can be discarded', async () => {
-        const valueBefore = await dashboardControls.getTimeSliceFromTimeSlider(false);
-        await dashboardControls.gotoNextTimeSlice(false);
+        const valueBefore = await dashboardControls.getTimeSliceFromTimeSlider();
+        await dashboardControls.gotoNextTimeSlice();
         const valueAfter = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueBefore).to.not.equal(valueAfter);
 
+        await dashboardControls.closeTimeSliderPopover();
         await dashboard.clickCancelOutOfEditMode();
         const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueNow).to.equal(valueBefore);
@@ -141,8 +142,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should display document count for timeslice when timeslice is selected', async () => {
-          await dashboardControls.gotoNextTimeSlice(false); // first slice is just partial slice with no data
-          await dashboardControls.gotoNextTimeSlice(); // close popover so its not blocking panel
+          await dashboardControls.gotoNextTimeSlice(); // first slice is just partial slice with no data
+          await dashboardControls.gotoNextTimeSlice();
+          await dashboardControls.closeTimeSliderPopover(); // close popover so its not blocking panel
           await dashboard.waitForRenderComplete();
           expect(await discover.getSavedSearchDocumentCount()).to.be('16 documents');
         });

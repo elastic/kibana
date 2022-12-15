@@ -617,11 +617,8 @@ export class DashboardPageControls extends FtrService {
   }
 
   // Time slider functions
-  public async gotoNextTimeSlice(closePopover: boolean = true) {
+  public async gotoNextTimeSlice() {
     await this.testSubjects.click('timeSlider-nextTimeWindow');
-    if (closePopover) {
-      this.closeTimeSliderPopover();
-    }
   }
 
   public async closeTimeSliderPopover() {
@@ -631,7 +628,7 @@ export class DashboardPageControls extends FtrService {
     }
   }
 
-  public async getTimeSliceFromTimeSlider(closePopover: boolean = true) {
+  public async getTimeSliceFromTimeSlider() {
     const isOpen = await this.testSubjects.exists('timeSlider-popoverContents');
     if (!isOpen) {
       await this.testSubjects.click('timeSlider-popoverToggleButton');
@@ -645,9 +642,6 @@ export class DashboardPageControls extends FtrService {
       popover
     );
     const value = await dualRangeSlider.getAttribute('aria-valuetext');
-    if (closePopover) {
-      this.closeTimeSliderPopover();
-    }
     return value;
   }
 }
