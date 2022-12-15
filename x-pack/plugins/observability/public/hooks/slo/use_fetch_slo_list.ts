@@ -25,8 +25,9 @@ interface SLOListParams {
 }
 
 export interface UseFetchSloListResponse {
-  loading: boolean;
   sloList: SLOList;
+  loading: boolean;
+  error: boolean;
 }
 
 export function useFetchSloList({
@@ -47,7 +48,7 @@ export function useFetchSloList({
     [params, refetch]
   );
 
-  const { loading, data } = useDataFetcher<SLOListParams, SLOList>({
+  const { data, loading, error } = useDataFetcher<SLOListParams, SLOList>({
     paramsForApiCall: params,
     initialDataState: sloList,
     executeApiCall: fetchSloList,
@@ -58,7 +59,7 @@ export function useFetchSloList({
     setSloList(data);
   }, [data]);
 
-  return { loading, sloList };
+  return { sloList, loading, error };
 }
 
 const fetchSloList = async (
