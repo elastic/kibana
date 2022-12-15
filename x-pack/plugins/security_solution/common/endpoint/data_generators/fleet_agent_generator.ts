@@ -26,7 +26,6 @@ const agentStatusList: readonly AgentStatus[] = [
   'error',
   'online',
   'inactive',
-  'warning',
   'enrolling',
   'unenrolling',
   'updating',
