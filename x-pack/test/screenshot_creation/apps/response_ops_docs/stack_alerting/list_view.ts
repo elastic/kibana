@@ -60,6 +60,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1024
       );
     });
+
+    it('rule snooze screenshot', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+      await snoozeBadge.click();
+      await commonScreenshots.takeScreenshot('snooze-panel', screenshotDirectories, 1400, 1024);
+    });
   });
 
   const createServerLogConnector = async (name: string) => {
