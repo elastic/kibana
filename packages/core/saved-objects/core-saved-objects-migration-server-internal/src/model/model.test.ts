@@ -2624,7 +2624,6 @@ describe('migrations v2 model', () => {
         const newState = model(unchangedMappingsState, res) as PostInitState;
 
         expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
-        expect(newState.skipReindex).toBe(true);
 
         expect(newState.versionAlias).toEqual('.kibana_7.12.0');
         expect(newState.currentAlias).toEqual('.kibana');
