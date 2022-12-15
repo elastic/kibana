@@ -24,23 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(breadcrumb).to.be('Home');
     });
 
-    it('Getting started page should render breadcrumbs', async () => {
-      const isCloud = await deployment.isCloud();
-
-      if (isCloud) {
-        await PageObjects.common.navigateToUrl('home', '/getting_started', {
-          useActualUrl: true,
-        });
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        const firstBreadcrumb = await testSubjects.getVisibleText('breadcrumb first');
-        const lastBreadcrumb = await testSubjects.getVisibleText('breadcrumb last');
-
-        expect(firstBreadcrumb).to.be('Home');
-        expect(lastBreadcrumb).to.be('Setup guides');
-      }
-    });
-
     it('Tutorials directory page should render breadcrumbs', async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -67,6 +50,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(firstBreadcrumb).to.be('Integrations');
       expect(lastBreadcrumb).to.be(tutorialId.toUpperCase());
+    });
+
+    // The getting started page is only rendered on cloud, and therefore the tests are only run on cloud
+    describe('Getting started page', () => {
+      let isCloud: boolean;
+
+      before(async () => {
+        isCloud = await deployment.isCloud();
+      });
+
+      beforeEach(async () => {
+        if (isCloud) {
+          await PageObjects.common.navigateToUrl('home', '/getting_started', {
+            useActualUrl: true,
+          });
+          await PageObjects.header.waitUntilLoadingHasFinished();
+        }
+      });
+
+      it('Getting started page should render breadcrumbs', async () => {
+        if (isCloud) {
+          const firstBreadcrumb = await testSubjects.getVisibleText('breadcrumb first');
+          const lastBreadcrumb = await testSubjects.getVisibleText('breadcrumb last');
+
+          expect(firstBreadcrumb).to.be('Home');
+          expect(lastBreadcrumb).to.be('Setup guides');
+        }
+      });
+
+      it('Home page breadcrumb should navigate to home', async () => {
+        if (isCloud) {
+          await PageObjects.home.clickHomeBreadcrumb();
+          expect(await PageObjects.home.isHomePageDisplayed()).to.be(true);
+        }
+      });
     });
   });
 }
