@@ -8,8 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { ControlGroupContainer, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Filter, TimeRange, compareFilters } from '@kbn/es-query';
-import { isEqual } from 'lodash';
+import { Filter, TimeRange } from '@kbn/es-query';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
@@ -47,17 +46,19 @@ export const ControlsContent: React.FC<Props> = ({
     const filtersSubscription = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
       setPanelFilters([...newFilters]);
     });
-    const inputSubscrption = controlGroup.getInput$().subscribe(({ panels, filters: currentFilters }) => {
-      setControlPanels(panels);
-      if (currentFilters?.length === 0) {
-        setPanelFilters([]);
-      }
-    });
+    const inputSubscrption = controlGroup
+      .getInput$()
+      .subscribe(({ panels, filters: currentFilters }) => {
+        setControlPanels(panels);
+        if (currentFilters?.length === 0) {
+          setPanelFilters([]);
+        }
+      });
     return () => {
       filtersSubscription.unsubscribe();
       inputSubscrption.unsubscribe();
     };
-  }, [controlGroup]);
+  }, [controlGroup, setControlPanels, setPanelFilters]);
 
   return (
     <LazyControlsRenderer
