@@ -27,6 +27,7 @@ import {
   TAKE_ACTION_MENU,
   ADD_ENDPOINT_EXCEPTION_BTN,
   DATAGRID_CHANGES_IN_PROGRESS,
+  EVENT_CONTAINER_TABLE_NOT_LOADING,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
 import {
@@ -114,6 +115,7 @@ export const expandFirstAlertActions = () => {
   // Adding wait time because.. something is loading in the background
   // which is preventing the popup to open upon button click below.
   // Currently not sure what
+  waitForAlerts();
   cy.wait(500);
   cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.visible');
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click('center');
@@ -239,9 +241,10 @@ export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: n
 };
 
 export const waitForAlerts = () => {
+  waitForPageFilters();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
-  waitForPageFilters();
+  cy.get(EVENT_CONTAINER_TABLE_NOT_LOADING).should('be.visible');
 };
 
 export const waitForAlertsPanelToBeLoaded = () => {

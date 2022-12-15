@@ -102,6 +102,8 @@ export const TAKE_ACTION_POPOVER_BTN = '[data-test-subj="selectedShowBulkActions
 
 export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu-button"]';
 
+export const TIMELINE_CONTEXT_MENU = '[data-test-subj="actions-context-menu"]';
+
 export const USER_NAME = '[data-test-subj^=formatted-field][data-test-subj$=user\\.name]';
 
 export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-existing-case-action"]';
@@ -123,3 +125,8 @@ export const USER_RISK_COLUMN = '[data-gridcell-column-id="user.risk.calculated_
 export const ACTION_COLUMN = '[data-gridcell-column-id="default-timeline-control-column"]';
 
 export const DATAGRID_CHANGES_IN_PROGRESS = '[data-test-subj="body-data-grid"] .euiProgress';
+
+export const EVENT_CONTAINER_TABLE_LOADING = '[data-test-subj="events-container-loading-true"]';
+
+export const EVENT_CONTAINER_TABLE_NOT_LOADING =
+  '[data-test-subj="events-container-loading-false"]';

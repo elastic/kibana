@@ -258,7 +258,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
               anchorPosition="downLeft"
               repositionOnScroll
             >
-              <EuiContextMenuPanel size="s" items={items} />
+              <EuiContextMenuPanel size="s" items={items} data-test-subj="actions-context-menu" />
             </EuiPopover>
           </EventsTdContent>
         </div>

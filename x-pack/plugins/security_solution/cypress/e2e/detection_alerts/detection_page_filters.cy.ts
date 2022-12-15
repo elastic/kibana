@@ -150,18 +150,17 @@ describe('Detections : Page Filters', () => {
     cy.get(ALERTS_COUNT)
       .invoke('text')
       .then((noOfAlerts) => {
-        expect(noOfAlerts.split(' ')[0]).eq('2');
+        const originalAlertCount = noOfAlerts.split(' ')[0];
         markAcknowledgedFirstAlert();
-      });
-
-    cy.reload();
-    waitForAlerts();
-    cy.get(OPTION_LIST_VALUES).eq(0).click();
-    cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible');
-    cy.get(ALERTS_COUNT)
-      .invoke('text')
-      .should((noOfAlerts) => {
-        expect(noOfAlerts.split(' ')[0]).eq('1');
+        cy.reload();
+        waitForAlerts();
+        cy.get(OPTION_LIST_VALUES).eq(0).click();
+        cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible');
+        cy.get(ALERTS_COUNT)
+          .invoke('text')
+          .should((newAlertCount) => {
+            expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10) - 1));
+          });
       });
   });
 
