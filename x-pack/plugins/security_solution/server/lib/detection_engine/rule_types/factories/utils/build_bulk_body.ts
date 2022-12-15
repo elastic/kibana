@@ -20,6 +20,7 @@ import { buildRuleNameFromMapping } from '../../../signals/mappings/build_rule_n
 import { buildSeverityFromMapping } from '../../../signals/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../../signals/mappings/build_risk_score_from_mapping';
 import type { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
+import { stripNonEcsFields } from './strip_non_ecs_fields';
 
 const isSourceDoc = (
   hit: SignalSourceHit
@@ -57,6 +58,7 @@ export const buildBulkBody = (
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const eventFields = buildEventTypeAlert(mergedDoc);
   const filteredSource = filterSource(mergedDoc);
+  const { result: validatedSource } = stripNonEcsFields(filteredSource);
 
   const overrides = applyOverrides
     ? {
@@ -86,7 +88,7 @@ export const buildBulkBody = (
 
   if (isSourceDoc(mergedDoc)) {
     return {
-      ...filteredSource,
+      ...validatedSource,
       ...eventFields,
       ...buildAlert(
         [mergedDoc],
