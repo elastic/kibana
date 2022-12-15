@@ -48,6 +48,7 @@ export class FieldParamType extends BaseParamType {
         const field = aggConfig.getField();
 
         if (!field) {
+          if (config.required === false) return;
           throw new TypeError(
             i18n.translate('data.search.aggs.paramTypes.field.requiredFieldParameterErrorMessage', {
               defaultMessage: '{fieldParameter} is a required parameter',
