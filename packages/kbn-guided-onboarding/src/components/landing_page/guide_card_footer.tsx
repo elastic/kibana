@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiButton, EuiProgress, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +50,7 @@ export interface GuideCardFooterProps {
   guides: GuideState[];
   useCase: GuideCardUseCase;
   telemetryId: string;
-  activateGuide: (useCase: GuideCardUseCase, guideState?: GuideState) => void;
+  activateGuide: (useCase: GuideCardUseCase, guideState?: GuideState) => Promise<void>;
 }
 export const GuideCardFooter = ({
   guides,
@@ -59,14 +59,21 @@ export const GuideCardFooter = ({
   activateGuide,
 }: GuideCardFooterProps) => {
   const guideState = guides.find((guide) => guide.guideId === (useCase as GuideId));
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const activateGuideCallback = useCallback(async () => {
+    setIsLoading(true);
+    await activateGuide(useCase, guideState);
+    setIsLoading(false);
+  }, [activateGuide, guideState, useCase]);
   const viewGuideButton = (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem grow={false}>
         <EuiButton
+          isLoading={isLoading}
           // Used for FS tracking
           data-test-subj={`onboarding--guideCard--view--${telemetryId}`}
           fill
-          onClick={() => activateGuide(useCase, guideState)}
+          onClick={activateGuideCallback}
         >
           {viewGuideLabel}
         </EuiButton>
@@ -122,10 +129,11 @@ export const GuideCardFooter = ({
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiButton
+            isLoading={isLoading}
             // Used for FS tracking
             data-test-subj={`onboarding--guideCard--continue--${telemetryId}`}
             fill
-            onClick={() => activateGuide(useCase, guideState)}
+            onClick={activateGuideCallback}
           >
             {continueGuideLabel}
           </EuiButton>

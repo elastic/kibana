@@ -49,6 +49,57 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(lensWindowHandler);
     });
 
+    it('should show the open button if visualization has an annotation layer', async () => {
+      await PageObjects.lens.createLayer('annotations');
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
+      const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('unifiedHistogramChart');
+      const columns = await PageObjects.discover.getColumnHeaders();
+      expect(columns).to.eql(['@timestamp', 'extension.raw', 'bytes']);
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(lensWindowHandler);
+    });
+
+    it('should show the open button if visualization has a reference line layer', async () => {
+      await PageObjects.lens.createLayer('referenceLine');
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
+      const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('unifiedHistogramChart');
+      const columns = await PageObjects.discover.getColumnHeaders();
+      expect(columns).to.eql(['@timestamp', 'extension.raw', 'bytes']);
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(lensWindowHandler);
+    });
+
+    it('should not show the open button if visualization has multiple data layers', async () => {
+      await PageObjects.lens.createLayer();
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-3 > lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-3 > lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'median',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+
+      expect(await testSubjects.isEnabled(`lnsApp_openInDiscover`)).to.be(false);
+
+      for (const index of [3, 2, 1]) {
+        await PageObjects.lens.removeLayer(index);
+      }
+    });
+
     it('should ignore the top values column if other category is enabled', async () => {
       // Make the breakdown dimention be ignored
       await PageObjects.lens.openDimensionEditor(

@@ -12,7 +12,7 @@ import uuid from 'uuid';
 import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
-import { ExecutionHandler } from './execution_handler';
+import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
 import { Alert, createAlertFactory } from '../alert';
 import {
@@ -459,6 +459,8 @@ export class TaskRunner<
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
     });
 
+    let executionHandlerRunResult: RunResult = { throttledActions: {} };
+
     await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
       await rulesClient.clearExpiredSnoozes({ id: rule.id });
 
@@ -470,7 +472,10 @@ export class TaskRunner<
         );
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
-        await executionHandler.run({ ...activeAlerts, ...currentRecoveredAlerts });
+        executionHandlerRunResult = await executionHandler.run({
+          ...activeAlerts,
+          ...currentRecoveredAlerts,
+        });
       }
     });
 
@@ -486,6 +491,7 @@ export class TaskRunner<
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: alertsToReturn,
       alertRecoveredInstances: recoveredAlertsToReturn,
+      summaryActions: executionHandlerRunResult.throttledActions,
     };
   }
 
