@@ -61,38 +61,38 @@ const getProgress = (state?: GuideState): number => {
 };
 
 const errorSection = (
-    <EuiEmptyPrompt
-      data-test-subj="guideErrorSection"
-      iconType="alert"
-      color="danger"
-      title={
-        <h2>
-          {i18n.translate('guidedOnboarding.dropdownPanel.errorSectionTitle', {
-            defaultMessage: 'Unable to load the guide',
+  <EuiEmptyPrompt
+    data-test-subj="guideErrorSection"
+    iconType="alert"
+    color="danger"
+    title={
+      <h2>
+        {i18n.translate('guidedOnboarding.dropdownPanel.errorSectionTitle', {
+          defaultMessage: 'Unable to load the guide',
+        })}
+      </h2>
+    }
+    body={
+      <>
+        <EuiText color="subdued">
+          {i18n.translate('guidedOnboarding.dropdownPanel.errorSectionDescription', {
+            defaultMessage: `Wait a moment and try again. If the problem persists, contact your administrator.`,
           })}
-        </h2>
-      }
-      body={
-        <>
-          <EuiText color="subdued">
-            {i18n.translate('guidedOnboarding.dropdownPanel.errorSectionDescription', {
-              defaultMessage: `Wait a moment and try again. If the problem persists, contact your administrator.`,
-            })}
-          </EuiText>
-          <EuiSpacer />
-          <EuiButton
-            iconSide="right"
-            onClick={() => window.location.reload()}
-            iconType="refresh"
-            color="danger"
-          >
-            {i18n.translate('guidedOnboarding.dropdownPanel.errorSectionReloadButton', {
-              defaultMessage: 'Reload',
-            })}
-          </EuiButton>
-        </>
-      }
-    />
+        </EuiText>
+        <EuiSpacer />
+        <EuiButton
+          iconSide="right"
+          onClick={() => window.location.reload()}
+          iconType="refresh"
+          color="danger"
+        >
+          {i18n.translate('guidedOnboarding.dropdownPanel.errorSectionReloadButton', {
+            defaultMessage: 'Reload',
+          })}
+        </EuiButton>
+      </>
+    }
+  />
 );
 
 export const GuidePanel = ({ api, application, notifications }: GuidePanelProps) => {
@@ -219,17 +219,19 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
   const stepsCompleted = getProgress(pluginState?.activeGuide);
   const isGuideReadyToComplete = pluginState?.activeGuide?.status === 'ready_to_complete';
 
-  const backToGuidesButton = <EuiButtonEmpty
-    onClick={navigateToLandingPage}
-    iconSide="left"
-    iconType="arrowLeft"
-    flush="left"
-    color="text"
-  >
-    {i18n.translate('guidedOnboarding.dropdownPanel.backToGuidesLink', {
-      defaultMessage: 'Back to guides',
-    })}
-  </EuiButtonEmpty>;
+  const backToGuidesButton = (
+    <EuiButtonEmpty
+      onClick={navigateToLandingPage}
+      iconSide="left"
+      iconType="arrowLeft"
+      flush="left"
+      color="text"
+    >
+      {i18n.translate('guidedOnboarding.dropdownPanel.backToGuidesLink', {
+        defaultMessage: 'Back to guides',
+      })}
+    </EuiButtonEmpty>
+  );
   return (
     <>
       <div css={styles.setupButton}>
