@@ -12,7 +12,6 @@ import {
   IExecutionErrorsResult,
   IExecutionKPIResult,
 } from '@kbn/alerting-plugin/common';
-import { KueryNode } from '@kbn/es-query';
 import {
   Rule,
   RuleType,
@@ -22,7 +21,6 @@ import {
   ResolvedRule,
   SnoozeSchedule,
   BulkEditResponse,
-  BulkDeleteResponse,
   BulkOperationResponse,
   BulkOperationAttributesWithoutHttp,
 } from '../../../../types';
@@ -102,10 +100,7 @@ export interface ComponentOpts {
   unsnoozeRule: (rule: Rule, scheduleIds?: string[]) => Promise<void>;
   bulkUnsnoozeRules: (props: BulkUnsnoozeRulesProps) => Promise<BulkEditResponse>;
   cloneRule: (ruleId: string) => Promise<Rule>;
-  bulkDeleteRules: (props: {
-    filter?: KueryNode | null;
-    ids?: string[];
-  }) => Promise<BulkDeleteResponse>;
+  bulkDeleteRules: (props: BulkOperationAttributesWithoutHttp) => Promise<BulkOperationResponse>;
   bulkEnableRules: (props: BulkOperationAttributesWithoutHttp) => Promise<BulkOperationResponse>;
   bulkDisableRules: (props: BulkOperationAttributesWithoutHttp) => Promise<BulkOperationResponse>;
 }
@@ -212,7 +207,7 @@ export function withBulkRuleOperations<T>(
         cloneRule={async (ruleId: string) => {
           return await cloneRule({ http, ruleId });
         }}
-        bulkDeleteRules={async (bulkDeleteProps: { filter?: KueryNode | null; ids?: string[] }) => {
+        bulkDeleteRules={async (bulkDeleteProps: BulkOperationAttributesWithoutHttp) => {
           return await bulkDeleteRules({ http, ...bulkDeleteProps });
         }}
         bulkEnableRules={async (bulkEnableProps: BulkOperationAttributesWithoutHttp) => {
