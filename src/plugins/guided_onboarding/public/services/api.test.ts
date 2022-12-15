@@ -213,7 +213,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('returns undefined if the selected guide is not active', async () => {
-      const completedState = await apiService.completeGuide('observability'); // not active
+      const completedState = await apiService.completeGuide('kubernetes'); // not active
       expect(completedState).not.toBeDefined();
     });
 
@@ -282,7 +282,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('returns undefined if the selected guide is not active', async () => {
-      const startState = await apiService.startGuideStep('observability', 'add_data'); // not active
+      const startState = await apiService.startGuideStep('kubernetes', 'add_data'); // not active
       expect(startState).not.toBeDefined();
     });
   });
@@ -400,7 +400,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('returns undefined if the selected guide is not active', async () => {
-      const startState = await apiService.completeGuideStep('observability', 'add_data'); // not active
+      const startState = await apiService.completeGuideStep('kubernetes', 'add_data'); // not active
       expect(startState).not.toBeDefined();
     });
   });
