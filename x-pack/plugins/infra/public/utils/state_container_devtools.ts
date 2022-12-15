@@ -7,13 +7,14 @@
 
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/public';
 import { EnhancerOptions } from 'redux-devtools-extension';
+import { getReduxDevtools, hasReduxDevtools, isDevMode } from './dev_mode';
 
 export const withReduxDevTools = <StateContainer extends ReduxLikeStateContainer<any>>(
   stateContainer: StateContainer,
   config?: EnhancerOptions
 ): StateContainer => {
-  if (process.env.NODE_ENV !== 'production' && (window as any).__REDUX_DEVTOOLS_EXTENSION__) {
-    const devToolsExtension = (window as any).__REDUX_DEVTOOLS_EXTENSION__;
+  if (isDevMode() && hasReduxDevtools()) {
+    const devToolsExtension = getReduxDevtools();
 
     const devToolsInstance = devToolsExtension.connect({
       ...config,
