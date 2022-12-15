@@ -142,7 +142,7 @@ export async function getAgentStatusForAgentPolicy(
     other: 0,
     /* @deprecated Agent events do not exists anymore */
     events: 0,
-    total: Object.values(statuses).reduce((acc, val) => acc + val, 0),
+    total: Object.values(statuses).reduce((acc, val) => acc + val, 0) - combinedStatuses.unenrolled,
   };
 }
 export async function getIncomingDataByAgentsId(

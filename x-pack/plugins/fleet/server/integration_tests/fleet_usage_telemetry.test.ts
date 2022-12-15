@@ -147,7 +147,7 @@ describe('fleet usage telemetry', () => {
         },
         {
           create: {
-            _id: 'inactive',
+            _id: 'unenrolled',
           },
         },
         {
@@ -156,7 +156,7 @@ describe('fleet usage telemetry', () => {
           },
           last_checkin_status: 'online',
           last_checkin: '2021-11-21T12:27:24Z',
-          active: false,
+          unenrolled_at: '2021-11-21T12:27:24Z',
           policy_id: 'policy1',
         },
       ],
@@ -251,7 +251,9 @@ describe('fleet usage telemetry', () => {
           total_enrolled: 2,
           healthy: 0,
           unhealthy: 0,
-          offline: 2,
+          inactive: 2,
+          unenrolled: 1,
+          offline: 0,
           total_all_statuses: 3,
           updating: 0,
         },
