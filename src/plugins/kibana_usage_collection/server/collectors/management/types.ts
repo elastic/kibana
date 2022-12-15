@@ -153,6 +153,5 @@ export interface UsageStats {
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
-  'enterpriseSearch:enableBehavioralAnalyticsSection': boolean;
   'enterpriseSearch:enableEnginesSection': boolean;
 }
