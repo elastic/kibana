@@ -70,8 +70,9 @@ describe('fetch_index_info', () => {
     it('returns field candidates and total hits', async () => {
       const esClientFieldCapsMock = jest.fn(() => ({
         fields: {
-          myIpFieldName: { ip: {} },
-          myKeywordFieldName: { keyword: {} },
+          myIpFieldName: { ip: { aggregatable: true } },
+          myKeywordFieldName: { keyword: { aggregatable: true } },
+          myKeywordFieldNameToBeIgnored: { keyword: { aggregatable: false } },
           myUnpopulatedKeywordFieldName: { keyword: {} },
           myNumericFieldName: { number: {} },
         },
