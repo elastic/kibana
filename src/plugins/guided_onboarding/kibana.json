@@ -10,5 +10,6 @@
   "server": true,
   "ui": true,
   "requiredBundles": ["kibanaReact"],
-  "optionalPlugins": ["cloud"]
+  "optionalPlugins": ["cloud"],
+  "configPath": ["guidedOnboarding"]
 }
