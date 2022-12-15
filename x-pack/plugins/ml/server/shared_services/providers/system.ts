@@ -76,7 +76,7 @@ export function getMlSystemProvider(
         ): Promise<estypes.SearchResponse<T>> {
           return await guards
             .isFullLicense()
-            .hasMlCapabilities(['canAccessML'])
+            .hasMlCapabilities(['canGetJobs'])
             .ok(async ({ mlClient }) => {
               return await mlClient.anomalySearch<T>(searchParams, jobIds);
             });

@@ -100,4 +100,20 @@ describe('APIKeysAPIClient', () => {
       body: JSON.stringify(mockAPIKeys),
     });
   });
+
+  it('updateApiKey() queries correct endpoint', async () => {
+    const httpMock = httpServiceMock.createStartContract();
+
+    const mockResponse = Symbol('mockResponse');
+    httpMock.put.mockResolvedValue(mockResponse);
+
+    const apiClient = new APIKeysAPIClient(httpMock);
+    const mockApiKeyUpdate = { id: 'test_id', metadata: {}, roles_descriptor: {} };
+
+    await expect(apiClient.updateApiKey(mockApiKeyUpdate)).resolves.toBe(mockResponse);
+    expect(httpMock.put).toHaveBeenCalledTimes(1);
+    expect(httpMock.put).toHaveBeenCalledWith('/internal/security/api_key', {
+      body: JSON.stringify(mockApiKeyUpdate),
+    });
+  });
 });

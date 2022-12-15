@@ -14,12 +14,12 @@ import { SLO } from '../../../../typings';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 
 interface Props {
-  onSelected: (slo: SLO) => void;
+  onSelected: (slo: SLO | undefined) => void;
 }
 
 function SloSelector({ onSelected }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
-  const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>();
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
   const { loading, sloList } = useFetchSloList(searchValue);
 
@@ -32,14 +32,10 @@ function SloSelector({ onSelected }: Props) {
   }, [loading, sloList]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
-    setSelected(opts);
-    if (opts.length === 1) {
-      const sloId = opts[0].value;
-      const selectedSlo = sloList.results.find((slo) => slo.id === sloId);
-      if (selectedSlo !== undefined) {
-        onSelected(selectedSlo);
-      }
-    }
+    setSelectedOptions(opts);
+    const selectedSlo =
+      opts.length === 1 ? sloList.results.find((slo) => slo.id === opts[0].value) : undefined;
+    onSelected(selectedSlo);
   };
 
   const onSearchChange = useMemo(() => debounce((value: string) => setSearchValue(value), 300), []);
@@ -59,6 +55,7 @@ function SloSelector({ onSelected }: Props) {
       async
       isLoading={loading}
       onChange={onChange}
+      fullWidth
       onSearchChange={onSearchChange}
     />
   );
