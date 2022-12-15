@@ -236,16 +236,21 @@ export class AlertingPlugin {
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 
-    this.alertsService = new AlertsService({
-      logger: this.logger,
-      pluginStop$: this.pluginStop$,
-      elasticsearchClientPromise: core
-        .getStartServices()
-        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
-    });
-    this.alertsService!.initialize().catch((err) => {
-      this.logger.error(`Error initializing alert resources! - ${err.message}`);
-    });
+    if (this.config.enableFrameworkAlerts) {
+      this.alertsService = new AlertsService({
+        logger: this.logger,
+        pluginStop$: this.pluginStop$,
+        elasticsearchClientPromise: core
+          .getStartServices()
+          .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      });
+      // TODO - should an initialization failure throw an error?
+      // we do retry all resource installation steps but if all the retries fail
+      // do we just disable alerts writing?
+      this.alertsService!.initialize().catch((err) => {
+        this.logger.error(`Error initializing alert resources! - ${err.message}`);
+      });
+    }
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {

@@ -27,6 +27,7 @@ import {
   INDEX_TEMPLATE_NAME,
   INITIAL_ALERTS_INDEX_NAME,
 } from './types';
+import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 const componentTemplatesToInstall = [
   {
@@ -75,7 +76,7 @@ export class AlertsService implements IAlertsService {
     this.initialized = false;
   }
 
-  public async initialize() {
+  public async initialize(timeoutMs?: number) {
     // Only initialize once
     if (this.initialized) return;
     this.initialized = true;
@@ -84,13 +85,14 @@ export class AlertsService implements IAlertsService {
 
     const esClient = await this.options.elasticsearchClientPromise;
 
-    await this.installWithTimeoutAndRetry(esClient, this.createOrUpdateIlmPolicy.bind(this));
-    await this.installWithTimeoutAndRetry(
+    await this.installWithTimeout(esClient, this.createOrUpdateIlmPolicy.bind(this), timeoutMs);
+    await this.installWithTimeout(
       esClient,
-      this.createOrUpdateComponentTemplates.bind(this)
+      this.createOrUpdateComponentTemplates.bind(this),
+      timeoutMs
     );
-    await this.installWithTimeoutAndRetry(esClient, this.createOrUpdateIndexTemplate.bind(this));
-    await this.installWithTimeoutAndRetry(esClient, this.createConcreteWriteIndex.bind(this));
+    await this.installWithTimeout(esClient, this.createOrUpdateIndexTemplate.bind(this), timeoutMs);
+    await this.installWithTimeout(esClient, this.createConcreteWriteIndex.bind(this), timeoutMs);
   }
 
   /**
@@ -100,10 +102,14 @@ export class AlertsService implements IAlertsService {
     this.options.logger.info(`Installing ILM policy ${ILM_POLICY_NAME}`);
 
     try {
-      await esClient.ilm.putLifecycle({
-        name: ILM_POLICY_NAME,
-        body: DEFAULT_ILM_POLICY,
-      });
+      await retryTransientEsErrors(
+        () =>
+          esClient.ilm.putLifecycle({
+            name: ILM_POLICY_NAME,
+            body: DEFAULT_ILM_POLICY,
+          }),
+        { logger: this.options.logger }
+      );
     } catch (err) {
       this.options.logger.error(`Error installing ILM policy ${ILM_POLICY_NAME} - ${err.message}`);
       throw err;
@@ -137,7 +143,9 @@ export class AlertsService implements IAlertsService {
     this.options.logger.info(`Installing component template ${template.name}`);
 
     try {
-      await esClient.cluster.putComponentTemplate(template);
+      await retryTransientEsErrors(() => esClient.cluster.putComponentTemplate(template), {
+        logger: this.options.logger,
+      });
     } catch (err) {
       this.options.logger.error(
         `Error installing component template ${template.name} - ${err.message}`
@@ -200,7 +208,9 @@ export class AlertsService implements IAlertsService {
     }
 
     try {
-      await esClient.indices.putIndexTemplate(indexTemplate);
+      await retryTransientEsErrors(() => esClient.indices.putIndexTemplate(indexTemplate), {
+        logger: this.options.logger,
+      });
     } catch (err) {
       this.options.logger.error(
         `Error installing index template ${INDEX_TEMPLATE_NAME} - ${err.message}`
@@ -235,12 +245,18 @@ export class AlertsService implements IAlertsService {
     { index, alias }: ConcreteIndexInfo
   ) {
     try {
-      await esClient.indices.putSettings({
-        index,
-        body: {
-          'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
-        },
-      });
+      await retryTransientEsErrors(
+        () =>
+          esClient.indices.putSettings({
+            index,
+            body: {
+              'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
+            },
+          }),
+        {
+          logger: this.options.logger,
+        }
+      );
       return;
     } catch (err) {
       this.options.logger.error(
@@ -276,10 +292,17 @@ export class AlertsService implements IAlertsService {
     }
 
     try {
-      await esClient.indices.putMapping({
-        index,
-        body: simulatedMapping,
-      });
+      await retryTransientEsErrors(
+        () =>
+          esClient.indices.putMapping({
+            index,
+            body: simulatedMapping,
+          }),
+        {
+          logger: this.options.logger,
+        }
+      );
+
       return;
     } catch (err) {
       this.options.logger.error(`Failed to PUT mapping for alias ${alias}: ${err.message}`);
@@ -342,16 +365,22 @@ export class AlertsService implements IAlertsService {
     // check if a concrete write index already exists
     if (!concreteWriteIndicesExist) {
       try {
-        await esClient.indices.create({
-          index: INITIAL_ALERTS_INDEX_NAME,
-          body: {
-            aliases: {
-              [DEFAULT_ALERTS_INDEX]: {
-                is_write_index: true,
+        await retryTransientEsErrors(
+          () =>
+            esClient.indices.create({
+              index: INITIAL_ALERTS_INDEX_NAME,
+              body: {
+                aliases: {
+                  [DEFAULT_ALERTS_INDEX]: {
+                    is_write_index: true,
+                  },
+                },
               },
-            },
-          },
-        });
+            }),
+          {
+            logger: this.options.logger,
+          }
+        );
       } catch (error) {
         this.options.logger.error(`Error creating concrete write index - ${error.message}`);
         // If the index already exists and it's the write index for the alias,
@@ -376,9 +405,10 @@ export class AlertsService implements IAlertsService {
     }
   }
 
-  private async installWithTimeoutAndRetry(
+  private async installWithTimeout(
     esClient: ElasticsearchClient,
-    installFn: (esClient: ElasticsearchClient) => Promise<void>
+    installFn: (esClient: ElasticsearchClient) => Promise<void>,
+    timeoutMs: number = INSTALLATION_TIMEOUT
   ): Promise<void> {
     try {
       let timeoutId: NodeJS.Timeout;
@@ -392,9 +422,9 @@ export class AlertsService implements IAlertsService {
       const throwTimeoutException = (): Promise<void> => {
         return new Promise((resolve, reject) => {
           timeoutId = setTimeout(() => {
-            const msg = `Timeout: it took more than ${INSTALLATION_TIMEOUT}ms`;
+            const msg = `Timeout: it took more than ${timeoutMs}ms`;
             reject(new Error(msg));
-          }, INSTALLATION_TIMEOUT);
+          }, timeoutMs);
 
           firstValueFrom(this.options.pluginStop$).then(() => {
             clearTimeout(timeoutId);

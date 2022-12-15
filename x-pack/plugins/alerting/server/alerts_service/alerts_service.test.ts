@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
 import { AlertsService } from './alerts_service';
 
@@ -106,7 +107,7 @@ describe('Alerts Service', () => {
     jest.resetAllMocks();
     logger = loggingSystemMock.createLogger();
     pluginStop$ = new ReplaySubject(1);
-
+    jest.spyOn(global.Math, 'random').mockReturnValue(0.01);
     clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
     clusterClient.indices.simulateIndexTemplate.mockImplementation(
       async () => SimulateTemplateResponse
@@ -600,6 +601,131 @@ describe('Alerts Service', () => {
       expect(clusterClient.indices.putMapping).toHaveBeenCalled();
       expect(clusterClient.indices.get).toHaveBeenCalled();
       expect(clusterClient.indices.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('retries', () => {
+    test('should retry adding ILM policy for transient ES errors', async () => {
+      clusterClient.ilm.putLifecycle
+        .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+        .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+        .mockResolvedValue({ acknowledged: true });
+      const alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      await alertsService.initialize();
+      expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(3);
+    });
+
+    test('should retry adding component template for transient ES errors', async () => {
+      clusterClient.cluster.putComponentTemplate
+        .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+        .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+        .mockResolvedValue({ acknowledged: true });
+      const alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      await alertsService.initialize();
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+    });
+
+    test('should retry updating index template for transient ES errors', async () => {
+      clusterClient.indices.putIndexTemplate
+        .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+        .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+        .mockResolvedValue({ acknowledged: true });
+      const alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      await alertsService.initialize();
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
+    });
+
+    test('should retry updating index settings for existing indices for transient ES errors', async () => {
+      clusterClient.indices.putSettings
+        .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+        .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+        .mockResolvedValue({ acknowledged: true });
+      const alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      await alertsService.initialize();
+      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
+    });
+
+    test('should retry updating index mappings for existing indices for transient ES errors', async () => {
+      clusterClient.indices.putMapping
+        .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+        .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+        .mockResolvedValue({ acknowledged: true });
+      const alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      await alertsService.initialize();
+      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(4);
+    });
+
+    test('should retry creating concrete index for transient ES errors', async () => {
+      clusterClient.indices.create
+        .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+        .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+        .mockResolvedValue({ index: 'index', shards_acknowledged: true, acknowledged: true });
+      const alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      await alertsService.initialize();
+      expect(clusterClient.indices.create).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('timeout', () => {
+    test('should short circuit initialization if timeout exceeded', async () => {
+      clusterClient.ilm.putLifecycle.mockImplementationOnce(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        return { acknowledged: true };
+      });
+      const alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      await expect(alertsService.initialize(10)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure during installation. Timeout: it took more than 10ms"`
+      );
+    });
+
+    test('should short circuit initialization if pluginStop$ signal received but not throw error', async () => {
+      pluginStop$.next();
+      const alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      await alertsService.initialize();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        new Error(`Server is stopping; must stop all async operations`)
+      );
     });
   });
 });
