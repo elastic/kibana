@@ -10,14 +10,14 @@ import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { DataTableRecord } from '../../../../types';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
+import type { InspectorAdapters } from '../../hooks/use_inspector';
 
 export interface DiscoverLayoutProps {
-  inspectorAdapters: { requests: RequestAdapter };
+  inspectorAdapters: InspectorAdapters;
   navigateTo: (url: string) => void;
   onChangeDataView: (id: string) => void;
   onUpdateQuery: (

@@ -36,7 +36,7 @@ export function useDiscoverState({
   history,
   savedSearch,
   setExpandedDoc,
-  dataViewList: initialDataViewList,
+  dataViewList,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
@@ -167,7 +167,7 @@ export function useDiscoverState({
     documents$: data$.documents$,
     dataViews,
     stateContainer,
-    dataViewList: initialDataViewList,
+    dataViewList,
     savedSearch,
   });
 

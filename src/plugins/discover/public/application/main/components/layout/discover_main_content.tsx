@@ -52,8 +52,7 @@ export const DiscoverMainContent = ({
   stateContainer,
   savedSearch,
 }: DiscoverMainContentProps) => {
-  const services = useDiscoverServices();
-  const { trackUiMetric } = services;
+  const { trackUiMetric } = useDiscoverServices();
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
