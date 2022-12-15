@@ -11,6 +11,7 @@ import { EuiPopover, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { Action } from '../../actions';
 import { ActionItem } from './cell_action_item';
 import { ExtraActionsButton } from './extra_actions_button';
@@ -49,7 +50,7 @@ export const HoverActionsPopover = React.memo<Props>(
     const [showHoverContent, setShowHoverContent] = useState(false);
     const [, setHoverTimeout] = useState<number | undefined>(undefined);
     const popoverRef = useRef<EuiPopover>(null);
-    const [actions, setActions] = useState<Action[] | null>(null);
+    const [{ value: actions }, loadActions] = useAsyncFn(getActions, [getActions]);
 
     const { visibleActions, extraActions } = useMemo(
       () => partitionActions(actions ?? [], showMoreActionsFrom),
@@ -79,8 +80,8 @@ export const HoverActionsPopover = React.memo<Props>(
       if (isExtraActionsPopoverOpen) return;
 
       // memoize actions after the first call
-      if (actions === null) {
-        getActions().then((newActions) => setActions(newActions));
+      if (actions === undefined) {
+        loadActions();
       }
 
       setHoverTimeout(
@@ -95,7 +96,7 @@ export const HoverActionsPopover = React.memo<Props>(
           }, HOVER_INTENT_DELAY)
         )
       );
-    }, [isExtraActionsPopoverOpen, actions, getActions]);
+    }, [isExtraActionsPopoverOpen, actions, loadActions]);
 
     const onMouseLeave = useCallback(() => {
       closePopover();

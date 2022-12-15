@@ -29,7 +29,7 @@ export const usePartitionActions = (
   getActions: () => Promise<Action[]>,
   showMoreActionsFrom: number
 ): PartitionedActions & { loading: boolean } => {
-  const { value: allActions, loading } = useAsync(() => getActions(), []);
+  const { value: allActions, loading } = useAsync(getActions, []);
 
   return useMemo(() => {
     if (loading) {
