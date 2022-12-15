@@ -46,15 +46,26 @@ function _buildSource(inactivityTimeouts: InactivityTimeouts, pathPrefix?: strin
       ? ${field('last_checkin')}.value.toInstant().toEpochMilli() 
       : -1;
     if (${field('unenrolled_at')}.size() > 0) { 
-        emit('unenrolled'); 
+      emit('unenrolled'); 
     } else if (${_buildInactiveClause(now, inactivityTimeouts, field)}) {
-        emit('inactive');
+      emit('inactive');
     } else if (
         lastCheckinMillis > 0 
         && lastCheckinMillis 
         < (${now - MS_BEFORE_OFFLINE}L)
     ) { 
-        emit('offline'); 
+      emit('offline'); 
+    } else if (
+      ${field('policy_revision_idx')}.size() == 0 || (
+        ${field('upgrade_started_at')}.size() > 0 &&
+        ${field('upgraded_at')}.size() == 0
+      )
+    ) { 
+      emit('updating'); 
+    } else if (${field('last_checkin')}.size() == 0) {
+      emit('enrolling'); 
+    } else if (${field('unenrollment_started_at')}.size() > 0) {
+      emit('unenrolling'); 
     } else if (
       ${field('last_checkin_status')}.size() > 0 &&
       ${field('last_checkin_status')}.value.toLowerCase() == 'error'
@@ -64,20 +75,9 @@ function _buildSource(inactivityTimeouts: InactivityTimeouts, pathPrefix?: strin
       ${field('last_checkin_status')}.size() > 0 &&
       ${field('last_checkin_status')}.value.toLowerCase() == 'degraded'
     ) { 
-        emit('degraded');
-    } else if (
-      ${field('policy_revision_idx')}.size() == 0 || (
-        ${field('upgrade_started_at')}.size() > 0 &&
-        ${field('upgraded_at')}.size() == 0
-      )
-    ) { 
-        emit('updating'); 
-    } else if (${field('last_checkin')}.size() == 0) {
-        emit('enrolling'); 
-    } else if (${field('unenrollment_started_at')}.size() > 0) {
-        emit('unenrolling'); 
+      emit('degraded');
     } else { 
-        emit('online'); 
+      emit('online'); 
     }
     `.replace(/(\n|\s{4})/g, ''); // condense source to single line
 }
