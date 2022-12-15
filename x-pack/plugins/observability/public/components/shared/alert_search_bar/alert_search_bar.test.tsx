@@ -8,27 +8,13 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
-import { useServices } from './services';
 import { ObservabilityAlertSearchBarProps } from './types';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
 import { observabilityAlertFeatureIds } from '../../../config';
 import { render } from '../../../utils/test_helper';
 
-const useServicesMock = useServices as jest.Mock;
 const getAlertsSearchBarMock = jest.fn();
 const ALERT_SEARCH_BAR_DATA_TEST_SUBJ = 'alerts-search-bar';
-
-jest.mock('./services');
-
-const mockServices = () => {
-  useServicesMock.mockReturnValue({
-    timeFilterService: timefilterServiceMock,
-    AlertsSearchBar: getAlertsSearchBarMock.mockReturnValue(
-      <div data-test-subj={ALERT_SEARCH_BAR_DATA_TEST_SUBJ} />
-    ),
-    useToasts: jest.fn(),
-  });
-};
 
 describe('ObservabilityAlertSearchBar', () => {
   const renderComponent = (props: Partial<ObservabilityAlertSearchBarProps> = {}) => {
@@ -43,14 +29,17 @@ describe('ObservabilityAlertSearchBar', () => {
       rangeTo: 'now',
       rangeFrom: 'now-15m',
       status: 'all',
+      services: {
+        timeFilterService: timefilterServiceMock.createStartContract().timefilter,
+        AlertsSearchBar: getAlertsSearchBarMock.mockReturnValue(
+          <div data-test-subj={ALERT_SEARCH_BAR_DATA_TEST_SUBJ} />
+        ),
+        useToasts: jest.fn(),
+      },
       ...props,
     };
     return render(<ObservabilityAlertSearchBar {...observabilityAlertSearchBarProps} />);
   };
-
-  beforeAll(() => {
-    mockServices();
-  });
 
   beforeEach(() => {
     jest.clearAllMocks();
