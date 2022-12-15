@@ -7,10 +7,11 @@
 
 import { useHostTable } from './use_host_table';
 import { renderHook } from '@testing-library/react-hooks';
+import { SnapshotNode } from '../../../../../common/http_api';
 
 describe('useHostTable hook', () => {
   it('it should map the nodes returned from the snapshot api to a format matching eui table items', () => {
-    const nodes = [
+    const nodes: SnapshotNode[] = [
       {
         metrics: [
           {
