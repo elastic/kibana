@@ -33,6 +33,10 @@ export const responsesHelp = i18n.translate('xpack.cloudDefend.controlResponsesH
     'Responses are evaluated from top to bottom. At most, one set of actions will be performed.',
 });
 
+export const addSelector = i18n.translate('xpack.cloudDefend.addSelector', {
+  defaultMessage: 'Add selector',
+});
+
 export const addSelectorCondition = i18n.translate('xpack.cloudDefend.addSelectorCondition', {
   defaultMessage: 'Add condition',
 });

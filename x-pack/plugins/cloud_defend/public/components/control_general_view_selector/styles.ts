@@ -7,13 +7,21 @@
 
 import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 
 export const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const { colors, size, border } = euiTheme;
+
   return useMemo(() => {
-    const yamlEditor: CSSObject = {
-      height: '400px',
+    const accordion: CSSObject = {
+      borderRadius: border.radius.small,
+      backgroundColor: colors.lightestShade,
+      '> .euiAccordion__triggerWrapper': {
+        padding: size.m,
+      },
     };
 
-    return { yamlEditor };
-  }, []);
+    return { accordion };
+  }, [border.radius.small, colors.lightestShade, size.m]);
 };

@@ -25,11 +25,6 @@ export enum ControlResponseAction {
   'block',
 }
 
-export enum ControlSelectorActivity {
-  'createExecutable',
-  'modifyExecutable',
-}
-
 export enum ControlSelectorCondition {
   activity = 'activity',
   containerImageName = 'containerImageName',
@@ -44,7 +39,13 @@ export enum ControlSelectorCondition {
   orchestratorType = 'orchestratorType',
 }
 
-export const ControlSelectorConditionUIOptions = {
+export interface ControlSelectorConditionUIOptions {
+  [key: string]: {
+    values: string[];
+  };
+}
+
+export const ControlSelectorConditionUIOptionsMap: ControlSelectorConditionUIOptions = {
   activity: { values: ['createExecutable', 'modifyExecutable'] },
 };
 
@@ -71,6 +72,11 @@ export interface ControlResponse {
   exclude: ControlSelector[];
   actions: ControlResponseAction[];
 }
+
+export const DefaultSelector: ControlSelector = {
+  name: 'Untitled',
+  activity: ControlSelectorConditionUIOptionsMap.activity.values,
+};
 
 interface OnChangeDeps {
   isValid: boolean;

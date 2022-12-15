@@ -16,13 +16,16 @@ import {
   EuiFieldText,
   EuiComboBox,
   EuiButtonEmpty,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import {
   ControlGeneralViewSelectorDeps,
   ControlFormErrorMap,
   ControlSelectorCondition,
-  ControlSelectorConditionUIOptions,
+  ControlSelectorConditionUIOptionsMap,
 } from '../../types';
 import { getControlSelectorValueForProp, setControlSelectorValueForProp } from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
@@ -100,8 +103,19 @@ export const ControlGeneralViewSelector = ({
   const onAddCondition = useCallback(
     (prop: string) => {
       setControlSelectorValueForProp(prop, [], selector);
+      onChange(selector);
+      closeAddCondition();
     },
-    [selector]
+    [closeAddCondition, onChange, selector]
+  );
+
+  const onRemoveCondition = useCallback(
+    (prop: string) => {
+      delete (selector as any)[prop];
+      onChange(selector);
+      closeAddCondition();
+    },
+    [closeAddCondition, onChange, selector]
   );
 
   const onChangeCondition = useCallback(
@@ -137,11 +151,14 @@ export const ControlGeneralViewSelector = ({
     );
   }, [selector]);
 
+  const conditionsAdded = Object.keys(ControlSelectorCondition).length - remainingProps.length;
+
   return (
     <EuiAccordion
       id={selector.name}
-      paddingSize="l"
+      paddingSize="m"
       buttonContent={selector.name}
+      css={styles.accordion}
       extraAction={
         <EuiPopover
           id={selector.name}
@@ -166,8 +183,9 @@ export const ControlGeneralViewSelector = ({
       }
     >
       <EuiForm component="form" error={errors} isInvalid={errors.length > 0}>
-        <EuiFormRow label={i18n.name}>
+        <EuiFormRow label={i18n.name} fullWidth={true}>
           <EuiFieldText
+            fullWidth={true}
             name="name"
             value={selector.name}
             onChange={onNameChange}
@@ -182,36 +200,46 @@ export const ControlGeneralViewSelector = ({
               }) || [];
 
             const label = i18n.getConditionLabel(prop);
-            const restrictedValues =
-              ControlSelectorConditionUIOptions[prop as ControlSelectorCondition]?.values;
+            const restrictedValues = ControlSelectorConditionUIOptionsMap[prop]?.values;
 
             return (
-              <EuiFormRow label={label}>
-                <EuiComboBox
-                  aria-label={label}
-                  onCreateOption={
-                    !restrictedValues
-                      ? (searchValue) => onAddValueToCondition(prop, searchValue)
-                      : undefined
-                  }
-                  selectedOptions={selectedOptions}
-                  options={
-                    restrictedValues
-                      ? restrictedValues.map((value: string) => ({ label: value, value }))
-                      : selectedOptions
-                  }
-                  onChange={(options) =>
-                    onChangeCondition(prop, options.map((option) => option.value) as string[])
-                  }
-                  isClearable={true}
-                  data-test-subj={'condition-' + prop}
-                />
+              <EuiFormRow label={label} fullWidth={true}>
+                <EuiFlexGroup alignItems="center">
+                  <EuiComboBox
+                    aria-label={label}
+                    fullWidth={true}
+                    onCreateOption={
+                      !restrictedValues
+                        ? (searchValue) => onAddValueToCondition(prop, searchValue)
+                        : undefined
+                    }
+                    selectedOptions={selectedOptions}
+                    options={
+                      restrictedValues
+                        ? restrictedValues.map((value: string) => ({ label: value, value }))
+                        : selectedOptions
+                    }
+                    onChange={(options) =>
+                      onChangeCondition(prop, options.map((option) => option.value) as string[])
+                    }
+                    isClearable={true}
+                    data-test-subj={'condition-' + prop}
+                  />
+                  <EuiFlexItem>
+                    <EuiButtonIcon
+                      disabled={conditionsAdded < 2}
+                      iconType="trash"
+                      color="danger"
+                      onClick={() => onRemoveCondition(prop)}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFormRow>
             );
           }
         })}
       </EuiForm>
-
+      <EuiSpacer size="m" />
       <EuiPopover
         id="cloudDefendControlAddCondition"
         button={

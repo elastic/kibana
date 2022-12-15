@@ -5,12 +5,12 @@
  * 2.0.
  */
 import React, { useMemo, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiButton } from '@elastic/eui';
 import yaml from 'js-yaml';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import { getInputFromPolicy } from '../../common/utils';
-import type { ControlSelector, ControlResponse, SettingsDeps } from '../../types';
+import { ControlSelector, ControlResponse, SettingsDeps, DefaultSelector } from '../../types';
 import * as i18n from './translations';
 import { ControlGeneralViewSelector } from '../control_general_view_selector';
 import { ControlGeneralViewResponse } from '../control_general_view_response';
@@ -46,20 +46,45 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
     [input?.vars?.configuration, onChange, policy]
   );
 
+  const incrementName = useCallback(
+    (name: string): string => {
+      // increment name using ints
+      const lastChar = parseInt(name.slice(-1), 10);
+      const newName = isNaN(lastChar) ? name + '1' : name.slice(0, -1) + (lastChar + 1);
+      const dupe = selectors.find((selector) => selector.name === newName);
+
+      if (dupe) {
+        return incrementName(dupe.name);
+      }
+
+      return newName;
+    },
+    [selectors]
+  );
+
+  const onAddSelector = useCallback(() => {
+    const newSelector = { ...DefaultSelector };
+    const dupe = selectors.find((selector) => selector.name === newSelector.name);
+
+    if (dupe) {
+      newSelector.name = incrementName(dupe.name);
+    }
+
+    selectors.push(newSelector);
+    onUpdateYaml(selectors, responses);
+  }, [incrementName, onUpdateYaml, responses, selectors]);
+
   const onDuplicateSelector = useCallback(
     (selector: ControlSelector) => {
       const duplicate = { ...selector };
 
-      // increment name using ints
-      const lastChar = parseInt(duplicate.name.slice(-1), 10);
-      duplicate.name = isNaN(lastChar)
-        ? duplicate.name + '1'
-        : duplicate.name.slice(0, -1) + (lastChar + 1);
+      duplicate.name = incrementName(duplicate.name);
+
       selectors.push(duplicate);
 
       onUpdateYaml(selectors, responses);
     },
-    [onUpdateYaml, responses, selectors]
+    [incrementName, onUpdateYaml, responses, selectors]
   );
 
   const onRemoveSelector = useCallback(
@@ -126,6 +151,9 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
           </EuiFlexItem>
         );
       })}
+      <EuiButton fullWidth color="primary" iconType="plusInCircle" onClick={onAddSelector}>
+        {i18n.addSelector}
+      </EuiButton>
 
       <EuiFlexItem>
         <EuiTitle size="xs">
