@@ -219,7 +219,9 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
         break;
 
       case 'inactive':
-        fleetServerAgent.active = false;
+        // default inactive timeout is 10 minutes
+        // https://github.com/hop-dev/kibana/blob/main/x-pack/plugins/fleet/server/services/agents/build_status_runtime_field.ts#L13
+        fleetServerAgent.last_checkin = moment().subtract(10, 'minutes').toISOString();
         break;
 
       case 'offline':

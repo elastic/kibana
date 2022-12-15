@@ -7,6 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { buildAgentStatusRuntimeField } from '@kbn/fleet-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
@@ -205,6 +207,8 @@ interface BuildUnitedIndexQueryResponse {
     query: Record<string, unknown>;
     track_total_hits: boolean;
     sort: estypes.SortCombinations[];
+    runtime_mappings: Record<string, unknown>;
+    fields?: string[];
   };
   from: number;
   size: number;
@@ -212,6 +216,7 @@ interface BuildUnitedIndexQueryResponse {
 }
 
 export async function buildUnitedIndexQuery(
+  soClient: SavedObjectsClientContract,
   queryOptions: GetMetadataListRequestQuery,
   endpointPolicyIds: string[] = []
 ): Promise<BuildUnitedIndexQueryResponse> {
@@ -273,11 +278,15 @@ export async function buildUnitedIndexQuery(
     };
   }
 
+  const runtimeMappings = await buildAgentStatusRuntimeField(soClient, 'united.agent.');
+  const fields = Object.keys(runtimeMappings);
   return {
     body: {
       query,
       track_total_hits: true,
       sort: MetadataSortMethod,
+      fields,
+      runtime_mappings: runtimeMappings,
     },
     from: page * pageSize,
     size: pageSize,

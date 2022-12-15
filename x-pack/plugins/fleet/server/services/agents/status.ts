@@ -23,10 +23,8 @@ import { FleetUnauthorizedError } from '../../errors';
 
 import { appContextService } from '../app_context';
 
-import { agentPolicyService } from '../agent_policy';
-
 import { getAgentById, removeSOAttributes } from './crud';
-import { buildStatusRuntimeQuery } from './build_status_query';
+import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 
 interface AggregationsStatusTermsBucketKeys extends AggregationsTermsBucketBase {
   key: AgentStatus;
@@ -51,8 +49,7 @@ export async function getAgentStatusForAgentPolicy(
   filterKuery?: string
 ) {
   const logger = appContextService.getLogger();
-  const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts(soClient);
-  const runtimeFields = buildStatusRuntimeQuery(inactivityTimeouts);
+  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
 
   const clauses: QueryDslQueryContainer[] = [];
 

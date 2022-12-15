@@ -6,21 +6,26 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { AGENT_POLLING_THRESHOLD_MS } from '../../constants';
-import type { agentPolicyService } from '../agent_policy';
+import { agentPolicyService } from '../agent_policy';
 const DEFAULT_MS_BEFORE_INACTIVE = 10 * 60 * 1000; // 10 minutes
 const MISSED_INTERVALS_BEFORE_OFFLINE = 10;
 const MS_BEFORE_OFFLINE = MISSED_INTERVALS_BEFORE_OFFLINE * AGENT_POLLING_THRESHOLD_MS;
 
 type InactivityTimeouts = Awaited<ReturnType<typeof agentPolicyService['getInactivityTimeouts']>>;
 
-const _buildInactiveClause = (now: number, inactivityTimeouts: InactivityTimeouts) => {
+const _buildInactiveClause = (
+  now: number,
+  inactivityTimeouts: InactivityTimeouts,
+  field: (path: string) => string
+) => {
   const policyClauses = inactivityTimeouts
     .map(({ inactivityTimeout, policyIds }) => {
       const inactivityTimeoutMs = inactivityTimeout * 1000;
       const policyOrs = policyIds
-        .map((policyId) => `doc['policy_id'].value == '${policyId}'`)
+        .map((policyId) => `${field('last_checkin')}.value == '${policyId}'`)
         .join(' || ');
 
       return `(${policyOrs}) && lastCheckinMillis < ${now - inactivityTimeoutMs}L`;
@@ -33,13 +38,16 @@ const _buildInactiveClause = (now: number, inactivityTimeouts: InactivityTimeout
   return `lastCheckinMillis > 0 && (${agentIsInactive})`;
 };
 
-function _buildSource(inactivityTimeouts: InactivityTimeouts) {
+function _buildSource(inactivityTimeouts: InactivityTimeouts, pathPrefix?: string) {
+  const field = (path: string) => `doc.${pathPrefix ? `${pathPrefix}${path}` : path}`;
   const now = Date.now();
   return `
-    long lastCheckinMillis = doc['last_checkin'].size() > 0 ? doc['last_checkin'].value.toInstant().toEpochMilli() : -1;
-    if (doc['unenrolled_at'].size() > 0) { 
+    long lastCheckinMillis = ${field('last_checkin')}.size() > 0 
+      ? ${field('last_checkin')}.value.toInstant().toEpochMilli() 
+      : -1;
+    if (${field('unenrolled_at')}.size() > 0) { 
         emit('unenrolled'); 
-    } else if (${_buildInactiveClause(now, inactivityTimeouts)}) {
+    } else if (${_buildInactiveClause(now, inactivityTimeouts, field)}) {
         emit('inactive');
     } else if (
         lastCheckinMillis > 0 
@@ -48,25 +56,25 @@ function _buildSource(inactivityTimeouts: InactivityTimeouts) {
     ) { 
         emit('offline'); 
     } else if (
-      doc['last_checkin_status'].size() > 0 &&
-      doc['last_checkin_status'].value.toLowerCase() == 'error'
+      ${field('last_checkin_status')}.size() > 0 &&
+      ${field('last_checkin_status')}.value.toLowerCase() == 'error'
     ) { 
         emit('error');
     } else if (
-      doc['last_checkin_status'].size() > 0 &&
-      doc['last_checkin_status'].value.toLowerCase() == 'degraded'
+      ${field('last_checkin_status')}.size() > 0 &&
+      ${field('last_checkin_status')}.value.toLowerCase() == 'degraded'
     ) { 
         emit('degraded');
     } else if (
-      doc['policy_revision_idx'].size() == 0 || (
-        doc['upgrade_started_at'].size() > 0 &&
-        doc['upgraded_at'].size() == 0
+      ${field('policy_revision_idx')}.size() == 0 || (
+        ${field('upgrade_started_at')}.size() > 0 &&
+        ${field('upgraded_at')}.size() == 0
       )
     ) { 
         emit('updating'); 
-    } else if (doc['last_checkin'].size() == 0) {
+    } else if (${field('last_checkin')}.size() == 0) {
         emit('enrolling'); 
-    } else if (doc['unenrollment_started_at'].size() > 0) {
+    } else if (${field('unenrollment_started_at')}.size() > 0) {
         emit('unenrolling'); 
     } else { 
         emit('online'); 
@@ -74,10 +82,11 @@ function _buildSource(inactivityTimeouts: InactivityTimeouts) {
     `.replace(/(\n|\s{4})/g, ''); // condense source to single line
 }
 
-export function buildStatusRuntimeQuery(
-  inactivityTimeouts: InactivityTimeouts
+function _buildStatusRuntimeField(
+  inactivityTimeouts: InactivityTimeouts,
+  pathPrefix?: string
 ): NonNullable<estypes.SearchRequest['runtime_mappings']> {
-  const source = _buildSource(inactivityTimeouts);
+  const source = _buildSource(inactivityTimeouts, pathPrefix);
   return {
     status: {
       type: 'keyword',
@@ -87,4 +96,17 @@ export function buildStatusRuntimeQuery(
       },
     },
   };
+}
+
+// Build the runtime field to return the agent status
+// pathPrefix is used to prefix the field path in the source
+// pathPrefix is used by the endpoint team currently to run
+// agent queries against the endpoint metadata index
+export async function buildAgentStatusRuntimeField(
+  soClient: SavedObjectsClientContract,
+  pathPrefix?: string
+) {
+  const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts(soClient);
+
+  return _buildStatusRuntimeField(inactivityTimeouts, pathPrefix);
 }

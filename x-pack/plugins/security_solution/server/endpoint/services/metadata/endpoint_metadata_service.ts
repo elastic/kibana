@@ -396,12 +396,13 @@ export class EndpointMetadataService {
    */
   async getHostMetadataList(
     esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
     fleetServices: EndpointFleetServicesInterface,
     queryOptions: GetMetadataListRequestQuery
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
     const endpointPolicies = await this.getAllEndpointPackagePolicies();
     const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
-    const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, endpointPolicyIds);
+    const unitedIndexQuery = await buildUnitedIndexQuery(soClient, queryOptions, endpointPolicyIds);
 
     let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadata>;
 

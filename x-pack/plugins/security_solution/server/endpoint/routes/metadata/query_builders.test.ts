@@ -13,6 +13,7 @@ import {
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
 import { get } from 'lodash';
 import { expectedCompleteUnitedIndexQuery } from './query_builders.fixtures';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
@@ -195,6 +196,7 @@ describe('query builder', () => {
   describe('buildUnitedIndexQuery', () => {
     it('correctly builds empty query', async () => {
       const query = await buildUnitedIndexQuery(
+        savedObjectsClientMock.create(),
         { page: 1, pageSize: 10, hostStatuses: [], kuery: '' },
         []
       );
@@ -239,6 +241,7 @@ describe('query builder', () => {
 
     it('correctly builds query', async () => {
       const query = await buildUnitedIndexQuery(
+        savedObjectsClientMock.create(),
         {
           page: 1,
           pageSize: 10,

@@ -7,7 +7,7 @@
 
 import type { EndpointMetadataServiceTestContextMock } from './mocks';
 import { createEndpointMetadataServiceTestContextMock } from './mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   legacyMetadataSearchResponseMock,
@@ -22,11 +22,13 @@ import type { HostMetadata } from '../../../../common/endpoint/types';
 import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server/services';
 import { EndpointError } from '../../../../common/endpoint/errors';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('EndpointMetadataService', () => {
   let testMockedContext: EndpointMetadataServiceTestContextMock;
   let metadataService: EndpointMetadataServiceTestContextMock['endpointMetadataService'];
   let esClient: ElasticsearchClientMock;
+  let soClient: SavedObjectsClientContract;
   let endpointDocGenerator: EndpointDocGenerator;
 
   beforeEach(() => {
@@ -34,6 +36,7 @@ describe('EndpointMetadataService', () => {
     testMockedContext = createEndpointMetadataServiceTestContextMock();
     metadataService = testMockedContext.endpointMetadataService;
     esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+    soClient = savedObjectsClientMock.create();
   });
 
   describe('#findHostMetadataForFleetAgents()', () => {
@@ -106,6 +109,7 @@ describe('EndpointMetadataService', () => {
       esClient.search.mockRejectedValue({});
       const metadataListResponse = metadataService.getHostMetadataList(
         esClient,
+        soClient,
         testMockedContext.fleetServices,
         {
           page: 0,
@@ -163,10 +167,15 @@ describe('EndpointMetadataService', () => {
       const queryOptions = { page: 1, pageSize: 10, kuery: '', hostStatuses: [] };
       const metadataListResponse = await metadataService.getHostMetadataList(
         esClient,
+        soClient,
         testMockedContext.fleetServices,
         queryOptions
       );
-      const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, packagePolicyIds);
+      const unitedIndexQuery = await buildUnitedIndexQuery(
+        soClient,
+        queryOptions,
+        packagePolicyIds
+      );
 
       expect(esClient.search).toBeCalledWith(unitedIndexQuery);
       expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), agentPolicyIds);

@@ -22,7 +22,7 @@ import { FleetError, isESClientError, AgentNotFoundError } from '../../errors';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
-import { buildStatusRuntimeQuery } from './build_status_query';
+import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 
 const ACTIVE_AGENT_CONDITION = 'active:true';
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
@@ -222,10 +222,9 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
 
-  let runtimeFields: estypes.MappingRuntimeFields = {};
+  let runtimeFields: Awaited<ReturnType<typeof buildAgentStatusRuntimeField>>;
   if (useRuntimeAgentStatus) {
-    const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts(soClient);
-    runtimeFields = buildStatusRuntimeQuery(inactivityTimeouts);
+    runtimeFields = await buildAgentStatusRuntimeField(soClient);
   }
 
   const isDefaultSort = sortField === 'enrolled_at' && sortOrder === 'desc';
