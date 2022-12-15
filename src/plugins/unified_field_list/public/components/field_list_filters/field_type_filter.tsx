@@ -26,6 +26,7 @@ import {
   EuiIconTip,
   EuiButtonEmpty,
   useEuiTheme,
+  EuiTitle,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -146,6 +147,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
           css={css`
             .euiFilterButton__textShift {
               min-width: 0;
+              line-height: 1;
             }
           `}
         >
@@ -161,9 +163,13 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                 padding: ${EQUAL_HEIGHT_OFFSET}px 0;
               `}
             >
-              {i18n.translate('unifiedFieldList.fieldTypeFilter.title', {
-                defaultMessage: 'Filter by field type',
-              })}
+              <EuiTitle size="xxs">
+                <h5 className="eui-textBreakWord">
+                  {i18n.translate('unifiedFieldList.fieldTypeFilter.title', {
+                    defaultMessage: 'Filter by field type',
+                  })}
+                </h5>
+              </EuiTitle>
             </EuiFlexItem>
             {selectedFieldTypes.length > 0 && (
               <EuiFlexItem grow={false}>
