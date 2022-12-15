@@ -67,8 +67,6 @@ export function useTextBasedQueryLanguage({
       const initialFetch = !prev.current.columns.length;
 
       if (isTextBasedQueryLang) {
-        const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
-        const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
         if (hasResults) {
           // check if state needs to contain column transformation due to a different columns in the resultset
           const firstRow = next.result![0];
@@ -85,6 +83,8 @@ export function useTextBasedQueryLanguage({
             prev.current = { columns: firstRowColumns, query };
           }
         }
+        const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
+        const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
 
         if (dataViewObj) {
           // don't set the columns on initial fetch, to prevent overwriting existing state
@@ -117,7 +117,15 @@ export function useTextBasedQueryLanguage({
             dataView.timeFieldName = dateFields[0].name;
           }
 
+          const addColumnsToState = Boolean(
+            nextColumns.length && (!initialFetch || !stateColumns?.length)
+          );
+
           const addDataViewToState = Boolean(dataView.id !== index);
+
+          if (!addColumnsToState && !addDataViewToState) {
+            return;
+          }
 
           const nextState = {
             ...(addDataViewToState && { index: dataView.id }),
