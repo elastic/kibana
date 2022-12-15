@@ -161,7 +161,7 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(3);
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(1, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -188,7 +188,7 @@ describe('createGetSummarizedAlertsFn', () => {
     });
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(2, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -215,7 +215,7 @@ describe('createGetSummarizedAlertsFn', () => {
     });
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(3, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -410,7 +410,7 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(3);
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(1, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -442,7 +442,7 @@ describe('createGetSummarizedAlertsFn', () => {
     });
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(2, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -483,7 +483,7 @@ describe('createGetSummarizedAlertsFn', () => {
     });
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(3, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -660,7 +660,7 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledWith({
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -812,7 +812,7 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledWith({
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {

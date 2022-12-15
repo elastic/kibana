@@ -24,7 +24,7 @@ import { ParsedTechnicalFields } from '../../common';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { IRuleDataClient, IRuleDataReader } from '../rule_data_client';
 
-const MAX_ALERT_DOCS_TO_RETURN = 1000;
+const MAX_ALERT_DOCS_TO_RETURN = 100;
 type AlertDocument = Partial<ParsedTechnicalFields & ParsedExperimentalFields>;
 
 interface CreateGetSummarizedAlertsFnOpts {
