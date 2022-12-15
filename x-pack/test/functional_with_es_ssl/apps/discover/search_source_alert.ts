@@ -255,7 +255,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const checkInitialRuleParamsState = async (dataView: string) => {
-    expect(await toasts.getToastCount()).to.be(0);
+    expect(await toasts.getToastCount()).to.be(1);
     expect(await filterBar.getFilterCount()).to.be(0);
     expect(await queryBar.getQueryString()).to.equal('');
     const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();

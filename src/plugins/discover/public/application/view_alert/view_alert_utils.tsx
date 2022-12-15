@@ -22,6 +22,11 @@ export interface SearchThresholdAlertParams extends RuleTypeParams {
   searchConfiguration: SerializedSearchSourceFields;
 }
 
+export interface QueryParams {
+  from: string | null;
+  to: string | null;
+}
+
 const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 
 const buildTimeRangeFilter = (
@@ -40,6 +45,8 @@ const buildTimeRangeFilter = (
 };
 
 export const getAlertUtils = (
+  openActualAlert: boolean,
+  queryParams: QueryParams,
   toastNotifications: ToastsStart,
   core: CoreStart,
   data: DataPublicPluginStart
@@ -110,10 +117,14 @@ export const getAlertUtils = (
       throw new Error('Data view fetch error');
     }
 
+    const timeRange = openActualAlert
+      ? { from: queryParams.from, to: queryParams.to }
+      : buildTimeRangeFilter(dataView, alert, timeFieldName);
+
     return {
       query: searchSource.getField('query') || data.query.queryString.getDefaultQuery(),
       dataViewSpec: dataView.toSpec(false),
-      timeRange: buildTimeRangeFilter(dataView, alert, timeFieldName),
+      timeRange,
       filters: searchSource.getField('filter') as Filter[],
     };
   };

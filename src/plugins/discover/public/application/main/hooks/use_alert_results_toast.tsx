@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect } from 'react';
 
-const displayPossibleDocsDiffInfoAlert = (toastNotifications: ToastsStart) => {
+export const displayPossibleDocsDiffInfoAlert = (toastNotifications: ToastsStart) => {
   const infoTitle = i18n.translate('discover.viewAlert.documentsMayVaryInfoTitle', {
     defaultMessage: 'Displayed documents may vary',
   });
