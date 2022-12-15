@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { asPercent } from '../../../../common/utils/formatters';
 import { SLO } from '../../../typings';
 import { isSloHealthy } from '../helpers/is_slo_healthy';
+import { getSloDifference } from '../helpers/get_slo_difference';
 
 export interface SloListItemSummaryStatsProps {
   slo: SLO;
@@ -18,8 +19,7 @@ export interface SloListItemSummaryStatsProps {
 export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
   const isHealthy = isSloHealthy(slo);
 
-  const difference = slo.summary.sliValue - slo.objective.target;
-  const differenceValue = `${difference > 0 ? '+' : ''}${asPercent(difference, 1, 'n/a')}`;
+  const { label } = getSloDifference(slo);
 
   return (
     <EuiFlexGroup direction="row" responsive={false}>
@@ -49,7 +49,7 @@ export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
           description={i18n.translate('xpack.observability.slos.slo.stats.difference', {
             defaultMessage: 'Difference',
           })}
-          title={differenceValue}
+          title={label}
           titleColor={isHealthy ? '' : 'danger'}
           titleSize="m"
           reverse
