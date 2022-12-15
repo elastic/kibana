@@ -16,8 +16,4 @@ export {
   FIND_DEFAULT_PER_PAGE,
 } from './src/saved_objects_utils';
 
-export {
-  setsAreEqual,
-  arrayMapsAreEqual,
-  setMapsAreEqual,
-} from './src/saved_objects_test_utils';
+export { setsAreEqual, arrayMapsAreEqual, setMapsAreEqual } from './src/saved_objects_test_utils';

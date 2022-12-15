@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { arrayMapsAreEqual, setMapsAreEqual, setsAreEqual } from "./saved_objects_test_utils";
+import { arrayMapsAreEqual, setMapsAreEqual, setsAreEqual } from './saved_objects_test_utils';
 
 describe('savedObjects/testUtils', () => {
   describe('#setsAreEqual', () => {
@@ -39,22 +39,22 @@ describe('savedObjects/testUtils', () => {
   });
 
   describe('#arrayMapsAreEqual', () => {
-    const mapA = new Map<string,string[]>();
+    const mapA = new Map<string, string[]>();
     mapA.set('a', ['1', '2', '3']);
     mapA.set('b', ['1', '2']);
 
-    const mapB = new Map<string,string[]>();
+    const mapB = new Map<string, string[]>();
     mapB.set('a', ['1', '2', '3']);
 
-    const mapC = new Map<string,string[]>();
+    const mapC = new Map<string, string[]>();
     mapC.set('a', ['1', '2', '3']);
     mapC.set('c', ['1', '2']);
 
-    const mapD = new Map<string,string[]>();
+    const mapD = new Map<string, string[]>();
     mapD.set('a', ['1', '2', '3']);
     mapD.set('b', ['1', '3']);
 
-    const mapE = new Map<string,string[]>();
+    const mapE = new Map<string, string[]>();
     mapE.set('b', ['2', '1']);
     mapE.set('a', ['3', '1', '2']);
 
@@ -86,23 +86,23 @@ describe('savedObjects/testUtils', () => {
     });
   });
 
-    describe('#setMapsAreEqual', () => {
-    const mapA = new Map<string,Set<string>>();
+  describe('#setMapsAreEqual', () => {
+    const mapA = new Map<string, Set<string>>();
     mapA.set('a', new Set(['1', '2', '3']));
     mapA.set('b', new Set(['1', '2']));
 
-    const mapB = new Map<string,Set<string>>();
+    const mapB = new Map<string, Set<string>>();
     mapB.set('a', new Set(['1', '2', '3']));
 
-    const mapC = new Map<string,Set<string>>();
+    const mapC = new Map<string, Set<string>>();
     mapC.set('a', new Set(['1', '2', '3']));
     mapC.set('c', new Set(['1', '2']));
 
-    const mapD = new Map<string,Set<string>>();
+    const mapD = new Map<string, Set<string>>();
     mapD.set('a', new Set(['1', '2', '3']));
     mapD.set('b', new Set(['1', '3']));
 
-    const mapE = new Map<string,Set<string>>();
+    const mapE = new Map<string, Set<string>>();
     mapE.set('b', new Set(['2', '1']));
     mapE.set('a', new Set(['3', '1', '2']));
 
