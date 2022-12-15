@@ -42,11 +42,24 @@ interface Props {
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [abortController, setAbortController] = useState(null);
   const [controlFilters, setControlFilters] = useState<Filter[]>([]);
+  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
   const [hits, setHits] = useState(0);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [query, setQuery] = useState<Query>();
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-7d', to: 'now' });
+
+  useEffect(() => {
+    if (!controlGroup) {
+      return;
+    }
+    const subscription = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
+      setControlFilters([...newFilters]);
+    });
+    return () => {
+      subscription.unsubscribe();
+    }
+  }, [controlGroup]);
 
   async function search() {
     setIsSearching(true);
@@ -131,10 +144,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
               viewMode: ViewMode.VIEW,
             };
           }}
-          onLoadComplete={async (controlGroup) => {
-            controlGroup.onFiltersPublished$.subscribe((newFilters) => {
-              setControlFilters([...newFilters]);
-            });
+          onLoadComplete={async (newControlGroup) => {
+            setControlGroup(newControlGroup);
           }}
           query={query}
           timeRange={timeRange}
