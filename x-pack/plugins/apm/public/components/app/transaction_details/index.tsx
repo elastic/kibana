@@ -11,22 +11,19 @@ import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
 import { TransactionDetailsTabs } from './transaction_details_tabs';
-import {
-  isMobileAgentName,
-  isServerlessAgent,
-} from '../../../../common/agent_name';
-import { MobileTransactionCharts } from '../../shared/charts/transaction_charts/mobile_transaction_charts';
+import { isServerlessAgent } from '../../../../common/agent_name';
 
 export function TransactionDetails() {
-  const { path, query } = useApmParams(
-    '/services/{serviceName}/transactions/view'
+  const { path, query } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
   );
   const {
     transactionName,
@@ -38,7 +35,7 @@ export function TransactionDetails() {
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
-  const { transactionType, fallbackToTransactions, runtimeName, agentName } =
+  const { transactionType, fallbackToTransactions, runtimeName } =
     useApmServiceContext();
 
   const history = useHistory();
@@ -60,7 +57,6 @@ export function TransactionDetails() {
   );
 
   const isServerless = isServerlessAgent(runtimeName);
-  const isMobileAgent = isMobileAgentName(agentName);
 
   return (
     <>
@@ -74,25 +70,16 @@ export function TransactionDetails() {
       <EuiSpacer size="m" />
 
       <ChartPointerEventContextProvider>
-        {isMobileAgent ? (
-          <MobileTransactionCharts
-            kuery={query.kuery}
-            environment={query.environment}
-            start={start}
-            end={end}
-          />
-        ) : (
-          <TransactionCharts
-            kuery={query.kuery}
-            environment={query.environment}
-            start={start}
-            end={end}
-            transactionName={transactionName}
-            isServerlessContext={isServerless}
-            comparisonEnabled={comparisonEnabled}
-            offset={offset}
-          />
-        )}
+        <TransactionCharts
+          kuery={query.kuery}
+          environment={query.environment}
+          start={start}
+          end={end}
+          transactionName={transactionName}
+          isServerlessContext={isServerless}
+          comparisonEnabled={comparisonEnabled}
+          offset={offset}
+        />
       </ChartPointerEventContextProvider>
 
       <EuiSpacer size="m" />
