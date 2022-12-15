@@ -6,29 +6,21 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiButton, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export function SloListEmpty() {
   return (
-    <EuiEmptyPrompt
-      iconType="logoObservability"
-      title={<h2>No SLOs found</h2>}
-      body={<p>Add a new SLO or change your filter settings.</p>}
-      actions={
-        <EuiButton color="primary" fill>
-          Add an SLO
-        </EuiButton>
-      }
-      footer={
-        <>
-          <EuiTitle size="xxs">
-            <h3>Want to learn more?</h3>
-          </EuiTitle>
-          <EuiLink href="#" target="_blank">
-            Read the docs
-          </EuiLink>
-        </>
-      }
-    />
+    <EuiCallOut
+      title={i18n.translate('xpack.observability.slos.list.emptyTitle', {
+        defaultMessage: 'No results',
+      })}
+      color="warning"
+      iconType="alert"
+    >
+      {i18n.translate('xpack.observability.slos.list.emptyMessage', {
+        defaultMessage: 'There are no results for your criteria.',
+      })}
+    </EuiCallOut>
   );
 }
