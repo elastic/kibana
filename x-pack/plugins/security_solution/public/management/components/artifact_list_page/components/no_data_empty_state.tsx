@@ -46,18 +46,12 @@ export const NoDataEmptyState = memo<{
 
     return (
       <ManagementEmptyStateWrapper>
-        <EmptyPrompt
-          data-test-subj={dataTestSubj}
-          iconType={canCreateItems ? 'plusInCircle' : undefined}
-          title={
-            canCreateItems ? (
-              <h2 data-test-subj={getTestId('title')}>{titleLabel}</h2>
-            ) : (
-              <h2 data-test-subj={getTestId('title-no-entries')}>{titleNoEntriesLabel}</h2>
-            )
-          }
-          body={
-            canCreateItems ? (
+        {canCreateItems ? (
+          <EmptyPrompt
+            data-test-subj={dataTestSubj}
+            iconType="plusInCircle"
+            title={<h2 data-test-subj={getTestId('title')}>{titleLabel}</h2>}
+            body={
               <div data-test-subj={getTestId('aboutInfo')}>
                 {aboutInfo}
                 {secondaryAboutInfo ? (
@@ -67,24 +61,25 @@ export const NoDataEmptyState = memo<{
                   </>
                 ) : undefined}
               </div>
-            ) : undefined
-          }
-          actions={
-            canCreateItems
-              ? [
-                  <EuiButton
-                    fill
-                    isDisabled={isAddDisabled}
-                    onClick={onAdd}
-                    data-test-subj={getTestId('addButton')}
-                  >
-                    {primaryButtonLabel}
-                  </EuiButton>,
-                  ...(backComponent ? [backComponent] : []),
-                ]
-              : []
-          }
-        />
+            }
+            actions={[
+              <EuiButton
+                fill
+                isDisabled={isAddDisabled}
+                onClick={onAdd}
+                data-test-subj={getTestId('addButton')}
+              >
+                {primaryButtonLabel}
+              </EuiButton>,
+              ...(backComponent ? [backComponent] : []),
+            ]}
+          />
+        ) : (
+          <EmptyPrompt
+            data-test-subj={dataTestSubj}
+            title={<h2 data-test-subj={getTestId('title-no-entries')}>{titleNoEntriesLabel}</h2>}
+          />
+        )}
       </ManagementEmptyStateWrapper>
     );
   }
