@@ -11,8 +11,8 @@ import {
   getAlertEvaluationUnitTypeByRuleTypeId,
 } from './get_alert_evaluation_unit_type_by_rule_type_id';
 
-export const formatAlertEvaluationValue = (ruleTypeId: string, evaluationValue?: number) => {
-  if (!evaluationValue) return '-';
+export const formatAlertEvaluationValue = (ruleTypeId?: string, evaluationValue?: number) => {
+  if (!evaluationValue || !ruleTypeId) return '-';
   const unitType = getAlertEvaluationUnitTypeByRuleTypeId(ruleTypeId);
   switch (unitType) {
     case AlertEvaluationUnitType.Duration:

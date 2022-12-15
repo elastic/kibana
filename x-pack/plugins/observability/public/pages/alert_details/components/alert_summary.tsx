@@ -33,13 +33,9 @@ import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSummaryProps } from '../types';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
 import { DEFAULT_DATE_FORMAT } from '../constants';
-import { CenterJustifiedSpinner } from '../../rule_details/components/center_justified_spinner';
 
 export function AlertSummary({ alert }: AlertSummaryProps) {
-  if (!alert) {
-    return <CenterJustifiedSpinner />;
-  }
-  const tags = alert.fields[ALERT_RULE_TAGS];
+  const tags = alert?.fields[ALERT_RULE_TAGS];
   return (
     <div data-test-subj="alert-summary-container">
       <EuiFlexGroup>
@@ -55,8 +51,8 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             {formatAlertEvaluationValue(
-              alert.fields[ALERT_RULE_TYPE_ID],
-              alert.fields[ALERT_EVALUATION_VALUE]
+              alert?.fields[ALERT_RULE_TYPE_ID],
+              alert?.fields[ALERT_EVALUATION_VALUE]
             )}
           </EuiText>
         </EuiFlexItem>
@@ -72,8 +68,8 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             {formatAlertEvaluationValue(
-              alert.fields[ALERT_RULE_TYPE_ID],
-              alert.fields[ALERT_EVALUATION_THRESHOLD]
+              alert?.fields[ALERT_RULE_TYPE_ID],
+              alert?.fields[ALERT_EVALUATION_THRESHOLD]
             )}
           </EuiText>
         </EuiFlexItem>
@@ -141,7 +137,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
-            {moment(alert.fields[ALERT_START]?.toString()).format(DEFAULT_DATE_FORMAT)}
+            {moment(alert?.fields[ALERT_START]?.toString()).format(DEFAULT_DATE_FORMAT)}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
