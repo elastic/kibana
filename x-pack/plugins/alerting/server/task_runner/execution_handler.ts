@@ -14,16 +14,12 @@ import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/s
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { parseDuration, RawRule, ThrottledActions } from '../types';
+import { GetRuleUrlFnOpts, parseDuration, RawRule, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
 import { ExecutionHandlerOptions, RuleTaskInstance } from './types';
 import { TaskRunnerContext } from './task_runner_factory';
-import {
-  transformActionParams,
-  transformSummaryActionParams,
-  transformSummaryContext,
-} from './transform_action_params';
+import { transformActionParams, transformSummaryActionParams } from './transform_action_params';
 import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
@@ -205,7 +201,11 @@ export class ExecutionHandler<
           if (isSummaryActionPerRuleRun(action) && !this.hasAlerts(alerts)) {
             continue;
           }
-          const summarizedAlerts = await this.getSummarizedAlerts({ action, spaceId, ruleId });
+          const { startMs, endMs, summarizedAlerts } = await this.getSummarizedAlerts({
+            action,
+            spaceId,
+            ruleId,
+          });
           const actionToRun = {
             ...action,
             params: injectActionParams({
@@ -222,11 +222,13 @@ export class ExecutionHandler<
                 actionsPlugin,
                 actionTypeId,
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                summaryContext: transformSummaryContext(
-                  this.ruleType.actionVariables?.context,
-                  summarizedAlerts
-                ),
-                ruleUrl: this.buildRuleUrl(spaceId),
+                ruleUrl: this.buildRuleUrl({
+                  id: ruleId,
+                  spaceId,
+                  params: this.rule.params,
+                  startMs,
+                  endMs,
+                }),
               }),
             }),
           };
@@ -271,7 +273,11 @@ export class ExecutionHandler<
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
                 alertParams: this.rule.params,
                 actionParams: action.params,
-                ruleUrl: this.buildRuleUrl(spaceId),
+                ruleUrl: this.buildRuleUrl({
+                  id: ruleId,
+                  spaceId,
+                  params: this.rule.params,
+                }),
                 flapping: executableAlert.getFlapping(),
               }),
             }),
@@ -407,7 +413,24 @@ export class ExecutionHandler<
     return alert.getScheduledActionOptions()?.actionGroup || this.ruleType.recoveryActionGroup.id;
   }
 
-  private buildRuleUrl(spaceId: string): string | undefined {
+  private buildRuleUrl({
+    id,
+    params,
+    spaceId,
+    startMs,
+    endMs,
+  }: GetRuleUrlFnOpts<Params>): string | undefined {
+    // Use the rule type's getRuleUrl callback if defined
+    // This does not necessarily require `kibanaBaseUrl` to be defined
+    const ruleTypeUrl = this.ruleType.getRuleUrl
+      ? this.ruleType?.getRuleUrl({ id, params, spaceId, startMs, endMs })
+      : null;
+
+    if (ruleTypeUrl) {
+      return ruleTypeUrl;
+    }
+
+    // Fallback to generic rule urle
     if (!this.taskRunnerContext.kibanaBaseUrl) {
       return;
     }
@@ -547,13 +570,35 @@ export class ExecutionHandler<
     const alerts = await this.ruleType.getSummarizedAlerts!(options);
 
     const total = alerts.new.count + alerts.ongoing.count + alerts.recovered.count;
-    return {
+    const summarizedAlerts = {
       ...alerts,
       all: {
         count: total,
         data: [...alerts.new.data, ...alerts.ongoing.data, ...alerts.recovered.data],
       },
     };
+
+    if (summarizedAlerts.all.count > 0) {
+      // get the time bounds for this alert array
+      const timestampMillis: number[] = summarizedAlerts.all.data
+        .map((alert: unknown) => {
+          const timestamp = (alert as { '@timestamp': string })['@timestamp'];
+          if (timestamp) {
+            return new Date(timestamp).valueOf();
+          }
+          return null;
+        })
+        .filter((timeInMillis: number | null) => null != timeInMillis)
+        .sort() as number[];
+
+      return {
+        startMs: timestampMillis[0],
+        endMs: timestampMillis[timestampMillis.length - 1],
+        summarizedAlerts,
+      };
+    }
+
+    return { summarizedAlerts };
   }
 
   private async actionRunOrAddToBulk({

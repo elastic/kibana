@@ -14,7 +14,6 @@ import { eqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from '../../signals/executors/eql';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
-import { getActionContext } from '../utils/helpers';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
@@ -56,7 +55,7 @@ export const createEqlAlertType = (
     ],
     defaultActionGroupId: 'default',
     actionVariables: {
-      context: getActionContext('eql'),
+      context: [{ name: 'server', description: 'the server' }],
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,

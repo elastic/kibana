@@ -12,7 +12,6 @@ import {
   AlertInstanceContext,
   RuleTypeParams,
   SanitizedRule,
-  ActionVariable,
   SummarizedAlertsWithAll,
 } from '../types';
 
@@ -108,13 +107,11 @@ export function transformSummaryActionParams({
   actionParams,
   ruleUrl,
   kibanaBaseUrl,
-  summaryContext,
 }: {
   alerts: SummarizedAlertsWithAll;
   rule: SanitizedRule<RuleTypeParams>;
   ruleTypeId: string;
   actionsPlugin: ActionsPluginStartContract;
-  summaryContext: AlertInstanceContext;
   actionId: string;
   actionTypeId: string;
   spaceId: string;
@@ -125,7 +122,13 @@ export function transformSummaryActionParams({
   const variables = {
     kibanaBaseUrl,
     date: new Date().toISOString(),
-    context: summaryContext,
+    context: {
+      alerts: alerts.new.data,
+      result_link: ruleUrl,
+    },
+    state: {
+      signals_count: alerts.new.count,
+    },
     rule: {
       params: rule.params,
       id: rule.id,
@@ -143,19 +146,4 @@ export function transformSummaryActionParams({
     actionParams,
     variables
   );
-}
-
-export function transformSummaryContext(
-  context: ActionVariable[] | undefined,
-  alerts: SummarizedAlertsWithAll
-): AlertInstanceContext {
-  return (context ?? []).reduce((acc, currContext: ActionVariable) => {
-    if (currContext.summaryBuilder) {
-      return {
-        ...acc,
-        [currContext.name]: currContext.summaryBuilder(alerts),
-      };
-    }
-    return acc;
-  }, {});
 }

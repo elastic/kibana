@@ -14,7 +14,6 @@ import { threatRuleParams } from '../../rule_schema';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
-import { getActionContext } from '../utils/helpers';
 
 export const createIndicatorMatchAlertType = (
   createOptions: CreateRuleOptions
@@ -57,7 +56,7 @@ export const createIndicatorMatchAlertType = (
     ],
     defaultActionGroupId: 'default',
     actionVariables: {
-      context: getActionContext('threat_match'),
+      context: [{ name: 'server', description: 'the server' }],
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,

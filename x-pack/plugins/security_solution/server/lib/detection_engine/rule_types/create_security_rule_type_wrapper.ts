@@ -24,6 +24,8 @@ import {
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
 import { getListClient } from './utils/get_list_client';
+// eslint-disable-next-line no-restricted-imports
+import { getNotificationResultsLink } from '../rule_actions_legacy';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
@@ -50,6 +52,18 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           injectReferences({ logger, params, savedObjectReferences }),
       },
       autoRecoverAlerts: false,
+      getRuleUrl: ({ id, params, startMs, endMs }) => {
+        if (!startMs || !endMs) {
+          return null;
+        }
+        return getNotificationResultsLink({
+          from: new Date(startMs).toISOString(),
+          to: new Date(endMs).toISOString(),
+          id,
+          kibanaSiemAppUrl: (params?.meta as { kibana_siem_app_url?: string } | undefined)
+            ?.kibana_siem_app_url,
+        });
+      },
       async executor(options) {
         agent.setTransactionName(`${options.rule.ruleTypeId} execution`);
         return withSecuritySpan('securityRuleTypeExecutor', async () => {
@@ -414,24 +428,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 enrichmentDurations: result.enrichmentTimes,
               },
             });
-
-            // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
-            // if (actions.length && completeRule.ruleConfig.throttle != null) {
-            //   await scheduleThrottledNotificationActions({
-            //     alertInstance: services.alertFactory.create(rule.id),
-            //     throttle: completeRule.ruleConfig.throttle ?? '',
-            //     startedAt,
-            //     id: completeRule.alertId,
-            //     kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
-            //       ?.kibana_siem_app_url,
-            //     outputIndex: ruleDataClient.indexNameWithNamespace(spaceId),
-            //     ruleId,
-            //     esClient: services.scopedClusterClient.asCurrentUser,
-            //     notificationRuleParams,
-            //     signals: result.createdSignals,
-            //     logger,
-            //   });
-            // }
           }
 
           return result.state;

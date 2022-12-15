@@ -151,6 +151,16 @@ export interface SummarizedAlerts {
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 
+export interface GetRuleUrlFnOpts<Params extends RuleTypeParams> {
+  id: string;
+  params: Params;
+  spaceId: string;
+  startMs?: number;
+  endMs?: number;
+}
+export type GetRuleUrlFn<Params extends RuleTypeParams> = (
+  opts: GetRuleUrlFnOpts<Params>
+) => string | null;
 export interface RuleType<
   Params extends RuleTypeParams = never,
   ExtractedParams extends RuleTypeParams = never,
@@ -196,6 +206,7 @@ export interface RuleType<
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
   getSummarizedAlerts?: GetSummarizedAlertsFn;
+  getRuleUrl?: GetRuleUrlFn<Params>;
 
   /**
    * Determines whether framework should
