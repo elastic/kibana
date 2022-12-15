@@ -5,12 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { clientMock } from './client.mock';
 import { serviceContractMock } from './service_contract.mock';
 
 const createSetupContractMock = () => {
-  return clientMock();
+  const client = clientMock();
+  const globalClient = clientMock();
+
+  return {
+    client,
+    globalClient,
+  };
 };
 
 const createMock = () => {
@@ -19,7 +24,7 @@ const createMock = () => {
   return mocked;
 };
 
-export const uiSettingsServiceMock = {
+export const settingsServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
   createStartContract: createSetupContractMock,
