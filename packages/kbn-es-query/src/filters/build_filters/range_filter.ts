@@ -7,6 +7,7 @@
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get, has, keys, map, mapValues, pickBy, reduce } from 'lodash';
+import { Serializable } from '@kbn/utility-types';
 import type { Filter, FilterMeta } from './types';
 import { FILTERS } from './types';
 import type { DataViewBase, DataViewFieldBase } from '../../es_query';
@@ -38,7 +39,7 @@ const dateComparators = {
  * It is similar, but not identical to estypes.QueryDslRangeQuery
  * @public
  */
-export interface RangeFilterParams {
+export type RangeFilterParams = Serializable & {
   from?: number | string;
   to?: number | string;
   gt?: number | string;
@@ -46,7 +47,7 @@ export interface RangeFilterParams {
   gte?: number | string;
   lte?: number | string;
   format?: string;
-}
+};
 
 export const hasRangeKeys = (params: RangeFilterParams) =>
   Boolean(
