@@ -81,6 +81,7 @@ export const FieldStatsContent: FC = () => {
 
   return showFieldStats ? (
     <FieldStats
+      key={fieldForStats.name}
       services={fieldStatsServices}
       dslQuery={jobCreator.query ?? defaultDatafeedQuery}
       fromDate={timeRange.from}

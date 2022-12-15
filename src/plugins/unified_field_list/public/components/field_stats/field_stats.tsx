@@ -127,19 +127,15 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   });
   const [dataView, changeDataView] = useState<DataView | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  // Keep track of the last loaded field
-  const prevFetchedRef = useRef<string | undefined>();
-  const fieldId = useMemo(
-    () => `${field?.name}-${dataTestSubject}`,
-    [field?.name, dataTestSubject]
-  );
+  const isCanceledRef = useRef<boolean>(false);
+
   const setState: typeof changeState = useCallback(
     (nextState) => {
-      if (prevFetchedRef.current !== fieldId) {
+      if (!isCanceledRef.current) {
         changeState(nextState);
       }
     },
-    [changeState, prevFetchedRef, fieldId]
+    [changeState, isCanceledRef]
   );
 
   useEffect(
@@ -153,17 +149,18 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   const setDataView: typeof changeDataView = useCallback(
     (nextDataView) => {
-      if (prevFetchedRef.current !== fieldId) {
+      if (!isCanceledRef.current) {
         changeDataView(nextDataView);
       }
     },
-    [changeDataView, prevFetchedRef, fieldId]
+    [changeDataView, isCanceledRef]
   );
 
   async function fetchData() {
-    if (prevFetchedRef.current === fieldId) {
+    if (isCanceledRef.current) {
       return;
     }
+
     try {
       const loadedDataView =
         typeof dataViewOrDataViewId === 'string'
@@ -211,14 +208,14 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   useEffect(() => {
     fetchData();
+  }, [dataViewOrDataViewId, field, dslQuery, query, filters, fromDate, toDate, services]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
     return () => {
-      prevFetchedRef.current = fieldId;
+      isCanceledRef.current = true;
       abortControllerRef.current?.abort();
     };
-    // Need to refetch data when the field or query changes
-    // not just when popover is closed/component is unmounted
-  }, [fieldId, dslQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
