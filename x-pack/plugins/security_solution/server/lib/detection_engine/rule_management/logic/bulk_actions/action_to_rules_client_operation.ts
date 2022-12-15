@@ -71,6 +71,7 @@ export const bulkEditActionToRulesClientOperation = (
           field: 'actions',
           operation: 'add',
           value: action.value.actions,
+          syncFrequency: true,
         },
         getThrottleOperation(action.value.throttle),
         getNotifyWhenOperation(action.value.throttle),

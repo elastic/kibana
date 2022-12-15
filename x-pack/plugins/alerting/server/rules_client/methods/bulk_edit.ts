@@ -63,6 +63,7 @@ export type BulkEditOperation =
       operation: 'add' | 'set';
       field: Extract<BulkEditFields, 'actions'>;
       value: NormalizedAlertAction[];
+      syncFrequency?: boolean;
     }
   | {
       operation: 'set';
@@ -364,6 +365,17 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
                   }
                 }
                 ruleActions = applyBulkEditOperation(operation, ruleActions);
+                if (operation.syncFrequency) {
+                  const frequency = operation.value[0].frequency;
+                  if (!frequency)
+                    throw Error(
+                      `Cannot sync frequency of existing actions when new bulk edit action has no frequency`
+                    );
+                  ruleActions.actions = ruleActions.actions.map((action) => ({
+                    ...action,
+                    frequency,
+                  }));
+                }
                 break;
               case 'snoozeSchedule':
                 // Silently skip adding snooze or snooze schedules on security
