@@ -73,6 +73,37 @@ export const testUsers: {
     username: 'integr_all',
     password: 'changeme',
   },
+  // for package_policy get one, bulk get with ids, get list
+  any_integr_read_policy_read: {
+    permissions: {
+      feature: {
+        fleet: ['read'],
+        siem: [
+          'minimal_all',
+          'trusted_applications_read',
+          'host_isolation_exceptions_read',
+          'blocklist_read',
+          'event_filters_read',
+          'policy_management_read',
+        ],
+      },
+      spaces: ['*'],
+    },
+    username: 'any_integr_read_policy_read',
+    password: 'changeme',
+  },
+  // for package_policy update API
+  any_integr_write_policy_write: {
+    permissions: {
+      feature: {
+        fleet: ['all'],
+        siem: ['minimal_all', 'policy_management_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'any_integr_write_policy_write',
+    password: 'changeme',
+  },
 };
 
 export const setupTestUsers = async (security: SecurityService) => {
