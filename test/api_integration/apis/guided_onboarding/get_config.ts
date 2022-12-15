@@ -15,7 +15,7 @@ export default function testGetGuideConfig({ getService }: FtrProviderContext) {
 
   describe('GET /api/guided_onboarding/configs', () => {
     // check that production guides are present
-    ['security', 'search', 'observability'].map((guideId) => {
+    ['siem', 'search', 'kubernetes'].map((guideId) => {
       it(`returns config for ${guideId}`, async () => {
         const response = await supertest.get(`${getConfigsPath}/${guideId}`).expect(200);
         expect(response.body).not.to.be.empty();
