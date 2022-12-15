@@ -57,7 +57,7 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
           ? (field: T) => {
               if (
                 fieldSearchHighlight?.length &&
-                !field.name.toLowerCase().includes(fieldSearchHighlight) &&
+                !field.name?.toLowerCase().includes(fieldSearchHighlight) &&
                 !field.displayName?.toLowerCase().includes(fieldSearchHighlight)
               ) {
                 return false;
