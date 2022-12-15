@@ -99,7 +99,9 @@ export async function scheduleSourceMapMigration({
   }
 }
 
-type TaskState = { isAborted: boolean };
+interface TaskState {
+  isAborted: boolean;
+}
 
 export async function runFleetSourcemapArtifactsMigration({
   taskState,
