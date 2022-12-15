@@ -10,10 +10,8 @@ import React, { useState } from 'react';
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
-import cuid from 'cuid';
 
 import {
-  EuiButton,
   EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -122,42 +120,6 @@ export const ElasticsearchJsClientReadme = () => {
                   {`# Grab the Elasticsearch JavaScript client from NPM and install it in your project \n`}
                   {`$ npm install @elastic/elasticsearch@<major>`}
                 </EuiCodeBlock>
-              </EuiPageSection>
-
-              <EuiPageSection>
-                <EuiTitle>
-                  <h2>
-                    <FormattedMessage
-                      id="customIntegrations.languageClients.JavascriptElasticsearch.readme.createApiKey"
-                      defaultMessage="Create an API key"
-                    />
-                  </h2>
-                </EuiTitle>
-
-                <EuiText>
-                  <FormattedMessage
-                    id="customIntegrations.languageClients.JavascriptElasticsearch.readme.apiKey"
-                    defaultMessage="Use the button bellow to generate an API key. You'll need this set up your client in the next step."
-                  />
-                </EuiText>
-
-                <EuiSpacer size="m" />
-
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => setApiKey(cuid())} disabled={!!apiKey}>
-                      Generate API key
-                    </EuiButton>
-                  </EuiFlexItem>
-
-                  {apiKey && (
-                    <EuiFlexItem grow={false}>
-                      <EuiCodeBlock paddingSize="s" isCopyable className="eui-displayInline">
-                        {apiKey}
-                      </EuiCodeBlock>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
               </EuiPageSection>
 
               <EuiPageSection>
