@@ -61,7 +61,7 @@ describe('fetchClusterHealth', () => {
         { clusterUuid: '1', clusterName: 'foo1' },
         { clusterUuid: '2', clusterName: 'foo2' },
       ],
-      void 0,
+      undefined,
       '1h'
     );
     expect(esClient.search).toHaveBeenCalledWith({
