@@ -21,7 +21,7 @@ export class BfetchRequestError extends Error {
     const message =
       code === 0
         ? i18n.translate('bfetch.networkError', {
-            defaultMessage: 'Please check your network connection and try again.',
+            defaultMessage: 'Check your network connection and try again.',
           })
         : i18n.translate('bfetch.networkErrorWithStatus', {
             defaultMessage: 'Check your network connection and try again. Code {code}',
