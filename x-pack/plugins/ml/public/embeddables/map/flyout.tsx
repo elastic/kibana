@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import type { MapEmbeddable, ILayer } from '@kbn/maps-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyoutFooter,
@@ -20,7 +20,6 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-
 import { Layer } from './layer';
 
 interface Props {
@@ -28,26 +27,15 @@ interface Props {
   onClose: () => void;
 }
 
-// TODO: Cannot find a date field for when there's no date field
-// TODO: no supported layers handle - can't find geo field?
 export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
   const { euiTheme } = useEuiTheme();
-  const [layers, setLayers] = useState<any[]>([]);
+  const [layers, setLayers] = useState<ILayer[]>([]);
 
   useEffect(() => {
     if (embeddable !== undefined) {
-      // @ts-ignore
-      const currentLayers = (
-        embeddable._savedMap?._attributes
-          ? // @ts-ignore // TODO: remove
-            JSON.parse(embeddable._savedMap._attributes.layerListJSON)
-          : // @ts-ignore // TODO: remove
-            []
-      ).filter(
-        ({ sourceDescriptor }) =>
-          sourceDescriptor.geoField !== undefined && sourceDescriptor.indexPatternId !== undefined
-      );
-
+      const currentLayers = embeddable
+        .getLayerList()
+        .filter((layer) => layer.getGeoFieldNames().length && layer.getIndexPatternIds().length);
       setLayers(currentLayers);
     }
   }, [embeddable]);

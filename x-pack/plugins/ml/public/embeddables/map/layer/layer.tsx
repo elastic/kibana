@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { MapEmbeddable, ILayer } from '@kbn/maps-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiFlexGroup,
@@ -20,19 +20,27 @@ import {
 import { CompatibleLayer } from './compatible_layer';
 import { IncompatibleLayer } from './incompatible_layer';
 interface Props {
-  layer: any;
+  layer: ILayer;
   layerIndex: number;
   embeddable: MapEmbeddable;
 }
 
 export const Layer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
+  const [displayName, setDisplayName] = useState<string>('');
   const sourceDataView = useMemo(() => {
     // @ts-ignore
     const dataViews: DataView[] = embeddable?.getRoot()?.getAllDataViews() ?? [];
-    return dataViews.find(
-      (dataView: DataView) => dataView.id === layer.sourceDescriptor.indexPatternId
-    );
+    return dataViews.find((dataView: DataView) => dataView.id === layer.getIndexPatternIds()[0]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layer]);
+
+  useEffect(() => {
+    const getLayerName = async () => {
+      const name = await layer.getDisplayName();
+      setDisplayName(name);
+    };
+    // eslint-disable-next-line no-console
+    getLayerName().catch(console.error);
   }, [layer]);
 
   return (
@@ -45,7 +53,7 @@ export const Layer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
             </EuiFlexItem>
             <EuiFlexItem grow>
               <EuiText color={sourceDataView?.timeFieldName ? '' : 'subdued'}>
-                <h5>{layer.label}</h5>
+                <h5>{displayName}</h5>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -60,7 +68,7 @@ export const Layer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
               layerIndex={layerIndex}
             />
           ) : (
-            <IncompatibleLayer />
+            <IncompatibleLayer noDataView={sourceDataView === undefined} />
           )}
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>

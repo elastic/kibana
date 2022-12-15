@@ -20,7 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import type { MapEmbeddable, ILayer } from '@kbn/maps-plugin/public';
 
 import type { DataView } from '@kbn/data-views-plugin/common'; // DataViewField
 import { JobDetails } from '../job_details';
@@ -32,7 +32,7 @@ interface DropDownLabel {
 
 interface Props {
   embeddable: MapEmbeddable;
-  layer: any; // upate type
+  layer: ILayer;
   layerIndex: number;
   sourceDataView: DataView;
 }
@@ -83,7 +83,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex, sour
                 id="xpack.ml.embeddables.geoJobFlyout.createJobCalloutTitle.multiMetric"
                 defaultMessage="The {geoField} field can be used to create a geo job for {sourceDataViewTitle}"
                 values={{
-                  geoField: layer.sourceDescriptor.geoField,
+                  geoField: layer.getGeoFieldNames()[0],
                   sourceDataViewTitle: sourceDataView?.getIndexPattern(),
                 }}
               />
@@ -127,7 +127,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex, sour
           <JobDetails
             embeddable={embeddable}
             sourceDataView={sourceDataView}
-            geoField={layer.sourceDescriptor.geoField}
+            geoField={layer.getGeoFieldNames()[0]}
             splitField={selectedSplitField}
           />
         ) : null}

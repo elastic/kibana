@@ -7,10 +7,13 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
-export const IncompatibleLayer: FC = () => {
+interface Props {
+  noDataView: boolean;
+}
+
+export const IncompatibleLayer: FC<Props> = ({ noDataView }) => {
   return (
     <EuiFlexGroup gutterSize="s" color="subdued" data-test-subj="mlMapLayerIncompatible">
       <EuiFlexItem grow={false}>
@@ -20,10 +23,17 @@ export const IncompatibleLayer: FC = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText color="subdued" size="s">
-          <FormattedMessage
-            id="xpack.ml.embeddables.geoJobFlyout.defaultLayerError"
-            defaultMessage="This layer cannot be used to create an anomaly detection job"
-          />
+          {noDataView === true ? (
+            <FormattedMessage
+              id="xpack.ml.embeddables.geoJobFlyout.noDataViewError"
+              defaultMessage="There is no source Data View for this layer. It cannot be used to create an anomaly detection job"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.embeddables.geoJobFlyout.noTimeFieldError"
+              defaultMessage="This source Dataview for this layer does not contain a timefield. It cannot be used to create an anomaly detection job"
+            />
+          )}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
