@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import CspCreatePolicyExtension from './policy_extension_create';
+import { CspPolicyTemplateForm } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
 import { getMockPolicyAWS, getMockPolicyEKS, getMockPolicyK8s } from './mocks';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
@@ -25,12 +25,18 @@ jest.mock('@elastic/eui/lib/services/accessibility', () => ({
   useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 
-describe('<CspCreatePolicyExtension />', () => {
+describe('<CspPolicyTemplateForm />', () => {
   const onChange = jest.fn();
 
-  const WrappedComponent = ({ newPolicy }: { newPolicy: NewPackagePolicy }) => (
+  const WrappedComponent = ({
+    newPolicy,
+    edit = false,
+  }: {
+    edit?: boolean;
+    newPolicy: NewPackagePolicy;
+  }) => (
     <TestProvider>
-      <CspCreatePolicyExtension newPolicy={newPolicy} onChange={onChange} />
+      <CspPolicyTemplateForm newPolicy={newPolicy} onChange={onChange} edit={edit} />
     </TestProvider>
   );
 
@@ -78,6 +84,35 @@ describe('<CspCreatePolicyExtension />', () => {
     expect(option2).toBeInTheDocument();
     expect(option3).toBeInTheDocument();
     expect(option1).toBeEnabled();
+    expect(option2.parentElement).toBeDisabled();
+    expect(option3.parentElement).toBeDisabled();
+    expect(option1.querySelector('input')).toBeChecked();
+  });
+
+  it('renders disabled KSPM input when editing', () => {
+    const { getByText } = render(<WrappedComponent newPolicy={getMockPolicyK8s()} edit={true} />);
+
+    const option1 = getByText('Self-Managed/Vanilla Kubernetes', { selector: 'button span' });
+    const option2 = getByText('EKS (Elastic Kubernetes Service)', { selector: 'button span' });
+
+    expect(option1).toBeInTheDocument();
+    expect(option2).toBeInTheDocument();
+    expect(option1.parentElement).toBeDisabled();
+    expect(option2.parentElement).toBeDisabled();
+    expect(option1.querySelector('input')).toBeChecked();
+  });
+
+  it('renders disabled CSPM input when editing', () => {
+    const { getByText } = render(<WrappedComponent newPolicy={getMockPolicyAWS()} edit={true} />);
+
+    const option1 = getByText('Amazon Web Services', { selector: 'button span' });
+    const option2 = getByText('GCP', { selector: 'button span' });
+    const option3 = getByText('Azure', { selector: 'button span' });
+
+    expect(option1).toBeInTheDocument();
+    expect(option2).toBeInTheDocument();
+    expect(option3).toBeInTheDocument();
+    expect(option1.parentElement).toBeDisabled();
     expect(option2.parentElement).toBeDisabled();
     expect(option3.parentElement).toBeDisabled();
     expect(option1.querySelector('input')).toBeChecked();
