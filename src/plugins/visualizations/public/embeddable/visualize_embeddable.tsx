@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
-import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
+import { Filter, onlyDisabledFiltersChanged, Query, TimeRange, uniqFilters } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -592,11 +592,27 @@ export class VisualizeEmbeddable
 
     this.expressionVariablesSubject.next(this.expressionVariables);
 
+    const searchSourceFilters = this.vis.data.searchSource?.getFields()?.filter;
+    const filters = (
+      typeof searchSourceFilters === 'function' ? searchSourceFilters() : searchSourceFilters
+    ) as Filter[] | Filter | undefined;
+
+    const combinedFilters = [
+      ...(this.input.filters ?? []),
+      ...(Array.isArray(filters) ? filters : filters ? [filters] : []),
+    ];
+
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
         query: this.input.query,
-        filters: this.input.filters,
+        filters: uniqFilters(combinedFilters, {
+          index: true,
+          disabled: true,
+          negate: true,
+          state: true,
+          alias: true,
+        }),
         disableShardWarnings: true,
       },
       variables: {

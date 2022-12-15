@@ -111,7 +111,6 @@ import { extractReferences } from './extract_references';
 import {
   EsdslExpressionFunctionDefinition,
   ExpressionFunctionKibanaContext,
-  filtersToAst,
   queryToAst,
 } from '../expressions';
 
@@ -1010,13 +1009,10 @@ export class SearchSource {
     const searchRequest = this.mergeProps();
     const { body, index, query } = searchRequest;
 
-    const filters = (
-      typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters
-    ) as Filter[] | Filter | undefined;
     const ast = buildExpression([
       buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
         q: query?.map(queryToAst),
-        filters: filters && filtersToAst(filters),
+        filters: [],
       }),
     ]).toAst();
 

@@ -45,12 +45,15 @@ const mapFilter = (
     ? removeRequiredAttributes(excludedAttributes)
     : excludedAttributes;
 
-  const cleaned: FilterMeta = omit(filter, attrsToExclude) as FilterMeta;
-
-  if (comparators.index) cleaned.index = filter.meta?.index;
-  if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);
-  if (comparators.disabled) cleaned.disabled = filter.meta && Boolean(filter.meta.disabled);
-  if (comparators.alias) cleaned.alias = filter.meta?.alias;
+  // Some filters are coming from GET params,
+  // so to check for equality it is required to remove fields with undefined values.
+  const cleanedFilter = JSON.parse(JSON.stringify(filter));
+  const cleaned: FilterMeta = omit(cleanedFilter, attrsToExclude) as FilterMeta;
+  if (comparators.index) cleaned.index = cleanedFilter.meta?.index;
+  if (comparators.negate) cleaned.negate = cleanedFilter.meta && Boolean(cleanedFilter.meta.negate);
+  if (comparators.disabled)
+    cleaned.disabled = cleanedFilter.meta && Boolean(cleanedFilter.meta.disabled);
+  if (comparators.alias) cleaned.alias = cleanedFilter.meta?.alias;
 
   return cleaned;
 };
