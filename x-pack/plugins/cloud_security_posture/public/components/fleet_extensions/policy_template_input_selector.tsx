@@ -5,8 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import type { PostureInput, PosturePolicyTemplate } from '../../../common/constants';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { InlineRadioGroup } from './inline_radio_group';
@@ -23,14 +24,28 @@ const noop = () => {};
 
 export const PolicyInputSelector = ({ input, ...rest }: Props) => {
   const baseOptions = getPolicyTemplateInputOptions(input.policy_template as PosturePolicyTemplate);
-  const options = rest.disabled
-    ? baseOptions.map((option) => ({
-        ...option,
-        disabled: true,
-      }))
-    : baseOptions;
-
-  if (!input) return null;
+  const options = baseOptions.map((option) => ({
+    ...option,
+    disabled: option.disabled || rest.disabled,
+    label: (
+      <EuiFlexGroup direction="row" alignItems="center">
+        <EuiFlexItem grow={true}>{option.label}</EuiFlexItem>
+        {option.icon && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type={option.icon}
+              css={
+                option.disabled &&
+                css`
+                  filter: grayscale(1);
+                `
+              }
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    ),
+  }));
 
   return (
     <div>

@@ -6,98 +6,72 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiRadio, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, EuiRadioGroup, type EuiRadioGroupProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-interface Props<T extends string> {
-  size?: 's' | 'm';
-  idSelected: string;
-  options: Array<{
-    id: T;
-    label: React.ReactNode;
-    icon?: string;
-    disabled?: boolean;
-    tooltip?: string;
-  }>;
-  onChange: (id: T) => void;
-}
+type RadioGroupProps = Pick<EuiRadioGroupProps, 'onChange' | 'options' | 'idSelected'>;
 
-export const InlineRadioGroup = <T extends string>({
-  idSelected,
-  size,
-  options,
-  onChange,
-}: Props<T>) => {
+type Props = RadioGroupProps & {
+  size?: 's' | 'm';
+};
+
+export const InlineRadioGroup = ({ idSelected, size, options, onChange }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <div
+    <EuiRadioGroup
+      idSelected={idSelected}
+      options={options.map((o) => ({
+        ...o,
+        ['data-enabled']: idSelected === o.id,
+        ['data-disabled']: o.disabled,
+      }))}
+      onChange={onChange}
       css={css`
         display: grid;
         grid-template-columns: repeat(${options.length}, 1fr);
-        grid-template-rows: ${size === 's' ? 40 : 52}px;
+        grid-template-rows: ${size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl};
         column-gap: ${euiTheme.size.s};
+        align-items: center;
 
-        .__extended_radio {
+        .euiRadio {
+          height: 100%;
+          padding-left: ${euiTheme.size.s};
+          padding-right: ${euiTheme.size.s};
+
           display: grid;
-          grid-template-columns: auto auto 1fr;
-        }
-        .__extended_radio svg,
-        .__extended_radio img {
-          justify-self: flex-end;
+          grid-template-columns: auto 1fr;
+          column-gap: ${euiTheme.size.s};
+          align-items: center;
+
+          border: 1px solid ${euiTheme.colors.lightShade};
+          border-radius: ${euiTheme.border.radius.medium};
+          background: ${euiTheme.colors.emptyShade};
         }
 
-        button:disabled svg,
-        button:disabled img {
-          filter: grayscale(1);
+        .euiRadio[data-enabled='true'] {
+          border-color: ${euiTheme.colors.primary};
+          background: ${euiTheme.colors.lightestShade};
+        }
+        .euiRadio[data-disabled='true'] {
+          border-color: ${euiTheme.colors.disabled};
+          background: ${euiTheme.colors.emptyShade};
+        }
+
+        .euiRadio .euiRadio__circle {
+          position: inherit;
+          top: 0;
+          left: 0;
+        }
+
+        .euiRadio .euiRadio__label {
+          padding-left: 0;
+        }
+
+        .euiRadioGroup__item {
+          margin-top: 0;
         }
       `}
-    >
-      {options.map((option) => {
-        const button = (
-          <EuiButton
-            key={option.id}
-            size="m"
-            color={'text'}
-            onClick={() => onChange(option.id)}
-            disabled={option.disabled}
-            iconType={option.icon}
-            iconSide="right"
-            contentProps={{ className: '__extended_radio' }}
-            style={{
-              height: '100%',
-              width: '100%',
-              textDecoration: 'none',
-              border: '1px solid',
-              borderColor: option.disabled
-                ? euiTheme.colors.disabled
-                : idSelected === option.id
-                ? euiTheme.colors.primary
-                : euiTheme.colors.lightShade,
-              background:
-                idSelected === option.id
-                  ? euiTheme.colors.lightestShade
-                  : euiTheme.colors.emptyShade,
-            }}
-          >
-            <EuiRadio
-              checked={idSelected === option.id}
-              disabled={option.disabled}
-              onChange={() => {}}
-            />
-            {option.label}
-          </EuiButton>
-        );
-
-        if (option.tooltip)
-          return (
-            <EuiToolTip key={option.id} content={option.tooltip}>
-              {button}
-            </EuiToolTip>
-          );
-
-        return button;
-      })}
-    </div>
+    />
   );
 };
