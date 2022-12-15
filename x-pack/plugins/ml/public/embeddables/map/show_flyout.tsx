@@ -8,10 +8,10 @@
 import React from 'react';
 import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
 import { from } from 'rxjs';
-import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 
 import {
   toMountPoint,
@@ -23,7 +23,7 @@ import { getMlGlobalServices } from '../../application/app';
 import { GeoJobFlyout } from './flyout';
 
 export async function showMapVisToJobFlyout(
-  embeddable: Embeddable,
+  embeddable: MapEmbeddable,
   coreStart: CoreStart,
   share: SharePluginStart,
   data: DataPublicPluginStart

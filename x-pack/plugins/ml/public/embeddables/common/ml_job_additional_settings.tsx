@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// @ts-nocheck
+
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { Embeddable } from '@kbn/lens-plugin/public';
+import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 
 import {
   EuiFlexGroup,
@@ -40,11 +41,12 @@ import { ML_APP_LOCATOR, ML_PAGES } from '../../../common/constants/locator';
 import { useMlFromLensKibanaContext } from '../lens/context';
 
 interface Props {
-  children: React.ReactElement;
-  quickJobCreator: any; // TODO: update
+  children?: React.ReactElement;
+  createADJobInWizard: any; // TODO: update
+  createADJob: any; // TODO: update
   layer?: LayerResult;
   layerIndex?: number;
-  embeddable: Embeddable;
+  embeddable: Embeddable | MapEmbeddable;
 }
 
 enum STATE {
@@ -57,7 +59,8 @@ enum STATE {
 
 export const MlJobAdditionalSettings: FC<Props> = ({
   children,
-  quickJobCreator,
+  createADJobInWizard,
+  createADJob,
   layer,
   layerIndex,
   embeddable,
@@ -67,7 +70,6 @@ export const MlJobAdditionalSettings: FC<Props> = ({
       share,
       application,
       mlServices: { mlApiServices },
-      lens,
     },
   } = useMlFromLensKibanaContext();
 
@@ -81,27 +83,21 @@ export const MlJobAdditionalSettings: FC<Props> = ({
   const [state, setState] = useState<STATE>(STATE.DEFAULT);
   const [createError, setCreateError] = useState<{ text: string; errorText: string } | null>(null);
 
-  const jobType = layer?.jobType ?? 'geo';
+  const jobType = layer?.jobType ?? JOB_TYPE.GEO;
 
-  function createADJobInWizard() {
-    // redirectToADJobWizards(embeddable, layerIndex, share, lens);
-  }
-
-  async function createADJob() {
+  async function createJob() {
     if (jobId === undefined) {
       return;
     }
-
     setState(STATE.SAVING);
     setCreateError(null);
-    const result = await quickJobCreator.createAndSaveJob(
+    const result = await createADJob({
       jobId,
       bucketSpan,
       embeddable,
       startJob,
       runInRealTime,
-      layerIndex
-    );
+    });
     const error = checkForCreationErrors(result);
     if (error === null) {
       setState(STATE.SAVE_SUCCESS);
@@ -117,7 +113,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
       const locator = share.url.locators.get(ML_APP_LOCATOR);
       if (locator) {
         const page = startJob
-          ? type === JOB_TYPE.MULTI_METRIC
+          ? type === JOB_TYPE.MULTI_METRIC || type === JOB_TYPE.GEO
             ? ML_PAGES.ANOMALY_EXPLORER
             : ML_PAGES.SINGLE_METRIC_VIEWER
           : ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
@@ -211,29 +207,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
     <>
       {state !== STATE.SAVE_SUCCESS && state !== STATE.SAVING ? (
         <>
-          {children}
-          {/* <EuiFlexGroup gutterSize="s" data-test-subj="mlLensLayerCompatible">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <EuiIcon type="checkInCircleFilled" color="success" />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s">
-                {layer.jobType === JOB_TYPE.MULTI_METRIC ? (
-                  <FormattedMessage
-                    id="xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle.multiMetric"
-                    defaultMessage="This layer can be used to create a multi-metric job"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle.singleMetric"
-                    defaultMessage="This layer can be used to create a single metric job"
-                  />
-                )}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup> */}
+          {children ?? null}
           <EuiSpacer size="m" />
           <EuiForm>
             <EuiFormRow
@@ -329,9 +303,9 @@ export const MlJobAdditionalSettings: FC<Props> = ({
                   jobIdValidationError !== '' ||
                   bucketSpanValidationError !== ''
                 }
-                onClick={createADJob.bind(null, layerIndex)}
+                onClick={createJob.bind(null, layerIndex)}
                 size="s"
-                data-test-subj={`mlLensLayerCreateJobButton_${layerIndex}`}
+                data-test-subj={`mlLensLayerCreateJobButton_${layerIndex ? layerIndex : ''}`}
               >
                 <FormattedMessage
                   id="xpack.ml.embeddables.lensLayerFlyout.createJobButton.saving"
@@ -342,11 +316,12 @@ export const MlJobAdditionalSettings: FC<Props> = ({
 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={createADJobInWizard.bind(null, layerIndex)}
+                onClick={createADJobInWizard}
+                // onClick={createADJobInWizard.bind(null, layerIndex)}
                 size="s"
                 iconType="popout"
                 iconSide="right"
-                data-test-subj={`mlLensLayerCreateWithWizardButton_${layerIndex}`}
+                data-test-subj={`mlLensLayerCreateWithWizardButton_${layerIndex ? layerIndex : ''}`}
               >
                 <FormattedMessage
                   id="xpack.ml.embeddables.lensLayerFlyout.createJobButton"
@@ -362,7 +337,9 @@ export const MlJobAdditionalSettings: FC<Props> = ({
         <>
           <EuiFlexGroup
             gutterSize="s"
-            data-test-subj={`mlLensLayerCompatible.jobCreated.success_${layerIndex}`}
+            data-test-subj={`mlLensLayerCompatible.jobCreated.success_${
+              layerIndex ? layerIndex : ''
+            }`}
           >
             <EuiFlexItem grow={false}>
               <EuiText size="s">
@@ -372,7 +349,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
             <EuiFlexItem>
               <EuiText size="s">
                 <FormattedMessage
-                  id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess"
+                  id="xpack.ml.embeddables.flyout.flyoutAdditionalSettings.saveSuccess"
                   defaultMessage="Job created"
                 />
               </EuiText>
@@ -383,21 +360,21 @@ export const MlJobAdditionalSettings: FC<Props> = ({
           <EuiButtonEmpty
             onClick={viewResults.bind(null, jobType)}
             flush="left"
-            data-test-subj={`mlLensLayerResultsButton_${layerIndex}`}
+            data-test-subj={`mlLensLayerResultsButton_${layerIndex ? layerIndex : ''}`}
           >
             {startJob === false ? (
               <FormattedMessage
-                id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.jobList"
+                id="xpack.ml.embeddables.flyoutAdditionalSettings.saveSuccess.resultsLink.jobList"
                 defaultMessage="View in job management page"
               />
-            ) : jobType === JOB_TYPE.MULTI_METRIC ? (
+            ) : jobType === JOB_TYPE.MULTI_METRIC || jobType === JOB_TYPE.GEO ? (
               <FormattedMessage
-                id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.multiMetric"
+                id="xpack.ml.embeddables.flyoutAdditionalSettings.saveSuccess.resultsLink.multiMetric"
                 defaultMessage="View results in Anomaly Explorer"
               />
             ) : (
               <FormattedMessage
-                id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.singleMetric"
+                id="xpack.ml.embeddables.flyoutAdditionalSettings.saveSuccess.resultsLink.singleMetric"
                 defaultMessage="View results in Single Metric Viewer"
               />
             )}
@@ -409,7 +386,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <FormattedMessage
-              id="xpack.ml.embeddables.lensLayerFlyout.creatingJob"
+              id="xpack.ml.embeddables.flyoutAdditionalSettings.creatingJob"
               defaultMessage="Creating job"
             />
           </EuiFlexItem>
@@ -436,30 +413,42 @@ const checkForCreationErrors = (
 ) => {
   if (result.jobCreated.error) {
     return {
-      text: i18n.translate('xpack.ml.embeddables.lensLayerFlyout.jobCreateError.jobCreated', {
-        defaultMessage: 'Job could not be created.',
-      }),
+      text: i18n.translate(
+        'xpack.ml.embeddables.flyoutAdditionalSettings.jobCreateError.jobCreated',
+        {
+          defaultMessage: 'Job could not be created.',
+        }
+      ),
       errorText: extractErrorMessage(result.jobCreated.error),
     };
   } else if (result.datafeedCreated.error) {
     return {
-      text: i18n.translate('xpack.ml.embeddables.lensLayerFlyout.jobCreateError.datafeedCreated', {
-        defaultMessage: 'Job created but datafeed could not be created.',
-      }),
+      text: i18n.translate(
+        'xpack.ml.embeddables.flyoutAdditionalSettings.jobCreateError.datafeedCreated',
+        {
+          defaultMessage: 'Job created but datafeed could not be created.',
+        }
+      ),
       errorText: extractErrorMessage(result.datafeedCreated.error),
     };
   } else if (result.jobOpened.error) {
     return {
-      text: i18n.translate('xpack.ml.embeddables.lensLayerFlyout.jobCreateError.jobOpened', {
-        defaultMessage: 'Job and datafeed created but the job could not be opened.',
-      }),
+      text: i18n.translate(
+        'xpack.ml.embeddables.flyoutAdditionalSettings.jobCreateError.jobOpened',
+        {
+          defaultMessage: 'Job and datafeed created but the job could not be opened.',
+        }
+      ),
       errorText: extractErrorMessage(result.jobOpened.error),
     };
   } else if (result.datafeedStarted.error) {
     return {
-      text: i18n.translate('xpack.ml.embeddables.lensLayerFlyout.jobCreateError.datafeedStarted', {
-        defaultMessage: 'Job and datafeed created but the datafeed could not be started.',
-      }),
+      text: i18n.translate(
+        'xpack.ml.embeddables.flyoutAdditionalSettings.jobCreateError.datafeedStarted',
+        {
+          defaultMessage: 'Job and datafeed created but the datafeed could not be started.',
+        }
+      ),
       errorText: extractErrorMessage(result.datafeedStarted.error),
     };
   } else {

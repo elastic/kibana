@@ -13,6 +13,7 @@ import type {
   ChartInfo,
   LensSavedObjectAttributes,
 } from '@kbn/lens-plugin/public';
+import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
@@ -20,6 +21,14 @@ import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
+
+export function isLensEmbeddable(arg: any): arg is Embeddable {
+  return arg.hasOwnProperty('type') && arg.type === 'lens';
+}
+
+export function isMapEmbeddable(arg: any): arg is MapEmbeddable {
+  return arg.hasOwnProperty('type') && arg.type === 'map';
+}
 
 export const COMPATIBLE_SERIES_TYPES = [
   'line',
@@ -66,9 +75,11 @@ export async function redirectToADJobWizards(
   window.open(url, '_blank');
 }
 
-export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: LensPublicStart) {
-  const isLensType = embeddable.type === 'lens';
-  if (isLensType && !lens) {
+export async function getJobsItemsFromEmbeddable(
+  embeddable: Embeddable | MapEmbeddable,
+  lens?: LensPublicStart
+) {
+  if (isLensEmbeddable(embeddable) && !lens) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.lensNotFound', {
         defaultMessage: 'Lens is not intialized',
@@ -87,8 +98,9 @@ export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: 
     );
   }
   const { to, from } = timeRange;
+  const dashboard = embeddable.parent?.type === 'dashboard' ? embeddable.parent : undefined;
 
-  if (isLensType && lens) {
+  if (isLensEmbeddable(embeddable) && lens) {
     const vis = embeddable.getSavedVis();
 
     if (vis === undefined) {
@@ -100,8 +112,6 @@ export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: 
     }
 
     const chartInfo = await getChartInfoFromVisualization(lens, vis);
-    // dashboard needs to be returned for map type, too
-    const dashboard = embeddable.parent?.type === 'dashboard' ? embeddable.parent : undefined;
 
     return {
       vis,
@@ -114,13 +124,11 @@ export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: 
     };
   } else {
     return {
-      // vis,
-      // chartInfo,
       from,
       to,
       query,
       filters,
-      // dashboard,
+      dashboard,
     };
   }
 }
