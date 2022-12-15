@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
@@ -101,7 +101,7 @@ export function useOnSubmit({
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
 
-  const [isInitialized, setIsInitalized] = useState(false);
+  const isInitializedRef = useRef(false);
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
   // New package policy state
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
@@ -182,9 +182,10 @@ export function useOnSubmit({
   // Initial loading of package info
   useEffect(() => {
     async function init() {
-      if (isInitialized || !packageInfo) {
+      if (isInitializedRef.current || !packageInfo) {
         return;
       }
+
       // Fetch all packagePolicies having the package name
       const { data: packagePolicyData } = await sendGetPackagePolicies({
         perPage: SO_SEARCH_LIMIT,
@@ -193,6 +194,7 @@ export function useOnSubmit({
       });
       const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
+      isInitializedRef.current = true;
       updatePackagePolicy(
         packageToPackagePolicy(
           packageInfo,
@@ -203,10 +205,9 @@ export function useOnSubmit({
           integrationToEnable
         )
       );
-      setIsInitalized(true);
     }
     init();
-  }, [packageInfo, agentPolicy, isInitialized, updatePackagePolicy, integrationToEnable]);
+  }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable]);
 
   const onSaveNavigate = useOnSaveNavigate({
     packagePolicy,
@@ -354,7 +355,7 @@ export function useOnSubmit({
     setValidationResults,
     hasAgentPolicyError,
     setHasAgentPolicyError,
-    isInitialized,
+    isInitialized: isInitializedRef.current,
     // TODO check
     navigateAddAgent,
     navigateAddAgentHelp,

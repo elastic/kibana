@@ -48,7 +48,7 @@ function mergeVars(
   return Object.entries(packageVars).reduce((acc, [varKey, varRecord]) => {
     acc[varKey] = {
       ...varRecord,
-      value: userVars[varKey].value ?? varRecord.value,
+      value: userVars?.[varKey]?.value ?? varRecord.value,
     };
 
     return acc;
@@ -180,7 +180,6 @@ export function usePackagePolicyWithRelatedData(
         const { data: upgradePackagePolicyDryRunData, error: upgradePackagePolicyDryRunError } =
           await sendUpgradePackagePolicyDryRun([packagePolicyId]);
 
-        //  TODO investigate this
         if (upgradePackagePolicyDryRunError) {
           throw upgradePackagePolicyDryRunError;
         }
@@ -189,7 +188,6 @@ export function usePackagePolicyWithRelatedData(
           ? hasUpgradeAvailable(upgradePackagePolicyDryRunData)
           : false;
 
-        // todo find a better variable name
         const isUpgradeScenario = options.forceUpgrade && hasUpgrade;
         // If the dry run data doesn't indicate a difference in version numbers, flip the form back
         // to its non-upgrade state, even if we were initially set to the upgrade view
@@ -210,11 +208,9 @@ export function usePackagePolicyWithRelatedData(
 
         if (isUpgradeScenario) {
           if (!proposedUpgradePackagePolicy) {
-            // TODO we should throw here it'
-            setLoadingError(
-              new Error('There was an error when trying to upgrade that package policy')
+            throw new Error(
+              'There was an error when trying to load upgrade diff for that package policy'
             );
-            return;
           }
           // If we're upgrading the package, we need to "start from" the policy as it's returned from
           // the dry run so we can allow the user to edit any new variables before saving + upgrading
