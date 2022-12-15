@@ -27,6 +27,7 @@ jest.mock('../app_context', () => {
 jest.mock('../agent_policy', () => {
   return {
     agentPolicyService: {
+      getInactivityTimeouts: jest.fn().mockResolvedValue([]),
       getByIDs: jest.fn().mockResolvedValue([{ id: 'hosted-agent-policy', is_managed: true }]),
     },
   };
