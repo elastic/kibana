@@ -1,7 +1,7 @@
 import {type Observable, defer, switchMap, of, map} from "rxjs";
 import type {ContentCache} from "./content_cache";
 
-export class CachedContentType<T = unknown> {
+export class CachedContentType {
   constructor(public readonly id: string, protected readonly cache: ContentCache) {}
 
   public list(): Observable<string[]> {
