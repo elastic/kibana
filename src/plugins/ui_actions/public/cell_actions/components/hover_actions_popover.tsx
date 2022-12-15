@@ -8,9 +8,10 @@
 
 import { EuiPopover, EuiScreenReaderOnly } from '@elastic/eui';
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import { debounce } from 'lodash';
 import { ActionItem } from './cell_action_item';
 import { ExtraActionsButton } from './extra_actions_button';
 import { ACTIONS_AREA_LABEL, YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
@@ -46,7 +47,6 @@ export const HoverActionsPopover = React.memo<Props>(
     const contentRef = useRef<HTMLDivElement>(null);
     const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
     const [showHoverContent, setShowHoverContent] = useState(false);
-    const [, setHoverTimeout] = useState<number | undefined>(undefined);
     const popoverRef = useRef<EuiPopover>(null);
 
     const [{ value: actions }, loadActions] = useLoadActionsFn();
@@ -57,10 +57,6 @@ export const HoverActionsPopover = React.memo<Props>(
     );
 
     const closePopover = useCallback(() => {
-      setHoverTimeout((prevHoverTimeout) => {
-        clearTimeout(prevHoverTimeout);
-        return undefined;
-      });
       setShowHoverContent(false);
     }, []);
 
@@ -74,6 +70,23 @@ export const HoverActionsPopover = React.memo<Props>(
       closePopover();
     }, [closePopover, setIsExtraActionsPopoverOpen]);
 
+    const openPopOverDebounced = useMemo(
+      () =>
+        debounce(() => {
+          if (!document.body.classList.contains(IS_DRAGGING_CLASS_NAME)) {
+            setShowHoverContent(true);
+          }
+        }, HOVER_INTENT_DELAY),
+      []
+    );
+
+    // prevent setState on an unMounted component
+    useEffect(() => {
+      return () => {
+        openPopOverDebounced.cancel();
+      };
+    }, [openPopOverDebounced]);
+
     const onMouseEnter = useCallback(async () => {
       // Do not open actions with extra action popover is open
       if (isExtraActionsPopoverOpen) return;
@@ -83,19 +96,8 @@ export const HoverActionsPopover = React.memo<Props>(
         loadActions(actionContext);
       }
 
-      setHoverTimeout(
-        Number(
-          setTimeout(() => {
-            // NOTE: the following read from the DOM is expensive, but not as
-            // expensive as the default behavior, which adds a div to the body,
-            // which-in turn performs a more expensive change to the layout
-            if (!document.body.classList.contains(IS_DRAGGING_CLASS_NAME)) {
-              setShowHoverContent(true);
-            }
-          }, HOVER_INTENT_DELAY)
-        )
-      );
-    }, [isExtraActionsPopoverOpen, actions, loadActions, actionContext]);
+      openPopOverDebounced();
+    }, [isExtraActionsPopoverOpen, actions, openPopOverDebounced, loadActions, actionContext]);
 
     const onMouseLeave = useCallback(() => {
       closePopover();
