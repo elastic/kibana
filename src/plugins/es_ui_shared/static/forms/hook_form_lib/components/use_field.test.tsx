@@ -346,7 +346,9 @@ describe('<UseField />', () => {
       expect(isValid).toBeUndefined(); // Initially the form validity is undefined...
 
       await act(async () => {
-        await formHook!.validate(); // ...until we validate the form
+        const validatePromise = formHook!.validate(); // ...until we validate the form
+        jest.advanceTimersByTime(0);
+        await validatePromise;
       });
 
       ({ isValid } = formHook);
