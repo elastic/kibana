@@ -1,24 +1,22 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Security: Packetbeat - Looks for unusual HTTP or TLS destination domain activity that could indicate execution, persistence, command-and-control or data exfiltration activity.",
+  "description": "Security: Packetbeat - Looks for unusual DNS activity that could indicate command-and-control activity.",
   "groups": [
     "security",
     "packetbeat",
-    "web"
+    "dns"
   ],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare by \"server.domain\"",
+        "detector_description": "rare by \"dns.question.name\"",
         "function": "rare",
-        "by_field_name": "server.domain"
+        "by_field_name": "dns.question.name"
       }
     ],
     "influencers": [
-      "host.name",
-      "destination.ip",
-      "source.ip"
+      "host.name"
     ]
   },
   "allow_lazy_open": true,
@@ -29,12 +27,13 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "created_by": "ml-module-siem-packetbeat",
+    "created_by": "ml-module-security-packetbeat",
     "custom_urls": [
       {
         "url_name": "Host Details",
         "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
-    ]
+    ],
+    "security_app_display_name": "Unusual DNS Activity"
   }
 }
