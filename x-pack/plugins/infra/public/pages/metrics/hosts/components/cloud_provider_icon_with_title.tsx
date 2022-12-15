@@ -31,7 +31,7 @@ export const CloudProviderIconWithTitle = ({
     >
       <EuiFlexItem grow={false}>
         <EuiIcon
-          type={provider ? cloudIcons[provider] : cloudIcons.unknownProvider}
+          type={(provider && cloudIcons[provider]) || cloudIcons.unknownProvider}
           size="m"
           title={title}
         />
