@@ -1,5 +1,5 @@
 {
-  "id": "siem_packetbeat",
+  "id": "security_packetbeat",
   "title": "Security: Packetbeat",
   "description": "Detect suspicious network activity in Packetbeat data.",
   "type": "Packetbeat data",
