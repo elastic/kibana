@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { CmAvatarEmpty, CmAvatarEmptyProps } from '../avatar_empty';
+import { CmAvatarEmpty } from '../avatar_empty';
 
 export default {
   title: 'Content Management/Item/Avatar/AvatarEmpty',
