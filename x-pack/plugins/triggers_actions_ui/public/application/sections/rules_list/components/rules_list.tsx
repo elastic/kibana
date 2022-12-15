@@ -231,7 +231,6 @@ export const RulesList = ({
     authorizedToCreateAnyRules,
     isSuccess: isLoadRuleTypesSuccess,
   } = useLoadRuleTypesQuery({ filteredRuleTypes });
-
   // Fetch action types
   const { actionTypes } = useLoadActionTypesQuery();
 
@@ -251,7 +250,7 @@ export const RulesList = ({
   const canLoadRules = isLoadRuleTypesSuccess && hasAnyAuthorizedRuleType;
 
   // Fetch rules
-  const { rulesState, loadRules, noData, initialLoad, lastUpdate } = useLoadRulesQuery({
+  const { rulesState, loadRules, noData, lastUpdate } = useLoadRulesQuery({
     filters: computedFilter,
     hasDefaultRuleTypesFiltersOn,
     page,
@@ -597,168 +596,9 @@ export const RulesList = ({
     setRuleFlyoutVisibility(true);
   }, []);
 
-  const table = (
-    <>
-      <RulesListFiltersBar
-        inputText={inputText}
-        filters={filters}
-        showActionFilter={showActionFilter}
-        rulesStatusesTotal={rulesStatusesTotal}
-        rulesLastRunOutcomesTotal={rulesLastRunOutcomesTotal}
-        tags={tags}
-        filterOptions={filterOptions}
-        actionTypes={actionTypes}
-        authorizedToCreateAnyRules={authorizedToCreateAnyRules}
-        showCreateRuleButton={showCreateRuleButton}
-        lastUpdate={lastUpdate}
-        showErrors={showErrors}
-        openFlyout={openFlyout}
-        updateFilters={updateFilters}
-        setInputText={setInputText}
-        onClearSelection={onClearSelection}
-        onRefreshRules={refreshRules}
-        onToggleRuleErrors={toggleRuleErrors}
-      />
-      <EuiSpacer size="s" />
-      <RulesListTable
-        items={tableItems}
-        isLoading={isRulesTableLoading}
-        rulesState={rulesState}
-        ruleTypesState={ruleTypesState}
-        ruleTypeRegistry={ruleTypeRegistry}
-        isPageSelected={isPageSelected}
-        isAllSelected={isAllSelected}
-        numberOfSelectedRules={numberOfSelectedItems}
-        sort={sort}
-        page={page}
-        percentileOptions={percentileOptions}
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        onSort={setSort}
-        onPage={setPage}
-        onRuleChanged={() => refreshRules()}
-        onRuleClick={(rule) => {
-          const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : commonRuleDetailsRoute;
-          history.push(detailsRoute.replace(`:ruleId`, rule.id));
-        }}
-        onRuleEditClick={(rule) => {
-          if (rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)) {
-            onRuleEdit(rule);
-          }
-        }}
-        onRuleDeleteClick={(rule) =>
-          updateRulesToBulkEdit({
-            action: 'delete',
-            rules: [rule],
-          })
-        }
-        onManageLicenseClick={(rule) =>
-          setManageLicenseModalOpts({
-            licenseType: ruleTypesState.data.get(rule.ruleTypeId)?.minimumLicenseRequired!,
-            ruleTypeId: rule.ruleTypeId,
-          })
-        }
-        onPercentileOptionsChange={setPercentileOptions}
-        onDisableRule={onDisableRule}
-        onEnableRule={onEnableRule}
-        onSnoozeRule={onSnoozeRule}
-        onUnsnoozeRule={onUnsnoozeRule}
-        onSelectAll={onSelectAll}
-        onSelectPage={onSelectPage}
-        onSelectRow={onSelectRow}
-        isRowSelected={isRowSelected}
-        renderCollapsedItemActions={(rule, onLoading) => (
-          <CollapsedItemActions
-            key={rule.id}
-            item={rule}
-            onLoading={onLoading}
-            onRuleChanged={() => refreshRules()}
-            onDeleteRule={() =>
-              updateRulesToBulkEdit({
-                action: 'delete',
-                rules: [rule],
-              })
-            }
-            onEditRule={() => onRuleEdit(rule)}
-            onUpdateAPIKey={() =>
-              updateRulesToBulkEdit({
-                action: 'updateApiKey',
-                rules: [rule],
-              })
-            }
-            onRunRule={() => onRunRule(rule.id)}
-            onCloneRule={onCloneRule}
-          />
-        )}
-        renderRuleError={(rule) => {
-          const _executionStatus = rule.executionStatus;
-          const hasErrorMessage = _executionStatus.status === 'error';
-          const isLicenseError =
-            _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
-
-          return isLicenseError || hasErrorMessage ? (
-            <EuiButtonIcon
-              onClick={() => toggleErrorMessage(_executionStatus, rule)}
-              aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
-              iconType={itemIdToExpandedRowMap[rule.id] ? 'arrowUp' : 'arrowDown'}
-            />
-          ) : null;
-        }}
-        renderSelectAllDropdown={() => {
-          return (
-            <BulkOperationPopover
-              numberOfSelectedRules={numberOfSelectedItems}
-              canModifySelectedRules={authorizedToModifySelectedRules}
-            >
-              <RuleQuickEditButtons
-                selectedItems={convertRulesToTableItems({
-                  rules: filterRulesById(rulesState.data, selectedIds),
-                  ruleTypeIndex: ruleTypesState.data,
-                  canExecuteActions,
-                  config,
-                })}
-                isBulkEditing={isBulkEditing}
-                bulkEditAction={bulkEditAction}
-                updateRulesToBulkEdit={updateRulesToBulkEdit}
-                isAllSelected={isAllSelected}
-                getFilter={getFilter}
-                onPerformingAction={() => setIsPerformingAction(true)}
-                onActionPerformed={() => {
-                  refreshRules();
-                  setIsPerformingAction(false);
-                }}
-                isEnablingRules={isEnablingRules}
-                isDisablingRules={isDisablingRules}
-                onEnable={onEnable}
-                onDisable={onDisable}
-              />
-            </BulkOperationPopover>
-          );
-        }}
-        rulesListKey={rulesListKey}
-        config={config}
-        visibleColumns={visibleColumns}
-        columns={columns}
-      />
-      {manageLicenseModalOpts && (
-        <ManageLicenseModal
-          licenseType={manageLicenseModalOpts.licenseType}
-          ruleTypeId={manageLicenseModalOpts.ruleTypeId}
-          onConfirm={() => {
-            window.open(`${http.basePath.get()}/app/management/stack/license_management`, '_blank');
-            setManageLicenseModalOpts(null);
-          }}
-          onCancel={() => setManageLicenseModalOpts(null)}
-        />
-      )}
-    </>
-  );
-
   const showPrompt = noData && !rulesState.isLoading && !ruleTypesState.isLoading;
 
   useEffect(() => {
-    if (initialLoad) {
-      return;
-    }
     if (showPrompt && !authorizedToCreateAnyRules) {
       setHeaderActions?.([<RulesListDocLink />]);
       return;
@@ -768,18 +608,11 @@ export const RulesList = ({
       return;
     }
     setHeaderActions?.();
-  }, [initialLoad, showPrompt, authorizedToCreateAnyRules]);
+  }, [showPrompt, authorizedToCreateAnyRules]);
 
   useEffect(() => {
     return () => setHeaderActions?.();
   }, []);
-
-  const renderTable = () => {
-    if (!showPrompt && !initialLoad) {
-      return table;
-    }
-    return null;
-  };
 
   const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
 
@@ -836,16 +669,15 @@ export const RulesList = ({
   };
 
   const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
-
   return (
     <>
-      <RulesListPrompts
-        showPrompt={showPrompt}
-        showCreateRule={showCreateRuleButtonInPrompt}
-        showSpinner={initialLoad}
-        authorizedToCreateRules={authorizedToCreateAnyRules}
-        onCreateRulesClick={openFlyout}
-      />
+      {showPrompt && (
+        <RulesListPrompts
+          showCreateRule={showCreateRuleButtonInPrompt}
+          authorizedToCreateRules={authorizedToCreateAnyRules}
+          onCreateRulesClick={openFlyout}
+        />
+      )}
       <EuiPageTemplate.Section data-test-subj="rulesList" grow={false} paddingSize="none">
         {isDeleteModalFlyoutVisible && (
           <RulesDeleteModalConfirmation
@@ -921,7 +753,164 @@ export const RulesList = ({
           />
         )}
         <EuiSpacer size="xs" />
-        {renderTable()}
+        {!showPrompt ? (
+          <>
+            <RulesListFiltersBar
+              inputText={inputText}
+              filters={filters}
+              showActionFilter={showActionFilter}
+              rulesStatusesTotal={rulesStatusesTotal}
+              rulesLastRunOutcomesTotal={rulesLastRunOutcomesTotal}
+              tags={tags}
+              filterOptions={filterOptions}
+              actionTypes={actionTypes}
+              authorizedToCreateAnyRules={authorizedToCreateAnyRules}
+              showCreateRuleButton={showCreateRuleButton}
+              lastUpdate={lastUpdate}
+              showErrors={showErrors}
+              openFlyout={openFlyout}
+              updateFilters={updateFilters}
+              setInputText={setInputText}
+              onClearSelection={onClearSelection}
+              onRefreshRules={refreshRules}
+              onToggleRuleErrors={toggleRuleErrors}
+            />
+            <EuiSpacer size="s" />
+            <RulesListTable
+              items={tableItems}
+              isLoading={isRulesTableLoading}
+              rulesState={rulesState}
+              ruleTypesState={ruleTypesState}
+              ruleTypeRegistry={ruleTypeRegistry}
+              isPageSelected={isPageSelected}
+              isAllSelected={isAllSelected}
+              numberOfSelectedRules={numberOfSelectedItems}
+              sort={sort}
+              page={page}
+              percentileOptions={percentileOptions}
+              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+              onSort={setSort}
+              onPage={setPage}
+              onRuleChanged={() => refreshRules()}
+              onRuleClick={(rule) => {
+                const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : commonRuleDetailsRoute;
+                history.push(detailsRoute.replace(`:ruleId`, rule.id));
+              }}
+              onRuleEditClick={(rule) => {
+                if (rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)) {
+                  onRuleEdit(rule);
+                }
+              }}
+              onRuleDeleteClick={(rule) =>
+                updateRulesToBulkEdit({
+                  action: 'delete',
+                  rules: [rule],
+                })
+              }
+              onManageLicenseClick={(rule) =>
+                setManageLicenseModalOpts({
+                  licenseType: ruleTypesState.data.get(rule.ruleTypeId)?.minimumLicenseRequired!,
+                  ruleTypeId: rule.ruleTypeId,
+                })
+              }
+              onPercentileOptionsChange={setPercentileOptions}
+              onDisableRule={onDisableRule}
+              onEnableRule={onEnableRule}
+              onSnoozeRule={onSnoozeRule}
+              onUnsnoozeRule={onUnsnoozeRule}
+              onSelectAll={onSelectAll}
+              onSelectPage={onSelectPage}
+              onSelectRow={onSelectRow}
+              isRowSelected={isRowSelected}
+              renderCollapsedItemActions={(rule, onLoading) => (
+                <CollapsedItemActions
+                  key={rule.id}
+                  item={rule}
+                  onLoading={onLoading}
+                  onRuleChanged={() => refreshRules()}
+                  onDeleteRule={() =>
+                    updateRulesToBulkEdit({
+                      action: 'delete',
+                      rules: [rule],
+                    })
+                  }
+                  onEditRule={() => onRuleEdit(rule)}
+                  onUpdateAPIKey={() =>
+                    updateRulesToBulkEdit({
+                      action: 'updateApiKey',
+                      rules: [rule],
+                    })
+                  }
+                  onRunRule={() => onRunRule(rule.id)}
+                  onCloneRule={onCloneRule}
+                />
+              )}
+              renderRuleError={(rule) => {
+                const _executionStatus = rule.executionStatus;
+                const hasErrorMessage = _executionStatus.status === 'error';
+                const isLicenseError =
+                  _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
+
+                return isLicenseError || hasErrorMessage ? (
+                  <EuiButtonIcon
+                    onClick={() => toggleErrorMessage(_executionStatus, rule)}
+                    aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
+                    iconType={itemIdToExpandedRowMap[rule.id] ? 'arrowUp' : 'arrowDown'}
+                  />
+                ) : null;
+              }}
+              renderSelectAllDropdown={() => {
+                return (
+                  <BulkOperationPopover
+                    numberOfSelectedRules={numberOfSelectedItems}
+                    canModifySelectedRules={authorizedToModifySelectedRules}
+                  >
+                    <RuleQuickEditButtons
+                      selectedItems={convertRulesToTableItems({
+                        rules: filterRulesById(rulesState.data, selectedIds),
+                        ruleTypeIndex: ruleTypesState.data,
+                        canExecuteActions,
+                        config,
+                      })}
+                      isBulkEditing={isBulkEditing}
+                      bulkEditAction={bulkEditAction}
+                      updateRulesToBulkEdit={updateRulesToBulkEdit}
+                      isAllSelected={isAllSelected}
+                      getFilter={getFilter}
+                      onPerformingAction={() => setIsPerformingAction(true)}
+                      onActionPerformed={() => {
+                        refreshRules();
+                        setIsPerformingAction(false);
+                      }}
+                      isEnablingRules={isEnablingRules}
+                      isDisablingRules={isDisablingRules}
+                      onEnable={onEnable}
+                      onDisable={onDisable}
+                    />
+                  </BulkOperationPopover>
+                );
+              }}
+              rulesListKey={rulesListKey}
+              config={config}
+              visibleColumns={visibleColumns}
+              columns={columns}
+            />
+            {manageLicenseModalOpts && (
+              <ManageLicenseModal
+                licenseType={manageLicenseModalOpts.licenseType}
+                ruleTypeId={manageLicenseModalOpts.ruleTypeId}
+                onConfirm={() => {
+                  window.open(
+                    `${http.basePath.get()}/app/management/stack/license_management`,
+                    '_blank'
+                  );
+                  setManageLicenseModalOpts(null);
+                }}
+                onCancel={() => setManageLicenseModalOpts(null)}
+              />
+            )}
+          </>
+        ) : null}
         {ruleFlyoutVisible && (
           <Suspense fallback={<div />}>
             <RuleAdd

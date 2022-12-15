@@ -29,7 +29,6 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
     http,
     notifications: { toasts },
   } = useKibana().services;
-
   const {
     refetch,
     isLoading,
