@@ -16,7 +16,7 @@ import {
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/SloListItem/SloListItemSummaryStats',
+  title: 'app/SLO/ListPage/SloListItemSummaryStats',
   argTypes: {},
 };
 
@@ -28,5 +28,5 @@ const defaultProps = {
   slo: anSLO,
 };
 
-export const SloList = Template.bind({});
-SloList.args = defaultProps;
+export const SloListItemSummaryStats = Template.bind({});
+SloListItemSummaryStats.args = defaultProps;
