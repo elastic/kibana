@@ -152,27 +152,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
     after(async () => {
-      // delete agents 1 to 9
-      await es.deleteByQuery({
-        index: AGENTS_INDEX,
-        body: {
-          query: {
-            terms: {
-              _id: [
-                'agent1',
-                'agent2',
-                'agent3',
-                'agent4',
-                'agent5',
-                'agent6',
-                'agent7',
-                'agent8',
-                'agent9',
-              ],
-            },
-          },
-        },
-      });
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
