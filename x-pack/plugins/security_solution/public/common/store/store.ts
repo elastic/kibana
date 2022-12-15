@@ -110,16 +110,14 @@ export const createStoreFactory = async (
   const dataTableInitialState = {
     dataTable: {
       tableById: {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
         ...subPlugins.alerts.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...subPlugins.rules.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...subPlugins.exceptions.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...subPlugins.hosts.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...subPlugins.network.storageDataTables!.tableById,
+        ...subPlugins.explore.exploreDataTables!.hosts.tableById,
+        ...subPlugins.explore.exploreDataTables!.network.tableById,
+        ...subPlugins.explore.exploreDataTables!.users.tableById,
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
       },
     },
   };
@@ -132,9 +130,7 @@ export const createStoreFactory = async (
 
   const initialState = createInitialState(
     {
-      ...subPlugins.hosts.store.initialState,
-      ...subPlugins.users.store.initialState,
-      ...subPlugins.network.store.initialState,
+      ...subPlugins.explore.store.initialState,
       ...timelineInitialState,
       ...subPlugins.management.store.initialState,
     },
@@ -148,9 +144,7 @@ export const createStoreFactory = async (
   );
 
   const rootReducer = {
-    ...subPlugins.hosts.store.reducer,
-    ...subPlugins.users.store.reducer,
-    ...subPlugins.network.store.reducer,
+    ...subPlugins.explore.store.reducer,
     timeline: timelineReducer,
     ...subPlugins.management.store.reducer,
   };

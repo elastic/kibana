@@ -756,7 +756,7 @@ describe('rule_details', () => {
       disableButton.simulate('click');
 
       expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(rule);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
 
     it('should enable the rule when clicked', async () => {
@@ -785,7 +785,7 @@ describe('rule_details', () => {
       enableButton.simulate('click');
 
       expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledWith(rule);
+      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
   });
 
