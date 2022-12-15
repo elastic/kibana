@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { ReactNode, useCallback, useContext } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { useFieldStatsFlyoutContext } from '../pages/components/pick_fields_step/components/field_stats_flyout';
 import { FieldStatsInfoButton } from '../common/components/field_stats_info_button';
 import { Field } from '../../../../../common/types/fields';
-import { MLJobWizardFieldStatsFlyoutContext } from '../pages/components/pick_fields_step/components/field_stats_flyout/field_stats_flyout';
 
 interface Option extends EuiComboBoxOptionOption<string> {
   field: Field;
 }
 export const useFieldStatsTrigger = () => {
-  const { setIsFlyoutVisible, setFieldName } = useContext(MLJobWizardFieldStatsFlyoutContext);
+  const { setIsFlyoutVisible, setFieldName } = useFieldStatsFlyoutContext();
   const handleFieldStatsButtonClick = useCallback(
-    (field: Field, label: string, searchValue: string) => {
+    (field: Field) => {
       if (typeof field.id === 'string') {
         setFieldName(field.id);
         setIsFlyoutVisible(true);

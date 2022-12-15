@@ -51,6 +51,8 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
         const aggOption: DropDownOption = {
           isGroupLabelOption: true,
           key: f.name,
+          // @ts-ignore Purposefully passing label as element instead of string
+          // for more robust rendering
           label: (
             <FieldStatsInfoButton
               field={f}

@@ -14,16 +14,14 @@ import { getKbnFieldIconType } from '../../../../../../common/util/get_field_ico
 
 export const FieldStatsInfoButton = ({
   field,
-  searchValue,
   label,
+  searchValue = '',
   onButtonClick,
 }: {
-  (
-    field: Field,
-    label: string,
-    searchValue: string,
-    onButtonClick: (field: Field, label: string, searchValue: string) => void
-  );
+  field: Field;
+  label: string;
+  searchValue?: string;
+  onButtonClick?: (field: Field) => void;
 }) => {
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
