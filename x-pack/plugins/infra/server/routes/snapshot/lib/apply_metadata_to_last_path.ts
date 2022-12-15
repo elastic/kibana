@@ -60,7 +60,10 @@ export const applyMetadataToLastPath = (
         lastPath.os = get(firstMetaDoc, inventoryFields.os) as string;
       }
       if (inventoryFields.cloudProvider) {
-        lastPath.cloudProvider = get(firstMetaDoc, inventoryFields.cloudProvider) as string;
+        lastPath.cloudProvider = get(
+          firstMetaDoc,
+          inventoryFields.cloudProvider
+        ) as SnapshotNodePath['cloudProvider'];
       }
       return [...node.path.slice(0, node.path.length - 1), lastPath];
     }
