@@ -255,7 +255,7 @@ export function DataViewsList({
                     <EuiHorizontalRule margin="none" />
                     <div style={{ width: 200 }}>
                       <EuiPopoverTitle paddingSize="s">
-                        {i18n.translate('unifiedSearch.optionsList.popover.sortTitle', {
+                        {i18n.translate('unifiedSearch.optionsList.popover.OrderTitle', {
                           defaultMessage: 'Order',
                         })}
                       </EuiPopoverTitle>
