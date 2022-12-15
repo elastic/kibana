@@ -6,7 +6,7 @@
  */
 
 import { registerTransactionDurationRuleType } from './register_transaction_duration_rule_type';
-import { createRuleTypeMocks, MOCK_ALERT_LIMIT } from '../../test_utils';
+import { createRuleTypeMocks } from '../../test_utils';
 
 describe('registerTransactionDurationRuleType', () => {
   it('sends alert when value is greater than threshold', async () => {
@@ -44,7 +44,6 @@ describe('registerTransactionDurationRuleType', () => {
         total: 1,
       },
     });
-    services.alertFactory.alertLimit.getValue.mockReturnValue(MOCK_ALERT_LIMIT);
 
     const params = {
       threshold: 3000,

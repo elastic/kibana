@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import { pick } from 'lodash';
+import { map } from 'lodash';
 import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../types';
+import { AlertFactory } from '../alert/create_alert_factory';
+import { AlertInstanceState, AlertInstanceContext, WithoutReservedActionGroups } from '../types';
 
 interface TrimmedRecoveredAlertsResult<
   State extends AlertInstanceState,
@@ -22,36 +22,30 @@ interface TrimmedRecoveredAlertsResult<
 export function trimRecoveredAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  RecoveryActionGroupIds extends string
+  RecoveryActionGroupIds extends string,
+  ActionGroupIds extends string
 >(
-  logger: Logger,
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {},
   currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {},
-  alertLimit: number
+  alertFactory: AlertFactory<
+    State,
+    Context,
+    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupIds>
+  >
 ): TrimmedRecoveredAlertsResult<State, Context, RecoveryActionGroupIds> {
-  if (Object.keys(recoveredAlerts).length > alertLimit) {
-    const entries = Object.entries(recoveredAlerts);
-    entries.sort((a, b) => {
-      const flappingHistoryA = a[1].getFlappingHistory() || [];
-      const flappingHistoryB = b[1].getFlappingHistory() || [];
-      return flappingHistoryA.length - flappingHistoryB.length;
-    });
-
-    // Dropping the "early recovered" alerts for now.
-    // In #143445 we will want to recover these alerts and set flapping to false
-    const earlyRecoveredAlerts = entries.splice(alertLimit * 1);
-    logger.warn(
-      `Recovered alerts have exceeded the max alert limit: dropping ${
-        earlyRecoveredAlerts.length
-      } ${earlyRecoveredAlerts.length > 1 ? 'alerts' : 'alert'}.`
-    );
-    const trimmedAlerts = Object.fromEntries(entries);
+  const ra = map(recoveredAlerts, (value, key) => {
     return {
-      trimmedAlertsRecovered: trimmedAlerts,
-      trimmedAlertsRecoveredCurrent: pick(currentRecoveredAlerts, Object.keys(trimmedAlerts)),
+      index: key,
+      flappingHistory: value.getFlappingHistory() || [],
     };
-  }
-
+  });
+  const earlyRecoveredAlerts = alertFactory.alertLimit.trimRecovered(ra);
+  // Dropping the "early recovered" alerts for now.
+  // In #143445 we will want to recover these alerts and set flapping to false
+  earlyRecoveredAlerts.forEach((alert) => {
+    delete recoveredAlerts[alert.index];
+    delete currentRecoveredAlerts[alert.index];
+  });
   return {
     trimmedAlertsRecovered: recoveredAlerts,
     trimmedAlertsRecoveredCurrent: currentRecoveredAlerts,

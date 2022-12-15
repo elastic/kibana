@@ -322,11 +322,14 @@ export const createLifecycleExecutor =
       });
 
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
-    const { trackedEventsToIndex, trackedRecoveredEventsToIndex } = trimRecoveredAlerts(
-      logger,
+    const { trackedEventsToIndex, trackedRecoveredEventsToIndex } = trimRecoveredAlerts<
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds
+    >(
       makeEventsDataMapFor(trackedAlertRecoveredIds),
       makeEventsDataMapFor(trackedAlertIds),
-      alertFactory.alertLimit.getValue()
+      alertFactory
     );
     const allEventsToIndex = [...trackedEventsToIndex, ...newEventsToIndex];
 

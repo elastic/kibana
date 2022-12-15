@@ -8,7 +8,7 @@ import { registerAnomalyRuleType } from './register_anomaly_rule_type';
 import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import * as GetServiceAnomalies from '../../../service_map/get_service_anomalies';
-import { createRuleTypeMocks, MOCK_ALERT_LIMIT } from '../../test_utils';
+import { createRuleTypeMocks } from '../../test_utils';
 import { ApmMlJob } from '../../../../../common/anomaly_detection/apm_ml_job';
 
 describe('Transaction duration anomaly alert', () => {
@@ -23,10 +23,6 @@ describe('Transaction duration anomaly alert', () => {
         ...dependencies,
         ml: undefined,
       });
-
-      services.alertFactory.alertLimit.getValue.mockReturnValue(
-        MOCK_ALERT_LIMIT
-      );
 
       const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
 
@@ -55,10 +51,6 @@ describe('Transaction duration anomaly alert', () => {
         ...dependencies,
         ml,
       });
-
-      services.alertFactory.alertLimit.getValue.mockReturnValue(
-        MOCK_ALERT_LIMIT
-      );
 
       const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
 
@@ -110,10 +102,6 @@ describe('Transaction duration anomaly alert', () => {
         ...dependencies,
         ml,
       });
-
-      services.alertFactory.alertLimit.getValue.mockReturnValue(
-        MOCK_ALERT_LIMIT
-      );
 
       const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
 
@@ -190,10 +178,6 @@ describe('Transaction duration anomaly alert', () => {
         ...dependencies,
         ml,
       });
-
-      services.alertFactory.alertLimit.getValue.mockReturnValue(
-        MOCK_ALERT_LIMIT
-      );
 
       const params = {
         anomalySeverityType: ANOMALY_SEVERITY.MINOR,

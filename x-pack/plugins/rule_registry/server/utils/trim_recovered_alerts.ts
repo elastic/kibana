@@ -5,43 +5,40 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import { AlertInstanceContext, AlertInstanceState } from '@kbn/alerting-plugin/common';
+import { PublicAlertFactory } from '@kbn/alerting-plugin/server/alert/create_alert_factory';
 import { ALERT_STATUS, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 
-export function trimRecoveredAlerts(
-  logger: Logger,
+export function trimRecoveredAlerts<
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never,
+  ActionGroupIds extends string = never
+>(
   trackedRecoveredEvents: any[],
   trackedEvents: any[],
-  alertLimit: number
+  alertFactory: PublicAlertFactory<InstanceState, InstanceContext, ActionGroupIds>
 ) {
   const recoveredAlerts = [
-    ...trackedRecoveredEvents.map((e, index) => ({ index, event: e, trackedEvents: false })),
+    ...trackedRecoveredEvents.map((e, index) => ({
+      index,
+      flappingHistory: e.flappingHistory,
+      trackedEvents: false,
+    })),
     ...trackedEvents
       .filter(({ event }) => event[ALERT_STATUS] === ALERT_STATUS_RECOVERED)
-      .map((e, index) => ({ index, event: e, trackedEvents: true })),
+      .map((e, index) => ({ index, flappingHistory: e.flappingHistory, trackedEvents: true })),
   ];
 
-  if (recoveredAlerts.length > alertLimit) {
-    recoveredAlerts.sort((a, b) => {
-      return a.event.flappingHistory.length - b.event.flappingHistory.length;
-    });
-
-    // Dropping the "early recovered" alerts for now.
-    // In #143445 we will want to recover these alerts and set flapping to false
-    const earlyRecoveredAlerts = recoveredAlerts.splice(alertLimit * 1);
-    logger.warn(
-      `Recovered alerts have exceeded the max alert limit: dropping ${
-        earlyRecoveredAlerts.length
-      } ${earlyRecoveredAlerts.length > 1 ? 'alerts' : 'alert'}.`
-    );
-    earlyRecoveredAlerts.forEach((alert) => {
-      if (alert.trackedEvents) {
-        trackedEvents.splice(alert.index, 1);
-      } else {
-        trackedRecoveredEvents.splice(alert.index, 1);
-      }
-    });
-  }
+  const earlyRecoveredAlerts = alertFactory.alertLimit.trimRecovered(recoveredAlerts);
+  // Dropping the "early recovered" alerts for now.
+  // In #143445 we will want to recover these alerts and set flapping to false
+  earlyRecoveredAlerts.forEach((alert) => {
+    if (alert.trackedEvents) {
+      trackedEvents.splice(alert.index as number, 1);
+    } else {
+      trackedRecoveredEvents.splice(alert.index as number, 1);
+    }
+  });
 
   return {
     trackedEventsToIndex: trackedEvents,

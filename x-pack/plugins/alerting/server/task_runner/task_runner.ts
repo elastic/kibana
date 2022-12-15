@@ -67,7 +67,7 @@ import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { loadRule } from './rule_loader';
 import { logAlerts } from './log_alerts';
-import { getPublicAlertFactory } from '../alert/create_alert_factory';
+import { AlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
@@ -269,6 +269,11 @@ export class TaskRunner<
       searchSourceClient,
     });
 
+    let alertFactory: AlertFactory<
+      State,
+      Context,
+      WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+    >;
     const { updatedRuleTypeState, hasReachedAlertLimit, originalAlerts, originalRecoveredAlerts } =
       await this.timer.runWithTimer(TaskRunnerTimerSpan.RuleTypeRun, async () => {
         for (const id in alertRawInstances) {
@@ -286,7 +291,7 @@ export class TaskRunner<
 
         const alertsCopy = cloneDeep(this.alerts);
 
-        const alertFactory = createAlertFactory<
+        alertFactory = createAlertFactory<
           State,
           Context,
           WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
@@ -427,8 +432,9 @@ export class TaskRunner<
         const { trimmedAlertsRecovered, trimmedAlertsRecoveredCurrent } = trimRecoveredAlerts<
           State,
           Context,
-          RecoveryActionGroupId
-        >(this.logger, processedAlertsRecovered, processedAlertsRecoveredCurrent, this.maxAlerts);
+          RecoveryActionGroupId,
+          ActionGroupIds
+        >(processedAlertsRecovered, processedAlertsRecoveredCurrent, alertFactory);
 
         logAlerts({
           logger: this.logger,

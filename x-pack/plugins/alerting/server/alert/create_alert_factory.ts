@@ -11,6 +11,12 @@ import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert, PublicAlert } from './alert';
 import { processAlerts } from '../lib';
 
+export interface RecoveredTrimOpts {
+  index: number | string;
+  flappingHistory: boolean[];
+  trackedEvents?: boolean;
+}
+
 export interface AlertFactory<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
@@ -21,6 +27,7 @@ export interface AlertFactory<
     getValue: () => number;
     setLimitReached: (reached: boolean) => void;
     checkLimitUsage: () => void;
+    trimRecovered: (recoveredAlerts: RecoveredTrimOpts[]) => RecoveredTrimOpts[];
   };
   hasReachedAlertLimit: () => boolean;
   done: () => AlertFactoryDoneUtils<State, Context, ActionGroupIds>;
@@ -33,7 +40,7 @@ export type PublicAlertFactory<
 > = Pick<AlertFactory<State, Context, ActionGroupIds>, 'create' | 'done'> & {
   alertLimit: Pick<
     AlertFactory<State, Context, ActionGroupIds>['alertLimit'],
-    'getValue' | 'setLimitReached'
+    'getValue' | 'setLimitReached' | 'trimRecovered'
   >;
 };
 
@@ -116,6 +123,22 @@ export function createAlertFactory<
           );
         }
       },
+      trimRecovered: (recoveredAlerts: RecoveredTrimOpts[]) => {
+        let earlyRecoveredAlerts: RecoveredTrimOpts[] = [];
+        if (recoveredAlerts.length > maxAlerts) {
+          recoveredAlerts.sort((a, b) => {
+            return a.flappingHistory.length - b.flappingHistory.length;
+          });
+
+          earlyRecoveredAlerts = recoveredAlerts.splice(maxAlerts * 1);
+          logger.warn(
+            `Recovered alerts have exceeded the max alert limit: dropping ${
+              earlyRecoveredAlerts.length
+            } ${earlyRecoveredAlerts.length > 1 ? 'alerts' : 'alert'}.`
+          );
+        }
+        return earlyRecoveredAlerts;
+      },
     },
     hasReachedAlertLimit: (): boolean => hasReachedAlertLimit,
     done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => {
@@ -164,6 +187,8 @@ export function getPublicAlertFactory<
     alertLimit: {
       getValue: (): number => alertFactory.alertLimit.getValue(),
       setLimitReached: (...args): void => alertFactory.alertLimit.setLimitReached(...args),
+      trimRecovered: (...args): RecoveredTrimOpts[] =>
+        alertFactory.alertLimit.trimRecovered(...args),
     },
     done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => alertFactory.done(),
   };

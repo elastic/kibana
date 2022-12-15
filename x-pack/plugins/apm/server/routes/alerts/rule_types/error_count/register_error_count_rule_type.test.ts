@@ -6,7 +6,7 @@
  */
 
 import { registerErrorCountRuleType } from './register_error_count_rule_type';
-import { createRuleTypeMocks, MOCK_ALERT_LIMIT } from '../../test_utils';
+import { createRuleTypeMocks } from '../../test_utils';
 
 describe('Error count alert', () => {
   it("doesn't send an alert when error count is less than threshold", async () => {
@@ -33,7 +33,6 @@ describe('Error count alert', () => {
         total: 1,
       },
     });
-    services.alertFactory.alertLimit.getValue.mockReturnValue(MOCK_ALERT_LIMIT);
 
     await executor({ params });
     expect(services.alertFactory.create).not.toBeCalled();
@@ -126,7 +125,6 @@ describe('Error count alert', () => {
         total: 1,
       },
     });
-    services.alertFactory.alertLimit.getValue.mockReturnValue(MOCK_ALERT_LIMIT);
 
     await executor({ params });
     [

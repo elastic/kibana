@@ -5,11 +5,19 @@
  * 2.0.
  */
 
+import { createAlertFactory } from '@kbn/alerting-plugin/server/alert';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { trimRecoveredAlerts } from './trim_recovered_alerts';
 
 describe('trimRecoveredAlerts', () => {
+  const logger = loggingSystemMock.createLogger();
+  const alertFactory = createAlertFactory({
+    alerts: {},
+    logger,
+    maxAlerts: 2,
+  });
+
   const alert1 = {
     event: {
       'kibana.alert.status': ALERT_STATUS_RECOVERED,
@@ -36,29 +44,20 @@ describe('trimRecoveredAlerts', () => {
   };
 
   test('should remove longest recovered alerts', () => {
-    const logger = loggingSystemMock.createLogger();
     const recoveredEvents = [alert1, alert2, alert3];
     const trackedEvents = [alert2, alert4];
 
-    const trimmedAlerts = trimRecoveredAlerts(logger, recoveredEvents, trackedEvents, 2);
+    const trimmedAlerts = trimRecoveredAlerts(recoveredEvents, trackedEvents, alertFactory);
     expect(trimmedAlerts.trackedEventsToIndex).toEqual([alert4]);
     expect(trimmedAlerts.trackedRecoveredEventsToIndex).toEqual([alert1, alert3]);
-
-    expect(logger.warn).toBeCalled();
-    expect(logger.warn).toBeCalledWith(
-      'Recovered alerts have exceeded the max alert limit: dropping 2 alerts.'
-    );
   });
 
   test('should not remove alerts if the num of recovered alerts is not at the limit', () => {
-    const logger = loggingSystemMock.createLogger();
     const recoveredEvents = [alert1, alert2];
     const trackedEvents = [alert4];
 
-    const trimmedAlerts = trimRecoveredAlerts(logger, recoveredEvents, trackedEvents, 2);
+    const trimmedAlerts = trimRecoveredAlerts(recoveredEvents, trackedEvents, alertFactory);
     expect(trimmedAlerts.trackedEventsToIndex).toEqual(trackedEvents);
     expect(trimmedAlerts.trackedRecoveredEventsToIndex).toEqual(recoveredEvents);
-
-    expect(logger.warn).not.toBeCalled();
   });
 });
