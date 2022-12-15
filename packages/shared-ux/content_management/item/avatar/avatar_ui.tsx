@@ -17,13 +17,14 @@ export interface CmAvatarUiProps {
   title: string;
   size?: TSize;
   disabled?: boolean;
+  color?: string;
 }
 
 /**
  * A presentational component of "avatar" view for a single content item.
  */
 export const CmAvatarUi: React.FC<CmAvatarUiProps> = (props) => {
-  const { title, size, disabled } = props;
+  const { title, size, disabled, color } = props;
 
   // TODO: Compute color here.
 
@@ -32,6 +33,7 @@ export const CmAvatarUi: React.FC<CmAvatarUiProps> = (props) => {
       name={title}
       size={size}
       isDisabled={disabled}
+      color={color}
     />
   );
 };

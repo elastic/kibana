@@ -9,6 +9,7 @@
 import * as React from 'react';
 import {CmAvatarUi, type CmAvatarUiProps} from './avatar_ui';
 import {useContentItem} from '../../context';
+import {CmAvatarEmpty} from './avatar_empty';
 
 /**
  * Props of {@link CmAvatar} component.
@@ -28,7 +29,12 @@ export const CmAvatar: React.FC<CmAvatarProps> = (props) => {
   const { data } = useContentItem(id);
 
   if (!data) {
-    return null;
+    return (
+      <CmAvatarEmpty
+        size={props.size}
+        disabled={props.disabled}
+      />
+    )
   }
 
   const title = data.fields.title || '';
