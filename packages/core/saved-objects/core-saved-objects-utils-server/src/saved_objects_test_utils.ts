@@ -24,8 +24,9 @@ export function setsAreEqual<T>(setA: Set<T>, setB: Set<T>) {
       // End the loop early if we found an inequality
       if(!setB.has(element)) throw NotEqualException;
     });
-  } catch (NotEqualException) {
-    return false;
+  } catch (e) {
+    if (e === NotEqualException) return false;
+    throw e;
   }
 
   return true;
