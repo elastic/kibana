@@ -24,14 +24,13 @@ export const getColor = (
   if (!isEnabled) {
     return theme.eui.euiColorLightestShade;
   }
-
   switch (status) {
     case 'down':
       return theme.eui.euiColorVis9_behindText;
     case 'up':
       return theme.eui.euiColorVis0_behindText;
     case 'unknown':
-      return theme.eui.euiColorVis0_behindText;
+      return theme.eui.euiColorGhost;
     default:
       return theme.eui.euiColorVis0_behindText;
   }
