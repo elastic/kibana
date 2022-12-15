@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { RulesCommonServiceProvider } from './common';
 import { RulesAPIServiceProvider } from './api';
 
-export { getTestRuleData } from './test_resources';
 export function RulesServiceProvider(context: FtrProviderContext) {
   return {
     api: RulesAPIServiceProvider(context),
