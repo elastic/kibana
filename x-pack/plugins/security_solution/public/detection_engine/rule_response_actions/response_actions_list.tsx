@@ -7,11 +7,16 @@
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { useParams } from 'react-router-dom';
+
+import { OsqueryInvestigationGuidePanel } from './osquery/osquery_investigation_guide_panel';
+import { useRule } from '../rule_management/logic';
 import type { ResponseActionType } from './get_supported_response_actions';
 import { ResponseActionAddButton } from './response_action_add_button';
 import { ResponseActionTypeForm } from './response_action_type_form';
 import type { ArrayItem } from '../../shared_imports';
-import { UseField, useFormContext } from '../../shared_imports';
+import { UseField, useFormContext, useFormData } from '../../shared_imports';
+import { getResponseActionsFromNote, getOsqueryQueriesFromNote } from './utils';
 
 interface ResponseActionsListProps {
   items: ArrayItem[];
@@ -28,8 +33,17 @@ export const ResponseActionsList = React.memo(
     const updateActionTypeId = useCallback((id) => {
       actionTypeIdRef.current = id;
     }, []);
+    const { detailName: ruleId } = useParams<{ detailName: string }>();
+    const { data: rule } = useRule(ruleId);
+
+    const osqueryNoteQueries = useMemo(
+      () => (rule?.note ? getOsqueryQueriesFromNote(rule.note) : []),
+      [rule?.note]
+    );
 
     const context = useFormContext();
+    const [formData] = useFormData();
+
     const renderButton = useMemo(() => {
       return (
         <ResponseActionAddButton
@@ -49,6 +63,11 @@ export const ResponseActionsList = React.memo(
       }
     }, [context, items.length]);
 
+    const handleInvestigationGuideClick = useCallback(() => {
+      const values = getResponseActionsFromNote(osqueryNoteQueries, formData.responseActions);
+      context.updateFieldValues(values);
+    }, [context, formData?.responseActions, osqueryNoteQueries]);
+
     return (
       <div data-test-subj={'response-actions-list'}>
         {items.map((actionItem, index) => {
@@ -62,6 +81,9 @@ export const ResponseActionsList = React.memo(
           );
         })}
         <EuiSpacer size="m" />
+        {osqueryNoteQueries.length && (
+          <OsqueryInvestigationGuidePanel onClick={handleInvestigationGuideClick} />
+        )}
         {renderButton}
       </div>
     );
