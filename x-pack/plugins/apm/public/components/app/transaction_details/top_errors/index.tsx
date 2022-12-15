@@ -18,7 +18,7 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getColumns } from '../../../shared/errors_table/get_columns';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
 type ErrorGroupMainStatisticsByTransactionName =
@@ -44,7 +44,10 @@ export function TopErrors() {
   const {
     query,
     path: { serviceName },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const {
     environment,

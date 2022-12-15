@@ -31,6 +31,7 @@ interface TransformActionParamsOptions {
   kibanaBaseUrl?: string;
   context: AlertInstanceContext;
   ruleUrl?: string;
+  flapping: boolean;
 }
 
 export function transformActionParams({
@@ -51,6 +52,7 @@ export function transformActionParams({
   kibanaBaseUrl,
   alertParams,
   ruleUrl,
+  flapping,
 }: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
@@ -80,6 +82,7 @@ export function transformActionParams({
       id: alertInstanceId,
       actionGroup: alertActionGroup,
       actionGroupName: alertActionGroupName,
+      flapping,
     },
   };
   return actionsPlugin.renderActionParameterTemplates(
