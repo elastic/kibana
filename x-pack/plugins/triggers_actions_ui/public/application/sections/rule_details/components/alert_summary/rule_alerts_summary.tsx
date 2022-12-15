@@ -7,14 +7,18 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { useLoadRuleAlertsAggs } from '../../../../hooks/use_load_rule_alerts_aggregations';
 import { useLoadRuleTypes } from '../../../../hooks/use_load_rule_types';
 import { RuleAlertsSummaryProps } from '.';
 import { AlertSummaryWidgetError, AlertsSummaryWidgetUI } from './components';
 
-export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummaryProps) => {
+export const RuleAlertsSummary = ({
+  rule,
+  filteredRuleTypes,
+  onClick,
+  timeRange,
+}: RuleAlertsSummaryProps) => {
   const [features, setFeatures] = useState<string>('');
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
@@ -26,6 +30,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
   } = useLoadRuleAlertsAggs({
     ruleId: rule.id,
     features,
+    timeRange,
   });
 
   useEffect(() => {
@@ -40,13 +45,9 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
   return (
     <AlertsSummaryWidgetUI
       active={active}
+      onClick={onClick}
       recovered={recovered}
-      timeRange={
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.last30days"
-          defaultMessage="Last 30 days"
-        />
-      }
+      timeRangeTitle={timeRange.title}
     />
   );
 };

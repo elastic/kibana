@@ -1,0 +1,25 @@
+parameters:
+  - schema:
+      type: string
+    name: agentId
+    in: path
+    required: true
+get:
+  summary: List agent uploads
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              body:
+                type: object
+                properties:
+                  item:
+                    type: array
+                    items:
+                      $ref: ../components/schemas/agent_diagnostics.yaml
+  operationId: list-agent-uploads

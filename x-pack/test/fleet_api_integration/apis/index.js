@@ -41,9 +41,6 @@ export default function ({ loadTestFile, getService }) {
     // Settings
     loadTestFile(require.resolve('./settings'));
 
-    // Preconfiguration
-    loadTestFile(require.resolve('./preconfiguration'));
-
     // Service tokens
     loadTestFile(require.resolve('./service_tokens'));
 
