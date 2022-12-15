@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const indexThresholdRule = {
       consumer: 'alerts',
       name: 'my rule',
-      notify_when: 'onActionGroupChange',
+      notifyWhen: 'onActionGroupChange',
       params: {
         index: ['.test-index'],
         timeField: '@timestamp',
