@@ -19,17 +19,8 @@ import { i18n } from '@kbn/i18n';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { DashboardConstants } from '../../dashboard_constants';
-import type {
-  EmbeddableFactory,
-  EmbeddableFactoryDefinition,
-  EmbeddableInput,
-} from '@kbn/embeddable-plugin/public';
-
 import { pluginServices } from '../../services/plugin_services';
-import { getPanelAddedSuccessString } from '../_dashboard_app_strings';
-import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
-import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
+import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 
 interface Props {
   /** Handler for creating new visualization of a specified type */
@@ -61,8 +52,6 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       showNewVisModal,
     },
   } = pluginServices.getServices();
-
-  const { embeddableInstance: dashboardContainer } = useDashboardContainerContext();
 
   const embeddableFactories = useMemo(
     () => Array.from(embeddable.getEmbeddableFactories()),
