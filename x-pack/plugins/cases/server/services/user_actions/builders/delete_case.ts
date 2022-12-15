@@ -5,17 +5,26 @@
  * 2.0.
  */
 
+import { CASE_SAVED_OBJECT } from '../../../../common/constants';
+import type { UserAction } from '../../../../common/api';
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import type { UserActionParameters, BuilderReturnValue } from '../types';
+import type {
+  SavedObjectParameters,
+  EventDetails,
+  UserActionParameters,
+  UserActionEvent,
+} from '../types';
 
 export class DeleteCaseUserActionBuilder extends UserActionBuilder {
-  build(args: UserActionParameters<'delete_case'>): BuilderReturnValue {
+  build(args: UserActionParameters<'delete_case'>): UserActionEvent {
     const { caseId, owner, user, connectorId } = args;
-    return {
+    const action = Actions.delete;
+
+    const parameters: SavedObjectParameters = {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
-        action: Actions.delete,
+        action,
         payload: {},
         type: ActionTypes.delete_case,
       },
@@ -24,5 +33,24 @@ export class DeleteCaseUserActionBuilder extends UserActionBuilder {
         ...this.createConnectorReference(connectorId ?? null),
       ],
     };
+
+    return {
+      parameters,
+      eventDetails: createDeleteEvent({ caseId, action }),
+    };
   }
 }
+
+export const createDeleteEvent = ({
+  caseId,
+  action,
+}: {
+  caseId: string;
+  action: UserAction;
+}): EventDetails => ({
+  getMessage: () => `User deleted case id: ${caseId}`,
+  action,
+  descriptiveAction: 'case_user_action_delete_case',
+  savedObjectId: caseId,
+  savedObjectType: CASE_SAVED_OBJECT,
+});
