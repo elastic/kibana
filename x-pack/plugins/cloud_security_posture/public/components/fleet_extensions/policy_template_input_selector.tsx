@@ -5,7 +5,15 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiToolTip,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { PostureInput, PosturePolicyTemplate } from '../../../common/constants';
@@ -22,29 +30,38 @@ type Props = { input: NewPackagePolicyPostureInput } & (
 
 const noop = () => {};
 
+const RadioLabel = ({
+  label,
+  icon,
+  disabled,
+  tooltip,
+}: ReturnType<typeof getPolicyTemplateInputOptions>[number]) => (
+  <EuiToolTip content={tooltip} anchorProps={{ style: { width: '100%' } }}>
+    <EuiFlexGroup direction="row" alignItems="center">
+      <EuiFlexItem grow={true}>{label}</EuiFlexItem>
+      {icon && (
+        <EuiFlexItem grow={false}>
+          <EuiIcon
+            type={icon}
+            css={
+              disabled &&
+              css`
+                filter: grayscale(1);
+              `
+            }
+          />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  </EuiToolTip>
+);
+
 export const PolicyInputSelector = ({ input, ...rest }: Props) => {
   const baseOptions = getPolicyTemplateInputOptions(input.policy_template as PosturePolicyTemplate);
   const options = baseOptions.map((option) => ({
     ...option,
     disabled: option.disabled || rest.disabled,
-    label: (
-      <EuiFlexGroup direction="row" alignItems="center">
-        <EuiFlexItem grow={true}>{option.label}</EuiFlexItem>
-        {option.icon && (
-          <EuiFlexItem grow={false}>
-            <EuiIcon
-              type={option.icon}
-              css={
-                option.disabled &&
-                css`
-                  filter: grayscale(1);
-                `
-              }
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ),
+    label: <RadioLabel {...option} />,
   }));
 
   return (
