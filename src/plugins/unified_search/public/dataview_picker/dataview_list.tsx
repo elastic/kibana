@@ -87,33 +87,27 @@ export function DataViewsList({
 
   const editorAndPopover = {
     getSortDirectionLegend: () =>
-      i18n.translate('controls.optionsList.popover.sortDirections', {
+      i18n.translate('unifiedSearch.optionsList.popover.sortDirections', {
         defaultMessage: 'Sort directions',
       }),
     sortBy: {
       _key: {
         getSortByLabel: () =>
-          i18n.translate('controls.optionsList.popover.sortBy.alphabetical', {
+          i18n.translate('unifiedSearch.optionsList.popover.sortBy.alphabetical', {
             defaultMessage: 'Alphabetically',
-          }),
-      },
-      _count: {
-        getSortByLabel: () =>
-          i18n.translate('controls.optionsList.popover.sortBy.docCount', {
-            defaultMessage: 'Last created',
           }),
       },
     },
     sortOrder: {
       asc: {
         getSortOrderLabel: () =>
-          i18n.translate('controls.optionsList.popover.sortOrder.asc', {
+          i18n.translate('unifiedSearch.optionsList.popover.sortOrder.asc', {
             defaultMessage: 'Ascending',
           }),
       },
       desc: {
         getSortOrderLabel: () =>
-          i18n.translate('controls.optionsList.popover.sortOrder.desc', {
+          i18n.translate('unifiedSearch.optionsList.popover.sortOrder.desc', {
             defaultMessage: 'Descending',
           }),
       },
@@ -223,9 +217,12 @@ export function DataViewsList({
                       <EuiButtonIcon
                         iconType="sortable"
                         onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
-                        aria-label={i18n.translate('controls.optionsList.popover.sortDescription', {
-                          defaultMessage: 'Define the sort order',
-                        })}
+                        aria-label={i18n.translate(
+                          'unifiedSearch.optionsList.popover.sortDescription',
+                          {
+                            defaultMessage: 'Define the sort order',
+                          }
+                        )}
                       />
                     }
                     panelPaddingSize="none"
@@ -235,7 +232,7 @@ export function DataViewsList({
                     panelClassName={'optionsList--sortPopover'}
                   >
                     <EuiPopoverTitle paddingSize="s">
-                      {i18n.translate('controls.optionsList.popover.sortTitle', {
+                      {i18n.translate('unifiedSearch.optionsList.popover.sortTitle', {
                         defaultMessage: 'Sort by',
                       })}
                     </EuiPopoverTitle>
@@ -245,9 +242,12 @@ export function DataViewsList({
                         singleSelection="always"
                         onChange={onSortByChange}
                         listProps={{ bordered: false }}
-                        aria-label={i18n.translate('controls.optionsList.popover.sortDescription', {
-                          defaultMessage: 'Define the sort order',
-                        })}
+                        aria-label={i18n.translate(
+                          'unifiedSearch.optionsList.popover.sortDescription',
+                          {
+                            defaultMessage: 'Define the sort order',
+                          }
+                        )}
                       >
                         {(sortByOptionList) => sortByOptionList}
                       </EuiSelectable>
@@ -255,7 +255,7 @@ export function DataViewsList({
                     <EuiHorizontalRule margin="none" />
                     <div style={{ width: 200 }}>
                       <EuiPopoverTitle paddingSize="s">
-                        {i18n.translate('controls.optionsList.popover.sortTitle', {
+                        {i18n.translate('unifiedSearch.optionsList.popover.sortTitle', {
                           defaultMessage: 'Order',
                         })}
                       </EuiPopoverTitle>
@@ -264,9 +264,12 @@ export function DataViewsList({
                         singleSelection="always"
                         onChange={onSortByOrder}
                         listProps={{ bordered: false }}
-                        aria-label={i18n.translate('controls.optionsList.popover.sortDescription', {
-                          defaultMessage: 'Define the sort order',
-                        })}
+                        aria-label={i18n.translate(
+                          'unifiedSearch.optionsList.popover.sortDescription',
+                          {
+                            defaultMessage: 'Define the sort order',
+                          }
+                        )}
                       >
                         {(sortOrderOptionList) => sortOrderOptionList}
                       </EuiSelectable>
