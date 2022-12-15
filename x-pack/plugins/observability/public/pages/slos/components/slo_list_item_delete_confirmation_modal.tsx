@@ -12,7 +12,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 import { SLO } from '../../../typings';
 
-export interface DeleteConfirmationPropsModal {
+export interface DeleteConfirmationModalProps {
   slo: SLO;
   onCancel: () => void;
   onDeleting: () => void;
@@ -24,7 +24,7 @@ export function DeleteConfirmationModal({
   onCancel,
   onDeleting,
   onDeleted,
-}: DeleteConfirmationPropsModal) {
+}: DeleteConfirmationModalProps) {
   const {
     notifications: { toasts },
   } = useKibana().services;

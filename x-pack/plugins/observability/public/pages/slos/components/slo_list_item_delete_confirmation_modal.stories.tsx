@@ -11,17 +11,17 @@ import { ComponentStory } from '@storybook/react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import {
   DeleteConfirmationModal as Component,
-  DeleteConfirmationPropsModal,
+  DeleteConfirmationModalProps,
 } from './slo_list_item_delete_confirmation_modal';
 import { anSLO } from '../../../../common/data/slo';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/DeleteConfirmationModal',
+  title: 'app/SLO/ListPage/SloListItemDeleteConfirmationModal',
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: DeleteConfirmationPropsModal) => (
+const Template: ComponentStory<typeof Component> = (props: DeleteConfirmationModalProps) => (
   <Component {...props} />
 );
 
@@ -29,5 +29,5 @@ const defaultProps = {
   slo: anSLO,
 };
 
-export const SloList = Template.bind({});
-SloList.args = defaultProps;
+export const SloListItemDeleteConfirmationModal = Template.bind({});
+SloListItemDeleteConfirmationModal.args = defaultProps;
