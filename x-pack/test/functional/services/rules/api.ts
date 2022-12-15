@@ -36,7 +36,7 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
           name,
           notify_when: notifyWhen,
           params,
-          rule_type_id,
+          rule_type_id: ruleTypeId,
           schedule,
         })
         .expect(200);
