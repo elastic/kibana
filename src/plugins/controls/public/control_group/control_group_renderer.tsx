@@ -89,7 +89,7 @@ export const ControlGroupRenderer = ({
     }
 
     if (
-      timeRange && !isEqual(controlGroup.getInput().timeRange, timeRange) ||
+      (timeRange && !isEqual(controlGroup.getInput().timeRange, timeRange)) ||
       !compareFilters(controlGroup.getInput().filters ?? [], filters ?? []) ||
       !isEqual(controlGroup.getInput().query, query)
     ) {
