@@ -8,7 +8,7 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import React, { useEffect, useState } from 'react';
-import { useLoadRuleAlertsAggs } from '../../../../hooks/use_load_rule_alerts_aggregations';
+import { useLoadAlertSummary } from '../../../../hooks/use_load_alert_summary';
 import { useLoadRuleTypes } from '../../../../hooks/use_load_rule_types';
 import { RuleAlertsSummaryProps } from '.';
 import { AlertSummaryWidgetError, AlertsSummaryWidgetUI } from './components';
@@ -25,10 +25,10 @@ export const RuleAlertsSummary = ({
     filteredRuleTypes,
   });
   const {
-    ruleAlertsAggs: { active, recovered },
-    isLoadingRuleAlertsAggs,
-    errorRuleAlertsAggs,
-  } = useLoadRuleAlertsAggs({
+    alertSummary: { active, recovered },
+    isLoading,
+    error,
+  } = useLoadAlertSummary({
     features,
     filter,
     timeRange,
@@ -41,8 +41,8 @@ export const RuleAlertsSummary = ({
     } else setFeatures(rule.consumer);
   }, [rule, ruleTypes]);
 
-  if (isLoadingRuleAlertsAggs) return <EuiLoadingSpinner />;
-  if (errorRuleAlertsAggs) return <AlertSummaryWidgetError />;
+  if (isLoading) return <EuiLoadingSpinner />;
+  if (error) return <AlertSummaryWidgetError />;
   return (
     <AlertsSummaryWidgetUI
       active={active}
