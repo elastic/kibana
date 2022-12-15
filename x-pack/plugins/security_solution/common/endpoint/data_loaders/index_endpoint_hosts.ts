@@ -195,7 +195,12 @@ export async function indexEndpointHostDocs({
       };
 
       // Create some fleet endpoint actions and .logs-endpoint actions for this Host
-      await indexEndpointAndFleetActionsForHost(client, hostMetadata, undefined);
+      const actionsResponse = await indexEndpointAndFleetActionsForHost(
+        client,
+        hostMetadata,
+        undefined
+      );
+      mergeAndAppendArrays(response, actionsResponse);
     }
 
     await client
