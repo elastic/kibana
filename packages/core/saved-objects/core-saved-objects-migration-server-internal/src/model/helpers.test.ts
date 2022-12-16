@@ -12,7 +12,6 @@ import {
   addMustClausesToBoolQuery,
   addMustNotClausesToBoolQuery,
   getAliases,
-  indexNameToAliasName,
   buildRemoveAliasActions,
   versionMigrationCompleted,
 } from './helpers';

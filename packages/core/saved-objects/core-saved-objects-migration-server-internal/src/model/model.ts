@@ -38,7 +38,6 @@ import {
   throwBadControlState,
   throwBadResponse,
   versionMigrationCompleted,
-  indexNameToAliasName,
   buildRemoveAliasActions,
 } from './helpers';
 import { createBatches } from './create_batches';
