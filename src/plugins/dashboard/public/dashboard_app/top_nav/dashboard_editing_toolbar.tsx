@@ -30,6 +30,7 @@ export function DashboardEditingToolbar() {
   const {
     usageCollection,
     data: { search },
+    notifications: { toasts },
     settings: { uiSettings },
     embeddable: { getStateTransfer, getEmbeddableFactory },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
@@ -100,13 +101,13 @@ export function DashboardEditingToolbar() {
       );
 
       if (newEmbeddable) {
-        pluginServices.getServices().notifications.toasts.addSuccess({
+        toasts.addSuccess({
           title: dashboardReplacePanelActionStrings.getSuccessMessage(newEmbeddable.getTitle()),
           'data-test-subj': 'addEmbeddableToDashboardSuccess',
         });
       }
     },
-    [trackUiMetric, dashboardContainer]
+    [trackUiMetric, dashboardContainer, toasts]
   );
 
   const getVisTypeQuickButton = (quickButtonForType: typeof quickButtonVisTypes[0]) => {
