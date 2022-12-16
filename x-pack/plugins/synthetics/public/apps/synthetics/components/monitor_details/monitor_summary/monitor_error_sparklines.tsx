@@ -46,10 +46,9 @@ export const MonitorErrorSparklines = ({ from, to, monitorId }: Props) => {
             'observer.geo.name': [selectedLocation?.label],
           },
           dataType: 'synthetics',
-          selectedMetricField: 'state.up',
+          selectedMetricField: 'monitor_errors',
           name: 'Monitor errors',
           color: euiTheme.colors.danger,
-          operationType: 'unique_count',
         },
       ]}
     />
