@@ -199,6 +199,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         ruleId: id,
         executionUuid: execution1Uuid,
         spaceId: 'default',
+        excludedAlertInstanceIds: [],
       });
       expect(execution1SummarizedAlerts.new.count).to.eql(1);
       expect(execution1SummarizedAlerts.ongoing.count).to.eql(0);
@@ -221,6 +222,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         ruleId: id,
         executionUuid: execution2Uuid,
         spaceId: 'default',
+        excludedAlertInstanceIds: [],
       });
       expect(execution2SummarizedAlerts.new.count).to.eql(0);
       expect(execution2SummarizedAlerts.ongoing.count).to.eql(1);
@@ -242,6 +244,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         ruleId: id,
         executionUuid: execution3Uuid,
         spaceId: 'default',
+        excludedAlertInstanceIds: [],
       });
       expect(execution3SummarizedAlerts.new.count).to.eql(0);
       expect(execution3SummarizedAlerts.ongoing.count).to.eql(0);
@@ -255,6 +258,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         start: preExecution1Start,
         end: new Date(),
         spaceId: 'default',
+        excludedAlertInstanceIds: [],
       });
       expect(timeRangeSummarizedAlerts1.new.count).to.eql(1);
       expect(timeRangeSummarizedAlerts1.ongoing.count).to.eql(0);
@@ -268,6 +272,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         start: preExecution2Start,
         end: new Date(),
         spaceId: 'default',
+        excludedAlertInstanceIds: [],
       });
       expect(timeRangeSummarizedAlerts2.new.count).to.eql(0);
       expect(timeRangeSummarizedAlerts2.ongoing.count).to.eql(0);
