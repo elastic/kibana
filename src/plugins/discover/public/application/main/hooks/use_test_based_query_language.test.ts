@@ -72,7 +72,7 @@ describe('useTextBasedQueryLanguage', () => {
     renderHook(() => useTextBasedQueryLanguage(props));
 
     await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
-    expect(replaceUrlAppState).toHaveBeenCalledWith({ index: 'the-data-view-id' });
+    expect(replaceUrlAppState).toHaveBeenCalledWith({ columns: [], index: 'the-data-view-id' });
 
     replaceUrlAppState.mockReset();
 
@@ -159,6 +159,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     await waitFor(() => {
       expect(replaceUrlAppState).toHaveBeenCalledWith({
+        columns: [],
         index: 'the-data-view-id',
       });
     });
