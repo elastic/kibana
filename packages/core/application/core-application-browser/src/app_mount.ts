@@ -165,8 +165,9 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * }
    * ```
    *
-   * @deprecated {@link ScopedHistory.block} should be used instead.
-   * @removeBy 8.8.0
+   * @remarks: Resources with names containing percent sign with other special characters or
+   * containing %25 sequence can experience navigation issues. Refs https://github.com/elastic/kibana/issues/82440 and https://github.com/elastic/kibana/issues/132600
+
    */
   onAppLeave: (handler: AppLeaveHandler) => void;
 

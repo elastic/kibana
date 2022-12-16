@@ -19,7 +19,6 @@ import type { EuiButtonColor } from '@elastic/eui';
  *
  * @public
  * @deprecated {@link AppMountParameters.onAppLeave} has been deprecated in favor of {@link ScopedHistory.block}
- * @removeBy 8.8.0
  */
 export type AppLeaveHandler = (
   factory: AppLeaveActionFactory,
