@@ -40,7 +40,10 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [hits, setHits] = useState(0);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [query, setQuery] = useState<Query>();
+  const [query, setQuery] = useState<Query>({
+    language:'kuery',
+    query: ''
+  });
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-7d', to: 'now' });
 
   useEffect(() => {
@@ -116,14 +119,17 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           dateRangeTo={timeRange.to}
           filters={filters}
           indexPatterns={[dataView]}
-          onFiltersUpdated={setFilters}
+          onFiltersUpdated={(filters) => {
+            // filterManager.setFilters populates filter.meta so filter pill has pretty title
+            data.query.filterManager.setFilters(filters);
+            setFilters(filters);
+          }}
           onQuerySubmit={({ dateRange, query: newQuery }) => {
             setQuery(newQuery);
             setTimeRange(dateRange);
           }}
           query={query}
           showSearchBar={true}
-          useDefaultBehaviors={true}
         />
         <ControlGroupRenderer
           filters={filters}
