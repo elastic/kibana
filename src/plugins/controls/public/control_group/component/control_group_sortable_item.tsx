@@ -12,7 +12,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import classNames from 'classnames';
 
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { ControlFrame, ControlFrameProps } from './control_frame_component';
 import { ControlGroupReduxState } from '../types';
 import { ControlGroupStrings } from '../control_group_strings';
@@ -67,7 +67,7 @@ const SortableControlInner = forwardRef<
     dragHandleRef
   ) => {
     const { isOver, isDragging, draggingIndex, index } = dragInfo;
-    const { useEmbeddableSelector } = useReduxContainerContext<ControlGroupReduxState>();
+    const { useEmbeddableSelector } = useReduxEmbeddableContext<ControlGroupReduxState>();
     const panels = useEmbeddableSelector((state) => state.explicitInput.panels);
 
     const grow = panels[embeddableId].grow;
@@ -119,7 +119,7 @@ const SortableControlInner = forwardRef<
  * can be quite cumbersome.
  */
 export const ControlClone = ({ draggingId }: { draggingId: string }) => {
-  const { useEmbeddableSelector: select } = useReduxContainerContext<ControlGroupReduxState>();
+  const { useEmbeddableSelector: select } = useReduxEmbeddableContext<ControlGroupReduxState>();
   const panels = select((state) => state.explicitInput.panels);
   const controlStyle = select((state) => state.explicitInput.controlStyle);
 
