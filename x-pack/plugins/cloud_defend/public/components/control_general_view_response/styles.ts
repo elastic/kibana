@@ -7,13 +7,19 @@
 
 import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 
 export const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const { size } = euiTheme;
+
   return useMemo(() => {
-    const yamlEditor: CSSObject = {
-      height: '400px',
+    const options: CSSObject = {
+      position: 'absolute',
+      top: size.m,
+      right: size.m,
     };
 
-    return { yamlEditor };
-  }, []);
+    return { options };
+  }, [size.m]);
 };

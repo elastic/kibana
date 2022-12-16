@@ -171,10 +171,15 @@ export const ControlGeneralViewSelector = ({
           <EuiContextMenuPanel
             size="s"
             items={[
-              <EuiContextMenuItem key="duplicate" icon="duplicate" onClick={onDuplicateClicked}>
+              <EuiContextMenuItem key="duplicate" icon="copy" onClick={onDuplicateClicked}>
                 {i18n.duplicate}
               </EuiContextMenuItem>,
-              <EuiContextMenuItem key="remove" icon="remove" onClick={onRemoveClicked}>
+              <EuiContextMenuItem
+                key="remove"
+                icon="trash"
+                disabled={selectors.length < 2}
+                onClick={onRemoveClicked}
+              >
                 {i18n.remove}
               </EuiContextMenuItem>,
             ]}

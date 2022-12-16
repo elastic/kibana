@@ -7,46 +7,38 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiFlexGroup,
+  EuiFlexItem,
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiForm,
   EuiFormRow,
   EuiComboBox,
-  EuiCheckboxGroup,
+  EuiCheckbox,
   EuiComboBoxOptionOption,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import { ControlGeneralViewResponseDeps, ControlResponseAction } from '../../types';
 import * as i18n from '../control_general_view/translations';
 
-const ActionOptions = [
-  { label: i18n.actionAlert, id: ControlResponseAction.alert as unknown as string },
-  { label: i18n.actionBlock, id: ControlResponseAction.block as unknown as string },
-];
-
 export const ControlGeneralViewResponse = ({
   response,
   selectors,
+  responses,
+  index,
   onRemove,
   onDuplicate,
   onChange,
 }: ControlGeneralViewResponseDeps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const styles = useStyles();
-  const items = useMemo(() => {
-    return [
-      {
-        key: 'duplicate',
-        name: i18n.duplicate,
-        icon: 'duplicate',
-        onClick: () => {
-          onDuplicate(response);
-        },
-      },
-    ];
-  }, [onDuplicate, response]);
+
+  const onTogglePopover = useCallback(() => {
+    setPopoverOpen(!isPopoverOpen);
+  }, [isPopoverOpen]);
 
   const closePopover = useCallback(() => {
     setPopoverOpen(false);
@@ -73,6 +65,11 @@ export const ControlGeneralViewResponse = ({
   const onChangeExcludes = useCallback(
     (options) => {
       response.exclude = options.map((option: EuiComboBoxOptionOption) => option.value);
+
+      if (response.exclude?.length === 0) {
+        delete response.exclude;
+      }
+
       onChange(response);
     },
     [onChange, response]
@@ -107,97 +104,113 @@ export const ControlGeneralViewResponse = ({
     onChange(response);
   }, [onChange, response]);
 
-  const selectedActionMap = useMemo(() => {
-    const { actions } = response;
-    return {
-      alert: actions.includes(ControlResponseAction.alert),
-      block: actions.includes(ControlResponseAction.block),
-    };
-  }, [response]);
+  const alertSelected = response.actions.includes(ControlResponseAction.alert);
+  const blockSelected = response.actions.includes(ControlResponseAction.block);
 
-  const onChangeActions = useCallback(
-    (optionId: string) => {
-      const action = optionId as unknown as ControlResponseAction;
+  const onToggleAlert = useCallback(() => {
+    if (alertSelected) {
+      delete response.actions[response.actions.indexOf(ControlResponseAction.alert)];
+    } else {
+      response.actions.push(ControlResponseAction.alert);
+    }
+    onChange(response);
+  }, [alertSelected, onChange, response]);
 
-      switch (action) {
-        case ControlResponseAction.alert:
-          if (!selectedActionMap.alert) {
-            response.actions.push(ControlResponseAction.alert);
-          } else {
-            delete response.actions[response.actions.indexOf(action)];
-          }
-        case ControlResponseAction.block:
-          if (!selectedActionMap.block) {
-            response.actions.push(ControlResponseAction.block);
-          } else {
-            delete response.actions[response.actions.indexOf(action)];
-          }
-      }
-
-      onChange(response);
-    },
-    [onChange, response, selectedActionMap.alert, selectedActionMap.block]
-  );
+  const onToggleBlock = useCallback(() => {
+    if (blockSelected) {
+      delete response.actions[response.actions.indexOf(ControlResponseAction.block)];
+    } else {
+      response.actions.push(ControlResponseAction.block);
+    }
+    onChange(response);
+  }, [blockSelected, onChange, response]);
 
   return (
     <EuiFlexGroup>
-      <EuiPopover
-        button={<EuiButtonIcon iconType="boxesHorizontal" />}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-      >
-        <EuiContextMenuPanel
-          size="s"
-          items={[
-            <EuiContextMenuItem key="duplicate" icon="duplicate" onClick={onDuplicateClicked}>
-              {i18n.duplicate}
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem key="remove" icon="remove" onClick={onRemoveClicked}>
-              {i18n.remove}
-            </EuiContextMenuItem>,
-          ]}
-        />
-      </EuiPopover>
-      <EuiForm component="form">
-        <EuiFormRow label={i18n.matchSelectors}>
-          <EuiComboBox
-            aria-label={i18n.matchSelectors}
-            fullWidth={true}
-            selectedOptions={selectedMatches}
-            options={selectorOptions}
-            isClearable={true}
-            onChange={onChangeMatches}
-            data-test-subj="cloudDefend:controlResponseMatches"
-          />
-        </EuiFormRow>
-        {response.exclude && (
-          <EuiFormRow label={i18n.excludeSelectors}>
+      <EuiFlexItem>
+        <EuiForm component="form" fullWidth>
+          <EuiFormRow label={i18n.matchSelectors} fullWidth>
             <EuiComboBox
-              aria-label={i18n.excludeSelectors}
-              fullWidth={true}
-              selectedOptions={selectedExcludes}
+              aria-label={i18n.matchSelectors}
+              fullWidth
+              selectedOptions={selectedMatches}
               options={selectorOptions}
-              onChange={onChangeExcludes}
               isClearable={true}
-              data-test-subj="cloudDefend:controlResponseExcludes"
+              onChange={onChangeMatches}
+              data-test-subj="cloudDefend:controlResponseMatches"
             />
           </EuiFormRow>
-        )}
-        {!response.exclude && (
-          <EuiButtonIcon iconType="plusInCircle" onClick={onShowExclude}>
-            {i18n.excludeSelectors}
-          </EuiButtonIcon>
-        )}
-        <EuiFormRow label={i18n.actions}>
-          <EuiCheckboxGroup
-            options={ActionOptions}
-            idToSelectedMap={selectedActionMap}
-            onChange={onChangeActions}
+          {response.exclude && (
+            <EuiFormRow label={i18n.excludeSelectors} fullWidth>
+              <EuiComboBox
+                aria-label={i18n.excludeSelectors}
+                fullWidth
+                selectedOptions={selectedExcludes}
+                options={selectorOptions}
+                onChange={onChangeExcludes}
+                isClearable={true}
+                data-test-subj="cloudDefend:controlResponseExcludes"
+              />
+            </EuiFormRow>
+          )}
+          <EuiSpacer size="s" />
+          {!response.exclude && (
+            <EuiButtonEmpty iconType="plusInCircle" onClick={onShowExclude} size="xs">
+              {i18n.excludeSelectors}
+            </EuiButtonEmpty>
+          )}
+          <EuiSpacer size="m" />
+          <EuiFormRow label={i18n.actions} fullWidth>
+            <EuiFlexGroup direction="row">
+              <EuiFlexItem grow={false}>
+                <EuiSpacer size="s" />
+                <EuiCheckbox
+                  id={'alert' + index}
+                  label={i18n.actionAlert}
+                  checked={alertSelected}
+                  onChange={onToggleAlert}
+                />
+              </EuiFlexItem>
+              <EuiSpacer size="m" />
+              <EuiFlexItem>
+                <EuiSpacer size="s" />
+                <EuiCheckbox
+                  id={'block' + index}
+                  label={i18n.actionBlock}
+                  checked={blockSelected}
+                  onChange={onToggleBlock}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </EuiForm>
+
+        <EuiPopover
+          css={styles.options}
+          button={<EuiButtonIcon iconType="boxesHorizontal" onClick={onTogglePopover} />}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+        >
+          <EuiContextMenuPanel
+            size="s"
+            items={[
+              <EuiContextMenuItem key="duplicate" icon="copy" onClick={onDuplicateClicked}>
+                {i18n.duplicate}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="remove"
+                icon="trash"
+                disabled={responses.length < 2}
+                onClick={onRemoveClicked}
+              >
+                {i18n.remove}
+              </EuiContextMenuItem>,
+            ]}
           />
-        </EuiFormRow>
-      </EuiForm>
+        </EuiPopover>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

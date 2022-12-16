@@ -69,13 +69,18 @@ export interface ControlSelector {
 
 export interface ControlResponse {
   match: ControlSelector[];
-  exclude: ControlSelector[];
+  exclude?: ControlSelector[];
   actions: ControlResponseAction[];
 }
 
 export const DefaultSelector: ControlSelector = {
   name: 'Untitled',
   activity: ControlSelectorConditionUIOptionsMap.activity.values,
+};
+
+export const DefaultResponse: ControlResponse = {
+  match: [],
+  actions: [ControlResponseAction.alert],
 };
 
 interface OnChangeDeps {
@@ -99,6 +104,8 @@ export interface ControlGeneralViewSelectorDeps {
 export interface ControlGeneralViewResponseDeps {
   response: ControlResponse;
   selectors: ControlSelector[];
+  responses: ControlResponse[];
+  index: number;
   onChange(response: ControlResponse): void;
   onRemove(response: ControlResponse): void;
   onDuplicate(response: ControlResponse): void;

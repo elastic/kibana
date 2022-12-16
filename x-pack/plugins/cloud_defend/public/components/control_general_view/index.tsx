@@ -22,7 +22,7 @@ import yaml from 'js-yaml';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import { getInputFromPolicy } from '../../common/utils';
-import { ControlSelector, ControlResponse, SettingsDeps, DefaultSelector } from '../../types';
+import { ControlSelector, ControlResponse, SettingsDeps, DefaultSelector, DefaultResponse } from '../../types';
 import * as i18n from './translations';
 import { ControlGeneralViewSelector } from '../control_general_view_selector';
 import { ControlGeneralViewResponse } from '../control_general_view_response';
@@ -85,6 +85,12 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
     selectors.push(newSelector);
     onUpdateYaml(selectors, responses);
   }, [incrementName, onUpdateYaml, responses, selectors]);
+
+  const onAddResponse = useCallback(() => {
+    const newResponse = { ...DefaultResponse };
+    responses.push(newResponse);
+    onUpdateYaml(selectors, responses);
+  }, [onUpdateYaml, responses, selectors]);
 
   const onDuplicateSelector = useCallback(
     (selector: ControlSelector) => {
@@ -186,24 +192,25 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
 
       <EuiFlexItem>
         <EuiDragDropContext onDragEnd={onResponseDragEnd}>
-          <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA" spacing="m" withPanel>
+          <EuiDroppable droppableId="cloudDefendControlResponses">
             {responses.map((response, i) => {
               return (
                 <EuiDraggable
-                  spacing="m"
                   key={i}
+                  css={styles.draggable}
+                  spacing="l"
                   index={i}
                   draggableId={i + ''}
                   customDragHandle={true}
                   hasInteractiveChildren={true}
                 >
                   {(provided) => (
-                    <EuiPanel paddingSize="s">
-                      <EuiFlexGroup alignItems="center" gutterSize="s">
+                    <EuiPanel paddingSize="m" hasShadow={false} color="subdued" css={styles.panel}>
+                      <EuiFlexGroup direction="column">
                         <EuiFlexItem grow={false}>
                           <EuiPanel
                             color="transparent"
-                            paddingSize="s"
+                            paddingSize="xs"
                             {...provided.dragHandleProps}
                             aria-label="Drag Handle"
                           >
@@ -213,12 +220,13 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
                         <EuiFlexItem>
                           <ControlGeneralViewResponse
                             key={i}
+                            index={i}
                             response={response}
+                            responses={responses}
                             selectors={selectors}
                             onRemove={onRemoveResponse}
                             onDuplicate={onDuplicateResponse}
                             onChange={onResponseChange}
-                            {...provided.dragHandleProps}
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -229,6 +237,9 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
             })}
           </EuiDroppable>
         </EuiDragDropContext>
+        <EuiButton fullWidth color="primary" iconType="plusInCircle" onClick={onAddResponse}>
+          {i18n.addResponse}
+        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

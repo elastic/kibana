@@ -10,10 +10,15 @@ import { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
   return useMemo(() => {
-    const yamlEditor: CSSObject = {
-      height: '400px',
+    const panel: CSSObject = {
+      position: 'relative',
     };
 
-    return { yamlEditor };
+    const draggable: CSSObject = {
+      paddingLeft: 0,
+      paddingRight: 0,
+    };
+
+    return { panel, draggable };
   }, []);
 };
