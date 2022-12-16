@@ -53,6 +53,10 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const testRunId = uuidv4();
 
+    const spaceId = server.spaces.spacesService.getSpaceId(request);
+
+    const paramsBySpace = await syntheticsService.getSyntheticsParams({ spaceId });
+
     const errors = await syntheticsService.runOnceConfigs([
       formatHeartbeatRequest({
         // making it enabled, even if it's disabled in the UI
@@ -60,6 +64,7 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         monitorId,
         heartbeatId: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
         testRunId,
+        params: paramsBySpace[spaceId],
       }),
     ]);
 
