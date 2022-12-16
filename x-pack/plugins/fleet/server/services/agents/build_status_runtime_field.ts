@@ -14,7 +14,9 @@ const DEFAULT_MS_BEFORE_INACTIVE = 10 * 60 * 1000; // 10 minutes
 const MISSED_INTERVALS_BEFORE_OFFLINE = 10;
 const MS_BEFORE_OFFLINE = MISSED_INTERVALS_BEFORE_OFFLINE * AGENT_POLLING_THRESHOLD_MS;
 
-type InactivityTimeouts = Awaited<ReturnType<typeof agentPolicyService['getInactivityTimeouts']>>;
+export type InactivityTimeouts = Awaited<
+  ReturnType<typeof agentPolicyService['getInactivityTimeouts']>
+>;
 
 const _buildInactiveClause = (
   now: number,
@@ -25,7 +27,7 @@ const _buildInactiveClause = (
     .map(({ inactivityTimeout, policyIds }) => {
       const inactivityTimeoutMs = inactivityTimeout * 1000;
       const policyOrs = policyIds
-        .map((policyId) => `${field('last_checkin')}.value == '${policyId}'`)
+        .map((policyId) => `${field('policy_id')}.value == '${policyId}'`)
         .join(' || ');
 
       return `(${policyOrs}) && lastCheckinMillis < ${now - inactivityTimeoutMs}L`;
@@ -35,17 +37,18 @@ const _buildInactiveClause = (
   const policyHasNoInactivityTimeout = `lastCheckinMillis < ${now - DEFAULT_MS_BEFORE_INACTIVE}L`;
   const agentIsInactive =
     (policyClauses.length ? `(${policyClauses}) || ` : '') + policyHasNoInactivityTimeout;
-  return `lastCheckinMillis > 0 && (${agentIsInactive})`;
+  return `lastCheckinMillis > 0 && ${field('policy_id')}.size() > 0 && (${agentIsInactive})`;
 };
 
 function _buildSource(inactivityTimeouts: InactivityTimeouts, pathPrefix?: string) {
-  const field = (path: string) => `doc['${pathPrefix ? `${pathPrefix}${path}` : path}']`;
+  const normalizedPrefix = pathPrefix ? `${pathPrefix}${pathPrefix.endsWith('.') ? '' : '.'}` : '';
+  const field = (path: string) => `doc['${normalizedPrefix + path}']`;
   const now = Date.now();
   return `
     long lastCheckinMillis = ${field('last_checkin')}.size() > 0 
       ? ${field('last_checkin')}.value.toInstant().toEpochMilli() 
       : -1;
-    if (${field('unenrolled_at')}.size() > 0) { 
+    if (${field('unenrolled_at')}.size() > 0) {
       emit('unenrolled'); 
     } else if (${_buildInactiveClause(now, inactivityTimeouts, field)}) {
       emit('inactive');
@@ -82,7 +85,8 @@ function _buildSource(inactivityTimeouts: InactivityTimeouts, pathPrefix?: strin
     `.replace(/(\n|\s{4})/g, ''); // condense source to single line
 }
 
-function _buildStatusRuntimeField(
+// exported for testing
+export function _buildStatusRuntimeField(
   inactivityTimeouts: InactivityTimeouts,
   pathPrefix?: string
 ): NonNullable<estypes.SearchRequest['runtime_mappings']> {
