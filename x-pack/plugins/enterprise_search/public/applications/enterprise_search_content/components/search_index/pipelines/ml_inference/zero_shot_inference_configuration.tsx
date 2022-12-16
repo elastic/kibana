@@ -66,7 +66,7 @@ export const ZeroShotClassificationInferenceConfiguration: React.FC = () => {
       <EuiFormRow
         label={i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.inference.zeroShot.labels.label',
-          { defaultMessage: 'Labels' }
+          { defaultMessage: 'Class labels' }
         )}
         fullWidth
       >
