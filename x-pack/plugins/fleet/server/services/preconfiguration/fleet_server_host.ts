@@ -22,6 +22,7 @@ import {
   getDefaultFleetServerHost,
 } from '../fleet_server_host';
 import { agentPolicyService } from '../agent_policy';
+
 import { isDifferent } from './utils';
 
 export function getCloudFleetServersHosts() {
