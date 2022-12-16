@@ -1,0 +1,40 @@
+{
+    "type": "index",
+    "value": {
+      "index": "new_terms",
+      "mappings": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "@timestamp": {
+            "type": "date"
+          },
+          "agent": {
+            "properties": {
+              "name": {
+                "properties": {
+                  "first": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "container": {
+            "properties": {
+              "image": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
+      "settings": {
+        "index": {
+          "number_of_replicas": "1",
+          "number_of_shards": "1"
+        }
+      }
+    }
+  }
