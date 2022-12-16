@@ -17,7 +17,6 @@ import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import { CustomBrandingServiceSetup } from '@kbn/core-custom-branding';
 import type {
   App,
   AppDeepLink,
@@ -30,6 +29,8 @@ import type {
 } from '@kbn/core-application-browser';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus, AppNavLinkStatus } from '@kbn/core-application-browser';
+import { CustomBranding, CustomBranding } from '@kbn/core-custom-branding';
+import { CustomBrandingService } from '@kbn/core-custom-branding/types';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
@@ -106,7 +107,7 @@ export class ApplicationService {
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
-  private customBranding = new CustomBrandingServiceSetup();
+  private customBranding = new CustomBrandingService();
 
   public setup({
     http: { basePath },
