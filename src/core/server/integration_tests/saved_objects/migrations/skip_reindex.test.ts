@@ -62,9 +62,11 @@ describe('skip reindexing', () => {
 
     const logs = await fs.readFile(logFilePath, 'utf-8');
 
-    expect(logs).toMatch('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
-    expect(logs).not.toMatch('CREATE_NEW_TARGET');
+    expect(logs).toMatch('INIT -> PREPARE_COMPATIBLE_MIGRATION');
+    expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
     expect(logs).toMatch('MARK_VERSION_INDEX_READY -> DONE');
+
+    expect(logs).not.toMatch('CREATE_NEW_TARGET');
   });
 });
 
