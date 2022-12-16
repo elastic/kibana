@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { BehaviorSubject, Observable } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
 
 /**
  * Combined parts of custom branding
@@ -39,14 +38,12 @@ export interface CustomBranding {
  * but not sure if these should be public since shouldn't this be hidden for the kibana operators?
  */
 interface Props extends CustomBranding {
+  customBranding$?: Observable<CustomBranding>;
   logo$?: Observable<string>;
   favicon$?: Observable<string>;
   pageTitle$?: Observable<string>;
   customizedLogo$?: Observable<string>;
 }
-
-/** @public */
-export interface CustomBrandingServiceSetup {}
 
 /** @public */
 export interface CustomBrandingStart {
@@ -60,10 +57,10 @@ export class CustomBrandingService {
   // @TODO I'm think Partial<Props> makes sense since I want customBranding to be at least one of the optional Props. I wouldn't be surprised if there's a more graceful way to convey this in typescript
   private customBranding: Partial<Props> | undefined;
   // @TODO but what if the kibana operator isn't using each customizable part of custom branding? would this be one observable or like a Map of observables?
-  private customBranding$: Observable<CustomBranding>;
+  private customBranding$: Observable<CustomBranding> | undefined;
 
-  // @TODO would this be part of CustomBrandingServiceSetup?
-  private registerCustomBrandingPlugin(pluginName: string) {
+  // @TODO would/should this be part of CustomBrandingServiceSetup?
+  private register(pluginName: string) {
     if (this.customBrandingPluginRegistered) {
       throw new Error('Another plugin is already registered');
     }
@@ -84,8 +81,8 @@ export class CustomBrandingService {
   }
 
   /** @public */
-  public setup(): CustomBrandingServiceSetup {
-    return this.registerCustomBrandingPlugin;
+  public setup() {
+    return this.register;
   }
 
   /**
@@ -100,11 +97,3 @@ export class CustomBrandingService {
     };
   }
 }
-
-// Helper function
-export const getObservable$ = (logo: string | Observable<string> | undefined) =>
-  useObservable(
-    logo
-      ? (logo as unknown as Observable<string>)
-      : new BehaviorSubject<string | undefined>(undefined)
-  );

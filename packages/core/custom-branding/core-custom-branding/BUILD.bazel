@@ -27,10 +27,10 @@ SOURCE_FILES = glob(
 
 SRCS = SOURCE_FILES
 
-filegroup(
-  name = "srcs",
-  srcs = SRCS,
-)
+# filegroup(
+#   name = "srcs",
+#   srcs = SRCS,
+# )
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",

@@ -29,8 +29,7 @@ import type {
 } from '@kbn/core-application-browser';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus, AppNavLinkStatus } from '@kbn/core-application-browser';
-import { CustomBranding, CustomBranding } from '@kbn/core-custom-branding';
-import { CustomBrandingService } from '@kbn/core-custom-branding/types';
+import { CustomBrandingService, CustomBrandingStart } from '@kbn/core-custom-branding';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
@@ -49,6 +48,7 @@ interface StartDeps {
   http: HttpStart;
   theme: ThemeServiceStart;
   overlays: OverlayStart;
+  customBranding: CustomBrandingStart;
 }
 
 function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
@@ -107,7 +107,7 @@ export class ApplicationService {
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
-  private customBranding = new CustomBrandingService();
+  customBranding = new CustomBrandingService();
 
   public setup({
     http: { basePath },
@@ -348,10 +348,7 @@ export class ApplicationService {
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
-            customBranding={
-              // this.customBranding.get('customizedLogo') ??
-              // this.customBranding.get('customizedLogo').pipe(takeUntil(this.stop$))
-            }
+            customBranding={this.customBranding.get()}
           />
         );
       },

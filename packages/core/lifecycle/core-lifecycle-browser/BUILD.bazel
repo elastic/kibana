@@ -57,6 +57,7 @@ TYPES_DEPS = [
   "//packages/core/overlays/core-overlays-browser:npm_module_types",
   "//packages/core/saved-objects/core-saved-objects-browser:npm_module_types",
   "//packages/core/chrome/core-chrome-browser:npm_module_types",
+  "//packages/core/custom-branding/core-custom-branding:npm_module_types",
 ]
 
 jsts_transpiler(
