@@ -80,7 +80,7 @@ describe('UnifiedFieldList useFieldFilters()', () => {
     expect(result.current.onFilterField).toBeUndefined();
 
     act(() => {
-      result.current.fieldListFiltersProps.onChangeFieldTypes!(['number']);
+      result.current.fieldListFiltersProps.onChangeFieldTypes(['number']);
     });
 
     expect(result.current.onFilterField).toBeDefined();
@@ -102,7 +102,7 @@ describe('UnifiedFieldList useFieldFilters()', () => {
     expect(result.current.fieldListFiltersProps.getCustomFieldType).toBe(props.getCustomFieldType);
 
     act(() => {
-      result.current.fieldListFiltersProps.onChangeFieldTypes!(['bytes', '@timestamp']);
+      result.current.fieldListFiltersProps.onChangeFieldTypes(['bytes', '@timestamp']);
     });
 
     expect(result.current.onFilterField).toBeDefined();

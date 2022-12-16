@@ -7,6 +7,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { act } from 'react-test-renderer';
 import {
   stubDataViewWithoutTimeField,
   stubLogstashDataView as dataView,
@@ -591,5 +592,49 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     ]);
 
     expect(fieldGroups.SelectedFields?.fields).toBe(customSortedFields);
+  });
+
+  it('should include filters props', async () => {
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
+        dataViewId: dataView.id!,
+        allFields,
+        services: mockedServices,
+      },
+    });
+
+    await waitForNextUpdate();
+
+    const { fieldListFiltersProps, fieldListGroupedProps } = result.current;
+    const fieldGroups = fieldListGroupedProps.fieldGroups;
+
+    expect(fieldGroups.AvailableFields?.fields?.length).toBe(25);
+    expect(fieldGroups.AvailableFields?.fieldSearchHighlight).toBeUndefined();
+    expect(fieldListFiltersProps.screenReaderDescriptionId).toBe(
+      fieldListGroupedProps.screenReaderDescriptionId
+    );
+
+    act(() => {
+      fieldListFiltersProps.onChangeNameFilter('Me');
+    });
+
+    const {
+      fieldListFiltersProps: newFieldListFiltersProps,
+      fieldListGroupedProps: newFieldListGroupedProps,
+    } = result.current;
+    const newFieldGroups = newFieldListGroupedProps.fieldGroups;
+    expect(newFieldGroups.AvailableFields?.fields?.length).toBe(4);
+    expect(newFieldGroups.AvailableFields?.fieldSearchHighlight).toBe('me');
+    expect(newFieldListFiltersProps.screenReaderDescriptionId).toBe(
+      newFieldListGroupedProps.screenReaderDescriptionId
+    );
+
+    act(() => {
+      newFieldListFiltersProps.onChangeFieldTypes?.(['date']);
+    });
+
+    expect(result.current.fieldListGroupedProps.fieldGroups.AvailableFields?.fields?.length).toBe(
+      3
+    );
   });
 });

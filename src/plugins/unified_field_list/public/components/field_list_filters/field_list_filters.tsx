@@ -19,7 +19,7 @@ export interface FieldListFiltersProps<T extends FieldListItem> {
   allFields?: FieldTypeFilterProps<T>['allFields'];
   getCustomFieldType?: FieldTypeFilterProps<T>['getCustomFieldType'];
   onSupportedFieldFilter?: FieldTypeFilterProps<T>['onSupportedFieldFilter'];
-  onChangeFieldTypes?: FieldTypeFilterProps<T>['onChange'];
+  onChangeFieldTypes: FieldTypeFilterProps<T>['onChange'];
   nameFilter: FieldNameSearchProps['nameFilter'];
   screenReaderDescriptionId?: FieldNameSearchProps['screenReaderDescriptionId'];
   onChangeNameFilter: FieldNameSearchProps['onChange'];
