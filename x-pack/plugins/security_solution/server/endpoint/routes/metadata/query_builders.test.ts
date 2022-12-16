@@ -266,9 +266,6 @@ describe('query builder', () => {
         },
         ['test-endpoint-policy-id']
       );
-      console.log('---------------------');
-      console.log(JSON.stringify(query.body.query, null, 2));
-      console.log('---------------------');
       const expected = expectedCompleteUnitedIndexQuery;
       expect(query.body.query).toEqual(expected);
     });
