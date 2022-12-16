@@ -137,7 +137,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                   >
                     <EuiButtonIcon
                       iconSize="s"
-                      iconType="plusInCircle"
+                      iconType="filterInclude"
                       onClick={() =>
                         onAddFilter(
                           fieldName,
@@ -164,7 +164,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                     />
                     <EuiButtonIcon
                       iconSize="s"
-                      iconType="minusInCircle"
+                      iconType="filterExclude"
                       onClick={() =>
                         onAddFilter(
                           fieldName,
