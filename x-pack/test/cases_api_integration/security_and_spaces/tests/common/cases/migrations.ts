@@ -505,6 +505,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
           for (const hit of casesFromES.body.hits.hits) {
             const caseID = hit._id;
+            expect(expectedSeverityValues[caseID]).not.to.be(undefined);
             expect(hit._source?.cases.severity).to.eql(expectedSeverityValues[caseID]);
           }
         });

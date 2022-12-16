@@ -23,7 +23,7 @@ import {
   SEVERITY_ESMODEL_TO_EXTERNAL,
   SEVERITY_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
-import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
+import { CaseAttributes, CaseFullExternalService, CaseSeverity } from '../../../common/api';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import {
   findConnectorIdReference,
@@ -183,7 +183,8 @@ export function transformSavedObjectToExternalModel(
     caseSavedObject.references
   );
 
-  const severity = SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObject.attributes?.severity];
+  const severity =
+    SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObject.attributes?.severity] ?? CaseSeverity.LOW;
 
   return {
     ...caseSavedObject,
