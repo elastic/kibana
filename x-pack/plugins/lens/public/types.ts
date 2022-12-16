@@ -800,7 +800,7 @@ export interface AccessorConfig {
     | 'invisible'
     | 'aggregate'
     | 'custom';
-  customIcon?: string;
+  customIcon?: IconType;
   color?: string;
   palette?: string[] | Array<{ color: string; stop: number }>;
 }
