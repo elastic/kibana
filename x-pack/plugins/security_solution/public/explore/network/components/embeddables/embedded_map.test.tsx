@@ -12,15 +12,10 @@ import * as redux from 'react-redux';
 import { waitFor } from '@testing-library/react';
 
 import '../../../../common/mock/match_media';
-import { useIndexPatterns } from '../../../../common/hooks/use_index_patterns';
 import { TestProviders } from '../../../../common/mock';
 
 import { EmbeddedMapComponent } from './embedded_map';
 import { createEmbeddable } from './embedded_map_helpers';
-
-const mockUseIndexPatterns = useIndexPatterns as jest.Mock;
-jest.mock('../../../../common/hooks/use_index_patterns');
-mockUseIndexPatterns.mockImplementation(() => [true, []]);
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./embedded_map_helpers', () => ({
