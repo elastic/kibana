@@ -47,7 +47,9 @@ import {
 import { FIELD_INPUT } from '../screens/exceptions';
 import {
   DETECTION_PAGE_FILTERS_LOADING,
+  DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU,
   DETECTION_PAGE_FILTER_GROUP_LOADING,
+  DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON,
   DETECTION_PAGE_FILTER_GROUP_WRAPPER,
   OPTION_LISTS_LOADING,
   OPTION_LIST_ACTIVE_CLEAR_SELECTION,
@@ -112,13 +114,32 @@ export const closeAlerts = () => {
 };
 
 export const expandFirstAlertActions = () => {
-  // Adding wait time because.. something is loading in the background
-  // which is preventing the popup to open upon button click below.
-  // Currently not sure what
   waitForAlerts();
-  cy.wait(500);
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.visible');
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click('center');
+
+  let count = 0;
+
+  const click = ($el: JQuery<HTMLElement>) => {
+    count++;
+    return $el.trigger('click');
+  };
+
+  /*
+   *
+   * Sometimes it takes some time for UI to attach event listener to
+   * TIMELINE_CONTEXT_MENU_BTN and cypress is too fast to click.
+   * Becuase of this popover does not open when click.
+   * pipe().should() makes sure that pipe function is repeated until should becomes true
+   *
+   * */
+
+  cy.get(TIMELINE_CONTEXT_MENU_BTN)
+    .first()
+    .should('be.visible')
+    .pipe(click)
+    .should('have.attr', 'data-popover-open', 'true')
+    .then(() => {
+      cy.log(`Clicked ${count} times`);
+    });
 };
 
 export const expandFirstAlert = () => {
@@ -275,4 +296,10 @@ export const waitForPageFilters = () => {
   cy.get(DETECTION_PAGE_FILTER_GROUP_LOADING).should('not.exist');
   cy.get(DETECTION_PAGE_FILTERS_LOADING).should('not.exist');
   cy.get(OPTION_LISTS_LOADING).should('have.lengthOf', 0);
+};
+
+export const resetFilters = () => {
+  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click({ force: true });
+  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click({ force: true });
+  waitForPageFilters();
 };

@@ -197,7 +197,6 @@ describe('Changing alert status', () => {
           cy.get(SELECTED_ALERTS).should('have.text', `Selected ${numberOfAlertsToBeOpened} alert`);
 
           openAlerts();
-          cy.wait(10000);
           waitForAlerts();
 
           const expectedNumberOfClosedAlertsAfterOpened = 2;

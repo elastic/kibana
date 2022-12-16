@@ -8,8 +8,6 @@
 import { getNewRule } from '../../objects/rule';
 import {
   CONTROL_FRAMES,
-  DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU,
-  DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
@@ -22,6 +20,7 @@ import { APP_ID, DEFAULT_DETECTION_PAGE_FILTERS } from '../../../common/constant
 import { formatPageFilterSearchParam } from '../../../common/utils/format_page_filter_search_param';
 import {
   markAcknowledgedFirstAlert,
+  resetFilters,
   selectCountTable,
   waitForAlerts,
   waitForPageFilters,
@@ -52,12 +51,6 @@ const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_P
       );
     });
   });
-};
-
-const resetFilters = () => {
-  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click({ force: true });
-  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click({ force: true });
-  waitForPageFilters();
 };
 
 describe('Detections : Page Filters', () => {

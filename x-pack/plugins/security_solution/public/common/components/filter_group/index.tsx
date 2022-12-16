@@ -37,6 +37,7 @@ import type { FilterContextType, FilterGroupProps, FilterItemObj } from './types
 import { useFilterUpdatesToUrlSync } from './hooks/use_filter_update_to_url_sync';
 import { APP_ID } from '../../../../common/constants';
 import './index.scss';
+import { useSpaceId } from '../../hooks/use_space_id';
 
 type ControlGroupBuilder = typeof controlGroupInputBuilder;
 
@@ -72,9 +73,16 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
+  const spaceId = useSpaceId() ?? 'default';
+
+  const localStoragePageFilterKey = useMemo(
+    () => `${APP_ID}.${spaceId}.${URL_PARAM_KEY.pageFilter}`,
+    [spaceId]
+  );
+
   const [controlGroupInputUpdates, setControlGroupInputUpdates] = useLocalStorage<
     ControlGroupInput | undefined
-  >(`${APP_ID}.${URL_PARAM_KEY.pageFilter}`, undefined);
+  >(localStoragePageFilterKey, undefined);
 
   const [initialUrlParam, setInitialUrlParam] = useState<FilterItemObj[]>();
 
