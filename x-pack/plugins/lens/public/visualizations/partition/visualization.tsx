@@ -170,14 +170,14 @@ export const getPieVisualization = ({
       // When we add a column it could be empty, and therefore have no order
       const accessors: AccessorConfig[] = originalOrder.map((accessor) => ({
         columnId: accessor,
-        triggerIcon: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
+        triggerIconType: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
       }));
 
       const firstNonCollapsedColumnId = layer.primaryGroups.find((id) => !isCollapsed(id, layer));
 
       accessors.forEach((accessorConfig) => {
         if (firstNonCollapsedColumnId === accessorConfig.columnId) {
-          accessorConfig.triggerIcon = 'colorBy';
+          accessorConfig.triggerIconType = 'colorBy';
           accessorConfig.palette = paletteService
             .get(state.palette?.name || 'default')
             .getCategoricalColors(10, state.palette?.params);
@@ -275,7 +275,7 @@ export const getPieVisualization = ({
       const originalSecondaryOrder = getSortedGroups(datasource, layer, 'secondaryGroups');
       const accessors = originalSecondaryOrder.map((accessor) => ({
         columnId: accessor,
-        triggerIcon: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
+        triggerIconType: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
       }));
 
       const secondaryGroupConfigBaseProps = {
@@ -321,10 +321,10 @@ export const getPieVisualization = ({
         ...(layer.allowMultipleMetrics
           ? hasSliceBy
             ? {
-                triggerIcon: 'disabled',
+                triggerIconType: 'disabled',
               }
             : {
-                triggerIcon: 'color',
+                triggerIconType: 'color',
                 color:
                   layer.colorsByDimension?.[columnId] ??
                   getDefaultColorForMultiMetricDimension({

@@ -381,7 +381,7 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
 
 export const getSingleColorConfig = (id: string, color = defaultReferenceLineColor) => ({
   columnId: id,
-  triggerIcon: 'color' as const,
+  triggerIconType: 'color' as const,
   color,
 });
 

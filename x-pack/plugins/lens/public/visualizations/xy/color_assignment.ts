@@ -107,7 +107,7 @@ export function getColorAssignments(
 function getDisabledConfig(accessor: string) {
   return {
     columnId: accessor as string,
-    triggerIcon: 'disabled' as const,
+    triggerIconType: 'disabled' as const,
   };
 }
 
@@ -125,7 +125,7 @@ export function getAssignedColorConfig(
     const annotation = layer.annotations.find((a) => a.id === accessor);
     return {
       columnId: accessor,
-      triggerIcon: annotation?.isHidden ? ('invisible' as const) : ('color' as const),
+      triggerIconType: annotation?.isHidden ? ('invisible' as const) : ('color' as const),
       color: isRangeAnnotationConfig(annotation)
         ? defaultAnnotationRangeColor
         : defaultAnnotationColor,
@@ -161,7 +161,7 @@ export function getAssignedColorConfig(
       : undefined;
   return {
     columnId: accessor as string,
-    triggerIcon: assignedColor ? 'color' : 'disabled',
+    triggerIconType: assignedColor ? 'color' : 'disabled',
     color: assignedColor ?? undefined,
   };
 }
@@ -187,7 +187,7 @@ export function getAccessorColorConfigs(
     if (currentYConfig?.color) {
       return {
         columnId: accessor as string,
-        triggerIcon: 'color',
+        triggerIconType: 'color',
         color: currentYConfig.color,
       };
     }
