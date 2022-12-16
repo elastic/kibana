@@ -48,7 +48,6 @@ import {
 import {
   sendBulkGetPackagePolicies,
   sendGetEndpointSecurityPackage,
-  sendGetFleetAgentsWithEndpoint,
 } from '../../../services/policies/ingest';
 import type { GetPolicyListResponse } from '../../policy/types';
 import type {
@@ -396,32 +395,6 @@ async function endpointDetailsListMiddleware({
     });
 
     loadEndpointsPendingActions(store);
-
-    try {
-      const endpointsTotalCount = await endpointsTotal(coreStart.http);
-      dispatch({
-        type: 'serverReturnedEndpointsTotal',
-        payload: endpointsTotalCount,
-      });
-    } catch (error) {
-      dispatch({
-        type: 'serverFailedToReturnEndpointsTotal',
-        payload: error,
-      });
-    }
-
-    try {
-      const agentsWithEndpoint = await sendGetFleetAgentsWithEndpoint(coreStart.http);
-      dispatch({
-        type: 'serverReturnedAgenstWithEndpointsTotal',
-        payload: agentsWithEndpoint.total,
-      });
-    } catch (error) {
-      dispatch({
-        type: 'serverFailedToReturnAgenstWithEndpointsTotal',
-        payload: error,
-      });
-    }
 
     dispatchIngestPolicies({ http: coreStart.http, hosts: endpointResponse.data, store });
   } catch (error) {

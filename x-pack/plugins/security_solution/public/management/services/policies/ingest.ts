@@ -8,7 +8,6 @@
 import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import type {
   GetAgentStatusResponse,
-  GetAgentsResponse,
   GetPackagesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
@@ -127,26 +126,6 @@ export const sendGetFleetAgentStatusForPolicy = (
     ...options,
     query: {
       policyId,
-    },
-  });
-};
-
-/**
- * Get a status summary for all Agents that are currently assigned to a given agent policy
- *
- * @param http
- * @param options
- */
-export const sendGetFleetAgentsWithEndpoint = (
-  http: HttpStart,
-  options: Exclude<HttpFetchOptions, 'query'> = {}
-): Promise<GetAgentsResponse> => {
-  return http.get(INGEST_API_FLEET_AGENTS, {
-    ...options,
-    query: {
-      page: 1,
-      perPage: 1,
-      kuery: 'packages : "endpoint"',
     },
   });
 };
