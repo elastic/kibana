@@ -138,15 +138,15 @@ export interface GetSummarizedAlertsFnOpts {
 export interface SummarizedAlerts {
   new: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
   ongoing: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
   recovered: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;

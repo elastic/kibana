@@ -37,6 +37,12 @@ describe('GuidedOnboarding ApiService', () => {
   let subscription: Subscription;
   let anotherSubscription: Subscription;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
   beforeEach(() => {
     httpClient = httpServiceMock.createStartContract({ basePath: '/base/path' });
     httpClient.get.mockResolvedValue({
@@ -74,7 +80,7 @@ describe('GuidedOnboarding ApiService', () => {
       httpClient.get.mockRejectedValueOnce(new Error('request failed'));
       subscription = apiService.fetchPluginState$().subscribe();
       // wait until the request fails
-      await new Promise((resolve) => process.nextTick(resolve));
+      jest.runAllTimers();
       anotherSubscription = apiService.fetchPluginState$().subscribe();
       expect(httpClient.get).toHaveBeenCalledTimes(1);
     });
@@ -561,6 +567,164 @@ describe('GuidedOnboarding ApiService', () => {
       // this assertion depends on the guides config
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({ status: 'skipped' }),
+      });
+    });
+  });
+
+  describe('isLoading$', () => {
+    it('is false by default', () => {
+      const isLoading = apiService.isLoading$.value;
+      expect(isLoading).toBe(false);
+    });
+
+    const testRequest = async (isFailedRequest?: boolean) => {
+      // advance the time to "while" the request is in flight
+      jest.advanceTimersByTime(1000);
+      expect(apiService.isLoading$.value).toBe(true);
+
+      // advance the time to "after" the request has completed
+      jest.runAllTimers();
+      if (isFailedRequest) {
+        // next tick to allow the code in the "catch" clause to run
+        await Promise.reject().catch(() => {});
+      }
+      // next tick to allow the code in the "then" clause to run
+      await Promise.resolve().then(() => {});
+      expect(apiService.isLoading$.value).toBe(false);
+    };
+
+    describe('is updated when fetching plugin state', () => {
+      it('true while request is in flight, false after the request completes', async () => {
+        httpClient.get.mockImplementation(() => {
+          return new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  pluginState: mockPluginStateNotStarted,
+                }),
+              2000
+            )
+          );
+        });
+        apiService.setup(httpClient, true);
+        // starting the request
+        subscription = apiService.fetchPluginState$().subscribe();
+        await testRequest();
+      });
+
+      it('true while request is in flight, false after the request fails', async () => {
+        httpClient.get.mockImplementation(() => {
+          return new Promise((resolve, reject) =>
+            setTimeout(() => reject(new Error('test')), 2000)
+          );
+        });
+        apiService.setup(httpClient, true);
+        // starting the request
+        subscription = apiService.fetchPluginState$().subscribe();
+
+        await testRequest(true);
+      });
+    });
+
+    describe('is updated when fetching all guides state', () => {
+      it('true while request is in flight, false after the request completes', async () => {
+        httpClient.get.mockImplementation(() => {
+          return new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  state: [],
+                }),
+              2000
+            )
+          );
+        });
+        apiService.setup(httpClient, true);
+        // starting the request
+        apiService.fetchAllGuidesState().then();
+
+        await testRequest();
+      });
+
+      it('true while request is in flight, false after the request fails', async () => {
+        httpClient.get.mockImplementation(() => {
+          return new Promise((resolve, reject) =>
+            setTimeout(() => reject(new Error('test')), 2000)
+          );
+        });
+        apiService.setup(httpClient, true);
+        // starting the request
+        apiService.fetchAllGuidesState().catch(() => {});
+
+        await testRequest(true);
+      });
+    });
+
+    describe('is updated when updating guide state', () => {
+      it('true while request is in flight, false after the request completes', async () => {
+        httpClient.put.mockImplementation(() => {
+          return new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  pluginState: mockPluginStateNotStarted,
+                }),
+              2000
+            )
+          );
+        });
+        apiService.setup(httpClient, true);
+        // starting the request
+        apiService.updatePluginState({}, true).then();
+
+        await testRequest();
+      });
+
+      it('true while request is in flight, false after the request fails', async () => {
+        httpClient.put.mockImplementation(() => {
+          return new Promise((resolve, reject) =>
+            setTimeout(() => reject(new Error('test')), 2000)
+          );
+        });
+        apiService.setup(httpClient, true);
+        // starting the request
+        apiService.updatePluginState({}, true).catch(() => {});
+
+        await testRequest(true);
+      });
+    });
+
+    describe('is updated when fetching guide config', () => {
+      it('true while request is in flight, false after the request completes', async () => {
+        httpClient.get.mockImplementation(() => {
+          return new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  config: testGuideConfig,
+                }),
+              2000
+            )
+          );
+        });
+        apiService.setup(httpClient, true);
+        // starting the request
+        apiService.getGuideConfig(testGuideId).then(() => {});
+
+        await testRequest();
+      });
+
+      it('true while request is in flight, false after the request fails', async () => {
+        httpClient.get.mockImplementation(() => {
+          return new Promise((resolve, reject) =>
+            setTimeout(() => reject(new Error('test')), 2000)
+          );
+        });
+        apiService.setup(httpClient, true);
+        // starting the request
+        apiService.getGuideConfig(testGuideId).catch(() => {});
+
+        await testRequest(true);
       });
     });
   });
