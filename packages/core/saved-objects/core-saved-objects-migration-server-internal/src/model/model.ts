@@ -9,7 +9,6 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
-import assert from 'assert';
 import { type AliasAction, isTypeof } from '../actions';
 import type { AllActionStates, State } from '../state';
 import type { ResponseType } from '../next';
@@ -171,9 +170,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         )
       ) {
         const targetIndex = source!;
-        const legacyAliasName = indexNameToAliasName(source!);
-
-        assert(aliases[legacyAliasName], `Expected ${legacyAliasName} to exist.`);
 
         return {
           ...stateP,
@@ -182,6 +178,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           targetIndex,
           sourceIndexMappings: indices[source!].mappings,
           preTransformDocsActions: [
+            // We try to remove the existing version alias to prevent older Kibana instances from
+            // writing while run the migration.
             { remove: { alias: indexNameToAliasName(source!), index: source!, must_exist: true } },
           ],
           // Setting this to "undefined" will trigger UPDATE_TARGET_MAPPINGS
