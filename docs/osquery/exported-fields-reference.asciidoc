@@ -4875,7 +4875,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *sender* - keyword, text.text
 
 * _asl.sender_ - Sender's identification string.  Default is process name.
-* _unified_log.sender_ - the name of the binary image that made the entry
+* _unified_log.sender_ - The name of the binary image that made the entry
 
 *sensor_backend_server* - keyword, text.text
 
