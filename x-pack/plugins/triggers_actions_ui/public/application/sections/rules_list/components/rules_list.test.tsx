@@ -635,26 +635,12 @@ describe('rules_list ', () => {
           await asyncForEach(mockedRulesData, assertions);
         });
 
-        it.only('Click column to sort by P50', async () => {
-          const {
-            getByTestId,
-            debug,
-            queryAllByTestId,
-            findByTestId,
-            getAllByRole,
-            container,
-            getByRole,
-          } = renderWithProviders(<RulesList />);
+        it('Click column to sort by P50', async () => {
+          const { getByTestId, queryAllByTestId, findByTestId, getAllByRole } = renderWithProviders(
+            <RulesList />
+          );
           const percentileEl: HTMLElement = await findByTestId(
             `rulesTable-${Percentiles.P50}ColumnName`
-          );
-          expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
-            expect.objectContaining({
-              sort: {
-                field: 'name',
-                direction: 'asc',
-              },
-            })
           );
 
           fireEvent.click(percentileEl);
@@ -690,17 +676,25 @@ describe('rules_list ', () => {
           expect(percentileOptions.length).toEqual(3);
         });
 
-        it('Select P95', () => {
-          const { queryAllByTestId, getAllByRole } = renderWithProviders(<RulesList />);
-          const percentileOptions = getAllByRole('option');
+        it('Select P95', async () => {
+          const { queryAllByTestId, findAllByTestId, findByTitle, container, getAllByRole } =
+            renderWithProviders(<RulesList />);
+          const percentilePopoverButton = await findByTitle('select percentile');
+          fireEvent.click(percentilePopoverButton);
 
-          fireEvent.click(percentileOptions[1]);
+          await findAllByTestId('percentileSelectablePopover-selectable');
+          const options = getAllByRole('option');
+          fireEvent.click(options[1]);
 
           expect(
             queryAllByTestId(`rulesTable-${Percentiles.P95}ColumnName`).length
           ).toBeGreaterThan(0);
 
-          const percentiles: HTMLElement[] = queryAllByTestId('rule-duration-format-value');
+          const percentiles: HTMLElement[] = Array.from(
+            container.querySelectorAll(
+              '[data-test-subj="rulesTableCell-ruleExecutionPercentile"] [data-test-subj="rule-duration-format-value"]'
+            )
+          );
 
           mockedRulesData.forEach((rule, index) => {
             if (typeof rule.monitoring?.run.calculated_metrics.p95 === 'number') {
@@ -713,10 +707,17 @@ describe('rules_list ', () => {
           });
         });
 
-        it('Click column to sort by P95', () => {
-          const { getByTestId } = renderWithProviders(<RulesList />);
+        it('Click column to sort by P95', async () => {
+          const { findByTestId, findByTitle, getByTestId, findAllByTestId, getAllByRole } =
+            renderWithProviders(<RulesList />);
+          const percentilePopoverButton = await findByTitle('select percentile');
+          fireEvent.click(percentilePopoverButton);
+          await findAllByTestId('percentileSelectablePopover-selectable');
+          const options = getAllByRole('option');
+          fireEvent.click(options[1]);
 
-          fireEvent.click(getByTestId(`rulesTable-${Percentiles.P95}ColumnName`));
+          const p95Column = await findByTestId(`rulesTable-${Percentiles.P95}ColumnName`);
+          fireEvent.click(p95Column);
 
           expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -753,11 +754,16 @@ describe('rules_list ', () => {
         });
 
         it('sorts rules when clicking the name column', async () => {
-          const { getByTestId } = renderWithProviders(<RulesList />);
+          const { findByTestId } = renderWithProviders(<RulesList />);
 
-          fireEvent.click(getByTestId('tableHeaderCell_name_1'));
+          const nameColumnTableHeaderEl = await findByTestId('tableHeaderCell_name_1');
+          const el = nameColumnTableHeaderEl.querySelector(
+            '[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton'
+          ) as HTMLElement;
 
-          expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
+          fireEvent.click(el);
+
+          expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
             expect.objectContaining({
               sort: {
                 field: 'name',
@@ -768,9 +774,14 @@ describe('rules_list ', () => {
         });
 
         it('sorts rules when clicking the status control column', async () => {
-          const { getByTestId } = renderWithProviders(<RulesList />);
+          const { findByTestId } = renderWithProviders(<RulesList />);
 
-          fireEvent.click(getByTestId('tableHeaderCell_enabled_10'));
+          const enabledColumnTableHeaderEl = await findByTestId('tableHeaderCell_enabled_10');
+          const el = enabledColumnTableHeaderEl.querySelector(
+            '[data-test-subj="tableHeaderCell_enabled_10"] .euiTableHeaderButton'
+          ) as HTMLElement;
+
+          fireEvent.click(el);
 
           expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
             expect.objectContaining({
@@ -783,48 +794,63 @@ describe('rules_list ', () => {
         });
 
         it('renders edit and delete buttons when user can manage rules', async () => {
-          const { queryAllByTestId } = renderWithProviders(<RulesList />);
-
-          expect(queryAllByTestId('ruleSidebarEditAction').length).toBeGreaterThan(0);
-          expect(queryAllByTestId('ruleSidebarDeleteAction').length).toBeGreaterThan(0);
+          const { findAllByTestId, queryByTestId } = renderWithProviders(<RulesList />);
+          await waitForElementToBeRemoved(() => queryByTestId('centerJustifiedSpinner'));
+          expect((await findAllByTestId('ruleSidebarEditAction')).length).toBeGreaterThan(0);
+          expect((await findAllByTestId('ruleSidebarDeleteAction')).length).toBeGreaterThan(0);
         });
 
         it('does not render edit and delete button when rule type does not allow editing in rules management', async () => {
-          const { queryAllByTestId } = renderWithProviders(<RulesList />);
+          const ruleTypeMock: RuleTypeModel = {
+            id: 'test_rule_type',
+            iconClass: 'test',
+            description: 'Rule when testing',
+            documentationUrl: 'https://localhost.local/docs',
+            validate: () => {
+              return { errors: {} };
+            },
+            ruleParamsExpression: jest.fn(),
+            requiresAppContext: true,
+          };
 
-          expect(queryAllByTestId('ruleSidebarEditAction').length).toEqual(0);
-          expect(queryAllByTestId('ruleSidebarDeleteAction').length).toBeGreaterThan(0);
+          ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
+          const { findAllByTestId, queryByTestId } = renderWithProviders(<RulesList />);
+          await waitForElementToBeRemoved(() => queryByTestId('centerJustifiedSpinner'));
+          expect(queryByTestId('ruleSidebarEditAction')).not.toBeInTheDocument();
+          expect((await findAllByTestId('ruleSidebarDeleteAction')).length).toBeGreaterThan(0);
         });
 
         it('renders brief', async () => {
-          (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
-          const { getByTestId } = renderWithProviders(<RulesList />);
+          const { findByTestId } = renderWithProviders(<RulesList />);
 
           // ruleLastRunOutcome: {
           //   succeeded: 3,
           //   failed: 3,
           //   warning: 6,
           // }
-          expect(getByTestId('totalSucceededRulesCount').textContent).toEqual('Succeeded: 3');
-          expect(getByTestId('totalFailedRulesCount').textContent).toEqual('Failed: 3');
-          expect(getByTestId('totalWarningRulesCount').textContent).toEqual('Warning: 6');
+          expect((await findByTestId('totalSucceededRulesCount')).textContent).toEqual(
+            'Succeeded: 3'
+          );
+          expect((await findByTestId('totalFailedRulesCount')).textContent).toEqual('Failed: 3');
+          expect((await findByTestId('totalWarningRulesCount')).textContent).toEqual('Warning: 6');
         });
 
         it('does not render the status filter if the feature flag is off', async () => {
-          const { queryAllByTestId } = renderWithProviders(<RulesList />);
-          expect(queryAllByTestId('ruleStatusFilter').length).toEqual(0);
+          const { queryByTestId } = renderWithProviders(<RulesList />);
+          expect(queryByTestId('ruleStatusFilter')).not.toBeInTheDocument();
         });
 
         it('renders the status filter if the experiment is on', async () => {
           (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-          const { queryAllByTestId } = renderWithProviders(<RulesList />);
-          expect(queryAllByTestId('ruleStatusFilter').length).toBeGreaterThan(0);
+
+          const { queryByTestId } = renderWithProviders(<RulesList />);
+          expect(queryByTestId('ruleStatusFilter')).toBeInTheDocument();
         });
 
         it('can filter by rule states', async () => {
           (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-          loadRulesWithKueryFilter.mockReset();
-          const { queryAllByTestId } = renderWithProviders(<RulesList />);
+          const { findAllByTestId, queryByTestId } = renderWithProviders(<RulesList />);
+          await waitForElementToBeRemoved(() => queryByTestId('centerJustifiedSpinner'));
 
           expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
             expect.objectContaining({
@@ -832,8 +858,8 @@ describe('rules_list ', () => {
             })
           );
 
-          fireEvent.click(queryAllByTestId('ruleStatusFilterButton')[0]);
-          fireEvent.click(queryAllByTestId('ruleStatusFilterOption-enabled')[0]);
+          fireEvent.click((await findAllByTestId('ruleStatusFilterButton'))[0]);
+          fireEvent.click((await findAllByTestId('ruleStatusFilterOption-enabled'))[0]);
 
           expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
             expect.objectContaining({
@@ -841,7 +867,7 @@ describe('rules_list ', () => {
             })
           );
 
-          fireEvent.click(queryAllByTestId('ruleStatusFilterOption-snoozed')[0]);
+          fireEvent.click((await findAllByTestId('ruleStatusFilterOption-snoozed'))[0]);
 
           expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
             expect.objectContaining({
@@ -849,7 +875,7 @@ describe('rules_list ', () => {
             })
           );
 
-          fireEvent.click(queryAllByTestId('ruleStatusFilterOption-snoozed')[0]);
+          fireEvent.click((await findAllByTestId('ruleStatusFilterOption-snoozed'))[0]);
 
           expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
             expect.objectContaining({
@@ -859,20 +885,24 @@ describe('rules_list ', () => {
         });
 
         it('does not render the tag filter is the feature flag is off', async () => {
-          const { queryAllByTestId } = renderWithProviders(<RulesList />);
-          expect(queryAllByTestId('ruleTagFilter').length).toEqual(0);
+          const { queryByTestId } = renderWithProviders(<RulesList />);
+          await waitForElementToBeRemoved(() => queryByTestId('centerJustifiedSpinner'));
+
+          expect(queryByTestId('ruleTagFilter')).not.toBeInTheDocument();
         });
 
         it('renders the tag filter if the experiment is on', async () => {
           (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-          const { queryAllByTestId } = renderWithProviders(<RulesList />);
-          expect(queryAllByTestId('ruleTagFilter').length).toBeGreaterThan(0);
+          const { queryByTestId } = renderWithProviders(<RulesList />);
+          await waitForElementToBeRemoved(() => queryByTestId('centerJustifiedSpinner'));
+
+          expect(queryByTestId('ruleTagFilter')).toBeInTheDocument();
         });
 
         it('can filter by tags', async () => {
           (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-          loadRulesWithKueryFilter.mockReset();
-          const { queryAllByTestId } = renderWithProviders(<RulesList />);
+          const { queryByTestId, findByTestId, getByTestId } = renderWithProviders(<RulesList />);
+          await waitForElementToBeRemoved(() => queryByTestId('centerJustifiedSpinner'));
 
           expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
             expect.objectContaining({
@@ -880,12 +910,10 @@ describe('rules_list ', () => {
             })
           );
 
-          fireEvent.click(queryAllByTestId('ruleTagFilterButton')[0]);
+          const ruleTagFilterButtonEl = getByTestId('ruleTagFilterButton');
+          fireEvent.click(ruleTagFilterButtonEl);
 
-          const tagFilterListItems = queryAllByTestId('ruleTagFilterSelectable');
-          expect(tagFilterListItems.length).toEqual(ruleTags.length);
-
-          fireEvent.click(tagFilterListItems[0]);
+          fireEvent.click(await findByTestId('ruleTagFilterOption-a'));
 
           expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
             expect.objectContaining({
@@ -893,7 +921,7 @@ describe('rules_list ', () => {
             })
           );
 
-          fireEvent.click(tagFilterListItems[1]);
+          fireEvent.click(await findByTestId('ruleTagFilterOption-b'));
 
           expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
             expect.objectContaining({
@@ -903,17 +931,19 @@ describe('rules_list ', () => {
         });
 
         it('rule list items with actions are editable if canExecuteAction is true', async () => {
-          const { queryAllByTestId } = renderWithProviders(<RulesList />);
+          const { container, queryByTestId } = renderWithProviders(<RulesList />);
+          await waitForElementToBeRemoved(() => queryByTestId('centerJustifiedSpinner'));
 
-          // expect(wrapper.find('button.euiButtonIcon[disabled=true]').length).toEqual(2);
+          const selectActionButtons = container.querySelectorAll('.euiButtonIcon[disabled]');
+          expect(selectActionButtons.length).toEqual(2);
         });
 
         it('rule list items with actions are not editable if canExecuteAction is false', async () => {
           const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
           hasExecuteActionsCapability.mockReturnValue(false);
-          const { queryAllByTestId } = renderWithProviders(<RulesList />);
+          const { container } = renderWithProviders(<RulesList />);
 
-          // expect(wrapper.find('button.euiButtonIcon[disabled=true]').length).toEqual(8);
+          expect(container.querySelectorAll('button.euiButtonIcon[disabled]').length).toEqual(8);
           hasExecuteActionsCapability.mockReturnValue(true);
         });
 
