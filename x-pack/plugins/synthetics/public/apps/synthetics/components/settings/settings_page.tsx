@@ -11,6 +11,7 @@ import { EuiPanel } from '@elastic/eui';
 import { AlertDefaultsForm } from './alerting_defaults/alert_defaults_form';
 import { ProjectAPIKeys } from './project_api_keys/project_api_keys';
 import { SettingsTabId } from './page_header';
+import { ParamsList } from './global_params/params_list';
 import { DataRetentionTab } from './data_retention';
 import { useSettingsBreadcrumbs } from './use_settings_breadcrumbs';
 import { ManagePrivateLocations } from './private_locations/manage_private_locations';
@@ -28,6 +29,8 @@ export const SettingsPage = () => {
         return <ManagePrivateLocations />;
       case 'data-retention':
         return <DataRetentionTab />;
+      case 'params':
+        return <ParamsList />;
       case 'alerting':
         return (
           <EuiPanel hasShadow={false} hasBorder={true}>
