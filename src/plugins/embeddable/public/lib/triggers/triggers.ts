@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
 import { IEmbeddable } from '..';
 
@@ -27,6 +27,15 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
     timeFieldName?: string;
     negate?: boolean;
   };
+}
+
+export interface CellValueContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable: T;
+  data: Array<{
+    value?: any;
+    eventId?: string;
+    columnMeta?: DatatableColumnMeta;
+  }>;
 }
 
 export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
@@ -96,6 +105,17 @@ export const valueClickTrigger: Trigger = {
   }),
   description: i18n.translate('embeddableApi.valueClickTrigger.description', {
     defaultMessage: 'A data point click on the visualization',
+  }),
+};
+
+export const CELL_VALUE_TRIGGER = 'CELL_VALUE_TRIGGER';
+export const cellValueTrigger: Trigger = {
+  id: CELL_VALUE_TRIGGER,
+  title: i18n.translate('embeddableApi.cellValueTrigger.title', {
+    defaultMessage: 'Cell value',
+  }),
+  description: i18n.translate('embeddableApi.cellValueTrigger.description', {
+    defaultMessage: 'Actions appear in the cell value options on the visualization',
   }),
 };
 
