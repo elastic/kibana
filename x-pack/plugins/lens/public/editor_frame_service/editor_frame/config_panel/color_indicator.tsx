@@ -86,8 +86,8 @@ export function ColorIndicator({
             size="m"
             type={accessorConfig.customIcon}
             color={accessorConfig.color}
-            aria-label={i18n.translate('xpack.lens.editorFrame.paletteColorIndicatorLabel', {
-              defaultMessage: 'This dimension is using a palette',
+            aria-label={i18n.translate('xpack.lens.editorFrame.customIconIndicatorLabel', {
+              defaultMessage: 'This dimension is using a custom icon',
             })}
           />
         )}
