@@ -73,9 +73,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButton
                     data-test-subj="homeAddData"
-                    // on self managed this button is primary
-                    // on Cloud this button is secondary, because there is a "guided onboarding" button
-                    fill={!isCloudEnabled}
+                    fill={true}
                     href={addBasePath('/app/integrations/browse')}
                     iconType="plusInCircle"
                     onClick={(event: MouseEvent) => {
