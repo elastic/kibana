@@ -21,9 +21,9 @@ jest.mock('../../../../hooks/use_load_rule_types', () => ({
   useLoadRuleTypes: jest.fn(),
 }));
 
-jest.mock('../../../../hooks/use_load_rule_alerts_aggregations', () => ({
-  useLoadRuleAlertsAggs: jest.fn().mockReturnValue({
-    ruleAlertsAggs: { active: 1, recovered: 7 },
+jest.mock('../../../../hooks/use_load_alert_summary', () => ({
+  useLoadAlertSummary: jest.fn().mockReturnValue({
+    alertSummary: { active: 1, recovered: 7 },
   }),
 }));
 
