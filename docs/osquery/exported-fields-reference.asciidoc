@@ -5637,7 +5637,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *timestamp* - keyword, text.text
 
 * _time.timestamp_ - Current timestamp (log format) in UTC
-* _unified_log.timestamp_ - unix timestamp associated with the entry
+* _unified_log.timestamp_ - Unix timestamp associated with the entry
 * _windows_eventlog.timestamp_ - Timestamp to selectively filter the events
 
 *timestamp_ms* - keyword, number.long
