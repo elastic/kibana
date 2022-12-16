@@ -33,17 +33,18 @@ export interface Dependencies {
   useToasts: () => ToastsStart;
 }
 
-export type ObservabilityAlertSearchBarDependencies = Dependencies;
-
 export interface Services {
   timeFilterService: TimefilterContract;
   AlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
   useToasts: () => ToastsStart;
 }
 
-export type ObservabilityAlertSearchBarProps = AlertSearchBarContainerState &
-  AlertSearchBarStateTransitions &
-  CommonAlertSearchBarProps;
+export interface ObservabilityAlertSearchBarProps
+  extends AlertSearchBarContainerState,
+    AlertSearchBarStateTransitions,
+    CommonAlertSearchBarProps {
+  services: Services;
+}
 
 interface AlertSearchBarContainerState {
   rangeFrom: string;

@@ -6,7 +6,6 @@
  */
 
 import { buildRangeFilter, Filter } from '@kbn/es-query';
-import { Logger } from '@kbn/core/server';
 import {
   DataView,
   getTime,
@@ -14,22 +13,41 @@ import {
   ISearchStartSearchSource,
   SortDirection,
 } from '@kbn/data-plugin/common';
+import {
+  BUCKET_SELECTOR_FIELD,
+  buildAggregation,
+  isCountAggregation,
+  parseAggregationResults,
+} from '@kbn/triggers-actions-ui-plugin/common';
+import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { Logger } from '@kbn/core/server';
 import { OnlySearchSourceRuleParams } from '../types';
+import { getComparatorScript } from '../../../../common';
 
-export async function fetchSearchSourceQuery(
-  ruleId: string,
-  params: OnlySearchSourceRuleParams,
-  latestTimestamp: string | undefined,
-  spacePrefix: string,
+export async function fetchSearchSourceQuery({
+  ruleId,
+  alertLimit,
+  params,
+  latestTimestamp,
+  spacePrefix,
+  services,
+}: {
+  ruleId: string;
+  alertLimit: number | undefined;
+  params: OnlySearchSourceRuleParams;
+  latestTimestamp: string | undefined;
+  spacePrefix: string;
   services: {
     logger: Logger;
     searchSourceClient: ISearchStartSearchSource;
     share: SharePluginStart;
-  }
-) {
+  };
+}) {
   const { logger, searchSourceClient } = services;
+  const isGroupAgg = isGroupAggregation(params.termField);
+  const isCountAgg = isCountAggregation(params.aggType);
 
   const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
@@ -38,7 +56,8 @@ export async function fetchSearchSourceQuery(
     initialSearchSource,
     index,
     params,
-    latestTimestamp
+    latestTimestamp,
+    alertLimit
   );
 
   logger.debug(
@@ -64,6 +83,7 @@ export async function fetchSearchSourceQuery(
     link: start + spacePrefix + '/app' + end,
     numMatches: Number(searchResult.hits.total),
     searchResult,
+    parsedResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: searchResult }),
     dateStart,
     dateEnd,
   };
@@ -73,14 +93,17 @@ export function updateSearchSource(
   searchSource: ISearchSource,
   index: DataView,
   params: OnlySearchSourceRuleParams,
-  latestTimestamp?: string
+  latestTimestamp: string | undefined,
+  alertLimit?: number
 ) {
+  const isGroupAgg = isGroupAggregation(params.termField);
   const timeFieldName = params.timeField || index.timeFieldName;
+
   if (!timeFieldName) {
     throw new Error('Invalid data view without timeFieldName.');
   }
 
-  searchSource.setField('size', params.size);
+  searchSource.setField('size', isGroupAgg ? 0 : params.size);
 
   const timeRange = {
     from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
@@ -104,7 +127,24 @@ export function updateSearchSource(
   const searchSourceChild = searchSource.createChild();
   searchSourceChild.setField('filter', filters as Filter[]);
   searchSourceChild.setField('sort', [{ [timeFieldName]: SortDirection.desc }]);
-
+  searchSourceChild.setField(
+    'aggs',
+    buildAggregation({
+      aggType: params.aggType,
+      aggField: params.aggField,
+      termField: params.termField,
+      termSize: params.termSize,
+      condition: {
+        resultLimit: alertLimit,
+        conditionScript: getComparatorScript(
+          params.thresholdComparator,
+          params.threshold,
+          BUCKET_SELECTOR_FIELD
+        ),
+      },
+      ...(isGroupAgg ? { topHitsSize: params.size } : {}),
+    })
+  );
   return {
     searchSource: searchSourceChild,
     dateStart,
