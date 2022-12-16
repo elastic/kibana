@@ -4,20 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export enum AlertEvaluationUnitType {
-  Duration,
-  Percent,
-  Number,
-}
+
+export const ALERT_EVALUATION_UNIT_TYPE = {
+  DURATION: 'DURATION',
+  PERCENT: 'PERCENT',
+  NUMBER: 'NUMBER',
+} as const;
+
+type ObjectValues<T> = T[keyof T];
+type AlertEvaluationUnitType = ObjectValues<typeof ALERT_EVALUATION_UNIT_TYPE>;
+
 export const getAlertEvaluationUnitTypeByRuleTypeId = (
   ruleTypeId: string
 ): AlertEvaluationUnitType => {
   switch (ruleTypeId) {
     case 'apm.transaction_duration':
-      return AlertEvaluationUnitType.Duration;
+      return ALERT_EVALUATION_UNIT_TYPE.DURATION;
     case 'apm.transaction_error_rate':
-      return AlertEvaluationUnitType.Percent;
+      return ALERT_EVALUATION_UNIT_TYPE.PERCENT;
     default:
-      return AlertEvaluationUnitType.Number;
+      return ALERT_EVALUATION_UNIT_TYPE.NUMBER;
   }
 };

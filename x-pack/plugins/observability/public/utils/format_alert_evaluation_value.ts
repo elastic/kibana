@@ -7,7 +7,7 @@
 
 import { asMillisecondDuration, asPercent } from '../../common/utils/formatters';
 import {
-  AlertEvaluationUnitType,
+  ALERT_EVALUATION_UNIT_TYPE,
   getAlertEvaluationUnitTypeByRuleTypeId,
 } from './get_alert_evaluation_unit_type_by_rule_type_id';
 
@@ -15,9 +15,9 @@ export const formatAlertEvaluationValue = (ruleTypeId?: string, evaluationValue?
   if (!evaluationValue || !ruleTypeId) return '-';
   const unitType = getAlertEvaluationUnitTypeByRuleTypeId(ruleTypeId);
   switch (unitType) {
-    case AlertEvaluationUnitType.Duration:
+    case ALERT_EVALUATION_UNIT_TYPE.DURATION:
       return asMillisecondDuration(evaluationValue);
-    case AlertEvaluationUnitType.Percent:
+    case ALERT_EVALUATION_UNIT_TYPE.PERCENT:
       return asPercent(evaluationValue, 100);
     default:
       return evaluationValue;
