@@ -26,8 +26,7 @@ const NonEcsCalloutComponent: React.FC<Props> = ({ children, enrichedFieldMetada
   >
     <div>{i18n.NON_ECS_CALLOUT({ fieldCount: enrichedFieldMetadata.length, version })}</div>
     <CalloutItem>{i18n.PRE_BUILT_DETECTION_ENGINE_RULES_WONT_WORK}</CalloutItem>
-    <CalloutItem>{i18n.PAGES_MAY_NOT_DISPLAY_EVENTS}</CalloutItem>
-    <CalloutItem>{i18n.TIMELINE_AND_TEMPLATES_MAY_NOT_OPERATE_PROPERLY}</CalloutItem>
+    <CalloutItem>{i18n.PAGES_MAY_NOT_DISPLAY_FIELDS}</CalloutItem>
     <CalloutItem>{i18n.CUSTOM_DETECTION_ENGINE_RULES_WORK}</CalloutItem>
     <EuiSpacer size="s" />
     {children}

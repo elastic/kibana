@@ -11,7 +11,7 @@ import React from 'react';
 
 import { EcsAllowedValues } from './ecs_allowed_values';
 import { TruncatedText } from '../../../../detection_engine/rule_monitoring/components/basic/text/truncated_text';
-import type { AllowedValue, EnrichedFieldMetadata } from '../types';
+import type { AllowedValue, EnrichedFieldMetadata, UnallowedValueCount } from '../types';
 
 import * as i18n from './translations';
 import { IndexInvalidValues } from './index_invalid_values';
@@ -21,42 +21,42 @@ export const EMPTY_PLACEHOLDER = '-';
 export const getTableColumns = (): Array<EuiTableFieldDataColumnType<EnrichedFieldMetadata>> => [
   {
     field: 'indexFieldName',
-    name: i18n.NAME,
+    name: i18n.FIELD,
     sortable: true,
     truncateText: false,
     width: '20%',
   },
   {
-    field: 'indexFieldType',
-    name: i18n.INDEX_TYPE,
-    render: (indexFieldType: string) => <EuiCode>{indexFieldType}</EuiCode>,
-    sortable: true,
-    truncateText: false,
-    width: '15%',
-  },
-  {
     field: 'type',
-    name: i18n.ECS_TYPE,
+    name: i18n.ECS_MAPPING,
     render: (type: string) => <EuiCode>{type != null ? type : EMPTY_PLACEHOLDER}</EuiCode>,
     sortable: true,
     truncateText: false,
     width: '15%',
   },
   {
-    field: 'indexInvalidValues',
-    name: i18n.INDEX_INVALID_VALUES,
-    render: (indexInvalidValues: string[]) => (
-      <IndexInvalidValues indexInvalidValues={indexInvalidValues} />
-    ),
-    sortable: false,
+    field: 'indexFieldType',
+    name: i18n.INDEX_MAPPING,
+    render: (indexFieldType: string) => <EuiCode>{indexFieldType}</EuiCode>,
+    sortable: true,
     truncateText: false,
-    width: '20%',
+    width: '15%',
   },
   {
     field: 'allowed_values',
     name: i18n.ECS_ALLOWED_VALUES,
     render: (allowedValues: AllowedValue[] | undefined) => (
       <EcsAllowedValues allowedValues={allowedValues} />
+    ),
+    sortable: false,
+    truncateText: false,
+    width: '20%',
+  },
+  {
+    field: 'indexInvalidValues',
+    name: i18n.INDEX_UNALLOWED_VALUES,
+    render: (indexInvalidValues: UnallowedValueCount[]) => (
+      <IndexInvalidValues indexInvalidValues={indexInvalidValues} />
     ),
     sortable: false,
     truncateText: false,

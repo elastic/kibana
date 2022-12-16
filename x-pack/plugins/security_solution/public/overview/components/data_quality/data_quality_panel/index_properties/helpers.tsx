@@ -10,7 +10,7 @@ import React from 'react';
 
 import { AllTab } from '../tabs/all_tab';
 import { EcsCompliantTab } from '../tabs/ecs_compliant_tab';
-import { getEcsCompliantColor } from '../tabs/ecs_compliant_tab/helpers';
+import { getEcsCompliantColor } from '../tabs/helpers';
 import { NonEcsTab } from '../tabs/non_ecs_tab';
 import { getNonEcsColor } from '../tabs/non_ecs_tab/helpers';
 import { NotEcsCompliantTab } from '../tabs/not_ecs_compliant_tab';
@@ -116,7 +116,7 @@ export const getTabs = ({
   },
   {
     append: <EuiBadge>{partitionedFieldMetadata.all.length}</EuiBadge>,
-    content: <AllTab enrichedFieldMetadata={partitionedFieldMetadata.all} />,
+    content: <AllTab enrichedFieldMetadata={partitionedFieldMetadata.all} version={version} />,
     id: ALL_TAB_ID,
     name: i18n.ALL,
   },

@@ -10,13 +10,14 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { EMPTY_PLACEHOLDER } from '../helpers';
+import type { UnallowedValueCount } from '../../types';
 
 const IndexInvalidValueFlexItem = styled(EuiFlexItem)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 interface Props {
-  indexInvalidValues: string[];
+  indexInvalidValues: UnallowedValueCount[];
 }
 
 const IndexInvalidValuesComponent: React.FC<Props> = ({ indexInvalidValues }) =>
@@ -24,9 +25,16 @@ const IndexInvalidValuesComponent: React.FC<Props> = ({ indexInvalidValues }) =>
     <EuiCode>{EMPTY_PLACEHOLDER}</EuiCode>
   ) : (
     <EuiFlexGroup direction="column" gutterSize="none">
-      {indexInvalidValues.map((x, i) => (
-        <IndexInvalidValueFlexItem grow={false} key={`${x}_${i}`}>
-          <EuiCode>{x}</EuiCode>
+      {indexInvalidValues.map(({ fieldName, count }, i) => (
+        <IndexInvalidValueFlexItem grow={false} key={`${fieldName}_${i}`}>
+          <div>
+            <EuiCode>{fieldName}</EuiCode>{' '}
+            <span>
+              {'('}
+              {count}
+              {')'}
+            </span>
+          </div>
         </IndexInvalidValueFlexItem>
       ))}
     </EuiFlexGroup>

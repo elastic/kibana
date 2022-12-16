@@ -24,7 +24,7 @@ import {
   ECS_FIELD_REFERENCE_URL,
   ECS_REFERENCE_URL,
   getCaseSummaryMarkdownComment,
-  UPDATE_MAPPING_URL,
+  MAPPING_URL,
 } from '../../index_properties/markdown/helpers';
 import * as i18n from '../../index_properties/translations';
 import { CopyToClipboardButton } from '../styles';
@@ -54,10 +54,11 @@ const NotEcsCompliantTabComponent: React.FC<Props> = ({
         ecsFieldReferenceUrl: ECS_FIELD_REFERENCE_URL,
         ecsReferenceUrl: ECS_REFERENCE_URL,
         indexName,
-        updateMappingUrl: UPDATE_MAPPING_URL,
+        mappingUrl: MAPPING_URL,
         version,
       }),
       getNotEcsCompliantMarkdownComment({
+        docsCount,
         enrichedFieldMetadata,
         indexName,
         version,

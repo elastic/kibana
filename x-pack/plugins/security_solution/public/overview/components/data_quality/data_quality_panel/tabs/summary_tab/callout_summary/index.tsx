@@ -11,13 +11,13 @@ import React, { useCallback, useMemo } from 'react';
 import { MissingTimestampCallout } from '../../callouts/missing_timestamp_callout';
 import { NonEcsCallout } from '../../callouts/non_ecs_callout';
 import { NotEcsCompliantCallout } from '../../callouts/not_ecs_compliant_callout';
-import { showMissingTimestampCallout } from '../../ecs_compliant_tab/helpers';
+import { showMissingTimestampCallout } from '../../helpers';
 import { getMarkdownComments } from '../helpers';
 import {
   ECS_FIELD_REFERENCE_URL,
   ECS_REFERENCE_URL,
   getCaseSummaryMarkdownComment,
-  UPDATE_MAPPING_URL,
+  MAPPING_URL,
 } from '../../../index_properties/markdown/helpers';
 import { showNotEcsCompliantCallout } from '../../not_ecs_compliant_tab/helpers';
 import { showNonEcsCallout } from '../../non_ecs_tab/helpers';
@@ -49,10 +49,11 @@ const CalloutSummaryComponent: React.FC<Props> = ({
         ecsFieldReferenceUrl: ECS_FIELD_REFERENCE_URL,
         ecsReferenceUrl: ECS_REFERENCE_URL,
         indexName,
-        updateMappingUrl: UPDATE_MAPPING_URL,
+        mappingUrl: MAPPING_URL,
         version,
       }),
       ...getMarkdownComments({
+        docsCount,
         indexName,
         partitionedFieldMetadata,
         version,

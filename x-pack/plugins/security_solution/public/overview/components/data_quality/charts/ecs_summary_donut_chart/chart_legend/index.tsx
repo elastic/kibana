@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { ChartLegendItem } from './chart_legend_item';
-import { getEcsCompliantColor } from '../../../data_quality_panel/tabs/ecs_compliant_tab/helpers';
+import { getEcsCompliantColor } from '../../../data_quality_panel/tabs/helpers';
 import {
   ECS_COMPLIANT_TAB_ID,
   NON_ECS_TAB_ID,

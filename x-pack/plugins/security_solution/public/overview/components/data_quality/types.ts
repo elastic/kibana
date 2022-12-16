@@ -34,7 +34,7 @@ export type EnrichedFieldMetadata = EcsMetadata & {
   hasEcsMetadata: boolean;
   indexFieldName: string;
   indexFieldType: string;
-  indexInvalidValues: string[];
+  indexInvalidValues: UnallowedValueCount[];
   isEcsCompliant: boolean;
 };
 
@@ -50,4 +50,28 @@ export interface PartitionedFieldMetadataStats {
   ecsCompliant: number;
   nonEcs: number;
   notEcsCompliant: number;
+}
+
+export interface UnallowedValueRequestItem {
+  allowedValues: string[];
+  indexFieldName: string;
+  indexName: string;
+}
+
+export interface Bucket {
+  key: string;
+  doc_count: number;
+}
+
+export interface UnallowedValueCount {
+  fieldName: string;
+  count: number;
+}
+
+export interface UnallowedValueSearchResult {
+  aggregations?: {
+    [x: string]: {
+      buckets?: Bucket[];
+    };
+  };
 }

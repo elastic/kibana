@@ -10,21 +10,21 @@ import { repeat } from 'lodash/fp';
 import {
   ECS_ALLOWED_VALUES,
   ECS_DESCRIPTION,
-  ECS_TYPE,
-  INDEX_INVALID_VALUES,
-  INDEX_TYPE,
-  NAME,
+  ECS_MAPPING,
+  INDEX_UNALLOWED_VALUES,
+  INDEX_MAPPING,
+  FIELD,
 } from '../../../compare_fields_table/translations';
 import * as i18n from '../translations';
-import type { AllowedValue, EnrichedFieldMetadata } from '../../../types';
+import type { AllowedValue, EnrichedFieldMetadata, UnallowedValueCount } from '../../../types';
 
 export const EMPTY_PLACEHOLDER = '-';
 
 export const ECS_FIELD_REFERENCE_URL =
   'https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html';
 export const ECS_REFERENCE_URL = 'https://www.elastic.co/guide/en/ecs/current/ecs-reference.html';
-export const UPDATE_MAPPING_URL =
-  'https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-put-mapping.html';
+export const MAPPING_URL =
+  'https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html';
 
 export const escape = (content: string | undefined): string | undefined =>
   content != null ? content.replaceAll('\n', ' ').replaceAll('|', '\\|') : content;
@@ -46,31 +46,33 @@ export const getAllowedValues = (allowedValues: AllowedValue[] | undefined): str
     ? getCodeFormattedValue(undefined)
     : allowedValues.map((x) => getCodeFormattedValue(x.name)).join(', ');
 
-export const getIndexInvalidValues = (indexInvalidValues: string[]): string =>
+export const getIndexInvalidValues = (indexInvalidValues: UnallowedValueCount[]): string =>
   indexInvalidValues.length === 0
     ? getCodeFormattedValue(undefined)
-    : indexInvalidValues.map((x) => getCodeFormattedValue(x)).join(', ');
+    : indexInvalidValues
+        .map(({ fieldName, count }) => `${getCodeFormattedValue(escape(fieldName))} (${count})`)
+        .join(', ');
 
 export const getMarkdownTableRows = (enrichedFieldMetadata: EnrichedFieldMetadata[]): string =>
   enrichedFieldMetadata
     .map(
       (x) =>
-        `| ${escape(x.indexFieldName)} | ${getCodeFormattedValue(
+        `| ${escape(x.indexFieldName)} | ${getCodeFormattedValue(x.type)} | ${getCodeFormattedValue(
           x.indexFieldType
-        )} | ${getCodeFormattedValue(x.type)} | ${getIndexInvalidValues(
+        )}  | ${getAllowedValues(x.allowed_values)} | ${getIndexInvalidValues(
           x.indexInvalidValues
-        )} | ${getAllowedValues(x.allowed_values)} | ${escape(
-          x.description ?? EMPTY_PLACEHOLDER
-        )} |`
+        )} | ${escape(x.description ?? EMPTY_PLACEHOLDER)} |`
     )
     .join('\n');
 
 export const getMarkdownComment = ({
+  docsCount,
   enrichedFieldMetadata,
   indexName,
   suggestedAction,
   title,
 }: {
+  docsCount: number;
   enrichedFieldMetadata: EnrichedFieldMetadata[];
   indexName: string;
   suggestedAction: string;
@@ -78,17 +80,20 @@ export const getMarkdownComment = ({
 }) =>
   `
 #### ${i18n.INDEX}: ${getCodeFormattedValue(indexName)}
+
+${getCodeFormattedValue(`${docsCount}`)} ${i18n.DOCS}
+
 #### ${escape(title)}
 ${escapePreserveNewlines(suggestedAction)}
 
 ${
   enrichedFieldMetadata.length > 0
     ? getMarkdownTableHeader([
-        NAME,
-        INDEX_TYPE,
-        ECS_TYPE,
-        INDEX_INVALID_VALUES,
+        FIELD,
+        ECS_MAPPING,
+        INDEX_MAPPING,
         ECS_ALLOWED_VALUES,
+        INDEX_UNALLOWED_VALUES,
         ECS_DESCRIPTION,
       ])
     : ''
@@ -101,14 +106,14 @@ export const getCaseSummaryMarkdownComment = ({
   ecsFieldReferenceUrl,
   ecsReferenceUrl,
   indexName,
-  updateMappingUrl,
+  mappingUrl,
   version,
 }: {
   docsCount: number;
   ecsFieldReferenceUrl: string;
   ecsReferenceUrl: string;
   indexName: string;
-  updateMappingUrl: string;
+  mappingUrl: string;
   version: string;
 }) =>
   `
@@ -118,7 +123,7 @@ ${i18n.CASE_SUMMARY_MARKDOWN_DESCRIPTION({
   ecsFieldReferenceUrl: `${escape(ecsFieldReferenceUrl)}`,
   ecsReferenceUrl: `${escape(ecsReferenceUrl)}`,
   indexName: `${escape(indexName)}`,
-  updateMappingUrl: `${escape(updateMappingUrl)}`,
+  mappingUrl: `${escape(mappingUrl)}`,
   version: `${escape(version)}`,
 })}
 
@@ -128,10 +133,9 @@ ${i18n.CASE_SUMMARY_MARKDOWN_DESCRIPTION({
 ${escape(indexName)}
 \`\`\`
 
-\`${docsCount}\` ${i18n.DOCS}
+${getCodeFormattedValue(`${docsCount}`)} ${i18n.DOCS}
 
 ### ${i18n.ECS_VERSION_MARKDOWN_COMMENT}
-
 
 \`\`\`
 ${escape(version)}

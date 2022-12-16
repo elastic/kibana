@@ -8,10 +8,7 @@
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
-import {
-  getMissingTimestampComment,
-  showMissingTimestampCallout,
-} from '../ecs_compliant_tab/helpers';
+import { getMissingTimestampComment, showMissingTimestampCallout } from '../helpers';
 import {
   ALL_TAB_ID,
   ECS_COMPLIANT_TAB_ID,
@@ -85,10 +82,12 @@ export const getTabId = (groupByField: string): string => {
 const isString = (x: string | null): x is string => typeof x === 'string';
 
 export const getMarkdownComments = ({
+  docsCount,
   indexName,
   partitionedFieldMetadata,
   version,
 }: {
+  docsCount: number;
   indexName: string;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   version: string;
@@ -97,6 +96,7 @@ export const getMarkdownComments = ({
     partitionedFieldMetadata.notEcsCompliant
   )
     ? getNotEcsCompliantMarkdownComment({
+        docsCount,
         enrichedFieldMetadata: partitionedFieldMetadata.notEcsCompliant,
         indexName,
         version,
@@ -105,6 +105,7 @@ export const getMarkdownComments = ({
 
   const nonEcsMarkdownComment = showNonEcsCallout(partitionedFieldMetadata.nonEcs)
     ? getNonEcsMarkdownComment({
+        docsCount,
         enrichedFieldMetadata: partitionedFieldMetadata.nonEcs,
         indexName,
         version,
@@ -115,6 +116,7 @@ export const getMarkdownComments = ({
     partitionedFieldMetadata.ecsCompliant
   )
     ? getMissingTimestampComment({
+        docsCount,
         enrichedFieldMetadata: partitionedFieldMetadata.ecsCompliant,
         indexName,
       })

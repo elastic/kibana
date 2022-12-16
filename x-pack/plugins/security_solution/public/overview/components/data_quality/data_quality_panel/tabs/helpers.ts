@@ -7,15 +7,17 @@
 
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { getMarkdownComment } from '../../index_properties/markdown/helpers';
-import { getFillColor } from '../summary_tab/helpers';
-import * as i18n from '../../index_properties/translations';
-import type { EnrichedFieldMetadata, PartitionedFieldMetadata } from '../../../types';
+import { getMarkdownComment } from '../index_properties/markdown/helpers';
+import { getFillColor } from './summary_tab/helpers';
+import * as i18n from '../index_properties/translations';
+import type { EnrichedFieldMetadata, PartitionedFieldMetadata } from '../../types';
 
 export const getMissingTimestampComment = ({
+  docsCount,
   enrichedFieldMetadata,
   indexName,
 }: {
+  docsCount: number;
   enrichedFieldMetadata: EnrichedFieldMetadata[];
   indexName: string;
 }): string => {
@@ -23,6 +25,7 @@ export const getMissingTimestampComment = ({
   const metadata = timestampMetadata != null ? [timestampMetadata] : [];
 
   return getMarkdownComment({
+    docsCount,
     enrichedFieldMetadata: metadata,
     indexName,
     suggestedAction: `${i18n.MISSING_TIMESTAMP_CALLOUT}

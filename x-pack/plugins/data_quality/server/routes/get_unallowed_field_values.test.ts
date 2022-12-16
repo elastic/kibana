@@ -25,11 +25,9 @@ describe('getUnallowedFieldValuesRoute route', () => {
     path: GET_UNALLOWED_FIELD_VALUES,
     body: [
       {
-        from: '2022-12-14T00:00:00.000Z',
-        to: '2022-12-14T23:59:59.999Z',
         indexName: 'auditbeat-*',
         indexFieldName: 'event.category',
-        allowedValues: [{ name: 'process' }],
+        allowedValues: ['process'],
       },
     ],
   });

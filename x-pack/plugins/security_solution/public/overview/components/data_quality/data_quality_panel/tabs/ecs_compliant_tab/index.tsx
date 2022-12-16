@@ -13,12 +13,12 @@ import { MissingTimestampCallout } from '../callouts/missing_timestamp_callout';
 import { CompareFieldsTable } from '../../../compare_fields_table';
 import { EmptyPromptBody } from '../../index_properties/empty_prompt_body';
 import { EmptyPromptTitle } from '../../index_properties/empty_prompt_title';
-import { getMissingTimestampComment, showMissingTimestampCallout } from './helpers';
+import { getMissingTimestampComment, showMissingTimestampCallout } from '../helpers';
 import {
   getCaseSummaryMarkdownComment,
   ECS_FIELD_REFERENCE_URL,
   ECS_REFERENCE_URL,
-  UPDATE_MAPPING_URL,
+  MAPPING_URL,
 } from '../../index_properties/markdown/helpers';
 import { CalloutItem } from '../styles';
 import * as i18n from '../../index_properties/translations';
@@ -52,10 +52,11 @@ const EcsCompliantTabComponent: React.FC<Props> = ({
         ecsFieldReferenceUrl: ECS_FIELD_REFERENCE_URL,
         ecsReferenceUrl: ECS_REFERENCE_URL,
         indexName,
-        updateMappingUrl: UPDATE_MAPPING_URL,
+        mappingUrl: MAPPING_URL,
         version,
       }),
       getMissingTimestampComment({
+        docsCount,
         enrichedFieldMetadata,
         indexName,
       }),
@@ -72,7 +73,9 @@ const EcsCompliantTabComponent: React.FC<Props> = ({
             size="s"
             title={i18n.ECS_COMPLIANT_CALLOUT_TITLE(enrichedFieldMetadata.length)}
           >
-            <p>{i18n.ECS_COMPLIANT_CALLOUT(enrichedFieldMetadata.length)}</p>
+            <p>
+              {i18n.ECS_COMPLIANT_CALLOUT({ fieldCount: enrichedFieldMetadata.length, version })}
+            </p>
             <CalloutItem>{i18n.ECS_COMPLIANT_MAPPINGS_ARE_FULLY_SUPPORTED}</CalloutItem>
             <CalloutItem>{i18n.PRE_BUILT_DETECTION_ENGINE_RULES_WORK}</CalloutItem>
             <CalloutItem>{i18n.CUSTOM_DETECTION_ENGINE_RULES_WORK}</CalloutItem>

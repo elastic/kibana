@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const ECS_ALLOWED_VALUES = i18n.translate(
   'xpack.securitySolution.dataQuality.compareFieldsTable.ecsAllowedValuesColumn',
   {
-    defaultMessage: 'ECS allowed values',
+    defaultMessage: 'ECS (allowed values)',
   }
 );
 
@@ -21,31 +21,31 @@ export const ECS_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ECS_TYPE = i18n.translate(
-  'xpack.securitySolution.dataQuality.compareFieldsTable.ecsTypeColumn',
+export const ECS_MAPPING = i18n.translate(
+  'xpack.securitySolution.dataQuality.compareFieldsTable.ecsMappingColumn',
   {
-    defaultMessage: 'ECS type',
+    defaultMessage: 'ECS (expected)',
   }
 );
 
-export const INDEX_INVALID_VALUES = i18n.translate(
-  'xpack.securitySolution.dataQuality.compareFieldsTable.indexInvalidValuesColumn',
+export const INDEX_UNALLOWED_VALUES = i18n.translate(
+  'xpack.securitySolution.dataQuality.compareFieldsTable.indexUnallowedValuesColumn',
   {
-    defaultMessage: 'Index invalid values',
+    defaultMessage: 'Index (unallowed values)',
   }
 );
 
-export const INDEX_TYPE = i18n.translate(
-  'xpack.securitySolution.dataQuality.compareFieldsTable.indexTypeColumn',
+export const INDEX_MAPPING = i18n.translate(
+  'xpack.securitySolution.dataQuality.compareFieldsTable.indexMappingColumn',
   {
-    defaultMessage: 'Index type',
+    defaultMessage: 'Index (actual)',
   }
 );
 
-export const NAME = i18n.translate(
-  'xpack.securitySolution.dataQuality.compareFieldsTable.nameColumn',
+export const FIELD = i18n.translate(
+  'xpack.securitySolution.dataQuality.compareFieldsTable.fieldColumn',
   {
-    defaultMessage: 'Name',
+    defaultMessage: 'Field',
   }
 );
 

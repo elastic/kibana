@@ -10,6 +10,7 @@ import { sortBy } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useMappings } from '../../use_mappings';
 
+import { getUnallowedValueRequestItems } from '../allowed_values/helpers';
 import { ErrorEmptyPrompt } from '../error_empty_prompt';
 import {
   getEnrichedFieldMetadata,
@@ -21,6 +22,7 @@ import { LoadingEmptyPrompt } from '../loading_empty_prompt';
 import * as i18n from './translations';
 import type { EcsMetadata, PartitionedFieldMetadata } from '../../types';
 import { useAddToNewCase } from '../../use_add_to_new_case';
+import { useUnallowedValues } from '../../use_unallowed_values';
 
 interface Props {
   docsCount: number;
@@ -42,7 +44,23 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   indexName,
   version,
 }) => {
-  const { error, indexes, loading } = useMappings(indexName);
+  const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
+
+  const requestItems = useMemo(
+    () =>
+      getUnallowedValueRequestItems({
+        ecsMetadata,
+        indexName,
+      }),
+    [ecsMetadata, indexName]
+  );
+
+  const {
+    error: unallowedValuesError,
+    loading: loadingUnallowedValues,
+    unallowedValues,
+  } = useUnallowedValues(requestItems);
+
   const mappingsProperties = useMemo(() => {
     if (indexes != null) {
       return indexes[indexName].mappings.properties;
@@ -52,7 +70,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   }, [indexName, indexes]);
 
   const partitionedFieldMetadata: PartitionedFieldMetadata = useMemo(() => {
-    if (ecsMetadata == null || mappingsProperties == null) {
+    if (ecsMetadata == null || mappingsProperties == null || unallowedValues == null) {
       return EMPTY_METADATA;
     }
 
@@ -60,11 +78,13 @@ const IndexPropertiesComponent: React.FC<Props> = ({
 
     const enrichedFieldMetadata = sortBy(
       'indexFieldName',
-      fieldTypes.map((fieldMetadata) => getEnrichedFieldMetadata({ ecsMetadata, fieldMetadata }))
+      fieldTypes.map((fieldMetadata) =>
+        getEnrichedFieldMetadata({ ecsMetadata, fieldMetadata, unallowedValues })
+      )
     );
 
     return getPartitionedFieldMetadata(enrichedFieldMetadata);
-  }, [ecsMetadata, mappingsProperties]);
+  }, [ecsMetadata, mappingsProperties, unallowedValues]);
 
   const { disabled: addToNewCaseDisabled, onAddToNewCase } = useAddToNewCase({ indexName });
   const [selectedTabId, setSelectedTabId] = useState<string>(SUMMARY_TAB_ID);
@@ -109,17 +129,26 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     [onSelectedTabChanged, selectedTabId, tabs]
   );
 
-  if (error != null) {
+  if (mappingsError != null) {
     return (
       <ErrorEmptyPrompt
-        error={i18n.ERROR_LOADING_MAPPINGS_BODY(error)}
+        error={i18n.ERROR_LOADING_MAPPINGS_BODY(mappingsError)}
         title={i18n.ERROR_LOADING_MAPPINGS_TITLE}
+      />
+    );
+  } else if (unallowedValuesError != null) {
+    return (
+      <ErrorEmptyPrompt
+        error={i18n.ERROR_LOADING_UNALLOWED_VALUES_BODY(unallowedValuesError)}
+        title={i18n.ERROR_LOADING_UNALLOWED_VALUES_TITLE}
       />
     );
   }
 
-  if (loading) {
+  if (loadingMappings) {
     return <LoadingEmptyPrompt loading={i18n.LOADING_MAPPINGS} />;
+  } else if (loadingUnallowedValues) {
+    return <LoadingEmptyPrompt loading={i18n.LOADING_UNALLOWED_VALUES} />;
   }
 
   return indexes != null ? (

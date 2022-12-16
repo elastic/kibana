@@ -16,9 +16,10 @@ import type { EnrichedFieldMetadata } from '../../../types';
 
 interface Props {
   enrichedFieldMetadata: EnrichedFieldMetadata[];
+  version: string;
 }
 
-const AllTabComponent: React.FC<Props> = ({ enrichedFieldMetadata }) => {
+const AllTabComponent: React.FC<Props> = ({ enrichedFieldMetadata, version }) => {
   const body = useMemo(() => <EmptyPromptBody body={i18n.ALL_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.ALL_EMPTY_TITLE} />, []);
 
@@ -27,7 +28,7 @@ const AllTabComponent: React.FC<Props> = ({ enrichedFieldMetadata }) => {
       {enrichedFieldMetadata.length > 0 ? (
         <>
           <EuiCallOut size="s" title={i18n.ALL_CALLOUT_TITLE(enrichedFieldMetadata.length)}>
-            <p>{i18n.ALL_CALLOUT}</p>
+            <p>{i18n.ALL_CALLOUT(version)}</p>
           </EuiCallOut>
           <EuiSpacer />
           <CompareFieldsTable enrichedFieldMetadata={enrichedFieldMetadata} />

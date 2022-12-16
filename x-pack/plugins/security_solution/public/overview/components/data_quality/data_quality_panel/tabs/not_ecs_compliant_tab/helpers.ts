@@ -11,15 +11,18 @@ import * as i18n from '../../index_properties/translations';
 import type { EnrichedFieldMetadata } from '../../../types';
 
 export const getNotEcsCompliantMarkdownComment = ({
+  docsCount,
   enrichedFieldMetadata,
   indexName,
   version,
 }: {
+  docsCount: number;
   enrichedFieldMetadata: EnrichedFieldMetadata[];
   indexName: string;
   version: string;
 }): string =>
   getMarkdownComment({
+    docsCount,
     enrichedFieldMetadata,
     indexName,
     suggestedAction: `${i18n.NOT_ECS_COMPLIANT_CALLOUT({

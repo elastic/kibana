@@ -29,7 +29,7 @@ describe('getMSearchRequest', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "aggregations": Object {
-          "auditbeat": Object {
+          "event.category": Object {
             "terms": Object {
               "field": "event.category",
               "order": Object {
@@ -81,7 +81,7 @@ describe('getMSearchRequest', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "aggregations": Object {
-          "auditbeat": Object {
+          "event.category": Object {
             "terms": Object {
               "field": "event.category",
               "order": Object {

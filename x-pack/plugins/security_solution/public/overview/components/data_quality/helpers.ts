@@ -13,6 +13,7 @@ import type {
   EnrichedFieldMetadata,
   PartitionedFieldMetadata,
   PartitionedFieldMetadataStats,
+  UnallowedValueCount,
 } from './types';
 
 export const getIndexNames = (stats: Record<string, IndicesStatsIndicesStats> | null) =>
@@ -87,26 +88,29 @@ export function getFieldTypes(mappingsProperties: Record<string, unknown>): Fiel
 export const getEnrichedFieldMetadata = ({
   ecsMetadata,
   fieldMetadata,
+  unallowedValues,
 }: {
   ecsMetadata: Record<string, EcsMetadata>;
   fieldMetadata: FieldType;
+  unallowedValues: Record<string, UnallowedValueCount[]>;
 }): EnrichedFieldMetadata => {
   const { field, type } = fieldMetadata;
+  const indexInvalidValues = unallowedValues[field] ?? [];
 
   if (has(fieldMetadata.field, ecsMetadata)) {
     return {
       ...ecsMetadata[field],
       indexFieldName: field,
       indexFieldType: type,
-      indexInvalidValues: [], // TODO: read invalid values from index
+      indexInvalidValues,
       hasEcsMetadata: true,
-      isEcsCompliant: type === ecsMetadata[field].type,
+      isEcsCompliant: type === ecsMetadata[field].type && indexInvalidValues.length === 0,
     };
   } else {
     return {
       indexFieldName: field,
       indexFieldType: type,
-      indexInvalidValues: [], // TODO: read invalid values from index
+      indexInvalidValues,
       hasEcsMetadata: false,
       isEcsCompliant: false,
     };

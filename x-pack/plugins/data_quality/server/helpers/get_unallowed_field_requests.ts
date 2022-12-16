@@ -26,7 +26,7 @@ export const getMSearchRequestBody = ({
   allowedValues: AllowedValuesInputs;
 }): MsearchMultisearchBody => ({
   aggregations: {
-    [indexName]: {
+    [indexFieldName]: {
       terms: {
         field: indexFieldName,
         order: {

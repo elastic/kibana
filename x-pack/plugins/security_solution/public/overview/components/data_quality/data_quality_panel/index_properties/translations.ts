@@ -18,13 +18,12 @@ export const ALL = i18n.translate('xpack.securitySolution.dataQuality.indexPrope
   defaultMessage: 'All',
 });
 
-export const ALL_CALLOUT = i18n.translate(
-  'xpack.securitySolution.dataQuality.indexProperties.allCallout',
-  {
+export const ALL_CALLOUT = (version: string) =>
+  i18n.translate('xpack.securitySolution.dataQuality.indexProperties.allCallout', {
+    values: { version },
     defaultMessage:
-      'All mappings for the fields in this index, which includes fields defined by the Elastic Common Schema (ECS), and fields that are not',
-  }
-);
+      "All mappings for the fields in this index, including fields that comply with the Elastic Common Schema (ECS), version {version}, and fields that don't",
+  });
 
 export const ALL_CALLOUT_TITLE = (fieldCount: number) =>
   i18n.translate('xpack.securitySolution.dataQuality.indexProperties.allCalloutTitle', {
@@ -58,21 +57,21 @@ export const CASE_SUMMARY_MARKDOWN_DESCRIPTION = ({
   ecsFieldReferenceUrl,
   ecsReferenceUrl,
   indexName,
-  updateMappingUrl,
+  mappingUrl,
   version,
 }: {
   ecsFieldReferenceUrl: string;
   ecsReferenceUrl: string;
   indexName: string;
-  updateMappingUrl: string;
+  mappingUrl: string;
   version: string;
 }) =>
   i18n.translate(
     'xpack.securitySolution.dataQuality.indexProperties.caseSummaryMarkdownDescription',
     {
-      values: { ecsFieldReferenceUrl, ecsReferenceUrl, indexName, updateMappingUrl, version },
+      values: { ecsFieldReferenceUrl, ecsReferenceUrl, indexName, mappingUrl, version },
       defaultMessage:
-        'This contains recommendations for [updating field mappings]({updateMappingUrl}) in the `{indexName}` index, because they are different than the [Elastic Common Schema]({ecsReferenceUrl}) (ECS) version `{version}` [definitions]({ecsFieldReferenceUrl}).',
+        'The `{indexName}` index has [mappings]({mappingUrl}) or field values that are different than the [Elastic Common Schema]({ecsReferenceUrl}) (ECS), version `{version}` [definitions]({ecsFieldReferenceUrl}).',
     }
   );
 
@@ -101,11 +100,17 @@ export const ECS_COMPLIANT = i18n.translate(
   }
 );
 
-export const ECS_COMPLIANT_CALLOUT = (fieldCount: number) =>
+export const ECS_COMPLIANT_CALLOUT = ({
+  fieldCount,
+  version,
+}: {
+  fieldCount: number;
+  version: string;
+}) =>
   i18n.translate('xpack.securitySolution.dataQuality.indexProperties.ecsCompliantCallout', {
-    values: { fieldCount },
+    values: { fieldCount, version },
     defaultMessage:
-      'The {fieldCount, plural, =1 {type for this field matches} other {types for these fields match}} the Elastic Common Schema (ECS)',
+      'The {fieldCount, plural, =1 {type and values for this field comply} other {types and values of these fields comply}} with the Elastic Common Schema (ECS), version {version}',
   });
 
 export const ECS_COMPLIANT_CALLOUT_TITLE = (fieldCount: number) =>
@@ -147,7 +152,7 @@ export const ECS_COMPLIANT_EMPTY_TITLE = i18n.translate(
 export const ECS_COMPLIANT_MAPPINGS_ARE_FULLY_SUPPORTED = i18n.translate(
   'xpack.securitySolution.dataQuality.indexProperties.ecsCompliantMappingsAreFullySupportedMessage',
   {
-    defaultMessage: '✅ ECS compliant mappings are fully supported',
+    defaultMessage: '✅ ECS compliant mappings and field values are fully supported',
   }
 );
 
@@ -164,10 +169,33 @@ export const ERROR_LOADING_MAPPINGS_BODY = (error: string) =>
     defaultMessage: 'There was a problem loading mappings: {error}',
   });
 
+export const ERROR_LOADING_UNALLOWED_VALUES_BODY = (error: string) =>
+  i18n.translate(
+    'xpack.securitySolution.dataQuality.emptyErrorPrompt.errorLoadingUnallowedValuesBody',
+    {
+      values: { error },
+      defaultMessage: 'There was a problem loading unallowed values: {error}',
+    }
+  );
+
+export const ERROR_LOADING_UNALLOWED_VALUES_TITLE = i18n.translate(
+  'xpack.securitySolution.dataQuality.emptyErrorPrompt.errorLoadingUnallowedValuesTitle',
+  {
+    defaultMessage: 'Unable to load unallowed values',
+  }
+);
+
 export const LOADING_MAPPINGS = i18n.translate(
   'xpack.securitySolution.dataQuality.emptyLoadingPrompt.loadingMappingsPrompt',
   {
     defaultMessage: 'Loading mappings',
+  }
+);
+
+export const LOADING_UNALLOWED_VALUES = i18n.translate(
+  'xpack.securitySolution.dataQuality.emptyLoadingPrompt.loadingUnallowedValuesPrompt',
+  {
+    defaultMessage: 'Loading unallowed values',
   }
 );
 
@@ -204,7 +232,7 @@ export const NON_ECS_CALLOUT = ({ fieldCount, version }: { fieldCount: number; v
   i18n.translate('xpack.securitySolution.dataQuality.indexProperties.nonEcsCallout', {
     values: { fieldCount, version },
     defaultMessage:
-      '{fieldCount, plural, =1 {This field is not} other {These fields are not}} defined by the Elastic Common Schema (ECS) version {version}. An index may contain non ECS fields, however:',
+      '{fieldCount, plural, =1 {This field is not} other {These fields are not}} defined by the Elastic Common Schema (ECS), version {version}. An index may contain non ECS fields, however:',
   });
 
 export const NON_ECS_CALLOUT_TITLE = (fieldCount: number) =>
@@ -245,28 +273,28 @@ export const NOT_ECS_COMPLIANT_CALLOUT = ({
   i18n.translate('xpack.securitySolution.dataQuality.indexProperties.notEcsCompliantCallout', {
     values: { fieldCount, version },
     defaultMessage:
-      'Consider updating the {fieldCount, plural, =1 {mapping} other {mappings}} for {fieldCount, plural, =1 {this field} other {these fields}} to match {fieldCount, plural, =1 {its Elastic Common Schema (ECS) version {version} type} other {their Elastic Common Schema (ECS) version {version} types}}, because:',
+      "Fields are Not ECS Compliant when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version {version}. Sometimes, indices created by older integrations will have mappings or values that were, but are no longer compliant.",
   });
 
 export const NOT_ECS_COMPLIANT_CALLOUT_TITLE = (fieldCount: number) =>
   i18n.translate('xpack.securitySolution.dataQuality.indexProperties.notEcsCompliantCalloutTitle', {
     values: { fieldCount },
     defaultMessage:
-      '{fieldCount} Not ECS compliant {fieldCount, plural, =1 {field mapping} other {field mappings}}',
+      '{fieldCount} Not ECS compliant {fieldCount, plural, =1 {field} other {fields}}',
   });
 
 export const NOT_ECS_COMPLIANT_EMPTY = i18n.translate(
   'xpack.securitySolution.dataQuality.indexProperties.notEcsCompliantEmptyContent',
   {
     defaultMessage:
-      'All of the field mappings in this index have types that match the Elastic Common Schema (ECS) types',
+      'All of the field mappings in this index have types that match the Elastic Common Schema (ECS) types. All fields with values required by ECS were correct.',
   }
 );
 
 export const NOT_ECS_COMPLIANT_EMPTY_TITLE = i18n.translate(
   'xpack.securitySolution.dataQuality.indexProperties.notEcsCompliantEmptyTitle',
   {
-    defaultMessage: 'All field mappings are ECS compliant',
+    defaultMessage: 'All field mappings and values are ECS compliant',
   }
 );
 
@@ -280,7 +308,8 @@ export const DETECTION_ENGINE_RULES_WILL_WORK = i18n.translate(
 export const DETECTION_ENGINE_RULES_WONT_WORK = i18n.translate(
   'xpack.securitySolution.dataQuality.indexProperties.detectionEngineRulesWontWorkMessage',
   {
-    defaultMessage: "❌ Detection engine rules won't work",
+    defaultMessage:
+      '❌ Detection engine rules referencing these fields may not match them correctly',
   }
 );
 
@@ -294,21 +323,22 @@ export const OTHER_APP_CAPABILITIES_WORK_PROPERLY = i18n.translate(
 export const PAGES_DISPLAY_EVENTS = i18n.translate(
   'xpack.securitySolution.dataQuality.indexProperties.pagesDisplayEventsMessage',
   {
-    defaultMessage: '✅ Pages display events',
+    defaultMessage: '✅ Pages display events and fields correctly',
   }
 );
 
-export const PAGES_MAY_NOT_DISPLAY_EVENTS = i18n.translate(
-  'xpack.securitySolution.dataQuality.indexProperties.pagesMayNotDisplayEventsMessage',
+export const PAGES_MAY_NOT_DISPLAY_FIELDS = i18n.translate(
+  'xpack.securitySolution.dataQuality.indexProperties.pagesMayNotDisplayFieldsMessage',
   {
-    defaultMessage: '⚠️ Pages may not display events',
+    defaultMessage: '🌕 Some pages and features may not display these fields',
   }
 );
 
 export const PAGES_WONT_DISPLAY_EVENTS = i18n.translate(
   'xpack.securitySolution.dataQuality.indexProperties.pagesWontDisplayEventsMessage',
   {
-    defaultMessage: '❌ Pages wont display events',
+    defaultMessage:
+      '❌ Pages may not display events or fields due to unexpected field mappings or values',
   }
 );
 
@@ -322,21 +352,14 @@ export const PRE_BUILT_DETECTION_ENGINE_RULES_WORK = i18n.translate(
 export const PRE_BUILT_DETECTION_ENGINE_RULES_WONT_WORK = i18n.translate(
   'xpack.securitySolution.dataQuality.indexProperties.preBuiltDetectionEngineRulesWontWorkMessage',
   {
-    defaultMessage: "❌ Pre-built detection engine rules won't work",
-  }
-);
-
-export const TIMELINE_AND_TEMPLATES_MAY_NOT_OPERATE_PROPERLY = i18n.translate(
-  'xpack.securitySolution.dataQuality.indexProperties.timelineAndTemplatesMayNotOperateProperlyMessage',
-  {
-    defaultMessage: '⚠️ Timeline and templates may not operate properly',
+    defaultMessage: "🌕 Pre-built detection engine rules won't match these fields",
   }
 );
 
 export const MAPPINGS_THAT_CONFLICT_WITH_ECS = i18n.translate(
   'xpack.securitySolution.dataQuality.indexProperties.mappingThatConflictWithEcsMessage',
   {
-    defaultMessage: '❌ Mappings that conflict with ECS are not supported',
+    defaultMessage: "❌ Mappings or field values that don't comply with ECS are not supported",
   }
 );
 

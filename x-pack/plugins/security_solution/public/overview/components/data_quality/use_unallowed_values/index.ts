@@ -5,29 +5,32 @@
  * 2.0.
  */
 
-import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
 
+import { getUnallowedValues } from './helpers';
 import * as i18n from '../translations';
+import type { UnallowedValueCount, UnallowedValueRequestItem } from '../types';
 
-const MAPPINGS_API_ROUTE = '/internal/data_quality/mappings';
+const UNALLOWED_VALUES_API_ROUTE = '/internal/data_quality/unallowed_field_values';
 
-interface UseMappings {
-  indexes: Record<string, IndicesGetMappingIndexMappingRecord> | null;
+interface UseUnallowedValues {
+  unallowedValues: Record<string, UnallowedValueCount[]> | null;
   error: string | null;
   loading: boolean;
 }
 
-export const useMappings = (pattern: string | null): UseMappings => {
-  const [indexes, setIndexes] = useState<Record<
+export const useUnallowedValues = (
+  requestItems: UnallowedValueRequestItem[]
+): UseUnallowedValues => {
+  const [unallowedValues, setUnallowedValues] = useState<Record<
     string,
-    IndicesGetMappingIndexMappingRecord
+    UnallowedValueCount[]
   > | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (pattern == null) {
+    if (requestItems.length === 0) {
       return;
     }
 
@@ -35,25 +38,30 @@ export const useMappings = (pattern: string | null): UseMappings => {
 
     async function fetchData() {
       try {
-        const encodedIndexName = encodeURIComponent(`${pattern}`);
-
-        const response = await fetch(`${MAPPINGS_API_ROUTE}/${encodedIndexName}`, {
-          method: 'GET',
+        const response = await fetch(UNALLOWED_VALUES_API_ROUTE, {
+          body: JSON.stringify(requestItems),
+          headers: { 'Content-Type': 'application/json', 'kbn-xsrf': 'xsrf' },
+          method: 'POST',
           signal: abortController.signal,
         });
 
         if (response.ok) {
-          const json = await response.json();
+          const searchResults = await response.json();
 
           if (!abortController.signal.aborted) {
-            setIndexes(json);
+            const unallowedValuesMap = getUnallowedValues({
+              requestItems,
+              searchResults,
+            });
+
+            setUnallowedValues(unallowedValuesMap);
           }
         } else {
           throw new Error(response.statusText);
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          setError(i18n.ERROR_LOADING_MAPPINGS(e));
+          setError(i18n.ERROR_LOADING_UNALLOWED_VALUES(e));
         }
       } finally {
         if (!abortController.signal.aborted) {
@@ -67,7 +75,7 @@ export const useMappings = (pattern: string | null): UseMappings => {
     return () => {
       abortController.abort();
     };
-  }, [pattern, setError]);
+  }, [requestItems, setError]);
 
-  return { indexes, error, loading };
+  return { unallowedValues, error, loading };
 };

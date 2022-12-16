@@ -91,6 +91,12 @@ export const ERROR_LOADING_STATS = (details: string) =>
     defaultMessage: 'Error loading stats: {details}',
   });
 
+export const ERROR_LOADING_UNALLOWED_VALUES = (details: string) =>
+  i18n.translate('xpack.securitySolution.dataQuality.errorLoadingUnallowedValuesLabel', {
+    values: { details },
+    defaultMessage: 'Error loading unallowed values: {details}',
+  });
+
 export const FIELDS = i18n.translate('xpack.securitySolution.dataQuality.fieldsLabel', {
   defaultMessage: 'Fields',
 });

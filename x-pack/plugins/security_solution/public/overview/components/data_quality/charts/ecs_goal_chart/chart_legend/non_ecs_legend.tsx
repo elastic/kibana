@@ -13,8 +13,7 @@ import * as i18n from '../../../data_quality_panel/index_properties/translations
 const NonEcsLegendComponent: React.FC = () => (
   <GoalChartLegend textAlign="center">
     <div>{i18n.PRE_BUILT_DETECTION_ENGINE_RULES_WONT_WORK}</div>
-    <div>{i18n.PAGES_MAY_NOT_DISPLAY_EVENTS}</div>
-    <div>{i18n.TIMELINE_AND_TEMPLATES_MAY_NOT_OPERATE_PROPERLY}</div>
+    <div>{i18n.PAGES_MAY_NOT_DISPLAY_FIELDS}</div>
     <div>{i18n.CUSTOM_DETECTION_ENGINE_RULES_WORK}</div>
   </GoalChartLegend>
 );
