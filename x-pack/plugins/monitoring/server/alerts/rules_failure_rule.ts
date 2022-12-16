@@ -45,9 +45,12 @@ export class RulesFailureRule extends BaseRule {
       actionVariables: [
         {
           name: 'cluster',
-          description: i18n.translate('xpack.monitoring.alerts.rulesFailures.actionVariables.node', {
-            defaultMessage: 'The cluster reporting rules falures.',
-          }),
+          description: i18n.translate(
+            'xpack.monitoring.alerts.rulesFailures.actionVariables.node',
+            {
+              defaultMessage: 'The cluster reporting rules falures.',
+            }
+          ),
         },
         ...Object.values(AlertingDefaults.ALERT_TYPE.context),
       ],
