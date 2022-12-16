@@ -112,6 +112,27 @@ describe('update_agent_tags', () => {
     expect(actionResults.body[1].error).not.toBeDefined();
   });
 
+  it('should update action results on success - kuery', async () => {
+    await updateTagsBatch(
+      soClient,
+      esClient,
+      [],
+      {},
+      {
+        tagsToAdd: ['new'],
+        tagsToRemove: [],
+        kuery: '',
+      }
+    );
+
+    const actionResults = esClient.bulk.mock.calls[0][0] as any;
+    const agentIds = actionResults?.body
+      ?.filter((i: any) => i.agent_id)
+      .map((i: any) => i.agent_id);
+    expect(agentIds[0]).toHaveLength(36); // uuid
+    expect(actionResults.body[1].error).not.toBeDefined();
+  });
+
   it('should write error action results for hosted agent when agentIds are passed', async () => {
     const { esClient: esClientMock, agentInHostedDoc } = createClientMock();
 

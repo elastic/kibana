@@ -182,15 +182,14 @@ export async function updateTagsBatch(
   }
 
   // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
-  const getArray = (count: number) => [...Array(count).keys()];
+  const getArray = (count: number) => Array.from({ length: count }, () => uuid());
 
   // writing successful action results
   if (res.updated ?? 0 > 0) {
     await bulkCreateAgentActionResults(
       esClient,
-
-      (options.kuery === undefined ? agentIds : getArray(res.updated!)).map(() => ({
-        agentId: uuid(),
+      (options.kuery === undefined ? agentIds : getArray(res.updated!)).map((id) => ({
+        agentId: id,
         actionId,
       }))
     );
