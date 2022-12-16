@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
 /**
  * Checks to see if the current user can access at least one artifact page.
@@ -18,7 +18,7 @@ export const useCanAccessSomeArtifacts = (): boolean => {
     canReadEventFilters,
     canReadTrustedApplications,
     canReadHostIsolationExceptions,
-  } = useEndpointPrivileges();
+  } = useUserPrivileges().endpointPrivileges;
 
   return useMemo(() => {
     return (

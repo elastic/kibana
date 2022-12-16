@@ -11,8 +11,9 @@ import {
   EuiCardProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiSpacer,
+  EuiText,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -35,9 +36,11 @@ export function ServiceGroupsCard({
   href,
   serviceGroupCounts,
 }: Props) {
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
+
   const activeAlertsHref = useObservabilityActiveAlertsHref(serviceGroup.kuery);
   const cardProps: EuiCardProps = {
-    style: { width: 286 },
+    style: { width: isMobile ? '100%' : 286 },
     icon: (
       <>
         {serviceGroupCounts?.alerts && (
@@ -104,7 +107,7 @@ export function ServiceGroupsCard({
   };
 
   return (
-    <EuiFlexItem key={serviceGroup.groupName}>
+    <EuiFlexItem key={serviceGroup.groupName} grow={false}>
       <EuiCard
         layout="vertical"
         {...cardProps}
