@@ -416,7 +416,7 @@ Example: `[marketing]`
 Example: `get`, `post`, `put`, `delete`
 
 | `http.request.headers.x-forwarded-for`
-| `X-Forwarded-For` request header used to identify the originating client IP address when connecting through proxy server(s).
+| `X-Forwarded-For` request header used to identify the originating client IP address when connecting through proxy servers.
 
 Example: `161.66.20.177, 236.198.214.101`
 
