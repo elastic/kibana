@@ -9,7 +9,6 @@ import uuid from 'uuid';
 import React from 'react';
 import type { HtmlPortalNode } from 'react-reverse-portal';
 import { OutPortal } from 'react-reverse-portal';
-import minimatch from 'minimatch';
 import type { Filter, Query } from '@kbn/es-query';
 import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/public';
 import type {
@@ -27,7 +26,6 @@ import type { IndexPatternMapping } from './types';
 import { getLayerList } from './map_config';
 import * as i18n from './translations';
 
-import type { IndexPatternSavedObject } from '../../../../common/hooks/types';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 
 /**
@@ -126,41 +124,4 @@ export const createEmbeddable = async (
   });
 
   return embeddableObject;
-};
-
-// These patterns are overly greedy and must be excluded when matching against Security indexes.
-const ignoredIndexPatterns = ['*', '*:*'];
-
-/**
- * Returns kibanaIndexPatterns that wildcard match at least one of siemDefaultIndices
- *
- * @param kibanaIndexPatterns
- * @param siemDefaultIndices
- */
-export const findMatchingIndexPatterns = ({
-  kibanaIndexPatterns,
-  siemDefaultIndices,
-}: {
-  kibanaIndexPatterns: IndexPatternSavedObject[];
-  siemDefaultIndices: string[];
-}): IndexPatternSavedObject[] => {
-  try {
-    return kibanaIndexPatterns.filter((kip) => {
-      const pattern = kip.attributes.title;
-      return (
-        !ignoredIndexPatterns.includes(pattern) &&
-        siemDefaultIndices.some((sdi) => {
-          const splitPattern = pattern.split(',') ?? [];
-          return splitPattern.length > 1
-            ? splitPattern.some((p) => {
-                const isMatch = minimatch(sdi, p);
-                return isMatch && p.charAt(0) === '-' ? false : isMatch;
-              })
-            : minimatch(sdi, pattern);
-        })
-      );
-    });
-  } catch {
-    return [];
-  }
 };
