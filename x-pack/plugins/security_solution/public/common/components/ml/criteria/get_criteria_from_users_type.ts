@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsersType } from '../../../../users/store/model';
+import { UsersType } from '../../../../explore/users/store/model';
 import type { CriteriaFields } from '../types';
 
 export const getCriteriaFromUsersType = (

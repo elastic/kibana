@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CommonAlertParamDetail } from './types/alerts';
+import { CommonAlertParamDetail, ExpressionConfig } from './types/alerts';
 import { AlertParamType } from './enums';
+import { validateDuration } from './validate_duration';
 
 /**
  * Helper string to add as a tag in every logging call
@@ -253,10 +254,18 @@ export const RULE_CCR_READ_EXCEPTIONS = `${RULE_PREFIX}ccr_read_exceptions`;
 export const RULE_LARGE_SHARD_SIZE = `${RULE_PREFIX}shard_size`;
 export const RULE_RULES_FAILURE = `${RULE_PREFIX}alert_rules_failure`;
 
+interface LegacyRuleDetails {
+  label: string;
+  description: string;
+  defaults?: Record<string, unknown>;
+  expressionConfig?: ExpressionConfig;
+  validate?: (input: any) => { errors: {} };
+}
+
 /**
  * Legacy rules details/label for server and public use
  */
-export const LEGACY_RULE_DETAILS = {
+export const LEGACY_RULE_DETAILS: Record<string, LegacyRuleDetails> = {
   [RULE_CLUSTER_HEALTH]: {
     label: i18n.translate('xpack.monitoring.alerts.clusterHealth.label', {
       defaultMessage: 'Cluster health',
@@ -264,6 +273,13 @@ export const LEGACY_RULE_DETAILS = {
     description: i18n.translate('xpack.monitoring.alerts.clusterHealth.description', {
       defaultMessage: 'Alert when the health of the cluster changes.',
     }),
+    defaults: {
+      duration: '2m',
+    },
+    expressionConfig: {
+      showDuration: true,
+    },
+    validate: validateDuration,
   },
   [RULE_ELASTICSEARCH_VERSION_MISMATCH]: {
     label: i18n.translate('xpack.monitoring.alerts.elasticsearchVersionMismatch.label', {

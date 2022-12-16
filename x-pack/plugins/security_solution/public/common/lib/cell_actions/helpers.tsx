@@ -16,8 +16,8 @@ import {
   USER_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { INDICATOR_REFERENCE } from '../../../../common/cti/constants';
-import { IP_FIELD_TYPE } from '../../../network/components/ip';
-import { PORT_NAMES } from '../../../network/components/port/helpers';
+import { IP_FIELD_TYPE } from '../../../explore/network/components/ip';
+import { PORT_NAMES } from '../../../explore/network/components/port/helpers';
 import { useKibana } from '../kibana';
 
 export const COLUMNS_WITH_LINKS = [
