@@ -330,6 +330,17 @@ export const CasesBulkGetRequestRt = rt.type({
   fields: rt.union([rt.undefined, rt.array(rt.string), rt.string]),
 });
 
+export const CasesBulkGetResponseRt = rt.type({
+  cases: CasesResponseRt,
+  errors: rt.array(
+    rt.type({
+      message: rt.string,
+      status: rt.union([rt.undefined, rt.number]),
+      caseId: rt.string,
+    })
+  ),
+});
+
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
@@ -354,3 +365,4 @@ export type RelatedCaseInfo = rt.TypeOf<typeof RelatedCaseInfoRt>;
 export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
 
 export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
+export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;

@@ -25,6 +25,7 @@ import type {
   ICasesFindResponse,
   ICasesPatchRequest,
   ICasesResponse,
+  ICasesBulkGetResponse,
 } from '../typedoc_interfaces';
 import type { CasesClientArgs } from '../types';
 import { bulkGet } from './bulk_get';
@@ -63,7 +64,7 @@ export interface CasesSubClient {
   /**
    * Retrieves a single case with the specified ID.
    */
-  bulkGet(params: CasesBulkGetRequest): Promise<ICaseResponse[]>;
+  bulkGet(params: CasesBulkGetRequest): Promise<ICasesBulkGetResponse>;
   /**
    * Pushes a specific case to an external system.
    */

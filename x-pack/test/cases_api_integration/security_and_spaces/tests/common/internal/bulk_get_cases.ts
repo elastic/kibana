@@ -45,15 +45,17 @@ export default ({ getService }: FtrProviderContext): void => {
         const caseOne = await createCase(supertest, postCaseReq);
         const caseTwo = await createCase(supertest, postCaseReq);
 
-        const cases = await bulkGetCases({ supertest, ids: [caseOne.id, caseTwo.id] });
+        const { cases, errors } = await bulkGetCases({ supertest, ids: [caseOne.id, caseTwo.id] });
+
         expect(cases).to.eql([caseOne, caseTwo]);
+        expect(errors.length).to.be(0);
       });
 
       it('should return the correct cases with specific fields', async () => {
         const caseOne = await createCase(supertest, postCaseReq);
         const caseTwo = await createCase(supertest, postCaseReq);
 
-        const cases = await bulkGetCases({
+        const { cases, errors } = await bulkGetCases({
           supertest,
           ids: [caseOne.id, caseTwo.id],
           fields: ['title'],
@@ -62,13 +64,16 @@ export default ({ getService }: FtrProviderContext): void => {
         const fieldsToPick = ['id', 'version', 'owner', 'title'];
 
         expect(cases).to.eql([pick(caseOne, fieldsToPick), pick(caseTwo, fieldsToPick)]);
+        expect(errors.length).to.be(0);
       });
 
-      it('should return only valid cases without errors', async () => {
+      it('should return only valid cases', async () => {
         const caseOne = await createCase(supertest, postCaseReq);
 
-        const cases = await bulkGetCases({ supertest, ids: [caseOne.id, 'not-exist'] });
+        const { cases, errors } = await bulkGetCases({ supertest, ids: [caseOne.id, 'not-exist'] });
+
         expect(cases).to.eql([caseOne]);
+        expect(errors.length).to.be(1);
       });
 
       it('should return the correct counts', async () => {
@@ -109,7 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const cases = await bulkGetCases({
+        const { cases, errors } = await bulkGetCases({
           supertest,
           ids: [caseOneUpdated.id, caseTwoUpdated.id],
         });
@@ -122,6 +127,7 @@ export default ({ getService }: FtrProviderContext): void => {
           { ...caseOneUpdated, comments: [], totalComment: 1, totalAlerts: 2 },
           { ...caseTwoUpdated, comments: [], totalComment: 0, totalAlerts: 1 },
         ]);
+        expect(errors.length).to.be(0);
       });
     });
 
@@ -146,11 +152,24 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 400,
         });
       });
+
+      it('should return saved object errors correctly', async () => {
+        const caseOne = await createCase(supertest, postCaseReq);
+
+        const { errors } = await bulkGetCases({ supertest, ids: [caseOne.id, 'not-exist'] });
+
+        expect(errors.length).to.be(1);
+        expect(errors[0]).to.eql({
+          message: 'Saved object [cases/not-exist] not found',
+          status: 404,
+          caseId: 'not-exist',
+        });
+      });
     });
 
     describe('rbac', () => {
       it('should return the correct cases', async () => {
-        const createdCases = await Promise.all([
+        const [secCase, obsCase] = await Promise.all([
           // Create case owned by the security solution user
           createCase(
             supertestWithoutAuth,
@@ -173,41 +192,74 @@ export default ({ getService }: FtrProviderContext): void => {
           ),
         ]);
 
-        const caseIds = createdCases.map((theCase) => theCase.id);
+        const caseIds = [secCase.id, obsCase.id];
 
         for (const scenario of [
           {
             user: globalRead,
             numberOfExpectedCases: 2,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
+            errors: { totals: 0, forCaseId: '' },
           },
           {
             user: superUser,
             numberOfExpectedCases: 2,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
+            errors: { totals: 0, forCaseId: '' },
           },
-          { user: secOnlyRead, numberOfExpectedCases: 1, owners: ['securitySolutionFixture'] },
-          { user: obsOnlyRead, numberOfExpectedCases: 1, owners: ['observabilityFixture'] },
+          {
+            user: secOnlyRead,
+            numberOfExpectedCases: 1,
+            owners: ['securitySolutionFixture'],
+            errors: { totals: 1, forCaseId: obsCase.id },
+          },
+          {
+            user: obsOnlyRead,
+            numberOfExpectedCases: 1,
+            owners: ['observabilityFixture'],
+            errors: { totals: 1, forCaseId: secCase.id },
+          },
           {
             user: obsSecRead,
             numberOfExpectedCases: 2,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
+            errors: { totals: 0, forCaseId: '' },
           },
           {
             user: obsSec,
             numberOfExpectedCases: 2,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
+            errors: { totals: 0, forCaseId: '' },
           },
-          { user: secOnly, numberOfExpectedCases: 1, owners: ['securitySolutionFixture'] },
-          { user: obsOnly, numberOfExpectedCases: 1, owners: ['observabilityFixture'] },
+          {
+            user: secOnly,
+            numberOfExpectedCases: 1,
+            owners: ['securitySolutionFixture'],
+            errors: { totals: 1, forCaseId: obsCase.id },
+          },
+          {
+            user: obsOnly,
+            numberOfExpectedCases: 1,
+            owners: ['observabilityFixture'],
+            errors: { totals: 1, forCaseId: secCase.id },
+          },
         ]) {
-          const cases = await bulkGetCases({
+          const { cases, errors } = await bulkGetCases({
             supertest: supertestWithoutAuth,
             ids: caseIds,
             auth: { user: scenario.user, space: 'space1' },
           });
 
           ensureSavedObjectIsAuthorized(cases, scenario.numberOfExpectedCases, scenario.owners);
+          expect(errors.length).to.be(scenario.errors.totals);
+
+          if (scenario.errors.totals) {
+            expect(errors[0]).to.eql({
+              message: 'Unauthorized',
+              status: 403,
+              caseId: scenario.errors.forCaseId,
+            });
+          }
         }
       });
 
@@ -253,13 +305,20 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         for (const user of [obsOnly, obsOnlyRead]) {
-          const cases = await bulkGetCases({
+          const { cases, errors } = await bulkGetCases({
             supertest: supertestWithoutAuth,
             ids: [newCase.id],
             auth: { user, space: 'space1' },
           });
 
           expect(cases.length).to.be(0);
+          expect(errors.length).to.be(1);
+
+          expect(errors[0]).to.eql({
+            message: 'Unauthorized',
+            status: 403,
+            caseId: newCase.id,
+          });
         }
       });
 

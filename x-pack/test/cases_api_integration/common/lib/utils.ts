@@ -53,6 +53,7 @@ import {
   BulkCreateCommentRequest,
   CommentType,
   CasesMetricsResponse,
+  CasesBulkGetResponse,
 } from '@kbn/cases-plugin/common/api';
 import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api/helpers';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
@@ -1431,7 +1432,7 @@ export const bulkGetCases = async ({
   fields?: string[];
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CaseResponse[]> => {
+}): Promise<CasesBulkGetResponse> => {
   const { body: res } = await supertest
     .post(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/_bulk_get`)
     .auth(auth.user.username, auth.user.password)

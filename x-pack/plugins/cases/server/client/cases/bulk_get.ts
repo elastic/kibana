@@ -9,10 +9,11 @@ import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { pick } from 'lodash';
+import { pick, partition } from 'lodash';
 
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { MAX_BULK_GET_CASES } from '../../../common/constants';
-import type { CasesBulkGetRequest, CaseResponse } from '../../../common/api';
+import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/api';
 import {
   CasesBulkGetRequestRt,
   CasesResponseRt,
@@ -28,8 +29,11 @@ import { Operations } from '../../authorization';
 import type { CasesClientArgs } from '../types';
 import {
   includeFieldsRequiredForAuthentication,
-  getAuthorizedSavedObjects,
+  getAuthorizedAndUnauthorizedSavedObjects,
 } from '../../authorization/utils';
+import type { CaseSavedObject } from '../../common/types';
+
+type SOWithErrors = Array<CaseSavedObject & { error: SavedObjectError }>;
 
 /**
  * Retrieves multiple cases by ids.
@@ -39,7 +43,7 @@ import {
 export const bulkGet = async (
   params: CasesBulkGetRequest,
   clientArgs: CasesClientArgs
-): Promise<CaseResponse[]> => {
+): Promise<CasesBulkGetResponse> => {
   const {
     services: { caseService, attachmentService },
     logger,
@@ -60,14 +64,21 @@ export const bulkGet = async (
 
     const finalFields = fields?.length ? [...fields, 'id', 'version'] : fields;
     const cases = await caseService.getCases({ caseIds: request.ids, fields: finalFields });
-    const validCases = cases.saved_objects.filter((caseInfo) => caseInfo.error === undefined);
+
+    const [validCases, soBulkGetErrors] = partition(
+      cases.saved_objects,
+      (caseInfo) => caseInfo.error === undefined
+    ) as [CaseSavedObject[], SOWithErrors];
 
     const authorizedEntities = await authorization.getAuthorizedEntities({
       operation: Operations.bulkGetCases,
       entities: validCases.map((theCase) => ({ id: theCase.id, owner: theCase.attributes.owner })),
     });
 
-    const authorizedCases = getAuthorizedSavedObjects(validCases, authorizedEntities);
+    const [authorizedCases, unauthorizedCases] = getAuthorizedAndUnauthorizedSavedObjects(
+      validCases,
+      authorizedEntities
+    );
 
     const requestForTotals = ['totalComment', 'totalAlerts'].some(
       (totalKey) => !fields || fields.includes(totalKey)
@@ -100,8 +111,11 @@ export const bulkGet = async (
     });
 
     const typeToEncode = getTypeForCertainFieldsFromArray(CasesResponseRt, fields);
+    const casesToReturn = typeToEncode.encode(flattenedCases);
 
-    return typeToEncode.encode(flattenedCases);
+    const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
+
+    return { cases: casesToReturn, errors };
   } catch (error) {
     const ids = params.ids ?? [];
     throw createCaseError({
@@ -131,4 +145,29 @@ const throwIfCaseIdsReachTheLimit = (ids: string[]) => {
   if (ids.length > MAX_BULK_GET_CASES) {
     throw Boom.badRequest(`Maximum request limit of ${MAX_BULK_GET_CASES} cases reached`);
   }
+};
+
+const constructErrors = (
+  soBulkGetErrors: SOWithErrors,
+  unauthorizedCases: CaseSavedObject[]
+): CasesBulkGetResponse['errors'] => {
+  const errors: CasesBulkGetResponse['errors'] = [];
+
+  for (const soError of soBulkGetErrors) {
+    errors.push({
+      message: soError.error.message,
+      status: soError.error.statusCode,
+      caseId: soError.id,
+    });
+  }
+
+  for (const theCase of unauthorizedCases) {
+    errors.push({
+      message: 'Unauthorized',
+      status: 403,
+      caseId: theCase.id,
+    });
+  }
+
+  return errors;
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { remove, uniq } from 'lodash';
+import { partition, remove, uniq } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
@@ -67,10 +67,10 @@ export const includeFieldsRequiredForAuthentication = (fields?: string[]): strin
   return uniq([...fields, OWNER_FIELD]);
 };
 
-export const getAuthorizedSavedObjects = <T>(
+export const getAuthorizedAndUnauthorizedSavedObjects = <T>(
   savedObjects: Array<SavedObject<T>>,
   authorizedEntities: OwnerEntity[]
-): Array<SavedObject<T>> =>
-  savedObjects.filter((so) =>
+): [Array<SavedObject<T>>, Array<SavedObject<T>>] =>
+  partition(savedObjects, (so) =>
     authorizedEntities.some((authorizedEntity) => authorizedEntity.id === so.id)
   );
