@@ -23,11 +23,19 @@ import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { AlertsService } from './alerts_service/alerts_service';
+import { alertsServiceMock } from './alerts_service/alerts_service.mock';
+
+const mockAlertService = alertsServiceMock.create();
+jest.mock('./alerts_service/alerts_service', () => ({
+  AlertsService: jest.fn().mockImplementation(() => mockAlertService),
+}));
 
 const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
     interval: '5m',
   },
+  enableFrameworkAlerts: false,
   invalidateApiKeysTask: {
     interval: '5m',
     removalDelay: '1h',
@@ -106,6 +114,20 @@ describe('Alerting Plugin', () => {
 
       expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalled();
       expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
+    });
+
+    it('should initialize AlertsService if enableFrameworkAlerts config is true', async () => {
+      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
+        ...generateAlertingConfig(),
+        enableFrameworkAlerts: true,
+      });
+      plugin = new AlertingPlugin(context);
+
+      // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
+      await plugin.setup(setupMocks, mockPlugins);
+
+      expect(AlertsService).toHaveBeenCalled();
+      expect(mockAlertService.initialize).toHaveBeenCalled();
     });
 
     it(`exposes configured minimumScheduleInterval()`, async () => {

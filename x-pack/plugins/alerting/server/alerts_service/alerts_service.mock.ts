@@ -10,7 +10,7 @@ import { AlertsService } from './alerts_service';
 
 const creatAlertsServiceMock = () => {
   const mocked: jest.Mocked<PublicMethodsOf<AlertsService>> = {
-    initialize: jest.fn(),
+    initialize: jest.fn(() => Promise.resolve()),
   };
   return mocked;
 };
