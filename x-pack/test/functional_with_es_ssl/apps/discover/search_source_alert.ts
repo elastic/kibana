@@ -366,7 +366,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('indexPattern-switcher--input');
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="${SOURCE_DATA_INDEX}"]`
+        `[title="${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 
