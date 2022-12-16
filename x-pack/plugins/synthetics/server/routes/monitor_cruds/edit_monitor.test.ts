@@ -16,6 +16,7 @@ import {
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 
 jest.mock('../telemetry/monitor_upgrade_sender', () => ({
   sendTelemetryEvents: jest.fn(),
@@ -52,6 +53,7 @@ describe('syncEditedMonitor', () => {
         buildPackagePolicyFromPackage: jest.fn().mockReturnValue({}),
       },
     },
+    encryptedSavedObjects: mockEncryptedSO,
   } as unknown as UptimeServerSetup;
 
   const editedMonitor = {

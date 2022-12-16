@@ -8,6 +8,10 @@
 import { SavedObjectsErrorHelpers, SavedObjectsServiceSetup } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
+import {
+  SYNTHETICS_SECRET_ENCRYPTED_TYPE,
+  syntheticsParamSavedObjectType,
+} from './synthetics_param';
 import { privateLocationsSavedObject } from './private_locations';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { DynamicSettings } from '../../../../common/runtime_types';
@@ -29,6 +33,7 @@ export const registerUptimeSavedObjects = (
 
   savedObjectsService.registerType(getSyntheticsMonitorSavedObjectType(encryptedSavedObjects));
   savedObjectsService.registerType(syntheticsServiceApiKey);
+  savedObjectsService.registerType(syntheticsParamSavedObjectType);
 
   encryptedSavedObjects.registerType({
     type: syntheticsServiceApiKey.name,
@@ -36,6 +41,7 @@ export const registerUptimeSavedObjects = (
   });
 
   encryptedSavedObjects.registerType(SYNTHETICS_MONITOR_ENCRYPTED_TYPE);
+  encryptedSavedObjects.registerType(SYNTHETICS_SECRET_ENCRYPTED_TYPE);
 };
 
 export interface UMSavedObjectsAdapter {
