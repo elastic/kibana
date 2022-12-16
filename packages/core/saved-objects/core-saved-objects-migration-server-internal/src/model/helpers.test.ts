@@ -12,6 +12,7 @@ import {
   addMustClausesToBoolQuery,
   addMustNotClausesToBoolQuery,
   getAliases,
+  indexNameToAliasName,
   versionMigrationCompleted,
 } from './helpers';
 
@@ -265,5 +266,13 @@ describe('versionMigrationCompleted', () => {
   });
   it('returns false if neither the version or current alias exists', () => {
     expect(versionMigrationCompleted('.current-alias', '.version-alias', {})).toBe(false);
+  });
+});
+
+describe('indexNameToAliasName', () => {
+  it('derives the version alias from the index name', () => {
+    expect(indexNameToAliasName('.kibana_7.17.0_001')).toBe('.kibana_7.17.0');
+    expect(indexNameToAliasName('.kibana_7.17.0_abc')).toBe('.kibana_7.17.0_abc');
+    expect(indexNameToAliasName('')).toBe('');
   });
 });

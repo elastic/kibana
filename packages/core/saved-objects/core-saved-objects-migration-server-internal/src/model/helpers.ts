@@ -202,6 +202,9 @@ export function getAliases(
  *
  * We can therefore derive the version alias name from the index name by stripping
  * the trailing "_xyz".
+ *
+ * @note This helper is a best-effort to derive the version alias name and does
+ * not validate that the index name provided matches the expected convention.
  */
 export function indexNameToAliasName(indexName: string): string {
   return indexName.trim().replace(/_\d\d\d$/, '');
