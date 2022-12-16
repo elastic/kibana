@@ -625,7 +625,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _ntfs_journal_events.category_ - The category that the event originated from
 * _power_sensors.category_ - The sensor category: currents, voltage, wattage
 * _system_extensions.category_ - System extension category
-* _unified_log.category_ - the category of the os_log_t used
+* _unified_log.category_ - The category of the os_log_t used
 * _yara_events.category_ - The category of the file
 
 *cdhash* - keyword, text.text
