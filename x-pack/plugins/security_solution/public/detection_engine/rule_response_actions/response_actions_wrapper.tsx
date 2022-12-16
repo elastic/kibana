@@ -50,7 +50,7 @@ export const ResponseActionsWrapper = React.memo(
 
     return (
       <div data-test-subj={'response-actions-wrapper'}>
-        {items.length && <ResponseActionsList items={items} removeItem={removeItem} />}
+        <ResponseActionsList items={items} removeItem={removeItem} />
         {renderButton}
       </div>
     );

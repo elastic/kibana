@@ -35,6 +35,8 @@ jest.mock('../../common/lib/kibana', () => {
 });
 
 import * as rules from '../rule_management/logic/use_rule';
+// @ts-expect-error we don't really care about thr useRule return value
+jest.spyOn(rules, 'useRule').mockReturnValue({});
 
 const renderWithContext = (Element: React.ReactElement) => {
   const mockTheme = getMockTheme({ eui: { euiColorLightestShade: '#F5F7FA' } });
@@ -60,13 +62,10 @@ describe('ResponseActionsForm', () => {
     expect(getByTestId('response-actions-form'));
     expect(getByTestId('response-actions-header'));
     expect(getByTestId('response-actions-wrapper'));
-    expect(queryByTestId('response-actions-list')).toEqual(null);
+    expect(queryByTestId('response-actions-list'));
     expect(queryByTestId('response-actions-list-item-0')).toEqual(null);
   });
   it('renders list of elements', async () => {
-    // @ts-expect-error we don't really care about thr useRule return value
-    jest.spyOn(rules, 'useRule').mockReturnValue({});
-
     const { getByTestId, queryByTestId } = renderWithContext(
       <Component
         items={[

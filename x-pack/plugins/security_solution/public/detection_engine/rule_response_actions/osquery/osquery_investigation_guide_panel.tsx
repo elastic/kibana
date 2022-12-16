@@ -42,7 +42,12 @@ export const OsqueryInvestigationGuidePanel: React.FC<OsqueryInvestigationGuideP
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size={'m'} color={'primary'} onClick={handleClick}>
+          <EuiButtonEmpty
+            size={'m'}
+            color={'primary'}
+            onClick={handleClick}
+            data-test-subj={'osqueryAddInvestigationGuideQueries'}
+          >
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.securitySolution.responseActionsList.addButton"
