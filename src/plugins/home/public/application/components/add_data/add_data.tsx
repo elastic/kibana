@@ -29,10 +29,9 @@ interface Props {
   addBasePath: (path: string) => string;
   application: ApplicationStart;
   isDarkMode: boolean;
-  isCloudEnabled: boolean;
 }
 
-export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
+export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => {
   const { trackUiMetric } = getServices();
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
   if (canAccessIntegrations) {
@@ -68,32 +67,12 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
             <EuiSpacer />
 
             <EuiFlexGroup gutterSize="m">
-              {isCloudEnabled && (
-                <EuiFlexItem grow={false}>
-                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                  <EuiButton
-                    data-test-subj="guidedOnboardingLink"
-                    fill
-                    href={addBasePath('#/getting_started')}
-                    onClick={(event: MouseEvent) => {
-                      trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding_link');
-                    }}
-                  >
-                    <FormattedMessage
-                      id="home.addData.guidedOnboardingLinkLabel"
-                      defaultMessage="Setup guides"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
               <EuiFlexItem grow={false}>
                 <RedirectAppLinks application={application}>
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButton
                     data-test-subj="homeAddData"
-                    // on self managed this button is primary
-                    // on Cloud this button is secondary, because there is a "guided onboarding" button
-                    fill={!isCloudEnabled}
+                    fill={true}
                     href={addBasePath('/app/integrations/browse')}
                     iconType="plusInCircle"
                     onClick={(event: MouseEvent) => {
