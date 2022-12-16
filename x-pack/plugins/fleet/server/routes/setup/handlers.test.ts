@@ -51,10 +51,9 @@ describe('FleetSetupHandler', () => {
           asCurrentUser: createPackagePolicyServiceMock(),
           asInternalUser: createPackagePolicyServiceMock(),
         },
-        epm: {
-          internalSoClient: savedObjectsClientMock.create(),
-        },
+        internalSoClient: savedObjectsClientMock.create(),
         spaceId: 'default',
+        limitedToPackages: undefined,
       },
     };
     response = httpServerMock.createResponseFactory();
