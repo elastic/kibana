@@ -18,7 +18,6 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
   const esFeatureExceptions = [
     'security',
     'index_lifecycle_management',
-    'migrate_data',
     'snapshot_restore',
     'rollup_jobs',
     'reporting',

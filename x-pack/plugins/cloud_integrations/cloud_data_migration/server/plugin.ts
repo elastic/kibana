@@ -17,7 +17,6 @@ export class CloudDataMigrationPlugin implements Plugin<void, void, any, any> {
       management: {
         data: [PLUGIN_ID],
       },
-      catalogue: [PLUGIN_ID],
       privileges: [
         {
           requiredClusterPrivileges: ['manage'],
