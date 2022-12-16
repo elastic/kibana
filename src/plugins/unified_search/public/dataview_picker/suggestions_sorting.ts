@@ -34,16 +34,9 @@ export const hadnleAlphabeticalSorting = (
   const sortedDataViews = dataViews.sort((a, b) =>
     (a.name ?? a.title).localeCompare(b.name ?? b.title)
   );
-  const orderDirectionFronStorage = localStorage.getItem('orderDirection');
 
   if (direction) {
     return direction === DEFAULT_SORT.direction ? sortedDataViews : sortedDataViews.reverse();
-  }
-
-  if (orderDirectionFronStorage) {
-    return orderDirectionFronStorage === DEFAULT_SORT.direction
-      ? sortedDataViews
-      : sortedDataViews.reverse();
   }
 
   return sortedDataViews;

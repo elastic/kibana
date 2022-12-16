@@ -20,11 +20,13 @@ import {
   EuiSelectableOption,
   EuiPanel,
   EuiHorizontalRule,
+  useEuiTheme,
 } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
 
 import { css } from '@emotion/react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OptionsListStrings } from './dataview_list_strings';
 import {
   OptionsListSortBy,
@@ -32,7 +34,9 @@ import {
   sortDirections,
   DEFAULT_SORT,
   hadnleAlphabeticalSorting,
+  getCompatibleSortingTypes,
 } from './suggestions_sorting';
+import { IUnifiedSearchPluginServices } from '../types';
 
 export type SortDirection = typeof sortDirections[number];
 export interface SortingType {
@@ -40,15 +44,7 @@ export interface SortingType {
   direction: SortDirection;
 }
 
-export const getCompatibleSortingTypes = (): OptionsListSortBy[] => ['_key'];
 export const getCompatibleSortingTypesByOrder = (): OptionsListOrder[] => ['asc', 'desc'];
-
-type SortByItem = EuiSelectableOption & {
-  data: { sortBy: OptionsListSortBy };
-};
-type SortOrderItem = EuiSelectableOption & {
-  data: { order: OptionsListOrder };
-};
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
@@ -71,45 +67,50 @@ export function DataViewsList({
   selectableProps,
   searchListInputId,
 }: DataViewsListProps) {
+  const { euiTheme } = useEuiTheme();
+  const popoverStyle = euiTheme.base * 13;
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
+  const { storage } = kibana.services;
+
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
 
   const [sortedDataViewsList, setSortedDataViewsList] = useState(dataViewsList);
 
-  const [sortByOptions, setSortByOptions] = useState<SortByItem[]>(() => {
+  const [sortByOptions, setSortByOptions] = useState<EuiSelectableOption[]>(() => {
     return getCompatibleSortingTypes().map((key) => {
       return {
         data: { sortBy: key },
         checked: key === DEFAULT_SORT.by ? 'on' : undefined,
         label: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(),
-      } as SortByItem;
+      };
     });
   });
 
-  const [sortOrderOptions, setSortOrderOptions] = useState<SortOrderItem[]>(() => {
+  const [sortOrderOptions, setSortOrderOptions] = useState<EuiSelectableOption[]>(() => {
     return getCompatibleSortingTypesByOrder().map((key) => {
       return {
         data: { order: key },
         checked: key === DEFAULT_SORT.direction ? 'on' : undefined,
         label: OptionsListStrings.editorAndPopover.sortOrder[key].getSortOrderLabel(),
-      } as SortOrderItem;
+      };
     });
   });
 
-  const onSortByChange = (updatedOptions: SortByItem[]) => {
+  const onSortByChange = (updatedOptions: EuiSelectableOption[]) => {
     setSortByOptions(updatedOptions);
   };
 
-  const handleOrderChangesDataViewList = (selectedOption?: SortOrderItem) => {
+  const handleOrderChangesDataViewList = (selectedOption: EuiSelectableOption) => {
     setSortedDataViewsList((currentDataViewsList) =>
-      hadnleAlphabeticalSorting(currentDataViewsList, selectedOption?.data?.order)
+      hadnleAlphabeticalSorting(currentDataViewsList, selectedOption.data?.order)
     );
   };
 
-  const onSortByOrder = (updatedOptions: SortOrderItem[]) => {
+  const onSortByOrder = (updatedOptions: EuiSelectableOption[]) => {
     setSortOrderOptions(updatedOptions);
     const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
     if (selectedOption) {
-      localStorage.setItem('orderDirection', selectedOption.data.order);
+      storage.set('orderDirection', selectedOption.data?.order);
       handleOrderChangesDataViewList(selectedOption);
     }
   };
@@ -182,7 +183,6 @@ export function DataViewsList({
                     isOpen={isSortingPopoverOpen}
                     aria-labelledby="optionsList_sortingOptions"
                     closePopover={() => setIsSortingPopoverOpen(false)}
-                    panelClassName={'optionsList--sortPopover'}
                   >
                     <EuiPopoverTitle paddingSize="s">
                       {OptionsListStrings.popover.getSortPopoverTitle()}
@@ -194,6 +194,7 @@ export function DataViewsList({
                       onChange={onSortByChange}
                       listProps={{ bordered: false }}
                       aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+                      style={{ width: popoverStyle }}
                     >
                       {(sortByOptionList) => sortByOptionList}
                     </EuiSelectable>
@@ -209,6 +210,7 @@ export function DataViewsList({
                       onChange={onSortByOrder}
                       listProps={{ bordered: false }}
                       aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+                      style={{ width: popoverStyle }}
                     >
                       {(sortOrderOptionList) => sortOrderOptionList}
                     </EuiSelectable>

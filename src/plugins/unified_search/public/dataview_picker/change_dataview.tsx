@@ -94,6 +94,8 @@ export function ChangeDataView({
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
   );
 
+  const orderDirection = storage.get('orderDirection');
+
   // Create a reusable id to ensure search input is the first focused item in the popover even though it's not the first item
   const searchListInputId = useGeneratedHtmlId({ prefix: 'dataviewPickerListSearchInput' });
 
@@ -114,10 +116,10 @@ export function ChangeDataView({
           }
         });
       }
-      setDataViewsList(hadnleAlphabeticalSorting(dataViewsRefs));
+      setDataViewsList(hadnleAlphabeticalSorting(dataViewsRefs, orderDirection));
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews, orderDirection]);
 
   useEffect(() => {
     if (trigger.label) {
