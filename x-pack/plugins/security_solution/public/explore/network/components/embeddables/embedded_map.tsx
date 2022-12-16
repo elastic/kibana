@@ -15,6 +15,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
+import { REQUEST_NAMES, useFetch } from '../../../../common/hooks/use_fetch';
 import { Loader } from '../../../../common/components/loader';
 import { displayErrorToast, useStateToaster } from '../../../../common/components/toasters';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
@@ -29,6 +30,7 @@ import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { getIsFieldInIndexPattern } from '../../../containers/fields/api';
 
 export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
 
@@ -118,7 +120,19 @@ export const EmbeddedMapComponent = ({
   );
   const { kibanaDataViews } = useDeepEqualSelector((state) => getDataViewsSelector(state));
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.default);
+  const { fetch, data, isLoading, error } = useFetch(
+    REQUEST_NAMES.FIELDS_IN_INDEX,
+    getIsFieldInIndexPattern
+  );
 
+  const searchFieldsInIndex = useCallback(
+    (indexName: string, fields: string[]) => {
+      fetch({
+        query: { indexName, fields },
+      });
+    },
+    [fetch]
+  );
   const [mapIndexPatterns, setMapIndexPatterns] = useState(
     kibanaDataViews.filter((dataView) => selectedPatterns.includes(dataView.title))
   );
