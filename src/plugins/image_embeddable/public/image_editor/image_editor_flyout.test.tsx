@@ -57,22 +57,14 @@ test('should call onCancel when "Close" clicked', async () => {
 
 test('should call onSave when "Save" clicked (url)', async () => {
   const onSave = jest.fn();
-  const { getByText, getByTestId, getByRole } = render(<ImageEditor onSave={onSave} />);
+  const { getByText, getByTestId } = render(<ImageEditor onSave={onSave} />);
 
   await userEvent.click(getByText('Use link'));
   await userEvent.type(getByTestId(`imageEmbeddableEditorUrlInput`), `https://elastic.co/image`);
   await userEvent.type(getByTestId(`imageEmbeddableEditorAltInput`), `alt text`);
 
-  expect(
-    getByRole('button', {
-      name: 'Add image',
-    })
-  ).toBeVisible();
-  await userEvent.click(
-    getByRole('button', {
-      name: 'Add image',
-    })
-  );
+  expect(getByTestId(`imageEmbeddableEditorSave`)).toBeVisible();
+  await userEvent.click(getByTestId(`imageEmbeddableEditorSave`));
   expect(onSave).toBeCalledWith({
     altText: 'alt text',
     backgroundColor: '',
@@ -99,7 +91,7 @@ test('should be able to edit', async () => {
     },
   };
   const onSave = jest.fn();
-  const { getByTestId, getByRole } = render(
+  const { getByTestId } = render(
     <ImageEditor onSave={onSave} initialImageConfig={initialImageConfig} />
   );
 
@@ -108,16 +100,8 @@ test('should be able to edit', async () => {
   await userEvent.type(getByTestId(`imageEmbeddableEditorUrlInput`), `-changed`);
   await userEvent.type(getByTestId(`imageEmbeddableEditorAltInput`), ` changed`);
 
-  expect(
-    getByRole('button', {
-      name: 'Edit image',
-    })
-  ).toBeVisible();
-  await userEvent.click(
-    getByRole('button', {
-      name: 'Edit image',
-    })
-  );
+  expect(getByTestId(`imageEmbeddableEditorSave`)).toBeVisible();
+  await userEvent.click(getByTestId(`imageEmbeddableEditorSave`));
   expect(onSave).toBeCalledWith({
     altText: 'alt text changed',
     backgroundColor: '',
@@ -146,7 +130,7 @@ test(`shouldn't be able to save if url is invalid`, async () => {
 
   validateUrl.mockImplementation(() => ({ isValid: false, error: 'error' }));
 
-  const { getByRole } = render(<ImageEditor initialImageConfig={initialImageConfig} />);
+  const { getByTestId } = render(<ImageEditor initialImageConfig={initialImageConfig} />);
 
-  expect(getByRole('button', { name: 'Edit image' })).toBeDisabled();
+  expect(getByTestId(`imageEmbeddableEditorSave`)).toBeDisabled();
 });

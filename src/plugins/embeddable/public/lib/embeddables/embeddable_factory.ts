@@ -97,7 +97,7 @@ export interface EmbeddableFactory<
    * Explicit input is stored on the parent container for this embeddable. It overrides all inherited
    * input passed down from the parent container.
    *
-   * Can be used to edit an embeddable by re-request the explicit input by providing initial input
+   * Can be used to edit an embeddable by re-requesting explicit input. Initial input can be provided to allow the editor to show the current state.
    */
   getExplicitInput(initialInput?: Partial<TEmbeddableInput>): Promise<Partial<TEmbeddableInput>>;
 

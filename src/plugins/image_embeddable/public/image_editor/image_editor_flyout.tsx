@@ -413,17 +413,10 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
               isDisabled={!isDraftImageConfigValid}
               data-test-subj="imageEmbeddableEditorSave"
             >
-              {isEditing ? (
-                <FormattedMessage
-                  id="imageEmbeddable.imageEditor.imageBackgroundEditImageButtonText"
-                  defaultMessage="Edit image"
-                />
-              ) : (
-                <FormattedMessage
-                  id="imageEmbeddable.imageEditor.imageBackgroundAddImageButtonText"
-                  defaultMessage="Add image"
-                />
-              )}
+              <FormattedMessage
+                id="imageEmbeddable.imageEditor.imageBackgroundSaveImageButtonText"
+                defaultMessage="Save"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
