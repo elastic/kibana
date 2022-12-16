@@ -127,6 +127,9 @@ export function kbnTypeToJobType(field: DataViewField) {
       }
       break;
     case KBN_FIELD_TYPES.NUMBER:
+      if (field.esTypes?.every((d) => d === 'aggregate_metric_double')) {
+        break;
+      }
       type = SUPPORTED_FIELD_TYPES.NUMBER;
       break;
     case KBN_FIELD_TYPES.DATE:

@@ -205,7 +205,11 @@ export const useDataVisualizerGridData = (
         }
         const fieldName = field.displayName !== undefined ? field.displayName : field.name;
         if (!OMIT_FIELDS.includes(fieldName)) {
-          if (field.aggregatable === true && !NON_AGGREGATABLE_FIELD_TYPES.has(field.type)) {
+          if (
+            field.aggregatable === true &&
+            !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) &&
+            !field.esTypes?.every((d) => d === 'aggregate_metric_double')
+          ) {
             aggregatableFields.push(field.name);
           } else {
             nonAggregatableFields.push(field.name);
