@@ -196,7 +196,7 @@ describe('Policy artifacts layout', () => {
       await render(false);
       expect(renderResult.queryByTestId('artifacts-assign-button')).toBeNull();
     });
-    it('should not display assign artifacts button on empty state when there are artifacts', async () => {
+    it('should not display assign and manage artifacts buttons on empty state when there are artifacts', async () => {
       mockedApi.responseProvider.eventFiltersList.mockImplementation(
         (args?: { query: { filter: string } }) => {
           if (
@@ -212,25 +212,9 @@ describe('Policy artifacts layout', () => {
       await render(false);
       expect(await renderResult.findByTestId('policy-artifacts-empty-unassigned')).not.toBeNull();
       expect(renderResult.queryByTestId('unassigned-assign-artifacts-button')).toBeNull();
-    });
-    it('should not display manage artifacts button on empty state when there are artifacts', async () => {
-      mockedApi.responseProvider.eventFiltersList.mockImplementation(
-        (args?: { query: { filter: string } }) => {
-          if (
-            !args ||
-            args.query.filter !== parsePoliciesAndFilterToKql({ policies: [policyItem.id, 'all'] })
-          ) {
-            return getFoundExceptionListItemSchemaMock(1);
-          } else {
-            return getFoundExceptionListItemSchemaMock(0);
-          }
-        }
-      );
-      await render(false);
-      expect(await renderResult.findByTestId('policy-artifacts-empty-unassigned')).not.toBeNull();
       expect(renderResult.queryByTestId('unassigned-manage-artifacts-button')).toBeNull();
     });
-    it('should not display manage artifacts button on empty state when there are not artifacts', async () => {
+    it('should not display manage artifacts button on empty state when there are no artifacts', async () => {
       mockedApi.responseProvider.eventFiltersList.mockReturnValue(
         getFoundExceptionListItemSchemaMock(0)
       );
