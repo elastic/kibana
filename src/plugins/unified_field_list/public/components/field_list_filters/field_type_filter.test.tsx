@@ -27,6 +27,8 @@ describe('UnifiedFieldList <FieldTypeFilter />', () => {
         .simulate('click');
     });
 
+    // wait for lazy modules if any
+    await new Promise((resolve) => setTimeout(resolve, 0));
     await wrapper.update();
   }
 
