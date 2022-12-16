@@ -12,6 +12,7 @@ import type { ArtifactListPageProps } from '../artifact_list_page';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { getFormComponentMock } from '../mocks';
 import { getArtifactListPageRenderingSetup } from '../mocks';
+import { artifactListPageLabels } from '../translations';
 
 describe('When showing the Empty State in ArtifactListPage', () => {
   let render: (
@@ -62,13 +63,23 @@ describe('When showing the Empty State in ArtifactListPage', () => {
 
   describe('and user is allowed to Create entries', () => {
     it('should show title, about info and add button', async () => {
-      render();
+      const { getByTestId, queryByTestId } = render();
 
-      await waitFor(() => {
-        expect(renderResult.getByTestId('testPage-emptyState-title')).toBeTruthy();
-        expect(renderResult.getByTestId('testPage-emptyState-aboutInfo')).toBeTruthy();
-        expect(renderResult.getByTestId('testPage-emptyState-addButton')).toBeTruthy();
+      await waitFor(async () => {
+        expect(getByTestId('testPage-emptyState'));
       });
+
+      expect(getByTestId('testPage-emptyState-title').textContent).toEqual(
+        artifactListPageLabels.emptyStateTitle
+      );
+      expect(getByTestId('testPage-emptyState-aboutInfo').textContent).toEqual(
+        artifactListPageLabels.emptyStateInfo
+      );
+      expect(getByTestId('testPage-emptyState-addButton').textContent).toEqual(
+        artifactListPageLabels.emptyStatePrimaryButtonLabel
+      );
+
+      expect(queryByTestId('testPage-emptyState-title-no-entries')).toBeNull();
     });
 
     it('should open create flyout when primary button is clicked', async () => {
@@ -138,7 +149,9 @@ describe('When showing the Empty State in ArtifactListPage', () => {
       render({ allowCardCreateAction: false });
 
       await waitFor(async () => {
-        expect(renderResult.getByTestId('testPage-emptyState-title-no-entries'));
+        expect(
+          renderResult.getByTestId('testPage-emptyState-title-no-entries').textContent
+        ).toEqual(artifactListPageLabels.emptyStateTitleNoEntries);
       });
     });
   });
