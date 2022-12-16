@@ -31,6 +31,7 @@ import {
   OptionsListOrder,
   sortDirections,
   DEFAULT_SORT,
+  hadnleAlphabeticalSorting,
 } from './suggestions_sorting';
 
 export type SortDirection = typeof sortDirections[number];
@@ -72,15 +73,6 @@ export function DataViewsList({
 }: DataViewsListProps) {
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
 
-  const hadnleAlphabeticalSorting = (
-    dataViews: DataViewListItemEnhanced[],
-    direction?: SortDirection
-  ) => {
-    const sortedDataViews = dataViews.sort((a, b) =>
-      (a.name ?? a.title).localeCompare(b.name ?? b.title)
-    );
-    return direction === 'asc' ? sortedDataViews : sortedDataViews.reverse();
-  };
   const [sortedDataViewsList, setSortedDataViewsList] = useState(dataViewsList);
 
   const [sortByOptions, setSortByOptions] = useState<SortByItem[]>(() => {
@@ -117,6 +109,7 @@ export function DataViewsList({
     setSortOrderOptions(updatedOptions);
     const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
     if (selectedOption) {
+      localStorage.setItem('orderDirection', selectedOption.data.order);
       handleOrderChangesDataViewList(selectedOption);
     }
   };
@@ -194,32 +187,31 @@ export function DataViewsList({
                     <EuiPopoverTitle paddingSize="s">
                       {OptionsListStrings.popover.getSortPopoverTitle()}
                     </EuiPopoverTitle>
-                    <div style={{ width: 200 }}>
-                      <EuiSelectable
-                        options={sortByOptions}
-                        singleSelection="always"
-                        onChange={onSortByChange}
-                        listProps={{ bordered: false }}
-                        aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
-                      >
-                        {(sortByOptionList) => sortByOptionList}
-                      </EuiSelectable>
-                    </div>
+
+                    <EuiSelectable
+                      options={sortByOptions}
+                      singleSelection="always"
+                      onChange={onSortByChange}
+                      listProps={{ bordered: false }}
+                      aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+                    >
+                      {(sortByOptionList) => sortByOptionList}
+                    </EuiSelectable>
+
                     <EuiHorizontalRule margin="none" />
-                    <div style={{ width: 200 }}>
-                      <EuiPopoverTitle paddingSize="s">
-                        {OptionsListStrings.popover.getOrderPopoverTitle()}
-                      </EuiPopoverTitle>
-                      <EuiSelectable
-                        options={sortOrderOptions}
-                        singleSelection="always"
-                        onChange={onSortByOrder}
-                        listProps={{ bordered: false }}
-                        aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
-                      >
-                        {(sortOrderOptionList) => sortOrderOptionList}
-                      </EuiSelectable>
-                    </div>
+
+                    <EuiPopoverTitle paddingSize="s">
+                      {OptionsListStrings.popover.getOrderPopoverTitle()}
+                    </EuiPopoverTitle>
+                    <EuiSelectable
+                      options={sortOrderOptions}
+                      singleSelection="always"
+                      onChange={onSortByOrder}
+                      listProps={{ bordered: false }}
+                      aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+                    >
+                      {(sortOrderOptionList) => sortOrderOptionList}
+                    </EuiSelectable>
                   </EuiPopover>
                 </EuiFlexItem>
               </EuiFlexGroup>
