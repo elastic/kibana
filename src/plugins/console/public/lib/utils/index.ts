@@ -148,7 +148,7 @@ export const replaceVariables = (
 
             const isStringifiedNumber = !isNaN(parseFloat(value));
             // We need to check uuids as well, since they are also numbers.
-            if (isStringifiedNumber && !isUuid(value)) {
+            if (isStringifiedNumber && !isUUID(value)) {
               return value;
             }
 
@@ -177,8 +177,9 @@ export const replaceVariables = (
   });
 };
 
-const isUuid = (value: string) => {
-  // regex for uuid v1 to v5 https://stackoverflow.com/questions/7905929/how-to-test-valid-uuid-guid/13653180#13653180?newreg=2963d489b30c4b3381f0415a215918ac
-  const re = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return re.test(value);
+const isUUID = (val: string) => {
+  return (
+    typeof val === 'string' &&
+    val.match(/[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/)
+  );
 };
