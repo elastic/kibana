@@ -23,7 +23,7 @@ import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   DatasourceDimensionEditorProps,
@@ -38,6 +38,7 @@ import type {
   IndexPatternRef,
   DatasourceLayerSettingsProps,
   DataSourceInfo,
+  UserMessage,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -813,13 +814,14 @@ export function getFormBasedDatasource({
     getDatasourceSuggestionsForVisualizeField,
     getDatasourceSuggestionsForVisualizeCharts,
 
-    getErrorMessages(state, indexPatterns) {
+    getUserMessages(state, { frame: frameDatasourceAPI, setState }) {
       if (!state) {
-        return;
+        return [];
       }
 
-      // Forward the indexpattern as well, as it is required by some operationType checks
-      const layerErrors = Object.entries(state.layers)
+      const indexPatterns = frameDatasourceAPI.dataViews.indexPatterns;
+
+      const layerErrors: UserMessage[][] = Object.entries(state.layers)
         .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
         .map(([layerId, layer]) =>
           (
@@ -831,46 +833,74 @@ export function getFormBasedDatasource({
               core,
               data
             ) ?? []
-          ).map((message) => ({
-            shortMessage: '', // Not displayed currently
-            longMessage: typeof message === 'string' ? message : message.message,
-            fixAction: typeof message === 'object' ? message.fixAction : undefined,
-          }))
+          ).map((error) => {
+            const message: UserMessage = {
+              severity: 'error',
+              fixableInEditor: true,
+              displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
+              shortMessage: '',
+              longMessage:
+                typeof error === 'string' ? (
+                  error
+                ) : (
+                  <>
+                    {error.message}
+                    {error.fixAction && (
+                      <EuiButton
+                        data-test-subj="errorFixAction"
+                        onClick={async () => {
+                          const newState = await error.fixAction?.newState(frameDatasourceAPI);
+                          if (newState) {
+                            setState(newState);
+                          }
+                        }}
+                      >
+                        {error.fixAction?.label}
+                      </EuiButton>
+                    )}
+                  </>
+                ),
+            };
+
+            return message;
+          })
         );
 
       // Single layer case, no need to explain more
       if (layerErrors.length <= 1) {
-        return layerErrors[0]?.length ? layerErrors[0] : undefined;
+        return layerErrors[0]?.length ? layerErrors[0] : [];
       }
 
       // For multiple layers we will prepend each error with the layer number
-      const messages = layerErrors.flatMap((errors, index) => {
+      const messages: UserMessage[] = layerErrors.flatMap((errors, index) => {
         return errors.map((error) => {
-          const { shortMessage, longMessage } = error;
-          return {
-            shortMessage: shortMessage
-              ? i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
-                  defaultMessage: 'Layer {position} error: {wrappedMessage}',
-                  values: {
-                    position: index + 1,
-                    wrappedMessage: shortMessage,
-                  },
-                })
-              : '',
-            longMessage: longMessage
-              ? i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
-                  defaultMessage: 'Layer {position} error: {wrappedMessage}',
-                  values: {
-                    position: index + 1,
-                    wrappedMessage: longMessage,
-                  },
-                })
-              : '',
+          const message: UserMessage = {
+            ...error,
+            shortMessage: i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
+              defaultMessage: 'Layer {position} error: {wrappedMessage}',
+              values: {
+                position: index + 1,
+                wrappedMessage: error.shortMessage,
+              },
+            }),
+            longMessage: (
+              <FormattedMessage
+                id="xpack.lens.indexPattern.layerErrorWrapper"
+                defaultMessage="Layer {position} error: {wrappedMessage}"
+                values={{
+                  position: index + 1,
+                  wrappedMessage: <>{error.longMessage}</>,
+                }}
+              />
+            ),
           };
+
+          return message;
         });
       });
-      return messages.length ? messages : undefined;
+      return messages;
     },
+
     getWarningMessages: (state, frame, adapters, setState) => {
       return [
         ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frame) || []),

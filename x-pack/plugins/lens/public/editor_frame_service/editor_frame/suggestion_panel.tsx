@@ -38,6 +38,7 @@ import {
   DatasourceMap,
   VisualizationMap,
   DatasourceLayers,
+  UserMessagesGetter,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
@@ -73,6 +74,7 @@ export interface SuggestionPanelProps {
   visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
+  getUserMessages: UserMessagesGetter;
 }
 
 const PreviewRenderer = ({
@@ -189,6 +191,7 @@ export function SuggestionPanel({
   visualizationMap,
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
+  getUserMessages,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -237,6 +240,7 @@ export function SuggestionPanel({
             }) => {
               return (
                 !hide &&
+                // it is used here just to filter out invalid configs
                 validateDatasourceAndVisualization(
                   suggestionDatasourceId ? datasourceMap[suggestionDatasourceId] : null,
                   suggestionDatasourceState,
@@ -258,7 +262,7 @@ export function SuggestionPanel({
                       frame.dataViews.indexPatterns
                     ),
                   }
-                ) == null
+                ).length === 0
               );
             }
           )
@@ -274,16 +278,10 @@ export function SuggestionPanel({
             ),
           }));
 
-    const validationErrors = validateDatasourceAndVisualization(
-      activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-      activeDatasourceId && currentDatasourceStates[activeDatasourceId]?.state,
-      currentVisualization.activeId ? visualizationMap[currentVisualization.activeId] : null,
-      currentVisualization.state,
-      frame
-    );
+    const hasErrors = getUserMessages('suggestionPanel', 'error').length > 0;
 
     const newStateExpression =
-      currentVisualization.state && currentVisualization.activeId && !validationErrors
+      currentVisualization.state && currentVisualization.activeId && !hasErrors
         ? preparePreviewExpression(
             { visualizationState: currentVisualization.state },
             visualizationMap[currentVisualization.activeId],
@@ -296,7 +294,7 @@ export function SuggestionPanel({
     return {
       suggestions: newSuggestions,
       currentStateExpression: newStateExpression,
-      currentStateError: validationErrors,
+      currentStateError: hasErrors,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -387,7 +385,7 @@ export function SuggestionPanel({
       {currentVisualization.activeId && !hideSuggestions && (
         <SuggestionPreview
           preview={{
-            error: currentStateError != null,
+            error: currentStateError,
             expression: currentStateExpression,
             icon:
               visualizationMap[currentVisualization.activeId].getDescription(

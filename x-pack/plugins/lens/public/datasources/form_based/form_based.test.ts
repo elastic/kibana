@@ -21,7 +21,13 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { TinymathAST } from '@kbn/tinymath';
 import { getFormBasedDatasource, GenericIndexPatternColumn } from './form_based';
-import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } from '../../types';
+import {
+  DatasourcePublicAPI,
+  Datasource,
+  FramePublicAPI,
+  OperationDescriptor,
+  FrameDatasourceAPI,
+} from '../../types';
 import { getFieldByNameFactory } from './pure_helpers';
 import {
   operationDefinitionMap,
@@ -2973,8 +2979,8 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
-  describe('#getErrorMessages', () => {
-    it('should use the results of getErrorMessages directly when single layer', () => {
+  describe('#getUserMessages', () => {
+    it('should generate error messages for a single layer', () => {
       (getErrorMessages as jest.Mock).mockClear();
       (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
       const state: FormBasedPrivateState = {
@@ -2987,10 +2993,43 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      expect(FormBasedDatasource.getErrorMessages(state, indexPatterns)).toEqual([
-        { longMessage: 'error 1', shortMessage: '' },
-        { longMessage: 'error 2', shortMessage: '' },
-      ]);
+      expect(
+        FormBasedDatasource.getUserMessages(state, {
+          frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+          setState: () => {},
+        })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "workspace",
+              },
+              Object {
+                "id": "suggestionPanel",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": "error 1",
+            "severity": "error",
+            "shortMessage": "",
+          },
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "workspace",
+              },
+              Object {
+                "id": "suggestionPanel",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": "error 2",
+            "severity": "error",
+            "shortMessage": "",
+          },
+        ]
+      `);
       expect(getErrorMessages).toHaveBeenCalledTimes(1);
     });
 
@@ -3012,10 +3051,65 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      expect(FormBasedDatasource.getErrorMessages(state, indexPatterns)).toEqual([
-        { longMessage: 'Layer 1 error: error 1', shortMessage: '' },
-        { longMessage: 'Layer 1 error: error 2', shortMessage: '' },
-      ]);
+      expect(
+        FormBasedDatasource.getUserMessages(state, {
+          frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+          setState: () => {},
+        })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "workspace",
+              },
+              Object {
+                "id": "suggestionPanel",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": <FormattedMessage
+              defaultMessage="Layer {position} error: {wrappedMessage}"
+              id="xpack.lens.indexPattern.layerErrorWrapper"
+              values={
+                Object {
+                  "position": 1,
+                  "wrappedMessage": <React.Fragment>
+                    error 1
+                  </React.Fragment>,
+                }
+              }
+            />,
+            "severity": "error",
+            "shortMessage": "Layer 1 error: ",
+          },
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "workspace",
+              },
+              Object {
+                "id": "suggestionPanel",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": <FormattedMessage
+              defaultMessage="Layer {position} error: {wrappedMessage}"
+              id="xpack.lens.indexPattern.layerErrorWrapper"
+              values={
+                Object {
+                  "position": 1,
+                  "wrappedMessage": <React.Fragment>
+                    error 2
+                  </React.Fragment>,
+                }
+              }
+            />,
+            "severity": "error",
+            "shortMessage": "Layer 1 error: ",
+          },
+        ]
+      `);
       expect(getErrorMessages).toHaveBeenCalledTimes(2);
     });
   });
@@ -3177,33 +3271,6 @@ describe('IndexPattern Data Source', () => {
           "xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled",
         ]
       `);
-    });
-
-    it('should prepend each error with its layer number on multi-layer chart', () => {
-      (getErrorMessages as jest.Mock).mockClear();
-      (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
-
-      state = {
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: [],
-            columns: {},
-          },
-          second: {
-            indexPatternId: '1',
-            columnOrder: [],
-            columns: {},
-          },
-        },
-        currentIndexPatternId: '1',
-      };
-
-      expect(FormBasedDatasource.getErrorMessages(state, indexPatterns)).toEqual([
-        { longMessage: 'Layer 1 error: error 1', shortMessage: '' },
-        { longMessage: 'Layer 1 error: error 2', shortMessage: '' },
-      ]);
-      expect(getErrorMessages).toHaveBeenCalledTimes(2);
     });
   });
 

@@ -9,7 +9,13 @@ import React, { useCallback, useRef, useMemo } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
-import { DatasourceMap, FramePublicAPI, VisualizationMap, Suggestion } from '../../types';
+import {
+  DatasourceMap,
+  FramePublicAPI,
+  VisualizationMap,
+  Suggestion,
+  UserMessagesGetter,
+} from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { BannerWrapper } from './banner_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
@@ -27,6 +33,8 @@ import {
   selectActiveDatasourceId,
   selectDatasourceStates,
   selectVisualization,
+  updateDatasourceState,
+  selectExecutionContext,
 } from '../../state_management';
 import type { LensInspector } from '../../lens_inspector_service';
 import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
@@ -96,6 +104,31 @@ export function EditorFrame(props: EditorFrameProps) {
     showMemoizedErrorNotification(error);
   }, []);
 
+  const context = useLensSelector(selectExecutionContext);
+
+  // TODO - store messages in ref -- may have to eventually store messages in redux so they can be pushed to from other places
+  const getUserMessages: UserMessagesGetter = (locationId, severity) =>
+    (activeDatasourceId
+      ? datasourceMap[activeDatasourceId].getUserMessages?.(
+          datasourceStates[activeDatasourceId].state,
+          {
+            frame: { ...context, ...framePublicAPI },
+            setState: (newState) =>
+              dispatchLens(
+                updateDatasourceState({
+                  updater: () => newState,
+                  datasourceId: activeDatasourceId,
+                })
+              ),
+          }
+        )
+      : []
+    ).filter(
+      (message) =>
+        Boolean(message.displayLocations.find((location) => location.id === locationId)) &&
+        (severity ? message.severity === severity : true)
+    );
+
   const bannerMessages: React.ReactNode[] | undefined = useMemo(() => {
     if (activeDatasourceId) {
       return datasourceMap[activeDatasourceId].getDeprecationMessages?.(
@@ -156,6 +189,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 visualizationMap={visualizationMap}
                 framePublicAPI={framePublicAPI}
                 getSuggestionForField={getSuggestionForField.current}
+                getUserMessages={getUserMessages}
               />
             </ErrorBoundary>
           )
@@ -169,6 +203,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 datasourceMap={datasourceMap}
                 visualizationMap={visualizationMap}
                 frame={framePublicAPI}
+                getUserMessages={getUserMessages}
               />
             </ErrorBoundary>
           )

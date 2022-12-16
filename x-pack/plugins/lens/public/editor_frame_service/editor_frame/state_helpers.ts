@@ -23,6 +23,7 @@ import {
   IndexPatternMap,
   IndexPatternRef,
   InitializationOptions,
+  UserMessage,
   Visualization,
   VisualizationMap,
   VisualizeEditorContext,
@@ -471,30 +472,34 @@ export const validateDatasourceAndVisualization = (
   currentVisualization: Visualization | null,
   currentVisualizationState: unknown | undefined,
   frame: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
-): ErrorMessage[] | undefined => {
+): UserMessage[] => {
   try {
-    const datasourceValidationErrors = currentDatasourceState
-      ? currentDataSource?.getErrorMessages(currentDatasourceState, frame.dataViews.indexPatterns)
-      : undefined;
+    // TODO - re-enable
+    return [];
 
-    const visualizationValidationErrors = currentVisualizationState
-      ? currentVisualization?.getErrorMessages(currentVisualizationState, frame)
-      : undefined;
+    // const datasourceValidationErrors = currentDatasourceState
+    //   ? currentDataSource?.getUserMessages(currentDatasourceState, { frame, setState: () => {} })
+    //   : undefined;
 
-    if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {
-      return [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])];
-    }
+    // const visualizationValidationErrors = currentVisualizationState
+    //   ? currentVisualization?.getErrorMessages(currentVisualizationState, frame)
+    //   : undefined;
+
+    // return [...(datasourceValidationErrors || [])];
   } catch (e) {
     showMemoizedErrorNotification(e);
     if (e.message) {
       return [
         {
+          severity: 'error',
+          fixableInEditor: false,
+          displayLocations: [{ id: 'workspace' }],
           shortMessage: e.message,
           longMessage: e.message,
-          type: 'critical',
         },
       ];
     }
   }
-  return undefined;
+
+  return [];
 };

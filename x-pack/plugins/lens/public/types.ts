@@ -271,6 +271,28 @@ interface DimensionLink {
   };
 }
 
+type UserMessageDisplayLocation =
+  | {
+      // NOTE: 'workspace' implies that this should block rendering. We want to move toward more errors that do not block the render!
+      id: 'toolbar' | 'embeddable' | 'workspace' | 'suggestionPanel';
+    }
+  | { id: 'dimensionTrigger'; layerId: string; dimensionId: string };
+
+export interface UserMessage {
+  severity: 'error' | 'warning';
+  shortMessage: string;
+  longMessage: React.ReactNode | string;
+  fixableInEditor: boolean;
+  displayLocations: UserMessageDisplayLocation[];
+}
+
+export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
+
+export type UserMessagesGetter = (
+  locationId: UserMessagesDisplayLocationId,
+  severity?: UserMessage['severity']
+) => UserMessage[];
+
 /**
  * Interface for the datasource registry
  */
@@ -432,16 +454,16 @@ export interface Datasource<T = unknown, P = unknown> {
    */
   checkIntegrity: (state: T, indexPatterns: IndexPatternMap) => string[];
 
-  getErrorMessages: (
+  /**
+   * The frame calls this function to display messages to the user
+   */
+  getUserMessages: (
     state: T,
-    indexPatterns: Record<string, IndexPattern>
-  ) =>
-    | Array<{
-        shortMessage: string;
-        longMessage: React.ReactNode;
-        fixAction?: { label: string; newState: () => Promise<T> };
-      }>
-    | undefined;
+    deps: {
+      frame: FrameDatasourceAPI;
+      setState: StateSetter<T>;
+    }
+  ) => UserMessage[];
 
   /**
    * The frame calls this function to display warnings about visualization

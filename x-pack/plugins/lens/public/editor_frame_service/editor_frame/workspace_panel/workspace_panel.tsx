@@ -18,9 +18,8 @@ import {
   EuiText,
   EuiButtonEmpty,
   EuiLink,
-  EuiButton,
-  EuiSpacer,
   EuiTextColor,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
@@ -47,6 +46,8 @@ import {
   DatasourceFixAction,
   Suggestion,
   DatasourceLayers,
+  UserMessage,
+  UserMessagesGetter,
 } from '../../../types';
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
@@ -58,12 +59,11 @@ import {
   getOriginalRequestErrorMessages,
   getUnknownVisualizationTypeError,
 } from '../../error_helper';
-import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
+import { getMissingIndexPattern } from '../state_helpers';
 import {
   onActiveDataChange,
   useLensDispatch,
   editVisualizationAction,
-  updateDatasourceState,
   setSaveable,
   useLensSelector,
   selectExecutionContext,
@@ -94,6 +94,7 @@ export interface WorkspacePanelProps {
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
   lensInspector: LensInspector;
+  getUserMessages: UserMessagesGetter;
 }
 
 interface WorkspaceState {
@@ -151,6 +152,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   ExpressionRenderer: ExpressionRendererComponent,
   suggestionForDraggedField,
   lensInspector,
+  getUserMessages,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
@@ -297,32 +299,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const unknownVisError = visualization.activeId && !activeVisualization;
 
-  // Note: mind to all these eslint disable lines: the frameAPI will change too frequently
-  // and to prevent race conditions it is ok to leave them there.
-
-  const configurationValidationError = useMemo(
-    () =>
-      validateDatasourceAndVisualization(
-        activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-        activeDatasourceId && datasourceStates[activeDatasourceId]?.state,
-        activeVisualization,
-        visualization.state,
-        framePublicAPI
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      activeVisualization,
-      visualization.state,
-      activeDatasourceId,
-      datasourceMap,
-      datasourceStates,
-      framePublicAPI.dateRange,
-    ]
-  );
+  const configurationValidationErrors = getUserMessages('workspace', 'error');
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
-    if (!configurationValidationError?.length && !missingRefsErrors.length && !unknownVisError) {
+    if (!configurationValidationErrors?.length && !missingRefsErrors.length && !unknownVisError) {
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
@@ -365,7 +346,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       }));
     }
   }, [
-    configurationValidationError?.length,
+    configurationValidationErrors?.length,
     missingRefsErrors.length,
     unknownVisError,
     activeVisualization,
@@ -588,7 +569,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         setLocalState={setLocalState}
-        localState={{ ...localState, configurationValidationError, missingRefsErrors }}
+        localState={{ ...localState, configurationValidationErrors, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
         core={core}
         activeDatasourceId={activeDatasourceId}
@@ -677,11 +658,7 @@ export const VisualizationWrapper = ({
   hasCompatibleActions: (event: ExpressionRendererEvent) => Promise<boolean>;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
-    configurationValidationError?: Array<{
-      shortMessage: string;
-      longMessage: React.ReactNode;
-      fixAction?: DatasourceFixAction<unknown>;
-    }>;
+    configurationValidationErrors?: UserMessage[];
     missingRefsErrors?: Array<{ shortMessage: string; longMessage: React.ReactNode }>;
     unknownVisError?: Array<{ shortMessage: string; longMessage: React.ReactNode }>;
   };
@@ -706,84 +683,26 @@ export const VisualizationWrapper = ({
   );
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
-  const dispatchLens = useLensDispatch();
+  if (localState.configurationValidationErrors?.length) {
+    const showExtraErrorsAction =
+      !localState.expandError && localState.configurationValidationErrors.length > 1 ? (
+        <EuiButtonEmpty
+          onClick={() => {
+            setLocalState((prevState: WorkspaceState) => ({
+              ...prevState,
+              expandError: !prevState.expandError,
+            }));
+          }}
+          data-test-subj="configuration-failure-more-errors"
+        >
+          {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
+            defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
+            values: { errors: localState.configurationValidationErrors.length - 1 },
+          })}
+        </EuiButtonEmpty>
+      ) : null;
 
-  function renderFixAction(
-    validationError:
-      | {
-          shortMessage: string;
-          longMessage: React.ReactNode;
-          fixAction?: DatasourceFixAction<unknown>;
-        }
-      | undefined
-  ) {
-    return (
-      validationError &&
-      validationError.fixAction &&
-      activeDatasourceId && (
-        <>
-          <EuiButton
-            data-test-subj="errorFixAction"
-            onClick={async () => {
-              const newState = await validationError.fixAction?.newState({
-                ...framePublicAPI,
-                ...context,
-              });
-              dispatchLens(
-                updateDatasourceState({
-                  updater: newState,
-                  datasourceId: activeDatasourceId,
-                })
-              );
-            }}
-          >
-            {validationError.fixAction.label}
-          </EuiButton>
-          <EuiSpacer />
-        </>
-      )
-    );
-  }
-
-  if (localState.configurationValidationError?.length) {
-    let showExtraErrors = null;
-    let showExtraErrorsAction = null;
-
-    if (localState.configurationValidationError.length > 1) {
-      if (localState.expandError) {
-        showExtraErrors = localState.configurationValidationError
-          .slice(1)
-          .map((validationError) => (
-            <>
-              <p
-                key={validationError.shortMessage}
-                className="eui-textBreakWord"
-                data-test-subj="configuration-failure-error"
-              >
-                {validationError.longMessage}
-              </p>
-              {renderFixAction(validationError)}
-            </>
-          ));
-      } else {
-        showExtraErrorsAction = (
-          <EuiButtonEmpty
-            onClick={() => {
-              setLocalState((prevState: WorkspaceState) => ({
-                ...prevState,
-                expandError: !prevState.expandError,
-              }));
-            }}
-            data-test-subj="configuration-failure-more-errors"
-          >
-            {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
-              defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
-              values: { errors: localState.configurationValidationError.length - 1 },
-            })}
-          </EuiButtonEmpty>
-        );
-      }
-    }
+    const [firstMessage, ...rest] = localState.configurationValidationErrors;
 
     return (
       <EuiFlexGroup data-test-subj="configuration-failure">
@@ -792,12 +711,18 @@ export const VisualizationWrapper = ({
             actions={showExtraErrorsAction}
             body={
               <>
-                <p className="eui-textBreakWord" data-test-subj="configuration-failure-error">
-                  {localState.configurationValidationError[0].longMessage}
-                </p>
-                {renderFixAction(localState.configurationValidationError?.[0])}
-
-                {showExtraErrors}
+                <div data-test-subj="configuration-failure-error">{firstMessage.longMessage}</div>
+                {localState.expandError && (
+                  <>
+                    <EuiSpacer />
+                    {rest.map((message) => (
+                      <div>
+                        {message.longMessage}
+                        <EuiSpacer />
+                      </div>
+                    ))}
+                  </>
+                )}
               </>
             }
             iconColor="danger"
