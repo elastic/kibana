@@ -5,41 +5,61 @@
  * 2.0.
  */
 
-import type { EuiButtonGroupOptionProps } from '@elastic/eui';
-import { EuiButtonGroup } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiText } from '@elastic/eui';
+import React, { useCallback } from 'react';
 
 import type { FilterMode } from '../types';
 
 import * as i18n from '../translations';
 
-const MY_RECENTLY_REPORTED_ID = 'myRecentlyReported';
+interface RecentCasesFilterOptions {
+  id: string;
+  label: string;
+}
 
-const toggleButtonIcons: EuiButtonGroupOptionProps[] = [
+const MY_RECENTLY_CREATED_ID = 'recentlyCreated';
+const MY_RECENTLY_REPORTED_ID = 'myRecentlyReported';
+const MY_RECENTLY_ASSIGNED_ID = 'myRecentlyAssigned';
+
+const caseFilterOptions: RecentCasesFilterOptions[] = [
   {
-    id: 'recentlyCreated',
+    id: MY_RECENTLY_CREATED_ID,
     label: i18n.RECENTLY_CREATED_CASES,
-    iconType: 'folderExclamation',
   },
   {
     id: MY_RECENTLY_REPORTED_ID,
     label: i18n.MY_RECENTLY_REPORTED_CASES,
-    iconType: 'reporter',
+  },
+  {
+    id: MY_RECENTLY_ASSIGNED_ID,
+    label: i18n.MY_RECENTLY_ASSIGNED_CASES,
   },
 ];
 
 export const RecentCasesFilters = React.memo<{
   filterBy: FilterMode;
   setFilterBy: (filterBy: FilterMode) => void;
-  showMyRecentlyReported: boolean;
-}>(({ filterBy, setFilterBy, showMyRecentlyReported }) => {
-  const options = useMemo(
-    () =>
-      showMyRecentlyReported
-        ? toggleButtonIcons
-        : toggleButtonIcons.filter((x) => x.id !== MY_RECENTLY_REPORTED_ID),
-    [showMyRecentlyReported]
-  );
+  hasCurrentUserInfo: boolean;
+  isLoading?: boolean;
+}>(({ filterBy, setFilterBy, hasCurrentUserInfo, isLoading = false }) => {
+  const options: Array<EuiSuperSelectOption<string>> = caseFilterOptions.map((option) => {
+    return {
+      value: option.id,
+      inputDisplay: (
+        <EuiFlexGroup
+          gutterSize="xs"
+          alignItems={'center'}
+          responsive={false}
+          data-test-subj={`recent-cases-filter-${option.id}`}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{option.label}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    };
+  });
 
   const onChange = useCallback(
     (filterMode: string) => {
@@ -49,12 +69,14 @@ export const RecentCasesFilters = React.memo<{
   );
 
   return (
-    <EuiButtonGroup
+    <EuiSuperSelect
+      disabled={!hasCurrentUserInfo}
+      fullWidth={true}
+      isLoading={isLoading}
       options={options}
-      idSelected={filterBy}
+      valueOfSelected={filterBy}
       onChange={onChange}
-      isIconOnly
-      legend={i18n.CASES_FILTER_CONTROL}
+      data-test-subj="recent-cases-filter"
     />
   );
 });

@@ -12,9 +12,16 @@ export const COMMENTS = i18n.translate('xpack.cases.recentCases.commentsTooltip'
 });
 
 export const MY_RECENTLY_REPORTED_CASES = i18n.translate(
-  'xpack.cases.recentCases.myRecentlyReportedCasesButtonLabel',
+  'xpack.cases.recentCases.myRecentlyReportedCasesLabel',
   {
-    defaultMessage: 'My recently reported cases',
+    defaultMessage: 'Created by me',
+  }
+);
+
+export const MY_RECENTLY_ASSIGNED_CASES = i18n.translate(
+  'xpack.cases.recentCases.myRecentlyAssignedCasesLabel',
+  {
+    defaultMessage: 'Assigned to me',
   }
 );
 
@@ -31,9 +38,9 @@ export const RECENT_CASES = i18n.translate('xpack.cases.recentCases.recentCasesS
 });
 
 export const RECENTLY_CREATED_CASES = i18n.translate(
-  'xpack.cases.recentCases.recentlyCreatedCasesButtonLabel',
+  'xpack.cases.recentCases.recentlyCreatedCasesLabel',
   {
-    defaultMessage: 'Recently created cases',
+    defaultMessage: 'Created by anyone',
   }
 );
 

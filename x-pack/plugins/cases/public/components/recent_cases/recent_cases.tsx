@@ -8,13 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-
+import { FormattedRelative } from '@kbn/i18n-react';
 import { IconWithCount } from './icon_with_count';
 import * as i18n from './translations';
 import { CaseDetailsLink } from '../links';
 import { LoadingPlaceholders } from './loading_placeholders';
 import { NoCases } from './no_cases';
-import { MarkdownRenderer } from '../markdown_editor';
 import type { FilterOptions } from '../../containers/types';
 import { TruncatedText } from '../truncated_text';
 import { initialData as initialGetCasesData, useGetCases } from '../../containers/use_get_cases';
@@ -56,15 +55,25 @@ export const RecentCasesComp = ({ filterOptions, maxCasesToShow }: RecentCasesPr
                 <TruncatedText text={c.title} />
               </CaseDetailsLink>
             </EuiText>
-
-            <IconWithCount count={c.totalComment} icon={'editorComment'} tooltip={i18n.COMMENTS} />
             {c.description && c.description.length && (
               <MarkdownContainer>
                 <EuiText color="subdued" size="xs">
-                  <MarkdownRenderer disableLinks={true}>{c.description}</MarkdownRenderer>
+                  <TruncatedText text={c.description} />
                 </EuiText>
               </MarkdownContainer>
             )}
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" data-test-subj="recent-cases-creation-relative-time">
+                  <FormattedRelative value={c.createdAt} />
+                </EuiText>
+              </EuiFlexItem>
+              <IconWithCount
+                count={c.totalComment}
+                icon={'editorComment'}
+                tooltip={i18n.COMMENTS}
+              />
+            </EuiFlexGroup>
             {i !== data.cases.length - 1 && <EuiSpacer size="l" />}
           </EuiFlexItem>
         </EuiFlexGroup>
