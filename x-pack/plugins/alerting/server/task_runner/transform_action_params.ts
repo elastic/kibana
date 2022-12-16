@@ -11,6 +11,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   RuleTypeParams,
+  SanitizedRule,
 } from '../types';
 
 interface TransformActionParamsOptions {
@@ -32,6 +33,25 @@ interface TransformActionParamsOptions {
   context: AlertInstanceContext;
   ruleUrl?: string;
   flapping: boolean;
+}
+
+interface SummarizedAlertsWithAll {
+  new: {
+    count: number;
+    data: unknown[];
+  };
+  ongoing: {
+    count: number;
+    data: unknown[];
+  };
+  recovered: {
+    count: number;
+    data: unknown[];
+  };
+  all: {
+    count: number;
+    data: unknown[];
+  };
 }
 
 export function transformActionParams({
@@ -71,6 +91,7 @@ export function transformActionParams({
     kibanaBaseUrl,
     params: alertParams,
     rule: {
+      params: alertParams,
       id: alertId,
       name: alertName,
       type: alertType,
@@ -84,6 +105,51 @@ export function transformActionParams({
       actionGroupName: alertActionGroupName,
       flapping,
     },
+  };
+  return actionsPlugin.renderActionParameterTemplates(
+    actionTypeId,
+    actionId,
+    actionParams,
+    variables
+  );
+}
+
+export function transformSummaryActionParams({
+  alerts,
+  rule,
+  ruleTypeId,
+  actionsPlugin,
+  actionId,
+  actionTypeId,
+  spaceId,
+  actionParams,
+  ruleUrl,
+  kibanaBaseUrl,
+}: {
+  alerts: SummarizedAlertsWithAll;
+  rule: SanitizedRule<RuleTypeParams>;
+  ruleTypeId: string;
+  actionsPlugin: ActionsPluginStartContract;
+  actionId: string;
+  actionTypeId: string;
+  spaceId: string;
+  actionParams: RuleActionParams;
+  kibanaBaseUrl?: string;
+  ruleUrl?: string;
+}): RuleActionParams {
+  const variables = {
+    kibanaBaseUrl,
+    date: new Date().toISOString(),
+    rule: {
+      params: rule.params,
+      id: rule.id,
+      name: rule.name,
+      type: ruleTypeId,
+      url: ruleUrl,
+      tags: rule.tags,
+      spaceId,
+    },
+    alerts,
   };
   return actionsPlugin.renderActionParameterTemplates(
     actionTypeId,
