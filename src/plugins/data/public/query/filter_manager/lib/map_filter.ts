@@ -66,15 +66,15 @@ export function mapFilter(filter: Filter) {
 
   // Map the filter into an object with the key and value exposed so it's
   // easier to work with in the template
-  mappedFilter.meta = filter.meta || {};
+  mappedFilter.meta = mappedFilter.meta || {};
   mappedFilter.meta.type = mapped.type;
   mappedFilter.meta.key = mapped.key;
   // Display value or formatter function.
   mappedFilter.meta.value = mapped.value;
   mappedFilter.meta.params = mapped.params;
-  mappedFilter.meta.disabled = Boolean(filter.meta.disabled);
-  mappedFilter.meta.negate = Boolean(filter.meta.negate);
-  mappedFilter.meta.alias = filter.meta.alias || null;
+  mappedFilter.meta.disabled = Boolean(mappedFilter.meta.disabled);
+  mappedFilter.meta.negate = Boolean(mappedFilter.meta.negate);
+  mappedFilter.meta.alias = mappedFilter.meta.alias || null;
 
   return mappedFilter;
 }
