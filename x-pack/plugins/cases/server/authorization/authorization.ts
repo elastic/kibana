@@ -139,9 +139,13 @@ export class Authorization {
     const { authorizedOwners } = await this.getAuthorizedOwners([operation]);
 
     if (!authorizedOwners.length) {
-      throw Boom.forbidden(
+      const error = Boom.forbidden(
         AuthorizationAuditLogger.createFailureMessage({ owners: authorizedOwners, operation })
       );
+
+      this.auditLogger.log({ error, operation });
+
+      throw error;
     }
 
     return entities.filter((entity) => authorizedOwners.includes(entity.owner));

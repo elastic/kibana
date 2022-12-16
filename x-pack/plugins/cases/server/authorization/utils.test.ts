@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 import { nodeBuilder } from '@kbn/es-query';
 import { OWNER_FIELD } from '../../common/api';
 import {
   combineFilterWithAuthorizationFilter,
   ensureFieldIsSafeForQuery,
+  getAuthorizedAndUnauthorizedSavedObjects,
   getOwnersFilter,
   includeFieldsRequiredForAuthentication,
 } from './utils';
@@ -274,6 +276,16 @@ describe('utils', () => {
           "type": "function",
         }
       `);
+    });
+  });
+
+  describe('getAuthorizedAndUnauthorizedSavedObjects', () => {
+    it('partitions authorized and unauthorized cases correctly', () => {
+      const cases = [{ id: '1' }, { id: '2' }, { id: '3' }] as unknown as SavedObject[];
+      const authorizedEntities = [{ id: '1', owner: 'cases' }];
+
+      const res = getAuthorizedAndUnauthorizedSavedObjects(cases, authorizedEntities);
+      expect(res).toEqual([[{ id: '1' }], [{ id: '2' }, { id: '3' }]]);
     });
   });
 });

@@ -80,6 +80,14 @@ export const bulkGet = async (
       authorizedEntities
     );
 
+    await authorization.ensureAuthorized({
+      operation: Operations.bulkGetCases,
+      entities: authorizedCases.map((theCase) => ({
+        owner: theCase.attributes.owner,
+        id: theCase.id,
+      })),
+    });
+
     const requestForTotals = ['totalComment', 'totalAlerts'].some(
       (totalKey) => !fields || fields.includes(totalKey)
     );
