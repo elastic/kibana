@@ -18,12 +18,22 @@
                     "type": "keyword"
                   }
                 }
+              },
+              "type": {
+                "type": "long"
               }
             }
           },
           "container": {
             "properties": {
               "image": {
+                "type": "keyword"
+              }
+            }
+          },
+          "client": {
+            "properties": {
+              "ip": {
                 "type": "keyword"
               }
             }
