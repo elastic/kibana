@@ -129,6 +129,7 @@ const bulkEnableRulesWithOCC = async (
   const taskIdsToEnable: string[] = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
+  const username = await context.getUserName();
 
   for await (const response of rulesFinder.find()) {
     await pMap(response.saved_objects, async (rule) => {
@@ -144,8 +145,6 @@ const bulkEnableRulesWithOCC = async (
         if (rule.attributes.name) {
           ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
         }
-
-        const username = await context.getUserName();
 
         const updatedAttributes = updateMeta(context, {
           ...rule.attributes,
@@ -212,6 +211,7 @@ const bulkEnableRulesWithOCC = async (
       }
     });
   }
+  await rulesFinder.close();
 
   const result = await context.unsecuredSavedObjectsClient.bulkCreate(rulesToEnable, {
     overwrite: true,
