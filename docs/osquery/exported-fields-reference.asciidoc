@@ -5337,7 +5337,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 *storage* - keyword, number.long
 
-* _unified_log.storage_ - the storage category for the entry
+* _unified_log.storage_ - The storage category for the entry.
 
 *storage_driver* - keyword, text.text
 
