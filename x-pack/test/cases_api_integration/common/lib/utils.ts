@@ -1418,3 +1418,26 @@ export const getReferenceFromEsResponse = (
   esResponse: TransportResult<GetResponse<SavedObjectsRawDocSource>, unknown>,
   id: string
 ) => esResponse.body._source?.references?.find((r) => r.id === id);
+
+export const bulkGetCases = async ({
+  supertest,
+  ids,
+  fields,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  ids: string[];
+  fields?: string[];
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResponse[]> => {
+  const { body: res } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/_bulk_get`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send({ ids, fields })
+    .expect(expectedHttpCode);
+
+  return res;
+};

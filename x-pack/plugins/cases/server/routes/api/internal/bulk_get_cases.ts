@@ -28,8 +28,9 @@ export const bulkGetCasesRoute = createCasesRoute({
         body: await casesClient.cases.bulkGet({ ...params }),
       });
     } catch (error) {
+      const ids = params.ids ?? [];
       throw createCaseError({
-        message: `Failed to bulk get cases in route: ${params.ids.join(', ')}: ${error}`,
+        message: `Failed to bulk get cases in route: ${ids.join(', ')}: ${error}`,
         error,
       });
     }

@@ -107,23 +107,58 @@ export class Authorization {
     entities: OwnerEntity[];
     operation: OperationDetails;
   }) {
-    const logSavedObjects = (error?: Error) => {
-      for (const entity of entities) {
-        this.auditLogger.log({ operation, error, entity });
-      }
-    };
-
     try {
       await this._ensureAuthorized(
         entities.map((entity) => entity.owner),
         operation
       );
     } catch (error) {
-      logSavedObjects(error);
+      this.logSavedObjects({ entities, operation, error });
       throw error;
     }
 
-    logSavedObjects();
+    this.logSavedObjects({ entities, operation });
+  }
+
+  /**
+   *
+   * Returns all authorized entities for an operation. It throws if the user is not authorized
+   * to any of the owners
+   *
+   * @param entities an array of entities describing the case owners in conjunction with the saved object ID attempting
+   *  to be authorized
+   * @param operation information describing the operation attempting to be authorized
+   */
+  public async getAuthorizedEntities({
+    entities,
+    operation,
+  }: {
+    entities: OwnerEntity[];
+    operation: OperationDetails;
+  }) {
+    const { authorizedOwners } = await this.getAuthorizedOwners([operation]);
+
+    if (!authorizedOwners.length) {
+      throw Boom.forbidden(
+        AuthorizationAuditLogger.createFailureMessage({ owners: authorizedOwners, operation })
+      );
+    }
+
+    return entities.filter((entity) => authorizedOwners.includes(entity.owner));
+  }
+
+  private async logSavedObjects({
+    entities,
+    operation,
+    error,
+  }: {
+    entities: OwnerEntity[];
+    operation: OperationDetails;
+    error?: Error;
+  }) {
+    for (const entity of entities) {
+      this.auditLogger.log({ operation, error, entity });
+    }
   }
 
   /**

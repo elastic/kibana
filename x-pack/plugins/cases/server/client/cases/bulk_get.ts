@@ -11,6 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pick } from 'lodash';
 
+import { MAX_BULK_GET_CASES } from '../../../common/constants';
 import type { CasesBulkGetRequest, CaseResponse } from '../../../common/api';
 import {
   CasesBulkGetRequestRt,
@@ -25,7 +26,10 @@ import { createCaseError } from '../../common/error';
 import { asArray, flattenCaseSavedObject } from '../../common/utils';
 import { Operations } from '../../authorization';
 import type { CasesClientArgs } from '../types';
-import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
+import {
+  includeFieldsRequiredForAuthentication,
+  getAuthorizedSavedObjects,
+} from '../../authorization/utils';
 
 /**
  * Retrieves multiple cases by ids.
@@ -51,29 +55,32 @@ export const bulkGet = async (
       fold(throwErrors(Boom.badRequest), identity)
     );
 
+    throwIfCaseIdsReachTheLimit(request.ids);
     throwIfFieldsAreInvalid(fields);
 
     const finalFields = fields?.length ? [...fields, 'id', 'version'] : fields;
     const cases = await caseService.getCases({ caseIds: request.ids, fields: finalFields });
     const validCases = cases.saved_objects.filter((caseInfo) => caseInfo.error === undefined);
 
-    await authorization.ensureAuthorized({
+    const authorizedEntities = await authorization.getAuthorizedEntities({
       operation: Operations.bulkGetCases,
       entities: validCases.map((theCase) => ({ id: theCase.id, owner: theCase.attributes.owner })),
     });
 
-    const requestForTotals = ['totalComment', 'totalAlerts'].some((totalKey) =>
-      fields?.includes(totalKey)
+    const authorizedCases = getAuthorizedSavedObjects(validCases, authorizedEntities);
+
+    const requestForTotals = ['totalComment', 'totalAlerts'].some(
+      (totalKey) => !fields || fields.includes(totalKey)
     );
 
     const commentTotals = requestForTotals
       ? await attachmentService.getCaseCommentStats({
           unsecuredSavedObjectsClient,
-          caseIds: validCases.map((theCase) => theCase.id),
+          caseIds: authorizedCases.map((theCase) => theCase.id),
         })
       : new Map();
 
-    const flattenedCases = validCases.map((theCase) => {
+    const flattenedCases = authorizedCases.map((theCase) => {
       const { alerts, userComments } = commentTotals.get(theCase.id) ?? {
         alerts: 0,
         userComments: 0,
@@ -96,8 +103,9 @@ export const bulkGet = async (
 
     return typeToEncode.encode(flattenedCases);
   } catch (error) {
+    const ids = params.ids ?? [];
     throw createCaseError({
-      message: `Failed to bulk get cases: ${params.ids.join(', ')}: ${error}`,
+      message: `Failed to bulk get cases: ${ids.join(', ')}: ${error}`,
       error,
       logger,
     });
@@ -116,5 +124,11 @@ const throwIfFieldsAreInvalid = (fields?: string[]) => {
     if (!validFields.includes(field)) {
       throw Boom.badRequest(`Field: ${field} is not supported`);
     }
+  }
+};
+
+const throwIfCaseIdsReachTheLimit = (ids: string[]) => {
+  if (ids.length > MAX_BULK_GET_CASES) {
+    throw Boom.badRequest(`Maximum request limit of ${MAX_BULK_GET_CASES} cases reached`);
   }
 };
