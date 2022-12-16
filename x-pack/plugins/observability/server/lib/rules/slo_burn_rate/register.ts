@@ -24,7 +24,7 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
   return {
     id: SLO_BURN_RATE_RULE_ID,
     name: i18n.translate('xpack.observability.slo.rules.burnRate.name', {
-      defaultMessage: 'SLO Burn Rate',
+      defaultMessage: 'SLO burn rate',
     }),
     validate: {
       params: schema.object({

@@ -56,7 +56,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
     >
       <EuiComboBox
         aria-label={i18n.translate('xpack.observability.slo.rules.sloSelector.ariaLabel', {
-          defaultMessage: 'SLO Selector',
+          defaultMessage: 'SLO',
         })}
         placeholder={i18n.translate('xpack.observability.slo.rules.sloSelector.placeholder', {
           defaultMessage: 'Select a SLO',
@@ -77,7 +77,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
 }
 
 const rowLabel = i18n.translate('xpack.observability.slo.rules.sloSelector.rowLabel', {
-  defaultMessage: 'Select SLO',
+  defaultMessage: 'SLO',
 });
 
 export { SloSelector };
