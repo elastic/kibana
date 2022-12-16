@@ -33,6 +33,30 @@ export const responsesHelp = i18n.translate('xpack.cloudDefend.controlResponsesH
     'Responses are evaluated from top to bottom. At most, one set of actions will be performed.',
 });
 
+export const matchSelectors = i18n.translate('xpack.cloudDefend.controlMatchSelectors', {
+  defaultMessage: 'Match selectors',
+});
+
+export const excludeSelectors = i18n.translate('xpack.cloudDefend.controlExcludeSelectors', {
+  defaultMessage: 'Exclude selectors',
+});
+
+export const actions = i18n.translate('xpack.cloudDefend.controlResponseActions', {
+  defaultMessage: 'Actions',
+});
+
+export const actionAlert = i18n.translate('xpack.cloudDefend.controlResponseActionAlert', {
+  defaultMessage: 'Alert',
+});
+
+export const actionBlock = i18n.translate('xpack.cloudDefend.controlResponseActionBlock', {
+  defaultMessage: 'Block',
+});
+
+export const addResponse = i18n.translate('xpack.cloudDefend.addResponse', {
+  defaultMessage: 'Add response',
+});
+
 export const addSelector = i18n.translate('xpack.cloudDefend.addSelector', {
   defaultMessage: 'Add selector',
 });

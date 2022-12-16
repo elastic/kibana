@@ -5,7 +5,19 @@
  * 2.0.
  */
 import React, { useMemo, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiButton } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+  EuiButton,
+  EuiPanel,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
+  euiDragDropReorder,
+} from '@elastic/eui';
 import yaml from 'js-yaml';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
@@ -128,6 +140,16 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
     [onUpdateYaml, responses, selectors]
   );
 
+  const onResponseDragEnd = useCallback(
+    ({ source, destination }) => {
+      if (source && destination) {
+        const reorderedResponses = euiDragDropReorder(responses, source.index, destination.index);
+        onUpdateYaml(selectors, reorderedResponses);
+      }
+    },
+    [onUpdateYaml, responses, selectors]
+  );
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -163,18 +185,50 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
       </EuiFlexItem>
 
       <EuiFlexItem>
-        {responses.map((response, i) => {
-          return (
-            <ControlGeneralViewResponse
-              key={i}
-              response={response}
-              selectors={selectors}
-              onRemove={onRemoveResponse}
-              onDuplicate={onDuplicateResponse}
-              onChange={onResponseChange}
-            />
-          );
-        })}
+        <EuiDragDropContext onDragEnd={onResponseDragEnd}>
+          <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA" spacing="m" withPanel>
+            {responses.map((response, i) => {
+              return (
+                <EuiDraggable
+                  spacing="m"
+                  key={i}
+                  index={i}
+                  draggableId={i + ''}
+                  customDragHandle={true}
+                  hasInteractiveChildren={true}
+                >
+                  {(provided) => (
+                    <EuiPanel paddingSize="s">
+                      <EuiFlexGroup alignItems="center" gutterSize="s">
+                        <EuiFlexItem grow={false}>
+                          <EuiPanel
+                            color="transparent"
+                            paddingSize="s"
+                            {...provided.dragHandleProps}
+                            aria-label="Drag Handle"
+                          >
+                            <EuiIcon type="grab" />
+                          </EuiPanel>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <ControlGeneralViewResponse
+                            key={i}
+                            response={response}
+                            selectors={selectors}
+                            onRemove={onRemoveResponse}
+                            onDuplicate={onDuplicateResponse}
+                            onChange={onResponseChange}
+                            {...provided.dragHandleProps}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiPanel>
+                  )}
+                </EuiDraggable>
+              );
+            })}
+          </EuiDroppable>
+        </EuiDragDropContext>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
