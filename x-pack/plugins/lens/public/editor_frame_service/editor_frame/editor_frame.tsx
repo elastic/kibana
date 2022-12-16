@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useMemo } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
@@ -103,21 +103,15 @@ export function EditorFrame(props: EditorFrameProps) {
     showMemoizedErrorNotification(error);
   }, []);
 
-  const bannerMessages: React.ReactNode[] | undefined = useMemo(() => {
-    if (activeDatasourceId) {
-      return datasourceMap[activeDatasourceId].getDeprecationMessages?.(
-        datasourceStates[activeDatasourceId].state
-      );
-    }
-  }, [activeDatasourceId, datasourceMap, datasourceStates]);
+  const bannerMessages = props.getUserMessages('banner', 'warning');
 
   return (
     <RootDragDropProvider>
       <FrameLayout
         bannerMessages={
-          bannerMessages ? (
+          bannerMessages.length ? (
             <ErrorBoundary onError={onError}>
-              <BannerWrapper nodes={bannerMessages} />
+              <BannerWrapper nodes={bannerMessages.map(({ longMessage }) => longMessage)} />
             </ErrorBoundary>
           ) : undefined
         }

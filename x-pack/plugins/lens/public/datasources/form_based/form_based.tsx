@@ -23,7 +23,7 @@ import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   DatasourceDimensionEditorProps,
@@ -69,6 +69,7 @@ import {
   getFiltersInLayer,
   getShardFailuresWarningMessages,
   getVisualDefaultsForLayer,
+  getDeprecatedSamplingWarningMessage,
   isColumnInvalid,
   cloneLayer,
 } from './utils';
@@ -901,26 +902,32 @@ export function getFormBasedDatasource({
       }
 
       const warningMessages = [
-        ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frameDatasourceAPI) ||
-          []),
-        ...getPrecisionErrorWarningMessages(
-          data.datatableUtilities,
-          state,
-          frameDatasourceAPI,
-          core.docLinks,
-          setState
-        ),
-      ].map((longMessage) => {
-        const message: UserMessage = {
-          severity: 'warning',
-          fixableInEditor: true,
-          displayLocations: [{ id: 'toolbar' }],
-          shortMessage: '',
-          longMessage,
-        };
+        ...[
+          ...(getStateTimeShiftWarningMessages(
+            data.datatableUtilities,
+            state,
+            frameDatasourceAPI
+          ) || []),
+          ...getPrecisionErrorWarningMessages(
+            data.datatableUtilities,
+            state,
+            frameDatasourceAPI,
+            core.docLinks,
+            setState
+          ),
+        ].map((longMessage) => {
+          const message: UserMessage = {
+            severity: 'warning',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'toolbar' }],
+            shortMessage: '',
+            longMessage,
+          };
 
-        return message;
-      });
+          return message;
+        }),
+        ...getDeprecatedSamplingWarningMessage(core),
+      ];
 
       return [...errorMessages, ...warningMessages];
     },
@@ -928,46 +935,7 @@ export function getFormBasedDatasource({
     getSearchWarningMessages: (state, warning, request, response) => {
       return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
     },
-    getDeprecationMessages: () => {
-      const deprecatedMessages: React.ReactNode[] = [];
-      const useFieldExistenceSamplingKey = 'lens:useFieldExistenceSampling';
-      const isUsingSampling = core.uiSettings.get(useFieldExistenceSamplingKey);
 
-      if (isUsingSampling) {
-        deprecatedMessages.push(
-          <EuiCallOut
-            color="warning"
-            iconType="alert"
-            size="s"
-            title={
-              <FormattedMessage
-                id="xpack.lens.indexPattern.useFieldExistenceSamplingBody"
-                defaultMessage="Field existence sampling has been deprecated and will be removed in Kibana {version}. You may disable this feature in {link}."
-                values={{
-                  version: '8.6.0',
-                  link: (
-                    <EuiLink
-                      onClick={() => {
-                        core.application.navigateToApp('management', {
-                          path: `/kibana/settings?query=${useFieldExistenceSamplingKey}`,
-                        });
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.lens.indexPattern.useFieldExistenceSampling.advancedSettings"
-                        defaultMessage="Advanced Settings"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            }
-          />
-        );
-      }
-
-      return deprecatedMessages;
-    },
     checkIntegrity: (state, indexPatterns) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
       return ids.filter((id) => !indexPatterns[id]);

@@ -8,10 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreStart, DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq } from 'lodash';
@@ -26,7 +26,7 @@ import {
 
 import { estypes } from '@elastic/elasticsearch';
 import type { DateRange } from '../../../common/types';
-import type { FramePublicAPI, IndexPattern, StateSetter } from '../../types';
+import type { FramePublicAPI, IndexPattern, StateSetter, UserMessage } from '../../types';
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
@@ -374,6 +374,52 @@ export function getPrecisionErrorWarningMessages(
   }
 
   return warningMessages;
+}
+
+export function getDeprecatedSamplingWarningMessage(core: CoreStart): UserMessage[] {
+  const useFieldExistenceSamplingKey = 'lens:useFieldExistenceSampling';
+  const isUsingSampling = core.uiSettings.get(useFieldExistenceSamplingKey);
+
+  return isUsingSampling
+    ? [
+        {
+          severity: 'warning',
+          fixableInEditor: false,
+          displayLocations: [{ id: 'banner' }],
+          shortMessage: '',
+          longMessage: (
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              size="s"
+              title={
+                <FormattedMessage
+                  id="xpack.lens.indexPattern.useFieldExistenceSamplingBody"
+                  defaultMessage="Field existence sampling has been deprecated and will be removed in Kibana {version}. You may disable this feature in {link}."
+                  values={{
+                    version: '8.6.0',
+                    link: (
+                      <EuiLink
+                        onClick={() => {
+                          core.application.navigateToApp('management', {
+                            path: `/kibana/settings?query=${useFieldExistenceSamplingKey}`,
+                          });
+                        }}
+                      >
+                        <FormattedMessage
+                          id="xpack.lens.indexPattern.useFieldExistenceSampling.advancedSettings"
+                          defaultMessage="Advanced Settings"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              }
+            />
+          ),
+        },
+      ]
+    : [];
 }
 
 export function getVisualDefaultsForLayer(layer: FormBasedLayer) {

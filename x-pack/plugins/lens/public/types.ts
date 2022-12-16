@@ -279,7 +279,8 @@ type UserMessageDisplayLocation =
         | 'embeddable'
         | 'workspace'
         | 'suggestionPanel'
-        | 'textBasedLanguagesQueryInput';
+        | 'textBasedLanguagesQueryInput'
+        | 'banner';
     }
   | { id: 'dimensionTrigger'; layerId: string; dimensionId: string };
 
@@ -468,8 +469,6 @@ export interface Datasource<T = unknown, P = unknown> {
       setState: StateSetter<T>;
     }
   ) => UserMessage[];
-
-  getDeprecationMessages?: (state: T) => React.ReactNode[] | undefined;
 
   /**
    * The embeddable calls this function to display warnings about visualization on the dashboard
