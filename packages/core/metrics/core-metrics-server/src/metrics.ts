@@ -191,8 +191,7 @@ export interface OpsMetrics {
   elasticsearch_client: ElasticsearchClientsMetrics;
   /**
    * Process related metrics.
-   * @deprecated use the processes field instead.
-   * @removeBy 8.8.0
+   * @remarks processes field preferred
    */
   process: OpsProcessMetrics;
   /** Process related metrics. Reports an array of objects for each kibana pid.*/
