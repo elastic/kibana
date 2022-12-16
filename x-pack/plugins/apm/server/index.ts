@@ -51,7 +51,6 @@ const configSchema = schema.object({
     span: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
     error: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
     metric: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
-    sourcemap: schema.string({ defaultValue: 'apm-*' }),
     onboarding: schema.string({ defaultValue: 'apm-*' }),
   }),
   forceSyntheticSource: schema.boolean({ defaultValue: false }),
@@ -61,10 +60,12 @@ const configSchema = schema.object({
 export const config: PluginConfigDescriptor<APMConfig> = {
   deprecations: ({
     rename,
+    unused,
     renameFromRoot,
     deprecateFromRoot,
     unusedFromRoot,
   }) => [
+    unused('indices.sourcemap', { level: 'warning' }),
     rename('autocreateApmIndexPattern', 'autoCreateApmDataView', {
       level: 'warning',
     }),
