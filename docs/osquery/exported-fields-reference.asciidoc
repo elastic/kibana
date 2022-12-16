@@ -2250,7 +2250,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 *hostname* - keyword, text.text
 
-* _curl_certificate.hostname_ - Hostname to CURL (domain[:port], e.g. osquery.io)
+* _curl_certificate.hostname_ - Hostname to CURL (domain[:port], for example, osquery.io)
 * _system_info.hostname_ - Network hostname including domain
 * _ycloud_instance_metadata.hostname_ - Hostname of the VM
 
