@@ -9,6 +9,7 @@ export { LargeShardSizeRule } from './large_shard_size_rule';
 export { CCRReadExceptionsRule } from './ccr_read_exceptions_rule';
 export { BaseRule } from './base_rule';
 export { CpuUsageRule } from './cpu_usage_rule';
+export { RulesFailureRule } from './rules_failure_rule';
 export { MissingMonitoringDataRule } from './missing_monitoring_data_rule';
 export { DiskUsageRule } from './disk_usage_rule';
 export { ThreadPoolSearchRejectionsRule } from './thread_pool_search_rejections_rule';

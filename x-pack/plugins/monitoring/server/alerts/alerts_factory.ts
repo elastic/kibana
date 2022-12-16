@@ -23,6 +23,7 @@ import {
   KibanaVersionMismatchRule,
   ElasticsearchVersionMismatchRule,
   BaseRule,
+  RulesFailureRule,
 } from '.';
 import {
   RULE_CLUSTER_HEALTH,
@@ -39,6 +40,7 @@ import {
   RULE_ELASTICSEARCH_VERSION_MISMATCH,
   RULE_CCR_READ_EXCEPTIONS,
   RULE_LARGE_SHARD_SIZE,
+  RULE_RULES_FAILURE,
 } from '../../common/constants';
 import { CommonAlertParams } from '../../common/types/alerts';
 
@@ -46,6 +48,7 @@ const BY_TYPE = {
   [RULE_CLUSTER_HEALTH]: ClusterHealthRule,
   [RULE_LICENSE_EXPIRATION]: LicenseExpirationRule,
   [RULE_CPU_USAGE]: CpuUsageRule,
+  [RULE_RULES_FAILURE]: RulesFailureRule,
   [RULE_MISSING_MONITORING_DATA]: MissingMonitoringDataRule,
   [RULE_DISK_USAGE]: DiskUsageRule,
   [RULE_THREAD_POOL_SEARCH_REJECTIONS]: ThreadPoolSearchRejectionsRule,

@@ -97,6 +97,11 @@ export interface AlertCpuUsageState extends AlertNodeState {
   cpuUsage: number;
 }
 
+export interface AlertRulesState extends AlertNodeState {
+  failures: number;
+  executions: number;
+}
+
 export interface AlertDiskUsageState extends AlertNodeState {
   diskUsage: number;
 }
@@ -171,6 +176,12 @@ export interface AlertCpuUsageNodeStats extends AlertNodeStats {
   containerUsage: number;
   containerPeriods: number;
   containerQuota: number;
+}
+
+export interface AlertRuleFailuresStats {
+  failures: number;
+  executions: number;
+  clusterUuid: string;
 }
 
 export interface AlertThreadPoolRejectionsStats {
