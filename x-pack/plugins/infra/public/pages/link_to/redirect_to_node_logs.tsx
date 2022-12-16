@@ -35,7 +35,6 @@ export const RedirectToNodeLogs = ({
 }: RedirectToNodeLogsType) => {
   const { services } = useKibanaContextForPlugin();
   const { isLoading, load } = useLogView({
-    fetch: services.http.fetch,
     logViewId: sourceId,
     logViews: services.logViews.client,
   });

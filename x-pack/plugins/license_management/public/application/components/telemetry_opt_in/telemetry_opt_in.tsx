@@ -16,9 +16,8 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LazyOptInExampleFlyout } from '@kbn/telemetry-management-section-plugin/public';
 import { TelemetryPluginStart } from '../../lib/telemetry';
-
-const OptInExampleFlyout = React.lazy(() => import('./opt_in_example_flyout'));
 
 interface State {
   showMoreTelemetryInfo: boolean;
@@ -65,7 +64,7 @@ export class TelemetryOptIn extends React.Component<Props, State> {
       // OptInExampleFlyout but telemetryManagementSection is disabled
       example = (
         <React.Suspense fallback={<EuiLoadingSpinner />}>
-          <OptInExampleFlyout
+          <LazyOptInExampleFlyout
             onClose={() => this.setState({ showExample: false })}
             fetchExample={telemetry.telemetryService.fetchExample}
           />
