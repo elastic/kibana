@@ -96,11 +96,6 @@ export async function updateTagsBatch(
     hostedAgentError
   );
   const agentIds = filteredAgents.map((agent) => agent.id);
-  const hostedAgentIds = givenAgents
-    .filter(
-      (agent) => filteredAgents.find((filteredAgent) => filteredAgent.id === agent.id) === undefined
-    )
-    .map((agent) => agent.id);
 
   let query: estypes.QueryDslQueryContainer | undefined;
   if (options.kuery !== undefined) {
