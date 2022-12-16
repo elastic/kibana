@@ -67,5 +67,35 @@ export default ({ getService }: FtrProviderContext) => {
       // invalid ECS field 'container.image' is getting removed
       expect(previewAlerts[0]._source).not.toHaveProperty('container.image');
     });
+
+    // source agent.type is long, ECS mapping for agent.type is keyword
+    it('should not remove source long field from alert if ECS field mapping is keyword', async () => {
+      const rule: QueryRuleCreateProps = {
+        ...getRuleForSignalTesting(['ecs_non_compliant']),
+        query: `id: "agent.type is long"`,
+      };
+      const { previewId, logs } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+      expect(logs[0].errors).toEqual([]);
+
+      // long value should be indexed as keyword
+      expect(previewAlerts[0]._source).toHaveProperty('agent.type', 13);
+    });
+
+    // source client.ip is keyword, ECS mapping for client.ip is ip
+    it('should remove source non ip field from alert if ECS field mapping is ip', async () => {
+      const rule: QueryRuleCreateProps = {
+        ...getRuleForSignalTesting(['ecs_non_compliant']),
+        query: `id: "client.ip is keyword"`,
+      };
+      const { previewId, logs } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+      expect(logs[0].errors).toEqual([]);
+
+      // invalid ECS field is getting removed
+      expect(previewAlerts[0]._source).not.toHaveProperty('client.ip');
+    });
   });
 };
