@@ -225,7 +225,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   headingId,
   initialPageSize,
   listingLimit,
-  urlStateEnabled = false,
+  urlStateEnabled = true,
   customTableColumn,
   emptyPrompt,
   findItems,
