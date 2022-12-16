@@ -21,3 +21,6 @@ export const getMigrationDocLink = () => {
   const docLinks = getDocLinks({ kibanaBranch: env.packageInfo.branch });
   return docLinks.kibanaUpgradeSavedObjects;
 };
+
+export const delay = (seconds: number) =>
+  new Promise((resolve) => setTimeout(resolve, seconds * 1000));

@@ -1,0 +1,96 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import Path from 'path';
+import fs from 'fs/promises';
+import { Env } from '@kbn/config';
+import { getEnvOptions } from '@kbn/config-mocks';
+import { REPO_ROOT } from '@kbn/utils';
+import type { Root } from '@kbn/core-root-server-internal';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
+import { delay } from './test_utils';
+import { SemVer } from 'semver';
+
+const logFilePath = Path.join(__dirname, 'skip_reindex.log');
+
+describe('skip reindexing', () => {
+  const currentVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
+  let esServer: TestElasticsearchUtils['es'];
+  let root: Root;
+
+  afterEach(async () => {
+    await root?.shutdown();
+    await esServer?.stop();
+    await delay(10);
+  });
+
+  it('when migrating to a new version, but mappings remain the same', async () => {
+    const { startES } = createTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
+      settings: {
+        es: {
+          license: 'basic',
+        },
+      },
+    });
+    esServer = await startES();
+    root = createRoot();
+
+    // Run initial migrations
+    await root.preboot();
+    await root.setup();
+    await root.start();
+
+    // stop Kibana and remove logs
+    await root.shutdown();
+    await delay(10);
+    await fs.unlink(logFilePath).catch(() => void 0);
+
+    const nextMinor = new SemVer(currentVersion).inc('patch').format();
+    root = createRoot(nextMinor);
+    await root.preboot();
+    await root.setup();
+    await root.start();
+
+    const logs = await fs.readFile(logFilePath, 'utf-8');
+
+    expect(logs).toMatch('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+    expect(logs).not.toMatch('CREATE_NEW_TARGET');
+    expect(logs).toMatch('MARK_VERSION_INDEX_READY -> DONE');
+  });
+});
+
+function createRoot(kibanaVersion?: string): Root {
+  return createRootWithCorePlugins(
+    {
+      logging: {
+        appenders: {
+          file: {
+            type: 'file',
+            fileName: logFilePath,
+            layout: {
+              type: 'json',
+            },
+          },
+        },
+        loggers: [
+          {
+            name: 'root',
+            level: 'info',
+            appenders: ['file'],
+          },
+        ],
+      },
+    },
+    { oss: true },
+    kibanaVersion
+  );
+}

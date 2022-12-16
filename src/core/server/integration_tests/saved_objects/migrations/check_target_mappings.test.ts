@@ -20,10 +20,9 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { delay } from './test_utils';
 
 const logFilePath = Path.join(__dirname, 'check_target_mappings.log');
-
-const delay = (seconds: number) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 
 async function removeLogFile() {
   // ignore errors if it doesn't exist
