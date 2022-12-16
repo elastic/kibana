@@ -192,7 +192,6 @@ export function useDiscoverState({
           return;
         }
         savedSearch.searchSource.setField('index', nextDataView);
-        reset();
         stateContainer.actions.setDataView(nextDataView);
       }
 
@@ -227,7 +226,6 @@ export function useDiscoverState({
     async (id: string) => {
       const nextDataView = await dataViews.get(id);
       if (nextDataView && dataView) {
-        reset();
         const nextAppState = getDataViewAppState(
           dataView,
           nextDataView,
@@ -252,7 +250,6 @@ export function useDiscoverState({
       state.query,
       state.sort,
       stateContainer,
-      reset,
     ]
   );
 
