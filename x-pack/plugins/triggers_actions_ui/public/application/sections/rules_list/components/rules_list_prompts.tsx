@@ -6,21 +6,40 @@
  */
 
 import React from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
 
 interface RulesListPromptsProps {
+  showPrompt: boolean;
   showCreateRule: boolean;
+  showSpinner: boolean;
   authorizedToCreateRules: boolean;
   onCreateRulesClick: () => void;
 }
 
 export const RulesListPrompts = (props: RulesListPromptsProps) => {
-  const { authorizedToCreateRules, showCreateRule, onCreateRulesClick } = props;
+  const { showPrompt, authorizedToCreateRules, showSpinner, showCreateRule, onCreateRulesClick } =
+    props;
 
-  if (authorizedToCreateRules) {
-    return <EmptyPrompt showCreateRule={showCreateRule} onCreateRulesClick={onCreateRulesClick} />;
-  } else {
-    return <NoPermissionPrompt />;
+  if (showPrompt) {
+    if (authorizedToCreateRules) {
+      return (
+        <EmptyPrompt showCreateRule={showCreateRule} onCreateRulesClick={onCreateRulesClick} />
+      );
+    } else {
+      return <NoPermissionPrompt />;
+    }
   }
+
+  if (showSpinner) {
+    return (
+      <EuiPageTemplate.Section grow={false} paddingSize="none">
+        <CenterJustifiedSpinner />
+      </EuiPageTemplate.Section>
+    );
+  }
+
+  return null;
 };

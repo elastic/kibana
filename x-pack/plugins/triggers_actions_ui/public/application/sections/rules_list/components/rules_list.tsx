@@ -250,7 +250,7 @@ export const RulesList = ({
   const canLoadRules = isLoadRuleTypesSuccess && hasAnyAuthorizedRuleType;
 
   // Fetch rules
-  const { rulesState, loadRules, noData, lastUpdate } = useLoadRulesQuery({
+  const { rulesState, loadRules, noData, lastUpdate, initialLoad } = useLoadRulesQuery({
     filters: computedFilter,
     hasDefaultRuleTypesFiltersOn,
     page,
@@ -671,13 +671,13 @@ export const RulesList = ({
   const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
   return (
     <>
-      {showPrompt && (
-        <RulesListPrompts
-          showCreateRule={showCreateRuleButtonInPrompt}
-          authorizedToCreateRules={authorizedToCreateAnyRules}
-          onCreateRulesClick={openFlyout}
-        />
-      )}
+      <RulesListPrompts
+        showPrompt={showPrompt}
+        showCreateRule={showCreateRuleButtonInPrompt}
+        showSpinner={initialLoad}
+        authorizedToCreateRules={authorizedToCreateAnyRules}
+        onCreateRulesClick={openFlyout}
+      />
       <EuiPageTemplate.Section data-test-subj="rulesList" grow={false} paddingSize="none">
         {isDeleteModalFlyoutVisible && (
           <RulesDeleteModalConfirmation
@@ -753,7 +753,7 @@ export const RulesList = ({
           />
         )}
         <EuiSpacer size="xs" />
-        {!showPrompt ? (
+        {!showPrompt && !initialLoad ? (
           <>
             <RulesListFiltersBar
               inputText={inputText}
