@@ -1008,7 +1008,6 @@ export const LensTopNavMenu = ({
       indicateNoData={indicateNoData}
       showSearchBar={true}
       dataViewPickerComponentProps={dataViewPickerProps}
-      // showDatePicker={showDatePicker}
       showDatePicker={
         indexPatterns.some((ip) => ip.isTimeBased()) ||
         Boolean(
