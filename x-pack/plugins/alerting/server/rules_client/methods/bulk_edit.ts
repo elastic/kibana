@@ -15,13 +15,13 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { BulkActionSkipResult } from '../../../common/bulk_edit';
 import {
   RawRule,
   SanitizedRule,
   RuleTypeParams,
   Rule,
   RuleSnoozeSchedule,
-  BulkActionSkipResult,
   RuleWithLegacyId,
   RuleTypeRegistry,
   RawRuleAction,
@@ -416,12 +416,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     const { attributes, ruleActions, hasUpdateApiKeyOperation, isAttributesUpdateSkipped } =
       await getUpdatedAttributesFromOperations(context, operations, rule, ruleType);
 
-    validateScheduleInterval(
-      context,
-      attributes.schedule.interval as string,
-      ruleType.id,
-      attributes.id as string
-    );
+    validateScheduleInterval(context, attributes.schedule.interval, ruleType.id, rule.id);
 
     const { modifiedParams: ruleParams, isParamsUpdateSkipped } = paramsModifier
       ? await paramsModifier(attributes.params as Params)
@@ -506,11 +501,16 @@ async function ensureAuthorizationForBulkUpdate(
   operations: BulkEditOperation[],
   rule: SavedObjectsFindResult<RawRule>
 ): Promise<void> {
+  if (rule.attributes.actions.length === 0) {
+    return;
+  }
+
   for (const operation of operations) {
     const { field } = operation;
-    if ((field === 'snoozeSchedule' || field === 'apiKey') && rule.attributes.actions.length > 0) {
+    if (field === 'snoozeSchedule' || field === 'apiKey') {
       try {
         await context.actionsAuthorization.ensureAuthorized('execute');
+        break;
       } catch (error) {
         throw Error(`Rule not authorized for bulk ${field} update - ${error.message}`);
       }

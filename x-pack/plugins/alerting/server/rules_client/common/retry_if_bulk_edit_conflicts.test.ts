@@ -9,7 +9,7 @@ import { KueryNode } from '@kbn/es-query';
 import { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
 import { RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { BulkEditSkipReason } from '../../types';
+import { BulkEditSkipReason } from '../../../common/bulk_edit';
 
 const mockFilter: KueryNode = {
   type: 'function',

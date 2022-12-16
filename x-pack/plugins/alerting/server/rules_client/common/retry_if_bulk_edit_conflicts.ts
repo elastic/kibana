@@ -9,9 +9,10 @@ import pMap from 'p-map';
 import { chunk } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { Logger, SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { BulkActionSkipResult } from '../../../common/bulk_edit';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkOperationError } from '../types';
-import { BulkActionSkipResult, RawRule } from '../../types';
+import { RawRule } from '../../types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 
 // max number of failed SO ids in one retry filter
