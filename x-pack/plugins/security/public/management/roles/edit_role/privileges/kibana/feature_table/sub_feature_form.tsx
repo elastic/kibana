@@ -71,7 +71,9 @@ export const SubFeatureForm = (props: Props) => {
         <EuiFlexItem className="eui-textTruncate eui-fullWidth">
           <EuiFlexGroup gutterSize="s" direction="column">
             <EuiFlexItem grow={false}>
-              <EuiText size="s">{props.subFeature.name}</EuiText>
+              <EuiText size="s">
+                {props.subFeature.name} {getTooltip()}
+              </EuiText>
             </EuiFlexItem>
             {props.subFeature.description && (
               <EuiFlexItem grow={false}>

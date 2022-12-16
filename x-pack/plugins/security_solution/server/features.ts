@@ -188,6 +188,7 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.processOperations', {
       defaultMessage: 'Process Operations',
     }),
+    description: 'halps me',
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
