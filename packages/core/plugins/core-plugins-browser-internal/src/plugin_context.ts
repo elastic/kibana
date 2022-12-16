@@ -79,6 +79,7 @@ export function createPluginSetupContext<
     http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
+    settings: deps.settings,
     injectedMetadata: {
       getInjectedVar: deps.injectedMetadata.getInjectedVar,
     },
@@ -125,6 +126,7 @@ export function createPluginStartContext<
     notifications: deps.notifications,
     overlays: deps.overlays,
     uiSettings: deps.uiSettings,
+    settings: deps.settings,
     savedObjects: deps.savedObjects,
     injectedMetadata: {
       getInjectedVar: deps.injectedMetadata.getInjectedVar,

@@ -23,7 +23,7 @@ import { ExecutionContextService } from '@kbn/core-execution-context-browser-int
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { HttpService } from '@kbn/core-http-browser-internal';
-import { UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
+import { SettingsService, UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -88,6 +88,7 @@ export class CoreSystem {
   private readonly http: HttpService;
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
+  private readonly settings: SettingsService;
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
   private readonly overlay: OverlayService;
@@ -132,6 +133,7 @@ export class CoreSystem {
     this.http = new HttpService();
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
+    this.settings = new SettingsService();
     this.overlay = new OverlayService();
     this.chrome = new ChromeService({
       browserSupportsCsp,
@@ -232,6 +234,7 @@ export class CoreSystem {
         executionContext,
       });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
+      const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
 
       const application = this.application.setup({ http });
@@ -246,6 +249,7 @@ export class CoreSystem {
         notifications,
         theme,
         uiSettings,
+        settings,
         executionContext,
       };
 
@@ -273,6 +277,7 @@ export class CoreSystem {
       const analytics = this.analytics.start();
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
+      const settings = await this.settings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
       const http = await this.http.start();
       const savedObjects = await this.savedObjects.start({ http });
@@ -330,6 +335,7 @@ export class CoreSystem {
         notifications,
         overlays,
         uiSettings,
+        settings,
         fatalErrors,
         deprecations,
       };
@@ -386,6 +392,7 @@ export class CoreSystem {
     this.http.stop();
     this.integrations.stop();
     this.uiSettings.stop();
+    this.settings.stop();
     this.chrome.stop();
     this.i18n.stop();
     this.application.stop();
