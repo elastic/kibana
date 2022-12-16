@@ -32,10 +32,22 @@ export const kubernetesGuideConfig: GuideConfig = {
       }),
       integration: 'kubernetes',
       descriptionList: [
-        i18n.translate('xpack.observability.guideConfig.addDataStep.descriptionList.item1', {
-          // TODO add the link to the docs, when markdown support is implemented https://github.com/elastic/kibana/issues/146404
-          defaultMessage: 'Deploy kube-state-metrics service to your Kubernetes.',
-        }),
+        {
+          descriptionText: i18n.translate(
+            'xpack.observability.guideConfig.addDataStep.descriptionList.item1.descriptionText',
+            {
+              defaultMessage: 'Deploy kube-state-metrics service to your Kubernetes.',
+            }
+          ),
+          linkText: i18n.translate(
+            'xpack.observability.guideConfig.addDataStep.descriptionList.item1.linkText',
+            {
+              defaultMessage: 'Learn more',
+            }
+          ),
+          linkUrl: 'https://github.com/kubernetes/kube-state-metrics',
+          isLinkExternal: true,
+        },
         i18n.translate('xpack.observability.guideConfig.addDataStep.descriptionList.item2', {
           defaultMessage: 'Add the Elastic Kubernetes integration.',
         }),
