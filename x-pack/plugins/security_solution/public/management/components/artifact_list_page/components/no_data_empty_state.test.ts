@@ -86,9 +86,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
       render();
       const addButton = await renderResult.findByTestId('testPage-emptyState-addButton');
 
-      act(() => {
-        userEvent.click(addButton);
-      });
+      userEvent.click(addButton);
 
       expect(renderResult.getByTestId('testPage-flyout')).toBeTruthy();
       expect(history.location.search).toMatch(/show=create/);
@@ -99,9 +97,7 @@ describe('When showing the Empty State in ArtifactListPage', () => {
         render();
         const addButton = await renderResult.findByTestId('testPage-emptyState-addButton');
 
-        act(() => {
-          userEvent.click(addButton);
-        });
+        userEvent.click(addButton);
 
         await waitFor(async () => {
           expect(renderResult.getByTestId('testPage-flyout'));
@@ -118,15 +114,11 @@ describe('When showing the Empty State in ArtifactListPage', () => {
         );
 
         // Submit form
-        act(() => {
-          userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
-        });
+        userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
 
         // wait for the list to show up
-        await act(async () => {
-          await waitFor(() => {
-            expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
-          });
+        await waitFor(() => {
+          expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
         });
       });
     });
