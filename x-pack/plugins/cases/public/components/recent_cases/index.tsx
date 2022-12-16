@@ -19,8 +19,7 @@ import { useCurrentUser } from '../../common/lib/kibana';
 import { useAllCasesNavigation } from '../../common/navigation';
 import { casesQueryClient } from '../cases_context/query_client';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
-import { getReporterFilter } from './get_reporter_filter';
-import { getAssigneeFilter } from './get_assignees_filter';
+import { getReporterFilter, getAssigneeFilter } from './get_filter_options';
 
 export interface RecentCasesProps {
   maxCasesToShow: number;
@@ -59,7 +58,6 @@ const RecentCasesWithoutQueryProvider = React.memo(({ maxCasesToShow }: RecentCa
   const recentCasesFilterOptions: Partial<FilterOptions> = useMemo(() => {
     if (recentCasesFilterBy === 'myRecentlyAssigned') {
       return getAssigneeFilter({
-        currentUser,
         isLoadingCurrentUserProfile,
         currentUserProfile,
       });
@@ -71,10 +69,6 @@ const RecentCasesWithoutQueryProvider = React.memo(({ maxCasesToShow }: RecentCa
       currentUserProfile,
     });
   }, [currentUser, currentUserProfile, isLoadingCurrentUserProfile, recentCasesFilterBy]);
-
-  const updatedFilterOptions = useMemo(() => {
-    return recentCasesFilterOptions;
-  }, [recentCasesFilterOptions]);
 
   // show the recently reported if we have the current user profile, or if we have the fallback user information
   const hasCurrentUserInfo = currentUserProfile != null || currentUser != null;
@@ -99,7 +93,7 @@ const RecentCasesWithoutQueryProvider = React.memo(({ maxCasesToShow }: RecentCa
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
       <EuiText color="subdued" size="s">
-        <RecentCasesComp filterOptions={updatedFilterOptions} maxCasesToShow={maxCasesToShow} />
+        <RecentCasesComp filterOptions={recentCasesFilterOptions} maxCasesToShow={maxCasesToShow} />
         <EuiHorizontalRule margin="s" />
         <EuiText size="xs">
           <LinkAnchor onClick={navigateToAllCasesClick} href={getAllCasesUrl()}>
