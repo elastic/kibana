@@ -10,10 +10,8 @@ import type { Query } from '@kbn/es-query';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import {
-  useLogStreamPageStateContext,
-  useLogStreamQueryChildService,
-} from '../../../observability_logs/log_stream_page/state';
+import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
+import { LogStreamPageActorRef } from '../../../observability_logs/log_stream_page/state';
 import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
@@ -35,19 +33,17 @@ import { useViewLogInProviderContext } from '../../../containers/logs/view_log_i
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useLogViewContext } from '../../../hooks/use_log_view';
-import {
-  useParsedQuery,
-  type ParsedQuery,
-} from '../../../observability_logs/log_stream_query_state';
+import { type ParsedQuery } from '../../../observability_logs/log_stream_query_state';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 import { LogsToolbar } from './page_toolbar';
 import { PageViewLogInContext } from './page_view_log_in_context';
+import { LogStreamPageTemplate } from './components/stream_page_template';
 
 const PAGE_THRESHOLD = 2;
 
-export const LogsPageLogsContent: React.FC<{
+export const StreamPageLogsContent = React.memo<{
   filterQuery: ParsedQuery;
-}> = ({ filterQuery }) => {
+}>(({ filterQuery }) => {
   const {
     data: {
       query: { queryString },
@@ -218,7 +214,7 @@ export const LogsPageLogsContent: React.FC<{
   );
 
   return (
-    <>
+    <LogStreamPageTemplate hasData={true} isDataLoading={false}>
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
@@ -284,22 +280,23 @@ export const LogsPageLogsContent: React.FC<{
           }}
         </AutoSizer>
       </PageContent>
-    </>
+    </LogStreamPageTemplate>
   );
-};
+});
 
-export const ConnectedLogsPageLogsContent = React.memo(() => {
-  const logStreamPageStateService = useLogStreamPageStateContext();
-  const logStreamQueryStateService = useLogStreamQueryChildService(logStreamPageStateService);
+type InitializedLogStreamPageState = MatchedStateFromActor<
+  LogStreamPageActorRef,
+  { hasLogViewIndices: 'initialized' }
+>;
 
-  const filterQuery = useParsedQuery(logStreamQueryStateService);
+export const StreamPageLogsContentForState = React.memo<{
+  logStreamPageState: InitializedLogStreamPageState;
+}>(({ logStreamPageState }) => {
+  const {
+    context: { parsedQuery },
+  } = logStreamPageState;
 
-  // TODO: remove this hack
-  if (filterQuery == null) {
-    return null;
-  }
-
-  return <LogsPageLogsContent filterQuery={filterQuery} />;
+  return <StreamPageLogsContent filterQuery={parsedQuery} />;
 });
 
 const LogPageMinimapColumn = euiStyled.div`
