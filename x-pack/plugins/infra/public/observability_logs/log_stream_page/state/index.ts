@@ -10,6 +10,7 @@ export {
   LogStreamPageStateProvider,
   useLogStreamPageState,
   useLogStreamPageStateContext,
+  useLogStreamQueryChildService,
   type LogStreamPageContext,
   type LogStreamPageEvent,
 } from './src';

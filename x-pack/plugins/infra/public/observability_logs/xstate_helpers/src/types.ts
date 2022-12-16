@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export * from './notification_channel';
-export * from './send_actions';
-export * from './types';
+import { ActorRefWithDeprecatedState } from 'xstate';
+
+export type OmitDeprecatedState<T extends ActorRefWithDeprecatedState<any, any, any, any>> = Omit<
+  T,
+  'state'
+>;

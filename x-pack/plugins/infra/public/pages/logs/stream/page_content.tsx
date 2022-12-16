@@ -14,7 +14,7 @@ import { useLogStreamPageStateContext } from '../../../observability_logs/log_st
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
 import { LogsPageTemplate } from '../shared/page_template';
-import { LogsPageLogsContent } from './page_logs_content';
+import { ConnectedLogsPageLogsContent } from './page_logs_content';
 import { LogStreamPageContentProviders } from './page_providers';
 
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
@@ -40,7 +40,7 @@ export const ConnectedStreamPageContent: React.FC = () => {
   );
 
   const hasIndices = useSelector(logStreamPageStateService, (state) =>
-    state.matches('hasLogViewIndices')
+    state.matches({ hasLogViewIndices: 'initialized' })
   );
 
   const missingIndices = useSelector(logStreamPageStateService, (state) =>
@@ -97,7 +97,7 @@ export const StreamPageContent: React.FC<InjectedProps> = (props: InjectedProps)
           }}
         >
           <LogStreamPageContentProviders>
-            <LogsPageLogsContent />
+            <ConnectedLogsPageLogsContent />
           </LogStreamPageContentProviders>
         </LogsPageTemplate>
       </div>

@@ -6,10 +6,10 @@
  */
 
 import { EsQueryConfig } from '@kbn/es-query';
-import { actions, createMachine, SpecialTargets } from 'xstate';
+import { actions, ActorRefFrom, createMachine, SpecialTargets } from 'xstate';
 import { QueryStringContract } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { sendIfDefined } from '../../xstate_helpers';
+import { OmitDeprecatedState, sendIfDefined } from '../../xstate_helpers';
 import { logStreamQueryNotificationEventSelectors } from './notifications';
 import { validateQuery } from './validate_query_service';
 import type {
@@ -165,3 +165,6 @@ export const createLogStreamQueryStateMachine = (
       subscribeToSearchBarChanges: subscribeToSearchBarChanges({ queryStringService }),
     },
   });
+
+export type LogStreamQueryStateMachine = ReturnType<typeof createLogStreamQueryStateMachine>;
+export type LogStreamQueryActorRef = OmitDeprecatedState<ActorRefFrom<LogStreamQueryStateMachine>>;

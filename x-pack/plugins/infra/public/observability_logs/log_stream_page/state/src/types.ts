@@ -6,6 +6,8 @@
  */
 
 import type { LogViewStatus } from '../../../../../common/log_views';
+import { ParsedQuery } from '../../../log_stream_query_state';
+import { LogStreamQueryNotificationEvent } from '../../../log_stream_query_state/src/notifications';
 import type {
   LogViewContextWithError,
   LogViewContextWithResolvedLogView,
@@ -14,8 +16,10 @@ import type {
 
 export type LogStreamPageEvent =
   | LogViewNotificationEvent
+  | LogStreamQueryNotificationEvent
   | {
-      type: 'RECEIVED_ALL_PARAMETERS';
+      type: 'RECEIVED_INITIAL_PARAMETERS';
+      validatedQuery: ParsedQuery;
     };
 
 export interface LogStreamPageContextWithLogView {
@@ -41,7 +45,7 @@ export type LogStreamPageTypestate =
       context: LogStreamPageContextWithLogViewError;
     }
   | {
-      value: 'hasLogViewIndices';
+      value: 'hasLogViewIndices' | { hasLogViewIndices: 'uninitialized' | 'initialized' };
       context: LogStreamPageContextWithLogView;
     }
   | {

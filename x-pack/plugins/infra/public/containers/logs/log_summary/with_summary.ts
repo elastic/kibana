@@ -7,8 +7,12 @@
 
 import useThrottle from 'react-use/lib/useThrottle';
 import { useLogViewContext } from '../../../hooks/use_log_view';
+import {
+  useLogStreamPageStateContext,
+  useLogStreamQueryChildService,
+} from '../../../observability_logs/log_stream_page/state';
+import { useSerializedParsedQuery } from '../../../observability_logs/log_stream_query_state';
 import { RendererFunction } from '../../../utils/typed_react';
-import { useLogFilterStateContext } from '../log_filter';
 import { useLogPositionStateContext } from '../log_position';
 import { LogSummaryBuckets, useLogSummary } from './log_summary';
 
@@ -24,7 +28,9 @@ export const WithSummary = ({
   }>;
 }) => {
   const { logViewId } = useLogViewContext();
-  const { filterQuery } = useLogFilterStateContext();
+  const serializedQuery = useSerializedParsedQuery(
+    useLogStreamQueryChildService(useLogStreamPageStateContext())
+  );
   const { startTimestamp, endTimestamp } = useLogPositionStateContext();
 
   // Keep it reasonably updated for the `now` case, but don't reload all the time when the user scrolls
@@ -35,7 +41,7 @@ export const WithSummary = ({
     logViewId,
     throttledStartTimestamp,
     throttledEndTimestamp,
-    filterQuery?.serializedQuery ?? null
+    serializedQuery
   );
 
   return children({ buckets, start, end });

@@ -6,7 +6,6 @@
  */
 
 import { AggregateQuery, BoolQuery, DataViewBase, Query } from '@kbn/es-query';
-import { ActorRef } from 'xstate';
 
 export type AnyQuery = Query | AggregateQuery;
 
@@ -79,5 +78,3 @@ export type LogStreamQueryEvent =
       type: 'VALIDATION_FAILED';
       error: Error;
     };
-
-export type LogStreamQueryActor = ActorRef<LogStreamQueryEvent>;

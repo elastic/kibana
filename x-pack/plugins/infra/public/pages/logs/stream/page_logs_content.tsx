@@ -7,9 +7,13 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import {
+  useLogStreamPageStateContext,
+  useLogStreamQueryChildService,
+} from '../../../observability_logs/log_stream_page/state';
 import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
@@ -18,7 +22,6 @@ import { LogMinimap } from '../../../components/logging/log_minimap';
 import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
 import { LogEntryStreamItem } from '../../../components/logging/log_text_stream/item';
 import { PageContent } from '../../../components/page';
-import { useLogFilterStateContext } from '../../../containers/logs/log_filter';
 import {
   useLogEntryFlyoutContext,
   WithFlyoutOptionsUrlState,
@@ -30,15 +33,21 @@ import { WithSummary } from '../../../containers/logs/log_summary';
 import { useLogViewConfigurationContext } from '../../../containers/logs/log_view_configuration';
 import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useLogViewContext } from '../../../hooks/use_log_view';
+import {
+  useParsedQuery,
+  type ParsedQuery,
+} from '../../../observability_logs/log_stream_query_state';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 import { LogsToolbar } from './page_toolbar';
 import { PageViewLogInContext } from './page_view_log_in_context';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const PAGE_THRESHOLD = 2;
 
-export const LogsPageLogsContent: React.FunctionComponent = () => {
+export const LogsPageLogsContent: React.FC<{
+  filterQuery: ParsedQuery;
+}> = ({ filterQuery }) => {
   const {
     data: {
       query: { queryString },
@@ -71,7 +80,6 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     updateDateRange,
     lastCompleteDateRangeExpressionUpdate,
   } = useLogPositionStateContext();
-  const { filterQuery } = useLogFilterStateContext();
 
   const {
     isReloading,
@@ -279,6 +287,20 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     </>
   );
 };
+
+export const ConnectedLogsPageLogsContent = React.memo(() => {
+  const logStreamPageStateService = useLogStreamPageStateContext();
+  const logStreamQueryStateService = useLogStreamQueryChildService(logStreamPageStateService);
+
+  const filterQuery = useParsedQuery(logStreamQueryStateService);
+
+  // TODO: remove this hack
+  if (filterQuery == null) {
+    return null;
+  }
+
+  return <LogsPageLogsContent filterQuery={filterQuery} />;
+});
 
 const LogPageMinimapColumn = euiStyled.div`
   flex: 1 0 0%;

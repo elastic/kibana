@@ -10,7 +10,7 @@ import createContainer from 'constate';
 import { isDevMode } from '../../../../utils/dev_mode';
 import {
   createLogStreamPageStateMachine,
-  LogStreamPageStateMachineDependencies,
+  type LogStreamPageStateMachineDependencies,
 } from './state_machine';
 
 export const useLogStreamPageState = ({
