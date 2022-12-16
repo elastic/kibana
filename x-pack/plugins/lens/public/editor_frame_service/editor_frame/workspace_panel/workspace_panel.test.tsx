@@ -34,6 +34,7 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import {
   applyChanges,
   setState,
@@ -44,6 +45,7 @@ import { getLensInspectorService } from '../../../lens_inspector_service';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { disableAutoApply, enableAutoApply } from '../../../state_management/lens_slice';
 import { Ast, toExpression } from '@kbn/interpreter';
+import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
@@ -67,10 +69,12 @@ const defaultProps = {
   plugins: {
     uiActions: uiActionsPluginMock.createStartContract(),
     data: mockDataPlugin(),
+    dataViews: dataViewPluginMocks.createStartContract(),
   },
   getSuggestionForField: () => undefined,
   lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
   toggleFullscreen: jest.fn(),
+  indexPatternService: createIndexPatternServiceMock(),
 };
 
 const toExpr = (
