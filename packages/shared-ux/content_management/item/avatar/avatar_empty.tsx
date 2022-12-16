@@ -13,7 +13,7 @@ import { CmAvatarUi, type CmAvatarUiProps } from './avatar_ui';
 /**
  * Props of {@link CmAvatarEmpty} component.
  */
-export type CmAvatarEmptyProps = Pick<CmAvatarUiProps, 'size' | 'disabled'>;
+export type CmAvatarEmptyProps = Pick<CmAvatarUiProps, 'size' | 'round' | 'disabled'>;
 
 /**
  * Renders an empty avatar, for example, when data is not available.

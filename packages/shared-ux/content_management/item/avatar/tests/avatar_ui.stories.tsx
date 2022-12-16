@@ -17,6 +17,7 @@ export default {
 };
 
 export const Default = () => <CmAvatarUi title="John Doe" />;
+export const Round = () => <CmAvatarUi title="John Doe" round />;
 export const FirstNameOnly = () => <CmAvatarUi title="Mike" />;
 export const OneCharacterInTitle = () => <CmAvatarUi title="a" />;
 export const NoTitle = () => <CmAvatarUi title="a" />;

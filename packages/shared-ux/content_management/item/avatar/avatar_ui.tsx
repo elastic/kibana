@@ -16,6 +16,7 @@ import type { TSize } from '../types';
 export interface CmAvatarUiProps {
   title: string;
   size?: TSize;
+  round?: boolean;
   disabled?: boolean;
   color?: string;
 }
@@ -24,7 +25,7 @@ export interface CmAvatarUiProps {
  * A presentational component of "avatar" view for a single content item.
  */
 export const CmAvatarUi: React.FC<CmAvatarUiProps> = (props) => {
-  const { title, size, disabled, color } = props;
+  const { title, size, round, disabled, color } = props;
 
   // TODO: Compute color here.
 
@@ -32,6 +33,7 @@ export const CmAvatarUi: React.FC<CmAvatarUiProps> = (props) => {
     <EuiAvatar
       name={title}
       size={size}
+      type={round ? 'user' : 'space'}
       isDisabled={disabled}
       color={color}
     />
