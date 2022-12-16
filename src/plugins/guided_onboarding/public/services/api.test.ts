@@ -46,7 +46,7 @@ describe('GuidedOnboarding ApiService', () => {
       pluginState: mockPluginStateInProgress,
     });
     apiService = new ApiService();
-    apiService.setup(httpClient, true);
+    apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: true });
   });
 
   afterEach(() => {
@@ -133,7 +133,7 @@ describe('GuidedOnboarding ApiService', () => {
       httpClient.get.mockResolvedValue({
         pluginState: mockPluginStateNotStarted,
       });
-      apiService.setup(httpClient, true);
+      apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: true });
 
       await apiService.activateGuide(testGuide);
 
@@ -184,7 +184,7 @@ describe('GuidedOnboarding ApiService', () => {
           activeGuide: readyToCompleteGuideState,
         },
       });
-      apiService.setup(httpClient, true);
+      apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: true });
     });
 
     it('updates the selected guide and marks it as complete', async () => {
@@ -239,7 +239,7 @@ describe('GuidedOnboarding ApiService', () => {
       httpClient.get.mockResolvedValue({
         state: [incompleteGuideState],
       });
-      apiService.setup(httpClient, true);
+      apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: true });
       const completedState = await apiService.completeGuide(testGuide);
       expect(completedState).not.toBeDefined();
     });
@@ -291,7 +291,7 @@ describe('GuidedOnboarding ApiService', () => {
       httpClient.get.mockResolvedValue({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
       });
-      apiService.setup(httpClient, true);
+      apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: true });
 
       await apiService.completeGuideStep(testGuide, testGuideFirstStep);
 
@@ -306,7 +306,7 @@ describe('GuidedOnboarding ApiService', () => {
       httpClient.get.mockResolvedValue({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep2InProgressState },
       });
-      apiService.setup(httpClient, true);
+      apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: true });
 
       await apiService.completeGuideStep(testGuide, testGuideManualCompletionStep);
 
@@ -339,7 +339,7 @@ describe('GuidedOnboarding ApiService', () => {
           },
         },
       });
-      apiService.setup(httpClient, true);
+      apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: true });
 
       await apiService.completeGuideStep(testGuide, testGuideLastStep);
 
@@ -366,7 +366,7 @@ describe('GuidedOnboarding ApiService', () => {
           activeGuide: testGuideStep1InProgressState,
         },
       });
-      apiService.setup(httpClient, true);
+      apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: true });
 
       await apiService.completeGuideStep(testGuide, testGuideFirstStep);
 
@@ -403,7 +403,7 @@ describe('GuidedOnboarding ApiService', () => {
       httpClient.get.mockResolvedValue({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
       });
-      apiService.setup(httpClient, true);
+      apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: true });
       subscription = apiService
         .isGuidedOnboardingActiveForIntegration$(testIntegration)
         .subscribe((isIntegrationInGuideStep) => {
@@ -417,7 +417,7 @@ describe('GuidedOnboarding ApiService', () => {
       httpClient.get.mockResolvedValue({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
       });
-      apiService.setup(httpClient, true);
+      apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: true });
       subscription = apiService
         .isGuidedOnboardingActiveForIntegration$(wrongIntegration)
         .subscribe((isIntegrationInGuideStep) => {
@@ -431,7 +431,7 @@ describe('GuidedOnboarding ApiService', () => {
       httpClient.get.mockResolvedValue({
         pluginState: { ...mockPluginStateNotStarted, activeGuide: testGuideNotActiveState },
       });
-      apiService.setup(httpClient, true);
+      apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: true });
       subscription = apiService
         .isGuidedOnboardingActiveForIntegration$(testIntegration)
         .subscribe((isIntegrationInGuideStep) => {
@@ -447,7 +447,7 @@ describe('GuidedOnboarding ApiService', () => {
       httpClient.get.mockResolvedValue({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
       });
-      apiService.setup(httpClient, true);
+      apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: true });
 
       await apiService.completeGuidedOnboardingForIntegration(testIntegration);
       expect(httpClient.put).toHaveBeenCalledTimes(1);
@@ -461,7 +461,7 @@ describe('GuidedOnboarding ApiService', () => {
       httpClient.get.mockResolvedValue({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
       });
-      apiService.setup(httpClient, true);
+      apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: true });
 
       await apiService.completeGuidedOnboardingForIntegration(wrongIntegration);
       expect(httpClient.put).not.toHaveBeenCalled();
@@ -479,7 +479,28 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('no API requests are sent on self-managed deployments', () => {
     beforeEach(() => {
-      apiService.setup(httpClient, false);
+      apiService.setup({ httpClient, isCloudEnabled: false, isGuidedOnboardingUiEnabled: true });
+    });
+
+    it('fetchPluginState$', () => {
+      subscription = apiService.fetchPluginState$().subscribe();
+      expect(httpClient.get).not.toHaveBeenCalled();
+    });
+
+    it('fetchAllGuidesState', async () => {
+      await apiService.fetchAllGuidesState();
+      expect(httpClient.get).not.toHaveBeenCalled();
+    });
+
+    it('updatePluginState', async () => {
+      await apiService.updatePluginState({}, false);
+      expect(httpClient.put).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('no API requests are sent when guided onboarding is disabled', () => {
+    beforeEach(() => {
+      apiService.setup({ httpClient, isCloudEnabled: true, isGuidedOnboardingUiEnabled: false });
     });
 
     it('fetchPluginState$', () => {
