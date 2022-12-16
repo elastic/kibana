@@ -15,7 +15,6 @@ import {
   EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiPanel,
   EuiProgress,
-  EuiResizeObserver,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -25,7 +24,6 @@ import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
-import { throttle } from 'lodash';
 import { useCurrentEuiTheme } from '../../../common/components/multi_select_picker/multi_select_picker';
 import { DV_RANDOM_SAMPLER_PREFERENCE, useStorage } from '../../hooks/use_storage';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
@@ -50,7 +48,6 @@ import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
 import { DatePickerWrapper } from '../../../common/components/date_picker_wrapper';
-import { HelpMenu } from '../../../common/components/help_menu';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
@@ -58,7 +55,6 @@ import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import { RANDOM_SAMPLER_OPTION, RandomSamplerOption } from '../../constants/random_sampler';
 
-const MAX_MEDIUM_PANEL_WIDTH = 1024;
 interface DataVisualizerPageState {
   overallStats: OverallStats;
   metricConfigs: FieldVisConfig[];
@@ -119,12 +115,12 @@ export interface IndexDataVisualizerViewProps {
   currentSavedSearch: SavedSearchSavedObject | null;
   currentSessionId?: string;
   getAdditionalLinks?: GetAdditionalLinks;
+  compact?: boolean;
 }
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
   const euiTheme = useCurrentEuiTheme();
 
-  const [panelWidth, setPanelWidth] = useState(1600);
   const [savedRandomSamplerPreference, saveRandomSamplerPreference] =
     useStorage<RandomSamplerOption>(
       DV_RANDOM_SAMPLER_PREFERENCE,
@@ -142,7 +138,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const { services } = useDataVisualizerKibana();
-  const { docLinks, notifications, uiSettings, data } = services;
+  const { notifications, uiSettings, data } = services;
   const { toasts } = notifications;
 
   const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(
@@ -155,7 +151,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
-  const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
+  const { currentDataView, currentSessionId, getAdditionalLinks, compact } = dataVisualizerProps;
 
   useEffect(() => {
     if (dataVisualizerProps?.currentSavedSearch !== undefined) {
@@ -452,175 +448,154 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     () => currentDataView.timeFieldName !== undefined && currentDataView.timeFieldName !== '',
     [currentDataView.timeFieldName]
   );
-  const helpLink = docLinks.links.ml.guide;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const resizeHandler = useCallback(
-    throttle((e: { width: number; height: number }) => {
-      // When window or table is resized,
-      // update the page body width
-      setPanelWidth(e.width);
-    }, 500),
-    []
-  );
-  const compact = useMemo(() => panelWidth <= MAX_MEDIUM_PANEL_WIDTH, [panelWidth]);
-
   return (
-    // Needs ResizeObserver to measure window width - side bar navigation
-    <EuiResizeObserver onResize={resizeHandler}>
-      {(resizeRef) => (
-        <div ref={resizeRef}>
-          <EuiPageBody data-test-subj="dataVisualizerIndexPage" paddingSize="none" panelled={false}>
-            <EuiFlexGroup gutterSize="m">
-              <EuiFlexItem>
-                <EuiPageContentHeader
-                  data-test-subj="dataVisualizerPageHeader"
-                  css={
-                    compact &&
-                    css`
-                      flex-direction: column;
-                      align-items: flex-start;
-                    `
-                  }
-                >
-                  <EuiPageContentHeaderSection>
-                    <div
-                      data-test-subj="dataViewTitleHeader"
-                      css={css`
-                        padding: $euiSizeS 0;
-                        display: flex;
-                        flex-direction: row;
-                        align-items: center;
-                        margin-right: ${euiTheme.euiSize};
-                      `}
-                    >
-                      <EuiTitle size={'s'}>
-                        <h2>{currentDataView.getName()}</h2>
-                      </EuiTitle>
-                      <DataVisualizerDataViewManagement
-                        currentDataView={currentDataView}
-                        useNewFieldsApi={true}
-                      />
-                    </div>
-                  </EuiPageContentHeaderSection>
-
-                  {compact ? <EuiSpacer size="m" /> : null}
-                  <EuiFlexGroup
-                    alignItems="center"
-                    justifyContent="flexEnd"
-                    gutterSize="s"
-                    data-test-subj="dataVisualizerTimeRangeSelectorSection"
-                  >
-                    {hasValidTimeField ? (
-                      <EuiFlexItem grow={false}>
-                        <FullTimeRangeSelector
-                          dataView={currentDataView}
-                          query={undefined}
-                          disabled={false}
-                          timefilter={timefilter}
-                        />
-                      </EuiFlexItem>
-                    ) : null}
-                    <EuiFlexItem grow={false}>
-                      <DatePickerWrapper
-                        isAutoRefreshOnly={!hasValidTimeField}
-                        showRefresh={!hasValidTimeField}
-                        compact={compact}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPageContentHeader>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiPageContentBody>
-              <EuiFlexGroup
-                gutterSize="m"
-                css={
-                  compact &&
-                  css`
-                    flex-direction: column;
-                  `
-                }
+    <EuiPageBody data-test-subj="dataVisualizerIndexPage" paddingSize="none" panelled={false}>
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem>
+          <EuiPageContentHeader
+            data-test-subj="dataVisualizerPageHeader"
+            css={
+              compact &&
+              css`
+                flex-direction: column;
+                align-items: flex-start;
+              `
+            }
+          >
+            <EuiPageContentHeaderSection>
+              <div
+                data-test-subj="dataViewTitleHeader"
+                css={css`
+                  padding: $euiSizeS 0;
+                  display: flex;
+                  flex-direction: row;
+                  align-items: center;
+                  margin-right: ${euiTheme.euiSize};
+                `}
               >
-                <EuiFlexItem>
-                  <EuiPanel hasShadow={false} hasBorder>
-                    <SearchPanel
-                      dataView={currentDataView}
-                      searchString={searchString}
-                      searchQuery={searchQuery}
-                      searchQueryLanguage={searchQueryLanguage}
-                      setSearchParams={setSearchParams}
-                      overallStats={overallStats}
-                      indexedFieldTypes={fieldTypes}
-                      setVisibleFieldTypes={setVisibleFieldTypes}
-                      visibleFieldTypes={visibleFieldTypes}
-                      visibleFieldNames={visibleFieldNames}
-                      setVisibleFieldNames={setVisibleFieldNames}
-                      showEmptyFields={showEmptyFields}
-                      onAddFilter={onAddFilter}
-                      compact={compact}
-                    />
+                <EuiTitle size={'s'}>
+                  <h2>{currentDataView.getName()}</h2>
+                </EuiTitle>
+                <DataVisualizerDataViewManagement
+                  currentDataView={currentDataView}
+                  useNewFieldsApi={true}
+                />
+              </div>
+            </EuiPageContentHeaderSection>
 
-                    {overallStats?.totalCount !== undefined && (
-                      <>
-                        <EuiSpacer size="m" />
-                        <EuiFlexGroup gutterSize="s" direction="column">
-                          <DocumentCountContent
-                            documentCountStats={documentCountStats}
-                            totalCount={overallStats.totalCount}
-                            setSamplingProbability={setSamplingProbability}
-                            samplingProbability={
-                              dataVisualizerListState.probability === null
-                                ? documentCountStats?.probability
-                                : dataVisualizerListState.probability
-                            }
-                            loading={overallStatsProgress.loaded < 100}
-                            randomSamplerPreference={savedRandomSamplerPreference}
-                            setRandomSamplerPreference={saveRandomSamplerPreference}
-                          />
-                        </EuiFlexGroup>
-                      </>
-                    )}
-                    <EuiSpacer size="m" />
-                    <FieldCountPanel
-                      showEmptyFields={showEmptyFields}
-                      toggleShowEmptyFields={toggleShowEmptyFields}
-                      fieldsCountStats={fieldsCountStats}
-                      metricsStats={metricsStats}
-                    />
-                    <EuiSpacer size="m" />
-                    <EuiProgress value={progress} max={100} size="xs" />
-                    <DataVisualizerTable<FieldVisConfig>
-                      items={configs}
-                      pageState={dataVisualizerListState}
-                      updatePageState={setDataVisualizerListState}
-                      getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
-                      extendedColumns={extendedColumns}
-                      loading={progress < 100}
-                      overallStatsRunning={overallStatsProgress.isRunning}
-                      showPreviewByDefault={dataVisualizerListState.showDistributions ?? true}
-                      onChange={setDataVisualizerListState}
-                      totalCount={overallStats.totalCount}
-                    />
-                  </EuiPanel>
-                </EuiFlexItem>
-                {compact ? <EuiSpacer size="m" /> : null}
+            {compact ? <EuiSpacer size="m" /> : null}
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="flexEnd"
+              gutterSize="s"
+              data-test-subj="dataVisualizerTimeRangeSelectorSection"
+            >
+              {hasValidTimeField ? (
                 <EuiFlexItem grow={false}>
-                  <ActionsPanel
+                  <FullTimeRangeSelector
                     dataView={currentDataView}
-                    searchQueryLanguage={searchQueryLanguage}
-                    searchString={searchString}
-                    getAdditionalLinks={getAdditionalLinks}
-                    compact={compact}
+                    query={undefined}
+                    disabled={false}
+                    timefilter={timefilter}
                   />
                 </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPageContentBody>
-          </EuiPageBody>
+              ) : null}
+              <EuiFlexItem grow={false}>
+                <DatePickerWrapper
+                  isAutoRefreshOnly={!hasValidTimeField}
+                  showRefresh={!hasValidTimeField}
+                  compact={compact}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPageContentHeader>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiPageContentBody>
+        <EuiFlexGroup
+          gutterSize="m"
+          css={
+            compact &&
+            css`
+              flex-direction: column;
+            `
+          }
+        >
+          <EuiFlexItem>
+            <EuiPanel hasShadow={false} hasBorder>
+              <SearchPanel
+                dataView={currentDataView}
+                searchString={searchString}
+                searchQuery={searchQuery}
+                searchQueryLanguage={searchQueryLanguage}
+                setSearchParams={setSearchParams}
+                overallStats={overallStats}
+                indexedFieldTypes={fieldTypes}
+                setVisibleFieldTypes={setVisibleFieldTypes}
+                visibleFieldTypes={visibleFieldTypes}
+                visibleFieldNames={visibleFieldNames}
+                setVisibleFieldNames={setVisibleFieldNames}
+                showEmptyFields={showEmptyFields}
+                onAddFilter={onAddFilter}
+                compact={compact}
+              />
 
-          <HelpMenu docLink={helpLink} />
-        </div>
-      )}
-    </EuiResizeObserver>
+              {overallStats?.totalCount !== undefined && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiFlexGroup gutterSize="s" direction="column">
+                    <DocumentCountContent
+                      documentCountStats={documentCountStats}
+                      totalCount={overallStats.totalCount}
+                      setSamplingProbability={setSamplingProbability}
+                      samplingProbability={
+                        dataVisualizerListState.probability === null
+                          ? documentCountStats?.probability
+                          : dataVisualizerListState.probability
+                      }
+                      loading={overallStatsProgress.loaded < 100}
+                      randomSamplerPreference={savedRandomSamplerPreference}
+                      setRandomSamplerPreference={saveRandomSamplerPreference}
+                    />
+                  </EuiFlexGroup>
+                </>
+              )}
+              <EuiSpacer size="m" />
+              <FieldCountPanel
+                showEmptyFields={showEmptyFields}
+                toggleShowEmptyFields={toggleShowEmptyFields}
+                fieldsCountStats={fieldsCountStats}
+                metricsStats={metricsStats}
+              />
+              <EuiSpacer size="m" />
+              <EuiProgress value={progress} max={100} size="xs" />
+              <DataVisualizerTable<FieldVisConfig>
+                items={configs}
+                pageState={dataVisualizerListState}
+                updatePageState={setDataVisualizerListState}
+                getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
+                extendedColumns={extendedColumns}
+                loading={progress < 100}
+                overallStatsRunning={overallStatsProgress.isRunning}
+                showPreviewByDefault={dataVisualizerListState.showDistributions ?? true}
+                onChange={setDataVisualizerListState}
+                totalCount={overallStats.totalCount}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+          {compact ? <EuiSpacer size="m" /> : null}
+          <EuiFlexItem grow={false}>
+            <ActionsPanel
+              dataView={currentDataView}
+              searchQueryLanguage={searchQueryLanguage}
+              searchString={searchString}
+              getAdditionalLinks={getAdditionalLinks}
+              compact={compact}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageContentBody>
+    </EuiPageBody>
   );
 };
