@@ -389,7 +389,9 @@ export const getXyVisualization = ({
             ? [
                 {
                   columnId: dataLayer.splitAccessor,
-                  triggerIconType: dataLayer.collapseFn ? ('aggregate' as const) : ('colorBy' as const),
+                  triggerIconType: dataLayer.collapseFn
+                    ? ('aggregate' as const)
+                    : ('colorBy' as const),
                   palette: dataLayer.collapseFn
                     ? undefined
                     : paletteService
