@@ -22,7 +22,7 @@ import type {
   ArchivePackage,
   BundledPackage,
 } from '../../types';
-import { checkSuperuser } from '../../routes/security';
+import { checkSuperuser } from '../security';
 import { FleetUnauthorizedError } from '../../errors';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';

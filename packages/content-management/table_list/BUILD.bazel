@@ -49,7 +49,7 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-i18n-react",
   "//packages/kbn-i18n",
-  "//packages/content-management/inspector",
+  "//packages/content-management/content_editor",
   "//packages/core/http/core-http-browser",
   "//packages/core/theme/core-theme-browser",
   "//packages/kbn-safer-lodash-set",
@@ -76,7 +76,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-i18n-react:npm_module_types",
-  "//packages/content-management/inspector:npm_module_types",
+  "//packages/content-management/content_editor:npm_module_types",
   "//packages/core/http/core-http-browser:npm_module_types",
   "//packages/core/theme/core-theme-browser:npm_module_types",
   "//packages/core/mount-utils/core-mount-utils-browser:npm_module_types",

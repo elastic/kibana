@@ -27,25 +27,25 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
-import { MLInferenceLogic } from './ml_inference_logic';
+import { TestPipelineLogic } from './test_pipeline_logic';
 
-import './add_ml_inference_pipeline_modal.scss';
+import './add_inference_pipeline_flyout.scss';
 
 export const TestPipeline: React.FC = () => {
   const {
     addInferencePipelineModal: {
       configuration: { sourceField },
       indexName,
-      simulateBody,
     },
     getDocumentsErr,
     isGetDocumentsLoading,
     showGetDocumentErrors,
+    simulateBody,
     simulatePipelineResult,
     simulatePipelineErrors,
-  } = useValues(MLInferenceLogic);
+  } = useValues(TestPipelineLogic);
   const { simulatePipeline, setPipelineSimulateBody, makeGetDocumentRequest } =
-    useActions(MLInferenceLogic);
+    useActions(TestPipelineLogic);
 
   const isSmallerViewport = useIsWithinMaxBreakpoint('s');
   const inputRef = useRef<HTMLInputElement>();

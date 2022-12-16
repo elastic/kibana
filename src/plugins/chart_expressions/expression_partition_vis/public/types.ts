@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ValueClickContext } from '@kbn/embeddable-plugin/public';
+import type { CellValueContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import {
   Plugin as ExpressionsPublicPlugin,
@@ -35,3 +35,16 @@ export interface FilterEvent {
   name: 'filter';
   data: ValueClickContext['data'];
 }
+
+export interface CellValueAction {
+  id: string;
+  iconType: string;
+  displayName: string;
+  execute: (data: CellValueContext['data']) => void;
+}
+
+export type ColumnCellValueActions = CellValueAction[][];
+
+export type GetCompatibleCellValueActions = (
+  data: CellValueContext['data']
+) => Promise<CellValueAction[]>;
