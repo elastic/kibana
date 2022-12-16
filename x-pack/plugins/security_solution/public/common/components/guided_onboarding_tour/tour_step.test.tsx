@@ -174,29 +174,13 @@ describe('SecurityTourStep', () => {
       incrementStep: jest.fn(),
       isTourShown: () => true,
     });
-    render(
+    const { getByTestId } = render(
       <SecurityTourStep {...stepDefaultProps} step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}>
         {mockChildren}
       </SecurityTourStep>,
       { wrapper: TestProviders }
     );
-    const mockCall = { ...mockTourStep.mock.calls[0][0] };
-    expect(mockCall.footerAction).toMatchInlineSnapshot(`
-     <EuiButton
-       color="success"
-       data-test-subj="onboarding--securityTourNextStepButton"
-       onClick={[Function]}
-       onKeyDown={[Function]}
-       size="s"
-       tour-step="nextButton"
-     >
-       <FormattedMessage
-         defaultMessage="Next"
-         id="xpack.securitySolution.guided_onboarding.nextStep.buttonLabel"
-         values={Object {}}
-       />
-     </EuiButton>
-    `);
+    expect(getByTestId('onboarding--securityTourNextStepButton')).toBeInTheDocument();
   });
 
   it('if a step has an anchor declared, the tour step should be a sibling of the mockChildren', () => {
@@ -289,13 +273,13 @@ describe('SecurityTourStep', () => {
       incrementStep: jest.fn(),
       isTourShown: () => true,
     });
-    render(
+    const { queryByTestId } = render(
       <SecurityTourStep {...stepDefaultProps} step={6}>
         {mockChildren}
       </SecurityTourStep>,
       { wrapper: TestProviders }
     );
-    const mockCall = { ...mockTourStep.mock.calls[0][0] };
-    expect(mockCall.footerAction).toMatchInlineSnapshot(`<React.Fragment />`);
+
+    expect(queryByTestId('onboarding--securityTourNextStepButton')).not.toBeInTheDocument();
   });
 });
