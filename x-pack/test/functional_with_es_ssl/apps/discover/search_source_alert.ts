@@ -253,8 +253,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  const checkInitialRuleParamsState = async (dataView: string) => {
-    expect(await toasts.getToastCount()).to.be(1);
+  const checkInitialRuleParamsState = async (dataView: string, isViewInApp = false) => {
+    expect(await toasts.getToastCount()).to.be(isViewInApp ? 1 : 0);
     expect(await filterBar.getFilterCount()).to.be(0);
     expect(await queryBar.getQueryString()).to.equal('');
     const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
@@ -378,7 +378,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('ruleDetails-viewInApp');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
+      await checkInitialRuleParamsState(SOURCE_DATA_VIEW, true);
     });
 
     it('should navigate to alert results via link provided in notification', async () => {
