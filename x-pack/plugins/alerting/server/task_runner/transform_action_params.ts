@@ -125,7 +125,7 @@ export function transformSummaryActionParams({
     // For backwards compatibility with security solutions rules
     context: {
       alerts: alerts.new.data,
-      result_link: ruleUrl,
+      results_link: ruleUrl,
       rule: rule.params,
     },
     state: {
