@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC, Fragment } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiFlexGroup,
@@ -39,7 +39,7 @@ export const TextClassificationOutput: FC<{
     | FillMaskInference
     | LangIdentInference;
 }> = ({ inferrer }) => {
-  const result = useObservable(inferrer.getInferenceResult$());
+  const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
   }
@@ -72,17 +72,17 @@ export const PredictionProbabilityList: FC<{
       ) : null}
 
       {response.map(({ value, predictionProbability }) => (
-        <>
+        <Fragment key={value}>
           <EuiProgress value={predictionProbability * 100} max={100} size="m" />
           <EuiSpacer size="s" />
           <EuiFlexGroup>
-            <>
-              <EuiFlexItem>{value}</EuiFlexItem>
-              <EuiFlexItem grow={false}>{predictionProbability}</EuiFlexItem>
-            </>
+            <EuiFlexItem data-test-subj={`mlTestModelLangIdentInputValue`}>{value}</EuiFlexItem>
+            <EuiFlexItem data-test-subj={`mlTestModelLangIdentInputProbability`} grow={false}>
+              {predictionProbability}
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
-        </>
+        </Fragment>
       ))}
     </>
   );

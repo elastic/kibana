@@ -67,6 +67,7 @@ import { legacyMetadataSearchResponseMock } from '../metadata/support/test_suppo
 import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
 import { CaseStatuses } from '@kbn/cases-components';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
 interface CallRouteInterface {
   body?: ResponseActionRequestBody;
@@ -173,10 +174,9 @@ describe('Response actions', () => {
 
         const ctx = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
 
-        ctx.securitySolution.endpointAuthz = {
-          ...ctx.securitySolution.endpointAuthz,
-          ...authz,
-        };
+        ctx.securitySolution.getEndpointAuthz.mockResolvedValue(
+          getEndpointAuthzInitialStateMock(authz)
+        );
 
         // mock _index_template
         ctx.core.elasticsearch.client.asInternalUser.indices.existsIndexTemplate.mockResponseImplementationOnce(

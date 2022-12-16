@@ -7776,14 +7776,28 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.GetFieldsOptions.filter",
+            "id": "def-public.GetFieldsOptions.indexFilter",
             "type": "Object",
             "tags": [],
-            "label": "filter",
+            "label": "indexFilter",
             "description": [],
             "signature": [
               "QueryDslQueryContainer",
               " | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.GetFieldsOptions.includeUnmapped",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeUnmapped",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -8579,7 +8593,9 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [],
+            "description": [
+              "Error associated with this object, populated if an operation failed for this object."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -12344,10 +12360,6 @@
               "path": "x-pack/plugins/graph/public/plugin.ts"
             },
             {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
-            },
-            {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
             },
@@ -12925,11 +12937,15 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -13096,10 +13112,6 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
-                "plugin": "dataViewEditor",
-                "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -13132,6 +13144,14 @@
                 "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
               },
@@ -13154,14 +13174,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
                 "plugin": "lens",
@@ -13329,10 +13341,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/index_or_search/preconfigured_job_redirect.ts"
               },
               {
@@ -13366,6 +13374,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/components/job_settings_form.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
               },
               {
                 "plugin": "ml",
@@ -13437,6 +13449,14 @@
               },
               {
                 "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
+              },
+              {
+                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
               },
               {
@@ -13478,6 +13498,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "stackAlerts",
@@ -13522,10 +13546,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "transform",
@@ -17002,7 +17022,7 @@
               "\n Get a list of field objects for an index pattern that may contain wildcards\n"
             ],
             "signature": [
-              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; filter?: ",
+              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
               " | undefined; }) => Promise<{ fields: ",
               {
@@ -17065,7 +17085,7 @@
                     "label": "fieldCapsOptions",
                     "description": [],
                     "signature": [
-                      "{ allow_no_indices: boolean; } | undefined"
+                      "{ allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined"
                     ],
                     "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                     "deprecated": false,
@@ -17101,10 +17121,10 @@
                   },
                   {
                     "parentPluginId": "data",
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.filter",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.indexFilter",
                     "type": "Object",
                     "tags": [],
-                    "label": "filter",
+                    "label": "indexFilter",
                     "description": [],
                     "signature": [
                       "QueryDslQueryContainer",
@@ -17989,29 +18009,29 @@
                   "ExplainResponse",
                   "<TDocument>>; }; features: ",
                   "default",
-                  "; fieldCaps: { (this: That, params: ",
+                  "; fieldCaps: { (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
-                  ">; (this: That, params: ",
+                  ">; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
                   "FieldCapsResponse",
-                  ", unknown>>; (this: That, params: ",
+                  ", unknown>>; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
@@ -20619,11 +20639,15 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -20790,10 +20814,6 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
-                "plugin": "dataViewEditor",
-                "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -20826,6 +20846,14 @@
                 "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
               },
@@ -20848,14 +20876,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
                 "plugin": "lens",
@@ -21023,10 +21043,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/index_or_search/preconfigured_job_redirect.ts"
               },
               {
@@ -21060,6 +21076,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/components/job_settings_form.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
               },
               {
                 "plugin": "ml",
@@ -21131,6 +21151,14 @@
               },
               {
                 "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
+              },
+              {
+                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
               },
               {
@@ -21172,6 +21200,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "stackAlerts",
@@ -21216,10 +21248,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "transform",
@@ -26633,14 +26661,28 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.GetFieldsOptions.filter",
+            "id": "def-common.GetFieldsOptions.indexFilter",
             "type": "Object",
             "tags": [],
-            "label": "filter",
+            "label": "indexFilter",
             "description": [],
             "signature": [
               "QueryDslQueryContainer",
               " | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.GetFieldsOptions.includeUnmapped",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeUnmapped",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -27000,7 +27042,9 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [],
+            "description": [
+              "Error associated with this object, populated if an operation failed for this object."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",

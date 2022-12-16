@@ -604,6 +604,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
               },
               {
@@ -1899,6 +1903,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
               },
               {
@@ -2147,10 +2155,6 @@
             {
               "plugin": "alerting",
               "path": "x-pack/plugins/alerting/server/plugin.ts"
-            },
-            {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/plugin.ts"
             },
             {
               "plugin": "ml",

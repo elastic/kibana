@@ -25,6 +25,7 @@ export type {
   Output,
   DownloadSource,
   FleetServerHost,
+  FleetProxy,
   DataStream,
   Settings,
   ActionStatus,
@@ -101,6 +102,7 @@ export type {
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
+  RegistryStreamWithDataStream,
   RegistryPolicyTemplate,
   PackageList,
   PackageListItem,
@@ -128,6 +130,8 @@ export type {
   PostDownloadSourceRequest,
   PutDownloadSourceRequest,
   GetAvailableVersionsResponse,
+  PostHealthCheckRequest,
+  PostHealthCheckResponse,
 } from '../../common/types';
 export {
   entries,

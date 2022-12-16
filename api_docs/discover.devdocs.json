@@ -628,6 +628,22 @@
             "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.breakdownField",
+            "type": "string",
+            "tags": [],
+            "label": "breakdownField",
+            "description": [
+              "\nBreakdown field"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/discover/public/locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1214,6 +1230,20 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.usesAdHocDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "usesAdHocDataView",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.SavedSearch.timeRestore",
             "type": "CompoundType",
             "tags": [],
@@ -1277,6 +1307,20 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.breakdownField",
+            "type": "string",
+            "tags": [],
+            "label": "breakdownField",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
             "deprecated": false,

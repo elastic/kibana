@@ -172,7 +172,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
         <QueryStringInput
           bubbleSubmitEvent={false}
           query={searchInput}
-          indexPatterns={[indexPattern]}
+          indexPatterns={[]}
           onChange={searchChangeHandler}
           onSubmit={applyInfluencersFilterQuery}
           placeholder={filterPlaceHolder}

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`guide card snapshots should render use case card component for observability 1`] = `
+exports[`guide card snapshots should render use case card component for kubernetes 1`] = `
 <UseCaseCard
   addBasePath={[MockFunction]}
   description="Monitor your Kubernetes infrastructure by consolidating your logs and metrics."
@@ -8,12 +8,13 @@ exports[`guide card snapshots should render use case card component for observab
     <GuideCardFooter
       activateGuide={[MockFunction]}
       guides={Array []}
-      useCase="observability"
+      telemetryId="kubernetes"
+      useCase="kubernetes"
     />
   }
   isDarkTheme={false}
   title="Observe my Kubernetes infrastructure"
-  useCase="observability"
+  useCase="kubernetes"
 />
 `;
 
@@ -25,6 +26,7 @@ exports[`guide card snapshots should render use case card component for search 1
     <GuideCardFooter
       activateGuide={[MockFunction]}
       guides={Array []}
+      telemetryId="search"
       useCase="search"
     />
   }
@@ -34,19 +36,20 @@ exports[`guide card snapshots should render use case card component for search 1
 />
 `;
 
-exports[`guide card snapshots should render use case card component for security 1`] = `
+exports[`guide card snapshots should render use case card component for siem 1`] = `
 <UseCaseCard
   addBasePath={[MockFunction]}
-  description="Defend your environment against threats by unifying SIEM, endpoint security, and cloud security."
+  description="Investigate threats and get your SIEM up and running by installing the Elastic Defend integration."
   footer={
     <GuideCardFooter
       activateGuide={[MockFunction]}
       guides={Array []}
-      useCase="security"
+      telemetryId="siem"
+      useCase="siem"
     />
   }
   isDarkTheme={false}
   title="Protect my environment"
-  useCase="security"
+  useCase="siem"
 />
 `;

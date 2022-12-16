@@ -21,6 +21,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { IndicatorsFlyoutContext } from './context';
 import { TakeAction } from './take_action/take_action';
 import { DateFormatter } from '../../../../components/date_formatter/date_formatter';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
@@ -34,7 +35,7 @@ export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
 export const TABS_TEST_ID = 'tiIndicatorFlyoutTabs';
 export const MORE_ACTIONS_ID = 'tiIndicatorFlyoutMoreActions';
 
-const enum TAB_IDS {
+enum TAB_IDS {
   overview,
   table,
   json,
@@ -49,12 +50,29 @@ export interface IndicatorsFlyoutProps {
    * Event to close flyout (used by {@link EuiFlyout}).
    */
   closeFlyout: () => void;
+  /**
+   * Boolean deciding if we show or hide the filter in/out feature in the flyout.
+   * We should be showing the filter in and out buttons when the flyout is used in the cases view.
+   */
+  kqlBarIntegration?: boolean;
+  /**
+   * Name of the indicator, used only when the flyout is rendered in the Cases view.
+   * Because the indicator name is a runtime field, when querying for the indicator from within
+   * the Cases view, this logic is not ran. Therefore, passing the name to the flyout is an
+   * easy (hopefully temporary) solution to display it within the flyout.
+   */
+  indicatorName?: string;
 }
 
 /**
  * Leverages the {@link EuiFlyout} from the @elastic/eui library to dhow the details of a specific {@link Indicator}.
  */
-export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({ indicator, closeFlyout }) => {
+export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
+  indicator,
+  closeFlyout,
+  kqlBarIntegration = false,
+  indicatorName,
+}) => {
   const [selectedTabId, setSelectedTabId] = useState(TAB_IDS.overview);
 
   const tabs = useMemo(
@@ -146,7 +164,11 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({ indicator, closeF
           {renderTabs}
         </EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>{selectedTabContent}</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        <IndicatorsFlyoutContext.Provider value={{ kqlBarIntegration, indicatorName }}>
+          {selectedTabContent}
+        </IndicatorsFlyoutContext.Provider>
+      </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>

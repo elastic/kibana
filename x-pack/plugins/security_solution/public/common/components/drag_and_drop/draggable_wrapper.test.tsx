@@ -58,7 +58,7 @@ describe('DraggableWrapper', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterEach(() => {

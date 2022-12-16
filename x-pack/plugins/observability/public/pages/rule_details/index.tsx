@@ -41,12 +41,14 @@ import { fromQuery, toQuery } from '../../utils/url';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
+import { getDefaultAlertSummaryTimeRange } from './helpers';
+
 import {
   EXECUTION_TAB,
   ALERTS_TAB,
   RULE_DETAILS_PAGE_ID,
   RULE_DETAILS_ALERTS_SEARCH_BAR_ID,
-  URL_STORAGE_KEY,
+  SEARCH_BAR_URL_STORAGE_KEY,
 } from './constants';
 import { RuleDetailsPathParams, TabId } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -57,7 +59,9 @@ import { PageTitle } from './components';
 import { getHealthColor } from './config';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
-import { observabilityFeatureId } from '../../../common';
+import { ALERT_STATUS_ALL } from '../../../common/constants';
+import { AlertStatus } from '../../../common/typings';
+import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
 import { ObservabilityAppServices } from '../../application/types';
 
@@ -70,12 +74,15 @@ export function RuleDetailsPage() {
       getEditAlertFlyout,
       getRuleEventLogList,
       getAlertsStateTable: AlertsStateTable,
-      getRuleAlertsSummary,
+      getRuleAlertsSummary: AlertSummaryWidget,
       getRuleStatusPanel,
       getRuleDefinition,
     },
     application: { capabilities, navigateToUrl },
     notifications: { toasts },
+    share: {
+      url: { locators },
+    },
   } = useKibana<ObservabilityAppServices>().services;
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
@@ -92,9 +99,10 @@ export function RuleDetailsPage() {
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
   });
-  const [tabId, setTabId] = useState<TabId>(
-    (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB
-  );
+  const [tabId, setTabId] = useState<TabId>(() => {
+    const urlTabId = (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB;
+    return [EXECUTION_TAB, ALERTS_TAB].includes(urlTabId) ? urlTabId : EXECUTION_TAB;
+  });
   const [features, setFeatures] = useState<string>('');
   const [ruleType, setRuleType] = useState<RuleType<string, string>>();
   const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
@@ -102,17 +110,40 @@ export function RuleDetailsPage() {
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
+  const [defaultAlertTimeRange] = useState(getDefaultAlertSummaryTimeRange);
   const ruleQuery = useRef([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
   ] as Query[]);
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
+    await locators.get(ruleDetailsLocatorID)?.navigate(
+      {
+        ruleId,
+        tabId: ALERTS_TAB,
+        status,
+      },
+      {
+        replace: true,
+      }
+    );
+    setTabId(ALERTS_TAB);
+    tabsRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const updateUrl = (nextQuery: { tabId: TabId }) => {
-    history.push({
+    const newTabId = nextQuery.tabId;
+    const nextSearch =
+      newTabId === ALERTS_TAB
+        ? {
+            ...toQuery(location.search),
+            ...nextQuery,
+          }
+        : { tabId: EXECUTION_TAB };
+
+    history.replace({
       ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        ...nextQuery,
-      }),
+      search: fromQuery(nextSearch),
     });
   };
 
@@ -216,14 +247,14 @@ export function RuleDetailsPage() {
           <EuiSpacer size="m" />
           <ObservabilityAlertSearchbarWithUrlSync
             appName={RULE_DETAILS_ALERTS_SEARCH_BAR_ID}
-            setEsQuery={setEsQuery}
-            urlStorageKey={URL_STORAGE_KEY}
-            queries={ruleQuery.current}
+            onEsQueryChange={setEsQuery}
+            urlStorageKey={SEARCH_BAR_URL_STORAGE_KEY}
+            defaultSearchQueries={ruleQuery.current}
           />
           <EuiSpacer size="s" />
           <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
             <EuiFlexItem>
-              {esQuery && (
+              {esQuery && features && (
                 <AlertsStateTable
                   alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                   configurationId={observabilityFeatureId}
@@ -281,7 +312,7 @@ export function RuleDetailsPage() {
         bottomBorder: false,
         rightSideItems: hasEditButton
           ? [
-              <EuiFlexGroup direction="rowReverse" alignItems="center">
+              <EuiFlexGroup direction="rowReverse" alignItems="flexStart">
                 <EuiFlexItem>
                   <EuiPopover
                     id="contextRuleEditMenu"
@@ -301,21 +332,19 @@ export function RuleDetailsPage() {
                       </EuiButton>
                     }
                   >
-                    <EuiFlexGroup direction="column" alignItems="flexStart">
+                    <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                       <EuiButtonEmpty
                         data-test-subj="editRuleButton"
                         size="s"
                         iconType="pencil"
                         onClick={handleEditRule}
                       >
-                        <EuiSpacer size="s" />
                         <EuiText size="s">
                           {i18n.translate('xpack.observability.ruleDetails.editRule', {
                             defaultMessage: 'Edit rule',
                           })}
                         </EuiText>
                       </EuiButtonEmpty>
-                      <EuiSpacer size="s" />
                       <EuiButtonEmpty
                         size="s"
                         iconType="trash"
@@ -329,11 +358,9 @@ export function RuleDetailsPage() {
                           })}
                         </EuiText>
                       </EuiButtonEmpty>
-                      <EuiSpacer size="s" />
                     </EuiFlexGroup>
                   </EuiPopover>
                 </EuiFlexItem>
-                <EuiSpacer size="s" />
               </EuiFlexGroup>,
             ]
           : [],
@@ -351,16 +378,19 @@ export function RuleDetailsPage() {
         </EuiFlexItem>
         <EuiSpacer size="m" />
         <EuiFlexItem style={{ minWidth: 350 }}>
-          {getRuleAlertsSummary({
-            rule,
-            filteredRuleTypes,
-          })}
+          <AlertSummaryWidget
+            rule={rule}
+            filteredRuleTypes={filteredRuleTypes}
+            onClick={(status) => onAlertSummaryWidgetClick(status)}
+            timeRange={defaultAlertTimeRange}
+          />
         </EuiFlexItem>
         <EuiSpacer size="m" />
         {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />
+      <div ref={tabsRef} />
       <EuiTabbedContent
         data-test-subj="ruleDetailsTabbedContent"
         tabs={tabs}

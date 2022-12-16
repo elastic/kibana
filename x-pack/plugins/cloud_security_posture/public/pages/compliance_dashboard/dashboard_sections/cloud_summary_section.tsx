@@ -6,9 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlexItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
 import { statusColors } from '../../../common/constants';
 import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
 import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
@@ -23,7 +22,7 @@ import {
 } from '../../../common/hooks/use_navigate_findings';
 import { RULE_FAILED } from '../../../../common/constants';
 
-export const dashboardColumnsGrow: Record<string, FlexItemGrowSize> = {
+export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   first: 3,
   second: 8,
   third: 8,

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 interface ExploreMatchingButtonProps {
@@ -44,6 +44,7 @@ export const ExploreMatchingButton = ({
           <EuiButton
             fullWidth
             size="s"
+            data-test-subj="explore-matching-indices-button"
             onClick={() => {
               setPopoverIsOpen(false);
               onCreateDefaultAdHocDataView(dataViewSearchString);

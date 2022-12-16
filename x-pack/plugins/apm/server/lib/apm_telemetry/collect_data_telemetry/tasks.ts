@@ -9,7 +9,7 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
-import { TelemetryTask } from '.';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_NAME,
@@ -41,7 +41,7 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
   USER_AGENT_ORIGINAL,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import {
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
   MAX_NUMBER_OF_SERVICE_GROUPS,
@@ -53,12 +53,30 @@ import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { APMPerService, APMTelemetry } from '../types';
+import { APMTelemetry, APMPerService, APMDataTelemetry } from '../types';
+import {
+  ApmIndicesConfig,
+  APM_AGENT_CONFIGURATION_INDEX,
+} from '../../../routes/settings/apm_indices/get_apm_indices';
+import { TelemetryClient } from '../telemetry_client';
+
+type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
 
 const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
 const timeout = '5m';
+
+interface TelemetryTask {
+  name: string;
+  executor: (params: TelemetryTaskExecutorParams) => Promise<APMDataTelemetry>;
+}
+
+export interface TelemetryTaskExecutorParams {
+  telemetryClient: TelemetryClient;
+  indices: ApmIndicesConfig;
+  savedObjectsClient: ISavedObjectsClient;
+}
 
 export const tasks: TelemetryTask[] = [
   {
@@ -449,7 +467,6 @@ export const tasks: TelemetryTask[] = [
         span: indices.span,
         transaction: indices.transaction,
         onboarding: indices.onboarding,
-        sourcemap: indices.sourcemap,
       };
 
       type ProcessorEvent = keyof typeof indicesByProcessorEvent;
@@ -543,7 +560,7 @@ export const tasks: TelemetryTask[] = [
     name: 'agent_configuration',
     executor: async ({ indices, telemetryClient }) => {
       const agentConfigurationCount = await telemetryClient.search({
-        index: indices.apmAgentConfigurationIndex,
+        index: APM_AGENT_CONFIGURATION_INDEX,
         body: {
           size: 0,
           timeout,
@@ -1018,11 +1035,10 @@ export const tasks: TelemetryTask[] = [
     executor: async ({ indices, telemetryClient }) => {
       const response = await telemetryClient.indicesStats({
         index: [
-          indices.apmAgentConfigurationIndex,
+          APM_AGENT_CONFIGURATION_INDEX,
           indices.error,
           indices.metric,
           indices.onboarding,
-          indices.sourcemap,
           indices.span,
           indices.transaction,
         ],

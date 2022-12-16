@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
@@ -16,6 +17,7 @@ import {
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
+import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { getUiActions } from '../../../kibana_services';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
 import { GetStateReturn } from '../services/discover_state';
@@ -29,6 +31,7 @@ export const useAdHocDataViews = ({
   filterManager,
   dataViews,
   toastNotifications,
+  trackUiMetric,
 }: {
   dataView: DataView;
   savedSearch: SavedSearch;
@@ -37,6 +40,7 @@ export const useAdHocDataViews = ({
   dataViews: DataViewsContract;
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
+  trackUiMetric?: (metricType: string, eventName: string | string[], count?: number) => void;
 }) => {
   const [adHocDataViewList, setAdHocDataViewList] = useState<DataView[]>(
     !dataView.isPersisted() ? [dataView] : []
@@ -48,8 +52,9 @@ export const useAdHocDataViews = ({
         const existing = prev.find((prevDataView) => prevDataView.id === dataView.id);
         return existing ? prev : [...prev, dataView];
       });
+      trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
-  }, [dataView]);
+  }, [dataView, trackUiMetric]);
 
   /**
    * Takes care of checking data view id references in filters

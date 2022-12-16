@@ -11,7 +11,7 @@ import { tasks } from './tasks';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 
 describe('data telemetry collection tasks', () => {
   const indices = {
@@ -298,10 +298,6 @@ describe('data telemetry collection tasks', () => {
             '1d': 1,
             all: 1,
           },
-          sourcemap: {
-            '1d': 1,
-            all: 1,
-          },
           span: {
             '1d': 1,
             all: 1,
@@ -319,9 +315,6 @@ describe('data telemetry collection tasks', () => {
             ms: 0,
           },
           onboarding: {
-            ms: 0,
-          },
-          sourcemap: {
             ms: 0,
           },
           span: {

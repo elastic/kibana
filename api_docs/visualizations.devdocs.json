@@ -202,7 +202,7 @@
             "label": "stage",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"production\""
+              "\"beta\" | \"experimental\" | \"production\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
@@ -1896,6 +1896,22 @@
               "() => ",
               "Observable",
               "<Record<string, unknown> | undefined>"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.getExpressionVariables",
+            "type": "Function",
+            "tags": [],
+            "label": "getExpressionVariables",
+            "description": [],
+            "signature": [
+              "() => Record<string, unknown> | undefined"
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
@@ -4500,7 +4516,7 @@
             "label": "stage",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"production\""
+              "\"beta\" | \"experimental\" | \"production\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
@@ -4966,7 +4982,7 @@
               "\nDescribes the visualization stage"
             ],
             "signature": [
-              "\"experimental\" | \"beta\" | \"production\" | undefined"
+              "\"beta\" | \"experimental\" | \"production\" | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
@@ -5545,7 +5561,7 @@
             "label": "stage",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"production\""
+              "\"beta\" | \"experimental\" | \"production\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
@@ -5892,6 +5908,21 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS",
+        "description": [],
+        "signature": [
+          "\"ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS\""
+        ],
+        "path": "src/plugins/visualizations/public/triggers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.ACTION_CONVERT_TO_LENS",
         "type": "string",
         "tags": [],
@@ -5914,6 +5945,21 @@
         "description": [],
         "signature": [
           "\"AGG_BASED_VISUALIZATION_TRIGGER\""
+        ],
+        "path": "src/plugins/visualizations/public/triggers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.DASHBOARD_VISUALIZATION_PANEL_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "DASHBOARD_VISUALIZATION_PANEL_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"DASHBOARD_VISUALIZATION_PANEL_TRIGGER\""
         ],
         "path": "src/plugins/visualizations/public/triggers/index.ts",
         "deprecated": false,
@@ -6206,7 +6252,7 @@
         "label": "VisualizationStage",
         "description": [],
         "signature": [
-          "\"experimental\" | \"beta\" | \"production\""
+          "\"beta\" | \"experimental\" | \"production\""
         ],
         "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
         "deprecated": false,
@@ -6372,7 +6418,7 @@
           },
           ") => void; reload: () => Promise<void>; supportedTriggers: () => string[]; getExpressionVariables$: () => ",
           "Observable",
-          "<Record<string, unknown> | undefined>; inputIsRefType: (input: ",
+          "<Record<string, unknown> | undefined>; getExpressionVariables: () => Record<string, unknown> | undefined; inputIsRefType: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -8977,12 +9023,12 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-common.EventAnnotationConfig.icon",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "icon",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | (() => JSX.Element) | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,

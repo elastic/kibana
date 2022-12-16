@@ -40,7 +40,7 @@ const onFormHook = (_form: FormHook<any>) => {
 
 describe('useForm() hook', () => {
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -83,6 +83,7 @@ describe('useForm() hook', () => {
       await act(async () => {
         setInputValue('usernameField', 'John');
         component.find('button').simulate('click');
+        jest.advanceTimersByTime(0);
       });
 
       const [formData, isValid] = onFormData.mock.calls[onFormData.mock.calls.length - 1];
@@ -134,6 +135,7 @@ describe('useForm() hook', () => {
         setInputValue('tagField2', expectedData.tags[1]);
 
         component.find('button').simulate('click');
+        jest.advanceTimersByTime(0);
       });
 
       const [formData] = onFormData.mock.calls[onFormData.mock.calls.length - 1];
@@ -184,16 +186,20 @@ describe('useForm() hook', () => {
       let isValid;
 
       await act(async () => {
-        ({ data, isValid } = await formHook!.submit());
+        const submitPromise = formHook!.submit();
+        jest.advanceTimersByTime(0);
+        ({ data, isValid } = await submitPromise);
       });
 
       expect(isValid).toBe(true);
       expect(data).toEqual({ username: 'initialValue' });
 
-      setInputValue('myField', 'wrongValue'); // Validation will fail
-
       await act(async () => {
-        ({ data, isValid } = await formHook!.submit());
+        setInputValue('myField', 'wrongValue'); // Validation will fail
+
+        const submitPromise = formHook!.submit();
+        jest.advanceTimersByTime(0);
+        ({ data, isValid } = await submitPromise);
       });
 
       expect(isValid).toBe(false);
@@ -254,6 +260,7 @@ describe('useForm() hook', () => {
       // Make some changes to the form fields
       await act(async () => {
         setInputValue('usernameField', 'John');
+        jest.advanceTimersByTime(0);
       });
 
       [{ data, isValid }] = onFormData.mock.calls[
@@ -577,7 +584,9 @@ describe('useForm() hook', () => {
       let isValid: boolean = false;
 
       await act(async () => {
-        isValid = await formHook!.validate();
+        const validatePromise = formHook!.validate();
+        jest.advanceTimersByTime(0);
+        isValid = await validatePromise;
       });
 
       expect(isValid).toBe(true);
@@ -624,10 +633,64 @@ describe('useForm() hook', () => {
       });
 
       await act(async () => {
-        isValid = await formHook!.validate();
+        const validatePromise = formHook!.validate();
+        jest.advanceTimersByTime(0);
+        isValid = await validatePromise;
       });
 
       expect(isValid).toBe(false);
+    });
+
+    test('should return correct state when validating a form field (combo box)', async () => {
+      let fieldHook: FieldHook<string[], unknown>;
+
+      const TestComp = () => {
+        const { form } = useForm();
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            <UseField
+              path="test-path"
+              defaultValue={['foo']}
+              config={{
+                validations: [
+                  {
+                    validator: emptyField('error-message'),
+                  },
+                ],
+              }}
+            >
+              {(field) => {
+                fieldHook = field;
+                return <ComboBoxField field={field as FieldHook} />;
+              }}
+            </UseField>
+          </Form>
+        );
+      };
+
+      registerTestBed(TestComp)();
+
+      let isValid: boolean = false;
+
+      await act(async () => {
+        fieldHook.setValue([]);
+        const validatePromise = formHook!.validate();
+        jest.advanceTimersByTime(0);
+        isValid = await validatePromise;
+      });
+
+      expect(isValid).toBe(false);
+
+      await act(async () => {
+        fieldHook.setValue(['bar']);
+        const validatePromise = formHook!.validate();
+        jest.advanceTimersByTime(0);
+        isValid = await validatePromise;
+      });
+
+      expect(isValid).toBe(true);
     });
   });
 
@@ -679,7 +742,9 @@ describe('useForm() hook', () => {
       expect(errors).toEqual([]);
 
       await act(async () => {
-        await formHook!.submit();
+        const submitPromise = formHook!.submit();
+        jest.advanceTimersByTime(0);
+        await submitPromise;
       });
       errors = formHook!.getErrors();
       expect(errors).toEqual(['Field1 can not be empty']);

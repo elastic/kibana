@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
@@ -16,20 +15,11 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SLO, StoredSLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
-import { createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
+import { createAPMTransactionDurationIndicator, createSLO, aStoredSLO } from './fixtures/slo';
 import { SLONotFound } from '../../errors';
 import { sloSchema } from '../../types/schema';
 
 const SOME_SLO = createSLO({ indicator: createAPMTransactionDurationIndicator() });
-
-function aStoredSLO(slo: SLO): SavedObject<StoredSLO> {
-  return {
-    id: slo.id,
-    attributes: sloSchema.encode(slo),
-    type: SO_SLO_TYPE,
-    references: [],
-  };
-}
 
 function aFindResponse(slo: SLO): SavedObjectsFindResponse<StoredSLO> {
   return {
@@ -111,11 +101,11 @@ describe('KibanaSavedObjectsSLORepository', () => {
   describe('find', () => {
     const DEFAULT_PAGINATION = { page: 1, perPage: 25 };
 
-    it('includes the filter on name when provided', async () => {
+    it('includes the filter on name with wildcard when provided', async () => {
       const repository = new KibanaSavedObjectsSLORepository(soClientMock);
       soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
 
-      const result = await repository.find({ name: 'availability' }, DEFAULT_PAGINATION);
+      const result = await repository.find({ name: 'availability*' }, DEFAULT_PAGINATION);
 
       expect(result).toEqual({
         page: 1,
@@ -127,7 +117,27 @@ describe('KibanaSavedObjectsSLORepository', () => {
         type: SO_SLO_TYPE,
         page: 1,
         perPage: 25,
-        filter: `slo.attributes.name: availability`,
+        filter: `slo.attributes.name: availability*`,
+      });
+    });
+
+    it('includes the filter on name with added wildcard when not provided', async () => {
+      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+      soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+
+      const result = await repository.find({ name: 'availa' }, DEFAULT_PAGINATION);
+
+      expect(result).toEqual({
+        page: 1,
+        perPage: 25,
+        total: 1,
+        results: [SOME_SLO],
+      });
+      expect(soClientMock.find).toHaveBeenCalledWith({
+        type: SO_SLO_TYPE,
+        page: 1,
+        perPage: 25,
+        filter: `slo.attributes.name: availa*`,
       });
     });
 

@@ -46,7 +46,7 @@ export const QuitGuideModal = ({
       setIsLoading(false);
       notifications.toasts.addDanger({
         title: i18n.translate('guidedOnboarding.quitGuideModal.deactivateGuideError', {
-          defaultMessage: 'Unable to update the guide. Please try again later.',
+          defaultMessage: 'Unable to update the guide. Wait a moment and try again.',
         }),
         text: error.message,
       });
@@ -71,8 +71,7 @@ export const QuitGuideModal = ({
         <EuiText>
           <p>
             {i18n.translate('guidedOnboarding.quitGuideModal.modalDescription', {
-              defaultMessage:
-                'You can restart anytime by opening the Setup guide from the Help menu.',
+              defaultMessage: 'You can restart the setup guide any time from the Help menu.',
             })}
           </p>
         </EuiText>

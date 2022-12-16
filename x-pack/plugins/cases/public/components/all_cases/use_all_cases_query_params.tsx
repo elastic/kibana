@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 
@@ -93,10 +93,16 @@ export function useAllCasesQueryParams(isModalView: boolean = false) {
 
       if (!isEqual(newUrlParams, urlParams)) {
         try {
-          history.push({
+          const newHistory = {
             ...location,
             search: stringify({ ...parsedUrlParams, ...newUrlParams }),
-          });
+          };
+
+          if (isFirstRenderRef.current) {
+            history.replace(newHistory);
+          } else {
+            history.push(newHistory);
+          }
         } catch {
           // silently fail
         }
@@ -115,10 +121,12 @@ export function useAllCasesQueryParams(isModalView: boolean = false) {
     ]
   );
 
-  if (isFirstRenderRef.current) {
-    persistAndUpdateQueryParams(isModalView ? DEFAULT_QUERY_PARAMS : {});
-    isFirstRenderRef.current = false;
-  }
+  useEffect(() => {
+    if (isFirstRenderRef.current) {
+      persistAndUpdateQueryParams(isModalView ? DEFAULT_QUERY_PARAMS : {});
+      isFirstRenderRef.current = false;
+    }
+  }, [isModalView, persistAndUpdateQueryParams]);
 
   return {
     queryParams,

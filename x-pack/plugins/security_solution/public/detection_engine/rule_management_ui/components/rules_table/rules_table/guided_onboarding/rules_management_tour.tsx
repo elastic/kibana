@@ -11,6 +11,7 @@ import { noop } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
+import { siemGuideId } from '../../../../../../../common/guided_onboarding/siem_guide_config';
 import { BulkActionType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFindRulesQuery } from '../../../../../rule_management/api/hooks/use_find_rules_query';
@@ -48,7 +49,7 @@ export const RulesManagementTour = () => {
   const { actions } = useRulesTableContext();
 
   const isRulesStepActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$('security', 'rules') ?? of(false),
+    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, 'rules') ?? of(false),
     false
   );
 
@@ -105,7 +106,7 @@ export const RulesManagementTour = () => {
   // Synchronize the current "internal" tour step with the global one
   useEffect(() => {
     if (isRulesStepActive && tourStatus === GuidedOnboardingRulesStatus.completed) {
-      guidedOnboardingApi?.completeGuideStep('security', 'rules');
+      guidedOnboardingApi?.completeGuideStep('siem', 'rules');
     }
   }, [guidedOnboardingApi, isRulesStepActive, tourStatus]);
 
@@ -143,7 +144,7 @@ export const RulesManagementTour = () => {
       )}
       {isSearchFirstRuleAnchorMounted && demoRule && (
         <EuiTourStep
-          title={i18n.SEARCH_FIRST_RULE_TITLE(demoRule.name)}
+          title={i18n.SEARCH_FIRST_RULE_TITLE}
           content={i18n.SEARCH_FIRST_RULE_CONTENT(demoRule.name)}
           onFinish={noop}
           step={2}
@@ -152,7 +153,7 @@ export const RulesManagementTour = () => {
           anchor={`#${SEARCH_FIRST_RULE_ANCHOR}`}
           anchorPosition="upCenter"
           footerAction={
-            <EuiButton size="s" color="success" fill onClick={findDemoRule}>
+            <EuiButton size="s" color="success" onClick={findDemoRule}>
               {i18n.NEXT_BUTTON}
             </EuiButton>
           }
@@ -160,7 +161,7 @@ export const RulesManagementTour = () => {
       )}
       {isActivateFirstRuleAnchorMounted && demoRule && (
         <EuiTourStep
-          title={i18n.ENABLE_FIRST_RULE_TITLE(demoRule.name)}
+          title={i18n.ENABLE_FIRST_RULE_TITLE}
           content={i18n.ENABLE_FIRST_RULE_CONTENT(demoRule.name)}
           onFinish={noop}
           step={3}
@@ -169,7 +170,7 @@ export const RulesManagementTour = () => {
           anchor={`#${ruleSwitchAnchor}`}
           anchorPosition="upCenter"
           footerAction={
-            <EuiButton size="s" color="success" fill onClick={enableDemoRule}>
+            <EuiButton size="s" color="success" onClick={enableDemoRule}>
               {i18n.NEXT_BUTTON}
             </EuiButton>
           }

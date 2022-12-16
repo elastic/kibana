@@ -704,7 +704,11 @@
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/fleet_usage_sender.ts"
+                "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
                 "plugin": "osquery",

@@ -41,19 +41,6 @@ export const OptionsListStrings = {
         defaultMessage:
           'Wait to display results until the list is complete. This setting is useful for large data sets, but the results might take longer to populate.',
       }),
-    getHideExcludeTitle: () =>
-      i18n.translate('controls.optionsList.editor.hideExclude', {
-        defaultMessage: 'Allow selections to be excluded',
-      }),
-    getHideExistsQueryTitle: () =>
-      i18n.translate('controls.optionsList.editor.hideExistsQuery', {
-        defaultMessage: 'Allow exists query',
-      }),
-    getHideExistsQueryTooltip: () =>
-      i18n.translate('controls.optionsList.editor.hideExistsQueryTooltip', {
-        defaultMessage:
-          'Allows you to create an exists query, which returns all documents that contain an indexed value for the field.',
-      }),
   },
   popover: {
     getAriaLabel: (fieldName: string) =>
@@ -129,6 +116,18 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.excludeOptionsLegend', {
         defaultMessage: 'Include or exclude selections',
       }),
+    getSortPopoverTitle: () =>
+      i18n.translate('controls.optionsList.popover.sortTitle', {
+        defaultMessage: 'Sort',
+      }),
+    getSortPopoverDescription: () =>
+      i18n.translate('controls.optionsList.popover.sortDescription', {
+        defaultMessage: 'Define the sort order',
+      }),
+    getSortDisabledTooltip: () =>
+      i18n.translate('controls.optionsList.popover.sortDisabledTooltip', {
+        defaultMessage: 'Ignore sorting when “Show only selected” is true.',
+      }),
   },
   controlAndPopover: {
     getExists: (negate: number = +false) =>
@@ -136,5 +135,39 @@ export const OptionsListStrings = {
         defaultMessage: '{negate, plural, one {Exist} other {Exists}}',
         values: { negate },
       }),
+  },
+  editorAndPopover: {
+    getSortDirectionLegend: () =>
+      i18n.translate('controls.optionsList.popover.sortDirections', {
+        defaultMessage: 'Sort directions',
+      }),
+    sortBy: {
+      _count: {
+        getSortByLabel: () =>
+          i18n.translate('controls.optionsList.popover.sortBy.docCount', {
+            defaultMessage: 'By document count',
+          }),
+      },
+      _key: {
+        getSortByLabel: () =>
+          i18n.translate('controls.optionsList.popover.sortBy.alphabetical', {
+            defaultMessage: 'Alphabetically',
+          }),
+      },
+    },
+    sortOrder: {
+      asc: {
+        getSortOrderLabel: () =>
+          i18n.translate('controls.optionsList.popover.sortOrder.asc', {
+            defaultMessage: 'Ascending',
+          }),
+      },
+      desc: {
+        getSortOrderLabel: () =>
+          i18n.translate('controls.optionsList.popover.sortOrder.desc', {
+            defaultMessage: 'Descending',
+          }),
+      },
+    },
   },
 };
