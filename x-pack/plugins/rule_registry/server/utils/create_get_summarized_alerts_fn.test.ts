@@ -43,7 +43,12 @@ describe('createGetSummarizedAlertsFn', () => {
       isLifecycleAlert: false,
     })();
 
-    await getSummarizedAlertsFn({ executionUuid: 'abc', ruleId: 'rule-id', spaceId: 'space-id' });
+    await getSummarizedAlertsFn({
+      executionUuid: 'abc',
+      ruleId: 'rule-id',
+      spaceId: 'space-id',
+      excludedAlertInstanceIds: [],
+    });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
   });
 
@@ -54,7 +59,12 @@ describe('createGetSummarizedAlertsFn', () => {
       isLifecycleAlert: false,
     })();
 
-    await getSummarizedAlertsFn({ executionUuid: 'abc', ruleId: 'rule-id', spaceId: 'space-id' });
+    await getSummarizedAlertsFn({
+      executionUuid: 'abc',
+      ruleId: 'rule-id',
+      spaceId: 'space-id',
+      excludedAlertInstanceIds: [],
+    });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
   });
 
@@ -156,6 +166,7 @@ describe('createGetSummarizedAlertsFn', () => {
       executionUuid: 'abc',
       ruleId: 'rule-id',
       spaceId: 'space-id',
+      excludedAlertInstanceIds: [],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(3);
@@ -405,6 +416,7 @@ describe('createGetSummarizedAlertsFn', () => {
       end: new Date('2020-01-01T12:25:00.000Z'),
       ruleId: 'rule-id',
       spaceId: 'space-id',
+      excludedAlertInstanceIds: [],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(3);
@@ -655,6 +667,7 @@ describe('createGetSummarizedAlertsFn', () => {
       executionUuid: 'abc',
       ruleId: 'rule-id',
       spaceId: 'space-id',
+      excludedAlertInstanceIds: [],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
@@ -807,6 +820,7 @@ describe('createGetSummarizedAlertsFn', () => {
       end: new Date('2020-01-01T12:25:00.000Z'),
       ruleId: 'rule-id',
       spaceId: 'space-id',
+      excludedAlertInstanceIds: [],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
@@ -897,7 +911,12 @@ describe('createGetSummarizedAlertsFn', () => {
     })();
 
     await expect(
-      getSummarizedAlertsFn({ executionUuid: 'abc', ruleId: 'rule-id', spaceId: 'space-id' })
+      getSummarizedAlertsFn({
+        executionUuid: 'abc',
+        ruleId: 'rule-id',
+        spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"search error"`);
   });
 
@@ -909,7 +928,11 @@ describe('createGetSummarizedAlertsFn', () => {
     })();
 
     await expect(
-      getSummarizedAlertsFn({ ruleId: 'rule-id', spaceId: 'space-id' })
+      getSummarizedAlertsFn({
+        ruleId: 'rule-id',
+        spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Must specify either execution UUID or time range for summarized alert query."`
     );
@@ -929,6 +952,7 @@ describe('createGetSummarizedAlertsFn', () => {
         end: new Date(),
         ruleId: 'rule-id',
         spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Must specify either execution UUID or time range for summarized alert query."`
@@ -943,7 +967,12 @@ describe('createGetSummarizedAlertsFn', () => {
     })();
 
     await expect(
-      getSummarizedAlertsFn({ start: new Date(), ruleId: 'rule-id', spaceId: 'space-id' })
+      getSummarizedAlertsFn({
+        start: new Date(),
+        ruleId: 'rule-id',
+        spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Must specify either execution UUID or time range for summarized alert query."`
     );
@@ -957,7 +986,12 @@ describe('createGetSummarizedAlertsFn', () => {
     })();
 
     await expect(
-      getSummarizedAlertsFn({ end: new Date(), ruleId: 'rule-id', spaceId: 'space-id' })
+      getSummarizedAlertsFn({
+        end: new Date(),
+        ruleId: 'rule-id',
+        spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Must specify either execution UUID or time range for summarized alert query."`
     );

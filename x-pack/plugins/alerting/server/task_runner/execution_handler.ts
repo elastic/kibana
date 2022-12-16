@@ -201,7 +201,12 @@ export class ExecutionHandler<
           if (isSummaryActionPerRuleRun(action) && !this.hasAlerts(alerts)) {
             continue;
           }
-          const summarizedAlerts = await this.getSummarizedAlerts({ action, spaceId, ruleId });
+          const summarizedAlerts = await this.getSummarizedAlerts({
+            action,
+            spaceId,
+            ruleId,
+            excludedAlertInstanceIds: this.rule.mutedInstanceIds,
+          });
           const actionToRun = {
             ...action,
             params: injectActionParams({
@@ -511,10 +516,12 @@ export class ExecutionHandler<
     action,
     ruleId,
     spaceId,
+    excludedAlertInstanceIds,
   }: {
     action: RuleAction;
     ruleId: string;
     spaceId: string;
+    excludedAlertInstanceIds: string[];
   }) {
     let options;
 
@@ -527,12 +534,14 @@ export class ExecutionHandler<
         end: new Date(),
         ruleId,
         spaceId,
+        excludedAlertInstanceIds,
       };
     } else {
       options = {
         executionUuid: this.executionId,
         ruleId,
         spaceId,
+        excludedAlertInstanceIds,
       };
     }
 
