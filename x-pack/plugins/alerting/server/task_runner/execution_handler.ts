@@ -225,10 +225,6 @@ export class ExecutionHandler<
           alertId,
           alertGroup: action.group,
         });
-
-        if (recovered) {
-          alert.scheduleActions(action.group as ActionGroupIds);
-        }
       }
 
       if (!!bulkActions.length) {
