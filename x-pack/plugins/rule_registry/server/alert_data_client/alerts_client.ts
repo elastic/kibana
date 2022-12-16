@@ -20,6 +20,7 @@ import {
   ValidFeatureId,
   ALERT_STATUS_RECOVERED,
   ALERT_END,
+  ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-data-utils';
 
 import {
@@ -36,6 +37,7 @@ import {
 import { Logger, ElasticsearchClient, EcsEventOutcome } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { isEmpty } from 'lodash';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -521,11 +523,15 @@ export class AlertsClient {
     fixedInterval = '1m',
   }: GetAlertSummaryParams) {
     try {
-      const indexToUse = ((await this.getAuthorizedAlertsIndices(featureIds)) ?? []).join(',');
+      const indexToUse = await this.getAuthorizedAlertsIndices(featureIds);
+
+      if (isEmpty(indexToUse)) {
+        throw Boom.badRequest('no featureIds were provided for getting alert summary');
+      }
 
       // first search for the alert by id, then use the alert info to check if user has access to it
       const responseAlertSum = await this.singleSearchAfterAndAudit({
-        index: indexToUse,
+        index: (indexToUse ?? []).join(),
         operation: ReadOperations.Get,
         aggs: {
           active_alerts_bucket: {
@@ -539,8 +545,8 @@ export class AlertsClient {
               extended_bounds: {
                 min: gte,
                 max: lte,
-                min_doc_count: 0,
               },
+              min_doc_count: 0,
             },
           },
           recovered_alerts: {
@@ -557,11 +563,14 @@ export class AlertsClient {
                   extended_bounds: {
                     min: gte,
                     max: lte,
-                    min_doc_count: 0,
                   },
+                  min_doc_count: 0,
                 },
               },
             },
+          },
+          count: {
+            terms: { field: ALERT_STATUS },
           },
         },
         query: {
@@ -575,14 +584,29 @@ export class AlertsClient {
                   },
                 },
               },
-              ...(filter ? [filter] : []),
+              ...(filter ? filter : []),
             ],
           },
         },
         size: 0,
       });
 
+      let activeAlertCount = 0;
+      let recoveredAlertCount = 0;
+      (
+        (responseAlertSum.aggregations?.count as estypes.AggregationsMultiBucketAggregateBase)
+          .buckets as estypes.AggregationsStringTermsBucketKeys[]
+      ).forEach((b) => {
+        if (b.key === ALERT_STATUS_ACTIVE) {
+          activeAlertCount = b.doc_count;
+        } else if (b.key === ALERT_STATUS_RECOVERED) {
+          recoveredAlertCount = b.doc_count;
+        }
+      });
+
       return {
+        activeAlertCount,
+        recoveredAlertCount,
         activeAlerts:
           (
             responseAlertSum.aggregations

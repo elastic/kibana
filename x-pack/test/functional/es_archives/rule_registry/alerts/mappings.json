@@ -69,6 +69,10 @@
           "type": "keyword",
           "ignore_above": 256
         },
+        "kibana.alert.status": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
         "kibana.alert.time_range": {
           "type": "date_range",
           "format": "epoch_millis||strict_date_optional_time"

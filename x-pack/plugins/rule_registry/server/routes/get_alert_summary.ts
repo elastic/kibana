@@ -33,7 +33,7 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
             t.exact(
               t.partial({
                 fixed_interval: t.string,
-                filter: t.object,
+                filter: t.array(t.object),
               })
             ),
           ])

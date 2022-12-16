@@ -45,6 +45,8 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       expect(alertSummary.body).to.eql({
+        activeAlertCount: 1,
+        recoveredAlertCount: 1,
         activeAlerts: [
           { key_as_string: '1608130800000', key: 1608130800000, doc_count: 0 },
           { key_as_string: '1608131400000', key: 1608131400000, doc_count: 2 },
@@ -74,17 +76,21 @@ export default ({ getService }: FtrProviderContext) => {
         .send({
           gte: '2020-12-16T15:00:00.000Z',
           lte: '2020-12-16T16:00:00.000Z',
-          filter: {
-            terms: {
-              _id: [LOGS_ALERT_ID2],
+          filter: [
+            {
+              terms: {
+                _id: [LOGS_ALERT_ID2],
+              },
             },
-          },
+          ],
           featureIds: ['logs'],
           fixed_interval: '10m',
         })
         .expect(200);
 
       expect(alertSummary.body).to.eql({
+        activeAlertCount: 0,
+        recoveredAlertCount: 1,
         activeAlerts: [
           { key_as_string: '1608130800000', key: 1608130800000, doc_count: 0 },
           { key_as_string: '1608131400000', key: 1608131400000, doc_count: 1 },
@@ -114,17 +120,21 @@ export default ({ getService }: FtrProviderContext) => {
         .send({
           gte: '2020-12-16T15:00:00.000Z',
           lte: '2020-12-16T16:00:00.000Z',
-          filter: {
-            terms: {
-              _id: [LOGS_ALERT_ID],
+          filter: [
+            {
+              terms: {
+                _id: [LOGS_ALERT_ID],
+              },
             },
-          },
+          ],
           featureIds: ['logs'],
           fixed_interval: '10m',
         })
         .expect(200);
 
       expect(alertSummary.body).to.eql({
+        activeAlertCount: 1,
+        recoveredAlertCount: 0,
         activeAlerts: [
           { key_as_string: '1608130800000', key: 1608130800000, doc_count: 0 },
           { key_as_string: '1608131400000', key: 1608131400000, doc_count: 1 },
