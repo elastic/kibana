@@ -5,5 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export { CustomBranding, CustomBrandingStart, CustomBrandingService } from './src/types';
+export type { CustomBranding, CustomBrandingStart } from './src/types';
+export { CustomBrandingService } from './src/types';
