@@ -155,6 +155,7 @@ export function ChangeDataView({
         {...rest}
       >
         <>
+          {/* we don't want to display the adHoc icon on text based mode */}
           {isAdHocSelected && !isTextBasedLangSelected && (
             <EuiIcon
               type={adhoc}
