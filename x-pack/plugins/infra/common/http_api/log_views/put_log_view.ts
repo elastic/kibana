@@ -13,7 +13,7 @@ export const putLogViewRequestParamsRT = rt.type({
 });
 
 export const putLogViewRequestPayloadRT = rt.type({
-  attributes: rt.partial(logViewAttributesRT.type.props),
+  attributes: logViewAttributesRT,
 });
 export type PutLogViewRequestPayload = rt.TypeOf<typeof putLogViewRequestPayloadRT>;
 

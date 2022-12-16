@@ -18,7 +18,7 @@ export const initInfraSource = (config: MonitoringConfig, infraPlugin: InfraPlug
       ccs: CCS_REMOTE_PATTERN,
     });
 
-    infraPlugin.defineInternalSourceConfiguration(INFRA_SOURCE_ID, {
+    infraPlugin.logViews.defineInternalLogView(INFRA_SOURCE_ID, {
       name: 'Elastic Stack Logs',
       logIndices: {
         type: 'index_name',
