@@ -18,7 +18,7 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/content-management-inspector",
+    "@kbn/content-management-content-editor",
     "@kbn/core-http-browser",
     "@kbn/core-theme-browser",
     "@kbn/core-mount-utils-browser",

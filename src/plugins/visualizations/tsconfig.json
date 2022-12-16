@@ -45,7 +45,7 @@
     "@kbn/content-management-table-list",
     "@kbn/test-jest-helpers",
     "@kbn/analytics",
-    "@kbn/content-management-inspector",
+    "@kbn/content-management-content-editor",
     "@kbn/core-saved-objects-api-browser",
     "@kbn/core-overlays-browser",
     "@kbn/config-schema",
