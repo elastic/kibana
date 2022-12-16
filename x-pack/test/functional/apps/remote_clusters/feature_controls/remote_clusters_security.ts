@@ -70,6 +70,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'rollup_jobs',
             'transform',
             'remote_clusters',
+            'migrate_data',
           ],
         });
       });
