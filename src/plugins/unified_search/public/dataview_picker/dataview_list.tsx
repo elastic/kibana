@@ -23,17 +23,16 @@ import {
 } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
 
-import { Direction } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { OptionsListStrings } from './dataview_list_strings';
+import {
+  OptionsListSortBy,
+  OptionsListOrder,
+  sortDirections,
+  DEFAULT_SORT,
+} from './suggestions_sorting';
 
-export type OptionsListSortBy = '_key';
-export type OptionsListOrder = 'asc' | 'desc';
-
-export const DEFAULT_SORT: SortingType = { by: '_key', direction: 'asc' };
-
-export const sortDirections: Readonly<Direction[]> = ['asc', 'desc'] as const;
 export type SortDirection = typeof sortDirections[number];
 export interface SortingType {
   by: OptionsListSortBy;
@@ -82,9 +81,7 @@ export function DataViewsList({
     );
     return direction === 'asc' ? sortedDataViews : sortedDataViews.reverse();
   };
-  const [sortedDataViewsList, setSortedDataViewsList] = useState(
-    hadnleAlphabeticalSorting(dataViewsList, 'asc')
-  );
+  const [sortedDataViewsList, setSortedDataViewsList] = useState(dataViewsList);
 
   const [sortByOptions, setSortByOptions] = useState<SortByItem[]>(() => {
     return getCompatibleSortingTypes().map((key) => {

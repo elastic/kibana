@@ -34,6 +34,7 @@ import type { TextBasedLanguagesTransitionModalProps } from './text_languages_tr
 import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
 import { DataViewSelector } from './data_view_selector';
+import { DEFAULT_SORT, hadnleAlphabeticalSorting } from './suggestions_sorting';
 
 // local storage key for the text based languages transition modal
 const TEXT_LANG_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
@@ -113,7 +114,7 @@ export function ChangeDataView({
           }
         });
       }
-      setDataViewsList(dataViewsRefs);
+      setDataViewsList(hadnleAlphabeticalSorting(dataViewsRefs, DEFAULT_SORT.direction));
     };
     fetchDataViews();
   }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
