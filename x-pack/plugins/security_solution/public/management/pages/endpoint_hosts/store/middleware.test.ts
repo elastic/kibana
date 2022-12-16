@@ -140,7 +140,6 @@ describe('endpoint list middleware', () => {
     await Promise.all([
       waitForAction('serverReturnedEndpointList'),
       waitForAction('endpointPendingActionsStateChanged'),
-      waitForAction('serverReturnedEndpointsTotal'),
       waitForAction('serverReturnedMetadataPatterns'),
       waitForAction('serverCancelledPolicyItemsLoading'),
       waitForAction('serverReturnedEndpointExistValue'),
