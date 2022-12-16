@@ -153,13 +153,13 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           query={query}
           timeRange={timeRange}
         />
-        {isSearching ? (
-          <EuiLoadingSpinner size="l" />
-        ) : (
-          <EuiCallOut title="Search results">
+        <EuiCallOut title="Search results">
+          {isSearching ? (
+            <EuiLoadingSpinner size="l" />
+          ) : (
             <p>Hits: {hits}</p>
-          </EuiCallOut>
-        )}
+          )}
+        </EuiCallOut>
       </EuiPanel>
     </>
   );
