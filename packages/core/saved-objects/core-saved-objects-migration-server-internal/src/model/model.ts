@@ -9,6 +9,7 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
+import assert from 'assert';
 import { type AliasAction, isTypeof } from '../actions';
 import type { AllActionStates, State } from '../state';
 import type { ResponseType } from '../next';
@@ -38,6 +39,7 @@ import {
   throwBadControlState,
   throwBadResponse,
   versionMigrationCompleted,
+  indexNameToAliasName,
 } from './helpers';
 import { createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -169,14 +171,19 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         )
       ) {
         const targetIndex = source!;
+        const legacyAliasName = indexNameToAliasName(source!);
+
+        assert(aliases[legacyAliasName], `Expected ${legacyAliasName} to exist.`);
 
         return {
           ...stateP,
-          // We set a special flag that indicates we DO NOT need to reindex
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+          controlState: 'PREPARE_COMPATIBLE_MIGRATION',
           sourceIndex: Option.none,
           targetIndex,
           sourceIndexMappings: indices[source!].mappings,
+          preTransformDocsActions: [
+            { remove: { alias: indexNameToAliasName(source!), index: source!, must_exist: true } },
+          ],
           // Setting this to "undefined" will trigger UPDATE_TARGET_MAPPINGS
           // which we always want to do for new versions
           targetIndexCurrentMappings: undefined,
@@ -184,9 +191,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             stateP.targetIndexMappings,
             indices[source!].mappings
           ),
-          // Point the current and version alias to the same index
+          // Point the version alias to the source index
           versionIndexReadyActions: Option.some<AliasAction[]>([
-            { add: { index: source!, alias: stateP.currentAlias } },
             { add: { index: source!, alias: stateP.versionAlias } },
           ]),
         };
@@ -307,6 +313,26 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           },
         ],
       };
+    }
+  } else if (stateP.controlState === 'PREPARE_COMPATIBLE_MIGRATION') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+      };
+    } else if (Either.isLeft(res)) {
+      // We assume that the alias was already deleted by another Kibana instance
+      if (isTypeof(res.left, 'alias_not_found_exception')) {
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+        };
+      } else {
+        throwBadResponse(stateP, res.left as never);
+      }
+    } else {
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
