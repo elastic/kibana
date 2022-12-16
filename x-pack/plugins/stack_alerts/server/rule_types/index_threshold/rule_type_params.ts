@@ -70,14 +70,11 @@ function validateDuration(duration: string): string | undefined {
   try {
     parseDuration(duration);
   } catch (err) {
-    return i18n.translate(
-      'xpack.triggersActionsUI.data.coreQueryParams.invalidDurationErrorMessage',
-      {
-        defaultMessage: 'invalid duration: "{duration}"',
-        values: {
-          duration,
-        },
-      }
-    );
+    return i18n.translate('xpack.stackAlerts.indexThreshold.invalidDurationErrorMessage', {
+      defaultMessage: 'invalid duration: "{duration}"',
+      values: {
+        duration,
+      },
+    });
   }
 }
