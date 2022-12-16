@@ -450,12 +450,13 @@ export const DiscoverGrid = ({
     }
     return { columns: sortingColumns, onSort: () => {} };
   }, [sortingColumns, onTableSort, isSortEnabled]);
+
+  const canSetExpandedDoc = Boolean(setExpandedDoc && DocumentView);
+
   const lead = useMemo(
     () =>
-      getLeadControlColumns(!!(setExpandedDoc && DocumentView)).filter(({ id }) =>
-        controlColumnIds.includes(id)
-      ),
-    [controlColumnIds, setExpandedDoc, DocumentView]
+      getLeadControlColumns(canSetExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
+    [controlColumnIds, canSetExpandedDoc]
   );
 
   const additionalControls = useMemo(
