@@ -61,7 +61,7 @@ export function asPercentWithTwoDecimals(
   // 33.2 => 33.20%
   // 3.32 => 3.32%
   // 0 => 0%
-  if (String(Math.abs(decimal)).split('.').at(1)?.length === 2 || decimal === 0) {
+  if (String(Math.abs(decimal)).split('.').at(1)?.length === 2 || decimal === 0 || decimal === 1) {
     return numeral(decimal).format('0%');
   }
 
