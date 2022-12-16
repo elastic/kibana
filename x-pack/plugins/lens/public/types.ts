@@ -104,6 +104,7 @@ export interface EditorFrameProps {
   showNoDataPopover: () => void;
   lensInspector: LensInspector;
   indexPatternService: IndexPatternServiceAPI;
+  getUserMessages: UserMessagesGetter;
 }
 
 export type VisualizationMap = Record<string, Visualization>;
@@ -274,7 +275,12 @@ interface DimensionLink {
 type UserMessageDisplayLocation =
   | {
       // NOTE: 'workspace' implies that this should block rendering. We want to move toward more errors that do not block the render!
-      id: 'toolbar' | 'embeddable' | 'workspace' | 'suggestionPanel';
+      id:
+        | 'toolbar'
+        | 'embeddable'
+        | 'workspace'
+        | 'suggestionPanel'
+        | 'textBasedLanguagesQueryInput';
     }
   | { id: 'dimensionTrigger'; layerId: string; dimensionId: string };
 
@@ -312,7 +318,6 @@ export interface Datasource<T = unknown, P = unknown> {
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
-  getUnifiedSearchErrors?: (state: T) => Error[];
 
   insertLayer: (state: T, newLayerId: string, linkToLayers?: string[]) => T;
   createEmptyLayer: (indexPatternId: string) => T;

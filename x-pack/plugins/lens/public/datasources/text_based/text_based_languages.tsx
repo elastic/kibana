@@ -177,22 +177,16 @@ export function getTextBasedDatasource({
         const message: UserMessage = {
           severity: 'error',
           fixableInEditor: true,
-          displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
+          displayLocations: [
+            { id: 'workspace' },
+            { id: 'suggestionPanel' },
+            { id: 'textBasedLanguagesQueryInput' },
+          ],
           shortMessage: err.message,
           longMessage: err.message,
         };
         return message;
       });
-    },
-    getUnifiedSearchErrors: (state) => {
-      const errors: Error[] = [];
-
-      Object.values(state.layers).forEach((layer) => {
-        if (layer.errors && layer.errors.length > 0) {
-          errors.push(...layer.errors);
-        }
-      });
-      return errors;
     },
     initialize(
       state?: TextBasedPersistedState,

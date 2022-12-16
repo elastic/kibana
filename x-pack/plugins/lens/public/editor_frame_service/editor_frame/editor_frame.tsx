@@ -33,8 +33,6 @@ import {
   selectActiveDatasourceId,
   selectDatasourceStates,
   selectVisualization,
-  updateDatasourceState,
-  selectExecutionContext,
 } from '../../state_management';
 import type { LensInspector } from '../../lens_inspector_service';
 import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
@@ -49,6 +47,7 @@ export interface EditorFrameProps {
   showNoDataPopover: () => void;
   lensInspector: LensInspector;
   indexPatternService: IndexPatternServiceAPI;
+  getUserMessages: UserMessagesGetter;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -103,31 +102,6 @@ export function EditorFrame(props: EditorFrameProps) {
   const onError = useCallback((error: Error) => {
     showMemoizedErrorNotification(error);
   }, []);
-
-  const context = useLensSelector(selectExecutionContext);
-
-  // TODO - store messages in ref -- may have to eventually store messages in redux so they can be pushed to from other places
-  const getUserMessages: UserMessagesGetter = (locationId, severity) =>
-    (activeDatasourceId
-      ? datasourceMap[activeDatasourceId].getUserMessages?.(
-          datasourceStates[activeDatasourceId].state,
-          {
-            frame: { ...context, ...framePublicAPI },
-            setState: (newState) =>
-              dispatchLens(
-                updateDatasourceState({
-                  updater: () => newState,
-                  datasourceId: activeDatasourceId,
-                })
-              ),
-          }
-        )
-      : []
-    ).filter(
-      (message) =>
-        Boolean(message.displayLocations.find((location) => location.id === locationId)) &&
-        (severity ? message.severity === severity : true)
-    );
 
   const bannerMessages: React.ReactNode[] | undefined = useMemo(() => {
     if (activeDatasourceId) {
@@ -189,7 +163,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 visualizationMap={visualizationMap}
                 framePublicAPI={framePublicAPI}
                 getSuggestionForField={getSuggestionForField.current}
-                getUserMessages={getUserMessages}
+                getUserMessages={props.getUserMessages}
               />
             </ErrorBoundary>
           )
@@ -203,7 +177,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 datasourceMap={datasourceMap}
                 visualizationMap={visualizationMap}
                 frame={framePublicAPI}
-                getUserMessages={getUserMessages}
+                getUserMessages={props.getUserMessages}
               />
             </ErrorBoundary>
           )

@@ -274,6 +274,7 @@ export const LensTopNavMenu = ({
   indexPatternService,
   currentDoc,
   onTextBasedSavedAndExit,
+  getUserMessages,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -964,21 +965,10 @@ export const LensTopNavMenu = ({
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 
-  // text based languages errors should also appear to the unified search bar
-  const textBasedLanguageModeErrors: Error[] = [];
-  if (activeDatasourceId && allLoaded) {
-    if (
-      datasourceMap[activeDatasourceId] &&
-      datasourceMap[activeDatasourceId].getUnifiedSearchErrors
-    ) {
-      const errors = datasourceMap[activeDatasourceId].getUnifiedSearchErrors?.(
-        datasourceStates[activeDatasourceId].state
-      );
-      if (errors) {
-        textBasedLanguageModeErrors.push(...errors);
-      }
-    }
-  }
+  const textBasedLanguageModeErrors = getUserMessages('textBasedLanguagesQueryInput', 'error').map(
+    ({ shortMessage }) => new Error(shortMessage)
+  );
+
   return (
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}

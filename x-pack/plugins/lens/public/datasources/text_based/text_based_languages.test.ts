@@ -554,6 +554,9 @@ describe('Textbased Data Source', () => {
               Object {
                 "id": "suggestionPanel",
               },
+              Object {
+                "id": "topNav",
+              },
             ],
             "fixableInEditor": true,
             "longMessage": "error 1",
@@ -567,6 +570,9 @@ describe('Textbased Data Source', () => {
               },
               Object {
                 "id": "suggestionPanel",
+              },
+              Object {
+                "id": "topNav",
               },
             ],
             "fixableInEditor": true,

@@ -50,6 +50,7 @@ import type {
   VisualizeEditorContext,
   LensTopNavMenuEntryGenerator,
   VisualizationMap,
+  UserMessagesGetter,
 } from '../types';
 import type { LensAttributeService } from '../lens_attribute_service';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
@@ -120,6 +121,7 @@ export interface LensTopNavMenuProps {
   theme$: Observable<CoreTheme>;
   indexPatternService: IndexPatternServiceAPI;
   onTextBasedSavedAndExit: ({ onSave }: { onSave: () => void }) => Promise<void>;
+  getUserMessages: UserMessagesGetter;
 }
 
 export interface HistoryLocationState {

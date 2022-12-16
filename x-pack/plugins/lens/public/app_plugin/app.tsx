@@ -15,7 +15,7 @@ import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
-import { EditorFrameInstance } from '../types';
+import { EditorFrameInstance, UserMessagesGetter } from '../types';
 import { Document } from '../persistence/saved_object_store';
 
 import {
@@ -27,6 +27,9 @@ import {
   DispatchSetState,
   selectSavedObjectFormat,
   updateIndexPatterns,
+  updateDatasourceState,
+  selectActiveDatasourceId,
+  selectFrameDatasourceAPI,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
@@ -92,6 +95,7 @@ export function App({
     sharingSavedObjectProps,
     isLinkedToOriginatingApp,
     searchSessionId,
+    datasourceStates,
     isLoading,
     isSaveable,
   } = useLensSelector((state) => state.lens);
@@ -440,6 +444,35 @@ export function App({
         })
       : undefined;
 
+  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+
+  const frameDatasourceAPI = useLensSelector((state) =>
+    selectFrameDatasourceAPI(state, datasourceMap)
+  );
+
+  // TODO - store messages in ref -- may have to eventually store messages in redux so they can be pushed to from other places
+  const getUserMessages: UserMessagesGetter = (locationId, severity) =>
+    (activeDatasourceId
+      ? datasourceMap[activeDatasourceId].getUserMessages?.(
+          datasourceStates[activeDatasourceId].state,
+          {
+            frame: frameDatasourceAPI,
+            setState: (newState) =>
+              dispatch(
+                updateDatasourceState({
+                  updater: () => newState,
+                  datasourceId: activeDatasourceId,
+                })
+              ),
+          }
+        )
+      : []
+    ).filter(
+      (message) =>
+        Boolean(message.displayLocations.find((location) => location.id === locationId)) &&
+        (severity ? message.severity === severity : true)
+    );
+
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp" role="main">
@@ -465,6 +498,7 @@ export function App({
           theme$={theme$}
           indexPatternService={indexPatternService}
           onTextBasedSavedAndExit={onTextBasedSavedAndExit}
+          getUserMessages={getUserMessages}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
@@ -473,6 +507,7 @@ export function App({
             showNoDataPopover={showNoDataPopover}
             lensInspector={lensInspector}
             indexPatternService={indexPatternService}
+            getUserMessages={getUserMessages}
           />
         )}
       </div>
@@ -540,18 +575,21 @@ export function App({
 const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
   showNoDataPopover,
+  getUserMessages,
   lensInspector,
   indexPatternService,
 }: {
   editorFrame: EditorFrameInstance;
   lensInspector: LensInspector;
   showNoDataPopover: () => void;
+  getUserMessages: UserMessagesGetter;
   indexPatternService: IndexPatternServiceAPI;
 }) {
   const { EditorFrameContainer } = editorFrame;
   return (
     <EditorFrameContainer
       showNoDataPopover={showNoDataPopover}
+      getUserMessages={getUserMessages}
       lensInspector={lensInspector}
       indexPatternService={indexPatternService}
     />

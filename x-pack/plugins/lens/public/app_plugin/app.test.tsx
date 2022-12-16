@@ -144,6 +144,7 @@ describe('Lens App', () => {
     expect(frame.EditorFrameContainer).toHaveBeenLastCalledWith(
       {
         indexPatternService: expect.any(Object),
+        getUserMessages: expect.any(Function),
         lensInspector: {
           adapters: {
             expression: expect.any(Object),
