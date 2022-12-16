@@ -1053,7 +1053,7 @@
                     "section": "def-public.EmbeddableContainerSettings",
                     "text": "EmbeddableContainerSettings"
                   },
-                  " | undefined"
+                  "<TContainerInput> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
@@ -6685,6 +6685,16 @@
         "tags": [],
         "label": "EmbeddableContainerSettings",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableContainerSettings",
+            "text": "EmbeddableContainerSettings"
+          },
+          "<TContainerInput>"
+        ],
         "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6716,6 +6726,23 @@
             ],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableContainerSettings.readyToInitializeChildren$",
+            "type": "Object",
+            "tags": [],
+            "label": "readyToInitializeChildren$",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "Observable",
+              "<TContainerInput> | undefined"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
