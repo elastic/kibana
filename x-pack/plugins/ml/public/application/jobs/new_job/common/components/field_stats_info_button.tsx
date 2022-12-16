@@ -24,7 +24,7 @@ export const FieldStatsInfoButton = ({
   onButtonClick?: (field: Field) => void;
 }) => {
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup gutterSize="none" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={i18n.translate(
@@ -59,11 +59,11 @@ export const FieldStatsInfoButton = ({
           />
         </EuiToolTip>
       </EuiFlexItem>
+      <EuiFlexItem grow={false} css={{ paddingRight: '4px' }}>
+        <FieldIcon type={getKbnFieldIconType(field.type)} fill="none" />
+      </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <FieldIcon type={getKbnFieldIconType(field.type)} fill="none" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

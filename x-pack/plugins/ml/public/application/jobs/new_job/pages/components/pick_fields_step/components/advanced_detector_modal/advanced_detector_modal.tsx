@@ -100,9 +100,12 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const usingScriptFields = jobCreator.additionalFields.length > 0;
   // list of aggregation combobox options.
 
+  const { renderOption, optionCss } = useFieldStatsTrigger();
+
   const aggOptions: EuiComboBoxOptionOption[] = aggs
     .filter((agg) => filterAggs(agg, usingScriptFields))
-    .map(createAggOption);
+    .map(createAggOption)
+    .map((o) => ({ ...o, css: optionCss }));
 
   // fields available for the selected agg
   const { currentFieldOptions, setCurrentFieldOptions } = useCurrentFieldOptions(
@@ -110,17 +113,19 @@ export const AdvancedDetectorModal: FC<Props> = ({
     filterCategoryFields(jobCreator.additionalFields, false),
     selectedFieldNames
   );
-
   const allFieldOptions: EuiComboBoxOptionOption[] = [
     ...createFieldOptions(fields, jobCreator.additionalFields),
-  ].sort(comboBoxOptionsSort);
+  ]
+    .sort(comboBoxOptionsSort)
+    .map((o) => ({ ...o, css: optionCss }));
 
   const splitFieldOptions: EuiComboBoxOptionOption[] = [
     ...allFieldOptions,
     ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
   ]
     .sort(comboBoxOptionsSort)
-    .filter(({ label }) => selectedFieldNames.includes(label) === false);
+    .filter(({ label }) => selectedFieldNames.includes(label) === false)
+    .map((o) => ({ ...o, css: optionCss }));
 
   const eventRateField = fields.find((f) => f.id === EVENT_RATE_FIELD_ID);
 
@@ -222,8 +227,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
       setExcludeFrequentOption(emptyOption);
     }
   }, [excludeFrequentEnabled]);
-
-  const { renderOption } = useFieldStatsTrigger();
 
   function onCreateClick() {
     detectorChangeHandler(detector, payload.index);

@@ -24,12 +24,12 @@ interface Props {
 
 export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedInfluencers }) => {
   const { jobCreator } = useContext(JobCreatorContext);
-  const { renderOption } = useFieldStatsTrigger();
+  const { renderOption, optionCss } = useFieldStatsTrigger();
 
   const options: EuiComboBoxOptionOption[] = [
     ...createFieldOptions(fields, jobCreator.additionalFields),
     ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
-  ];
+  ].map((o) => ({ ...o, css: optionCss }));
 
   const selection: EuiComboBoxOptionOption[] = selectedInfluencers.map((i) => ({ label: i }));
 

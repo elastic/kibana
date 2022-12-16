@@ -24,11 +24,12 @@ interface Props {
 
 export const SummaryCountFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
   const { jobCreator } = useContext(JobCreatorContext);
+  const { renderOption, optionCss } = useFieldStatsTrigger();
+
   const options: EuiComboBoxOptionOption[] = [
     ...createDocCountFieldOption(jobCreator.aggregationFields.length > 0),
     ...createFieldOptions(fields, jobCreator.additionalFields),
-  ];
-  const { renderOption } = useFieldStatsTrigger();
+  ].map((o) => ({ ...o, css: optionCss }));
 
   const selection: EuiComboBoxOptionOption[] = [];
   if (selectedField !== null) {

@@ -22,6 +22,8 @@ interface Props {
 }
 
 export const GeoFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
+  const { renderOption, optionCss } = useFieldStatsTrigger();
+
   const options: EuiComboBoxOptionOption[] = useMemo(
     () =>
       fields.map(
@@ -29,11 +31,11 @@ export const GeoFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField
           ({
             label: f.name,
             field: f,
+            css: optionCss,
           } as DropDownLabel)
       ),
-    [fields]
+    [fields, optionCss]
   );
-  const { renderOption } = useFieldStatsTrigger();
 
   const selection: EuiComboBoxOptionOption[] = useMemo(() => {
     const selectedOptions: EuiComboBoxOptionOption[] = [];

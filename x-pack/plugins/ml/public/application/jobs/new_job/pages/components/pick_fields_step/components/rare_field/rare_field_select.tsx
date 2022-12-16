@@ -31,14 +31,16 @@ export const RareFieldSelect: FC<Props> = ({
   testSubject,
   placeholder,
 }) => {
+  const { renderOption, optionCss } = useFieldStatsTrigger();
+
   const options: EuiComboBoxOptionOption[] = fields.map(
     (f) =>
       ({
         label: f.name,
         field: f,
+        css: optionCss,
       } as DropDownLabel)
   );
-  const { renderOption } = useFieldStatsTrigger();
 
   const selection: EuiComboBoxOptionOption[] = [];
   if (selectedField !== null) {

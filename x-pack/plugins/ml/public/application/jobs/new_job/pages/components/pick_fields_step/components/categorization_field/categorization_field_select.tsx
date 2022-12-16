@@ -21,12 +21,17 @@ interface Props {
 
 export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
   const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
+  const { renderOption, optionCss } = useFieldStatsTrigger();
+
   const options: EuiComboBoxOptionOption[] = useMemo(
-    () => [...createFieldOptions(fields, jobCreator.additionalFields)],
+    () =>
+      [...createFieldOptions(fields, jobCreator.additionalFields)].map((o) => ({
+        ...o,
+        css: optionCss,
+      })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [fields, jobCreatorUpdated]
+    [fields, jobCreatorUpdated, optionCss]
   );
-  const { renderOption } = useFieldStatsTrigger();
 
   const selection: EuiComboBoxOptionOption[] = useMemo(() => {
     const selectedOptions: EuiComboBoxOptionOption[] = [];

@@ -25,8 +25,14 @@ export const CategorizationPerPartitionFieldSelect: FC<Props> = ({
   selectedField,
 }) => {
   const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
+  const { renderOption, optionCss } = useFieldStatsTrigger();
+
   const options: EuiComboBoxOptionOption[] = useMemo(
-    () => [...createFieldOptions(fields, jobCreator.additionalFields)],
+    () =>
+      [...createFieldOptions(fields, jobCreator.additionalFields)].map((o) => ({
+        ...o,
+        css: optionCss,
+      })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [fields, jobCreatorUpdated]
   );
@@ -44,7 +50,6 @@ export const CategorizationPerPartitionFieldSelect: FC<Props> = ({
       changeHandler((selectedOptions[0] && selectedOptions[0].label) ?? null),
     [changeHandler]
   );
-  const { renderOption } = useFieldStatsTrigger();
 
   return (
     <EuiComboBox

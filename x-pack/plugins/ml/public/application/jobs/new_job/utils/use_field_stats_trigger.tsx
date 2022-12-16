@@ -14,6 +14,18 @@ import { Field } from '../../../../../common/types/fields';
 interface Option extends EuiComboBoxOptionOption<string> {
   field: Field;
 }
+const optionCss = `
+          .euiComboBoxOption__enterBadge {
+            display: none;
+          }
+          .euiFlexGroup {
+            gap: 0px;
+          }
+          .euiComboBoxOption__content{
+            margin-left: 2px;
+          }
+        `;
+
 export const useFieldStatsTrigger = () => {
   const { setIsFlyoutVisible, setFieldName } = useFieldStatsFlyoutContext();
   const handleFieldStatsButtonClick = useCallback(
@@ -41,5 +53,5 @@ export const useFieldStatsTrigger = () => {
     },
     [handleFieldStatsButtonClick]
   );
-  return { renderOption, setIsFlyoutVisible, setFieldName, handleFieldStatsButtonClick };
+  return { renderOption, setIsFlyoutVisible, setFieldName, handleFieldStatsButtonClick, optionCss };
 };
