@@ -27,6 +27,7 @@ import type {
   ChromeHelpExtension,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
+import { CustomBrandingStart } from '@kbn/core-custom-branding';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
@@ -49,7 +50,7 @@ export interface StartDeps {
   http: HttpStart;
   injectedMetadata: InternalInjectedMetadataStart;
   notifications: NotificationsStart;
-  customBranding$: Map<string, Observable<string>>;
+  customBranding: CustomBrandingStart;
 }
 
 /** @internal */
@@ -102,7 +103,7 @@ export class ChromeService {
     http,
     injectedMetadata,
     notifications,
-    customBranding$,
+    customBranding,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
@@ -233,8 +234,7 @@ export class ChromeService {
           navControlsExtension$={navControls.getExtension$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
-          logo$={customBranding$.get('logo')!.pipe(takeUntil(this.stop$))}
-          customizedLogo$={customBranding$.get('customizedLogo')!.pipe(takeUntil(this.stop$))}
+          customBranding={customBranding !== undefined ? customBranding.get() : null}
         />
       ),
 
@@ -301,20 +301,6 @@ export class ChromeService {
       },
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
-
-      setLogo: (logo: string) => {
-        if (customBranding$.get('logo') !== undefined) {
-          customBranding$.get('logo')!.next(logo);
-        }
-      },
-
-      setCustomizedLogo: (customizedLogo: string) => {
-        if (customBranding$.get('customizedLogo') !== undefined) {
-          customBranding$.get('customizedLogo')!.next(customizedLogo);
-        }
-      },
-
-      getCustomizedLogo$: () => customBranding$.get('customizedLogo')!.pipe(takeUntil(this.stop$)),
     };
   }
 
