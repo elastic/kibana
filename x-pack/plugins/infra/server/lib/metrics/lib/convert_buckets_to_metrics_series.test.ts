@@ -7,7 +7,7 @@
 
 import { MetricsAPIRequest } from '../../../../common/http_api';
 import moment from 'moment';
-import { convertHistogramBucketsToTimeseries } from './convert_histogram_buckets_to_timeseries';
+import { convertBucketsToMetricsApiSeries } from './convert_buckets_to_metrics_series';
 
 const keys = ['example-0'];
 
@@ -22,6 +22,7 @@ const options: MetricsAPIRequest = {
   metrics: [
     { id: 'metric_0', aggregations: { metric_0: { avg: { field: 'system.cpu.user.pct' } } } },
   ],
+  includeTimeseries: true,
 };
 
 const buckets = [
@@ -63,13 +64,13 @@ const buckets = [
   },
 ];
 
-describe('convertHistogramBucketsToTimeseies(keys, options, buckets)', () => {
+describe('convertBucketsToMetricsApiSeries', () => {
   it('should just work', () => {
-    expect(convertHistogramBucketsToTimeseries(keys, options, buckets, 60000)).toMatchSnapshot();
+    expect(convertBucketsToMetricsApiSeries(keys, options, buckets, 60000)).toMatchSnapshot();
   });
   it('should drop the last bucket', () => {
     expect(
-      convertHistogramBucketsToTimeseries(
+      convertBucketsToMetricsApiSeries(
         keys,
         { ...options, dropPartialBuckets: true },
         buckets,
@@ -79,7 +80,7 @@ describe('convertHistogramBucketsToTimeseies(keys, options, buckets)', () => {
   });
   it('should return empty timeseries for empty metrics', () => {
     expect(
-      convertHistogramBucketsToTimeseries(keys, { ...options, metrics: [] }, buckets, 60000)
+      convertBucketsToMetricsApiSeries(keys, { ...options, metrics: [] }, buckets, 60000)
     ).toMatchSnapshot();
   });
   it('should work with normalized_values', () => {
@@ -91,7 +92,7 @@ describe('convertHistogramBucketsToTimeseies(keys, options, buckets)', () => {
       return bucket;
     });
     expect(
-      convertHistogramBucketsToTimeseries(keys, { ...options }, bucketsWithNormalizedValue, 60000)
+      convertBucketsToMetricsApiSeries(keys, { ...options }, bucketsWithNormalizedValue, 60000)
     ).toMatchSnapshot();
   });
   it('should work with percentiles', () => {
@@ -99,7 +100,7 @@ describe('convertHistogramBucketsToTimeseies(keys, options, buckets)', () => {
       return { ...bucket, metric_0: { values: { '95.0': 3 } } };
     });
     expect(
-      convertHistogramBucketsToTimeseries(keys, { ...options }, bucketsWithPercentiles, 60000)
+      convertBucketsToMetricsApiSeries(keys, { ...options }, bucketsWithPercentiles, 60000)
     ).toMatchSnapshot();
   });
   it('should throw error with multiple percentiles', () => {
@@ -107,12 +108,7 @@ describe('convertHistogramBucketsToTimeseies(keys, options, buckets)', () => {
       return { ...bucket, metric_0: { values: { '95.0': 3, '99.0': 4 } } };
     });
     expect(() =>
-      convertHistogramBucketsToTimeseries(
-        keys,
-        { ...options },
-        bucketsWithMultiplePercentiles,
-        60000
-      )
+      convertBucketsToMetricsApiSeries(keys, { ...options }, bucketsWithMultiplePercentiles, 60000)
     ).toThrow();
   });
   it('should work with keyed percentiles', () => {
@@ -120,7 +116,7 @@ describe('convertHistogramBucketsToTimeseies(keys, options, buckets)', () => {
       return { ...bucket, metric_0: { values: [{ key: '99.0', value: 4 }] } };
     });
     expect(
-      convertHistogramBucketsToTimeseries(keys, { ...options }, bucketsWithKeyedPercentiles, 60000)
+      convertBucketsToMetricsApiSeries(keys, { ...options }, bucketsWithKeyedPercentiles, 60000)
     ).toMatchSnapshot();
   });
   it('should throw error with multiple keyed percentiles', () => {
@@ -136,7 +132,7 @@ describe('convertHistogramBucketsToTimeseies(keys, options, buckets)', () => {
       };
     });
     expect(() =>
-      convertHistogramBucketsToTimeseries(
+      convertBucketsToMetricsApiSeries(
         keys,
         { ...options },
         bucketsWithMultipleKeyedPercentiles,
@@ -193,7 +189,7 @@ describe('convertHistogramBucketsToTimeseies(keys, options, buckets)', () => {
     ];
 
     expect(
-      convertHistogramBucketsToTimeseries(keys, topMetricOptions, bucketsWithTopAggregation, 60000)
+      convertBucketsToMetricsApiSeries(keys, topMetricOptions, bucketsWithTopAggregation, 60000)
     ).toMatchSnapshot();
   });
 });
