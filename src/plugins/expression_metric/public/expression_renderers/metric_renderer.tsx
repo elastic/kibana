@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { CSSProperties, lazy } from 'react';
+import React, { CSSProperties } from 'react';
 import { Observable } from 'rxjs';
 import { CoreTheme } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -19,6 +19,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { MetricRendererConfig } from '../../common/types';
+import { LazyMetricComponent } from '../components';
 
 const strings = {
   getDisplayName: () =>
@@ -31,7 +32,6 @@ const strings = {
     }),
 };
 
-const LazyMetricComponent = lazy(() => import('../components/metric_component'));
 const MetricComponent = withSuspense(LazyMetricComponent);
 
 export const getMetricRenderer =

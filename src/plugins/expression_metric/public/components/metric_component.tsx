@@ -6,23 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent, CSSProperties } from 'react';
+import React, { FunctionComponent } from 'react';
 import numeral from '@elastic/numeral';
+import { MetricComponentProps } from './types';
 
-interface Props {
-  /** The text to display under the metric */
-  label?: string;
-  /** CSS font properties for the label */
-  labelFont: CSSProperties;
-  /** Value of the metric to display */
-  metric: string | number | null;
-  /** CSS font properties for the metric */
-  metricFont: CSSProperties;
-  /** NumeralJS format string */
-  metricFormat?: string;
-}
-
-const Metric: FunctionComponent<Props> = ({
+const MetricComponent: FunctionComponent<MetricComponentProps> = ({
   label,
   metric,
   labelFont,
@@ -42,4 +30,4 @@ const Metric: FunctionComponent<Props> = ({
 );
 
 // eslint-disable-next-line import/no-default-export
-export { Metric as default };
+export { MetricComponent as default };
