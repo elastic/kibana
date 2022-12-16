@@ -15,10 +15,10 @@ import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 
 import { EmbeddedMapComponent } from './embedded_map';
-import { createEmbeddable } from './embedded_map_helpers';
+import { createEmbeddable } from './create_embeddable';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('./embedded_map_helpers', () => ({
+jest.mock('./create_embeddable', () => ({
   createEmbeddable: jest.fn(),
 }));
 
