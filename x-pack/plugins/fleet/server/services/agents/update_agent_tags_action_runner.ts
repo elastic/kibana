@@ -181,7 +181,7 @@ export async function updateTagsBatch(
     });
   }
 
-  // creating unique 0...n ids to use as agentId, as we don't have all agent ids in case of action by kuery
+  // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
   const getArray = (count: number) => [...Array(count).keys()];
 
   // writing successful action results
@@ -189,8 +189,8 @@ export async function updateTagsBatch(
     await bulkCreateAgentActionResults(
       esClient,
 
-      (options.kuery === undefined ? agentIds : getArray(res.updated!)).map((id) => ({
-        agentId: id + '',
+      (options.kuery === undefined ? agentIds : getArray(res.updated!)).map(() => ({
+        agentId: uuid(),
         actionId,
       }))
     );
