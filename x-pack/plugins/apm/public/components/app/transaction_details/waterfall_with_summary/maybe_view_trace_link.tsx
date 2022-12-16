@@ -53,6 +53,7 @@ export function MaybeViewTraceLink({
     query: { comparisonEnabled, offset },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
     '/traces/explorer',
     '/dependencies/operation'
   );

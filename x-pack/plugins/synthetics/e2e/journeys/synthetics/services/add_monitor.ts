@@ -77,10 +77,21 @@ export const cleanPrivateLocations = async (params: Record<string, any>) => {
   const server = getService('kibanaServer');
 
   try {
-    await server.savedObjects.clean({ types: [privateLocationsSavedObjectName] });
     await server.savedObjects.clean({
-      types: ['ingest-agent-policies', 'ingest-package-policies'],
+      types: [privateLocationsSavedObjectName, 'ingest-agent-policies', 'ingest-package-policies'],
     });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(e);
+  }
+};
+
+export const cleanTestParams = async (params: Record<string, any>) => {
+  const getService = params.getService;
+  const server = getService('kibanaServer');
+
+  try {
+    await server.savedObjects.clean({ types: ['synthetics-param'] });
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log(e);
