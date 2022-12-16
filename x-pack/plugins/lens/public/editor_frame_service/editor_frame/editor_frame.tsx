@@ -31,6 +31,7 @@ import {
 import type { LensInspector } from '../../lens_inspector_service';
 import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
+import { popularizeField } from '../../utils';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;
@@ -85,11 +86,30 @@ export function EditorFrame(props: EditorFrameProps) {
     (field) => {
       const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
+        popularizeField(
+          field.indexPatternId,
+          field.id,
+          props.plugins.dataViews,
+          props.core.application.capabilities,
+          props.indexPatternService,
+          framePublicAPI.dataViews.indexPatterns,
+          datasourceStates,
+          datasourceMap
+        );
         trackUiCounterEvents('drop_onto_workspace');
         switchToSuggestion(dispatchLens, suggestion, { clearStagedPreview: true });
       }
     },
-    [getSuggestionForField, dispatchLens]
+    [
+      getSuggestionForField,
+      dispatchLens,
+      props.plugins.dataViews,
+      props.core.application.capabilities,
+      props.indexPatternService,
+      framePublicAPI.dataViews.indexPatterns,
+      datasourceStates,
+      datasourceMap,
+    ]
   );
 
   const onError = useCallback((error: Error) => {
@@ -139,6 +159,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 framePublicAPI={framePublicAPI}
                 uiActions={props.plugins.uiActions}
                 indexPatternService={props.indexPatternService}
+                dataViewsService={props.plugins.dataViews}
               />
             </ErrorBoundary>
           )
@@ -156,6 +177,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 visualizationMap={visualizationMap}
                 framePublicAPI={framePublicAPI}
                 getSuggestionForField={getSuggestionForField.current}
+                indexPatternService={props.indexPatternService}
               />
             </ErrorBoundary>
           )

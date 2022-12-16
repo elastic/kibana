@@ -50,6 +50,7 @@ import {
 import { onDropForVisualization, shouldRemoveSource } from './buttons/drop_targets_utils';
 import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from './flyout_container';
+import { popularizeField } from '../../../utils';
 
 // hide the random sampling settings from the UI
 const DISPLAY_RANDOM_SAMPLING_SETTINGS = false;
@@ -118,6 +119,7 @@ export function LayerPanel(
     visualizationState,
     onChangeIndexPattern,
     core,
+    indexPatternService,
   } = props;
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
@@ -214,6 +216,18 @@ export function LayerPanel(
         );
       }
       if (hasDropSucceeded) {
+        if (dropType === 'field_replace' || dropType === 'field_add') {
+          popularizeField(
+            source.indexPatternId as string,
+            source.id,
+            props.dataViewsService,
+            core.application.capabilities,
+            indexPatternService,
+            framePublicAPI.dataViews.indexPatterns,
+            datasourceStates,
+            props.datasourceMap
+          );
+        }
         activeVisualization.onDrop = activeVisualization.onDrop?.bind(activeVisualization);
 
         updateVisualization(
@@ -249,6 +263,9 @@ export function LayerPanel(
     activeVisualization,
     updateVisualization,
     props,
+    core.application.capabilities,
+    datasourceStates,
+    indexPatternService,
   ]);
 
   const isDimensionPanelOpen = Boolean(activeId);

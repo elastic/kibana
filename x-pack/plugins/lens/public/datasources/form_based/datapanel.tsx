@@ -345,6 +345,11 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [core.uiSettings]
   );
 
+  const popularFieldsLimit = useMemo(
+    () => core.uiSettings.get('fields:popularLimit'),
+    [core.uiSettings]
+  );
+
   const fieldListGroupedProps = useGroupedFields<IndexPatternField>({
     dataViewId: currentIndexPatternId,
     allFields,
@@ -352,6 +357,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       dataViews,
     },
     fieldsExistenceReader,
+    popularFieldsLimit: popularFieldsLimit ?? 0,
     isAffectedByGlobalFilter: Boolean(filters.length),
     onFilterField,
     onSupportedFieldFilter,

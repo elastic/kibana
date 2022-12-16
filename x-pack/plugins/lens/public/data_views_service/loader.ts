@@ -35,6 +35,7 @@ export function convertDataViewIntoLensIndexPattern(
       // Convert the getters on the index pattern service into plain JSON
       const base = {
         name: field.name,
+        count: field.count,
         displayName: field.displayName,
         type: field.type,
         aggregatable: field.aggregatable,
