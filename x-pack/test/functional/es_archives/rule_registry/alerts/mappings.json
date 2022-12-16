@@ -16,6 +16,10 @@
         "kibana.alert.rule.consumer": {
           "type": "keyword",
           "ignore_above": 256
+        },
+        "kibana.alert.time_range": {
+          "type": "date_range",
+          "format": "epoch_millis||strict_date_optional_time"
         }
       }
     }
@@ -40,6 +44,41 @@
         "kibana.alert.rule.consumer": {
           "type": "keyword",
           "ignore_above": 256
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": ".alerts-observability.logs.alerts-default",
+    "mappings": {
+      "properties": {
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "kibana.alert.rule.consumer": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "kibana.alert.status": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "kibana.alert.time_range": {
+          "type": "date_range",
+          "format": "epoch_millis||strict_date_optional_time"
+        },
+        "kibana.alert.end": {
+          "type": "date"
         }
       }
     }
