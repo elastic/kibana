@@ -117,6 +117,18 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
       type: LAYER_TYPE.EMS_VECTOR_TILE,
     },
     ...indexPatternIds.reduce((acc: object[], { title, id }) => {
+      // we should maybe do our field validation here
+      // the below getXLayer functions are field specific queries, need to make sure each of
+      // these data views supports the fields we're going to be querying
+      // found in lmc.default
+      if (id === 'ce19aeb8-49aa-4da6-bfd3-90dbd00125d4') {
+        console.log('layer details', {
+          title,
+          lewkup: lmc[title],
+          default: lmc.default,
+        });
+        return acc;
+      }
       const layerGroupDescriptor = {
         id: uuid.v4(),
         label: title,

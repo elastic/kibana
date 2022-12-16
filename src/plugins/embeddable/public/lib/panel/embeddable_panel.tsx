@@ -277,8 +277,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       ? this.props.embeddable.getSelfStyledOptions()
       : undefined;
 
-    console.log('are we here??????', this.state);
-
     return (
       <EuiPanel
         className={classes}
