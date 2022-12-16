@@ -82,7 +82,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 *activity* - keyword, number.long
 
-* _unified_log.activity_ - the activity ID associate with the entry
+* _unified_log.activity_ - the activity ID associate with the entry.
 
 *actual* - keyword, number.long
 
