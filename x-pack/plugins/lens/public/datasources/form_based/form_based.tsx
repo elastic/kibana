@@ -261,7 +261,7 @@ export function getFormBasedDatasource({
           ...state,
           layers: {
             ...newLayers,
-            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId].linkToLayers),
+            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId]?.linkToLayers),
           },
         },
       };

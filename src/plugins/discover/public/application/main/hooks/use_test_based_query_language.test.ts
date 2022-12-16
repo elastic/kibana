@@ -316,4 +316,37 @@ describe('useTextBasedQueryLanguage', () => {
       columns: ['field1'],
     });
   });
+
+  test('changing a text based query with a dataview that not exists should return results', async () => {
+    const replaceUrlAppState = jest.fn();
+    const props = getHookProps(replaceUrlAppState, query);
+    const { documents$ } = props;
+
+    renderHook(() => useTextBasedQueryLanguage(props));
+
+    documents$.next(msgComplete);
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(2));
+    replaceUrlAppState.mockReset();
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.COMPLETE,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { sql: 'SELECT field1 from the-data-view-*' },
+    });
+    await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
+
+    await waitFor(() => {
+      expect(replaceUrlAppState).toHaveBeenCalledWith({
+        index: 'the-data-view-id',
+        columns: ['field1'],
+      });
+    });
+  });
 });

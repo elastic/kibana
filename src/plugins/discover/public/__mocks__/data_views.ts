@@ -28,7 +28,9 @@ export function createDiscoverDataViewsMock() {
       return Promise.resolve([dataViewMock, dataViewComplexMock, dataViewWithTimefieldMock]);
     }),
     createFilter: jest.fn(),
-    create: jest.fn(),
+    create: async (id: string) => {
+      return Promise.resolve(dataViewMock);
+    },
     clearInstanceCache: jest.fn(),
     getFieldsForIndexPattern: jest.fn((dataView) => dataView.fields),
   } as unknown as jest.Mocked<DataViewsContract>;

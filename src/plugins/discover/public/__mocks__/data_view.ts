@@ -63,6 +63,14 @@ const fields = [
     filterable: true,
     aggregatable: true,
   },
+  {
+    name: '@timestamp',
+    type: 'date',
+    displayName: '@timestamp',
+    scripted: false,
+    filterable: true,
+    aggregatable: true,
+  },
 ] as DataView['fields'];
 
 export const buildDataViewMock = ({

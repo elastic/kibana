@@ -84,55 +84,38 @@ export function useTextBasedQueryLanguage({
           }
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
-        const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
+        let dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
 
-        if (dataViewObj) {
-          // don't set the columns on initial fetch, to prevent overwriting existing state
-          const addColumnsToState = Boolean(
-            nextColumns.length && (!initialFetch || !stateColumns?.length)
-          );
-          // no need to reset index to state if it hasn't changed
-          const addDataViewToState = Boolean(dataViewObj.id !== index);
-          if (!addColumnsToState && !addDataViewToState) {
-            return;
-          }
-
-          const nextState = {
-            ...(addDataViewToState && { index: dataViewObj.id }),
-            columns: nextColumns,
-          };
-          stateContainer.replaceUrlAppState(nextState);
-        } else {
-          // create an adhoc dataview if a permanent one doesn't exist
-          const dataView = await dataViews.create({
+        // no dataview found but the index pattern is valid
+        // create an adhoc instance instead
+        if (!dataViewObj) {
+          dataViewObj = await dataViews.create({
             title: indexPatternFromQuery,
           });
 
-          if (dataView.fields.getByName('@timestamp')?.type === 'date') {
-            dataView.timeFieldName = '@timestamp';
+          if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
+            dataViewObj.timeFieldName = '@timestamp';
+          } else if (dataViewObj.fields.getByType('date')) {
+            const dateFields = dataViewObj.fields.getByType('date');
+            dataViewObj.timeFieldName = dateFields[0].name;
           }
-
-          if (dataView.fields.getByType('date')) {
-            const dateFields = dataView.fields.getByType('date');
-            dataView.timeFieldName = dateFields[0].name;
-          }
-
-          const addColumnsToState = Boolean(
-            nextColumns.length && (!initialFetch || !stateColumns?.length)
-          );
-
-          const addDataViewToState = Boolean(dataView.id !== index);
-
-          if (!addColumnsToState && !addDataViewToState) {
-            return;
-          }
-
-          const nextState = {
-            ...(addDataViewToState && { index: dataView.id }),
-            columns: nextColumns,
-          };
-          stateContainer.replaceUrlAppState(nextState);
         }
+
+        // don't set the columns on initial fetch, to prevent overwriting existing state
+        const addColumnsToState = Boolean(
+          nextColumns.length && (!initialFetch || !stateColumns?.length)
+        );
+        // no need to reset index to state if it hasn't changed
+        const addDataViewToState = Boolean(dataViewObj.id !== index);
+        if (!addColumnsToState && !addDataViewToState) {
+          return;
+        }
+
+        const nextState = {
+          ...(addDataViewToState && { index: dataViewObj.id }),
+          columns: nextColumns,
+        };
+        stateContainer.replaceUrlAppState(nextState);
       } else {
         // cleanup for a "regular" query
         cleanup();
