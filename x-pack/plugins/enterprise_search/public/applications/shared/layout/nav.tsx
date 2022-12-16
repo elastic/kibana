@@ -19,8 +19,12 @@ import {
   SEARCH_EXPERIENCES_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-import { enableBehavioralAnalyticsSection } from '../../../../common/ui_settings_keys';
-import { SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../enterprise_search_content/routes';
+import { enableEnginesSection } from '../../../../common/ui_settings_keys';
+import {
+  ENGINES_PATH,
+  SEARCH_INDICES_PATH,
+  SETTINGS_PATH,
+} from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
@@ -28,7 +32,7 @@ import { generateNavLink } from './nav_link_helpers';
 export const useEnterpriseSearchNav = () => {
   const { productAccess, uiSettings } = useValues(KibanaLogic);
 
-  const analyticsSectionEnabled = uiSettings?.get<boolean>(enableBehavioralAnalyticsSection, false);
+  const enginesSectionEnabled = uiSettings?.get<boolean>(enableEnginesSection, false);
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
@@ -71,29 +75,40 @@ export const useEnterpriseSearchNav = () => {
         defaultMessage: 'Content',
       }),
     },
-    ...(analyticsSectionEnabled
+    ...(enginesSectionEnabled
       ? [
           {
-            id: 'enterpriseSearchAnalytics',
-            items: [
-              {
-                id: 'analytics_collections',
-                name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollectionsTitle', {
-                  defaultMessage: 'Collections',
-                }),
-                ...generateNavLink({
-                  shouldNotCreateHref: true,
-                  shouldShowActiveForSubroutes: true,
-                  to: ANALYTICS_PLUGIN.URL,
-                }),
-              },
-            ],
-            name: i18n.translate('xpack.enterpriseSearch.nav.analyticsTitle', {
-              defaultMessage: 'Analytics',
+            id: 'enterpriseSearchEngines',
+            name: i18n.translate('xpack.enterpriseSearch.nav.enginesTitle', {
+              defaultMessage: 'Engines',
+            }),
+            ...generateNavLink({
+              shouldNotCreateHref: true,
+              shouldShowActiveForSubroutes: true,
+              to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
             }),
           },
         ]
       : []),
+    {
+      id: 'enterpriseSearchAnalytics',
+      items: [
+        {
+          id: 'analytics_collections',
+          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollectionsTitle', {
+            defaultMessage: 'Collections',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ANALYTICS_PLUGIN.URL,
+          }),
+        },
+      ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.analyticsTitle', {
+        defaultMessage: 'Behavorial Analytics',
+      }),
+    },
     {
       id: 'search',
       items: [

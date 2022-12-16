@@ -6,6 +6,7 @@
  */
 
 import { queue } from 'async';
+import { uniqWith, isEqual } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -477,8 +478,8 @@ export const defineExplainLogRateSpikesRoute = (
                 // field/value pairs that are not part of the original list of significant change points.
                 // This cleans up groups and removes those unrelated field/value pairs.
                 const filteredDf = df
-                  .map((fi) => {
-                    fi.set = Object.entries(fi.set).reduce<ItemsetResult['set']>(
+                  .map((fi, fiIndex) => {
+                    const updatedSet = Object.entries(fi.set).reduce<ItemsetResult['set']>(
                       (set, [field, value]) => {
                         if (
                           changePoints.some(
@@ -491,7 +492,16 @@ export const defineExplainLogRateSpikesRoute = (
                       },
                       {}
                     );
+
+                    // only assign the updated reduced set if it doesn't already match
+                    // an existing set. if there's a match just add an empty set
+                    // so it will be filtered in the last step.
+                    fi.set = df.some((d, dIndex) => fiIndex !== dIndex && isEqual(fi.set, d.set))
+                      ? {}
+                      : updatedSet;
+
                     fi.size = Object.keys(fi.set).length;
+
                     return fi;
                   })
                   .filter((fi) => fi.size > 1);
@@ -540,7 +550,7 @@ export const defineExplainLogRateSpikesRoute = (
 
                     return {
                       ...g,
-                      group,
+                      group: uniqWith(group, (a, b) => isEqual(a, b)),
                     };
                   }
                 );

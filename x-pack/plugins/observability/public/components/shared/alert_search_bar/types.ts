@@ -5,12 +5,45 @@
  * 2.0.
  */
 
+import { ReactElement } from 'react';
+import { ToastsStart } from '@kbn/core-notifications-browser';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { AlertsSearchBarProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_search_bar';
 import { BoolQuery, Query } from '@kbn/es-query';
 import { AlertStatus } from '../../../../common/typings';
 
 export interface AlertStatusFilterProps {
   status: AlertStatus;
-  onChange: (id: string, value: string) => void;
+  onChange: (id: AlertStatus) => void;
+}
+
+export interface AlertSearchBarWithUrlSyncProps extends CommonAlertSearchBarProps {
+  urlStorageKey: string;
+}
+
+export interface Dependencies {
+  data: {
+    query: {
+      timefilter: { timefilter: TimefilterContract };
+    };
+  };
+  triggersActionsUi: {
+    getAlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
+  };
+  useToasts: () => ToastsStart;
+}
+
+export interface Services {
+  timeFilterService: TimefilterContract;
+  AlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
+  useToasts: () => ToastsStart;
+}
+
+export interface ObservabilityAlertSearchBarProps
+  extends AlertSearchBarContainerState,
+    AlertSearchBarStateTransitions,
+    CommonAlertSearchBarProps {
+  services: Services;
 }
 
 interface AlertSearchBarContainerState {
@@ -21,23 +54,14 @@ interface AlertSearchBarContainerState {
 }
 
 interface AlertSearchBarStateTransitions {
-  setRangeFrom: (rangeFrom: string) => void;
-  setRangeTo: (rangeTo: string) => void;
-  setKuery: (kuery: string) => void;
-  setStatus: (status: AlertStatus) => void;
+  onRangeFromChange: (rangeFrom: string) => void;
+  onRangeToChange: (rangeTo: string) => void;
+  onKueryChange: (kuery: string) => void;
+  onStatusChange: (status: AlertStatus) => void;
 }
 
-export interface CommonAlertSearchBarProps {
+interface CommonAlertSearchBarProps {
   appName: string;
-  setEsQuery: (query: { bool: BoolQuery }) => void;
-  queries?: Query[];
+  onEsQueryChange: (query: { bool: BoolQuery }) => void;
+  defaultSearchQueries?: Query[];
 }
-
-export interface AlertSearchBarWithUrlSyncProps extends CommonAlertSearchBarProps {
-  urlStorageKey: string;
-}
-
-export interface AlertSearchBarProps
-  extends AlertSearchBarContainerState,
-    AlertSearchBarStateTransitions,
-    CommonAlertSearchBarProps {}

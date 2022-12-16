@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { FleetAuthzRouter } from '../../services/security';
+
 import { AGENT_API_ROUTES } from '../../constants';
 import {
   GetAgentsRequestSchema,
@@ -30,7 +32,6 @@ import {
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
-import type { FleetAuthzRouter } from '../security';
 
 import { PostBulkUpdateAgentTagsRequestSchema } from '../../types/rest_spec/agent';
 
@@ -55,11 +56,7 @@ import {
   postCancelActionHandlerBuilder,
 } from './actions_handlers';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
-import {
-  getCurrentUpgradesHandler,
-  postAgentUpgradeHandler,
-  postBulkAgentsUpgradeHandler,
-} from './upgrade_handler';
+import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 import {
   bulkRequestDiagnosticsHandler,
   requestDiagnosticsHandler,
@@ -286,17 +283,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     postBulkAgentsUpgradeHandler
-  );
-  // Current upgrades
-  router.get(
-    {
-      path: AGENT_API_ROUTES.CURRENT_UPGRADES_PATTERN,
-      validate: false,
-      fleetAuthz: {
-        fleet: { all: true },
-      },
-    },
-    getCurrentUpgradesHandler
   );
 
   // Current actions

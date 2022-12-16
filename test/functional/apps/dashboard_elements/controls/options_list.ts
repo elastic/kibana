@@ -221,48 +221,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.controlEditorCancel(true);
       });
 
-      it('can create control with non-default sorting', async () => {
-        await dashboardControls.createControl({
-          controlType: OPTIONS_LIST_CONTROL,
-          dataViewTitle: 'animals-*',
-          fieldName: 'sound.keyword',
-          additionalSettings: {
-            hideSort: true,
-            defaultSortType: { by: '_key', direction: 'asc' },
-          },
-        });
-        controlId = (await dashboardControls.getAllControlIds())[1];
-        expect(await dashboardControls.getControlsCount()).to.be(2);
-
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await ensureAvailableOptionsEql([...animalSoundAvailableOptions].sort(), true);
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-      });
-
-      it('can edit default sorting method', async () => {
-        await dashboardControls.editExistingControl(controlId);
-        expect(await testSubjects.getVisibleText('optionsListControl__chooseSortBy')).to.equal(
-          'Alphabetically'
-        );
-        const ascendingButtonSelected = await (
-          await testSubjects.find('optionsListEditor__sortOrder_asc')
-        ).elementHasClass('uiButtonGroupButton-isSelected');
-        expect(ascendingButtonSelected).to.be(true);
-        const descendingButtonSelected = await (
-          await testSubjects.find('optionsListEditor__sortOrder_desc')
-        ).elementHasClass('uiButtonGroupButton-isSelected');
-        expect(descendingButtonSelected).to.be(false);
-
-        await dashboardControls.optionsListSetAdditionalSettings({
-          defaultSortType: { by: '_key', direction: 'desc' },
-        });
-        await dashboardControls.controlEditorSave();
-
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await ensureAvailableOptionsEql([...animalSoundAvailableOptions].sort().reverse(), true);
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-      });
-
       after(async () => {
         await dashboardControls.clearAllControls();
       });
