@@ -12744,7 +12744,6 @@
     "xpack.enterpriseSearch.shared.flashMessages.defaultErrorMessage": "发生意外错误",
     "xpack.enterpriseSearch.shared.result.expandTooltip.allVisible": "所有字段均可见",
     "xpack.enterpriseSearch.shared.unsavedChangesMessage": "您的更改尚未更改。是否确定要离开？",
-    "xpack.enterpriseSearch.technicalPreviewLabel": "技术预览",
     "xpack.enterpriseSearch.trialCalloutLink": "详细了解 Elastic Stack 许可证。",
     "xpack.enterpriseSearch.troubleshooting.setup.documentationLinkLabel": "Enterprise Search 设置故障排除",
     "xpack.enterpriseSearch.typeLabel": "类型",
