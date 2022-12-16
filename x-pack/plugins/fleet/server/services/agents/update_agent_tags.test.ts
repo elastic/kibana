@@ -92,6 +92,9 @@ describe('update_agent_tags', () => {
   });
 
   it('should update action results on success', async () => {
+    esClient.updateByQuery.mockReset();
+    esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 1, total: 1 } as any);
+
     await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], []);
 
     const agentAction = esClient.create.mock.calls[0][0] as any;
@@ -133,11 +136,11 @@ describe('update_agent_tags', () => {
     expect(actionResults.body[1].error).not.toBeDefined();
   });
 
-  it('should write error action results for hosted agent when agentIds are passed', async () => {
+  it('should skip hosted agent from total when agentIds are passed', async () => {
     const { esClient: esClientMock, agentInHostedDoc } = createClientMock();
 
     esClientMock.updateByQuery.mockReset();
-    esClientMock.updateByQuery.mockResolvedValue({ failures: [], updated: 0, total: '0' } as any);
+    esClientMock.updateByQuery.mockResolvedValue({ failures: [], updated: 0, total: 0 } as any);
 
     await updateAgentTags(
       soClient,
@@ -153,13 +156,9 @@ describe('update_agent_tags', () => {
         action_id: expect.anything(),
         agents: [],
         type: 'UPDATE_TAGS',
-        total: 1,
+        total: 0,
       })
     );
-
-    const errorResults = esClientMock.bulk.mock.calls[0][0] as any;
-    expect(errorResults.body[1].agent_id).toEqual(agentInHostedDoc._id);
-    expect(errorResults.body[1].error).toEqual('Cannot modify tags on a hosted agent');
   });
 
   it('should write error action results when failures are returned', async () => {

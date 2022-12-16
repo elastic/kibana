@@ -71,7 +71,7 @@ export async function getActionStatuses(
     const docCount = matchingBucket?.doc_count ?? 0;
     const nbAgentsAck =
       action.type === 'UPDATE_TAGS'
-        ? docCount
+        ? Math.min(docCount, nbAgentsActioned)
         : Math.min(
             docCount,
             // only using cardinality count when count lower than precision threshold

@@ -167,7 +167,6 @@ export async function updateTagsBatch(
   appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
 
   const actionId = options.actionId ?? uuid();
-  const total = options.total ?? givenAgents.length;
 
   if (options.retryCount === undefined) {
     // creating an action doc so that update tags  shows up in activity
@@ -176,8 +175,7 @@ export async function updateTagsBatch(
       agents: options.kuery === undefined ? agentIds : [],
       created_at: new Date().toISOString(),
       type: 'UPDATE_TAGS',
-      // for kuery cases, the total can be less than the initial selection, as we filter out tags that are already added/removed
-      total: options.kuery === undefined ? total : res.total,
+      total: res.total,
     });
   }
 
@@ -203,18 +201,6 @@ export async function updateTagsBatch(
         agentId: failure.id,
         actionId,
         error: failure.cause.reason,
-      }))
-    );
-  }
-
-  // writing hosted agent errors - hosted agents filtered out
-  if (options.kuery === undefined && hostedAgentIds.length > 0) {
-    await bulkCreateAgentActionResults(
-      esClient,
-      hostedAgentIds.map((id) => ({
-        agentId: id + '',
-        actionId,
-        error: hostedAgentError,
       }))
     );
   }
