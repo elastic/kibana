@@ -18,6 +18,29 @@ export default function ({ getService }: FtrProviderContext) {
   describe('fleet_agents_status', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+      await es.create({
+        id: 'ingest-agent-policies:policy-inactivity-timeout',
+        index: '.kibana',
+        refresh: 'wait_for',
+        document: {
+          type: 'ingest-agent-policies',
+          'ingest-agent-policies': {
+            name: 'Test policy',
+            namespace: 'default',
+            description: 'Policy with inactivity timeout',
+            status: 'active',
+            is_default: true,
+            monitoring_enabled: ['logs', 'metrics'],
+            revision: 2,
+            updated_at: '2020-05-07T19:34:42.533Z',
+            updated_by: 'system',
+            inactivity_timeout: 60,
+          },
+          migrationVersion: {
+            'ingest-agent-policies': '7.10.0',
+          },
+        },
+      });
       // 2 agents online
       await es.update({
         id: 'agent1',
@@ -53,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       });
-      // 1 agents inactive
+      // 1 agents inactive (default timeout)
       await es.update({
         id: 'agent4',
         refresh: 'wait_for',
@@ -65,22 +88,31 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       });
-      // 1 agent upgrading
+      // 1 agents inactive (policy timeout)
       await es.create({
         id: 'agent5',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_revision_idx: 1,
-            last_checkin: new Date().toISOString(),
-            upgrade_started_at: new Date().toISOString(),
-          },
+        document: {
+          policy_id: 'policy-inactivity-timeout',
+          policy_revision_idx: 1,
+          last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
+        },
+      });
+      // 1 agent upgrading
+      await es.create({
+        id: 'agent6',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        document: {
+          policy_revision_idx: 1,
+          last_checkin: new Date().toISOString(),
+          upgrade_started_at: new Date().toISOString(),
         },
       });
       // 1 agent reassigned to a new policy
       await es.create({
-        id: 'agent6',
+        id: 'agent7',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         document: {
@@ -98,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // 1 agent unenrolled
       await es.create({
-        id: 'agent7',
+        id: 'agent8',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         document: {
@@ -116,7 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       // 1 agent error
       await es.create({
-        id: 'agent8',
+        id: 'agent9',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         document: {
@@ -134,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       // 1 agent degraded (error category)
       await es.create({
-        id: 'agent9',
+        id: 'agent10',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         document: {
@@ -161,12 +193,12 @@ export default function ({ getService }: FtrProviderContext) {
         results: {
           events: 0,
           other: 0,
-          total: 8,
+          total: 9,
           online: 2,
           error: 2,
           offline: 1,
           updating: 2,
-          inactive: 1,
+          inactive: 2,
           unenrolled: 1,
         },
       });
