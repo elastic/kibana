@@ -848,7 +848,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _authorized_keys.comment_ - Optional comment
 * _docker_image_history.comment_ - Instruction comment
 * _etc_protocols.comment_ - Comment with protocol description
-* _etc_services.comment_ - Optional comment for a service.
+* _etc_services.comment_ - Optional comment for a service
 * _groups.comment_ - Remarks or comments associated with the group
 * _keychain_items.comment_ - Optional keychain comment
 
