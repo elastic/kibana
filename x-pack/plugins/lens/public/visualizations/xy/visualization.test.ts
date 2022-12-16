@@ -17,7 +17,7 @@ import type {
   SeriesType,
 } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { IconChartBar } from '@kbn/chart-icons';
+import { IconChartBar, IconCircle } from '@kbn/chart-icons';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { Datatable } from '@kbn/expressions-plugin/common';
@@ -1983,7 +1983,12 @@ describe('xy_visualization', () => {
           layerId: 'annotations',
         });
         expect(config.groups[0].accessors).toEqual([
-          { color: '#f04e98', columnId: 'an1', triggerIconType: 'color' },
+          {
+            color: '#f04e98',
+            columnId: 'an1',
+            customIcon: IconCircle,
+            triggerIconType: 'custom',
+          },
         ]);
         expect(config.groups[0].invalid).toEqual(false);
       });
