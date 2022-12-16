@@ -29,10 +29,9 @@ interface Props {
   addBasePath: (path: string) => string;
   application: ApplicationStart;
   isDarkMode: boolean;
-  isCloudEnabled: boolean;
 }
 
-export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
+export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => {
   const { trackUiMetric } = getServices();
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
   if (canAccessIntegrations) {

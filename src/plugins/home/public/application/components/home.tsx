@@ -33,7 +33,6 @@ export interface HomeProps {
   localStorage: Storage;
   urlBasePath: string;
   hasUserDataView: () => Promise<boolean>;
-  isCloudEnabled: boolean;
 }
 
 interface State {
@@ -127,7 +126,7 @@ export class Home extends Component<HomeProps, State> {
   }
 
   private renderNormal() {
-    const { addBasePath, solutions, isCloudEnabled } = this.props;
+    const { addBasePath, solutions } = this.props;
     const { application, trackUiMetric } = getServices();
     const isDarkMode = getServices().uiSettings?.get('theme:darkMode') || false;
     const devTools = this.findDirectoryById('console');
@@ -149,12 +148,7 @@ export class Home extends Component<HomeProps, State> {
       >
         <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
 
-        <AddData
-          addBasePath={addBasePath}
-          application={application}
-          isDarkMode={isDarkMode}
-          isCloudEnabled={isCloudEnabled}
-        />
+        <AddData addBasePath={addBasePath} application={application} isDarkMode={isDarkMode} />
 
         <ManageData
           addBasePath={addBasePath}

@@ -26,14 +26,14 @@ import {
 } from './helpers';
 
 export class ApiService implements GuidedOnboardingApi {
-  private isCloudEnabled: boolean | undefined;
+  private isEnabled: boolean | undefined;
   private client: HttpSetup | undefined;
   private pluginState$!: BehaviorSubject<PluginState | undefined>;
   private isPluginStateLoading: boolean | undefined;
   public isGuidePanelOpen$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
-  public setup(httpClient: HttpSetup, isCloudEnabled: boolean) {
-    this.isCloudEnabled = isCloudEnabled;
+  public setup(httpClient: HttpSetup, isEnabled: boolean) {
+    this.isEnabled = isEnabled;
     this.client = httpClient;
     this.pluginState$ = new BehaviorSubject<PluginState | undefined>(undefined);
     this.isGuidePanelOpen$ = new BehaviorSubject<boolean>(false);
@@ -76,7 +76,7 @@ export class ApiService implements GuidedOnboardingApi {
    * Subsequently, the observable is updated automatically, when the state changes.
    */
   public fetchPluginState$(): Observable<PluginState | undefined> {
-    if (!this.isCloudEnabled) {
+    if (!this.isEnabled) {
       return of(undefined);
     }
     if (!this.client) {
@@ -100,7 +100,7 @@ export class ApiService implements GuidedOnboardingApi {
    * where all guides are displayed with their corresponding status.
    */
   public async fetchAllGuidesState(): Promise<{ state: GuideState[] } | undefined> {
-    if (!this.isCloudEnabled) {
+    if (!this.isEnabled) {
       return undefined;
     }
     if (!this.client) {
@@ -125,7 +125,7 @@ export class ApiService implements GuidedOnboardingApi {
     state: { status?: PluginStatus; guide?: GuideState },
     panelState: boolean
   ): Promise<{ pluginState: PluginState } | undefined> {
-    if (!this.isCloudEnabled) {
+    if (!this.isEnabled) {
       return undefined;
     }
     if (!this.client) {
