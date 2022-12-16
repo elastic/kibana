@@ -1249,7 +1249,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/types.ts"
+                "path": "src/plugins/dashboard/public/dashboard_app/types.ts"
               },
               {
                 "plugin": "dashboard",

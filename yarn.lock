@@ -2825,11 +2825,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-inspector@link:packages/content-management/inspector":
+"@kbn/content-management-content-editor@link:bazel-bin/packages/content-management/content_editor":
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-table-list@link:packages/content-management/table_list":
+"@kbn/content-management-table-list@link:bazel-bin/packages/content-management/table_list":
   version "0.0.0"
   uid ""
 
