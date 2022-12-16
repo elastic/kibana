@@ -538,6 +538,7 @@ export function parseDataStreamElasticsearchEntry(
     parsedElasticsearchEntry.privileges = expandedElasticsearch.privileges;
   }
 
+  // we parse the settings from the data stream, what abou tthe values from the index template?
   if (expandedElasticsearch?.source_mode) {
     parsedElasticsearchEntry.source_mode = expandedElasticsearch.source_mode;
   }

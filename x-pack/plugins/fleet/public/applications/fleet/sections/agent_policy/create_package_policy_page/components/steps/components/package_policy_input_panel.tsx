@@ -134,6 +134,10 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         (ds) => ds.dataset === packagePolicyInputStream?.data_stream.dataset
       );
 
+      // It seems this logic does check for the data stream setting. What if template and data stream are not in sync (no rollover yet)
+      // Is there a way in Elasticsearch to say: For data stream X, what template will apply? The reason I'm asking
+      // is that there is a chance that users made some modification in the settings or that for a namespace an additional
+      // template was set in place. So if we only look at the data stream, the info might be wrong / outdated.
       if (dataStreamInfo?.elasticsearch?.index_mode === 'time_series') {
         if (!packagePolicy.package) return;
         if (!packagePolicy.package?.experimental_data_stream_features)
@@ -143,6 +147,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         const match = packagePolicy.package!.experimental_data_stream_features.find(
           (feat) => feat.data_stream === dsName
         );
+        // If the user updates the TSDB setting, will this make its way to the template? Could not find where.
         if (match) {
           if (!match.features.tsdb) {
             match.features.tsdb = true;

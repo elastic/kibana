@@ -270,6 +270,10 @@ export function buildComponentTemplates(params: {
 
   const indexTemplateSettings = registryElasticsearch?.['index_template.settings'] ?? {};
 
+  // TODO: Is this the place that index_mode should be added as it belongs into template.settings.index.mode
+  // On package upgrade, what happens if the previous package version had index_mode: time_series and now it is
+  // switched back? This would work for the template but not when the data stream is rolled over
+  // Ideally TSDB can be disabled again but is not possible today -> validation on the package side needed?
   const templateSettings = merge(defaultSettings, indexTemplateSettings);
 
   const indexTemplateMappings = registryElasticsearch?.['index_template.mappings'] ?? {};
@@ -281,6 +285,7 @@ export function buildComponentTemplates(params: {
     (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
   );
 
+  // In case of index_mode: time_series this should be set to true by default except it is overwritten
   const sourceModeSynthetic =
     params.experimentalDataStreamFeature?.features.synthetic_source !== false &&
     (params.experimentalDataStreamFeature?.features.synthetic_source === true ||

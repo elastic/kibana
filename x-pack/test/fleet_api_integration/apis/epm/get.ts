@@ -182,6 +182,9 @@ export default function (providerContext: FtrProviderContext) {
       const dataStream = packageInfo?.data_streams?.find(
         ({ dataset }) => dataset === 'non_epr_fields.test_metrics_2'
       );
+      // These are tests for source_mode set in the package. Couldn't find any integration tests around the policy part?
+      // Is this all covered by unit tests? I'm especially curious how an upgrade around this feature is tested?
+      // And how do you test it manually with uploading a package when you run from source -> run your own registry?
       expect(dataStream?.elasticsearch?.source_mode).equal('default');
     });
     it('returns package info from the registry if ?full=false', async function () {

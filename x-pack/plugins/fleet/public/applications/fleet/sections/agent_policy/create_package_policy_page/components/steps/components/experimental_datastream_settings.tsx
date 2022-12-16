@@ -57,6 +57,8 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
     experimentalDataFeatures ?? [],
     registryDataStream
   );
+
+  // Additional dependency here on TSDB feature set
   const isSyntheticSourceEnabledByDefault =
     registryDataStream.elasticsearch?.source_mode === 'synthetic';
 
@@ -65,6 +67,7 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
       typeof syntheticSourceExperimentalValue !== 'undefined'
         ? syntheticSourceExperimentalValue
         : isSyntheticSourceEnabledByDefault,
+    // I initially was looking for this but couldn't find it as I was looking for time_series. Should we align on naming?
     tsdb:
       getExperimentalFeatureValue('tsdb', experimentalDataFeatures ?? [], registryDataStream) ??
       false,
@@ -93,6 +96,11 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
       });
     }
 
+    // This sets the features on change, will it update data stream itself?
+    // Is this were rollover should happen?
+    // Ideally there would be a "data management" part in Fleet (or outside) where on a change
+    // the policy API could just make a call with the requested change and would get back if it was applied or
+    // not, not having to think about templates, data streams etc.
     setNewExperimentalDataFeatures(newExperimentalDataStreamFeatures);
   };
 

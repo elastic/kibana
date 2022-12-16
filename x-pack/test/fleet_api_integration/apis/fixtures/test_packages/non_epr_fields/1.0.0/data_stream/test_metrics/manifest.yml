@@ -13,4 +13,5 @@ streams:
       show_user: true
 
 elasticsearch:
+  # Good to see these packages for testing. Is there a flow to test upgrades?
   source_mode: "synthetic"
