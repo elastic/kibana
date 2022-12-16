@@ -53,7 +53,10 @@ export function LatencyChart({ height, kuery }: Props) {
   } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
     '/services/{serviceName}/transactions',
-    '/services/{serviceName}/transactions/view'
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/transactions',
+    '/mobile-services/{serviceName}/transactions/view'
   );
 
   const { environment } = useEnvironmentsContext();
