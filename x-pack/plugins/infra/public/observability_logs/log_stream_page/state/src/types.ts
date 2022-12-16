@@ -31,6 +31,10 @@ export interface LogStreamPageContextWithLogViewError {
   logViewError: LogViewContextWithError['error'];
 }
 
+export interface LogStreamPageContextWithQuery {
+  parsedQuery: ParsedQuery;
+}
+
 export type LogStreamPageTypestate =
   | {
       value: 'uninitialized';
@@ -45,8 +49,12 @@ export type LogStreamPageTypestate =
       context: LogStreamPageContextWithLogViewError;
     }
   | {
-      value: 'hasLogViewIndices' | { hasLogViewIndices: 'uninitialized' | 'initialized' };
+      value: 'hasLogViewIndices' | { hasLogViewIndices: 'uninitialized' };
       context: LogStreamPageContextWithLogView;
+    }
+  | {
+      value: { hasLogViewIndices: 'initialized' };
+      context: LogStreamPageContextWithLogView & LogStreamPageContextWithQuery;
     }
   | {
       value: 'missingLogViewIndices';

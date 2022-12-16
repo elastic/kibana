@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { actions, ActorRefFrom, createMachine } from 'xstate';
+import { actions, ActorRefFrom, createMachine, EmittedFrom } from 'xstate';
 import {
   createLogStreamQueryStateMachine,
   LogStreamQueryStateMachineDependencies,
@@ -17,12 +17,13 @@ import type {
   LogStreamPageContext,
   LogStreamPageContextWithLogView,
   LogStreamPageContextWithLogViewError,
+  LogStreamPageContextWithQuery,
   LogStreamPageEvent,
   LogStreamPageTypestate,
 } from './types';
 
 export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPageContext = {}) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKAXATmAhgLYAK+M2+WYAdAK4B2Alk1o-sowF6QDEAMgHkAggBEAkgDkA4gH1BsgGpiAogHUZGACpCASpuUiA2gAYAuolAAHVLEatU9CyAAeiALQAmAJzUPHgGwArIEALAAcHmHhXsEhADQgAJ6IAQDM1IHGYQDs2ZnZxl5e-l6pAL5lCWiYuAQkZGAUVHRMLGwc3BD8wuLScgKKKuoAYkJifAYm5kgg1rb2jjOuCJ4hAIzUqZklHgX+xqlrkQnJCKlB1P4loYH+qV7hHoEVVejYeESk5FiUNAzMdnaXF4glEklk8hkSjUGgAqgBheHKAyTMxOOaAhxOZbZNbZajGXLBVIkrJrYInRBHYzUEIeVIhVJhNZZLws7IhF4garvOpfRo-Zr-NrsYFdUG9CEDKFDOGI5EiSZraZWGyYxagHEhEIEwkeI7Zc7GO6UhCZHzZML7MKBDwhQp0zmVblvWqfBpNGhofAQZhQPjoBSMMAAd26YL6kOhIzGEyMaJmGIW2JS4VpJTCWXp5K82Q8pvN1Et1tt9oedq5PLd9W+v2o3t99H9geDYYl4P6gxhGARSJR8ZVszVyaWiEZPnt-m8Ry8xjta38pqN1FK+uy+w8xhCgS8lddHxrArrDb9AagQdD4clnZl3d7CqVg6TjCxo4QISumy2MWNMWiAVNO58WMFkImMOc50CMI9xqA9+U9etUB9U8W1DYZ8EYZAQR6Dso1lLRdH0Ad0WHF8NRcdxvF8AJYgiKIwhiUIC1SDwMgNcC8g5O1nmdKs4I9QUaAAC3wWAzwvEMxHoX0AGM4BaAFWFFToeB0ZQkTEBQDBkSQxE0MQhD4GRiF0IQAFllH0HQMCmEj5jIlMEBnfxqAiYojjWVJCjnJcwnSIIrSuNZZ2CGJyi5ehUAgOAnD4vkBN+Oz1UczwGM2bYvF2Y0Dk8003AXFcwitG0imCjlsl3Xj93i2shVaQFlMgJKR01Md8ySKk6WoclwKyEqF0yJ1Xlgmqj2aE8m3E1tmoct9dgyUIrmKwJch-eIOrOIrNncgI8y2PweOG3l3Vqr0kMbZtz1bdDMKaxNSNfVqzVco4Qkyu5-AqtYSsAnci1SDkQJZOkvGgqqRpOsbhNEqbQyk2SYvu+zHoopzNxpQIWPXY0p1BikNrWPE2M8o5AsZQkYOOw8EJEsTUMk6TGDk2AFJFDo7tVZHyOWV6wgyLH9iubwbUCU0nlYoHDjxO0-KnSnq3gwTqFp2GGYRlnFKBToZpRnmmR1PIF3Avy3NSU1tWA85CYKY1vqueX+NO6hCEYWBbEm+n4aZxHOeSt8SZczdMu8YIslubJfotAGAdxWODnCiogA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKAXATmAhgLYAK+M2+WYAdAK4B2Alk1o-sowF6QDEAMgHkAggBEAkgDkA4gH1BsgGpiAogHUZGACpCASpuUiA2gAYAuolAAHVLEatU9CyAAeiALQAmAJzUPHgGwArIEALAAcHmHhXsEhADQgAJ6IAQDM1IHGYQDs2ZnZxl5e-l6pAL5lCWiYuAQkZGAUVHRMLGwc3BD8wuLScgKKKuoAYkJifAYm5kgg1rb2jjOuCJ4hAIzUqZklHgX+xqlrkQnJCKlB1P4loYH+qV7hHoEVVejYeESk5FiUNAzMdnaXF4glEklk8hkSjUGgAqgBheHKAyTMxOOaAhxOZbZNbZajGXLBVIkrJrYInRBHYzUEIeVIhVJhNZZLws7IhF4garvOpfRo-Zr-NrsYFdUG9CEDKFDOGI5EiSZraZWGyYxagHEhEIEwkeI7Zc7GO6UhCZHzZML7MKBDwhQp0zmVblvWqfBpNGhofAQZhQPjoBSMMAAd26YL6kOhIzGEyMaJmGIW2JS4VpJTCWXp5K82Q8pvN1Et1tt9oedq5PLd9W+v2o3t99H9geDYYl4P6gxhGARSJR8ZVszVyaWiEZPnt-m8Ry8xjta38pqN1FK+uy+w8xhCgS8lddHxrArrDb9AagQdD4clnZl3d7CqVg6TjCxo4QISumy2MWNMWiAVNO58WMFkImMOc50CMI9xqA9+U9etUB9U8W1DYZ8EYZAQR6Dso1lLRdH0Ad0WHF8NRcdxvF8AJYgiKIwhiUIC1SDwMgNcC8g5O1nmdKs4I9QUaAAC3wWAzwvEMxHoX0AGM4BaAFWFFToeB0ZQkTEBQDBkSQxE0MQhD4GRiF0IQAFllH0HQMCmEj5jIlMEBnfxqAiYojjWVJCjnJcwnSIIrSuNZZ2CGJyl4-c+QEusRLE1DJOkxg5NgBSRQ6XgFEMsQRBkABFWFlB0ABNGR4QACSEaRUSfUjX01Kl-DyWk1gie4clzHNTQCVjIhCAoOXuQlZ38GDeXdWtmli8TWyk2T5MUoEVMyvhsrygritKiqquIxNavI5YFya9YIltKd7RJAs5xXdcnm3TJAkONYKmdehUAgOAnD4qKJrAOz1UczwGM2bYvF2Y0Dk8003AXFcwitOHdkCBcmQrCLYO+o8hVaQFlMgP6R3q998ySKk6WoclwKyG02SCLdRureDBMQ5Cm2m0N8Yct9dgyUIrnhwJch-eISbOOHNncgI8y2PweNedHxsxr0kMbZtz1bdDMLx3b7LqiizVco4QlBu5GrZanAJ3ItUg5ECWTpLxoLRsbDwQqb4tmpKPu1-632pGkHt2fYrm8G1AlNNY8TYzyI7zcJzha+n+J+6g3bV0MPeS1KcfSiAOd1g67TCDIWPXY0pwdikRaeVjbce2O-KnROMdd0S2YSuaUoW3Hc+9gm9c8qIiyRqCdwF84pwLJ4iznS1zjzG0WKbhWEMIRhYFsVn3cS5K8-2qlDhczdQe8YIslubILYta3rdxW+DnCiogA */
   createMachine<LogStreamPageContext, LogStreamPageEvent, LogStreamPageTypestate>(
     {
       context: initialContext,
@@ -94,6 +95,7 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
               on: {
                 RECEIVED_INITIAL_PARAMETERS: {
                   target: 'initialized',
+                  actions: 'storeQuery',
                 },
 
                 VALID_QUERY_CHANGED: {
@@ -103,7 +105,15 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
                 },
               },
             },
-            initialized: {},
+            initialized: {
+              on: {
+                VALID_QUERY_CHANGED: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: 'storeQuery',
+                },
+              },
+            },
           },
 
           invoke: {
@@ -128,6 +138,17 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
                 logViewStatus: event.status,
                 resolvedLogView: event.resolvedLogView,
               } as LogStreamPageContextWithLogView)
+            : {}
+        ),
+        storeQuery: actions.assign((_context, event) =>
+          event.type === 'RECEIVED_INITIAL_PARAMETERS'
+            ? ({
+                parsedQuery: event.validatedQuery,
+              } as LogStreamPageContextWithQuery)
+            : event.type === 'VALID_QUERY_CHANGED'
+            ? ({
+                parsedQuery: event.parsedQuery,
+              } as LogStreamPageContextWithQuery)
             : {}
         ),
       },
@@ -174,3 +195,4 @@ export const createLogStreamPageStateMachine = ({
 
 export type LogStreamPageStateMachine = ReturnType<typeof createLogStreamPageStateMachine>;
 export type LogStreamPageActorRef = OmitDeprecatedState<ActorRefFrom<LogStreamPageStateMachine>>;
+export type LogStreamPageState = EmittedFrom<LogStreamPageActorRef>;

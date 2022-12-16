@@ -12,6 +12,7 @@ import { actions, InvokeCreator } from 'xstate';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import type {
   LogStreamQueryContext,
+  LogStreamQueryContextWithParsedQuery,
   LogStreamQueryContextWithQuery,
   LogStreamQueryEvent,
 } from './types';
@@ -63,7 +64,8 @@ export const initializeFromUrl = ({
 
     return {
       query,
-    } as LogStreamQueryContextWithQuery;
+      parsedQuery: { bool: { filter: [{ match_none: {} }] } }, // safe default
+    } as LogStreamQueryContextWithQuery & LogStreamQueryContextWithParsedQuery;
   });
 
 const filterStateInUrlRT = rt.union([

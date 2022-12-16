@@ -38,7 +38,7 @@ export type LogStreamQueryTypestate =
       value: 'hasQuery' | { hasQuery: 'validating' };
       context: LogStreamQueryContextWithDataViews &
         LogStreamQueryContextWithQuery &
-        Partial<LogStreamQueryContextWithParsedQuery>;
+        LogStreamQueryContextWithParsedQuery;
     }
   | {
       value: { hasQuery: 'valid' };
