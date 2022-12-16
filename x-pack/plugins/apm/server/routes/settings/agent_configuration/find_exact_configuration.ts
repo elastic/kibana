@@ -12,6 +12,7 @@ import {
   SERVICE_NAME,
 } from '../../../../common/es_fields/apm';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/get_apm_indices';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 import { getConfigsAppliedToAgentsThroughFleet } from './get_config_applied_to_agent_through_fleet';
 
@@ -31,7 +32,7 @@ export async function findExactConfiguration({
     : { bool: { must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }] } };
 
   const params = {
-    index: internalESClient.apmIndices.apmAgentConfigurationIndex,
+    index: APM_AGENT_CONFIGURATION_INDEX,
     body: {
       query: {
         bool: { filter: [serviceNameFilter, environmentFilter] },
