@@ -12,7 +12,7 @@ import illustration from './assets/illustration.svg';
 
 export function SloListWelcomePrompt() {
   return (
-    <EuiPageTemplate minHeight="0">
+    <EuiPageTemplate minHeight="0" data-test-subj="slosPageWelcomePrompt">
       <EuiPageTemplate.EmptyPrompt
         title={
           <EuiTitle size="l">
