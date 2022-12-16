@@ -58,9 +58,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/logging",
+                "pluginId": "@kbn/ecs",
                 "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
+                "docId": "kibKbnEcsPluginApi",
                 "section": "def-server.EcsEventOutcome",
                 "text": "EcsEventOutcome"
               },
@@ -3059,11 +3059,11 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_to_730/migrations_730.ts"
+                "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_to_730/migrations_730.ts"
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_to_730/migrations_730.ts"
+                "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_to_730/migrations_730.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",

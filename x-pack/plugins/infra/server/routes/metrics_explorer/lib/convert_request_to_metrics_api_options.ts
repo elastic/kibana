@@ -27,6 +27,7 @@ export const convertRequestToMetricsAPIOptions = (
     limit,
     metrics,
     dropPartialBuckets: true,
+    includeTimeseries: true,
   };
 
   if (options.afterKey) {
@@ -43,7 +44,7 @@ export const convertRequestToMetricsAPIOptions = (
     try {
       const filterObject = JSON.parse(options.filterQuery);
       if (isObject(filterObject)) {
-        metricsApiOptions.filters = [filterObject];
+        metricsApiOptions.filters = [filterObject as any];
       }
     } catch (err) {
       metricsApiOptions.filters = [
