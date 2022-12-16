@@ -53,6 +53,7 @@ export interface GroupedFieldsResult<T extends FieldListItem> {
     scrollToTopResetCounter: number;
     fieldsExistenceStatus: ExistenceFetchStatus;
     fieldsExistInIndex: boolean;
+    screenReaderDescriptionId?: string;
   };
 }
 
@@ -351,14 +352,23 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     return fieldsExistenceReader.getFieldsExistenceStatus(dataViewId);
   }, [dataViewId, hasDataLoaded, fieldsExistenceReader]);
 
+  const screenReaderDescriptionId =
+    fieldListFilters.fieldListFiltersProps.screenReaderDescriptionId;
   const fieldListGroupedProps = useMemo(() => {
     return {
       fieldGroups,
       scrollToTopResetCounter,
       fieldsExistInIndex,
       fieldsExistenceStatus,
+      screenReaderDescriptionId,
     };
-  }, [fieldGroups, scrollToTopResetCounter, fieldsExistInIndex, fieldsExistenceStatus]);
+  }, [
+    fieldGroups,
+    scrollToTopResetCounter,
+    fieldsExistInIndex,
+    fieldsExistenceStatus,
+    screenReaderDescriptionId,
+  ]);
 
   return {
     fieldListGroupedProps,

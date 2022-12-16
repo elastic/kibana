@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiHighlight, htmlIdGenerator } from '@elastic/eui';
+import { EuiHighlight } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
@@ -41,8 +41,6 @@ export type TextBasedDataPanelProps = DatasourceDataPanelProps<TextBasedPrivateS
   dataViews: DataViewsPublicPluginStart;
   layerFields?: string[];
 };
-const htmlId = htmlIdGenerator('datapanel-text-based-languages');
-const fieldSearchDescriptionId = htmlId();
 
 export function TextBasedDataPanel({
   setState,
@@ -153,17 +151,12 @@ export function TextBasedDataPanel({
           className="lnsInnerIndexPatternDataPanel"
           isProcessing={!dataHasLoaded}
           prepend={
-            <FieldListFilters
-              {...fieldListFiltersProps}
-              screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
-              data-test-subj="lnsTextBasedLanguages"
-            />
+            <FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsTextBasedLanguages" />
           }
         >
           <FieldListGrouped<DatatableColumn>
             {...fieldListGroupedProps}
             renderFieldItem={renderFieldItem}
-            screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
             data-test-subj="lnsTextBasedLanguages"
           />
         </FieldList>

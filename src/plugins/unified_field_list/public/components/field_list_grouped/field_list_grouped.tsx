@@ -34,7 +34,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   fieldsExistInIndex: boolean;
   renderFieldItem: FieldsAccordionProps<T>['renderFieldItem'];
   scrollToTopResetCounter: number;
-  screenReaderDescriptionForSearchInputId?: string;
+  screenReaderDescriptionId?: string;
   'data-test-subj'?: string;
 }
 
@@ -44,7 +44,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   fieldsExistInIndex,
   renderFieldItem,
   scrollToTopResetCounter,
-  screenReaderDescriptionForSearchInputId,
+  screenReaderDescriptionId,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
   const hasSyncedExistingFields =
@@ -118,11 +118,11 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       onScroll={throttle(lazyScroll, 100)}
     >
       <div className="unifiedFieldList__fieldListGrouped__container">
-        {Boolean(screenReaderDescriptionForSearchInputId) && (
+        {Boolean(screenReaderDescriptionId) && (
           <EuiScreenReaderOnly>
             <div
               aria-live="polite"
-              id={screenReaderDescriptionForSearchInputId}
+              id={screenReaderDescriptionId}
               data-test-subj={`${dataTestSubject}__ariaDescription`}
             >
               {hasSyncedExistingFields

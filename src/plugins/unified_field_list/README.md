@@ -62,8 +62,6 @@ These components can be combined and customized as the following:
 * `<FieldListGrouped .../>` - renders a fields list which is split in sections (Special, Selected, Popular, Available, Empty, Meta fields). It accepts already grouped fields, please use `useGroupedFields` hook for it.
 
 ```
-const fieldSearchDescriptionId = htmlIdGenerator('<custom label>')();
-
 const { isProcessing } = useExistingFieldsFetcher({
   dataViews: [currentDataView],
   ...
@@ -81,14 +79,12 @@ const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields({
   prepend={
     <FieldListFilters
       {...fieldListFiltersProps}
-      screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
     />
   }
 >
   <FieldListGrouped<IndexPatternField>
     {...fieldListGroupedProps}
     renderFieldItem={renderFieldItem}
-    screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
   />
 </FieldList>
 ```

@@ -8,7 +8,7 @@
 import './datapanel.scss';
 import { uniq } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
@@ -165,9 +165,6 @@ export function FormBasedDataPanel({
     </>
   );
 }
-
-const htmlId = htmlIdGenerator('datapanel');
-const fieldSearchDescriptionId = htmlId();
 
 export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   currentIndexPatternId,
@@ -425,18 +422,11 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       <FieldList
         className="lnsInnerIndexPatternDataPanel"
         isProcessing={isProcessing}
-        prepend={
-          <FieldListFilters
-            {...fieldListFiltersProps}
-            screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
-            data-test-subj="lnsIndexPattern"
-          />
-        }
+        prepend={<FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsIndexPattern" />}
       >
         <FieldListGrouped<IndexPatternField>
           {...fieldListGroupedProps}
           renderFieldItem={renderFieldItem}
-          screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
           data-test-subj="lnsIndexPattern"
         />
       </FieldList>

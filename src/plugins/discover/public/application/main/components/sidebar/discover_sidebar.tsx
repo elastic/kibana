@@ -376,7 +376,7 @@ export function DiscoverSidebarComponent({
             <FieldListGrouped
               {...fieldListGroupedProps}
               renderFieldItem={renderFieldItem}
-              screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
+              screenReaderDescriptionId={fieldSearchDescriptionId}
             />
           )}
         </EuiFlexItem>

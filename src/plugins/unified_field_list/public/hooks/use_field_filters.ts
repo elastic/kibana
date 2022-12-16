@@ -7,11 +7,14 @@
  */
 
 import { useMemo, useState } from 'react';
+import { htmlIdGenerator } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
 import { type FieldListItem, type FieldTypeKnown, GetCustomFieldType } from '../types';
 import { getFieldIconType } from '../utils/field_types';
+
+const htmlId = htmlIdGenerator('fieldList');
 
 export interface FieldFiltersParams<T extends FieldListItem> {
   allFields: T[] | null;
@@ -24,7 +27,7 @@ export interface FieldFiltersParams<T extends FieldListItem> {
 
 export interface FieldFiltersResult<T extends FieldListItem> {
   fieldSearchHighlight: string;
-  fieldListFiltersProps: Omit<FieldListFiltersProps<T>, 'fieldSearchDescriptionId'>;
+  fieldListFiltersProps: FieldListFiltersProps<T>;
   onFilterField?: (field: T) => boolean;
 }
 
@@ -36,6 +39,7 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
 }: FieldFiltersParams<T>): FieldFiltersResult<T> {
   const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>([]);
   const [nameFilter, setNameFilter] = useState<string>('');
+  const screenReaderDescriptionId = useMemo(() => htmlId(), []);
   const docLinks = services.core.docLinks;
 
   return useMemo(() => {
@@ -51,6 +55,7 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
         onChangeFieldTypes: setSelectedFieldTypes,
         nameFilter,
         onChangeNameFilter: setNameFilter,
+        screenReaderDescriptionId,
       },
       onFilterField:
         fieldSearchHighlight?.length || selectedFieldTypes.length > 0
@@ -78,5 +83,6 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
     setSelectedFieldTypes,
     nameFilter,
     setNameFilter,
+    screenReaderDescriptionId,
   ]);
 }

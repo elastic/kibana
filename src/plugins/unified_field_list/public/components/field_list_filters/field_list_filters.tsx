@@ -21,7 +21,7 @@ export interface FieldListFiltersProps<T extends FieldListItem> {
   onSupportedFieldFilter?: FieldTypeFilterProps<T>['onSupportedFieldFilter'];
   onChangeFieldTypes?: FieldTypeFilterProps<T>['onChange'];
   nameFilter: FieldNameSearchProps['nameFilter'];
-  screenReaderDescriptionForSearchInputId?: FieldNameSearchProps['screenReaderDescriptionForSearchInputId'];
+  screenReaderDescriptionId?: FieldNameSearchProps['screenReaderDescriptionId'];
   onChangeNameFilter: FieldNameSearchProps['onChange'];
 }
 
@@ -34,7 +34,7 @@ export function FieldListFilters<T extends FieldListItem = DataViewField>({
   onSupportedFieldFilter,
   onChangeFieldTypes,
   nameFilter,
-  screenReaderDescriptionForSearchInputId,
+  screenReaderDescriptionId,
   onChangeNameFilter,
 }: FieldListFiltersProps<T>) {
   return (
@@ -54,7 +54,7 @@ export function FieldListFilters<T extends FieldListItem = DataViewField>({
         ) : undefined
       }
       nameFilter={nameFilter}
-      screenReaderDescriptionForSearchInputId={screenReaderDescriptionForSearchInputId}
+      screenReaderDescriptionId={screenReaderDescriptionId}
       onChange={onChangeNameFilter}
     />
   );
