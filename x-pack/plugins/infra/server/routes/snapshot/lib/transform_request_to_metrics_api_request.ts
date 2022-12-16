@@ -83,6 +83,9 @@ export const transformRequestToMetricsAPIRequest = async ({
   if (inventoryFields.os) {
     topMetricMetrics.push({ field: inventoryFields.os });
   }
+  if (inventoryFields.cloudProvider) {
+    topMetricMetrics.push({ field: inventoryFields.cloudProvider });
+  }
 
   const metaAggregation: MetricsAPIMetric = {
     id: META_KEY,
