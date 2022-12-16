@@ -16,7 +16,7 @@ import {
   pluginStateSavedObjectsId,
   guideStateSavedObjectsType,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
-import { testGuideId } from '@kbn/guided-onboarding-plugin/common';
+import { testGuideId } from '@kbn/guided-onboarding';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createGuides, createPluginState } from './helpers';
 
