@@ -16,6 +16,7 @@ import {
   PrivateLocation,
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
+import { mockEncryptedSO } from '../utils/mocks';
 
 describe('SyntheticsMonitorClient', () => {
   const mockEsClient = {
@@ -43,6 +44,7 @@ describe('SyntheticsMonitorClient', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
+    encryptedSavedObjects: mockEncryptedSO,
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);

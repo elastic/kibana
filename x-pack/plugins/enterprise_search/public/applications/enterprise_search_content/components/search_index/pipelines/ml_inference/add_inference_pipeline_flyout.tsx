@@ -38,10 +38,11 @@ import { IndexNameLogic } from '../../index_name_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { ConfigurePipeline } from './configure_pipeline';
-import { AddInferencePipelineSteps, MLInferenceLogic } from './ml_inference_logic';
+import { MLInferenceLogic } from './ml_inference_logic';
 import { NoModelsPanel } from './no_models';
 import { ReviewPipeline } from './review_pipeline';
 import { TestPipeline } from './test_pipeline';
+import { AddInferencePipelineSteps } from './types';
 
 import './add_inference_pipeline_flyout.scss';
 
