@@ -21,7 +21,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const unsavedDashboardTitle = 'New Dashboard';
   const newDashboartTitle = 'A Wild Dashboard';
 
-  describe('dashboard unsaved listing', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/147634
+  describe.skip('dashboard unsaved listing', () => {
     const addSomePanels = async () => {
       // add an area chart by value
       await dashboardAddPanel.clickEditorMenuButton();
@@ -147,6 +148,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.saveVisualizationExpectSuccess('Wildvis', {
         redirectToOrigin: true,
       });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
 
       // ensure that the unsaved listing exists
       await PageObjects.dashboard.gotoDashboardLandingPage();

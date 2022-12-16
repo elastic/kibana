@@ -28,7 +28,7 @@ import { RegistryProvider } from './registry';
 export interface ApmFtrConfig {
   name: APMFtrConfigName;
   license: 'basic' | 'trial';
-  kibanaConfig?: Record<string, string | string[]>;
+  kibanaConfig?: Record<string, any>;
 }
 
 async function getApmApiClient({

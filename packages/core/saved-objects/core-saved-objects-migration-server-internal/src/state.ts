@@ -173,6 +173,7 @@ export interface PostInitState extends BaseState {
   readonly sourceIndex: Option.Option<string>;
   /** The target index is the index to which the migration writes */
   readonly targetIndex: string;
+  readonly targetIndexCurrentMappings?: IndexMapping;
   readonly versionIndexReadyActions: Option.Option<AliasAction[]>;
   readonly outdatedDocumentsQuery: QueryDslQueryContainer;
 }
