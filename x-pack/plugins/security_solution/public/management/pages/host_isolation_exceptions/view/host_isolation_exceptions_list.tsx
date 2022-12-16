@@ -87,6 +87,12 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object
       defaultMessage: '"{itemName}" has been removed from host isolation exception list.',
       values: { itemName },
     }),
+  emptyStateTitleNoEntries: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.emptyStateTitleNoEntries',
+    {
+      defaultMessage: 'There are no host isolation exceptions to display.',
+    }
+  ),
   emptyStateTitle: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.emptyStateTitle',
     {
@@ -112,7 +118,8 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object
 export const HostIsolationExceptionsList = memo(() => {
   const http = useHttp();
   const apiClient = HostIsolationExceptionsApiClient.getInstance(http);
-  const { canWriteHostIsolationExceptions } = useUserPrivileges().endpointPrivileges;
+  const { canWriteHostIsolationExceptions, canDeleteHostIsolationExceptions } =
+    useUserPrivileges().endpointPrivileges;
 
   return (
     <ArtifactListPage
@@ -123,6 +130,7 @@ export const HostIsolationExceptionsList = memo(() => {
       searchableFields={SEARCHABLE_FIELDS}
       allowCardCreateAction={canWriteHostIsolationExceptions}
       allowCardEditAction={canWriteHostIsolationExceptions}
+      allowCardDeleteAction={canDeleteHostIsolationExceptions}
     />
   );
 });
