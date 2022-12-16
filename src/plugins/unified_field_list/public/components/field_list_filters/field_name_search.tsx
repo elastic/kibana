@@ -14,7 +14,7 @@ export interface FieldNameSearchProps {
   'data-test-subj': string;
   append?: EuiFieldSearchProps['append'];
   nameFilter: string;
-  fieldSearchDescriptionId?: string;
+  screenReaderDescriptionForSearchInputId?: string;
   onChange: (nameFilter: string) => unknown;
 }
 
@@ -22,7 +22,7 @@ export const FieldNameSearch: React.FC<FieldNameSearchProps> = ({
   'data-test-subj': dataTestSubject,
   append,
   nameFilter,
-  fieldSearchDescriptionId,
+  screenReaderDescriptionForSearchInputId,
   onChange,
 }) => {
   const searchPlaceholder = i18n.translate('unifiedFieldList.fieldNameSearch.filterByNameLabel', {
@@ -32,7 +32,7 @@ export const FieldNameSearch: React.FC<FieldNameSearchProps> = ({
 
   return (
     <EuiFieldSearch
-      aria-describedby={fieldSearchDescriptionId}
+      aria-describedby={screenReaderDescriptionForSearchInputId}
       aria-label={searchPlaceholder}
       data-test-subj={`${dataTestSubject}FieldSearch`}
       fullWidth

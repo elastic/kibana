@@ -4,10 +4,8 @@ This Kibana plugin contains components and services for field list UI (as in fie
 
 ---
 
-## Components
+## Field Stats nad Field Popover Components
 
-* `<FieldListGrouped .../>` - renders a fields list which is split in sections (Selected, Special, Available, Empty, Meta fields). It accepts already grouped fields, please use `useGroupedFields` hook for it. 
- 
 * `<FieldStats .../>` - loads and renders stats (Top values, Distribution) for a data view field.
 
 * `<FieldVisualizeButton .../>` - renders a button to open this field in Lens.
@@ -55,6 +53,46 @@ These components can be combined and customized as the following:
 />
 ```
 
+## Field List components
+
+* `<FieldList .../>` - a top-level component to render field filters and field list sections.
+
+* `<FieldListFilters .../>` - renders a field search input and field filters by type. Please use `useGroupedFields` hook for it. For a more direct control, see `useFieldFilters` hook.
+
+* `<FieldListGrouped .../>` - renders a fields list which is split in sections (Special, Selected, Popular, Available, Empty, Meta fields). It accepts already grouped fields, please use `useGroupedFields` hook for it.
+
+```
+const fieldSearchDescriptionId = htmlIdGenerator('<custom label>')();
+
+const { isProcessing } = useExistingFieldsFetcher({
+  dataViews: [currentDataView],
+  ...
+});
+  
+const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields({
+  dataViewId: currentDataViewId, // pass `null` here for text-based queries to skip fields existence check
+  allFields, // pass `null` to show loading indicators
+  ...
+});
+
+// and now we can render a field list
+<FieldList
+  isProcessing={isProcessing}
+  prepend={
+    <FieldListFilters
+      {...fieldListFiltersProps}
+      screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
+    />
+  }
+>
+  <FieldListGrouped<IndexPatternField>
+    {...fieldListGroupedProps}
+    renderFieldItem={renderFieldItem}
+    screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
+  />
+</FieldList>
+```
+
 ## Public Services
 
 * `loadStats(...)` - returns the loaded field stats (can also work with Ad-hoc data views)
@@ -63,15 +101,18 @@ These components can be combined and customized as the following:
 
 ## Hooks
 
+* `useGroupedFields(...)` - this hook groups fields list into sections of Selected, Special, Available, Empty, Meta fields.
+ 
+* `useFieldFilters(...)` - manages state of `FieldListFilters` component. It is included into `useGroupedFields`.
+
 * `useExistingFieldsFetcher(...)` - this hook is responsible for fetching fields existence info for specified data views. It can be used higher in components tree than `useExistingFieldsReader` hook.
 
-* `useExistingFieldsReader(...)` - you can call this hook to read fields existence info which was fetched by `useExistingFieldsFetcher` hook. Using multiple "reader" hooks from different children components is supported. So you would need only one "fetcher" and as many "reader" hooks as necessary.
+* `useExistingFieldsReader(...)` - you can call this hook to read fields existence info which was fetched by `useExistingFieldsFetcher` hook. Using multiple "reader" hooks from different children components is supported. So you would need only one "fetcher" and as many "reader" hooks as necessary. It is included into `useGroupedFields`.
 
-* `useGroupedFields(...)` - this hook groups fields list into sections of Selected, Special, Available, Empty, Meta fields.
-
-An example of using hooks together with `<FieldListGrouped .../>`:
+An example of using hooks for fetching and reading info whether a field is empty or not:
 
 ```
+// define a fetcher in any of your components
 const { refetchFieldsExistenceInfo, isProcessing } = useExistingFieldsFetcher({
   dataViews,
   query,
@@ -80,24 +121,10 @@ const { refetchFieldsExistenceInfo, isProcessing } = useExistingFieldsFetcher({
   toDate,
   ...
 });
-const fieldsExistenceReader = useExistingFieldsReader()
-const fieldListGroupedProps = useGroupedFields({
-  dataViewId: currentDataViewId, // pass `null` here for text-based queries to skip fields existence check
-  allFields, // pass `null` to show loading indicators
-  fieldsExistenceReader, // pass `undefined` for text-based queries 
-  ...
-});
 
-// and now we can render a field list
-<FieldListGrouped
-  {...fieldListGroupedProps}
-  renderFieldItem={renderFieldItem}
-  screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
-/>
-
-// or check whether a field contains data
+// define a reader in any of your components on the same page to check whether a field contains data
 const { hasFieldData } = useExistingFieldsReader();
-const hasData = hasFieldData(currentDataViewId, fieldName) // return a boolean
+const hasData = hasFieldData(currentDataViewId, fieldName) // returns a boolean
 ```
 
 ## Server APIs

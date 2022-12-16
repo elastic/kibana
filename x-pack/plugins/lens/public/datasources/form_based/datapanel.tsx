@@ -8,7 +8,7 @@
 import './datapanel.scss';
 import { uniq } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiProgress, htmlIdGenerator } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
@@ -19,6 +19,7 @@ import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
+  FieldList,
   FieldListFilters,
   FieldListGrouped,
   type FieldListGroupedProps,
@@ -421,29 +422,24 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
-      <EuiFlexGroup
-        gutterSize="none"
+      <FieldList
         className="lnsInnerIndexPatternDataPanel"
-        direction="column"
-        responsive={false}
-      >
-        {isProcessing && <EuiProgress size="xs" color="accent" position="absolute" />}
-        <EuiFlexItem grow={false}>
+        isProcessing={isProcessing}
+        prepend={
           <FieldListFilters
             {...fieldListFiltersProps}
-            fieldSearchDescriptionId={fieldSearchDescriptionId}
-            data-test-subj="lnsIndexPattern"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <FieldListGrouped<IndexPatternField>
-            {...fieldListGroupedProps}
-            renderFieldItem={renderFieldItem}
             screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
             data-test-subj="lnsIndexPattern"
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+      >
+        <FieldListGrouped<IndexPatternField>
+          {...fieldListGroupedProps}
+          renderFieldItem={renderFieldItem}
+          screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
+          data-test-subj="lnsIndexPattern"
+        />
+      </FieldList>
     </ChildDragDropProvider>
   );
 };

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHighlight, htmlIdGenerator } from '@elastic/eui';
+import { EuiHighlight, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
@@ -17,6 +17,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
+  FieldList,
   FieldListFilters,
   FieldIcon,
   GetCustomFieldType,
@@ -148,28 +149,24 @@ export function TextBasedDataPanel({
       }}
     >
       <ChildDragDropProvider {...dragDropContext}>
-        <EuiFlexGroup
-          gutterSize="none"
+        <FieldList
           className="lnsInnerIndexPatternDataPanel"
-          direction="column"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
+          isProcessing={!dataHasLoaded}
+          prepend={
             <FieldListFilters
               {...fieldListFiltersProps}
-              fieldSearchDescriptionId={fieldSearchDescriptionId}
-              data-test-subj="lnsTextBasedLanguages"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <FieldListGrouped<DatatableColumn>
-              {...fieldListGroupedProps}
-              renderFieldItem={renderFieldItem}
               screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
               data-test-subj="lnsTextBasedLanguages"
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          }
+        >
+          <FieldListGrouped<DatatableColumn>
+            {...fieldListGroupedProps}
+            renderFieldItem={renderFieldItem}
+            screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
+            data-test-subj="lnsTextBasedLanguages"
+          />
+        </FieldList>
       </ChildDragDropProvider>
     </KibanaContextProvider>
   );
