@@ -109,7 +109,7 @@ export async function runFleetSourcemapArtifactsMigration({
   internalESClient,
   logger,
 }: {
-  taskState: TaskState;
+  taskState?: TaskState;
   fleet: FleetStartContract;
   internalESClient: ElasticsearchClient;
   logger: Logger;
@@ -167,14 +167,14 @@ async function paginateArtifacts({
   logger,
   internalESClient,
 }: {
-  taskState: TaskState;
+  taskState?: TaskState;
   page: number;
   apmArtifactClient: FleetArtifactsClient;
   kuery: string;
   logger: Logger;
   internalESClient: ElasticsearchClient;
 }) {
-  if (taskState.isAborted) {
+  if (taskState?.isAborted) {
     return;
   }
 
