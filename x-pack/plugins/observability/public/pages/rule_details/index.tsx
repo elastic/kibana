@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useHistory, useParams, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -111,9 +112,14 @@ export function RuleDetailsPage() {
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
   const [defaultAlertTimeRange] = useState(getDefaultAlertSummaryTimeRange);
-  const ruleQuery = useRef([
+  const ruleQuery = useRef<Query[]>([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
-  ] as Query[]);
+  ]);
+  const alertSummaryWidgetFilter = useRef<estypes.QueryDslQueryContainer>({
+    term: {
+      'kibana.alert.rule.uuid': ruleId,
+    },
+  });
   const tabsRef = useRef<HTMLDivElement>(null);
 
   const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
@@ -383,6 +389,7 @@ export function RuleDetailsPage() {
             filteredRuleTypes={filteredRuleTypes}
             onClick={(status) => onAlertSummaryWidgetClick(status)}
             timeRange={defaultAlertTimeRange}
+            filter={alertSummaryWidgetFilter.current}
           />
         </EuiFlexItem>
         <EuiSpacer size="m" />

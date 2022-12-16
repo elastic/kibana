@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import { createSelector } from 'reselect';
 import { SyntheticsAppState } from '../root_reducer';
+import { AppState } from '..';
 
 export const selectDynamicSettings = (state: SyntheticsAppState) => state.dynamicSettings;
+const getState = (appState: AppState) => appState.agentPolicies;
+export const selectAgentPolicies = createSelector(getState, (state) => state);
+
+export const selectAddingNewPrivateLocation = (state: AppState) =>
+  state.agentPolicies.isAddingNewPrivateLocation ?? false;
