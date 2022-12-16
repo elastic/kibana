@@ -39,7 +39,7 @@ const _buildInactiveClause = (
 };
 
 function _buildSource(inactivityTimeouts: InactivityTimeouts, pathPrefix?: string) {
-  const field = (path: string) => `doc.${pathPrefix ? `${pathPrefix}${path}` : path}`;
+  const field = (path: string) => `doc['${pathPrefix ? `${pathPrefix}${path}` : path}']`;
   const now = Date.now();
   return `
     long lastCheckinMillis = ${field('last_checkin')}.size() > 0 
