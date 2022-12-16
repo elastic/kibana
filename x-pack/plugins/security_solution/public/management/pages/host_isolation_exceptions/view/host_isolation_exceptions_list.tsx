@@ -90,7 +90,7 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object
   emptyStateTitleNoEntries: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.emptyStateTitleNoEntries',
     {
-      defaultMessage: 'There are no host isolation exception entries to display.',
+      defaultMessage: 'There are no host isolation exceptions to display.',
     }
   ),
   emptyStateTitle: i18n.translate(

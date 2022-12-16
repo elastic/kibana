@@ -117,7 +117,7 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   emptyStateTitleNoEntries: i18n.translate(
     'xpack.securitySolution.eventFilters.emptyStateTitleNoEntries',
     {
-      defaultMessage: 'There are no event filter entries to display.',
+      defaultMessage: 'There are no event filters to display.',
     }
   ),
   emptyStateTitle: i18n.translate('xpack.securitySolution.eventFilters.emptyStateTitle', {

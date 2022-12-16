@@ -92,7 +92,7 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   emptyStateTitleNoEntries: i18n.translate(
     'xpack.securitySolution.trustedApps.emptyStateTitleNoEntries',
     {
-      defaultMessage: 'There are no trusted application entries to display.',
+      defaultMessage: 'There are no trusted applications to display.',
     }
   ),
   emptyStateTitle: i18n.translate('xpack.securitySolution.trustedApps.emptyStateTitle', {
