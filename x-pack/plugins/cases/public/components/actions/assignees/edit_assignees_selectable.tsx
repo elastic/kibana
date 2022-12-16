@@ -32,6 +32,7 @@ import { useCasesContext } from '../../cases_context/use_cases_context';
 import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
 import { SmallUserAvatar } from '../../user_profiles/small_user_avatar';
+import { NoSelectedAssignees } from './no_selected_assignees';
 
 interface Props {
   selectedCases: Case[];
@@ -174,7 +175,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
       options={finalOptions}
       searchable
       searchProps={{
-        placeholder: i18n.SEARCH_PLACEHOLDER,
+        placeholder: i18n.SEARCH_ASSIGNEES_PLACEHOLDER,
         isLoading: isLoadingData,
         isClearable: !isLoadingData,
         onChange: onSearchChange,
@@ -185,7 +186,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
       listProps={{ showIcons: false }}
       onChange={onChange}
       noMatchesMessage={!isLoadingData ? <NoMatches /> : <EmptyMessage />}
-      emptyMessage={<EmptyMessage />}
+      emptyMessage={<NoSelectedAssignees />}
       data-test-subj="cases-actions-assignees-edit-selectable"
       height="full"
     >

@@ -10,7 +10,6 @@ import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { EditAssigneesSelectable } from './edit_assignees_selectable';
 import { basicCase } from '../../../containers/mock';
-import { waitForComponentToUpdate } from '../../../common/test_utils';
 import userEvent from '@testing-library/user-event';
 import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
 import { act, waitFor } from '@testing-library/react';
@@ -69,15 +68,13 @@ describe('EditAssigneesSelectable', () => {
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
 
     expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
-    expect(result.getByPlaceholderText('Search')).toBeInTheDocument();
+    expect(result.getByPlaceholderText('Find a user')).toBeInTheDocument();
     expect(result.getByText('Selected: 1')).toBeInTheDocument();
 
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
       expect(result.getByText(userProfile.user.full_name)).toBeInTheDocument();
     }
-
-    await waitForComponentToUpdate();
   });
 
   it('renders the selected assignees label correctly', async () => {
@@ -89,8 +86,6 @@ describe('EditAssigneesSelectable', () => {
       // @ts-ignore: full name exists
       expect(result.getByText(userProfile.user.full_name)).toBeInTheDocument();
     }
-
-    await waitForComponentToUpdate();
   });
 
   it('renders the assignees icons correctly', async () => {
@@ -104,8 +99,6 @@ describe('EditAssigneesSelectable', () => {
       const iconDataTestSubj = `cases-actions-assignees-edit-selectable-assignee-${uid}-icon-${icon}`;
       expect(result.getByTestId(iconDataTestSubj)).toBeInTheDocument();
     }
-
-    await waitForComponentToUpdate();
   });
 
   it('selects and unselects correctly assignees with one case', async () => {
@@ -124,8 +117,6 @@ describe('EditAssigneesSelectable', () => {
       ],
       unSelectedItems: ['u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0'],
     });
-
-    await waitForComponentToUpdate();
   });
 
   it('selects and unselects correctly assignees with multiple cases', async () => {
@@ -144,8 +135,6 @@ describe('EditAssigneesSelectable', () => {
       ],
       unSelectedItems: ['u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0'],
     });
-
-    await waitForComponentToUpdate();
   });
 
   it('renders the icons correctly after selecting and deselecting assignees', async () => {
@@ -173,8 +162,6 @@ describe('EditAssigneesSelectable', () => {
       ],
       unSelectedItems: ['u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0'],
     });
-
-    await waitForComponentToUpdate();
   });
 
   it('sort users alphabetically correctly', async () => {
@@ -185,15 +172,13 @@ describe('EditAssigneesSelectable', () => {
     const result = appMock.render(
       <EditAssigneesSelectable {...props} userProfiles={reversedUserProfiles} />
     );
-    const allUsersInView = result.getAllByRole('option');
 
+    const allUsersInView = result.getAllByRole('option');
     expect(allUsersInView.length).toBe(3);
 
     expect(allUsersInView[0].textContent?.includes('Damaged Raccoon')).toBe(true);
     expect(allUsersInView[1].textContent?.includes('Physical Dinosaur')).toBe(true);
     expect(allUsersInView[2].textContent?.includes('Wet Dingo')).toBe(true);
-
-    await waitForComponentToUpdate();
   });
 
   it('search and sorts alphabetically', async () => {
@@ -203,7 +188,7 @@ describe('EditAssigneesSelectable', () => {
 
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
 
-    userEvent.type(result.getByPlaceholderText('Search'), 's');
+    userEvent.type(result.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -218,8 +203,6 @@ describe('EditAssigneesSelectable', () => {
     expect(searchResults.length).toBe(2);
     expect(searchResults[0].textContent?.includes('Physical Dinosaur')).toBe(true);
     expect(searchResults[1].textContent?.includes('Silly Hare')).toBe(true);
-
-    await waitForComponentToUpdate();
   });
 
   it('selecting and deselecting a searched user does not show it after the user cleared the search', async () => {
@@ -229,7 +212,7 @@ describe('EditAssigneesSelectable', () => {
 
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
 
-    userEvent.type(result.getByPlaceholderText('Search'), 's');
+    userEvent.type(result.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -251,14 +234,12 @@ describe('EditAssigneesSelectable', () => {
     });
 
     expect(result.queryByTestId(searchedUserDataTestSubj)).not.toBeInTheDocument();
-
-    await waitForComponentToUpdate();
   });
 
   it('does not show the same user in search results if it is already in the initial user profile mapping', async () => {
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
 
-    userEvent.type(result.getByPlaceholderText('Search'), 's');
+    userEvent.type(result.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -270,8 +251,6 @@ describe('EditAssigneesSelectable', () => {
     );
 
     expect(searchResults.length).toBe(1);
-
-    await waitForComponentToUpdate();
   });
 
   it('selects a searched user correctly', async () => {
@@ -281,7 +260,7 @@ describe('EditAssigneesSelectable', () => {
 
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
 
-    userEvent.type(result.getByPlaceholderText('Search'), 's');
+    userEvent.type(result.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -299,8 +278,6 @@ describe('EditAssigneesSelectable', () => {
       ],
       unSelectedItems: [],
     });
-
-    await waitForComponentToUpdate();
   });
 
   it('shows deselected users from the initial user profile mapping', async () => {
@@ -322,8 +299,6 @@ describe('EditAssigneesSelectable', () => {
       selectedItems: [],
       unSelectedItems: ['u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0'],
     });
-
-    await waitForComponentToUpdate();
   });
 
   it('does not shows initial empty search results on the list of users', async () => {
@@ -342,14 +317,12 @@ describe('EditAssigneesSelectable', () => {
     });
 
     expect(result.queryByTestId(searchedUserDataTestSubj)).not.toBeInTheDocument();
-
-    await waitForComponentToUpdate();
   });
 
   it('shows the no matching component', async () => {
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
 
-    userEvent.type(result.getByPlaceholderText('Search'), 'not-exists');
+    userEvent.type(result.getByPlaceholderText('Find a user'), 'not-exists');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -360,18 +333,17 @@ describe('EditAssigneesSelectable', () => {
         result.getAllByTestId('case-user-profiles-assignees-popover-no-matches')[0]
       ).toBeInTheDocument();
     });
-
-    await waitForComponentToUpdate();
   });
 
   it('shows unknown users', async () => {
-    const result = appMock.render(<EditAssigneesSelectable {...props} unknownUsers={['123']} />);
+    const result = appMock.render(
+      <EditAssigneesSelectable {...props} unknownUsers={['123', '456']} />
+    );
 
     await waitFor(() => {
-      expect(result.getByText('Unknown')).toBeInTheDocument();
+      const unknownUsers = result.getAllByText('Unknown');
+      expect(unknownUsers.length).toBe(2);
     });
-
-    await waitForComponentToUpdate();
   });
 
   it('selects unknown users', async () => {
@@ -387,8 +359,6 @@ describe('EditAssigneesSelectable', () => {
       selectedItems: ['u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0', '123'],
       unSelectedItems: [],
     });
-
-    await waitForComponentToUpdate();
   });
 
   it('deselects unknown users', async () => {
@@ -407,7 +377,5 @@ describe('EditAssigneesSelectable', () => {
       selectedItems: [],
       unSelectedItems: ['123'],
     });
-
-    await waitForComponentToUpdate();
   });
 });

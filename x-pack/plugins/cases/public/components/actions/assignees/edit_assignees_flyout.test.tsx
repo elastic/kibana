@@ -55,7 +55,7 @@ describe('EditAssigneesFlyout', () => {
     await waitForComponentToUpdate();
   });
 
-  it('calls onSaveTags when pressing the save selection button', async () => {
+  it('calls onSaveAssignees when pressing the save selection button', async () => {
     const result = appMock.render(<EditAssigneesFlyout {...props} />);
 
     await waitForComponentToUpdate();

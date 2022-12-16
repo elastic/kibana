@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 export { CANCEL, UNKNOWN } from '../../../common/translations';
-export { EDITED_CASES, SELECTED_CASES, SAVE_SELECTION, SEARCH_PLACEHOLDER } from '../translations';
+export { EDITED_CASES, SELECTED_CASES, SAVE_SELECTION } from '../translations';
 
 export const EDIT_ASSIGNEES = i18n.translate('xpack.cases.actions.assignees.edit', {
   defaultMessage: 'Edit assignees',
@@ -18,3 +18,24 @@ export const SELECTED_ASSIGNEES = (selectedAssignees: number) =>
     defaultMessage: 'Selected: {selectedAssignees}',
     values: { selectedAssignees },
   });
+
+export const SEARCH_ASSIGNEES_PLACEHOLDER = i18n.translate(
+  'xpack.cases.actions.assignees.searchPlaceholder',
+  {
+    defaultMessage: 'Find a user',
+  }
+);
+
+export const NO_SELECTED_ASSIGNEES = i18n.translate(
+  'xpack.cases.actions.assignees.searchPlaceholder',
+  {
+    defaultMessage: 'The selected cases do not have assigned users',
+  }
+);
+
+export const NO_SELECTED_ASSIGNEES_HELP_TEXT = i18n.translate(
+  'xpack.cases.actions.assignees.searchPlaceholder',
+  {
+    defaultMessage: 'Search to assign users',
+  }
+);
