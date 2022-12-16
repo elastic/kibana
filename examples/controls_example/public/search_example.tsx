@@ -41,8 +41,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [filters, setFilters] = useState<Filter[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [query, setQuery] = useState<Query>({
-    language:'kuery',
-    query: ''
+    language: 'kuery',
+    query: '',
   });
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-7d', to: 'now' });
 
@@ -160,11 +160,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           timeRange={timeRange}
         />
         <EuiCallOut title="Search results">
-          {isSearching ? (
-            <EuiLoadingSpinner size="l" />
-          ) : (
-            <p>Hits: {hits}</p>
-          )}
+          {isSearching ? <EuiLoadingSpinner size="l" /> : <p>Hits: {hits}</p>}
         </EuiCallOut>
       </EuiPanel>
     </>
