@@ -10,19 +10,30 @@ import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-plugin/public';
-import { useLocationName, useStatusByLocation } from '../../../../hooks';
+import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
-import { MonitorOverviewItem, Ping } from '../../../../../../../common/runtime_types';
+import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover';
 import { OverviewGridItemLoader } from './overview_grid_item_loader';
 
-export const getColor = (theme: ReturnType<typeof useTheme>, isEnabled: boolean, ping?: Ping) => {
+export const getColor = (
+  theme: ReturnType<typeof useTheme>,
+  isEnabled: boolean,
+  status?: string
+) => {
   if (!isEnabled) {
     return theme.eui.euiColorLightestShade;
   }
-  return (ping?.summary?.down || 0) > 0
-    ? theme.eui.euiColorVis9_behindText
-    : theme.eui.euiColorVis0_behindText;
+  switch (status) {
+    case 'down':
+      return theme.eui.euiColorVis9_behindText;
+    case 'up':
+      return theme.eui.euiColorVis0_behindText;
+    case 'unknown':
+      return theme.eui.euiColorGhost;
+    default:
+      return theme.eui.euiColorVis0_behindText;
+  }
 };
 
 export const MetricItem = ({
@@ -41,8 +52,7 @@ export const MetricItem = ({
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const locationName = useLocationName({ locationId: monitor.location?.id });
-  const { locations } = useStatusByLocation(monitor.configId);
-  const ping = locations.find((loc) => loc.observer?.geo?.name === locationName);
+  const status = useStatusByLocationOverview(monitor.configId, locationName);
   const theme = useTheme();
 
   return (
@@ -92,7 +102,7 @@ export const MetricItem = ({
                       </span>
                     ),
                     valueFormatter: (d: number) => formatDuration(d),
-                    color: getColor(theme, monitor.isEnabled, ping),
+                    color: getColor(theme, monitor.isEnabled, status),
                   },
                 ],
               ]}
