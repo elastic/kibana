@@ -39,6 +39,7 @@ export async function fetchKibanaNodeRules(
     dataset: 'node_rules',
     ccs: CCS_REMOTE_PATTERN,
   });
+  
   const params = {
     index: indexPatterns,
     filter_path: ['aggregations'],
@@ -105,6 +106,7 @@ export async function fetchKibanaNodeRules(
   }
 
   const response = await esClient.search(params);
+  
   const stats: AlertRuleFailuresStats[] = [];
   const clusterBuckets = get(
     response,
@@ -119,10 +121,11 @@ export async function fetchKibanaNodeRules(
     }
 
     const stat = {
-      failures: get(indices, 'executions[0]', 0),
-      executions: get(indices, 'executions[0]', 0),
+      failures: get(clusterBucket, 'failures.value', 0),
+      executions: get(clusterBucket, 'executions.value', 0),
       clusterUuid: clusterBucket.key,
     };
+
     stats.push(stat);
   }
   return stats;

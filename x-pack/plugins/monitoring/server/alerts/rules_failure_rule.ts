@@ -76,7 +76,7 @@ export class RulesFailureRule extends BaseRule {
     return stats.map((stat) => {
       return {
         clusterUuid: stat.clusterUuid,
-        shouldFire: stat.failures > params.threshold!,
+        shouldFire: stat.failures > 0,
         severity: AlertSeverity.Danger,
         meta: stat,
       };
@@ -191,9 +191,6 @@ export class RulesFailureRule extends BaseRule {
       internalShortMessage,
       internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
       state: AlertingDefaults.ALERT_STATE.firing,
-      /* continue to send "nodes" and "count" values for users before https://github.com/elastic/kibana/pull/102544
-        see https://github.com/elastic/kibana/issues/100136#issuecomment-865229431
-        */
       nodes: `${firingNode.nodeName}:${firingNode.failures}`,
       count: 1,
       node: `${firingNode.nodeName}:${firingNode.failures}`,
