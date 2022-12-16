@@ -3240,7 +3240,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _lxd_cluster_members.message_ - Message from the node (Online/Offline)
 * _selinux_events.message_ - Message
 * _syslog_events.message_ - The syslog message
-* _unified_log.message_ - composed message
+* _unified_log.message_ - Composed message
 * _user_events.message_ - Message from the event
 
 *metadata_endpoint* - keyword, text.text
