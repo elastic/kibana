@@ -14,7 +14,7 @@ import type {
 import * as Either from 'fp-ts/lib/Either';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { State } from '../state';
-import type { FetchIndexResponse } from '../actions';
+import type { AliasAction, FetchIndexResponse } from '../actions';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -191,21 +191,17 @@ export function getAliases(
 }
 
 /**
- * Kibana stores Saved Objects in indices named according to the following
- * convention:
- *
- *  .kibana_a.b.c_xyz
- *
- * We name version aliases according to the following convention:
- *
- * .kibana_a.b.c
- *
- * We can therefore derive the version alias name from the index name by stripping
- * the trailing "_xyz".
- *
- * @note This helper is a best-effort to derive the version alias name and does
- * not validate that the index name provided matches the expected convention.
+ * Build a list of alias actions to remove the provided aliases from the given index.
  */
-export function indexNameToAliasName(indexName: string): string {
-  return indexName.trim().replace(/_\d\d\d$/, '');
+export function buildRemoveAliasActions(
+  index: string,
+  aliases: string[],
+  exclude: string[]
+): AliasAction[] {
+  return aliases.flatMap((alias) => {
+    if (exclude.includes(alias)) {
+      return [];
+    }
+    return [{ remove: { index, alias, must_exist: true } }];
+  });
 }

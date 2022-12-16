@@ -13,6 +13,7 @@ import {
   addMustNotClausesToBoolQuery,
   getAliases,
   indexNameToAliasName,
+  buildRemoveAliasActions,
   versionMigrationCompleted,
 } from './helpers';
 
@@ -269,10 +270,21 @@ describe('versionMigrationCompleted', () => {
   });
 });
 
-describe('indexNameToAliasName', () => {
-  it('derives the version alias from the index name', () => {
-    expect(indexNameToAliasName('.kibana_7.17.0_001')).toBe('.kibana_7.17.0');
-    expect(indexNameToAliasName('.kibana_7.17.0_abc')).toBe('.kibana_7.17.0_abc');
-    expect(indexNameToAliasName('')).toBe('');
+describe('buildRemoveAliasActions', () => {
+  test('empty', () => {
+    expect(buildRemoveAliasActions('.kibana_test_123', [], [])).toEqual([]);
+  });
+  test('no exclusions', () => {
+    expect(buildRemoveAliasActions('.kibana_test_123', ['a', 'b', 'c'], [])).toEqual([
+      { remove: { index: '.kibana_test_123', alias: 'a', must_exist: true } },
+      { remove: { index: '.kibana_test_123', alias: 'b', must_exist: true } },
+      { remove: { index: '.kibana_test_123', alias: 'c', must_exist: true } },
+    ]);
+  });
+  test('with exclusions', () => {
+    expect(buildRemoveAliasActions('.kibana_test_123', ['a', 'b', 'c'], ['b'])).toEqual([
+      { remove: { index: '.kibana_test_123', alias: 'a', must_exist: true } },
+      { remove: { index: '.kibana_test_123', alias: 'c', must_exist: true } },
+    ]);
   });
 });

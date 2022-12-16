@@ -39,6 +39,7 @@ import {
   throwBadResponse,
   versionMigrationCompleted,
   indexNameToAliasName,
+  buildRemoveAliasActions,
 } from './helpers';
 import { createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -177,11 +178,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           sourceIndex: Option.none,
           targetIndex,
           sourceIndexMappings: indices[source!].mappings,
-          preTransformDocsActions: [
-            // We try to remove the existing version alias to prevent older Kibana instances from
-            // writing while run the migration.
-            { remove: { alias: indexNameToAliasName(source!), index: source!, must_exist: true } },
-          ],
+          preTransformDocsActions: buildRemoveAliasActions(source!, Object.keys(aliases), [
+            stateP.currentAlias,
+            stateP.versionAlias,
+          ]),
           // Setting this to "undefined" will trigger UPDATE_TARGET_MAPPINGS
           // which we always want to do for new versions
           targetIndexCurrentMappings: undefined,
