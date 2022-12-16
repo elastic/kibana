@@ -10,6 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { KNOWN_FIELD_TYPES } from './field_types';
 
+/**
+ * A user-friendly description of an unknown field type
+ */
 export const UNKNOWN_FIELD_TYPE_DESC = i18n.translate(
   'unifiedFieldList.fieldNameDescription.unknownField',
   {
@@ -17,6 +20,11 @@ export const UNKNOWN_FIELD_TYPE_DESC = i18n.translate(
   }
 );
 
+/**
+ * Returns a user-friendly description of a field type
+ * @param type
+ * @public
+ */
 export function getFieldTypeDescription(type?: string) {
   if (!type || type === KBN_FIELD_TYPES.UNKNOWN) {
     return UNKNOWN_FIELD_TYPE_DESC;

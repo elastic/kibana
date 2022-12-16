@@ -9,7 +9,10 @@
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldListItem, FieldTypeKnown } from '../../types';
 
-// TODO: add tests
+/**
+ * Returns a field type. Time series metric type will override the original field type.
+ * @param field
+ */
 export function getFieldType<T extends FieldListItem = DataViewField>(field: T): FieldTypeKnown {
   const timeSeriesMetric = field.timeSeriesMetric;
   if (timeSeriesMetric) {

@@ -10,6 +10,12 @@ import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldListItem, GetCustomFieldType } from '../../types';
 import { getFieldType } from './get_field_type';
 
+/**
+ * Returns an icon type for a field
+ * @param field
+ * @param getCustomFieldType
+ * @public
+ */
 export function getFieldIconType<T extends FieldListItem = DataViewField>(
   field: T,
   getCustomFieldType?: GetCustomFieldType<T>

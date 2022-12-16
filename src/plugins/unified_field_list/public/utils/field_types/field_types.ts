@@ -8,6 +8,10 @@
 
 import { FieldTypeKnown } from '../../types';
 
+/**
+ * Field types for which name and description are defined
+ * @public
+ */
 export enum KNOWN_FIELD_TYPES {
   DOCUMENT = 'document', // "Records" on Lens page
   BOOLEAN = 'boolean',

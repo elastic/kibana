@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-// TODO: add tests
+/**
+ * Wraps field name on dot
+ * @param str
+ * @public
+ */
 export function wrapFieldNameOnDot(str?: string): string {
   // u200B is a non-width white-space character, which allows
   // the browser to efficiently word-wrap right after the dot

@@ -61,8 +61,10 @@ These components can be combined and customized as the following:
 
 * `<FieldListGrouped .../>` - renders a fields list which is split in sections (Special, Selected, Popular, Available, Empty, Meta fields). It accepts already grouped fields, please use `useGroupedFields` hook for it.
 
+* `<FieldIcon type={getFieldIconType(field)} />` - renders a field icon.
+
 ```
-const { isProcessing } = useExistingFieldsFetcher({
+const { isProcessing } = useExistingFieldsFetcher({ // this hook fetches fields info to understand which fields are empty.
   dataViews: [currentDataView],
   ...
 });
@@ -82,12 +84,20 @@ const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields({
     />
   }
 >
-  <FieldListGrouped<IndexPatternField>
+  <FieldListGrouped
     {...fieldListGroupedProps}
     renderFieldItem={renderFieldItem}
   />
 </FieldList>
 ```
+
+## Utils
+
+* `getFieldIconType(field)` - gets icon's type for the field
+
+* `getFieldTypeName(field)` - gets a field type label to show to the user
+
+* `getFieldTypeDescription(field)` - gets a field type description to show to the user as help info
 
 ## Public Services
 
@@ -101,6 +111,8 @@ const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields({
  
 * `useFieldFilters(...)` - manages state of `FieldListFilters` component. It is included into `useGroupedFields`.
 
+* `useQuerySubscriber(...)` - memorizes current query, filters and absolute date range which are set via UnifiedSearch.
+
 * `useExistingFieldsFetcher(...)` - this hook is responsible for fetching fields existence info for specified data views. It can be used higher in components tree than `useExistingFieldsReader` hook.
 
 * `useExistingFieldsReader(...)` - you can call this hook to read fields existence info which was fetched by `useExistingFieldsFetcher` hook. Using multiple "reader" hooks from different children components is supported. So you would need only one "fetcher" and as many "reader" hooks as necessary. It is included into `useGroupedFields`.
@@ -108,13 +120,15 @@ const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields({
 An example of using hooks for fetching and reading info whether a field is empty or not:
 
 ```
+// `useQuerySubscriber` hook simplifies working with current query state which is required for `useExistingFieldsFetcher`
+const querySubscriberResult = useQuerySubscriber(...);
 // define a fetcher in any of your components
 const { refetchFieldsExistenceInfo, isProcessing } = useExistingFieldsFetcher({
   dataViews,
-  query,
-  filters,
-  fromDate,
-  toDate,
+  query: querySubscriberResult.query,
+  filters: querySubscriberResult.filters,
+  fromDate: querySubscriberResult.fromDate,
+  toDate: querySubscriberResult.toDate,
   ...
 });
 

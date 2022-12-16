@@ -42,7 +42,16 @@ import {
 } from '../../utils/field_types';
 import type { FieldListItem, FieldTypeKnown, GetCustomFieldType } from '../../types';
 
-const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after "Clear all" appears
+const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after "Clear all" button appears
+const popoverTitleStyle = css`
+  padding: ${EQUAL_HEIGHT_OFFSET}px 0;
+`;
+const filterButtonStyle = css`
+  .euiFilterButton__textShift {
+    min-width: 0;
+    line-height: 1;
+  }
+`;
 
 export interface FieldTypeFilterProps<T extends FieldListItem> {
   'data-test-subj': string;
@@ -143,13 +152,8 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
           hasActiveFilters={!!selectedFieldTypes.length}
           numActiveFilters={selectedFieldTypes.length}
           data-test-subj={`${testSubj}Toggle`}
+          css={filterButtonStyle}
           onClick={() => setIsOpen((value) => !value)}
-          css={css`
-            .euiFilterButton__textShift {
-              min-width: 0;
-              line-height: 1;
-            }
-          `}
         >
           <EuiIcon type="filter" />
         </EuiFilterButton>
@@ -158,11 +162,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
       <>
         <EuiPopoverTitle paddingSize="none">
           <EuiFlexGroup responsive={false} gutterSize="xs" css={titleStyle} alignItems="center">
-            <EuiFlexItem
-              css={css`
-                padding: ${EQUAL_HEIGHT_OFFSET}px 0;
-              `}
-            >
+            <EuiFlexItem css={popoverTitleStyle}>
               <EuiTitle size="xxs">
                 <h5 className="eui-textBreakWord">
                   {i18n.translate('unifiedFieldList.fieldTypeFilter.title', {
