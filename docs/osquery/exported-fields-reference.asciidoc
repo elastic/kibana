@@ -3110,7 +3110,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 *max_rows* - keyword, number.long
 
-* _unified_log.max_rows_ - the max number of rows returned (defaults to 100)
+* _unified_log.max_rows_ - The max number of rows returned (defaults to 100).
 
 *max_speed* - keyword, number.long
 
