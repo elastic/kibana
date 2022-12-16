@@ -94,8 +94,8 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
                       </EuiBadge>
                     ) : (
                       <EuiBadge color={euiLightVars.euiColorDanger}>
-                        {i18n.translate('xpack.observability.slos.slo.state.failed', {
-                          defaultMessage: 'Failed',
+                        {i18n.translate('xpack.observability.slos.slo.state.violated', {
+                          defaultMessage: 'Violated',
                         })}
                       </EuiBadge>
                     )}
@@ -118,6 +118,7 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
               <EuiButtonIcon
                 aria-label="Actions"
                 display="empty"
+                color="text"
                 iconType="boxesVertical"
                 size="s"
                 onClick={handleClickActions}

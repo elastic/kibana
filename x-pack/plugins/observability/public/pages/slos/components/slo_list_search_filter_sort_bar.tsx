@@ -124,8 +124,7 @@ export function SloListSearchFilterSortBar({
                 iconType="arrowDown"
                 onClick={handleToggleFilterButton}
                 isSelected={isFilterPopoverOpen}
-                hasActiveFilters={Boolean(selectedStatusFilters.length)}
-                numActiveFilters={selectedStatusFilters.length}
+                numFilters={selectedStatusFilters.length}
               >
                 {i18n.translate('xpack.observability.slos.list.statusFilter', {
                   defaultMessage: 'Status',
