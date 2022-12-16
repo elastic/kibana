@@ -27,13 +27,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe('lens show underlying data from dashboard', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/147625
+  describe.skip('lens show underlying data from dashboard', () => {
     it('should show the open button for a compatible saved visualization', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.save('Embedded Visualization', true, false, false, 'new');
+
+      await PageObjects.dashboard.saveDashboard(`Open in Discover Testing ${uuid()}`, {
+        exitFromEditMode: true,
+      });
+
+      await dashboardPanelActions.openContextMenu();
+
+      await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+
+      const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('unifiedHistogramChart');
+      // check the table columns
+      const columns = await PageObjects.discover.getColumnHeaders();
+      expect(columns).to.eql(['@timestamp', 'ip', 'bytes']);
+
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(dashboardWindowHandle);
+    });
+
+    it('should show the open button for a compatible saved visualization with annotations and reference line', async () => {
+      await PageObjects.dashboard.switchToEditMode();
+      await dashboardPanelActions.clickEdit();
+
+      await PageObjects.lens.createLayer('annotations');
+      await PageObjects.lens.createLayer('referenceLine');
+      await PageObjects.lens.save('Embedded Visualization', false);
 
       await PageObjects.dashboard.saveDashboard(`Open in Discover Testing ${uuid()}`, {
         exitFromEditMode: true,
