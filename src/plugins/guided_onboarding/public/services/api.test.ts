@@ -477,7 +477,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
   });
 
-  describe('no API requests are sent on self-managed deployments', () => {
+  describe('no API requests are sent when the guided onboarding is disabled', () => {
     beforeEach(() => {
       apiService.setup(httpClient, false);
     });

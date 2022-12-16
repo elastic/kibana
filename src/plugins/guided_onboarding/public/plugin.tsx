@@ -17,6 +17,7 @@ import {
   CoreTheme,
   ApplicationStart,
   NotificationsStart,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -24,6 +25,7 @@ import type {
   AppPluginStartDependencies,
   GuidedOnboardingPluginSetup,
   GuidedOnboardingPluginStart,
+  ClientConfigType,
 } from './types';
 import { GuidePanel } from './components';
 import { ApiService, apiService } from './services/api';
@@ -31,7 +33,8 @@ import { ApiService, apiService } from './services/api';
 export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>
 {
-  constructor() {}
+  constructor(private ctx: PluginInitializerContext) {}
+
   public setup(core: CoreSetup): GuidedOnboardingPluginSetup {
     return {};
   }
@@ -41,12 +44,13 @@ export class GuidedOnboardingPlugin
     { cloud }: AppPluginStartDependencies
   ): GuidedOnboardingPluginStart {
     const { chrome, http, theme, application, notifications } = core;
+    const { ui: isGuidedOnboardingUiEnabled } = this.ctx.config.get<ClientConfigType>();
 
     // Initialize services
-    apiService.setup(http, !!cloud?.isCloudEnabled);
+    apiService.setup(http, !!cloud?.isCloudEnabled && isGuidedOnboardingUiEnabled);
 
-    // Guided onboarding UI is only available on cloud
-    if (cloud?.isCloudEnabled) {
+    // Guided onboarding UI is only available if enabled and the user is running on cloud
+    if (isGuidedOnboardingUiEnabled && cloud?.isCloudEnabled) {
       chrome.navControls.registerExtension({
         order: 1000,
         mount: (target) =>
