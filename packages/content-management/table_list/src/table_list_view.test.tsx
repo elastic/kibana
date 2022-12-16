@@ -53,6 +53,7 @@ const requiredProps: TableListViewProps = {
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/145267
+// Note: I will unskip as part of https://github.com/elastic/kibana/pull/145618
 describe.skip('TableListView', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
@@ -539,7 +540,7 @@ describe.skip('TableListView', () => {
     });
   });
 
-  describe('inspector', () => {
+  describe('content editor', () => {
     const setupInspector = registerTestBed<string, TableListViewProps>(
       WithServices<TableListViewProps>(TableListView),
       {
@@ -571,13 +572,13 @@ describe.skip('TableListView', () => {
       },
     ];
 
-    test('should have an "inpect" button if the inspector is enabled', async () => {
+    test('should have an "inpect" button if the content editor is enabled', async () => {
       let testBed: TestBed;
 
       await act(async () => {
         testBed = await setupInspector({
           findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
-          inspector: { enabled: true },
+          contentEditor: { enabled: true },
         });
       });
 
@@ -585,8 +586,8 @@ describe.skip('TableListView', () => {
       component.update();
 
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
-      expect(tableCellsValues[0][2]).toBe('Inspect Item 1');
-      expect(tableCellsValues[1][2]).toBe('Inspect Item 2');
+      expect(tableCellsValues[0][2]).toBe('View Item 1 details');
+      expect(tableCellsValues[1][2]).toBe('View Item 2 details');
     });
   });
 
