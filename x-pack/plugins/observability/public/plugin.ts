@@ -146,7 +146,7 @@ export class Plugin
       title: i18n.translate('xpack.observability.slosLinkTitle', {
         defaultMessage: 'SLOs',
       }),
-      navLinkStatus: AppNavLinkStatus.visible,
+      navLinkStatus: AppNavLinkStatus.hidden,
       order: 8002,
       path: '/slos',
     },
