@@ -87,7 +87,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<string[]>([]);
 
   // Status for filtering
-  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([
+    'healthy',
+    'unhealthy',
+    'updating',
+    'offline',
+  ]);
 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
