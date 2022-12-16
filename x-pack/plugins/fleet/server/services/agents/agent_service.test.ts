@@ -105,7 +105,6 @@ describe('AgentService', () => {
     describe('with required privilege', () => {
       const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
       const mockSoClient = savedObjectsClientMock.create();
-
       const agentClient = new AgentServiceImpl(mockEsClient, mockSoClient).asScoped(
         httpServerMock.createKibanaRequest()
       );
