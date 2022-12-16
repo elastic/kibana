@@ -193,9 +193,6 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         executionId: execution1Uuid,
       });
 
-      // Refresh the index so the data is available for reading
-      await es.indices.refresh({ index: `${ruleDataClient.indexName}*` });
-
       const execution1SummarizedAlerts = await getSummarizedAlerts({
         ruleId: id,
         executionUuid: execution1Uuid,
@@ -356,9 +353,6 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         state: getState(true, {}),
         executionId: execution1Uuid,
       });
-
-      // Refresh the index so the data is available for reading
-      await es.indices.refresh({ index: `${ruleDataClient.indexName}*` });
 
       const summarizedAlertsExcludingId1 = await getSummarizedAlerts({
         ruleId,
