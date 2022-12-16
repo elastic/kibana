@@ -5585,7 +5585,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 * _bpf_process_events.tid_ - Thread ID
 * _bpf_socket_events.tid_ - Thread ID
-* _unified_log.tid_ - the tid of the thread that made the entry
+* _unified_log.tid_ - The tid of the thread that made the entry
 * _windows_crashes.tid_ - Thread ID of the crashed thread
 * _windows_eventlog.tid_ - Thread ID which emitted the event record
 
