@@ -155,24 +155,41 @@ describe('stripNonEcsFields', () => {
         },
       ]);
     });
+  });
 
+  describe('dot notation', () => {
     it('should strip conflicting fields that use dot notation', () => {
-      expect(
-        stripNonEcsFields({
-          'agent.name.conflict': 'some-value',
-          message: 'test message',
-        })
-      ).toEqual({
-        result: {
-          message: 'test message',
-        },
-        removed: [
-          {
-            key: 'agent.name.conflict',
-            value: 'some-value',
-          },
-        ],
+      const { result, removed } = stripNonEcsFields({
+        'agent.name.conflict': 'some-value',
+        message: 'test message',
       });
+
+      expect(result).toEqual({
+        message: 'test message',
+      });
+
+      expect(removed).toEqual([
+        {
+          key: 'agent.name.conflict',
+          value: 'some-value',
+        },
+      ]);
+    });
+
+    it('should not strip valid ECS fields that use dot notation', () => {
+      const { result, removed } = stripNonEcsFields({
+        'agent.name': 'some name',
+        'agent.build.original': 'v10',
+        message: 'test message',
+      });
+
+      expect(result).toEqual({
+        'agent.name': 'some name',
+        'agent.build.original': 'v10',
+        message: 'test message',
+      });
+
+      expect(removed).toEqual([]);
     });
   });
 
@@ -221,6 +238,4 @@ describe('stripNonEcsFields', () => {
       });
     });
   });
-
-  //   it('should strip source histogram field if ECS mapping is not histogram', () => {});
 });

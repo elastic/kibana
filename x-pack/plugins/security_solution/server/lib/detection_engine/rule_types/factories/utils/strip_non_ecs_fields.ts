@@ -7,11 +7,19 @@
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 
-import { isPlainObject, cloneDeep, unset, isArray } from 'lodash';
+import { isPlainObject, cloneDeep, isArray } from 'lodash';
 
 import type { SearchTypes } from '../../../../../../common/detection_engine/types';
 
-// const getECSObjectFields =
+type SourceFieldRecord = Record<string, SearchTypes>;
+type SourceField = SearchTypes | SourceFieldRecord;
+
+/**
+ * type guard for object of SearchTypes
+ */
+const isSearchTypesRecord = (value: SourceField): value is SourceFieldRecord => {
+  return isPlainObject(value);
+};
 
 /**
  * retrieve all nested object fields from ecsFieldMap
@@ -43,66 +51,118 @@ const getEcsObjectFields = () => {
 const ecsObjectFields = getEcsObjectFields();
 
 /**
- * check whether field is value is ECS compliant
+ * checks if path is a valid Ecs object type
  */
-const computeIsEcsCompliant = (value: Record<string, SearchTypes> | SearchTypes, path: string) => {
+const getIsEcsFieldObject = (path: string) => {
+  const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
+  return ['object', 'flattened'].includes(ecsField?.type) || ecsObjectFields[path];
+};
+
+/**
+ * checks if path is Ecs mapping
+ */
+const getIsEcsField = (path: string) => {
   const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
   const isEcsField = !!ecsField || ecsObjectFields[path];
+
+  return isEcsField;
+};
+
+/**
+ * if any of partial path in dotted notation is not an object in ECS mapping
+ * it means the field itself is not valid as well
+ * For example, 'agent.name.conflict' - if agent.name is keyword, so the whole path is invalid
+ */
+const validateDottedPathInEcsMappings = (path: string): boolean => {
+  let isValid = true;
+  path
+    .split('.')
+    .slice(0, -1) // exclude last path item, as we check only if all parent are objects
+    .reduce((acc, key) => {
+      const pathToValidate = [acc, key].filter(Boolean).join('.');
+      const isEcsField = getIsEcsField(pathToValidate);
+      const isEcsFieldObject = getIsEcsFieldObject(pathToValidate);
+
+      // if field is in Ecs mapping and not object, the whole path is invalid
+      if (isEcsField && !isEcsFieldObject) {
+        isValid = false;
+      }
+      return pathToValidate;
+    }, '');
+
+  return isValid;
+};
+
+/**
+ * check whether field is value is ECS compliant
+ */
+const computeIsEcsCompliant = (value: SourceField, path: string) => {
+  // if path consists of dot-notation, ensure each path within it is ECS compliant
+  if (path.includes('.') && !validateDottedPathInEcsMappings(path)) {
+    return false;
+  }
+
+  const isEcsField = getIsEcsField(path);
 
   // if field is not present is ECS mapping, it's valid as doesn't have any conflicts with existing mapping
   if (!isEcsField) {
     return true;
   }
 
-  const isEcsFieldObject =
-    ['object', 'flattened'].includes(ecsField?.type) || ecsObjectFields[path];
+  const isEcsFieldObject = getIsEcsFieldObject(path);
 
-  // if checked value is object but ECS field not, it's not compliant
-  if (isPlainObject(value) && !isEcsFieldObject) {
-    return false;
+  // if checked value is object but ECS mapping not, it's not compliant
+  if (isPlainObject(value)) {
+    return isEcsFieldObject;
   }
 
-  // if checked value is not object but ECS field is, it's not compliant
-  if (!isPlainObject(value) && isEcsFieldObject) {
-    return false;
-  }
-
-  return true;
+  // checked value is not object and if ECS mapping is not as well, it compliant
+  return !isEcsFieldObject;
 };
 
 interface StripNonEcsFieldsReturn {
-  result: Record<string, SearchTypes>;
+  result: SourceFieldRecord;
   removed: Array<{ key: string; value: SearchTypes }>;
 }
 
 /**
  * strips alert source object from ECS non compliant fields
  */
-export const stripNonEcsFields = (doc: Record<string, SearchTypes>): StripNonEcsFieldsReturn => {
+export const stripNonEcsFields = (doc: SourceFieldRecord): StripNonEcsFieldsReturn => {
   const result = cloneDeep(doc);
   const removed: Array<{ key: string; value: SearchTypes }> = [];
 
+  /**
+   * traverses through object and deletes ECS non compliant fields
+   * @param document - document to traverse
+   * @param documentKey - document key in parent document, if exists
+   * @param parent - parent of traversing document
+   * @param parentPath - path of parent in initial source document
+   */
   const traverseAndDeleteInObj = (
-    document: Record<string, SearchTypes> | SearchTypes,
-    path: string
+    document: SourceField,
+    documentKey: string,
+    parent?: SourceFieldRecord,
+    parentPath?: string
   ) => {
-    // if document array, traverse through each item w/o changing path
+    const fullPath = [parentPath, documentKey].filter(Boolean).join('.');
+    // if document array, traverse through each item w/o changing documentKey/parent/parentPath
     if (isArray(document)) {
       document.forEach((value) => {
-        traverseAndDeleteInObj(value, path);
+        traverseAndDeleteInObj(value, documentKey, parent, parentPath);
       });
       return;
     }
 
-    if (path && !computeIsEcsCompliant(document, path)) {
-      unset(result, path);
-      removed.push({ key: path, value: document });
+    if (parent && !computeIsEcsCompliant(document, fullPath)) {
+      delete parent[documentKey];
+      removed.push({ key: fullPath, value: document });
+      return;
     }
 
-    if (isPlainObject(document)) {
-      Object.entries(document as Record<string, SearchTypes>).forEach(([key, value]) => {
-        const fullPath = path ? `${path}.${key}` : key;
-        traverseAndDeleteInObj(value, fullPath);
+    if (isSearchTypesRecord(document)) {
+      Object.entries(document).forEach(([key, value]) => {
+        traverseAndDeleteInObj(value, key, document, fullPath);
       });
     }
   };
