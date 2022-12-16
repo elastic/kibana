@@ -71,7 +71,7 @@ export function transformUpdateResponseToExternalModel(
     ...updatedCase,
     attributes: {
       ...restUpdateAttributes,
-      ...(severity && { severity: SEVERITY_ESMODEL_TO_EXTERNAL[severity] }),
+      ...((severity || severity === 0) && { severity: SEVERITY_ESMODEL_TO_EXTERNAL[severity] }),
       ...(transformedConnector && { connector: transformedConnector }),
       // if externalService is null that means we intentionally updated it to null within ES so return that as a valid value
       ...(externalService !== undefined && { external_service: externalService }),
