@@ -387,6 +387,7 @@ export interface InventoryModel {
     name: string;
     os?: string;
     ip?: string;
+    cloudProvider?: string;
   };
   crosslinkSupport: {
     details: boolean;
