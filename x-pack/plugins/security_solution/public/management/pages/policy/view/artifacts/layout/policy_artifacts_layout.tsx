@@ -161,6 +161,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
               policyName={policyItem.name}
               listId={exceptionsListApiClient.listId}
               labels={labels}
+              externalPrivileges={externalPrivileges}
               getPolicyArtifactsPath={getPolicyArtifactsPath}
               getArtifactPath={getArtifactPath}
             />
@@ -169,6 +170,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
               policyId={policyItem.id}
               policyName={policyItem.name}
               labels={labels}
+              externalPrivileges={externalPrivileges}
               getPolicyArtifactsPath={getPolicyArtifactsPath}
               getArtifactPath={getArtifactPath}
             />
