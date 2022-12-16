@@ -188,6 +188,33 @@ describe('update_agent_tags', () => {
     ).rejects.toThrowError('version conflict of 100 agents');
   });
 
+  it('should write out error results on last retry with version conflicts', async () => {
+    esClient.updateByQuery.mockReset();
+    esClient.updateByQuery.mockResolvedValue({
+      failures: [],
+      updated: 0,
+      version_conflicts: 100,
+    } as any);
+
+    await expect(
+      updateTagsBatch(
+        soClient,
+        esClient,
+        [],
+        {},
+        {
+          tagsToAdd: ['new'],
+          tagsToRemove: [],
+          kuery: '',
+          total: 100,
+          retryCount: 3,
+        }
+      )
+    ).rejects.toThrowError('version conflict of 100 agents');
+    const errorResults = esClient.bulk.mock.calls[0][0] as any;
+    expect(errorResults.body[1].error).toEqual('version conflict on 3rd retry');
+  });
+
   it('should run add tags async when actioning more agents than batch size', async () => {
     esClient.search.mockResolvedValue({
       hits: {

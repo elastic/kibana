@@ -63,7 +63,7 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
         actionId: this.actionParams.actionId,
         total: this.actionParams.total,
         kuery: this.actionParams.kuery,
-        isRetry: !!this.retryParams.retryCount,
+        retryCount: this.retryParams.retryCount,
       }
     );
 
@@ -83,7 +83,7 @@ export async function updateTagsBatch(
     actionId?: string;
     total?: number;
     kuery?: string;
-    isRetry?: boolean;
+    retryCount?: number;
   }
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
@@ -169,7 +169,7 @@ export async function updateTagsBatch(
   const actionId = options.actionId ?? uuid();
   const total = options.total ?? givenAgents.length;
 
-  if (!options.isRetry) {
+  if (options.retryCount === undefined) {
     // creating an action doc so that update tags  shows up in activity
     await createAgentAction(esClient, {
       id: actionId,
@@ -220,6 +220,17 @@ export async function updateTagsBatch(
   }
 
   if (res.version_conflicts ?? 0 > 0) {
+    // write out error results on last retry, so action is not stuck in progress
+    if (options.retryCount === 3) {
+      await bulkCreateAgentActionResults(
+        esClient,
+        getArray(res.version_conflicts!).map((id) => ({
+          agentId: id,
+          actionId,
+          error: 'version conflict on 3rd retry',
+        }))
+      );
+    }
     throw new Error(`version conflict of ${res.version_conflicts} agents`);
   }
 
