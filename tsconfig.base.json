@@ -442,6 +442,8 @@
       "@kbn/docs-utils/*": ["packages/kbn-docs-utils/*"],
       "@kbn/ebt-tools": ["packages/kbn-ebt-tools"],
       "@kbn/ebt-tools/*": ["packages/kbn-ebt-tools/*"],
+      "@kbn/ecs": ["packages/kbn-ecs"],
+      "@kbn/ecs/*": ["packages/kbn-ecs/*"],
       "@kbn/es": ["packages/kbn-es"],
       "@kbn/es/*": ["packages/kbn-es/*"],
       "@kbn/es-archiver": ["packages/kbn-es-archiver"],
