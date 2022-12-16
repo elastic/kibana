@@ -29,7 +29,7 @@ import {
   DATAGRID_CHANGES_IN_PROGRESS,
   EVENT_CONTAINER_TABLE_NOT_LOADING,
 } from '../screens/alerts';
-import { REFRESH_BUTTON } from '../screens/security_header';
+import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import {
   ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE,
   TIMELINE_COLUMN_SPINNER,
@@ -243,6 +243,7 @@ export const markAcknowledgedFirstAlert = () => {
 };
 
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
+  waitForAlerts();
   for (let i = 0; i < numberOfAlerts; i++) {
     cy.get(ALERT_CHECKBOX).eq(i).click({ force: true });
   }
@@ -266,6 +267,7 @@ export const waitForAlerts = () => {
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
   cy.get(EVENT_CONTAINER_TABLE_NOT_LOADING).should('be.visible');
+  cy.get(LOADING_INDICATOR).should('not.exist');
 };
 
 export const waitForAlertsPanelToBeLoaded = () => {
