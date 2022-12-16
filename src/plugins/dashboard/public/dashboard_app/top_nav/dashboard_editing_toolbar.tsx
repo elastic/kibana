@@ -94,7 +94,14 @@ export function DashboardEditingToolbar() {
         trackUiMetric(METRIC_TYPE.CLICK, embeddableFactory.type);
       }
 
-      const explicitInput = await embeddableFactory.getExplicitInput();
+      let explicitInput: Awaited<ReturnType<typeof embeddableFactory.getExplicitInput>>;
+      try {
+        explicitInput = await embeddableFactory.getExplicitInput();
+      } catch (e) {
+        // error likely means user canceled embeddable creation
+        return;
+      }
+
       const newEmbeddable = await dashboardContainer.addNewEmbeddable(
         embeddableFactory.type,
         explicitInput
