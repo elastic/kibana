@@ -18,6 +18,7 @@ import { normalizeProjectMonitors } from '.';
 
 describe('browser normalizers', () => {
   describe('normalize push monitors', () => {
+    const testHash = 'ljlkj';
     const playwrightOptions = {
       headless: true,
     };
@@ -67,6 +68,7 @@ describe('browser normalizers', () => {
         locations: ['us_central'],
         tags: ['tag1', 'tag2'],
         ignoreHTTPSErrors: true,
+        hash: testHash,
       } as ProjectMonitor, // test that normalizers defaults to browser when type is omitted
       {
         id: 'test-id-2',
@@ -85,6 +87,7 @@ describe('browser normalizers', () => {
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
         type: DataStream.BROWSER,
+        hash: testHash,
       },
       {
         id: 'test-id-3',
@@ -104,6 +107,7 @@ describe('browser normalizers', () => {
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
         type: DataStream.BROWSER,
+        hash: testHash,
       },
     ];
 
@@ -132,8 +136,6 @@ describe('browser normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
             ],
             name: 'test-name-1',
@@ -158,6 +160,7 @@ describe('browser normalizers', () => {
             custom_heartbeat_id: 'test-id-1-test-project-id-test-space',
             timeout: null,
             id: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
           errors: [],
@@ -177,8 +180,6 @@ describe('browser normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
               {
                 geo: {
@@ -188,8 +189,6 @@ describe('browser normalizers', () => {
                 id: 'us_east',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
             ],
             name: 'test-name-2',
@@ -215,6 +214,7 @@ describe('browser normalizers', () => {
             custom_heartbeat_id: 'test-id-2-test-project-id-test-space',
             timeout: null,
             id: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
           errors: [],
@@ -234,8 +234,6 @@ describe('browser normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
               {
                 geo: {
@@ -245,15 +243,11 @@ describe('browser normalizers', () => {
                 id: 'us_east',
                 isServiceManaged: true,
                 label: 'Test Location',
-                url: 'test-url',
-                status: 'ga',
               },
               {
                 id: 'germany',
                 isServiceManaged: false,
                 label: 'Germany',
-                agentPolicyId: 'germany',
-                concurrentMonitors: 1,
               },
             ],
             name: 'test-name-3',
@@ -279,6 +273,7 @@ describe('browser normalizers', () => {
             custom_heartbeat_id: 'test-id-3-test-project-id-test-space',
             timeout: null,
             id: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
           errors: [],

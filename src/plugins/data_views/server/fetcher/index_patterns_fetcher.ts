@@ -57,12 +57,12 @@ export class IndexPatternsFetcher {
   async getFieldsForWildcard(options: {
     pattern: string | string[];
     metaFields?: string[];
-    fieldCapsOptions?: { allow_no_indices: boolean };
+    fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean };
     type?: string;
     rollupIndex?: string;
-    filter?: QueryDslQueryContainer;
+    indexFilter?: QueryDslQueryContainer;
   }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
-    const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, filter } = options;
+    const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, indexFilter } = options;
     const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
     const allowNoIndices = fieldCapsOptions
       ? fieldCapsOptions.allow_no_indices
@@ -78,8 +78,9 @@ export class IndexPatternsFetcher {
       metaFields,
       fieldCapsOptions: {
         allow_no_indices: allowNoIndices,
+        include_unmapped: fieldCapsOptions?.includeUnmapped,
       },
-      filter,
+      indexFilter,
     });
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];

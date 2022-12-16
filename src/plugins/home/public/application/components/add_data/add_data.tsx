@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { FC, MouseEvent } from 'react';
 import {
   EuiButton,
@@ -13,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -29,9 +31,10 @@ interface Props {
   addBasePath: (path: string) => string;
   application: ApplicationStart;
   isDarkMode: boolean;
+  isCloudEnabled: boolean;
 }
 
-export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => {
+export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
   const { trackUiMetric } = getServices();
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
   if (canAccessIntegrations) {
@@ -59,26 +62,47 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => 
               <p>
                 <FormattedMessage
                   id="home.addData.text"
-                  defaultMessage="To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, add a sample data set."
+                  defaultMessage="To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, play with a sample data set."
                 />
               </p>
             </EuiText>
 
             <EuiSpacer />
 
-            <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+            <EuiFlexGroup gutterSize="m">
+              {isCloudEnabled && (
+                <EuiFlexItem grow={false}>
+                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                  <EuiButton
+                    data-test-subj="guidedOnboardingLink"
+                    fill
+                    href={addBasePath('#/getting_started')}
+                    onClick={(event: MouseEvent) => {
+                      trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding_link');
+                    }}
+                  >
+                    <FormattedMessage
+                      id="home.addData.guidedOnboardingLinkLabel"
+                      defaultMessage="Setup guides"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <RedirectAppLinks application={application}>
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButton
                     data-test-subj="homeAddData"
-                    fill
+                    // on self managed this button is primary
+                    // on Cloud this button is secondary, because there is a "guided onboarding" button
+                    fill={!isCloudEnabled}
                     href={addBasePath('/app/integrations/browse')}
                     iconType="plusInCircle"
                     onClick={(event: MouseEvent) => {
                       trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
                       createAppNavigationHandler('/app/integrations/browse')(event);
                     }}
+                    fullWidth
                   >
                     <FormattedMessage
                       id="home.addData.addDataButtonLabel"
@@ -116,18 +140,76 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => 
             </EuiFlexGroup>
           </EuiFlexItem>
 
-          <EuiFlexItem>
-            <EuiImage
-              alt="Illustration of Elastic data integrations"
-              className="homDataAdd__illustration"
-              src={
-                addBasePath('/plugins/kibanaReact/assets/') +
-                (isDarkMode
-                  ? 'illustration_integrations_darkmode.svg'
-                  : 'illustration_integrations_lightmode.svg')
-              }
-            />
-          </EuiFlexItem>
+          {!isCloudEnabled ? (
+            <EuiFlexItem>
+              <EuiPanel paddingSize="l">
+                <EuiFlexGroup alignItems="center" gutterSize="xl">
+                  <EuiFlexItem>
+                    <EuiImage
+                      alt={i18n.translate('home.moveData.illustration.alt.text', {
+                        defaultMessage: 'Illustration for cloud data migration',
+                      })}
+                      src={
+                        addBasePath('/plugins/kibanaReact/assets/') +
+                        'illustration_cloud_migration.png'
+                      }
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h4>
+                        <FormattedMessage
+                          id="home.addData.moveYourDataTitle"
+                          defaultMessage="Considering Elastic Cloud?"
+                        />
+                      </h4>
+                    </EuiTitle>
+
+                    <EuiSpacer size="s" />
+
+                    <EuiText size="s">
+                      <FormattedMessage
+                        id="home.addData.moveYourDataToElasticCloud"
+                        defaultMessage="Moving your data to Elastic Cloud is easy and can save you time and money."
+                      />
+                    </EuiText>
+
+                    <EuiSpacer size="m" />
+
+                    {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                    <EuiButton
+                      color="primary"
+                      href={addBasePath('/app/management/data/migrate_data')}
+                      onClick={(event: MouseEvent) => {
+                        trackUiMetric(METRIC_TYPE.CLICK, 'migrate_data_to_cloud');
+                        createAppNavigationHandler('/app/management/data/migrate_data')(event);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="home.addData.moveYourDataButtonLabel"
+                        defaultMessage="Explore the benefits"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem>
+              <EuiImage
+                alt={i18n.translate('home.addData.illustration.alt.text', {
+                  defaultMessage: 'Illustration of Elastic data integrations',
+                })}
+                className="homDataAdd__illustration"
+                src={
+                  addBasePath('/plugins/kibanaReact/assets/') +
+                  (isDarkMode
+                    ? 'illustration_integrations_darkmode.svg'
+                    : 'illustration_integrations_lightmode.svg')
+                }
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     );

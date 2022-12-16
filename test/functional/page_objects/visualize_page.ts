@@ -59,8 +59,8 @@ export class VisualizePageObject extends FtrService {
     await this.kibanaServer.uiSettings.replace({
       defaultIndex: this.defaultIndexString,
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
-      'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
       'visualization:visualize:legacyHeatmapChartsLibrary': !isNewLibrary,
+      'histogram:maxBars': 100,
     });
   }
 
@@ -145,6 +145,15 @@ export class VisualizePageObject extends FtrService {
     await this.clickNewVisualization();
     await this.clickAggBasedVisualizations();
     await this.waitForVisualizationSelectPage();
+  }
+
+  public async navigateToLensFromAnotherVisulization() {
+    const button = await this.testSubjects.find('visualizeEditInLensButton');
+    await button.click();
+  }
+
+  public async hasNavigateToLensButton() {
+    return await this.testSubjects.exists('visualizeEditInLensButton');
   }
 
   public async hasVisType(type: string) {

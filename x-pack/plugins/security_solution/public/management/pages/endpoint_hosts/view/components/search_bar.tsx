@@ -7,8 +7,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { RisonValue } from 'rison-node';
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import { TimeHistory } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -37,9 +36,7 @@ export const AdminSearchBar = memo(() => {
           // if query is changed, reset back to first page
           // so that user is not (possibly) being left on an invalid page
           page_index: params.query?.query === searchBarQuery.query ? queryParams.page_index : '0',
-          ...(params.query?.query.trim()
-            ? { admin_query: encode(params.query as unknown as RisonValue) }
-            : {}),
+          ...(params.query?.query.trim() ? { admin_query: encode(params.query) } : {}),
         })
       );
     },
@@ -63,7 +60,6 @@ export const AdminSearchBar = memo(() => {
             iconType="search"
             showFilterBar={false}
             showDatePicker={false}
-            showQueryBar={true}
             showQueryInput={true}
           />
         </div>

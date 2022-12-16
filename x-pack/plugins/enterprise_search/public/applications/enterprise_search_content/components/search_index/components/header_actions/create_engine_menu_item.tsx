@@ -19,11 +19,13 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 
 export interface CreateEngineMenuItemProps {
   indexName?: string;
+  ingestionMethod: string;
   isHiddenIndex?: boolean;
 }
 
 export const CreateEngineMenuItem: React.FC<CreateEngineMenuItemProps> = ({
   indexName,
+  ingestionMethod,
   isHiddenIndex,
 }) => {
   const engineCreationPath = !indexName
@@ -37,6 +39,7 @@ export const CreateEngineMenuItem: React.FC<CreateEngineMenuItemProps> = ({
     <EuiFlexGroup alignItems="center" gutterSize="xs">
       <EuiFlexItem>
         <EuiContextMenuItem
+          data-telemetry-id={`entSearchContent-${ingestionMethod}-header-createEngine-createEngine`}
           size="s"
           icon="plusInCircle"
           onClick={() => {

@@ -976,6 +976,48 @@
     "objects": [
       {
         "parentPluginId": "customIntegrations",
+        "id": "def-common.FEATURED_INTEGRATIONS_BY_CATEGORY",
+        "type": "Object",
+        "tags": [],
+        "label": "FEATURED_INTEGRATIONS_BY_CATEGORY",
+        "description": [],
+        "path": "src/plugins/custom_integrations/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.FEATURED_INTEGRATIONS_BY_CATEGORY.security",
+            "type": "Array",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.FEATURED_INTEGRATIONS_BY_CATEGORY.",
+            "type": "Array",
+            "tags": [],
+            "label": "''",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "customIntegrations",
         "id": "def-common.INTEGRATION_CATEGORY_DISPLAY",
         "type": "Object",
         "tags": [],

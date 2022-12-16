@@ -47,6 +47,7 @@ const rewriteQueryReq: RewriteRequestCase<AggregateOptions> = ({
 });
 const rewriteBodyRes: RewriteResponseCase<AggregateResult> = ({
   alertExecutionStatus,
+  ruleLastRunOutcome,
   ruleEnabledStatus,
   ruleMutedStatus,
   ruleSnoozedStatus,
@@ -55,6 +56,7 @@ const rewriteBodyRes: RewriteResponseCase<AggregateResult> = ({
 }) => ({
   ...rest,
   rule_execution_status: alertExecutionStatus,
+  rule_last_run_outcome: ruleLastRunOutcome,
   rule_enabled_status: ruleEnabledStatus,
   rule_muted_status: ruleMutedStatus,
   rule_snoozed_status: ruleSnoozedStatus,

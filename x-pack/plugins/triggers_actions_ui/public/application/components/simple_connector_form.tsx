@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -16,11 +16,12 @@ import { PasswordField } from './password_field';
 export interface CommonFieldSchema {
   id: string;
   label: string;
-  helpText?: string;
+  helpText?: string | ReactNode;
 }
 
 export interface ConfigFieldSchema extends CommonFieldSchema {
   isUrlField?: boolean;
+  defaultValue?: string;
 }
 
 export interface SecretsFieldSchema extends CommonFieldSchema {
@@ -42,9 +43,11 @@ const { emptyField, urlField } = fieldValidators;
 const getFieldConfig = ({
   label,
   isUrlField = false,
+  defaultValue,
 }: {
   label: string;
   isUrlField?: boolean;
+  defaultValue?: string;
 }) => ({
   label,
   validations: [
@@ -74,6 +77,7 @@ const getFieldConfig = ({
         ]
       : []),
   ],
+  defaultValue,
 });
 
 const FormRow: React.FC<FormRowProps> = ({
@@ -83,6 +87,7 @@ const FormRow: React.FC<FormRowProps> = ({
   isPasswordField,
   isUrlField,
   helpText,
+  defaultValue,
 }) => {
   const dataTestSub = `${id}-input`;
   return (
@@ -92,7 +97,7 @@ const FormRow: React.FC<FormRowProps> = ({
           {!isPasswordField ? (
             <UseField
               path={id}
-              config={getFieldConfig({ label, isUrlField })}
+              config={getFieldConfig({ label, isUrlField, defaultValue })}
               helpText={helpText}
               componentProps={{
                 euiFieldProps: { readOnly, fullWidth: true, 'data-test-subj': dataTestSub },
@@ -104,6 +109,7 @@ const FormRow: React.FC<FormRowProps> = ({
               label={label}
               readOnly={readOnly}
               data-test-subj={dataTestSub}
+              helpText={helpText}
             />
           )}
         </EuiFlexItem>

@@ -12,8 +12,8 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { useActions } from './use_actions';
 import { basicCase } from '../../containers/mock';
 import * as api from '../../containers/api';
+import type { AppMockRenderer } from '../../common/mock';
 import {
-  AppMockRenderer,
   createAppMockRenderer,
   noDeleteCasesPermissions,
   onlyDeleteCasesPermission,
@@ -96,7 +96,9 @@ describe('useActions', () => {
     });
 
     act(() => {
-      userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`));
+      userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`), undefined, {
+        skipPointerEventsCheck: true,
+      });
     });
 
     await waitFor(() => {

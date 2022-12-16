@@ -18,11 +18,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { i18n } from '@kbn/i18n';
-// @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
-// @ts-expect-error
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource } from '../es_agg_source';
 import { registerSource } from '../source_registry';

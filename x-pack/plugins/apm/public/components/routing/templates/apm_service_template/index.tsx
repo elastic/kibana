@@ -8,16 +8,19 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingLogo,
   EuiPageHeaderProps,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
+
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
 import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
+import { useHistory } from 'react-router-dom';
 import {
-  isJavaAgentName,
-  isJRubyAgent,
   isMobileAgentName,
   isRumAgentName,
   isServerlessAgent,
@@ -30,13 +33,15 @@ import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/ser
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
+import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { BetaBadge } from '../../../shared/beta_badge';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
+import { replace } from '../../../shared/links/url_helpers';
+import { isPending } from '../../../../hooks/use_fetcher';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -79,12 +84,18 @@ function TemplateWithContext({
     query,
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/*');
+  const history = useHistory();
+  const location = useLocation();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const router = useApmRouter();
 
   const tabs = useTabs({ selectedTab });
+
+  const { agentName, serviceAgentStatus } = useApmServiceContext();
+
+  const isPendingServiceAgent = !agentName && isPending(serviceAgentStatus);
 
   useBreadcrumb(
     () => ({
@@ -96,6 +107,12 @@ function TemplateWithContext({
     }),
     [query, router, selectedTab, serviceName, title]
   );
+
+  if (isMobileAgentName(agentName)) {
+    replace(history, {
+      pathname: location.pathname.replace('/services/', '/mobile-services/'),
+    });
+  }
 
   return (
     <ApmMainTemplate
@@ -129,10 +146,21 @@ function TemplateWithContext({
         ),
       }}
     >
-      <SearchBar {...searchBarOptions} />
-      <ServiceAnomalyTimeseriesContextProvider>
-        {children}
-      </ServiceAnomalyTimeseriesContextProvider>
+      {isPendingServiceAgent ? (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="l" />
+            <EuiLoadingLogo logo="logoObservability" size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <>
+          <SearchBar {...searchBarOptions} />
+          <ServiceAnomalyTimeseriesContextProvider>
+            {children}
+          </ServiceAnomalyTimeseriesContextProvider>
+        </>
+      )}
     </ApmMainTemplate>
   );
 }
@@ -149,26 +177,7 @@ export function isMetricsTabHidden({
   if (isServerlessAgent(runtimeName)) {
     return !isAwsLambdaEnabled;
   }
-  return (
-    !agentName ||
-    isRumAgentName(agentName) ||
-    isJavaAgentName(agentName) ||
-    isMobileAgentName(agentName) ||
-    isJRubyAgent(agentName, runtimeName)
-  );
-}
-
-export function isMetricsJVMsTabHidden({
-  agentName,
-  runtimeName,
-}: {
-  agentName?: string;
-  runtimeName?: string;
-}) {
-  return (
-    !(isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName)) ||
-    isServerlessAgent(runtimeName)
-  );
+  return !agentName || isRumAgentName(agentName);
 }
 
 export function isInfraTabHidden({
@@ -179,10 +188,7 @@ export function isInfraTabHidden({
   runtimeName?: string;
 }) {
   return (
-    !agentName ||
-    isRumAgentName(agentName) ||
-    isMobileAgentName(agentName) ||
-    isServerlessAgent(runtimeName)
+    !agentName || isRumAgentName(agentName) || isServerlessAgent(runtimeName)
   );
 }
 
@@ -245,8 +251,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
         defaultMessage: 'Dependencies',
       }),
-      hidden:
-        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
+      hidden: !agentName || isRumAgentName(agentName),
     },
     {
       key: 'errors',
@@ -277,23 +282,12 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
     },
     {
-      key: 'nodes',
-      href: router.link('/services/{serviceName}/nodes', {
-        path: { serviceName },
-        query,
-      }),
-      label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
-        defaultMessage: 'Metrics',
-      }),
-      hidden: isMetricsJVMsTabHidden({ agentName, runtimeName }),
-    },
-    {
       key: 'infrastructure',
       href: router.link('/services/{serviceName}/infrastructure', {
         path: { serviceName },
         query,
       }),
-      append: <BetaBadge icon="editorBold" />,
+      append: <BetaBadge icon="beta" />,
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
@@ -321,8 +315,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       append: isServerlessAgent(runtimeName) && (
         <TechnicalPreviewBadge icon="beaker" />
       ),
-      hidden:
-        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
+      hidden: !agentName || isRumAgentName(agentName),
     },
     {
       key: 'alerts',

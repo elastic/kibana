@@ -35,7 +35,11 @@ function getActions(status: UISearchSessionState) {
     actions.push(ACTION.DELETE);
   }
 
-  if (status === SearchSessionStatus.EXPIRED) {
+  if (
+    status === SearchSessionStatus.EXPIRED ||
+    status === SearchSessionStatus.ERROR ||
+    status === SearchSessionStatus.CANCELLED
+  ) {
     actions.push(ACTION.DELETE);
   }
 
@@ -77,6 +81,7 @@ const mapToUISession =
     } = savedObject.attributes;
 
     const status = sessionStatuses[savedObject.id]?.status;
+    const errors = sessionStatuses[savedObject.id]?.errors;
     const actions = getActions(status);
 
     // TODO: initialState should be saved without the searchSessionID
@@ -97,8 +102,10 @@ const mapToUISession =
       reloadUrl: reloadUrl!,
       initialState,
       restoreState,
+      idMapping,
       numSearches: Object.keys(idMapping).length,
       version,
+      errors,
     };
   };
 
@@ -165,17 +172,12 @@ export class SearchSessionsMgmtAPI {
     return [];
   }
 
-  public reloadSearchSession(reloadUrl: string) {
-    this.deps.usageCollector?.trackSessionReloaded();
-    this.deps.application.navigateToUrl(reloadUrl);
-  }
-
   public getExtendByDuration() {
     return this.config.defaultExpiration;
   }
 
-  // Cancel and expire
-  public async sendCancel(id: string): Promise<void> {
+  // Delete and expire
+  public async sendDelete(id: string): Promise<void> {
     this.deps.usageCollector?.trackSessionDeleted();
     try {
       await this.sessionsClient.delete(id);

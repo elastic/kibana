@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
 import { useLensFormulaHelper } from './use_lens_formula_helper';
 import { ALL_VALUES_SELECTED } from '../configurations/constants/url_constants';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
@@ -74,7 +75,7 @@ export function getLayerConfigs(
 
       layerConfigs.push({
         filters,
-        indexPattern: dataView,
+        dataView,
         seriesConfig,
         time: series.time,
         name: series.name,
@@ -130,12 +131,22 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
         lensFormulaHelper
       );
 
-      return lensAttributes.getJSON(lastRefresh);
+      return lensAttributes.getJSON('lnsLegacyMetric', lastRefresh);
+    }
+
+    if (reportTypeT === 'heatmap') {
+      const lensAttributes = new HeatMapLensAttributes(
+        layerConfigs,
+        reportTypeT,
+        lensFormulaHelper
+      );
+
+      return lensAttributes.getJSON('lnsHeatmap', lastRefresh);
     }
 
     const lensAttributes = new LensAttributes(layerConfigs, reportTypeT, lensFormulaHelper);
 
-    return lensAttributes.getJSON(lastRefresh);
+    return lensAttributes.getJSON('lnsXY', lastRefresh);
     // we also want to check the state on allSeries changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViews, reportType, storage, theme, lastRefresh, allSeries, lensFormulaHelper]);

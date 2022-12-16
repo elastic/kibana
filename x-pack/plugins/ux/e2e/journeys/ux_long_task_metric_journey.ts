@@ -54,9 +54,9 @@ journey('UX LongTaskMetrics', async ({ page, params }) => {
 
   step('Confirm metrics values', async () => {
     // Wait until chart data is loaded
-    page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle');
     // wait for first metric to be shown
-    page.waitForSelector(`text="237 ms"`);
+    await page.waitForSelector(`text="237 ms"`);
 
     let metric = await (
       await page.waitForSelector(byTestId(longestMetric))

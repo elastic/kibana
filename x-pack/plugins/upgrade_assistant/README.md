@@ -2,12 +2,20 @@
 
 ## About
 
-Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. It will only be enabled on the last minor before the next major release. This is controlled via the config: `xpack.upgrade_assistant.readonly` ([#101296](https://github.com/elastic/kibana/pull/101296)).
+Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 
 Its primary purposes are to:
 
 * **Surface deprecations.** Deprecations are features that are currently being used that will be removed in the next major. Surfacing tells the user that there's a problem preventing them from upgrading.
 * **Migrate from deprecated features to supported features.** This addresses the problem, clearing the path for the upgrade. Generally speaking, once all deprecations are addressed, the user can safely upgrade.
+
+### UA feature set
+Since Kibana version `8.6` UA is enabled to assist users during all upgrades including minor versions of the Elastic Stack.
+Some features of the UA are only needed when upgrading to a new major version. These are the following features are controlled by the config `featureSet`:
+* ML Snapshots (`featureSet.mlSnapshots`): Machine learning Upgrade mode can be toggled from outside Kibana, the purpose of this feature guard is to hide all ML related deprecations from the end user until the next major upgrade.
+When we want to enable ML model snapshot deprecation warnings again we need to change the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION` to something higher than 7.0.0 in the Elasticsearch code.
+* Migrating system indices (`featureSet.migrateSystemIndices`): Migrating system indices should only be enabled for major version upgrades. This config hides the second step from the UA UI for migrating system indices.
+* Reindex corrective actions (`featureSet.reindexCorrectiveActions`): Deprecations with reindexing corrective actions are only enabled for major version upgrades. Currently, the reindex actions include some logic that is specific to the [8.0 upgrade](https://github.com/elastic/kibana/blob/main/x-pack/plugins/upgrade_assistant/server/lib/reindexing/index_settings.ts). End users could get into a bad situation if this is enabled before this logic is fixed.
 
 ### Deprecations
 
@@ -35,8 +43,11 @@ Elasticsearch deprecations can be handled in a number of ways:
     * Create an index alias pointing from the original index name to the prefixed index name.
     * Reindex from the original index into the prefixed index.
     * Delete the old index and rename the prefixed index.
-* **Removing settings.** Some index and cluser settings are deprecated and need to be removed. The Upgrade Assistant provides a way to auto-resolve these settings via a "Remove deprecated settings" button. 
+Currently reindexing deprecations are only enabled for major version upgrades  by setting the config `featureSet.reindexCorrectiveActions` to `true` on the `x.last` version of the stack.
+Reindexing at the moment includes some logic that is specific to the [8.0 upgrade](https://github.com/elastic/kibana/blob/main/x-pack/plugins/upgrade_assistant/server/lib/reindexing/index_settings.ts). End users could get into a bad situation if this is enabled before this logic is fixed.
+* **Removing settings.** Some index and cluser settings are deprecated and need to be removed. The Upgrade Assistant provides a way to auto-resolve these settings via a "Remove deprecated settings" button. Migrating system indices should only be enabled for major version upgrades. This is controlled by the config `featureSet.migrateSystemIndices` which hides the second step from the UA UI for migrating system indices.
 * **Upgrading or deleting snapshots**. This is specific to Machine Learning. If a user has old Machine Learning job model snapshots, they will need to be upgraded or deleted. The Upgrade Assistant provides a way to resolve this automatically for the user ([#100066](https://github.com/elastic/kibana/pull/100066)).
+Deprecations related to ML snapshots are only enabled during `x.last` version of the stack. This is controlled by the `featureSet.mlSnapshots` config. When we want to enable ML model snapshot deprecation warnings again we need to change the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION` to something higher than `7.0.0` in the Elasticsearch code.
 * **Following the docs.** The Deprecation Info API provides links to the deprecation docs. Users
 will follow these docs to address the problem and make these warnings or errors disappear in the
 Upgrade Assistant.

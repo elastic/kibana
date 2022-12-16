@@ -22,20 +22,12 @@ describe('ExpandedCellValueActions', () => {
     },
     globalFilters: [],
     onFilterAdded: () => {},
-    timelineId: 'mockTimelineId',
+    scopeId: 'mockTimelineId',
     value: ['mock value'],
   };
   const wrapper = shallow(<ExpandedCellValueActions {...props} />);
 
   test('renders show topN button', () => {
     expect(wrapper.find('[data-test-subj="data-grid-expanded-show-top-n"]').exists()).toBeTruthy();
-  });
-
-  test('renders filter in button', () => {
-    expect(wrapper.find('EuiFlexItem').first().html()).toContain('Filter button');
-  });
-
-  test('renders filter out button', () => {
-    expect(wrapper.find('EuiFlexItem').last().html()).toContain('Filter out button');
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { expect, Page } from '@elastic/synthetics';
-import { getQuerystring } from '@kbn/observability-plugin/e2e/utils';
+import { getQuerystring, TIMEOUT_60_SEC } from '@kbn/observability-plugin/e2e/utils';
 import { DataStream } from '../../common/runtime_types/monitor_management';
 import { loginPageProvider } from './login';
 import { utilsPageProvider } from './utils';
@@ -34,10 +34,13 @@ export function monitorManagementPageProvider({
     }),
     ...utilsPageProvider({ page }),
 
-    async navigateToMonitorManagement() {
+    async navigateToMonitorManagement(doLogin = false) {
       await page.goto(monitorManagement, {
         waitUntil: 'networkidle',
       });
+      if (doLogin) {
+        await this.loginToKibana();
+      }
       await this.waitForMonitorManagementLoadingToFinish();
     },
 
@@ -162,7 +165,7 @@ export function monitorManagementPageProvider({
 
     async selectLocations({ locations }: { locations: string[] }) {
       for (let i = 0; i < locations.length; i++) {
-        await page.check(`text=${locations[i]}`);
+        await page.check(`text=${locations[i]}`, TIMEOUT_60_SEC);
       }
     },
 

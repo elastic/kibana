@@ -7,11 +7,10 @@
 
 import './feature_table.scss';
 
+import type { EuiAccordionProps, EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiAccordion,
-  EuiAccordionProps,
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -251,6 +250,7 @@ export class FeatureTable extends Component<Props, State> {
                   selectedFeaturePrivileges={
                     this.props.role.kibana[this.props.privilegeIndex].feature[feature.id] ?? []
                   }
+                  allSpacesSelected={this.props.allSpacesSelected}
                   disabled={this.props.disabled}
                   licenseAllowsSubFeatPrivCustomization={
                     this.props.canCustomizeSubFeaturePrivileges

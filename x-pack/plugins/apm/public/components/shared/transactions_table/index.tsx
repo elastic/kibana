@@ -21,7 +21,11 @@ import { EuiCode } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
@@ -100,7 +104,9 @@ export function TransactionsTable({
     },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions',
-    '/services/{serviceName}/overview'
+    '/services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/transactions',
+    '/mobile-services/{serviceName}/overview'
   );
 
   const [tableOptions, setTableOptions] = useState<{
@@ -241,9 +247,9 @@ export function TransactionsTable({
   const columns = getColumns({
     serviceName,
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-    transactionGroupDetailedStatisticsLoading:
-      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
-      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED,
+    transactionGroupDetailedStatisticsLoading: isPending(
+      transactionGroupDetailedStatisticsStatus
+    ),
     transactionGroupDetailedStatistics,
     comparisonEnabled,
     shouldShowSparkPlots,

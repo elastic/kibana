@@ -21,6 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('setup api', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     // FLAKY: https://github.com/elastic/kibana/issues/118479
     describe.skip('setup performs upgrades', async () => {
       const oldEndpointVersion = '0.13.0';
@@ -160,10 +161,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('allows elastic/fleet-server user to call required APIs', async () => {
-      const {
-        token,
-        // @ts-expect-error SecurityCreateServiceTokenRequest should not require `name`
-      } = await es.security.createServiceToken({
+      const { token } = await es.security.createServiceToken({
         namespace: 'elastic',
         service: 'fleet-server',
       });

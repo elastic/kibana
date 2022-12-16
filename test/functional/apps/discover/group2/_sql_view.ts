@@ -43,8 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
         expect(await testSubjects.exists('addFilter')).to.be(true);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(true);
-        expect(await testSubjects.exists('discoverChart')).to.be(true);
-        expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
+        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
+        expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
@@ -64,8 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
-        expect(await testSubjects.exists('discoverChart')).to.be(false);
-        expect(await testSubjects.exists('discoverQueryHits')).to.be(false);
+        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
+        expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(false);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(false);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(false);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(false);
@@ -88,6 +88,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const cell = await dataGrid.getCellElement(0, 3);
+        expect(await cell.getVisibleText()).to.be('2269');
+      });
+
+      it('should render when switching to a time range with no data, then back to a time range with data', async () => {
+        await PageObjects.discover.selectTextBaseLang('SQL');
+        const testQuery = `SELECT "@tags", geo.dest, count(*) occurred FROM "logstash-*"
+          GROUP BY "@tags", geo.dest
+          HAVING occurred > 20
+          ORDER BY occurred DESC`;
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        let cell = await dataGrid.getCellElement(0, 3);
+        expect(await cell.getVisibleText()).to.be('2269');
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 19, 2015 @ 06:31:44.000',
+          'Sep 19, 2015 @ 06:31:44.000'
+        );
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await testSubjects.exists('discoverNoResults')).to.be(true);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        cell = await dataGrid.getCellElement(0, 3);
         expect(await cell.getVisibleText()).to.be('2269');
       });
     });

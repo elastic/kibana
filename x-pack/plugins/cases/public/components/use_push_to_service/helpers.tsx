@@ -10,8 +10,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
 import * as i18n from './translations';
-import { ActionLicense } from '../../containers/types';
-import { CLOSED_CASE_PUSH_ERROR_ID, ErrorMessage } from './callout/types';
+import type { ActionLicense } from '../../containers/types';
+import type { ErrorMessage } from './callout/types';
+import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
 
 export const getLicenseError = () => ({
   id: 'license-error',

@@ -60,7 +60,12 @@ export const syncEditedMonitorBulk = async ({
           monitorsToUpdate.map(({ previousMonitor, monitorWithRevision }) => ({
             type: syntheticsMonitorType,
             id: previousMonitor.id,
-            attributes: monitorWithRevision,
+            attributes: {
+              ...monitorWithRevision,
+              [ConfigKey.CONFIG_ID]: previousMonitor.id,
+              [ConfigKey.MONITOR_QUERY_ID]:
+                monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
+            },
           }))
         );
         savedObjectsSuccessful = true;
@@ -74,7 +79,12 @@ export const syncEditedMonitorBulk = async ({
       try {
         const editSyncPromise = await syntheticsMonitorClient.editMonitors(
           monitorsToUpdate.map(({ normalizedMonitor, previousMonitor }) => ({
-            monitor: normalizedMonitor as MonitorFields,
+            monitor: {
+              ...(normalizedMonitor as MonitorFields),
+              [ConfigKey.CONFIG_ID]: previousMonitor.id,
+              [ConfigKey.MONITOR_QUERY_ID]:
+                normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
+            },
             id: previousMonitor.id,
             previousMonitor,
           })),
@@ -106,7 +116,7 @@ export const syncEditedMonitorBulk = async ({
         formatTelemetryUpdateEvent(
           editedMonitorSavedObject as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>,
           previousMonitor,
-          server.kibanaVersion,
+          server.stackVersion,
           Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
           errors
         )

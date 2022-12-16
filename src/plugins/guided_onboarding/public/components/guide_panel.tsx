@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -24,52 +24,29 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
-import { ApplicationStart } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
-import { guidesConfig } from '../constants/guides_config';
-import type { GuideState, GuideStepIds } from '../../common/types';
-import type { GuideConfig, StepConfig } from '../types';
+import { ApplicationStart, NotificationsStart } from '@kbn/core/public';
+import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
-import type { ApiService } from '../services/api';
+import { GuideId } from '@kbn/guided-onboarding';
+import type { GuidedOnboardingApi } from '../types';
+
+import type { GuideConfig, PluginState, StepConfig } from '../../common';
 
 import { GuideStep } from './guide_panel_step';
 import { QuitGuideModal } from './quit_guide_modal';
 import { getGuidePanelStyles } from './guide_panel.styles';
+import { GuideButton } from './guide_button';
 
 interface GuidePanelProps {
-  api: ApiService;
+  api: GuidedOnboardingApi;
   application: ApplicationStart;
+  notifications: NotificationsStart;
 }
-
-const getConfig = (state?: GuideState): GuideConfig | undefined => {
-  if (state) {
-    return guidesConfig[state.guideId];
-  }
-
-  return undefined;
-};
-
-const getStepNumber = (state?: GuideState): number | undefined => {
-  let stepNumber: number | undefined;
-
-  state?.steps.forEach((step, stepIndex) => {
-    // If the step is in_progress, show that step number
-    if (step.status === 'in_progress') {
-      stepNumber = stepIndex + 1;
-    }
-
-    // If the step is active, show the previous step number
-    if (step.status === 'active') {
-      stepNumber = stepIndex;
-    }
-  });
-
-  return stepNumber;
-};
 
 const getProgress = (state?: GuideState): number => {
   if (state) {
@@ -83,11 +60,48 @@ const getProgress = (state?: GuideState): number => {
   return 0;
 };
 
-export const GuidePanel = ({ api, application }: GuidePanelProps) => {
+const errorSection = (
+  <EuiEmptyPrompt
+    data-test-subj="guideErrorSection"
+    iconType="alert"
+    color="danger"
+    title={
+      <h2>
+        {i18n.translate('guidedOnboarding.dropdownPanel.errorSectionTitle', {
+          defaultMessage: 'Unable to load the guide',
+        })}
+      </h2>
+    }
+    body={
+      <>
+        <EuiText color="subdued">
+          {i18n.translate('guidedOnboarding.dropdownPanel.errorSectionDescription', {
+            defaultMessage: `Wait a moment and try again. If the problem persists, contact your administrator.`,
+          })}
+        </EuiText>
+        <EuiSpacer />
+        <EuiButton
+          iconSide="right"
+          onClick={() => window.location.reload()}
+          iconType="refresh"
+          color="danger"
+        >
+          {i18n.translate('guidedOnboarding.dropdownPanel.errorSectionReloadButton', {
+            defaultMessage: 'Reload',
+          })}
+        </EuiButton>
+      </>
+    }
+  />
+);
+
+export const GuidePanel = ({ api, application, notifications }: GuidePanelProps) => {
   const { euiTheme } = useEuiTheme();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isQuitGuideModalOpen, setIsQuitGuideModalOpen] = useState(false);
-  const [guideState, setGuideState] = useState<GuideState | undefined>(undefined);
+  const [pluginState, setPluginState] = useState<PluginState | undefined>(undefined);
+  const [guideConfig, setGuideConfig] = useState<GuideConfig | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const styles = getGuidePanelStyles(euiTheme);
 
@@ -95,20 +109,66 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     setIsGuideOpen((prevIsGuideOpen) => !prevIsGuideOpen);
   };
 
-  const navigateToStep = async (stepId: GuideStepIds, stepLocation: StepConfig['location']) => {
-    await api.startGuideStep(guideState!.guideId, stepId);
-    if (stepLocation) {
-      application.navigateToApp(stepLocation.appID, { path: stepLocation.path });
-    }
-  };
+  const handleStepButtonClick = useCallback(
+    async (step: GuideStepStatus, stepConfig: StepConfig) => {
+      if (pluginState) {
+        const { id, status } = step;
+        const guideId: GuideId = pluginState!.activeGuide!.guideId!;
+
+        try {
+          if (status === 'ready_to_complete') {
+            return await api.completeGuideStep(guideId, id);
+          }
+
+          if (status === 'active' || status === 'in_progress') {
+            await api.startGuideStep(guideId, id);
+
+            if (stepConfig.location) {
+              await application.navigateToApp(stepConfig.location.appID, {
+                path: stepConfig.location.path,
+              });
+
+              if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
+                await api.completeGuideStep(guideId, id);
+              }
+            }
+          }
+        } catch (error) {
+          notifications.toasts.addDanger({
+            title: i18n.translate('guidedOnboarding.dropdownPanel.stepHandlerError', {
+              defaultMessage: 'Unable to update the guide. Wait a moment and try again.',
+            }),
+            text: error.message,
+          });
+        }
+      }
+    },
+    [api, application, notifications.toasts, pluginState]
+  );
 
   const navigateToLandingPage = () => {
     setIsGuideOpen(false);
     application.navigateToApp('home', { path: '#getting_started' });
   };
 
-  const completeGuide = async () => {
-    await api.completeGuide(guideState!.guideId);
+  const completeGuide = async (
+    completedGuideRedirectLocation: GuideConfig['completedGuideRedirectLocation']
+  ) => {
+    try {
+      await api.completeGuide(pluginState!.activeGuide!.guideId!);
+
+      if (completedGuideRedirectLocation) {
+        const { appID, path } = completedGuideRedirectLocation;
+        application.navigateToApp(appID, { path });
+      }
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('guidedOnboarding.dropdownPanel.completeGuideError', {
+          defaultMessage: 'Unable to update the guide. Wait a moment and try again.',
+        }),
+        text: error.message,
+      });
+    }
   };
 
   const openQuitGuideModal = () => {
@@ -123,8 +183,15 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   };
 
   useEffect(() => {
-    const subscription = api.fetchActiveGuideState$().subscribe((newGuideState) => {
-      setGuideState(newGuideState);
+    const subscription = api.fetchPluginState$().subscribe((newPluginState) => {
+      setPluginState(newPluginState);
+    });
+    return () => subscription.unsubscribe();
+  }, [api]);
+
+  useEffect(() => {
+    const subscription = api.isLoading$.subscribe((isLoadingValue) => {
+      setIsLoading(isLoadingValue);
     });
     return () => subscription.unsubscribe();
   }, [api]);
@@ -136,44 +203,47 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     return () => subscription.unsubscribe();
   }, [api]);
 
-  const guideConfig = getConfig(guideState);
+  const fetchGuideConfig = useCallback(async () => {
+    if (pluginState?.activeGuide?.guideId) {
+      const config = await api.getGuideConfig(pluginState.activeGuide.guideId);
+      if (config) {
+        setGuideConfig(config);
+      }
+    }
+  }, [api, pluginState]);
 
-  // TODO handle loading, error state
-  // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
-  if (!guideConfig) {
-    return (
-      <EuiButton
-        onClick={toggleGuide}
-        color="success"
-        fill
-        isDisabled={true}
-        size="s"
-        data-test-subj="disabledGuideButton"
-      >
-        {i18n.translate('guidedOnboarding.disabledGuidedSetupButtonLabel', {
-          defaultMessage: 'Setup guide',
-        })}
-      </EuiButton>
-    );
-  }
+  useEffect(() => {
+    fetchGuideConfig();
+  }, [fetchGuideConfig]);
 
-  const stepNumber = getStepNumber(guideState);
-  const stepsCompleted = getProgress(guideState);
+  const stepsCompleted = getProgress(pluginState?.activeGuide);
+  const isGuideReadyToComplete = pluginState?.activeGuide?.status === 'ready_to_complete';
 
+  const backToGuidesButton = (
+    <EuiButtonEmpty
+      onClick={navigateToLandingPage}
+      iconSide="left"
+      iconType="arrowLeft"
+      flush="left"
+      color="text"
+    >
+      {i18n.translate('guidedOnboarding.dropdownPanel.backToGuidesLink', {
+        defaultMessage: 'Back to guides',
+      })}
+    </EuiButtonEmpty>
+  );
   return (
     <>
-      <EuiButton onClick={toggleGuide} color="success" fill size="s" data-test-subj="guideButton">
-        {Boolean(stepNumber)
-          ? i18n.translate('guidedOnboarding.guidedSetupStepButtonLabel', {
-              defaultMessage: 'Setup guide: step {stepNumber}',
-              values: {
-                stepNumber,
-              },
-            })
-          : i18n.translate('guidedOnboarding.guidedSetupButtonLabel', {
-              defaultMessage: 'Setup guide',
-            })}
-      </EuiButton>
+      <div css={styles.setupButton}>
+        <GuideButton
+          isLoading={isLoading}
+          pluginState={pluginState}
+          guideConfig={guideConfig}
+          toggleGuidePanel={toggleGuide}
+          isGuidePanelOpen={isGuideOpen}
+          navigateToLandingPage={navigateToLandingPage}
+        />
+      </div>
 
       {isGuideOpen && (
         <EuiFlyout
@@ -183,162 +253,214 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
           css={styles.flyoutOverrides.flyoutContainer}
           maskProps={{ headerZindexLocation: 'above' }}
           data-test-subj="guidePanel"
+          maxWidth={480}
         >
-          <EuiFlyoutHeader>
-            <EuiButtonEmpty
-              onClick={navigateToLandingPage}
-              iconSide="left"
-              iconType="arrowLeft"
-              flush="left"
-              color="text"
-            >
-              {i18n.translate('guidedOnboarding.dropdownPanel.backToGuidesLink', {
-                defaultMessage: 'Back to guides',
-              })}
-            </EuiButtonEmpty>
+          {guideConfig && pluginState && pluginState.status !== 'error' ? (
+            <>
+              <EuiFlyoutHeader>
+                {backToGuidesButton}
+                <EuiTitle size="m">
+                  <h2 data-test-subj="guideTitle">
+                    {isGuideReadyToComplete
+                      ? i18n.translate('guidedOnboarding.dropdownPanel.completeGuideFlyoutTitle', {
+                          defaultMessage: 'Well done!',
+                        })
+                      : guideConfig.title}
+                  </h2>
+                </EuiTitle>
 
-            <EuiTitle size="m">
-              <h2>{guideConfig?.title}</h2>
-            </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiHorizontalRule margin="s" />
+              </EuiFlyoutHeader>
 
-            <EuiSpacer size="s" />
-            <EuiHorizontalRule margin="s" />
-          </EuiFlyoutHeader>
-
-          <EuiFlyoutBody css={styles.flyoutOverrides.flyoutBody}>
-            <div>
-              <EuiText size="m">
-                <p>{guideConfig?.description}</p>
-              </EuiText>
-
-              {guideConfig.docs && (
-                <>
-                  <EuiSpacer size="s" />
+              <EuiFlyoutBody css={styles.flyoutOverrides.flyoutBody}>
+                <div>
                   <EuiText size="m">
-                    <EuiLink external target="_blank" href={guideConfig.docs.url}>
-                      {guideConfig.docs.text}
-                    </EuiLink>
+                    <p data-test-subj="guideDescription">
+                      {isGuideReadyToComplete
+                        ? i18n.translate(
+                            'guidedOnboarding.dropdownPanel.completeGuideFlyoutDescription',
+                            {
+                              defaultMessage: `You've completed the Elastic {guideName} guide.`,
+                              values: {
+                                guideName: guideConfig.guideName,
+                              },
+                            }
+                          )
+                        : guideConfig.description}
+                    </p>
                   </EuiText>
-                </>
-              )}
 
-              {/* Progress bar should only show after the first step has been complete */}
-              {stepsCompleted > 0 && (
-                <>
-                  <EuiSpacer size="xl" />
-                  <EuiProgress
-                    data-test-subj="guideProgress"
-                    label={i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
-                      defaultMessage: 'Progress',
-                    })}
-                    value={stepsCompleted}
-                    valueText={i18n.translate('guidedOnboarding.dropdownPanel.progressValueLabel', {
-                      defaultMessage: '{stepCount} steps',
-                      values: {
-                        stepCount: `${stepsCompleted} / ${guideConfig.steps.length}`,
-                      },
-                    })}
-                    max={guideConfig.steps.length}
-                    size="l"
-                  />
+                  {guideConfig.docs && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiText size="m">
+                        <EuiLink external target="_blank" href={guideConfig.docs.url}>
+                          {guideConfig.docs.text}
+                        </EuiLink>
+                      </EuiText>
+                    </>
+                  )}
 
-                  <EuiSpacer size="s" />
-                </>
-              )}
+                  {/* Progress bar should only show after the first step has been complete */}
+                  {stepsCompleted > 0 && (
+                    <>
+                      <EuiSpacer size="xl" />
+                      <EuiProgress
+                        data-test-subj="guideProgress"
+                        label={
+                          isGuideReadyToComplete
+                            ? i18n.translate('guidedOnboarding.dropdownPanel.completedLabel', {
+                                defaultMessage: 'Completed',
+                              })
+                            : i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
+                                defaultMessage: 'Progress',
+                              })
+                        }
+                        value={stepsCompleted}
+                        valueText={i18n.translate(
+                          'guidedOnboarding.dropdownPanel.progressValueLabel',
+                          {
+                            defaultMessage: '{stepCount} steps',
+                            values: {
+                              stepCount: `${stepsCompleted} / ${guideConfig.steps.length}`,
+                            },
+                          }
+                        )}
+                        max={guideConfig.steps.length}
+                        size="l"
+                      />
 
-              <EuiHorizontalRule />
+                      <EuiSpacer size="s" />
+                    </>
+                  )}
 
-              {guideConfig?.steps.map((step, index) => {
-                const accordionId = htmlIdGenerator(`accordion${index}`)();
-                const stepState = guideState?.steps[index];
+                  <EuiHorizontalRule />
 
-                if (stepState) {
-                  return (
-                    <GuideStep
-                      accordionId={accordionId}
-                      stepStatus={stepState.status}
-                      stepConfig={step}
-                      stepNumber={index + 1}
-                      navigateToStep={navigateToStep}
-                      key={accordionId}
-                    />
-                  );
-                }
-              })}
+                  {guideConfig?.steps.map((step, index) => {
+                    const accordionId = htmlIdGenerator(`accordion${index}`)();
+                    const stepState = pluginState?.activeGuide?.steps[index];
 
-              {guideState?.status === 'ready_to_complete' && (
-                <EuiFlexGroup justifyContent="flexEnd">
+                    if (stepState) {
+                      return (
+                        <GuideStep
+                          isLoading={isLoading}
+                          accordionId={accordionId}
+                          stepStatus={stepState.status}
+                          stepConfig={step}
+                          stepNumber={index + 1}
+                          handleButtonClick={() => handleStepButtonClick(stepState, step)}
+                          key={accordionId}
+                          telemetryGuideId={guideConfig!.telemetryId}
+                        />
+                      );
+                    }
+                  })}
+
+                  {isGuideReadyToComplete && (
+                    <EuiFlexGroup justifyContent="flexEnd">
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          isLoading={isLoading}
+                          onClick={() => completeGuide(guideConfig.completedGuideRedirectLocation)}
+                          fill
+                          // data-test-subj used for FS tracking and testing
+                          data-test-subj={`onboarding--completeGuideButton--${
+                            guideConfig!.telemetryId
+                          }`}
+                        >
+                          {i18n.translate('guidedOnboarding.dropdownPanel.elasticButtonLabel', {
+                            defaultMessage: 'Continue using Elastic',
+                          })}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
+                </div>
+              </EuiFlyoutBody>
+
+              <EuiFlyoutFooter css={styles.flyoutOverrides.flyoutFooter}>
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="center"
+                  gutterSize="xs"
+                  responsive={false}
+                  wrap
+                >
                   <EuiFlexItem grow={false}>
-                    <EuiButton onClick={completeGuide} fill data-test-subj="useElasticButton">
-                      {i18n.translate('guidedOnboarding.dropdownPanel.elasticButtonLabel', {
-                        defaultMessage: 'Continue using Elastic',
+                    <EuiButtonEmpty
+                      iconType="questionInCircle"
+                      iconSide="right"
+                      href="https://cloud.elastic.co/support "
+                      target="_blank"
+                      css={styles.flyoutOverrides.flyoutFooterLink}
+                      iconSize="m"
+                    >
+                      {i18n.translate('guidedOnboarding.dropdownPanel.footer.support', {
+                        defaultMessage: 'Need help?',
                       })}
-                    </EuiButton>
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color={euiTheme.colors.disabled}>
+                      |
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType="faceHappy"
+                      iconSide="right"
+                      href="https://www.elastic.co/kibana/feedback"
+                      target="_blank"
+                      css={styles.flyoutOverrides.flyoutFooterLink}
+                      iconSize="s"
+                    >
+                      {i18n.translate('guidedOnboarding.dropdownPanel.footer.feedback', {
+                        defaultMessage: 'Give feedback',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color={euiTheme.colors.disabled}>
+                      |
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType="exit"
+                      iconSide="right"
+                      onClick={openQuitGuideModal}
+                      data-test-subj="quitGuideButton"
+                      css={styles.flyoutOverrides.flyoutFooterLink}
+                      iconSize="s"
+                    >
+                      {i18n.translate(
+                        'guidedOnboarding.dropdownPanel.footer.exitGuideButtonLabel',
+                        {
+                          defaultMessage: 'Quit guide',
+                        }
+                      )}
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              )}
-            </div>
-          </EuiFlyoutBody>
-
-          <EuiFlyoutFooter css={styles.flyoutOverrides.flyoutFooter}>
-            <EuiFlexGroup direction="column" alignItems="center" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiButtonEmpty onClick={openQuitGuideModal} data-test-subj="quitGuideButton">
-                  {i18n.translate('guidedOnboarding.dropdownPanel.footer.exitGuideButtonLabel', {
-                    defaultMessage: 'Quit setup guide',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <EuiText color="subdued" textAlign="center">
-                  <FormattedMessage
-                    id="guidedOnboarding.dropdownPanel.footer.feedbackDescription"
-                    defaultMessage="How's onboarding? We’d love your {feedbackLink}"
-                    values={{
-                      feedbackLink: (
-                        <EuiLink
-                          href="https://www.elastic.co/kibana/feedback"
-                          target="_blank"
-                          external
-                        >
-                          {i18n.translate('guidedOnboarding.dropdownPanel.footer.feedbackLabel', {
-                            defaultMessage: 'feedback',
-                          })}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </EuiText>
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <EuiText color="subdued" textAlign="center">
-                  <FormattedMessage
-                    id="guidedOnboarding.dropdownPanel.footer.supportDescription"
-                    defaultMessage="Other questions? We're {helpLink}"
-                    values={{
-                      helpLink: (
-                        <EuiLink href="https://cloud.elastic.co/support " target="_blank" external>
-                          {i18n.translate(
-                            'guidedOnboarding.dropdownPanel.footer.helpTextDescription',
-                            {
-                              defaultMessage: 'here to help',
-                            }
-                          )}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
+              </EuiFlyoutFooter>
+            </>
+          ) : (
+            <EuiFlyoutBody>
+              {backToGuidesButton}
+              {errorSection}
+            </EuiFlyoutBody>
+          )}
         </EuiFlyout>
       )}
 
       {isQuitGuideModalOpen && (
-        <QuitGuideModal closeModal={closeQuitGuideModal} currentGuide={guideState!} />
+        <QuitGuideModal
+          closeModal={closeQuitGuideModal}
+          currentGuide={pluginState!.activeGuide!}
+          telemetryGuideId={guideConfig!.telemetryId}
+          notifications={notifications}
+        />
       )}
     </>
   );

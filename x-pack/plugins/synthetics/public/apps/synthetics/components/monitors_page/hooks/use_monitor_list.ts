@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { useGetUrlParams } from '../../../hooks';
@@ -18,7 +18,7 @@ import {
 
 export function useMonitorList() {
   const dispatch = useDispatch();
-  const [isDataQueried, setIsDataQueried] = useState(false);
+  const isDataQueriedRef = useRef(false);
 
   const { pageState, loading, loaded, error, data } = useSelector(selectMonitorListState);
   const syntheticsMonitors = useSelector(selectEncryptedSyntheticsSavedMonitors);
@@ -50,14 +50,15 @@ export function useMonitorList() {
 
   // Initial loading
   useEffect(() => {
-    if (!loading && !isDataQueried) {
+    if (!loading && !isDataQueriedRef.current) {
+      isDataQueriedRef.current = true;
       reloadPage();
     }
 
     if (loading) {
-      setIsDataQueried(true);
+      isDataQueriedRef.current = true;
     }
-  }, [reloadPage, isDataQueried, syntheticsMonitors, loading]);
+  }, [reloadPage, syntheticsMonitors, loading]);
 
   return {
     loading,
@@ -68,7 +69,7 @@ export function useMonitorList() {
     total: data?.total ?? 0,
     loadPage,
     reloadPage,
-    isDataQueried,
+    isDataQueried: isDataQueriedRef.current,
     absoluteTotal: data.absoluteTotal ?? 0,
   };
 }

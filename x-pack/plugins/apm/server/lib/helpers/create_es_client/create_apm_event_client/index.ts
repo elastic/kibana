@@ -11,7 +11,7 @@ import type {
   FieldCapsResponse,
   TermsEnumRequest,
   TermsEnumResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ValuesType } from 'utility-types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
@@ -80,6 +80,7 @@ export interface APMEventClientConfig {
   indices: ApmIndicesConfig;
   options: {
     includeFrozen: boolean;
+    forceSyntheticSource: boolean;
   };
 }
 
@@ -87,8 +88,9 @@ export class APMEventClient {
   private readonly esClient: ElasticsearchClient;
   private readonly debug: boolean;
   private readonly request: KibanaRequest;
-  private readonly indices: ApmIndicesConfig;
+  public readonly indices: ApmIndicesConfig;
   private readonly includeFrozen: boolean;
+  private readonly forceSyntheticSource: boolean;
 
   constructor(config: APMEventClientConfig) {
     this.esClient = config.esClient;
@@ -96,6 +98,7 @@ export class APMEventClient {
     this.request = config.request;
     this.indices = config.indices;
     this.includeFrozen = config.options.includeFrozen;
+    this.forceSyntheticSource = config.options.forceSyntheticSource;
   }
 
   private callAsyncWithDebug<T extends { body: any }>({
@@ -149,11 +152,18 @@ export class APMEventClient {
       this.indices
     );
 
+    const forceSyntheticSourceForThisRequest =
+      this.forceSyntheticSource &&
+      params.apm.events.includes(ProcessorEvent.metric);
+
     const searchParams = {
       ...withProcessorEventFilter,
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
       ignore_unavailable: true,
       preference: 'any',
+      ...(forceSyntheticSourceForThisRequest
+        ? { force_synthetic_source: true }
+        : {}),
     };
 
     return this.callAsyncWithDebug({

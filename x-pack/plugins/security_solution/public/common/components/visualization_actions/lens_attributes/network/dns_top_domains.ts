@@ -89,7 +89,7 @@ export const dnsTopDomainsLensAttributes: LensAttributes = {
       },
     ],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           'b1c3efc6-c886-4fba-978f-3b6bb5e7948a': {
             columns: {

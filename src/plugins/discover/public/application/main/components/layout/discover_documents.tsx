@@ -28,7 +28,7 @@ import {
   HIDE_ANNOUNCEMENTS,
 } from '../../../../../common';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
-import { DataDocuments$, DataDocumentsMsg, RecordRawType } from '../../hooks/use_saved_search';
+import { DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
@@ -37,6 +37,7 @@ import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/docu
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { DataTableRecord } from '../../../../types';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
+import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -84,7 +85,7 @@ function DiscoverDocumentsComponent({
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
-  const documentState: DataDocumentsMsg = useDataState(documents$);
+  const documentState = useDataState(documents$);
   const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
   const isPlainRecord = useMemo(
     () => getRawRecordType(state.query) === RecordRawType.PLAIN,
@@ -215,6 +216,8 @@ function DiscoverDocumentsComponent({
               rowsPerPageState={state.rowsPerPage}
               onUpdateRowsPerPage={onUpdateRowsPerPage}
               onFieldEdited={onFieldEdited}
+              savedSearchId={savedSearch.id}
+              DocumentView={DiscoverGridFlyout}
             />
           </div>
         </>

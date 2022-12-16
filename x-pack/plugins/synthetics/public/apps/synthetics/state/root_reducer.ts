@@ -7,6 +7,10 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
+import { dynamicSettingsReducer, DynamicSettingsState } from './settings';
+import { settingsReducer, SettingsState } from './settings';
+import { agentPoliciesReducer, AgentPoliciesState } from './private_locations';
+import { networkEventsReducer, NetworkEventsState } from './network_events';
 import { monitorDetailsReducer, MonitorDetailsState } from './monitor_details';
 import { uiReducer, UiState } from './ui';
 import { indexStatusReducer, IndexStatusState } from './index_status';
@@ -16,16 +20,22 @@ import { serviceLocationsReducer, ServiceLocationsState } from './service_locati
 import { monitorOverviewReducer, MonitorOverviewState } from './overview';
 import { BrowserJourneyState } from './browser_journey/models';
 import { browserJourneyReducer } from './browser_journey';
+import { PingStatusState, pingStatusReducer } from './ping_status';
 
 export interface SyntheticsAppState {
   ui: UiState;
-  indexStatus: IndexStatusState;
-  syntheticsEnablement: SyntheticsEnablementState;
+  settings: SettingsState;
+  pingStatus: PingStatusState;
   monitorList: MonitorListState;
-  serviceLocations: ServiceLocationsState;
-  monitorDetails: MonitorDetailsState;
+  indexStatus: IndexStatusState;
   overview: MonitorOverviewState;
+  networkEvents: NetworkEventsState;
+  agentPolicies: AgentPoliciesState;
+  monitorDetails: MonitorDetailsState;
   browserJourney: BrowserJourneyState;
+  serviceLocations: ServiceLocationsState;
+  syntheticsEnablement: SyntheticsEnablementState;
+  dynamicSettings: DynamicSettingsState;
 }
 
 export const rootReducer = combineReducers<SyntheticsAppState>({
@@ -37,4 +47,9 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   monitorDetails: monitorDetailsReducer,
   overview: monitorOverviewReducer,
   browserJourney: browserJourneyReducer,
+  networkEvents: networkEventsReducer,
+  pingStatus: pingStatusReducer,
+  agentPolicies: agentPoliciesReducer,
+  dynamicSettings: dynamicSettingsReducer,
+  settings: settingsReducer,
 });

@@ -8,16 +8,34 @@
 import * as t from 'io-ts';
 import { DateFromString } from './date_from_string';
 
+const actionSchema = t.type({
+  date: DateFromString,
+});
+
+export const throttledActionSchema = t.record(t.string, actionSchema);
+export type ThrottledActions = t.TypeOf<typeof throttledActionSchema>;
+
+const lastScheduledActionsSchema = t.intersection([
+  t.partial({
+    subgroup: t.string,
+  }),
+  t.type({
+    group: t.string,
+    date: DateFromString,
+  }),
+  t.partial({ actions: throttledActionSchema }),
+]);
+
+export type LastScheduledActions = t.TypeOf<typeof lastScheduledActionsSchema>;
+
 const metaSchema = t.partial({
-  lastScheduledActions: t.intersection([
-    t.partial({
-      subgroup: t.string,
-    }),
-    t.type({
-      group: t.string,
-      date: DateFromString,
-    }),
-  ]),
+  lastScheduledActions: lastScheduledActionsSchema,
+  // an array used to track changes in alert state, the order is based on the rule executions (oldest to most recent)
+  // true - alert has changed from active/recovered
+  // false - the status has remained either active or recovered
+  flappingHistory: t.array(t.boolean),
+  // flapping flag that indicates whether the alert is flapping
+  flapping: t.boolean,
 });
 export type AlertInstanceMeta = t.TypeOf<typeof metaSchema>;
 

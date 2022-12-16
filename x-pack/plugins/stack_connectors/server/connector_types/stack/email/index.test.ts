@@ -42,9 +42,7 @@ let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 beforeEach(() => {
   jest.resetAllMocks();
   configurationUtilities = actionsConfigMock.create();
-  connectorType = getConnectorType({
-    logger: mockedLogger,
-  });
+  connectorType = getConnectorType({});
 });
 
 describe('connector registration', () => {
@@ -438,7 +436,7 @@ describe('params validation', () => {
         "cc": Array [],
         "kibanaFooterLink": Object {
           "path": "/",
-          "text": "Go to Kibana",
+          "text": "Go to Elastic",
         },
         "message": "this is the message",
         "subject": "this is a test",
@@ -510,7 +508,7 @@ describe('execute()', () => {
     message: 'a message to you',
     kibanaFooterLink: {
       path: '/',
-      text: 'Go to Kibana',
+      text: 'Go to Elastic',
     },
   };
 
@@ -522,6 +520,7 @@ describe('execute()', () => {
     secrets,
     services,
     configurationUtilities: actionsConfigMock.create(),
+    logger: mockedLogger,
   };
 
   test('ensure parameters are as expected', async () => {
@@ -543,7 +542,7 @@ describe('execute()', () => {
 
       --
 
-      This message was sent by Kibana.",
+      This message was sent by Elastic.",
           "subject": "the subject",
         },
         "hasAuth": true,
@@ -594,7 +593,7 @@ describe('execute()', () => {
 
       --
 
-      This message was sent by Kibana.",
+      This message was sent by Elastic.",
           "subject": "the subject",
         },
         "hasAuth": false,
@@ -645,7 +644,7 @@ describe('execute()', () => {
 
       --
 
-      This message was sent by Kibana.",
+      This message was sent by Elastic.",
           "subject": "the subject",
         },
         "hasAuth": false,
@@ -708,7 +707,7 @@ describe('execute()', () => {
       message: '{{rogue}}',
       kibanaFooterLink: {
         path: '/',
-        text: 'Go to Kibana',
+        text: 'Go to Elastic',
       },
     };
     const variables = {
@@ -730,7 +729,7 @@ describe('execute()', () => {
         ],
         "kibanaFooterLink": Object {
           "path": "/",
-          "text": "Go to Kibana",
+          "text": "Go to Elastic",
         },
         "message": "\\\\*bold\\\\*",
         "subject": "*bold*",
@@ -739,9 +738,8 @@ describe('execute()', () => {
     `);
   });
 
-  test('provides a footer link to Kibana when publicBaseUrl is defined', async () => {
+  test('provides a footer link to Elastic when publicBaseUrl is defined', async () => {
     const connectorTypeWithPublicUrl = getConnectorType({
-      logger: mockedLogger,
       publicBaseUrl: 'https://localhost:1234/foo/bar',
     });
 
@@ -754,13 +752,12 @@ describe('execute()', () => {
 
       --
 
-      This message was sent by Kibana. [Go to Kibana](https://localhost:1234/foo/bar)."
+      This message was sent by Elastic. [Go to Elastic](https://localhost:1234/foo/bar)."
     `);
   });
 
-  test('allows to generate a deep link into Kibana when publicBaseUrl is defined', async () => {
+  test('allows to generate a deep link into Elastic when publicBaseUrl is defined', async () => {
     const connectorTypeWithPublicUrl = getConnectorType({
-      logger: mockedLogger,
       publicBaseUrl: 'https://localhost:1234/foo/bar',
     });
 
@@ -770,7 +767,7 @@ describe('execute()', () => {
         ...params,
         kibanaFooterLink: {
           path: '/my/app',
-          text: 'View this in Kibana',
+          text: 'View this in Elastic',
         },
       },
     };
@@ -784,7 +781,7 @@ describe('execute()', () => {
 
       --
 
-      This message was sent by Kibana. [View this in Kibana](https://localhost:1234/foo/bar/my/app)."
+      This message was sent by Elastic. [View this in Elastic](https://localhost:1234/foo/bar/my/app)."
     `);
   });
 

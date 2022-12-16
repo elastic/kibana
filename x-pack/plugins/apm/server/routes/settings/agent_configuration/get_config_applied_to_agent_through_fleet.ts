@@ -7,18 +7,14 @@
 
 import { termQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import datemath from '@kbn/datemath';
-import { METRICSET_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { METRICSET_NAME } from '../../../../common/es_fields/apm';
+import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 
-export async function getConfigsAppliedToAgentsThroughFleet({
-  setup,
-}: {
-  setup: Setup;
-}) {
-  const { internalClient, indices } = setup;
-
+export async function getConfigsAppliedToAgentsThroughFleet(
+  internalESClient: APMInternalESClient
+) {
   const params = {
-    index: indices.metric,
+    index: internalESClient.apmIndices.metric,
     size: 0,
     body: {
       query: {
@@ -43,7 +39,7 @@ export async function getConfigsAppliedToAgentsThroughFleet({
     },
   };
 
-  const response = await internalClient.search(
+  const response = await internalESClient.search(
     'get_config_applied_to_agent_through_fleet',
     params
   );

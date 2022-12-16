@@ -12,8 +12,8 @@ import * as i18n from '../case_view/translations';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { PropertyActions } from '../property_actions';
-import { Case } from '../../../common/ui/types';
-import { CaseService } from '../../containers/use_get_case_user_actions';
+import type { Case } from '../../../common/ui/types';
+import type { CaseService } from '../../containers/use_get_case_user_actions';
 import { useAllCasesNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 

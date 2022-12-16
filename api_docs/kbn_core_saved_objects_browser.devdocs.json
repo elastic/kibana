@@ -41,7 +41,13 @@
               "{@link SavedObjectsClientContract}"
             ],
             "signature": [
-              "SavedObjectsClientContract"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-browser/src/contracts.ts",
             "deprecated": false,

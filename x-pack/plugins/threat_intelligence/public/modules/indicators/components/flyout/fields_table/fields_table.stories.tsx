@@ -10,7 +10,8 @@ import { mockIndicatorsFiltersContext } from '../../../../../common/mocks/mock_i
 import { IndicatorFieldsTable } from '.';
 import { generateMockIndicator } from '../../../../../../common/types/indicator';
 import { StoryProvidersComponent } from '../../../../../common/mocks/story_providers';
-import { IndicatorsFiltersContext } from '../../../containers/indicators_filters';
+import { IndicatorsFiltersContext } from '../../../containers/filters';
+import { IndicatorsFlyoutContext } from '../context';
 
 export default {
   component: IndicatorFieldsTable,
@@ -19,15 +20,41 @@ export default {
 
 export function WithIndicators() {
   const indicator = generateMockIndicator();
+  const context = {
+    kqlBarIntegration: false,
+  };
 
   return (
     <StoryProvidersComponent>
       <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-        <IndicatorFieldsTable
-          fields={['threat.indicator.type']}
-          indicator={indicator}
-          search={false}
-        />
+        <IndicatorsFlyoutContext.Provider value={context}>
+          <IndicatorFieldsTable
+            fields={['threat.indicator.type']}
+            indicator={indicator}
+            search={false}
+          />
+        </IndicatorsFlyoutContext.Provider>
+      </IndicatorsFiltersContext.Provider>
+    </StoryProvidersComponent>
+  );
+}
+
+export function NoFilterButtons() {
+  const indicator = generateMockIndicator();
+  const context = {
+    kqlBarIntegration: true,
+  };
+
+  return (
+    <StoryProvidersComponent>
+      <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+        <IndicatorsFlyoutContext.Provider value={context}>
+          <IndicatorFieldsTable
+            fields={['threat.indicator.type']}
+            indicator={indicator}
+            search={false}
+          />
+        </IndicatorsFlyoutContext.Provider>
       </IndicatorsFiltersContext.Provider>
     </StoryProvidersComponent>
   );

@@ -12,7 +12,7 @@ import { EuiHealth, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
+import { TrainedModelState } from '../../../../../../common/types/pipelines';
 
 const modelStartedText = i18n.translate(
   'xpack.enterpriseSearch.inferencePipelineCard.modelState.started',
@@ -72,7 +72,12 @@ const modelNotDeployedTooltip = i18n.translate(
   }
 );
 
-export const TrainedModelHealth: React.FC<InferencePipeline> = ({
+export interface TrainedModelHealthProps {
+  modelState: TrainedModelState;
+  modelStateReason?: string;
+}
+
+export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
   modelState,
   modelStateReason,
 }) => {

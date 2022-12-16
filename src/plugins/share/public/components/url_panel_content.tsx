@@ -20,6 +20,7 @@ import {
   EuiRadioGroup,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
@@ -45,6 +46,7 @@ export interface UrlPanelContentProps {
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   urlService: BrowserUrlService;
+  snapshotShareWarning?: string;
 }
 
 export enum ExportUrlAsType {
@@ -78,7 +80,6 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     super(props);
 
     this.shortUrlCache = undefined;
-
     this.state = {
       exportUrlAs: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
       useShortUrl: false,
@@ -155,6 +156,33 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
       </EuiFormRow>
     );
 
+    const showWarningButton =
+      this.props.snapshotShareWarning &&
+      this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT;
+
+    const copyButton = (copy: () => void) => (
+      <EuiButton
+        fill
+        fullWidth
+        onClick={copy}
+        disabled={this.state.isCreatingShortUrl || this.state.url === ''}
+        data-share-url={this.state.url}
+        data-test-subj="copyShareUrlButton"
+        size="s"
+        iconType={showWarningButton ? 'alert' : undefined}
+        color={showWarningButton ? 'warning' : 'primary'}
+      >
+        {this.props.isEmbedded ? (
+          <FormattedMessage
+            id="share.urlPanel.copyIframeCodeButtonLabel"
+            defaultMessage="Copy iFrame code"
+          />
+        ) : (
+          <FormattedMessage id="share.urlPanel.copyLinkButtonLabel" defaultMessage="Copy link" />
+        )}
+      </EuiButton>
+    );
+
     return (
       <I18nProvider>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
@@ -166,27 +194,19 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
 
           <EuiCopy textToCopy={this.state.url || ''} anchorClassName="eui-displayBlock">
             {(copy: () => void) => (
-              <EuiButton
-                fill
-                fullWidth
-                onClick={copy}
-                disabled={this.state.isCreatingShortUrl || this.state.url === ''}
-                data-share-url={this.state.url}
-                data-test-subj="copyShareUrlButton"
-                size="s"
-              >
-                {this.props.isEmbedded ? (
-                  <FormattedMessage
-                    id="share.urlPanel.copyIframeCodeButtonLabel"
-                    defaultMessage="Copy iFrame code"
-                  />
+              <>
+                {showWarningButton ? (
+                  <EuiToolTip
+                    position="bottom"
+                    content={this.props.snapshotShareWarning}
+                    display="block"
+                  >
+                    {copyButton(copy)}
+                  </EuiToolTip>
                 ) : (
-                  <FormattedMessage
-                    id="share.urlPanel.copyLinkButtonLabel"
-                    defaultMessage="Copy link"
-                  />
+                  copyButton(copy)
                 )}
-              </EuiButton>
+              </>
             )}
           </EuiCopy>
         </EuiForm>
@@ -246,13 +266,11 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
         },
       }),
     });
-
     return this.updateUrlParams(formattedUrl);
   };
 
   private getSnapshotUrl = () => {
     const url = this.props.shareableUrl || window.location.href;
-
     return this.updateUrlParams(url);
   };
 
@@ -404,17 +422,24 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
   };
 
   private renderExportUrlAsOptions = () => {
+    const snapshotLabel = (
+      <FormattedMessage id="share.urlPanel.snapshotLabel" defaultMessage="Snapshot" />
+    );
     return [
       {
         id: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
-        label: this.renderWithIconTip(
-          <FormattedMessage id="share.urlPanel.snapshotLabel" defaultMessage="Snapshot" />,
-          <FormattedMessage
-            id="share.urlPanel.snapshotDescription"
-            defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
+        label: (
+          <>
+            {this.renderWithIconTip(
+              snapshotLabel,
+              <FormattedMessage
+                id="share.urlPanel.snapshotDescription"
+                defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
             Edits to the saved {objectType} won't be visible via this URL."
-            values={{ objectType: this.props.objectType }}
-          />
+                values={{ objectType: this.props.objectType }}
+              />
+            )}
+          </>
         ),
         ['data-test-subj']: 'exportAsSnapshot',
       },

@@ -94,7 +94,7 @@ jest.mock(
   }
 );
 jest.mock('../../../../detections/components/alerts_table/actions');
-jest.mock('../../../../risk_score/containers', () => {
+jest.mock('../../../../explore/containers/risk_score', () => {
   return {
     useRiskScore: jest.fn().mockReturnValue({
       loading: true,
@@ -105,7 +105,7 @@ jest.mock('../../../../risk_score/containers', () => {
 });
 
 const defaultProps = {
-  timelineId: TimelineId.test,
+  scopeId: TimelineId.test,
   isHostIsolationPanelOpen: false,
   handleOnEventClosed: jest.fn(),
   onAddIsolationStatusClick: jest.fn(),

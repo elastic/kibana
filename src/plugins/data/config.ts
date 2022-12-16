@@ -23,7 +23,7 @@ export const searchSessionsConfigSchema = schema.object({
   /**
    * maxUpdateRetries controls how many retries we perform while attempting to save a search session
    */
-  maxUpdateRetries: schema.number({ defaultValue: 3 }),
+  maxUpdateRetries: schema.number({ defaultValue: 10 }),
 
   /**
    * defaultExpiration controls how long search sessions are valid for, until they are expired.
@@ -47,10 +47,31 @@ export const searchSessionsConfigSchema = schema.object({
 });
 
 export const searchConfigSchema = schema.object({
+  /**
+   * Config for search strategies that use async search based API underneath
+   */
   asyncSearch: schema.object({
+    /**
+     *  Block and wait until the search is completed up to the timeout (see es async_search's `wait_for_completion_timeout`)
+     *  TODO: we should optimize this as 100ms is likely not optimal (https://github.com/elastic/kibana/issues/143277)
+     */
     waitForCompletion: schema.duration({ defaultValue: '100ms' }),
+    /**
+     *  How long the async search needs to be available after each search poll. Ongoing async searches and any saved search results are deleted after this period.
+     *  (see es async_search's `keep_alive`)
+     *  Note: This is applicable to the searches before the search session is saved.
+     *  After search session is saved `keep_alive` is extended using `data.search.sessions.defaultExpiration` config
+     */
     keepAlive: schema.duration({ defaultValue: '1m' }),
+    /**
+     * Affects how often partial results become available, which happens whenever shard results are reduced (see es async_search's `batched_reduce_size`)
+     */
     batchedReduceSize: schema.number({ defaultValue: 64 }),
+    /**
+     * How long to wait before polling the async_search after the previous poll response.
+     * If not provided, then default dynamic interval with backoff is used.
+     */
+    pollInterval: schema.maybe(schema.number({ min: 1000 })),
   }),
   aggs: schema.object({
     shardDelay: schema.object({

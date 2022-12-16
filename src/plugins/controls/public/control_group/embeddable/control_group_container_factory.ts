@@ -14,12 +14,12 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Container, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
 import { ControlGroupInput, CONTROL_GROUP_TYPE } from '../types';
-import { ControlGroupStrings } from '../control_group_strings';
 import {
   createControlGroupExtract,
   createControlGroupInject,
@@ -40,7 +40,9 @@ export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition
   public isEditable = async () => false;
 
   public readonly getDisplayName = () => {
-    return ControlGroupStrings.getEmbeddableTitle();
+    return i18n.translate('controls.controlGroup.title', {
+      defaultMessage: 'Control group',
+    });
   };
 
   public getDefaultInput(): Partial<ControlGroupInput> {

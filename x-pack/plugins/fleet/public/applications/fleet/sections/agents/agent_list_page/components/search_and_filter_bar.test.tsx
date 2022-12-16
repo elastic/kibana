@@ -20,6 +20,8 @@ import { FleetStatusProvider, ConfigContext, KibanaVersionContext } from '../../
 
 import { getMockTheme } from '../../../../../../mocks';
 
+import { ExperimentalFeaturesService } from '../../../../services';
+
 import { SearchAndFilterBar } from './search_and_filter_bar';
 
 const mockTheme = getMockTheme({
@@ -49,6 +51,10 @@ const TestComponent = (props: any) => (
 );
 
 describe('SearchAndFilterBar', () => {
+  beforeAll(() => {
+    // @ts-ignore - prevents us needing to mock the entire service
+    ExperimentalFeaturesService.init({});
+  });
   it('should show no Actions button when no agent is selected', async () => {
     const selectedAgents: Agent[] = [];
     const props: any = {

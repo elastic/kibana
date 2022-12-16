@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import {
+import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsBulkResponse,
@@ -16,12 +16,13 @@ import {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './types';
+import type { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './types';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
-import { CaseAttributes, CaseFullExternalService, NONE_CONNECTOR_ID } from '../../../common/api';
+import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
+import { NONE_CONNECTOR_ID } from '../../../common/api';
 import {
   findConnectorIdReference,
   transformFieldsToESModel,
@@ -29,6 +30,7 @@ import {
   transformESConnectorToExternalModel,
 } from '../transform';
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
+import type { CaseSavedObject } from '../../common/types';
 
 export function transformUpdateResponsesToExternalModels(
   response: SavedObjectsBulkUpdateResponse<ESCaseAttributes>
@@ -163,7 +165,7 @@ export function transformFindResponseToExternalModel(
 
 export function transformSavedObjectToExternalModel(
   caseSavedObject: SavedObject<ESCaseAttributes>
-): SavedObject<CaseAttributes> {
+): CaseSavedObject {
   const connector = transformESConnectorOrUseDefault({
     // if the saved object had an error the attributes field will not exist
     connector: caseSavedObject.attributes?.connector,

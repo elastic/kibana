@@ -30,7 +30,8 @@ const mountUpdateConnector = (props: Partial<Props> = {}, isOAuth: boolean = fal
   );
 };
 
-describe('UpdateConnector renders', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/147396
+describe.skip('UpdateConnector renders', () => {
   it('should render update connector fields', () => {
     const wrapper = mountUpdateConnector();
 
@@ -207,7 +208,7 @@ describe('UpdateConnector renders', () => {
     const wrapper = mountUpdateConnector();
 
     await act(async () => {
-      wrapper.find('[data-test-subj="snUpdateInstallationSubmit"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="snUpdateInstallationSubmit"]').first().simulate('click');
       wrapper.update();
     });
 

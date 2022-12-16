@@ -8,13 +8,13 @@
 import { useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { CaseConnector } from '../../../common/api';
-import { CaseAttributes } from '../../../common/api/cases/case';
-import { CaseStatuses } from '../../../common/api/cases/status';
-import { Case, UpdateByKey, UpdateKey } from '../../containers/types';
+import type { CaseConnector } from '../../../common/api';
+import type { CaseAttributes } from '../../../common/api/cases/case';
+import type { CaseStatuses } from '../../../common/api/cases/status';
+import type { Case, UpdateByKey, UpdateKey } from '../../containers/types';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
-import { OnUpdateFields } from './types';
+import type { OnUpdateFields } from './types';
 
 export const useOnUpdateField = ({ caseData, caseId }: { caseData: Case; caseId: string }) => {
   const { isLoading, updateKey: loadingKey, updateCaseProperty } = useUpdateCase();

@@ -81,7 +81,7 @@ describe('ExportModal', () => {
         onIncludeReferenceChange={onIncludeReferenceChange}
       />
     );
-    wrapper.find('EuiButton').simulate('click');
+    wrapper.find('EuiButton button').simulate('click');
 
     expect(onExport).toHaveBeenCalledTimes(1);
     expect(onCancel).not.toHaveBeenCalled();

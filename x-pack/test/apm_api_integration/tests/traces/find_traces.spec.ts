@@ -4,12 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 import { apm, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { TraceSearchType } from '@kbn/apm-plugin/common/trace_explorer';
@@ -58,13 +52,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  function fetchTraces(samples: Array<{ traceId: string; transactionId: string }>) {
-    if (!samples.length) {
+  function fetchTraces(traceSamples: Array<{ traceId: string; transactionId: string }>) {
+    if (!traceSamples.length) {
       return [];
     }
 
     return Promise.all(
-      samples.map(async ({ traceId }) => {
+      traceSamples.map(async ({ traceId, transactionId }) => {
         const response = await apmApiClient.readUser({
           endpoint: `GET /internal/apm/traces/{traceId}`,
           params: {
@@ -72,10 +66,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start: new Date(start).toISOString(),
               end: new Date(endWithOffset).toISOString(),
+              entryTransactionId: transactionId,
             },
           },
         });
-        return response.body.traceDocs;
+        return response.body.traceItems.traceDocs;
       })
     );
   }
@@ -90,7 +85,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       expect(response.status).to.be(200);
       expect(response.body).to.eql({
-        samples: [],
+        traceSamples: [],
       });
     });
   });
@@ -168,28 +163,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('and the query is empty', () => {
         it('returns all trace samples', async () => {
           const {
-            body: { samples },
+            body: { traceSamples },
           } = await fetchTraceSamples({
             query: '',
             type: TraceSearchType.kql,
             environment: 'ENVIRONMENT_ALL',
           });
 
-          expect(samples.length).to.eql(5);
+          expect(traceSamples.length).to.eql(5);
         });
       });
 
       describe('and query is set', () => {
         it('returns the relevant traces', async () => {
           const {
-            body: { samples },
+            body: { traceSamples },
           } = await fetchTraceSamples({
             query: 'span.destination.service.resource:elasticsearch',
             type: TraceSearchType.kql,
             environment: 'ENVIRONMENT_ALL',
           });
 
-          expect(samples.length).to.eql(1);
+          expect(traceSamples.length).to.eql(1);
         });
       });
     });
@@ -214,7 +209,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('and the query is set', () => {
         it('returns the correct trace samples for transaction sequences', async () => {
           const {
-            body: { samples },
+            body: { traceSamples },
           } = await fetchTraceSamples({
             query: `sequence by trace.id
                 [ transaction where service.name == "java" ]
@@ -223,7 +218,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             environment: 'ENVIRONMENT_ALL',
           });
 
-          const traces = await fetchTraces(samples);
+          const traces = await fetchTraces(traceSamples);
 
           expect(traces.length).to.eql(2);
 
@@ -242,7 +237,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the correct trace samples for join sequences', async () => {
         const {
-          body: { samples },
+          body: { traceSamples },
         } = await fetchTraceSamples({
           query: `sequence by trace.id
               [ span where service.name == "java" ] by span.id
@@ -251,7 +246,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment: 'ENVIRONMENT_ALL',
         });
 
-        const traces = await fetchTraces(samples);
+        const traces = await fetchTraces(traceSamples);
 
         expect(traces.length).to.eql(1);
 
@@ -262,37 +257,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(mapped).to.eql([['java', 'python', 'node']]);
-      });
-
-      it('returns the correct trace samples for exit spans', async () => {
-        const {
-          body: { samples },
-        } = await fetchTraceSamples({
-          query: `sequence by trace.id
-              [ transaction where service.name == "python" ]
-              [ span where span.destination.service.resource == "redis" ]`,
-          type: TraceSearchType.eql,
-          environment: 'ENVIRONMENT_ALL',
-        });
-
-        const traces = await fetchTraces(samples);
-
-        expect(traces.length).to.eql(1);
-
-        const mapped = traces.map((traceDocs) => {
-          return sortBy(traceDocs, '@timestamp')
-            .filter(
-              (doc) => doc.processor.event === 'transaction' || doc.processor.event === 'span'
-            )
-            .map((doc) => {
-              if (doc.span && 'destination' in doc.span) {
-                return doc.span.destination!.service.resource;
-              }
-              return doc.service.name;
-            });
-        });
-
-        expect(mapped).to.eql([['python', 'redis']]);
       });
     });
 

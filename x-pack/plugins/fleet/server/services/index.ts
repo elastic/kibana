@@ -62,3 +62,5 @@ export type { PackageService, PackageClient } from './epm';
 
 // Fleet server policy config
 export { migrateSettingsToFleetServerHost } from './fleet_server_host';
+
+export { FleetUsageSender } from './telemetry/fleet_usage_sender';

@@ -134,3 +134,5 @@ export const GaugeColorModes = {
   PALETTE: 'palette',
   NONE: 'none',
 } as const;
+
+export const CollapseFunctions = ['sum', 'avg', 'min', 'max'] as const;

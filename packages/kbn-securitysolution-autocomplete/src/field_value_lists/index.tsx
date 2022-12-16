@@ -11,6 +11,7 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } fr
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
 import { DataViewFieldBase } from '@kbn/es-query';
+import { getDocLinks } from '@kbn/doc-links';
 
 import { filterFieldToList } from '../filter_field_to_list';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
@@ -121,7 +122,11 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
       !allowLargeValueLists && (
         <EuiText size="xs">
           {i18n.LISTS_TOOLTIP_INFO}{' '}
-          <EuiLink external target="_blank" href="https://www.elastic.co/">
+          <EuiLink
+            external
+            target="_blank"
+            href={getDocLinks({ kibanaBranch: 'main' }).securitySolution.exceptions.value_lists}
+          >
             {i18n.SEE_DOCUMENTATION}
           </EuiLink>
         </EuiText>

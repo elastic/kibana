@@ -346,7 +346,7 @@ The actions framework exports the `registerSubActionConnectorType` to register s
 
 ```
 plugins.actions.registerSubActionConnectorType({
-  id: '.test-sub-action-connector',
+  id: 'test.sub-action-connector',
   name: 'Test: Sub action connector',
   minimumLicenseRequired: 'platinum' as const,
   schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
@@ -363,7 +363,7 @@ The sub actions framework allows custom validators during registration of the co
 
 ```typescript
 plugins.actions.registerSubActionConnectorType({
-  id: '.test-sub-action-connector',
+  id: 'test.sub-action-connector',
   name: 'Test: Sub action connector',
   minimumLicenseRequired: 'platinum' as const,
   schema: { config: TestConfigSchema, secrets: TestSecretsSchema },

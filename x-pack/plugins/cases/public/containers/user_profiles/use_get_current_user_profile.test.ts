@@ -8,7 +8,8 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useToasts, useKibana } from '../../common/lib/kibana';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import * as api from './api';
 import { useGetCurrentUserProfile } from './use_get_current_user_profile';
 

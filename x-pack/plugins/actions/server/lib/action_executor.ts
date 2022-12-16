@@ -105,12 +105,6 @@ export class ActionExecutor {
       throw new Error('ActionExecutor not initialized');
     }
 
-    if (!this.isESOCanEncrypt) {
-      throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-      );
-    }
-
     return withSpan(
       {
         name: `execute_action`,
@@ -121,7 +115,6 @@ export class ActionExecutor {
       },
       async (span) => {
         const {
-          logger,
           spaces,
           getServices,
           encryptedSavedObjectsClient,
@@ -136,14 +129,20 @@ export class ActionExecutor {
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
         const actionInfo = await getActionInfoInternal(
-          await getActionsClientWithRequest(request, source),
+          getActionsClientWithRequest,
+          request,
+          this.isESOCanEncrypt,
           encryptedSavedObjectsClient,
           preconfiguredActions,
           actionId,
-          namespace.namespace
+          namespace.namespace,
+          source
         );
 
         const { actionTypeId, name, config, secrets } = actionInfo;
+        const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
+        let { logger } = this.actionExecutorContext!;
+        logger = logger.get(loggerId);
 
         if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
           this.actionInfo = actionInfo;
@@ -228,6 +227,7 @@ export class ActionExecutor {
             isEphemeral,
             taskInfo,
             configurationUtilities,
+            logger,
           });
         } catch (err) {
           if (err.reason === ActionExecutionErrorReason.Validation) {
@@ -239,7 +239,7 @@ export class ActionExecutor {
               message: 'an error occurred while running the action',
               serviceMessage: err.message,
               error: err,
-              retry: false,
+              retry: true,
             };
           }
         }
@@ -318,11 +318,14 @@ export class ActionExecutor {
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
       this.actionInfo = await getActionInfoInternal(
-        await getActionsClientWithRequest(request, source),
+        getActionsClientWithRequest,
+        request,
+        this.isESOCanEncrypt,
         encryptedSavedObjectsClient,
         preconfiguredActions,
         actionId,
-        namespace.namespace
+        namespace.namespace,
+        source
       );
     }
     const task = taskInfo
@@ -368,12 +371,18 @@ interface ActionInfo {
   actionId: string;
 }
 
-async function getActionInfoInternal(
-  actionsClient: PublicMethodsOf<ActionsClient>,
+async function getActionInfoInternal<Source = unknown>(
+  getActionsClientWithRequest: (
+    request: KibanaRequest,
+    authorizationContext?: ActionExecutionSource<unknown>
+  ) => Promise<PublicMethodsOf<ActionsClient>>,
+  request: KibanaRequest,
+  isESOCanEncrypt: boolean,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string,
-  namespace: string | undefined
+  namespace: string | undefined,
+  source?: ActionExecutionSource<Source>
 ): Promise<ActionInfo> {
   // check to see if it's a pre-configured action first
   const pcAction = preconfiguredActions.find(
@@ -388,6 +397,14 @@ async function getActionInfoInternal(
       actionId,
     };
   }
+
+  if (!isESOCanEncrypt) {
+    throw new Error(
+      `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+    );
+  }
+
+  const actionsClient = await getActionsClientWithRequest(request, source);
 
   // if not pre-configured action, should be a saved object
   // ensure user can read the action before processing

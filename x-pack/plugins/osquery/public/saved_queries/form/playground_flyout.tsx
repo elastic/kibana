@@ -14,7 +14,7 @@ import { useFormContext } from 'react-hook-form';
 import { LiveQuery } from '../../live_queries';
 
 const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
-  &.euiFlyoutHeader.euiFlyoutHeader--hasBorder {
+  &.euiFlyoutHeader {
     padding-top: 21px;
     padding-bottom: 20px;
   }

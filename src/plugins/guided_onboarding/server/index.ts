@@ -9,10 +9,9 @@
 import { PluginInitializerContext } from '@kbn/core/server';
 import { GuidedOnboardingPlugin } from './plugin';
 
-export { config } from './config';
-
 export function plugin(initializerContext: PluginInitializerContext) {
   return new GuidedOnboardingPlugin(initializerContext);
 }
 
 export type { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
+export { testGuideConfig } from '../common/test_guide_config';

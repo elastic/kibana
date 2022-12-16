@@ -58,8 +58,10 @@ import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '.
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
+import type { LayerCellValueActions } from '../types';
 
 const onClickValue = jest.fn();
+const layerCellValueActions: LayerCellValueActions = [];
 const onSelectRange = jest.fn();
 
 describe('XYChart component', () => {
@@ -114,9 +116,11 @@ describe('XYChart component', () => {
       paletteService,
       minInterval: 50,
       onClickValue,
+      layerCellValueActions,
       onSelectRange,
       syncColors: false,
       syncTooltips: false,
+      syncCursor: true,
       useLegacyTimeAxis: false,
       eventAnnotationService: eventAnnotationServiceMock,
       renderComplete: jest.fn(),

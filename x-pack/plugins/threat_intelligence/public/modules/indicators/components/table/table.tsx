@@ -18,7 +18,10 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import {
+  EuiDataGridColumn,
+  EuiDataGridRowHeightsOptions,
+} from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { CellActions, cellPopoverRendererFactory, cellRendererFactory } from './components';
 import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
@@ -26,9 +29,9 @@ import { EmptyState } from '../../../../components/empty_state';
 import { IndicatorsTableContext, IndicatorsTableContextValue } from './contexts';
 import { IndicatorsFlyout } from '../flyout';
 import { ColumnSettingsValue, useToolbarOptions } from './hooks';
-import { useFieldTypes } from '../../../../hooks/use_field_types';
-import { getFieldSchema } from '../../utils/get_field_schema';
-import { Pagination } from '../../services/fetch_indicators';
+import { useFieldTypes } from '../../../../hooks';
+import { getFieldSchema } from '../../utils';
+import { Pagination } from '../../services';
 
 export interface IndicatorsTableProps {
   indicators: Indicator[];
@@ -94,7 +97,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     () => [
       {
         id: 'Actions',
-        width: 72,
+        width: 84,
         headerCellRender: () => (
           <FormattedMessage
             id="xpack.threatIntelligence.indicator.table.actionColumnLabel"
@@ -161,6 +164,10 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
       );
     }
 
+    const rowHeightsOptions: EuiDataGridRowHeightsOptions = {
+      lineHeight: '30px',
+    };
+
     if (!indicatorCount) {
       return <EmptyState />;
     }
@@ -194,6 +201,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
           sorting={sorting}
           columnVisibility={columnVisibility}
           columns={mappedColumns}
+          rowHeightsOptions={rowHeightsOptions}
         />
       </>
     );

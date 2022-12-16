@@ -18,8 +18,6 @@
  * random(-10,10) // returns a random number between -10 (inclusive) and 10 (exclusive)
  */
 
-module.exports = { random };
-
 function random(a, b) {
   if (a == null) return Math.random();
 
@@ -33,3 +31,5 @@ function random(a, b) {
   if (a > b) throw new Error(`Min is greater than max`);
   return Math.random() * (b - a) + a;
 }
+
+module.exports = { random };

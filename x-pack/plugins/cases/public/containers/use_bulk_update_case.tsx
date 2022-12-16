@@ -8,9 +8,9 @@
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import * as i18n from './translations';
 import { updateCases } from './api';
-import { CaseUpdateRequest } from './types';
+import type { CaseUpdateRequest } from './types';
 import { useCasesToast } from '../common/use_cases_toast';
-import { ServerError } from '../types';
+import type { ServerError } from '../types';
 import { casesQueriesKeys, casesMutationsKeys } from './constants';
 
 interface MutationArgs {
@@ -37,7 +37,7 @@ export const useUpdateCases = () => {
         showSuccessToast(successToasterTitle);
       },
       onError: (error: ServerError) => {
-        showErrorToast(error, { title: i18n.ERROR_DELETING });
+        showErrorToast(error, { title: i18n.ERROR_UPDATING });
       },
     }
   );

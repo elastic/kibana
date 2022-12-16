@@ -26,9 +26,11 @@ import { DocumentsLogic, DEFAULT_PAGINATION } from './documents_logic';
 import { IndexNameLogic } from './index_name_logic';
 
 import './documents.scss';
+import { IndexViewLogic } from './index_view_logic';
 
 export const SearchIndexDocuments: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
+  const { ingestionMethod } = useValues(IndexViewLogic);
   const { simplifiedMapping } = useValues(DocumentsLogic);
   const { makeRequest, makeMappingRequest, setSearchQuery } = useActions(DocumentsLogic);
 
@@ -58,6 +60,7 @@ export const SearchIndexDocuments: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFieldSearch
+                data-telemetry-id={`entSearchContent-${ingestionMethod}-documents-searchDocuments`}
                 placeholder={i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndex.documents.searchField.placeholder',
                   {

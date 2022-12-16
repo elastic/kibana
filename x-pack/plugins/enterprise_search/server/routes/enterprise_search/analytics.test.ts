@@ -7,13 +7,15 @@
 
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
+import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { RequestHandlerContext } from '@kbn/core/server';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 
 jest.mock('../../lib/analytics/fetch_analytics_collection', () => ({
-  fetchAnalyticsCollectionByName: jest.fn(),
+  fetchAnalyticsCollectionById: jest.fn(),
 }));
 import { AnalyticsCollection } from '../../../common/types/analytics';
-import { fetchAnalyticsCollectionByName } from '../../lib/analytics/fetch_analytics_collection';
+import { fetchAnalyticsCollectionById } from '../../lib/analytics/fetch_analytics_collection';
 
 import { registerAnalyticsRoutes } from './analytics';
 
@@ -29,27 +31,40 @@ describe('Enterprise Search Analytics API', () => {
     mockRouter = new MockRouter({
       context,
       method: 'get',
-      path: '/internal/enterprise_search/analytics/collections/{collection_name}',
+      path: '/internal/enterprise_search/analytics/collections/{id}',
     });
+
+    const mockDataPlugin = {
+      indexPatterns: {
+        dataViewsServiceFactory: jest.fn(),
+      },
+    };
+
+    const mockedSavedObjects = {
+      getScopedClient: jest.fn(),
+    };
 
     registerAnalyticsRoutes({
       ...mockDependencies,
+      data: mockDataPlugin as unknown as DataPluginStart,
+      savedObjects: mockedSavedObjects as unknown as SavedObjectsServiceStart,
       router: mockRouter.router,
     });
   });
 
-  describe('GET /internal/enterprise_search/analytics/collections/{collection_name}', () => {
+  describe('GET /internal/enterprise_search/analytics/collections/{id}', () => {
     it('fetches a defined analytics collection name', async () => {
       const mockData: AnalyticsCollection = {
         event_retention_day_length: 30,
+        events_datastream: 'logs-elastic_analytics.events-example',
         id: '1',
         name: 'my_collection',
       };
 
-      (fetchAnalyticsCollectionByName as jest.Mock).mockImplementationOnce(() => {
+      (fetchAnalyticsCollectionById as jest.Mock).mockImplementationOnce(() => {
         return Promise.resolve(mockData);
       });
-      await mockRouter.callRoute({ params: { collection_name: 'my_collection' } });
+      await mockRouter.callRoute({ params: { id: '1' } });
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: mockData,
@@ -57,11 +72,11 @@ describe('Enterprise Search Analytics API', () => {
     });
 
     it('throws a 404 error if data returns an empty obj', async () => {
-      (fetchAnalyticsCollectionByName as jest.Mock).mockImplementationOnce(() => {
+      (fetchAnalyticsCollectionById as jest.Mock).mockImplementationOnce(() => {
         return Promise.resolve(undefined);
       });
       await mockRouter.callRoute({
-        params: { collection_name: 'my_collection' },
+        params: { id: 'my_collection' },
       });
 
       expect(mockRouter.response.customError).toHaveBeenCalledWith({

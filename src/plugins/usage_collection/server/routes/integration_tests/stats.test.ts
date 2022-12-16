@@ -20,7 +20,7 @@ import {
   metricsServiceMock,
   executionContextServiceMock,
 } from '@kbn/core/server/mocks';
-import { createHttpServer } from '@kbn/core/server/test_utils';
+import { createHttpServer } from '@kbn/core-http-server-mocks';
 import { registerStatsRoute } from '../stats';
 import supertest from 'supertest';
 import { CollectorSet } from '../../collector';

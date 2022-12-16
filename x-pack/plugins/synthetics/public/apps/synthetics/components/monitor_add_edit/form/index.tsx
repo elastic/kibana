@@ -25,7 +25,7 @@ export const MonitorForm: React.FC<{ defaultValues?: SyntheticsMonitor; space?: 
     defaultValues:
       formatDefaultFormValues(defaultValues as SyntheticsMonitor) ||
       getDefaultFormFields(space)[FormMonitorType.MULTISTEP],
-    shouldFocusError: true,
+    shouldFocusError: false,
   });
 
   /* React hook form doesn't seem to register a field
