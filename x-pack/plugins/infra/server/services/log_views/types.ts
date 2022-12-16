@@ -30,7 +30,7 @@ export interface LogViewsServiceStartDeps {
 }
 
 export interface LogViewsServiceSetup {
-  defineInternalLogView(logViewId: string, logViewAttributes: LogViewAttributes): void;
+  defineInternalLogView(logViewId: string, logViewAttributes: Partial<LogViewAttributes>): void;
 }
 
 export interface LogViewsServiceStart {

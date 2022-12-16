@@ -66,12 +66,13 @@ export const logViewColumnConfigurationRT = rt.union([
 ]);
 export type LogViewColumnConfiguration = rt.TypeOf<typeof logViewColumnConfigurationRT>;
 
-export const logViewAttributesRT = rt.partial({
+export const logViewAttributesRT = rt.strict({
   name: rt.string,
   description: rt.string,
   logIndices: logIndexReferenceRT,
   logColumns: rt.array(logViewColumnConfigurationRT),
 });
+
 export type LogViewAttributes = rt.TypeOf<typeof logViewAttributesRT>;
 
 export const logViewRT = rt.exact(
