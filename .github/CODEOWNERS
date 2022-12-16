@@ -695,7 +695,7 @@ packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/analytics/shippers/gainsight @elastic/kibana-core
-packages/content-management/inspector @elastic/kibana-global-experience
+packages/content-management/content_editor @elastic/kibana-global-experience
 packages/content-management/table_list @elastic/kibana-global-experience
 packages/core/analytics/core-analytics-browser @elastic/kibana-core
 packages/core/analytics/core-analytics-browser-internal @elastic/kibana-core
@@ -907,6 +907,7 @@ packages/kbn-dev-utils @elastic/kibana-operations
 packages/kbn-doc-links @elastic/kibana-docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-ebt-tools @elastic/kibana-core
+packages/kbn-ecs @elastic/kibana-core
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations
 packages/kbn-es-errors @elastic/kibana-core
