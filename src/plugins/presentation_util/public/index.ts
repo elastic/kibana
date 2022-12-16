@@ -39,9 +39,9 @@ export {
 } from './components';
 
 export {
-  useReduxContainerContext,
   useReduxEmbeddableContext,
   lazyLoadReduxEmbeddablePackage,
+  cleanFiltersForSerialize,
   type ReduxEmbeddableState,
   type ReduxEmbeddableTools,
   type ReduxEmbeddablePackage,

@@ -99,3 +99,12 @@ export interface IUiSettingsClient {
    */
   getUpdateErrors$: () => Observable<Error>;
 }
+
+/** @public */
+export interface SettingsStart {
+  client: IUiSettingsClient;
+  globalClient: IUiSettingsClient;
+}
+
+/** @public */
+export type SettingsSetup = SettingsStart;
