@@ -29,15 +29,7 @@ export interface ClientConfigType {
 }
 
 export interface GuidedOnboardingApi {
-  setup: ({
-    httpClient,
-    isCloudEnabled,
-    isGuidedOnboardingUiEnabled,
-  }: {
-    httpClient: HttpSetup;
-    isCloudEnabled: boolean;
-    isGuidedOnboardingUiEnabled: boolean;
-  }) => void;
+  setup: (httpClient: HttpSetup, isCloudEnabled: boolean) => void;
   fetchPluginState$: () => Observable<PluginState | undefined>;
   fetchAllGuidesState: () => Promise<{ state: GuideState[] } | undefined>;
   updatePluginState: (

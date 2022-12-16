@@ -47,11 +47,7 @@ export class GuidedOnboardingPlugin
     const { ui: isGuidedOnboardingUiEnabled } = this.ctx.config.get<ClientConfigType>();
 
     // Initialize services
-    apiService.setup({
-      httpClient: http,
-      isCloudEnabled: !!cloud?.isCloudEnabled,
-      isGuidedOnboardingUiEnabled,
-    });
+    apiService.setup(http, !!cloud?.isCloudEnabled);
 
     // Guided onboarding UI is only available if enabled and the user is running on cloud
     if (isGuidedOnboardingUiEnabled && cloud?.isCloudEnabled) {
