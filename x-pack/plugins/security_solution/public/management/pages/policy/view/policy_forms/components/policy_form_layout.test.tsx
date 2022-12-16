@@ -343,6 +343,7 @@ describe('Policy Form Layout', () => {
       beforeEach(() => {
         const mockedPrivileges = getUserPrivilegesMockDefaultValue();
         mockedPrivileges.endpointPrivileges.canWritePolicyManagement = false;
+        mockedPrivileges.endpointPrivileges.canAccessFleet = false;
 
         useUserPrivilegesMock.mockReturnValue(mockedPrivileges);
 

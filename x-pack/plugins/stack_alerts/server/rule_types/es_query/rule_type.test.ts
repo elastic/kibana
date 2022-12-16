@@ -110,6 +110,8 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.LT,
         threshold: [0],
         searchType: 'esQuery',
+        aggType: 'count',
+        groupBy: 'all',
       };
 
       expect(ruleType.validate?.params?.validate(params)).toBeTruthy();
@@ -129,6 +131,8 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.BETWEEN,
         threshold: [0],
         searchType: 'esQuery',
+        aggType: 'count',
+        groupBy: 'all',
       };
 
       expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
@@ -144,10 +148,12 @@ describe('ruleType', () => {
         size: 100,
         timeWindowSize: 5,
         timeWindowUnit: 'm',
-        thresholdComparator: Comparator.BETWEEN,
+        thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -179,6 +185,8 @@ describe('ruleType', () => {
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -226,6 +234,8 @@ describe('ruleType', () => {
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -276,6 +286,8 @@ describe('ruleType', () => {
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -320,6 +332,8 @@ describe('ruleType', () => {
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -393,6 +407,8 @@ describe('ruleType', () => {
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -440,6 +456,8 @@ describe('ruleType', () => {
         threshold: [0],
         searchType: 'esQuery',
         excludeHitsFromPreviousRun: true,
+        aggType: 'count',
+        groupBy: 'all',
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -510,6 +528,8 @@ describe('ruleType', () => {
       searchConfiguration: {},
       searchType: 'searchSource',
       excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
     };
 
     afterAll(() => {
@@ -530,6 +550,8 @@ describe('ruleType', () => {
         threshold: [0],
         esQuery: '',
         searchType: 'searchSource',
+        aggType: 'count',
+        groupBy: 'all',
       };
 
       expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(

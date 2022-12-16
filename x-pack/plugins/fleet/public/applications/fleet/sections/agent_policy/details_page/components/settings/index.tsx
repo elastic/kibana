@@ -86,6 +86,8 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           // eslint-disable-next-line @typescript-eslint/naming-convention
           unenroll_timeout,
           // eslint-disable-next-line @typescript-eslint/naming-convention
+          inactivity_timeout,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           data_output_id,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           monitoring_output_id,
@@ -100,6 +102,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           namespace,
           monitoring_enabled,
           unenroll_timeout,
+          inactivity_timeout,
           data_output_id,
           monitoring_output_id,
           download_source_id,
@@ -145,6 +148,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
             'namespace',
             'monitoring_enabled',
             'unenroll_timeout',
+            'inactivity_timeout',
             'data_output_id',
             'monitoring_output_id',
             'download_source_id',
