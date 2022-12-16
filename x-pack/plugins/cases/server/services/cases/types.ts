@@ -22,9 +22,9 @@ export type ExternalServicesWithoutConnectorId = Omit<
 
 export enum ESCaseSeverity {
   LOW = 0,
-  MEDIUM = 1,
-  HIGH = 2,
-  CRITICAL = 3,
+  MEDIUM = 10,
+  HIGH = 20,
+  CRITICAL = 30,
 }
 
 /**
