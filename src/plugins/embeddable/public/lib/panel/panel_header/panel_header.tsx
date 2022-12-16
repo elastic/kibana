@@ -216,12 +216,14 @@ export function PanelHeader({
     );
   };
 
+  const titleClasses = classNames('embPanel__title', { 'embPanel--dragHandle': !isViewMode });
+
   return (
     <figcaption
       className={classes}
       data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
     >
-      <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
+      <h2 data-test-subj="dashboardPanelTitle" className={titleClasses}>
         <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
         {renderTitle()}
         {renderBadges(badges, embeddable)}
