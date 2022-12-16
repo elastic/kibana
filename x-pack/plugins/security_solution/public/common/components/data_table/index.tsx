@@ -299,45 +299,47 @@ export const DataTableComponent = React.memo<DataTableProps>(
 
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
-      !isEventRenderedView ? columnHeaders.map((header) => {
-          const buildAction = (dataTableCellAction: DataTableCellAction) =>
-            dataTableCellAction({
-              browserFields,
-              data: data.map((row) => row.data),
-              ecsData: data.map((row) => row.ecs),
-              header: columnHeaders.find((h) => h.id === header.id),
-              pageSize: pagination.pageSize,
-              scopeId: id,
-              closeCellPopover: dataGridRef.current?.closeCellPopover,
-            });
-          return {
-            ...header,
-            actions: {
-              ...header.actions,
-              additional: [
-                {
-                  iconType: 'cross',
-                  label: REMOVE_COLUMN,
-                  onClick: () => {
-                    dispatch(dataTableActions.removeColumn({ id, columnId: header.id }));
-                  },
-                  size: 'xs',
+        !isEventRenderedView
+          ? columnHeaders.map((header) => {
+              const buildAction = (dataTableCellAction: DataTableCellAction) =>
+                dataTableCellAction({
+                  browserFields,
+                  data: data.map((row) => row.data),
+                  ecsData: data.map((row) => row.ecs),
+                  header: columnHeaders.find((h) => h.id === header.id),
+                  pageSize: pagination.pageSize,
+                  scopeId: id,
+                  closeCellPopover: dataGridRef.current?.closeCellPopover,
+                });
+              return {
+                ...header,
+                actions: {
+                  ...header.actions,
+                  additional: [
+                    {
+                      iconType: 'cross',
+                      label: REMOVE_COLUMN,
+                      onClick: () => {
+                        dispatch(dataTableActions.removeColumn({ id, columnId: header.id }));
+                      },
+                      size: 'xs',
+                    },
+                  ],
                 },
-              ],
-            },
-            ...(hasCellActions({
-              columnId: header.id,
-              disabledCellActions,
+                ...(hasCellActions({
+                  columnId: header.id,
+                  disabledCellActions,
+                })
+                  ? {
+                      cellActions:
+                        header.dataTableCellActions?.map(buildAction) ??
+                        defaultCellActions?.map(buildAction),
+                      visibleCellActions: 3,
+                    }
+                  : {}),
+              };
             })
-              ? {
-                  cellActions:
-                    header.dataTableCellActions?.map(buildAction) ??
-                    defaultCellActions?.map(buildAction),
-                  visibleCellActions: 3,
-                }
-              : {}),
-          };
-        }) : columnHeaders,
+          : columnHeaders,
       [
         browserFields,
         columnHeaders,
