@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiToolTip } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
 import { SnapshotNodePath } from '../../../../../common/http_api';
@@ -34,11 +35,13 @@ export const CloudProviderIconWithTitle = ({
       responsive={false}
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon
-          type={(provider && cloudIcons[provider]) || cloudIcons.unknownProvider}
-          size="m"
-          title={text}
-        />
+        <EuiToolTip delay="long" content={provider ?? 'Unknown'}>
+          <EuiIcon
+            type={(provider && cloudIcons[provider]) || cloudIcons.unknownProvider}
+            size="m"
+            title={text}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-textTruncate">
         {title ?? (
