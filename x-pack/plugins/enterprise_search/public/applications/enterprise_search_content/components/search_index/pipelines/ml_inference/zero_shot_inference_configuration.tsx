@@ -45,17 +45,17 @@ export const ZeroShotClassificationInferenceConfiguration: React.FC = () => {
     });
   };
   const onCreateLabel = (labelValue: string, labels: LabelOptions = []) => {
-    const normalizedLabelValue = labelValue.trim().toLowerCase();
+    const normalizedLabelValue = labelValue.trim();
     if (!normalizedLabelValue) return;
 
-    const existingLabel = labels.find((label) => label.label === labelValue.trim());
+    const existingLabel = labels.find((label) => label.label === normalizedLabelValue);
     if (existingLabel) return;
     setInferencePipelineConfiguration({
       ...configuration,
       inferenceConfig: {
         zero_shot_classification: {
           ...(configuration?.inferenceConfig?.zero_shot_classification ?? {}),
-          labels: [...zeroShotLabels, labelValue.trim()],
+          labels: [...zeroShotLabels, normalizedLabelValue],
         },
       },
     });
