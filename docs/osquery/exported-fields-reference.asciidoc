@@ -5416,7 +5416,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *subsystem* - keyword, text.text
 
 * _system_controls.subsystem_ - Subsystem ID, control type
-* _unified_log.subsystem_ - the subsystem of the os_log_t used
+* _unified_log.subsystem_ - The subsystem of the os_log_t used
 
 *subsystem_model* - keyword, text.text
 
