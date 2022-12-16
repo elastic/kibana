@@ -4153,7 +4153,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _services.pid_ - the Process ID of the service
 * _shared_memory.pid_ - Process ID to last use the segment
 * _socket_events.pid_ - Process (or thread) ID
-* _unified_log.pid_ - the pid of the process that made the entry
+* _unified_log.pid_ - The pid of the process that made the entry
 * _user_events.pid_ - Process (or thread) ID
 * _windows_crashes.pid_ - Process ID of the crashed process
 * _windows_eventlog.pid_ - Process ID which emitted the event record
