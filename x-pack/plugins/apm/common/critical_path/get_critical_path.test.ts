@@ -12,17 +12,20 @@ import { getCriticalPath } from './get_critical_path';
 
 describe('getCriticalPath', () => {
   function getCriticalPathFromEvents(events: ApmFields[]) {
-    const waterfall = getWaterfall(
-      {
+    const entryTransaction = dedot(events[0]!, {}) as Transaction;
+    const waterfall = getWaterfall({
+      traceItems: {
         traceDocs: events.map(
           (event) => dedot(event, {}) as Transaction | Span
         ),
         errorDocs: [],
         exceedsMax: false,
-        linkedChildrenOfSpanCountBySpanId: {},
+        spanLinksCountById: {},
+        traceItemCount: events.length,
+        maxTraceItems: 1000,
       },
-      events[0]['transaction.id']!
-    );
+      entryTransaction,
+    });
 
     return {
       waterfall,

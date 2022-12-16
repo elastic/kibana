@@ -52,12 +52,8 @@ const TestComponent = (props: any) => (
 
 describe('SearchAndFilterBar', () => {
   beforeAll(() => {
-    ExperimentalFeaturesService.init({
-      createPackagePolicyMultiPageLayout: true,
-      packageVerification: true,
-      showDevtoolsRequest: false,
-      diagnosticFileUploadEnabled: false,
-    });
+    // @ts-ignore - prevents us needing to mock the entire service
+    ExperimentalFeaturesService.init({});
   });
   it('should show no Actions button when no agent is selected', async () => {
     const selectedAgents: Agent[] = [];

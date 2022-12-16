@@ -10,6 +10,6 @@ import { AlertStatus } from '@kbn/rule-data-utils';
 export interface AlertsSummaryWidgetUIProps {
   active: number;
   recovered: number;
-  timeRange: JSX.Element | string;
+  timeRangeTitle: JSX.Element | string;
   onClick: (status?: AlertStatus) => void;
 }
