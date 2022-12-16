@@ -11,7 +11,11 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { Datatable, ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
+import type {
+  Datatable,
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -50,16 +54,18 @@ const partitionVisRenderer = css({
 export const getColumnCellValueActions = async (
   visConfig: PartitionVisParams,
   visData: Datatable,
-  getCompatibleCellValueActions: GetCompatibleCellValueActions | undefined
+  getCompatibleCellValueActions?: IInterpreterRenderHandlers['getCompatibleCellValueActions']
 ) => {
   if (!Array.isArray(visConfig.dimensions.buckets) || !getCompatibleCellValueActions) {
     return [];
   }
   return Promise.all(
     visConfig.dimensions.buckets.reduce<Array<Promise<CellValueAction[]>>>((acc, accessor) => {
-      const column = getColumnByAccessor(accessor, visData.columns);
-      if (column) {
-        acc.push(getCompatibleCellValueActions([{ columnMeta: column.meta }]));
+      const columnMeta = getColumnByAccessor(accessor, visData.columns)?.meta;
+      if (columnMeta) {
+        acc.push(
+          (getCompatibleCellValueActions as GetCompatibleCellValueActions)([{ columnMeta }])
+        );
       }
       return acc;
     }, [])
@@ -84,12 +90,6 @@ export const getPartitionVisRenderer: (
       unmountComponentAtNode(domNode);
     });
 
-    const columnCellValueActions = await getColumnCellValueActions(
-      visConfig,
-      visData,
-      handlers.getCompatibleCellValueActions as GetCompatibleCellValueActions
-    );
-
     const renderComplete = () => {
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
@@ -106,7 +106,10 @@ export const getPartitionVisRenderer: (
       handlers.done();
     };
 
-    const palettesRegistry = await plugins.charts.palettes.getPalettes();
+    const [columnCellValueActions, palettesRegistry] = await Promise.all([
+      getColumnCellValueActions(visConfig, visData, handlers.getCompatibleCellValueActions),
+      plugins.charts.palettes.getPalettes(),
+    ]);
 
     render(
       <I18nProvider>

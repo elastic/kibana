@@ -58,7 +58,7 @@ import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '.
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
-import { LayerCellValueActions } from '../types';
+import type { LayerCellValueActions } from '../types';
 
 const onClickValue = jest.fn();
 const layerCellValueActions: LayerCellValueActions = [];

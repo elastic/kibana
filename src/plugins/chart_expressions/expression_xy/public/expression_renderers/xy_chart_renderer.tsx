@@ -18,7 +18,10 @@ import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import type {
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -162,7 +165,7 @@ const extractCounterEvents = (
  **/
 const getLayerCellValueActions = async (
   layers: CommonXYDataLayerConfig[],
-  getCompatibleCellValueActions?: GetCompatibleCellValueActions
+  getCompatibleCellValueActions?: IInterpreterRenderHandlers['getCompatibleCellValueActions']
 ) => {
   if (!layers || !getCompatibleCellValueActions) {
     return [];
@@ -174,7 +177,7 @@ const getLayerCellValueActions = async (
           const column = layer.table.columns.find(({ id }) => id === accessor);
           return { columnMeta: column?.meta };
         }) ?? [];
-      return getCompatibleCellValueActions(data);
+      return (getCompatibleCellValueActions as GetCompatibleCellValueActions)(data);
     })
   );
 };

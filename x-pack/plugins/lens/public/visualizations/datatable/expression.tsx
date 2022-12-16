@@ -29,7 +29,7 @@ import type {
 import type { FormatFactory } from '../../../common';
 import type { DatatableProps } from '../../../common/expressions';
 
-async function columnsFilterable(table: Datatable, handlers: IInterpreterRenderHandlers) {
+async function getColumnsFilterable(table: Datatable, handlers: IInterpreterRenderHandlers) {
   if (!table.rows.length) {
     return;
   }
@@ -58,7 +58,7 @@ async function columnsFilterable(table: Datatable, handlers: IInterpreterRenderH
  **/
 export async function getColumnCellValueActions(
   config: DatatableProps,
-  getCompatibleCellValueActions: GetCompatibleCellValueActions | undefined
+  getCompatibleCellValueActions?: ILensInterpreterRenderHandlers['getCompatibleCellValueActions']
 ): Promise<LensCellValueAction[][]> {
   if (!config.data || !getCompatibleCellValueActions) {
     return [];
@@ -66,7 +66,7 @@ export async function getColumnCellValueActions(
   return Promise.all(
     config.data.columns.map(({ meta: columnMeta }) => {
       try {
-        return getCompatibleCellValueActions([{ columnMeta }]);
+        return (getCompatibleCellValueActions as GetCompatibleCellValueActions)([{ columnMeta }]);
       } catch {
         return [];
       }
@@ -129,10 +129,10 @@ export const getDatatableRenderer = (dependencies: {
       }
     }
 
-    const columnCellValueActions = await getColumnCellValueActions(
-      config,
-      getCompatibleCellValueActions as GetCompatibleCellValueActions | undefined
-    );
+    const [columnCellValueActions, columnsFilterable] = await Promise.all([
+      getColumnCellValueActions(config, getCompatibleCellValueActions),
+      getColumnsFilterable(config.data, handlers),
+    ]);
 
     ReactDOM.render(
       <KibanaThemeProvider theme$={dependencies.theme.theme$}>
@@ -146,7 +146,7 @@ export const getDatatableRenderer = (dependencies: {
             getType={resolvedGetType}
             rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
             columnCellValueActions={columnCellValueActions}
-            columnFilterable={await columnsFilterable(config.data, handlers)}
+            columnFilterable={columnsFilterable}
             interactive={isInteractive()}
             uiSettings={dependencies.uiSettings}
             renderComplete={renderComplete}
