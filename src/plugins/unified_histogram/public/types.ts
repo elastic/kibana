@@ -15,7 +15,6 @@ import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Subject } from 'rxjs';
-import type { UnifiedMessage } from './messaging';
 
 /**
  * The fetch status of a unified histogram request
@@ -119,7 +118,7 @@ export interface UnifiedHistogramBreakdownContext {
 /**
  * Message to refetch the chart and total hits
  */
-export interface UnifiedHistogramRefetchMessage extends UnifiedMessage {
+export interface UnifiedHistogramRefetchMessage {
   type: 'refetch';
 }
 
