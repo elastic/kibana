@@ -11,8 +11,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 
@@ -68,26 +68,32 @@ export const SubFeatureForm = (props: Props) => {
   return (
     <>
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem className="eui-textTruncate eui-fullWidth">
+          <EuiFlexGroup gutterSize="s" direction="column">
             <EuiFlexItem grow={false}>
               <EuiText size="s">{props.subFeature.name}</EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {props.subFeature.description && (
-                <EuiIconTip type="iInCircle" content={props.subFeature.description} />
-              )}
-            </EuiFlexItem>
+            {props.subFeature.description && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={props.subFeature.description}
+                  anchorClassName="eui-textTruncate"
+                >
+                  <EuiText
+                    color={'subdued'}
+                    size={'xs'}
+                    className="eui-textTruncate eui-fullWidth"
+                    data-test-subj="subFeatureDescription"
+                  >
+                    {props.subFeature.description}
+                  </EuiText>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
-          {props.subFeature.description && (
-            <EuiText color={'subdued'} size={'xs'}>
-              {props.subFeature.description}
-            </EuiText>
-          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
       </EuiFlexGroup>
-      {props.subFeature.description && <EuiSpacer size="s" />}
     </>
   );
 
