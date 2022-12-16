@@ -12,7 +12,7 @@ import useLifecycles from 'react-use/lib/useLifecycles';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import { compareFilters } from '@kbn/es-query';
 
@@ -105,7 +105,7 @@ export const ControlGroupRenderer = ({
 };
 
 export const useControlGroupContainerContext = () =>
-  useReduxContainerContext<ControlGroupReduxState, typeof controlGroupReducers>();
+  useReduxEmbeddableContext<ControlGroupReduxState, typeof controlGroupReducers>();
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export

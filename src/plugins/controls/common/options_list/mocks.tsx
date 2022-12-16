@@ -26,14 +26,13 @@ const mockOptionsListComponentState = {
   validSelections: [],
 } as OptionsListComponentState;
 
-const mockOptionsListEmbeddableInput = {
+export const mockOptionsListEmbeddableInput = {
   id: 'sample options list',
   fieldName: 'sample field',
   dataViewId: 'sample id',
   selectedOptions: [],
   runPastTimeout: false,
   singleSelect: false,
-  allowExclude: false,
   exclude: false,
 } as OptionsListEmbeddableInput;
 

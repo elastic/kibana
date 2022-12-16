@@ -9,6 +9,8 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RouteConfig } from '@kbn/core/server';
 
+import type { FleetAuthzRouter } from '../../services/security';
+
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
 import { appContextService, packagePolicyService } from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
@@ -22,7 +24,6 @@ import type {
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
 } from '../../types/rest_spec';
-import type { FleetAuthzRouter } from '../security';
 import type { FleetRequestHandler } from '../../types';
 import type { PackagePolicy } from '../../types';
 
