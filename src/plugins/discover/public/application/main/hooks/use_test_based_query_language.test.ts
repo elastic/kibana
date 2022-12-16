@@ -8,6 +8,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
+import { DataViewsContract } from '@kbn/data-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { AppState, GetStateReturn } from '../services/discover_state';
@@ -22,7 +23,8 @@ import { savedSearchMock } from '../../../__mocks__/saved_search';
 
 function getHookProps(
   replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>,
-  query: AggregateQuery | Query | undefined
+  query: AggregateQuery | Query | undefined,
+  dataViewsService?: DataViewsContract
 ) {
   const stateContainer = {
     replaceUrlAppState,
@@ -43,7 +45,7 @@ function getHookProps(
 
   return {
     documents$,
-    dataViews: discoverServiceMock.dataViews,
+    dataViews: dataViewsService ?? discoverServiceMock.dataViews,
     stateContainer,
     dataViewList: [dataViewMock as DataViewListItem],
     savedSearch: savedSearchMock,
@@ -319,7 +321,15 @@ describe('useTextBasedQueryLanguage', () => {
 
   test('changing a text based query with a dataview that not exists should return results', async () => {
     const replaceUrlAppState = jest.fn();
-    const props = getHookProps(replaceUrlAppState, query);
+    const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
+    dataViewsCreateMock.mockImplementation(() => ({
+      ...dataViewMock,
+    }));
+    const dataViewsService = {
+      ...discoverServiceMock.dataViews,
+      create: dataViewsCreateMock,
+    };
+    const props = getHookProps(replaceUrlAppState, query, dataViewsService);
     const { documents$ } = props;
 
     renderHook(() => useTextBasedQueryLanguage(props));

@@ -51,19 +51,15 @@ export const useAdHocDataViews = ({
 
   useEffect(() => {
     const isTextBasedMode = query && isOfAggregateQueryType(query);
-    if (!dataView.isPersisted() && !isTextBasedMode) {
+    if (!dataView.isPersisted()) {
       setAdHocDataViewList((prev) => {
         const existing = prev.find((prevDataView) => prevDataView.id === dataView.id);
-        return existing ? prev : [...prev, dataView];
+        return existing ? prev : isTextBasedMode ? [dataView] : [...prev, dataView];
       });
-      trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
-    }
-
-    if (!dataView.isPersisted() && isTextBasedMode) {
-      setAdHocDataViewList((prev) => {
-        const existing = prev.find((prevDataView) => prevDataView.id === dataView.id);
-        return existing ? prev : [dataView];
-      });
+      // increase the counter only for dataview mode
+      if (!isTextBasedMode) {
+        trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
+      }
     }
   }, [dataView, query, trackUiMetric]);
 
