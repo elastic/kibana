@@ -19,7 +19,7 @@ interface CommonProps {
   policyId: string;
   policyName: string;
   labels: typeof POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS;
-  externalPrivileges?: boolean;
+  canWriteArtifact?: boolean;
   getPolicyArtifactsPath: (policyId: string) => string;
   getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
 }
@@ -29,7 +29,7 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
     policyId,
     policyName,
     labels,
-    externalPrivileges = false,
+    canWriteArtifact = false,
     getPolicyArtifactsPath,
     getArtifactPath,
   }) => {
@@ -50,7 +50,7 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
           title={<h2>{labels.emptyUnexistingTitle}</h2>}
           body={labels.emptyUnexistingMessage}
           actions={
-            externalPrivileges ? (
+            canWriteArtifact ? (
               // eslint-disable-next-line @elastic/eui/href-or-on-click
               <EuiButton
                 color="primary"

@@ -22,7 +22,7 @@ interface CommonProps {
   policyName: string;
   listId: string;
   labels: typeof POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS;
-  externalPrivileges?: boolean;
+  canWriteArtifact?: boolean;
   getPolicyArtifactsPath: (policyId: string) => string;
   getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
 }
@@ -33,7 +33,7 @@ export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
     policyName,
     listId,
     labels,
-    externalPrivileges = false,
+    canWriteArtifact = false,
     getPolicyArtifactsPath,
     getArtifactPath,
   }) => {
@@ -60,12 +60,12 @@ export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
           data-test-subj="policy-artifacts-empty-unassigned"
           title={<h2>{labels.emptyUnassignedTitle}</h2>}
           body={
-            externalPrivileges
+            canWriteArtifact
               ? labels.emptyUnassignedMessage(policyName)
               : labels.emptyUnassignedNoPrivilegesMessage(policyName)
           }
           actions={[
-            ...(canCreateArtifactsByPolicy && externalPrivileges
+            ...(canCreateArtifactsByPolicy && canWriteArtifact
               ? [
                   <EuiButton
                     color="primary"
@@ -77,7 +77,7 @@ export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
                   </EuiButton>,
                 ]
               : []),
-            externalPrivileges ? (
+            canWriteArtifact ? (
               // eslint-disable-next-line @elastic/eui/href-or-on-click
               <EuiLink
                 onClick={onClickHandler}

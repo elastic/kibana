@@ -28,7 +28,7 @@ import { useUserPrivileges } from '../../../../../../common/components/user_priv
 
 jest.mock('../../../../../../common/components/user_privileges');
 
-let render: (externalPrivileges?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
+let render: (canWriteArtifact?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
 let mockedContext: AppContextTestRender;
 let renderResult: ReturnType<AppContextTestRender['render']>;
 let policyItem: ImmutableObject<PolicyData>;
@@ -61,7 +61,7 @@ describe('Policy artifacts layout', () => {
         canCreateArtifactsByPolicy: true,
       },
     });
-    render = async (externalPrivileges = true) => {
+    render = async (canWriteArtifact = true) => {
       await act(async () => {
         renderResult = mockedContext.render(
           <PolicyArtifactsLayout
@@ -73,7 +73,7 @@ describe('Policy artifacts layout', () => {
             searchableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
             getArtifactPath={getEventFiltersListPath}
             getPolicyArtifactsPath={getPolicyEventFiltersPath}
-            externalPrivileges={externalPrivileges}
+            canWriteArtifact={canWriteArtifact}
           />
         );
         await waitFor(mockedApi.responseProvider.eventFiltersList);

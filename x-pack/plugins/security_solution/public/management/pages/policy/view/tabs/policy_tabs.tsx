@@ -218,7 +218,7 @@ export const PolicyTabs = React.memo(() => {
                   searchableFields={TRUSTED_APPS_SEARCHABLE_FIELDS}
                   getArtifactPath={getTrustedAppsListPath}
                   getPolicyArtifactsPath={getPolicyDetailsArtifactsListPath}
-                  externalPrivileges={canWriteTrustedApplications}
+                  canWriteArtifact={canWriteTrustedApplications}
                 />
               </>
             ),
@@ -243,7 +243,7 @@ export const PolicyTabs = React.memo(() => {
                   searchableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
                   getArtifactPath={getEventFiltersListPath}
                   getPolicyArtifactsPath={getPolicyEventFiltersPath}
-                  externalPrivileges={canWriteEventFilters}
+                  canWriteArtifact={canWriteEventFilters}
                 />
               </>
             ),
@@ -268,7 +268,7 @@ export const PolicyTabs = React.memo(() => {
                   searchableFields={HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS}
                   getArtifactPath={getHostIsolationExceptionsListPath}
                   getPolicyArtifactsPath={getPolicyHostIsolationExceptionsPath}
-                  externalPrivileges={canWriteHostIsolationExceptions}
+                  canWriteArtifact={canWriteHostIsolationExceptions}
                 />
               </>
             ),
@@ -290,7 +290,7 @@ export const PolicyTabs = React.memo(() => {
                   searchableFields={BLOCKLISTS_SEARCHABLE_FIELDS}
                   getArtifactPath={getBlocklistsListPath}
                   getPolicyArtifactsPath={getPolicyBlocklistsPath}
-                  externalPrivileges={canWriteBlocklist}
+                  canWriteArtifact={canWriteBlocklist}
                 />
               </>
             ),
