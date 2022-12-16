@@ -351,6 +351,7 @@ export const createLifecycleExecutor =
             : { index: { _id: event[ALERT_UUID]! } },
           event,
         ]),
+        refresh: 'wait_for',
       });
     } else {
       logger.debug(

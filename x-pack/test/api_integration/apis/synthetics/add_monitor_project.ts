@@ -15,10 +15,8 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import {
-  comparePolicies,
-  getTestProjectSyntheticsPolicy,
-} from '../uptime/rest/sample_data/test_policy';
+import { comparePolicies } from './sample_data/test_policy';
+import { getTestProjectSyntheticsPolicy } from './sample_data/test_project_monitor_policy';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddProjectMonitors', function () {
@@ -74,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.10.3')
+        .post('/api/fleet/epm/packages/synthetics/0.11.4')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -1024,6 +1022,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationName: 'Test private location 0',
           })
         );
       } finally {
@@ -1146,6 +1145,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationName: 'Test private location 0',
           })
         );
 
@@ -1226,6 +1226,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationName: 'Test private location 0',
           })
         );
 
@@ -1262,6 +1263,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: id2,
             configId: configId2,
             projectId: project,
+            locationName: 'Test private location 0',
           })
         );
       } finally {

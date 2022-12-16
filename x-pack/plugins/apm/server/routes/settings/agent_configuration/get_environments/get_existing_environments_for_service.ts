@@ -11,6 +11,7 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 import { APMInternalESClient } from '../../../../lib/helpers/create_es_client/create_internal_es_client';
+import { APM_AGENT_CONFIGURATION_INDEX } from '../../apm_indices/get_apm_indices';
 
 export async function getExistingEnvironmentsForService({
   serviceName,
@@ -26,7 +27,7 @@ export async function getExistingEnvironmentsForService({
     : { must_not: [{ exists: { field: SERVICE_NAME } }] };
 
   const params = {
-    index: internalESClient.apmIndices.apmAgentConfigurationIndex,
+    index: APM_AGENT_CONFIGURATION_INDEX,
     body: {
       size: 0,
       query: { bool },
