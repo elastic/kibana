@@ -118,13 +118,12 @@ export async function fetchKibanaNodeRules(
       break;
     }
 
-      const stat = {
-        failures: get(indices, 'executions[0]', 0),
-        executions: get(indices, 'executions[0]', 0),
-        clusterUuid: clusterBucket.key,
-      };
-      stats.push(stat);
-
+    const stat = {
+      failures: get(indices, 'executions[0]', 0),
+      executions: get(indices, 'executions[0]', 0),
+      clusterUuid: clusterBucket.key,
+    };
+    stats.push(stat);
   }
   return stats;
 }
