@@ -146,6 +146,9 @@ export const ruleRegistrySearchStrategyProvider = (
         map((response) => {
           // Do we have to loop over each hit? Yes.
           // ecs auditLogger requires that we log each alert independently
+          //
+          //
+          logger.debug(JSON.stringify({ RuleStrategy: response }));
           if (securityAuditLogger != null) {
             response.rawResponse.hits?.hits?.forEach((hit) => {
               securityAuditLogger.log(

@@ -22,6 +22,7 @@ import {
 import { ENHANCED_ES_SEARCH_STRATEGY, ISearchOptions } from '@kbn/data-plugin/common';
 import { AuditLogger, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { AlertAuditAction, alertAuditEvent } from '@kbn/rule-registry-plugin/server';
+import { Logger } from '@kbn/logging';
 import {
   TimelineFactoryQueryTypes,
   TimelineStrategyResponseType,
@@ -35,7 +36,8 @@ import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_
 export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart,
   alerting: AlertingPluginStartContract,
-  security?: SecurityPluginSetup
+  security?: SecurityPluginSetup,
+  logger: Logger
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
   const esAsInternal = data.search.searchAsInternalUser;
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
@@ -70,7 +72,7 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
           queryFactory,
         });
       } else {
-        return timelineSearchStrategy({ es, request, options, deps, queryFactory });
+        return timelineSearchStrategy({ es, request, options, deps, queryFactory, logger });
       }
     },
     cancel: async (id, options, deps) => {
@@ -87,16 +89,30 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   options,
   deps,
   queryFactory,
+  logger,
 }: {
   es: ISearchStrategy;
   request: TimelineStrategyRequestType<T>;
   options: ISearchOptions;
   deps: SearchStrategyDependencies;
   queryFactory: TimelineFactory<T>;
+  logger: Logger;
 }) => {
   const dsl = queryFactory.buildDsl(request);
   return es.search({ ...request, params: dsl }, options, deps).pipe(
     map((response) => {
+      logger.debug(
+        JSON.stringify({
+          timelineSearch: {
+            _source: dsl._source,
+            request,
+            dsl,
+            ...response,
+            rawResponse: shimHitsTotal(response.rawResponse, options),
+          },
+        })
+      );
+
       return {
         ...response,
         rawResponse: shimHitsTotal(response.rawResponse, options),
@@ -163,6 +179,8 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
           );
         });
       }
+
+      logger.debug({ rawResponse });
 
       return {
         ...response,
