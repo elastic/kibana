@@ -95,6 +95,14 @@ export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLi
 }
 
 /** @public */
+export interface ChromeGlobalHelpExtensionMenuLink extends ChromeHelpExtensionMenuCustomLink {
+  /**
+   * Highest priority items are listed at the top of the list of links.
+   */
+  priority: number;
+}
+
+/** @public */
 export type ChromeHelpExtensionMenuLink =
   | ChromeHelpExtensionMenuGitHubLink
   | ChromeHelpExtensionMenuDiscussLink

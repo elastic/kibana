@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { noop, startsWith, endsWith } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiComboBox,
-  EuiFieldText,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -32,6 +32,8 @@ import {
   operatorLabels,
   selectionsAreValid,
 } from './helpers';
+
+import { ControlledComboboxInput, ControlledDefaultInput } from './components';
 
 import * as i18n from './translations';
 
@@ -55,12 +57,9 @@ interface Props {
   operator: QueryOperator;
   providerId: string;
   timelineId: string;
-  value: string | number;
+  value: string | number | Array<string | number>;
   type?: DataProviderType;
 }
-
-const sanatizeValue = (value: string | number): string =>
-  Array.isArray(value) ? `${value[0]}` : `${value}`; // fun fact: value should never be an array
 
 export const getInitialOperatorLabel = (
   isExcluded: boolean,
@@ -68,6 +67,8 @@ export const getInitialOperatorLabel = (
 ): EuiComboBoxOptionOption[] => {
   if (operator === ':') {
     return isExcluded ? [{ label: i18n.IS_NOT }] : [{ label: i18n.IS }];
+  } else if (operator === 'includes') {
+    return isExcluded ? [{ label: i18n.IS_NOT_ONE_OF }] : [{ label: i18n.IS_ONE_OF }];
   } else {
     return isExcluded ? [{ label: i18n.DOES_NOT_EXIST }] : [{ label: i18n.EXISTS }];
   }
@@ -90,7 +91,33 @@ export const StatefulEditDataProvider = React.memo<Props>(
     const [updatedOperator, setUpdatedOperator] = useState<EuiComboBoxOptionOption[]>(
       getInitialOperatorLabel(isExcluded, operator)
     );
-    const [updatedValue, setUpdatedValue] = useState<string | number>(value);
+
+    const [updatedValue, setUpdatedValue] = useState<string | number | Array<string | number>>(
+      value
+    );
+
+    const showComboBoxInput = useMemo(
+      () =>
+        updatedOperator.length > 0 &&
+        (updatedOperator[0].label === i18n.IS_ONE_OF ||
+          updatedOperator[0].label === i18n.IS_NOT_ONE_OF),
+      [updatedOperator]
+    );
+
+    const showValueInput = useMemo(
+      () =>
+        type !== DataProviderType.template &&
+        updatedOperator.length > 0 &&
+        updatedOperator[0].label !== i18n.EXISTS &&
+        updatedOperator[0].label !== i18n.DOES_NOT_EXIST &&
+        !showComboBoxInput,
+      [showComboBoxInput, type, updatedOperator]
+    );
+
+    const disableSave = useMemo(
+      () => showComboBoxInput && Array.isArray(updatedValue) && !updatedValue.length,
+      [showComboBoxInput, updatedValue]
+    );
 
     /** Focuses the Value input if it is visible, falling back to the Save button if it's not */
     const focusInput = () => {
@@ -126,8 +153,8 @@ export const StatefulEditDataProvider = React.memo<Props>(
       focusInput();
     }, []);
 
-    const onValueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      setUpdatedValue(e.target.value);
+    const onValueChange = useCallback((changedValue: string | number | string[]) => {
+      setUpdatedValue(changedValue);
     }, []);
 
     const disableScrolling = () => {
@@ -169,14 +196,6 @@ export const StatefulEditDataProvider = React.memo<Props>(
       updatedValue,
       type,
     ]);
-
-    const isValueFieldInvalid = useMemo(
-      () =>
-        type !== DataProviderType.template &&
-        (startsWith('{', sanatizeValue(updatedValue)) ||
-          endsWith('}', sanatizeValue(updatedValue))),
-      [type, updatedValue]
-    );
 
     useEffect(() => {
       disableScrolling();
@@ -224,22 +243,6 @@ export const StatefulEditDataProvider = React.memo<Props>(
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-              {type !== DataProviderType.template &&
-              updatedOperator.length > 0 &&
-              updatedOperator[0].label !== i18n.EXISTS &&
-              updatedOperator[0].label !== i18n.DOES_NOT_EXIST ? (
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow label={i18n.VALUE_LABEL}>
-                    <EuiFieldText
-                      className={VALUE_INPUT_CLASS_NAME}
-                      onChange={onValueChange}
-                      placeholder={i18n.VALUE}
-                      value={sanatizeValue(updatedValue)}
-                      isInvalid={isValueFieldInvalid}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              ) : null}
             </EuiFlexGroup>
           </EuiFlexItem>
 
@@ -248,6 +251,35 @@ export const StatefulEditDataProvider = React.memo<Props>(
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
+            {showValueInput && (
+              <EuiFormRow label={i18n.VALUE_LABEL}>
+                <ControlledDefaultInput onChangeCallback={onValueChange} value={value} />
+              </EuiFormRow>
+            )}
+
+            {showComboBoxInput && type !== DataProviderType.template && (
+              <EuiFormRow label={i18n.VALUE_LABEL}>
+                <ControlledComboboxInput onChangeCallback={onValueChange} value={value} />
+              </EuiFormRow>
+            )}
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            {type === DataProviderType.template && showComboBoxInput && (
+              <>
+                <EuiCallOut
+                  color="warning"
+                  iconType="alert"
+                  size="s"
+                  title={i18n.UNAVAILABLE_OPERATOR(updatedOperator[0].label)}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -257,10 +289,11 @@ export const StatefulEditDataProvider = React.memo<Props>(
                   fill={true}
                   isDisabled={
                     !selectionsAreValid({
+                      type,
                       browserFields,
                       selectedField: updatedField,
                       selectedOperator: updatedOperator,
-                    }) || isValueFieldInvalid
+                    }) || disableSave
                   }
                   onClick={handleSave}
                   size="m"

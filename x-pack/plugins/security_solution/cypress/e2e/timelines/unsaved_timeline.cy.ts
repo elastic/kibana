@@ -31,7 +31,7 @@ import {
   populateTimeline,
   waitForTimelineChanges,
 } from '../../tasks/timeline';
-import { HOSTS_URL } from '../../urls/navigation';
+import { HOSTS_URL, MANAGE_URL } from '../../urls/navigation';
 
 describe('Save Timeline Prompts', () => {
   before(() => {
@@ -129,7 +129,7 @@ describe('Save Timeline Prompts', () => {
     cy.url().should('not.contain', HOSTS_URL);
   });
 
-  it('When user navigates to the page where timeline is present, Time save modal shold not exists.', () => {
+  it('When user navigates to the page where timeline is present, Time save modal should not exists.', () => {
     populateTimeline();
     waitForTimelineChanges();
     closeTimelineUsingToggle();
@@ -144,5 +144,23 @@ describe('Save Timeline Prompts', () => {
     openKibanaNavigation();
     cy.get(ALERTS_PAGE).click();
     cy.get(TIMELINE_SAVE_MODAL).should('not.exist');
+  });
+
+  it('Changed and unsaved timeline should NOT prompt when user navigates from the page where timeline is disabled', () => {
+    populateTimeline();
+    waitForTimelineChanges();
+    closeTimelineUsingToggle();
+    openKibanaNavigation();
+    cy.get(MANAGE_PAGE).click();
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
+    cy.get(MODAL_CONFIRMATION_BTN).click();
+    // now we have come from MANAGE_PAGE where timeline is disabled
+    // to outside app where timeline is not present.
+    // There should be NO confirmation model in that case.
+    openKibanaNavigation();
+    navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
+    // should not be manage page i.e. successfull navigation
+    cy.get(TIMELINE_SAVE_MODAL).should('not.exist');
+    cy.url().should('not.contain', MANAGE_URL);
   });
 });

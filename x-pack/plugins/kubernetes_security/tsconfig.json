@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     // add all the folders containg files to be compiled
@@ -17,7 +16,7 @@
     "storybook/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     // add references to other TypeScript projects the plugin depends on
 

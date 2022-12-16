@@ -13,6 +13,7 @@ import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import {
   Datasource,
   DatasourceLayers,
@@ -29,7 +30,7 @@ import {
 import { buildExpression } from './expression_helpers';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import { Document } from '../../persistence/saved_object_store';
-import { getActiveDatasourceIdFromDoc } from '../../utils';
+import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
 import type { ErrorMessage } from '../types';
 import {
   getMissingCurrentDatasource,
@@ -81,6 +82,20 @@ const getLastUsedIndexPatternId = (
   return indexPattern && indexPatternRefs.find((i) => i.id === indexPattern)?.id;
 };
 
+const getRefsForAdHocDataViewsFromContext = (
+  indexPatternRefs: IndexPatternRef[],
+  usedIndexPatternsIds: string[],
+  indexPatterns: Record<string, IndexPattern>
+) => {
+  const indexPatternIds = indexPatternRefs.map(({ id }) => id);
+  const adHocDataViewsIds = usedIndexPatternsIds.filter((id) => !indexPatternIds.includes(id));
+
+  const adHocDataViewsList = Object.values(indexPatterns).filter(({ id }) =>
+    adHocDataViewsIds.includes(id)
+  );
+  return adHocDataViewsList.map(({ id, title, name }) => ({ id, title, name }));
+};
+
 export async function initializeDataViews(
   {
     dataViews,
@@ -110,10 +125,10 @@ export async function initializeDataViews(
     })
   );
   const { isFullEditor } = options ?? {};
-  const contextDataViewSpec = (initialContext as VisualizeFieldContext)?.dataViewSpec;
+
   // make it explicit or TS will infer never[] and break few lines down
   const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
-    ? loadIndexPatternRefs(dataViews, adHocDataViews, contextDataViewSpec)
+    ? loadIndexPatternRefs(dataViews)
     : []);
 
   // if no state is available, use the fallbackId
@@ -127,7 +142,7 @@ export async function initializeDataViews(
 
   const adHocDataviewsIds: string[] = Object.keys(adHocDataViews || {});
 
-  const usedIndexPatterns = getIndexPatterns(
+  const usedIndexPatternsIds = getIndexPatterns(
     references,
     initialContext,
     initialId,
@@ -137,17 +152,25 @@ export async function initializeDataViews(
   // load them
   const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
 
-  const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedIndexPatterns);
+  const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedIndexPatternsIds);
 
   const indexPatterns = await loadIndexPatterns({
     dataViews,
-    patterns: usedIndexPatterns,
+    patterns: usedIndexPatternsIds,
     notUsedPatterns,
     cache: {},
     adHocDataViews,
   });
 
-  return { indexPatternRefs, indexPatterns };
+  const adHocDataViewsRefs = getRefsForAdHocDataViewsFromContext(
+    indexPatternRefs,
+    usedIndexPatternsIds,
+    indexPatterns
+  );
+  return {
+    indexPatternRefs: sortDataViewRefs([...indexPatternRefs, ...adHocDataViewsRefs]),
+    indexPatterns,
+  };
 }
 
 /**
@@ -299,6 +322,7 @@ export async function persistedStateToExpression(
     uiSettings: IUiSettingsClient;
     storage: IStorageWrapper;
     dataViews: DataViewsContract;
+    timefilter: TimefilterContract;
   }
 ): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
   const {
@@ -390,6 +414,7 @@ export async function persistedStateToExpression(
     visualizationState,
     { datasourceLayers, dataViews: { indexPatterns } as DataViewsState }
   );
+  const currentTimeRange = services.timefilter.getAbsoluteTime();
 
   return {
     ast: buildExpression({
@@ -401,6 +426,7 @@ export async function persistedStateToExpression(
       datasourceStates,
       datasourceLayers,
       indexPatterns,
+      dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
     }),
     errors: validationResult,
   };

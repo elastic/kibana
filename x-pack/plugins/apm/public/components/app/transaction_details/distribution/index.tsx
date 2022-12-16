@@ -7,52 +7,52 @@
 
 import { XYBrushEvent } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
-import type { TabContentProps } from '../types';
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { DurationDistributionChartWithScrubber } from '../../../shared/charts/duration_distribution_chart_with_scrubber';
 import { HeightRetainer } from '../../../shared/height_retainer';
-import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
+import { fromQuery, push, toQuery } from '../../../shared/links/url_helpers';
 import { TransactionTab } from '../waterfall_with_summary/transaction_tabs';
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
+import { TraceSamplesFetchResult } from '../../../../hooks/use_transaction_trace_samples_fetcher';
 
 interface TransactionDistributionProps {
   onChartSelection: (event: XYBrushEvent) => void;
   onClearSelection: () => void;
   selection?: [number, number];
-  traceSamples: TabContentProps['traceSamples'];
-  traceSamplesStatus: FETCH_STATUS;
+  traceSamplesFetchResult: TraceSamplesFetchResult;
 }
 
 export function TransactionDistribution({
   onChartSelection,
   onClearSelection,
   selection,
-  traceSamples,
-  traceSamplesStatus,
+  traceSamplesFetchResult,
 }: TransactionDistributionProps) {
   const { urlParams } = useLegacyUrlParams();
   const { traceId, transactionId } = urlParams;
 
   const {
-    query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+    query: { rangeFrom, rangeTo, showCriticalPath, environment },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const history = useHistory();
-  const { waterfall, status: waterfallStatus } = useWaterfallFetcher({
+  const waterfallFetchResult = useWaterfallFetcher({
     traceId,
     transactionId,
     start,
@@ -60,17 +60,11 @@ export function TransactionDistribution({
   });
   const { waterfallItemId, detailTab } = urlParams;
 
-  const {
-    query: { environment },
-  } = useApmParams('/services/{serviceName}/transactions/view');
-
   const { serviceName } = useApmServiceContext();
-  const isLoading =
-    waterfallStatus === FETCH_STATUS.LOADING ||
-    traceSamplesStatus === FETCH_STATUS.LOADING;
 
   const markerCurrentEvent =
-    waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
+    waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction
+      .duration.us;
 
   const {
     chartData,
@@ -79,6 +73,30 @@ export function TransactionDistribution({
     status,
     totalDocCount,
   } = useTransactionDistributionChartData();
+
+  const onShowCriticalPathChange = useCallback(
+    (nextShowCriticalPath: boolean) => {
+      push(history, {
+        query: {
+          showCriticalPath: nextShowCriticalPath ? 'true' : 'false',
+        },
+      });
+    },
+    [history]
+  );
+
+  const onTabClick = useCallback(
+    (tab: TransactionTab) => {
+      history.replace({
+        ...history.location,
+        search: fromQuery({
+          ...toQuery(history.location.search),
+          detailTab: tab,
+        }),
+      });
+    },
+    [history]
+  );
 
   return (
     <HeightRetainer>
@@ -109,21 +127,15 @@ export function TransactionDistribution({
               }),
             });
           }}
-          onTabClick={(tab) => {
-            history.replace({
-              ...history.location,
-              search: fromQuery({
-                ...toQuery(history.location.search),
-                detailTab: tab,
-              }),
-            });
-          }}
+          onTabClick={onTabClick}
           serviceName={serviceName}
           waterfallItemId={waterfallItemId}
           detailTab={detailTab as TransactionTab | undefined}
-          waterfall={waterfall}
-          isLoading={isLoading}
-          traceSamples={traceSamples}
+          waterfallFetchResult={waterfallFetchResult}
+          traceSamplesFetchStatus={traceSamplesFetchResult.status}
+          traceSamples={traceSamplesFetchResult.data?.traceSamples}
+          showCriticalPath={showCriticalPath}
+          onShowCriticalPathChange={onShowCriticalPathChange}
         />
       </div>
     </HeightRetainer>

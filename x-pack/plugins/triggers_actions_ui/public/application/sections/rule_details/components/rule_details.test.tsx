@@ -62,12 +62,12 @@ const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const mockRuleApis = {
   muteRule: jest.fn(),
   unmuteRule: jest.fn(),
-  enableRule: jest.fn(),
-  disableRule: jest.fn(),
   requestRefresh: jest.fn(),
   refreshToken: Date.now(),
   snoozeRule: jest.fn(),
   unsnoozeRule: jest.fn(),
+  bulkEnableRules: jest.fn(),
+  bulkDisableRules: jest.fn(),
 };
 
 const authorizedConsumers = {
@@ -642,7 +642,7 @@ describe('rule_details', () => {
         wrapper.update();
       });
 
-      const refreshButton = wrapper.find('[data-test-subj="refreshRulesButton"]').first();
+      const refreshButton = wrapper.find('[data-test-subj="refreshRulesButton"]').last();
       expect(refreshButton.exists()).toBeTruthy();
 
       refreshButton.simulate('click');
@@ -668,10 +668,10 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
       actionsButton.simulate('click');
 
-      const updateButton = wrapper.find('[data-test-subj="updateAPIKeyButton"]').first();
+      const updateButton = wrapper.find('[data-test-subj="updateAPIKeyButton"]').last();
       expect(updateButton.exists()).toBeTruthy();
 
       updateButton.simulate('click');
@@ -679,7 +679,7 @@ describe('rule_details', () => {
       const confirm = wrapper.find('[data-test-subj="updateApiKeyIdsConfirmation"]').first();
       expect(confirm.exists()).toBeTruthy();
 
-      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first();
+      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').last();
       expect(confirmButton.exists()).toBeTruthy();
 
       confirmButton.simulate('click');
@@ -708,10 +708,10 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
       actionsButton.simulate('click');
 
-      const updateButton = wrapper.find('[data-test-subj="deleteRuleButton"]').first();
+      const updateButton = wrapper.find('[data-test-subj="deleteRuleButton"]').last();
       expect(updateButton.exists()).toBeTruthy();
 
       updateButton.simulate('click');
@@ -719,7 +719,7 @@ describe('rule_details', () => {
       const confirm = wrapper.find('[data-test-subj="deleteIdsConfirmation"]').first();
       expect(confirm.exists()).toBeTruthy();
 
-      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first();
+      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').last();
       expect(confirmButton.exists()).toBeTruthy();
 
       confirmButton.simulate('click');
@@ -747,16 +747,16 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
       actionsButton.simulate('click');
 
-      const disableButton = wrapper.find('[data-test-subj="disableButton"]').first();
+      const disableButton = wrapper.find('[data-test-subj="disableButton"]').last();
       expect(disableButton.exists()).toBeTruthy();
 
       disableButton.simulate('click');
 
-      expect(mockRuleApis.disableRule).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.disableRule).toHaveBeenCalledWith(rule);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
 
     it('should enable the rule when clicked', async () => {
@@ -776,16 +776,16 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
       actionsButton.simulate('click');
 
-      const enableButton = wrapper.find('[data-test-subj="disableButton"]').first();
+      const enableButton = wrapper.find('[data-test-subj="disableButton"]').last();
       expect(enableButton.exists()).toBeTruthy();
 
       enableButton.simulate('click');
 
-      expect(mockRuleApis.enableRule).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.enableRule).toHaveBeenCalledWith(rule);
+      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
   });
 

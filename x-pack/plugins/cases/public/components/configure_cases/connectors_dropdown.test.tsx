@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { EuiSuperSelect } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { ConnectorsDropdown, Props } from './connectors_dropdown';
+import type { Props } from './connectors_dropdown';
+import { ConnectorsDropdown } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
 

@@ -11,18 +11,7 @@ import { useLocation, useHistory, useParams } from 'react-router-dom';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiHorizontalRule,
-  EuiFlexItem,
-  EuiFlexGrid,
-  EuiSpacer,
-  EuiCard,
-  EuiIcon,
-  EuiCallOut,
-  EuiLink,
-} from '@elastic/eui';
-
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { EuiHorizontalRule, EuiFlexItem, EuiCallOut, EuiLink } from '@elastic/eui';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
@@ -31,19 +20,17 @@ import {
   isIntegrationPolicyTemplate,
 } from '../../../../../../../common/services';
 
-import { useStartServices } from '../../../../hooks';
+import { useCategories, usePackages, useStartServices } from '../../../../hooks';
 
 import { pagePathGetters } from '../../../../constants';
 import {
-  useGetCategories,
-  useGetPackages,
   useBreadcrumbs,
   useGetAppendCustomIntegrations,
   useGetReplacementCustomIntegrations,
   useLink,
 } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
-import type { GetPackagesResponse, PackageList } from '../../../../types';
+import type { PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import type { PackageListItem } from '../../../../types';
@@ -194,11 +181,11 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
 
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
-export const AvailablePackages: React.FC<{
-  allPackages?: GetPackagesResponse | null;
-  isLoading: boolean;
-}> = ({ allPackages, isLoading }) => {
+export const AvailablePackages: React.FC<{}> = ({}) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
+  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
+    boolean | undefined
+  >(undefined);
 
   useBreadcrumbs('integrations_all');
 
@@ -233,10 +220,7 @@ export const AvailablePackages: React.FC<{
     data: eprPackages,
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
-  } = useGetPackages({
-    category: '',
-    excludeInstallStatus: true,
-  });
+  } = usePackages(prereleaseIntegrationsEnabled);
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
@@ -287,9 +271,7 @@ export const AvailablePackages: React.FC<{
     data: eprCategories,
     isLoading: isLoadingCategories,
     error: eprCategoryLoadingError,
-  } = useGetCategories({
-    include_policy_templates: true,
-  });
+  } = useCategories(prereleaseIntegrationsEnabled);
 
   const categories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
@@ -317,7 +299,13 @@ export const AvailablePackages: React.FC<{
   let controls = [
     <EuiFlexItem grow={false}>
       <EuiHorizontalRule margin="m" />
-      <IntegrationPreference initialType={preference} onChange={setPreference} />
+      <IntegrationPreference
+        initialType={preference}
+        onChange={setPreference}
+        onPrereleaseEnabledChange={(isEnabled) => {
+          setPrereleaseIntegrationsEnabled(isEnabled);
+        }}
+      />
     </EuiFlexItem>,
   ];
 
@@ -339,65 +327,6 @@ export const AvailablePackages: React.FC<{
     ];
   }
 
-  // TODO: Remove this hard coded list of integrations with a suggestion service
-  const featuredList = (
-    <>
-      <EuiFlexGrid columns={3}>
-        <EuiFlexItem>
-          <TrackApplicationView viewId="integration-card:epr:web_crawler:featured">
-            <EuiCard
-              data-test-subj="integration-card:epr:web_crawler:featured"
-              icon={<EuiIcon type="logoEnterpriseSearch" size="xxl" />}
-              href={addBasePath(
-                '/app/enterprise_search/content/search_indices/new_index?method=crawler'
-              )}
-              title={i18n.translate('xpack.fleet.featuredSearchTitle', {
-                defaultMessage: 'Web crawler',
-              })}
-              description={i18n.translate('xpack.fleet.featuredSearchDesc', {
-                defaultMessage:
-                  'Add search to your website with the Enterprise Search web crawler.',
-              })}
-            />
-          </TrackApplicationView>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <TrackApplicationView viewId="integration-card:epr:apm:featured">
-            <EuiCard
-              data-test-subj="integration-card:epr:apm:featured"
-              title={i18n.translate('xpack.fleet.featuredObsTitle', {
-                defaultMessage: 'Elastic APM',
-              })}
-              description={i18n.translate('xpack.fleet.featuredObsDesc', {
-                defaultMessage:
-                  'Monitor, detect, and diagnose complex application performance issues.',
-              })}
-              href={addBasePath('/app/home#/tutorial/apm')}
-              icon={<EuiIcon type="logoObservability" size="xxl" />}
-            />
-          </TrackApplicationView>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <TrackApplicationView viewId="integration-card:epr:endpoint:featured">
-            <EuiCard
-              data-test-subj="integration-card:epr:endpoint:featured"
-              icon={<EuiIcon type="logoSecurity" size="xxl" />}
-              href={addBasePath('/app/integrations/detail/endpoint/')}
-              title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
-                defaultMessage: 'Elastic Defend',
-              })}
-              description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
-                defaultMessage:
-                  'Protect your hosts and cloud workloads with threat prevention, detection, and deep security data visibility.',
-              })}
-            />
-          </TrackApplicationView>
-        </EuiFlexItem>
-      </EuiFlexGrid>
-      <EuiSpacer size="xl" />
-    </>
-  );
-
   let noEprCallout;
   if (eprPackageLoadingError || eprCategoryLoadingError) {
     const error = eprPackageLoadingError || eprCategoryLoadingError;
@@ -406,7 +335,6 @@ export const AvailablePackages: React.FC<{
 
   return (
     <PackageListGrid
-      featuredList={featuredList}
       isLoading={isLoadingAllPackages || isLoadingAppendCustomIntegrations}
       controls={controls}
       initialSearch={searchParam}

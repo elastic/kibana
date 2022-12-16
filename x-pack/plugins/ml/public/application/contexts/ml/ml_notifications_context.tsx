@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
-import { combineLatest, of, timer } from 'rxjs';
-import { catchError, switchMap, map, tap } from 'rxjs/operators';
+import React, { FC, useContext, useState, useEffect } from 'react';
+import { combineLatest, timer } from 'rxjs';
+import { switchMap, map, tap, retry } from 'rxjs/operators';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlKibana } from '../kibana';
@@ -38,8 +38,14 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
   const {
     services: {
       mlServices: { mlApiServices },
+      application: { capabilities },
     },
   } = useMlKibana();
+  const canGetJobs = capabilities.ml.canGetJobs as boolean;
+  const canGetDataFrameAnalytics = capabilities.ml.canGetDataFrameAnalytics as boolean;
+  const canGetTrainedModels = capabilities.ml.canGetTrainedModels as boolean;
+
+  const canGetNotifications = canGetJobs && canGetDataFrameAnalytics && canGetTrainedModels;
 
   const [lastCheckedAt, setLastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
   const lastCheckedAt$ = useAsObservable(lastCheckedAt);
@@ -49,33 +55,34 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
   const [notificationsCounts, setNotificationsCounts] =
     useState<NotificationsCountResponse>(defaultCounts);
 
-  useEffect(function startPollingNotifications() {
-    const subscription = combineLatest([lastCheckedAt$, timer(0, NOTIFICATIONS_CHECK_INTERVAL)])
-      .pipe(
-        // Use the latest check time or 7 days ago by default.
-        map(([lastChecked]) => lastChecked ?? moment().subtract(7, 'd').valueOf()),
-        tap((lastCheckedAtQuery) => {
-          setLatestRequestedAt(lastCheckedAtQuery);
-        }),
-        switchMap((lastCheckedAtQuery) =>
-          mlApiServices.notifications.countMessages$({
-            lastCheckedAt: lastCheckedAtQuery,
-          })
-        ),
-        catchError((error) => {
-          // Fail silently for now
-          return of({} as NotificationsCountResponse);
-        })
-      )
-      .subscribe((response) => {
-        setNotificationsCounts(isPopulatedObject(response) ? response : defaultCounts);
-      });
+  useEffect(
+    function startPollingNotifications() {
+      if (!canGetNotifications) return;
 
-    return () => {
-      subscription.unsubscribe();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      const subscription = combineLatest([lastCheckedAt$, timer(0, NOTIFICATIONS_CHECK_INTERVAL)])
+        .pipe(
+          // Use the latest check time or 7 days ago by default.
+          map(([lastChecked]) => lastChecked ?? moment().subtract(7, 'd').valueOf()),
+          tap((lastCheckedAtQuery) => {
+            setLatestRequestedAt(lastCheckedAtQuery);
+          }),
+          switchMap((lastCheckedAtQuery) =>
+            mlApiServices.notifications.countMessages$({
+              lastCheckedAt: lastCheckedAtQuery,
+            })
+          ),
+          retry({ delay: NOTIFICATIONS_CHECK_INTERVAL })
+        )
+        .subscribe((response) => {
+          setNotificationsCounts(isPopulatedObject(response) ? response : defaultCounts);
+        });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+    [canGetNotifications, lastCheckedAt$, mlApiServices.notifications]
+  );
 
   return (
     <MlNotificationsContext.Provider

@@ -4,6 +4,7 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
 <Fragment>
   <div>
     <EuiButton
+      color="primary"
       fill={true}
       iconSide="right"
       iconType="questionInCircle"
@@ -26,6 +27,7 @@ exports[`ValidateJob renders the button 1`] = `
 <Fragment>
   <div>
     <EuiButton
+      color="primary"
       fill={true}
       iconSide="right"
       iconType="questionInCircle"
@@ -48,6 +50,7 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
 <Fragment>
   <div>
     <EuiButton
+      color="primary"
       fill={true}
       iconSide="right"
       iconType="questionInCircle"

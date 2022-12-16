@@ -17,12 +17,17 @@ import {
   Direction,
   EuiSpacer,
   EuiTableActionsColumnType,
+  CriteriaWithPagination,
+  Query,
+  Ast,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { useOpenContentEditor } from '@kbn/content-management-content-editor';
+import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 
 import {
   Table,
@@ -35,13 +40,21 @@ import { useServices } from './services';
 import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './services';
 import type { Action } from './actions';
 import { getReducer } from './reducer';
+import type { SortColumnField } from './components';
+import { useTags } from './use_tags';
+
+interface ContentEditorConfig
+  extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
+  enabled?: boolean;
+}
 
 export interface Props<T extends UserContentCommonSchema = UserContentCommonSchema> {
   entityName: string;
   entityNamePlural: string;
   tableListTitle: string;
+  tableListDescription?: string;
   listingLimit: number;
-  initialFilter: string;
+  initialFilter?: string;
   initialPageSize: number;
   emptyPrompt?: JSX.Element;
   /** Add an additional custom column */
@@ -56,7 +69,10 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   children?: ReactNode | undefined;
   findItems(
     searchQuery: string,
-    references?: SavedObjectsFindOptionsReference[]
+    refs?: {
+      references?: SavedObjectsFindOptionsReference[];
+      referencesToExclude?: SavedObjectsFindOptionsReference[];
+    }
   ): Promise<{ total: number; hits: T[] }>;
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
   getDetailViewLink?: (entity: T) => string | undefined;
@@ -65,6 +81,22 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   editItem?(item: T): void;
+  /**
+   * Name for the column containing the "title" value.
+   */
+  titleColumnName?: string;
+  /**
+   * Additional actions (buttons) to be placed in the page header.
+   * @note only the first two values will be used.
+   */
+  additionalRightSideActions?: ReactNode[];
+  /**
+   * This assumes the content is already wrapped in an outer PageTemplate component.
+   * @note Hack! This is being used as a workaround so that this page can be rendered in the Kibana management UI
+   * @deprecated
+   */
+  withoutPageTemplateWrapper?: boolean;
+  contentEditor?: ContentEditorConfig;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -74,13 +106,16 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   isDeletingItems: boolean;
   showDeleteModal: boolean;
   fetchError?: IHttpFetchError<Error>;
-  searchQuery: string;
+  searchQuery: {
+    text: string;
+    query: Query;
+  };
   selectedIds: string[];
   totalItems: number;
   hasUpdatedAtMetadata: boolean;
   pagination: Pagination;
-  tableSort?: {
-    field: keyof T;
+  tableSort: {
+    field: SortColumnField;
     direction: Direction;
   };
 }
@@ -96,8 +131,11 @@ export interface UserContentCommonSchema {
   };
 }
 
+const ast = Ast.create([]);
+
 function TableListViewComp<T extends UserContentCommonSchema>({
   tableListTitle,
+  tableListDescription,
   entityName,
   entityNamePlural,
   initialFilter: initialQuery,
@@ -113,7 +151,11 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   getDetailViewLink,
   onClickTitle,
   id = 'userContent',
+  contentEditor = { enabled: false },
   children,
+  titleColumnName,
+  additionalRightSideActions = [],
+  withoutPageTemplateWrapper,
 }: Props<T>) {
   if (!getDetailViewLink && !onClickTitle) {
     throw new Error(
@@ -127,12 +169,19 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     );
   }
 
+  if (contentEditor.isReadonly === false && contentEditor.onSave === undefined) {
+    throw new Error(
+      `[TableListView] A value for [contentEditor.onSave()] must be provided when [contentEditor.isReadonly] is false.`
+    );
+  }
+
   const isMounted = useRef(false);
   const fetchIdx = useRef(0);
 
   const {
     canEditAdvancedSettings,
     getListingLimitSettingsUrl,
+    getTagIdsFromReferences,
     searchQueryParser,
     notifyError,
     DateFormatterComp,
@@ -151,12 +200,19 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     showDeleteModal: false,
     hasUpdatedAtMetadata: false,
     selectedIds: [],
-    searchQuery: initialQuery,
+    searchQuery:
+      initialQuery !== undefined
+        ? { text: initialQuery, query: new Query(ast, undefined, initialQuery) }
+        : { text: '', query: new Query(ast, undefined, '') },
     pagination: {
       pageIndex: 0,
       totalItemCount: 0,
       pageSize: initialPageSize,
       pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
+    },
+    tableSort: {
+      field: 'attributes.title' as const,
+      direction: 'asc',
     },
   });
 
@@ -174,18 +230,108 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     pagination,
     tableSort,
   } = state;
-  const hasNoItems = !isFetchingItems && items.length === 0 && !searchQuery;
+
+  const hasQuery = searchQuery.text !== '';
+  const hasNoItems = !isFetchingItems && items.length === 0 && !hasQuery;
   const pageDataTestSubject = `${entityName}LandingPage`;
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
+
+  const fetchItems = useCallback(async () => {
+    dispatch({ type: 'onFetchItems' });
+
+    try {
+      const idx = ++fetchIdx.current;
+
+      const {
+        searchQuery: searchQueryParsed,
+        references,
+        referencesToExclude,
+      } = searchQueryParser?.(searchQuery.text) ?? {
+        searchQuery: searchQuery.text,
+        references: undefined,
+        referencesToExclude: undefined,
+      };
+
+      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
+
+      if (!isMounted.current) {
+        return;
+      }
+
+      if (idx === fetchIdx.current) {
+        dispatch({
+          type: 'onFetchItemsSuccess',
+          data: {
+            response,
+          },
+        });
+      }
+    } catch (err) {
+      dispatch({
+        type: 'onFetchItemsError',
+        data: err,
+      });
+    }
+  }, [searchQueryParser, findItems, searchQuery.text]);
+
+  const openContentEditor = useOpenContentEditor();
+
+  const updateQuery = useCallback((query: Query) => {
+    dispatch({
+      type: 'onSearchQueryChange',
+      data: { query, text: query.text },
+    });
+  }, []);
+
+  const {
+    addOrRemoveIncludeTagFilter,
+    addOrRemoveExcludeTagFilter,
+    clearTagSelection,
+    tagsToTableItemMap,
+  } = useTags({
+    query: searchQuery.query,
+    updateQuery,
+    items,
+  });
+
+  const inspectItem = useCallback(
+    (item: T) => {
+      const tags = getTagIdsFromReferences(item.references).map((_id) => {
+        return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
+      });
+
+      const close = openContentEditor({
+        item: {
+          id: item.id,
+          title: item.attributes.title,
+          description: item.attributes.description,
+          tags,
+        },
+        entityName,
+        ...contentEditor,
+        onSave:
+          contentEditor.onSave &&
+          (async (args) => {
+            await contentEditor.onSave!(args);
+            await fetchItems();
+
+            close();
+          }),
+      });
+    },
+    [getTagIdsFromReferences, openContentEditor, entityName, contentEditor, fetchItems]
+  );
 
   const tableColumns = useMemo(() => {
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
         field: 'attributes.title',
-        name: i18n.translate('contentManagement.tableList.mainColumnName', {
-          defaultMessage: 'Name, description, tags',
-        }),
+        name:
+          titleColumnName ??
+          i18n.translate('contentManagement.tableList.mainColumnName', {
+            defaultMessage: 'Name, description, tags',
+          }),
         sortable: true,
         render: (field: keyof T, record: T) => {
           return (
@@ -194,7 +340,14 @@ function TableListViewComp<T extends UserContentCommonSchema>({
               item={record}
               getDetailViewLink={getDetailViewLink}
               onClickTitle={onClickTitle}
-              searchTerm={searchQuery}
+              onClickTag={(tag, withModifierKey) => {
+                if (withModifierKey) {
+                  addOrRemoveExcludeTagFilter(tag);
+                } else {
+                  addOrRemoveIncludeTagFilter(tag);
+                }
+              }}
+              searchTerm={searchQuery.text}
             />
           );
         },
@@ -220,9 +373,11 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
 
     // Add "Actions" column
-    if (editItem) {
-      const actions: EuiTableActionsColumnType<T>['actions'] = [
-        {
+    if (editItem || contentEditor.enabled !== false) {
+      const actions: EuiTableActionsColumnType<T>['actions'] = [];
+
+      if (editItem) {
+        actions.push({
           name: (item) => {
             return i18n.translate('contentManagement.tableList.listing.table.editActionName', {
               defaultMessage: 'Edit {itemDescription}',
@@ -241,8 +396,33 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           type: 'icon',
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
-        },
-      ];
+        });
+      }
+
+      if (contentEditor.enabled !== false) {
+        actions.push({
+          name: (item) => {
+            return i18n.translate(
+              'contentManagement.tableList.listing.table.viewDetailsActionName',
+              {
+                defaultMessage: 'View {itemTitle} details',
+                values: {
+                  itemTitle: get(item, 'attributes.title'),
+                },
+              }
+            );
+          },
+          description: i18n.translate(
+            'contentManagement.tableList.listing.table.viewDetailsActionDescription',
+            {
+              defaultMessage: 'View details',
+            }
+          ),
+          icon: 'inspect',
+          type: 'icon',
+          onClick: inspectItem,
+        });
+      }
 
       columns.push({
         name: i18n.translate('contentManagement.tableList.listing.table.actionTitle', {
@@ -255,14 +435,19 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
     return columns;
   }, [
+    titleColumnName,
     customTableColumn,
     hasUpdatedAtMetadata,
     editItem,
     id,
     getDetailViewLink,
     onClickTitle,
-    searchQuery,
+    searchQuery.text,
+    addOrRemoveIncludeTagFilter,
+    addOrRemoveExcludeTagFilter,
     DateFormatterComp,
+    contentEditor,
+    inspectItem,
   ]);
 
   const itemsById = useMemo(() => {
@@ -276,37 +461,16 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   // ------------
   // Callbacks
   // ------------
-  const fetchItems = useCallback(async () => {
-    dispatch({ type: 'onFetchItems' });
+  const onSortChange = useCallback((field: SortColumnField, direction: Direction) => {
+    dispatch({
+      type: 'onTableSortChange',
+      data: { field, direction },
+    });
+  }, []);
 
-    try {
-      const idx = ++fetchIdx.current;
-
-      const { searchQuery: searchQueryParsed, references } = searchQueryParser
-        ? searchQueryParser(searchQuery)
-        : { searchQuery, references: undefined };
-
-      const response = await findItems(searchQueryParsed, references);
-
-      if (!isMounted.current) {
-        return;
-      }
-
-      if (idx === fetchIdx.current) {
-        dispatch({
-          type: 'onFetchItemsSuccess',
-          data: {
-            response,
-          },
-        });
-      }
-    } catch (err) {
-      dispatch({
-        type: 'onFetchItemsError',
-        data: err,
-      });
-    }
-  }, [searchQueryParser, searchQuery, findItems]);
+  const onTableChange = useCallback((criteria: CriteriaWithPagination<T>) => {
+    dispatch({ type: 'onTableChange', data: criteria });
+  }, []);
 
   const deleteSelectedItems = useCallback(async () => {
     if (isDeletingItems) {
@@ -424,23 +588,31 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     return null;
   }
 
-  if (!fetchError && hasNoItems) {
+  const PageTemplate = withoutPageTemplateWrapper
+    ? (React.Fragment as unknown as typeof KibanaPageTemplate)
+    : KibanaPageTemplate;
+
+  if (!showFetchError && hasNoItems) {
     return (
-      <KibanaPageTemplate panelled isEmptyState={true} data-test-subj={pageDataTestSubject}>
+      <PageTemplate panelled isEmptyState={true} data-test-subj={pageDataTestSubject}>
         <KibanaPageTemplate.Section
           aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
         >
           {renderNoItemsMessage()}
         </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+      </PageTemplate>
     );
   }
 
   return (
-    <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>
+    <PageTemplate panelled data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
         pageTitle={<span id={headingId}>{tableListTitle}</span>}
-        rightSideItems={[renderCreateButton() ?? <span />]}
+        description={tableListDescription}
+        rightSideItems={[
+          renderCreateButton() ?? <span />,
+          ...additionalRightSideActions?.slice(0, 2),
+        ]}
         data-test-subj="top-nav"
       />
       <KibanaPageTemplate.Section aria-labelledby={hasInitialFetchReturned ? headingId : undefined}>
@@ -468,13 +640,20 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           isFetchingItems={isFetchingItems}
           searchQuery={searchQuery}
           tableColumns={tableColumns}
+          hasUpdatedAtMetadata={hasUpdatedAtMetadata}
           tableSort={tableSort}
           pagination={pagination}
           selectedIds={selectedIds}
           entityName={entityName}
           entityNamePlural={entityNamePlural}
+          tagsToTableItemMap={tagsToTableItemMap}
           deleteItems={deleteItems}
           tableCaption={tableListTitle}
+          onTableChange={onTableChange}
+          onSortChange={onSortChange}
+          addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
+          addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
+          clearTagSelection={clearTagSelection}
         />
 
         {/* Delete modal */}
@@ -489,7 +668,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           />
         )}
       </KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
+    </PageTemplate>
   );
 }
 

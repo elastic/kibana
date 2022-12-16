@@ -209,7 +209,7 @@ export function getVisualizeFieldSuggestions({
   // suggestions for visualizing textbased languages
   if (visualizeTriggerFieldContext && 'query' in visualizeTriggerFieldContext) {
     if (visualizeTriggerFieldContext.query) {
-      return suggestions.find((s) => s.datasourceId === 'textBasedLanguages');
+      return suggestions.find((s) => s.datasourceId === 'textBased');
     }
   }
 

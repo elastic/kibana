@@ -9,14 +9,14 @@ exports[`Storyshots components/Elements/ElementCard with click handler 1`] = `
   }
 >
   <div
-    className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon emotion-euiPanel-grow-m-m-plain-hasShadow-isClickable"
+    className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon emotion-euiPanel-grow-m-m-plain-hasShadow-isClickable-euiCard-left-vertical"
     onClick={[Function]}
   >
     <div
-      className="euiCard__top"
+      className="euiCard__top emotion-euiCard__top-vertical"
     >
       <span
-        className="euiCard__icon"
+        className="euiCard__icon emotion-euiCard__icon-vertical"
         data-euiicon-type="canvasApp"
         size="xxl"
       >
@@ -24,23 +24,23 @@ exports[`Storyshots components/Elements/ElementCard with click handler 1`] = `
       </span>
     </div>
     <div
-      className="euiCard__content"
+      className="euiCard__content emotion-euiCard__content-vertical"
     >
-      <span
+      <p
         className="euiTitle euiCard__title emotion-euiTitle-s"
         id="generated-idTitle"
       >
         <button
           aria-describedby=" generated-idDescription"
-          className="euiCard__titleButton"
+          className="euiCard__titleButton emotion-euiCard__text-left-interactive"
           disabled={false}
           onClick={[Function]}
         >
           Element 1
         </button>
-      </span>
+      </p>
       <div
-        className="euiText euiCard__description emotion-euiText-s"
+        className="euiText emotion-euiText-s-euiCard__description"
         id="generated-idDescription"
       >
         <p>
@@ -49,7 +49,7 @@ exports[`Storyshots components/Elements/ElementCard with click handler 1`] = `
       </div>
     </div>
     <div
-      className="euiCard__footer"
+      className="emotion-euiCard__footer"
     />
   </div>
 </div>
@@ -64,13 +64,13 @@ exports[`Storyshots components/Elements/ElementCard with image 1`] = `
   }
 >
   <div
-    className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned canvasElementCard emotion-euiPanel-grow-m-m-plain-hasShadow"
+    className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned canvasElementCard emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-left-vertical"
   >
     <div
-      className="euiCard__top"
+      className="euiCard__top emotion-euiCard__top-vertical"
     >
       <div
-        className="euiCard__image"
+        className="euiCard__image emotion-euiCard__image"
       >
         <img
           alt=""
@@ -79,16 +79,20 @@ exports[`Storyshots components/Elements/ElementCard with image 1`] = `
       </div>
     </div>
     <div
-      className="euiCard__content"
+      className="euiCard__content emotion-euiCard__content-vertical"
     >
-      <span
+      <p
         className="euiTitle euiCard__title emotion-euiTitle-s"
         id="generated-idTitle"
       >
-        Element 1
-      </span>
+        <span
+          className="emotion-euiCard__text-left"
+        >
+          Element 1
+        </span>
+      </p>
       <div
-        className="euiText euiCard__description emotion-euiText-s"
+        className="euiText emotion-euiText-s-euiCard__description"
         id="generated-idDescription"
       >
         <p>
@@ -97,7 +101,7 @@ exports[`Storyshots components/Elements/ElementCard with image 1`] = `
       </div>
     </div>
     <div
-      className="euiCard__footer"
+      className="emotion-euiCard__footer"
     />
   </div>
 </div>
@@ -112,14 +116,14 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
   }
 >
   <div
-    className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon emotion-euiPanel-grow-m-m-plain-hasShadow-isClickable"
+    className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon emotion-euiPanel-grow-m-m-plain-hasShadow-isClickable-euiCard-left-vertical"
     onClick={[Function]}
   >
     <div
-      className="euiCard__top"
+      className="euiCard__top emotion-euiCard__top-vertical"
     >
       <span
-        className="euiCard__icon"
+        className="euiCard__icon emotion-euiCard__icon-vertical"
         data-euiicon-type="canvasApp"
         size="xxl"
       >
@@ -127,23 +131,23 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
       </span>
     </div>
     <div
-      className="euiCard__content"
+      className="euiCard__content emotion-euiCard__content-vertical"
     >
-      <span
+      <p
         className="euiTitle euiCard__title emotion-euiTitle-s"
         id="generated-idTitle"
       >
         <button
           aria-describedby=" generated-idDescription"
-          className="euiCard__titleButton"
+          className="euiCard__titleButton emotion-euiCard__text-left-interactive"
           disabled={false}
           onClick={[Function]}
         >
           Element 1
         </button>
-      </span>
+      </p>
       <div
-        className="euiText euiCard__description emotion-euiText-s"
+        className="euiText emotion-euiText-s-euiCard__description"
         id="generated-idDescription"
       >
         <p>
@@ -152,117 +156,117 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
       </div>
     </div>
     <div
-      className="euiCard__footer"
+      className="emotion-euiCard__footer"
     >
       <span
-        className="euiBadge euiBadge--iconLeft"
+        className="euiBadge emotion-euiBadge"
         style={
           Object {
             "backgroundColor": "#666666",
-            "color": "#fff",
+            "color": "#FFF",
           }
         }
       >
         <span
-          className="euiBadge__content"
+          className="euiBadge__content emotion-euiBadge__content"
         >
           <span
-            className="euiBadge__text"
+            className="euiBadge__text emotion-euiBadge__text"
           >
             tag1
           </span>
         </span>
       </span>
       <span
-        className="euiBadge euiBadge--iconLeft"
+        className="euiBadge emotion-euiBadge"
         style={
           Object {
             "backgroundColor": "#666666",
-            "color": "#fff",
+            "color": "#FFF",
           }
         }
       >
         <span
-          className="euiBadge__content"
+          className="euiBadge__content emotion-euiBadge__content"
         >
           <span
-            className="euiBadge__text"
+            className="euiBadge__text emotion-euiBadge__text"
           >
             tag2
           </span>
         </span>
       </span>
       <span
-        className="euiBadge euiBadge--iconLeft"
+        className="euiBadge emotion-euiBadge"
         style={
           Object {
             "backgroundColor": "#666666",
-            "color": "#fff",
+            "color": "#FFF",
           }
         }
       >
         <span
-          className="euiBadge__content"
+          className="euiBadge__content emotion-euiBadge__content"
         >
           <span
-            className="euiBadge__text"
+            className="euiBadge__text emotion-euiBadge__text"
           >
             tag3
           </span>
         </span>
       </span>
       <span
-        className="euiBadge euiBadge--iconLeft"
+        className="euiBadge emotion-euiBadge"
         style={
           Object {
             "backgroundColor": "#666666",
-            "color": "#fff",
+            "color": "#FFF",
           }
         }
       >
         <span
-          className="euiBadge__content"
+          className="euiBadge__content emotion-euiBadge__content"
         >
           <span
-            className="euiBadge__text"
+            className="euiBadge__text emotion-euiBadge__text"
           >
             tag4
           </span>
         </span>
       </span>
       <span
-        className="euiBadge euiBadge--iconLeft"
+        className="euiBadge emotion-euiBadge"
         style={
           Object {
             "backgroundColor": "#666666",
-            "color": "#fff",
+            "color": "#FFF",
           }
         }
       >
         <span
-          className="euiBadge__content"
+          className="euiBadge__content emotion-euiBadge__content"
         >
           <span
-            className="euiBadge__text"
+            className="euiBadge__text emotion-euiBadge__text"
           >
             tag5
           </span>
         </span>
       </span>
       <span
-        className="euiBadge euiBadge--iconLeft"
+        className="euiBadge emotion-euiBadge"
         style={
           Object {
             "backgroundColor": "#666666",
-            "color": "#fff",
+            "color": "#FFF",
           }
         }
       >
         <span
-          className="euiBadge__content"
+          className="euiBadge__content emotion-euiBadge__content"
         >
           <span
-            className="euiBadge__text"
+            className="euiBadge__text emotion-euiBadge__text"
           >
             tag6
           </span>
@@ -282,13 +286,13 @@ exports[`Storyshots components/Elements/ElementCard with title and description 1
   }
 >
   <div
-    className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon emotion-euiPanel-grow-m-m-plain-hasShadow"
+    className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-left-vertical"
   >
     <div
-      className="euiCard__top"
+      className="euiCard__top emotion-euiCard__top-vertical"
     >
       <span
-        className="euiCard__icon"
+        className="euiCard__icon emotion-euiCard__icon-vertical"
         data-euiicon-type="canvasApp"
         size="xxl"
       >
@@ -296,16 +300,20 @@ exports[`Storyshots components/Elements/ElementCard with title and description 1
       </span>
     </div>
     <div
-      className="euiCard__content"
+      className="euiCard__content emotion-euiCard__content-vertical"
     >
-      <span
+      <p
         className="euiTitle euiCard__title emotion-euiTitle-s"
         id="generated-idTitle"
       >
-        Element 1
-      </span>
+        <span
+          className="emotion-euiCard__text-left"
+        >
+          Element 1
+        </span>
+      </p>
       <div
-        className="euiText euiCard__description emotion-euiText-s"
+        className="euiText emotion-euiText-s-euiCard__description"
         id="generated-idDescription"
       >
         <p>
@@ -314,7 +322,7 @@ exports[`Storyshots components/Elements/ElementCard with title and description 1
       </div>
     </div>
     <div
-      className="euiCard__footer"
+      className="emotion-euiCard__footer"
     />
   </div>
 </div>

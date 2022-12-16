@@ -14,16 +14,23 @@ import {
   RawIndicatorFieldId,
 } from '../../../../../../common/types/indicator';
 import { IndicatorsFlyoutTable, TABLE_TEST_ID } from '.';
-import { unwrapValue } from '../../../utils/unwrap_value';
+import { unwrapValue } from '../../../utils';
 import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
+import { IndicatorsFlyoutContext } from '../context';
 
 const mockIndicator: Indicator = generateMockIndicator();
 
 describe('<IndicatorsFlyoutTable />', () => {
   it('should render fields and values in table', () => {
+    const context = {
+      kqlBarIntegration: false,
+    };
+
     const { getByTestId, getByText, getAllByText } = render(
       <TestProvidersComponent>
-        <IndicatorsFlyoutTable indicator={mockIndicator} />
+        <IndicatorsFlyoutContext.Provider value={context}>
+          <IndicatorsFlyoutTable indicator={mockIndicator} />
+        </IndicatorsFlyoutContext.Provider>
       </TestProvidersComponent>
     );
 

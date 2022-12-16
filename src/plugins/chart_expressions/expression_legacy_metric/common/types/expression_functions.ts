@@ -15,10 +15,11 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
-import { VisParams, visType, LabelPositionType } from './expression_renderers';
+import { VisParams, visType, LabelPositionType, MetricAlignment } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
 export interface MetricArguments {
+  autoScaleMetricAlignment?: MetricAlignment;
   percentageMode: boolean;
   colorMode: ColorMode;
   showLabels: boolean;

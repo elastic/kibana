@@ -222,10 +222,10 @@
           },
           {
             "parentPluginId": "threatIntelligence",
-            "id": "def-public.SecuritySolutionPluginContext.getSecuritySolutionStore",
+            "id": "def-public.SecuritySolutionPluginContext.securitySolutionStore",
             "type": "Object",
             "tags": [],
-            "label": "getSecuritySolutionStore",
+            "label": "securitySolutionStore",
             "description": [
               "\nSecurity Solution store"
             ],
@@ -284,7 +284,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "Query"
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              }
             ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
@@ -301,7 +307,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]"
             ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
@@ -319,7 +331,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "TimeRange"
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              }
             ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
@@ -371,6 +389,119 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.registerQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "registerQuery",
+            "description": [
+              "\nRegister query in security solution store for tracking and centralized refresh support"
+            ],
+            "signature": [
+              "(query: { id: string; loading: boolean; refetch: VoidFunction; }) => void"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "threatIntelligence",
+                "id": "def-public.SecuritySolutionPluginContext.registerQuery.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "threatIntelligence",
+                    "id": "def-public.SecuritySolutionPluginContext.registerQuery.$1.id",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "threatIntelligence",
+                    "id": "def-public.SecuritySolutionPluginContext.registerQuery.$1.loading",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "loading",
+                    "description": [],
+                    "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "threatIntelligence",
+                    "id": "def-public.SecuritySolutionPluginContext.registerQuery.$1.refetch",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "refetch",
+                    "description": [],
+                    "signature": [
+                      "VoidFunction"
+                    ],
+                    "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "returnComment": [],
+                    "children": []
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.deregisterQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "deregisterQuery",
+            "description": [
+              "\nDeregister stale query"
+            ],
+            "signature": [
+              "(query: { id: string; }) => void"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "threatIntelligence",
+                "id": "def-public.SecuritySolutionPluginContext.deregisterQuery.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "threatIntelligence",
+                    "id": "def-public.SecuritySolutionPluginContext.deregisterQuery.$1.id",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

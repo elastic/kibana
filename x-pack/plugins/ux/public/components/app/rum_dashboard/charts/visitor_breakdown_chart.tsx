@@ -105,7 +105,7 @@ const visConfig: PieVisualizationState = {
     {
       layerId: 'layer1',
       primaryGroups: ['col1'],
-      metric: 'col2',
+      metrics: ['col2'],
       categoryDisplay: 'default',
       legendDisplay: 'hide',
       numberDisplay: 'percent',
@@ -188,7 +188,7 @@ export function getVisitorBreakdownLensAttributes({
         [localDataView.id]: localDataView,
       },
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: dataLayer,
           },

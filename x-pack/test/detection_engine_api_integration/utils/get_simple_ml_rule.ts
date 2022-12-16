@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 /**
  * This is a representative ML rule payload as expected by the server
  * @param ruleId The rule id
  * @param enabled Set to tru to enable it, by default it is off
  */
-export const getSimpleMlRule = (ruleId = 'rule-1', enabled = false): CreateRulesSchema => ({
+export const getSimpleMlRule = (ruleId = 'rule-1', enabled = false): RuleCreateProps => ({
   name: 'Simple ML Rule',
   description: 'Simple Machine Learning Rule',
   enabled,

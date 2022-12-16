@@ -9,16 +9,13 @@ import { RISK_SCORE_SAVED_OBJECTS_URL, SAVED_OBJECTS_URL } from '../../../urls/r
 import type { RiskScoreEntity } from '../../risk_scores/common';
 import { getRiskScoreTagName } from '../../risk_scores/saved_objects';
 
-export const deleteSavedObjects = (
-  templateName: `${RiskScoreEntity}RiskScoreDashboards`,
-  deleteAll: boolean
-) => {
+export const deleteSavedObjects = (templateName: `${RiskScoreEntity}RiskScoreDashboards`) => {
   return cy.request({
     method: 'post',
     url: `${RISK_SCORE_SAVED_OBJECTS_URL}/_bulk_delete/${templateName}`,
     failOnStatusCode: false,
     body: {
-      deleteAll,
+      deleteAll: true,
     },
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
   });

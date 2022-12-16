@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
+import { EuiLoadingContent } from '@elastic/eui';
 
 import { INTEGRATIONS_ROUTING_PATHS } from '../../constants';
 import { IntegrationsStateContextProvider, useBreadcrumbs } from '../../hooks';
@@ -31,7 +32,9 @@ export const EPMApp: React.FunctionComponent = () => {
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_language_clients}>
         <IntegrationsStateContextProvider>
-          <CustomLanguagesOverview />
+          <React.Suspense fallback={<EuiLoadingContent />}>
+            <CustomLanguagesOverview />
+          </React.Suspense>
         </IntegrationsStateContextProvider>
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>

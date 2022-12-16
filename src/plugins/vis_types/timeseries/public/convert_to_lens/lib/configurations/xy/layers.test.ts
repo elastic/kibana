@@ -8,7 +8,7 @@
 
 import { XYLayerConfig } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import type { Panel } from '../../../../../common/types';
+import type { Panel, Metric } from '../../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 import {
   Layer,
@@ -20,14 +20,26 @@ import { createPanel, createSeries } from '../../__mocks__';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
+const mockExtractOrGenerateDatasourceInfo = jest.fn();
+
 jest.mock('uuid', () => ({
   v4: () => 'test-id',
+}));
+
+jest.mock('../../datasource', () => ({
+  extractOrGenerateDatasourceInfo: jest.fn(() => mockExtractOrGenerateDatasourceInfo()),
 }));
 
 const mockedIndices = [
   {
     id: 'test',
     title: 'test',
+    timeFieldName: 'test_field',
+    getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
+  },
+  {
+    id: 'test2',
+    title: 'test2',
     timeFieldName: 'test_field',
     getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
   },
@@ -212,7 +224,7 @@ describe('getLayers', () => {
         },
       ],
     },
-  ];
+  ] as Metric[];
 
   const percentileRankMetrics = [
     {
@@ -355,6 +367,14 @@ describe('getLayers', () => {
       },
     ],
     series: [createSeries({ metrics: staticValueMetric })],
+  });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockExtractOrGenerateDatasourceInfo.mockReturnValue({
+      indexPattern: mockedIndices[0],
+      indexPatternId: mockedIndices[0].id,
+      timeField: mockedIndices[0].timeFieldName,
+    });
   });
 
   test.each<
@@ -568,9 +588,31 @@ describe('getLayers', () => {
         },
       ],
     ],
-    [
-      'multiple annotations with different data views create separate layers',
-      [dataSourceLayersWithStatic, panelWithMultiAnnotations, indexPatternsService, false],
+  ])('should return %s', async (_, input, expected) => {
+    const layers = await getLayers(...input);
+    expect(layers).toEqual(expected.map(expect.objectContaining));
+  });
+
+  test('should return multiple annotations with different data views create separate layers', async () => {
+    mockExtractOrGenerateDatasourceInfo.mockReturnValueOnce({
+      indexPattern: mockedIndices[0],
+      indexPatternId: mockedIndices[0].id,
+      timeField: mockedIndices[0].timeFieldName,
+    });
+    mockExtractOrGenerateDatasourceInfo.mockReturnValueOnce({
+      indexPattern: mockedIndices[1],
+      indexPatternId: mockedIndices[1].id,
+      timeField: mockedIndices[1].timeFieldName,
+    });
+
+    const layers = await getLayers(
+      dataSourceLayersWithStatic,
+      panelWithMultiAnnotations,
+      indexPatternsService,
+      false
+    );
+
+    expect(layers).toEqual(
       [
         {
           layerType: 'referenceLine',
@@ -634,7 +676,7 @@ describe('getLayers', () => {
               type: 'query',
             },
           ],
-          indexPatternId: 'test',
+          indexPatternId: 'test2',
         },
         {
           layerId: 'test-id',
@@ -659,18 +701,28 @@ describe('getLayers', () => {
               type: 'query',
             },
           ],
-          indexPatternId: 'test2',
+          indexPatternId: 'test',
         },
-      ],
-    ],
-    [
-      'annotation layer gets correct dataView when none is defined',
-      [
-        dataSourceLayersWithStatic,
-        panelWithSingleAnnotationDefaultDataView,
-        indexPatternsService,
-        false,
-      ],
+      ].map(expect.objectContaining)
+    );
+    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(3);
+  });
+
+  test('should return annotation layer gets correct dataView when none is defined', async () => {
+    mockExtractOrGenerateDatasourceInfo.mockReturnValue({
+      indexPattern: { ...mockedIndices[0], id: 'default' },
+      indexPatternId: 'default',
+      timeField: mockedIndices[0].timeFieldName,
+    });
+
+    const layers = await getLayers(
+      dataSourceLayersWithStatic,
+      panelWithSingleAnnotationDefaultDataView,
+      indexPatternsService,
+      false
+    );
+
+    expect(layers).toEqual(
       [
         {
           layerType: 'referenceLine',
@@ -712,10 +764,8 @@ describe('getLayers', () => {
           ],
           indexPatternId: 'default',
         },
-      ],
-    ],
-  ])('should return %s', async (_, input, expected) => {
-    const layers = await getLayers(...input);
-    expect(layers).toEqual(expected.map(expect.objectContaining));
+      ].map(expect.objectContaining)
+    );
+    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(1);
   });
 });

@@ -202,6 +202,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [firstTableRef, onClickValue, isInteractive]
   );
 
+  const columnCellValueActions = useMemo(
+    () => (isInteractive ? props.columnCellValueActions : undefined),
+    [props.columnCellValueActions, isInteractive]
+  );
+
   const handleTransposedColumnClick = useMemo(
     () =>
       isInteractive
@@ -310,7 +315,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         alignments,
         headerRowHeight,
         headerRowLines,
-        dataGridRef.current?.closeCellPopover
+        columnCellValueActions,
+        dataGridRef.current?.closeCellPopover,
+        props.columnFilterable
       ),
     [
       bucketColumns,
@@ -326,6 +333,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       alignments,
       headerRowHeight,
       headerRowLines,
+      columnCellValueActions,
+      props.columnFilterable,
     ]
   );
 

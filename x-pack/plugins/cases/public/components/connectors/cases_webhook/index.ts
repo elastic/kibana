@@ -7,7 +7,7 @@
 
 import { lazy } from 'react';
 
-import { CaseConnector } from '../types';
+import type { CaseConnector } from '../types';
 import { ConnectorTypes } from '../../../../common/api';
 
 export const getCaseConnector = (): CaseConnector<null> => {

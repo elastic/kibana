@@ -14,8 +14,8 @@ describe('helpers', () => {
   describe('hasSubtechniqueOptions', () => {
     describe('when technique has subtechnique options', () => {
       const technique = mockTechniques[0];
-      it('returns true', () => {
-        expect(hasSubtechniqueOptions(technique)).toBe(true);
+      it('returns true', async () => {
+        expect(await hasSubtechniqueOptions(technique)).toBe(true);
       });
     });
 
@@ -26,8 +26,8 @@ describe('helpers', () => {
         id: 'T0000',
         subtechnique: [],
       };
-      it('returns false', () => {
-        expect(hasSubtechniqueOptions(technique)).toBe(false);
+      it('returns false', async () => {
+        expect(await hasSubtechniqueOptions(technique)).toBe(false);
       });
     });
   });

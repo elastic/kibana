@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { loadFieldExisting } from './load_field_existing';
+import type { LoadFieldExistingHandler } from './load_field_existing';
+
+export const loadFieldExisting: LoadFieldExistingHandler = async (params) => {
+  const { loadFieldExisting: loadFieldExistingHandler } = await import('./load_field_existing');
+  return await loadFieldExistingHandler(params);
+};

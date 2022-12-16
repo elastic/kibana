@@ -9,12 +9,12 @@ import dateMath from '@kbn/datemath';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { mlExecutor } from './ml';
-import { getCompleteRuleMock, getMlRuleParams } from '../../schemas/rule_schemas.mock';
+import { getCompleteRuleMock, getMlRuleParams } from '../../rule_schema/mocks';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { findMlSignals } from '../find_ml_signals';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
-import type { MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import type { MachineLearningRuleParams } from '../../rule_schema';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
 jest.mock('../find_ml_signals');
@@ -22,6 +22,8 @@ jest.mock('../bulk_create_ml_signals');
 
 describe('ml_executor', () => {
   let jobsSummaryMock: jest.Mock;
+  let forceStartDatafeedsMock: jest.Mock;
+  let stopDatafeedsMock: jest.Mock;
   let mlMock: ReturnType<typeof mlPluginServerMock.createSetupContract>;
   let alertServices: RuleExecutorServicesMock;
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
@@ -39,6 +41,8 @@ describe('ml_executor', () => {
     mlMock = mlPluginServerMock.createSetupContract();
     mlMock.jobServiceProvider.mockReturnValue({
       jobsSummary: jobsSummaryMock,
+      forceStartDatafeeds: forceStartDatafeedsMock,
+      stopDatafeeds: stopDatafeedsMock,
     });
     alertServices = alertsMock.createRuleExecutorServices();
     ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({

@@ -18,8 +18,7 @@ import { useLicenseContext } from '../../../context/license/use_license_context'
 import { LicensePrompt } from '../../shared/license_prompt';
 
 import { FailedTransactionsCorrelations } from '../correlations/failed_transactions_correlations';
-
-import type { TabContentProps } from './types';
+import { TabContentProps } from './transaction_details_tabs';
 
 function FailedTransactionsCorrelationsTab({ onFilter }: TabContentProps) {
   const license = useLicenseContext();

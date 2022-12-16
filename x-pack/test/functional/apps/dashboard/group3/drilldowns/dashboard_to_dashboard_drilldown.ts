@@ -37,10 +37,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spaces = getService('spaces');
   const elasticChart = getService('elasticChart');
 
-  // Failing: See https://github.com/elastic/kibana/issues/142913
-  // Failing: See https://github.com/elastic/kibana/issues/142912
-  describe.skip('Dashboard to dashboard drilldown', function () {
-    describe('Create & use drilldowns', () => {
+  describe('Dashboard to dashboard drilldown', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/142715
+    describe.skip('Create & use drilldowns', () => {
       before(async () => {
         log.debug('Dashboard Drilldowns:initTests');
         await security.testUser.setRoles(['test_logstash_reader', 'global_dashboard_all']);

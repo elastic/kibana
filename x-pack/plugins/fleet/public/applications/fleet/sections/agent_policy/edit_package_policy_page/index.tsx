@@ -35,6 +35,7 @@ import {
   sendGetPackageInfoByKey,
   sendUpgradePackagePolicyDryRun,
   useAuthz,
+  useGetSettings,
 } from '../../../hooks';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
@@ -128,6 +129,17 @@ export const EditPackagePolicyForm = memo<{
   const [isUpgrade, setIsUpgrade] = useState<boolean>(false);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+
+  const [prerelease, setPrerelease] = React.useState<boolean>(false);
+
+  const { data: settings } = useGetSettings();
+
+  useEffect(() => {
+    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
+    if (settings?.item) {
+      setPrerelease(isEnabled);
+    }
+  }, [settings?.item]);
 
   useEffect(() => {
     if (forceUpgrade) {
@@ -265,7 +277,8 @@ export const EditPackagePolicyForm = memo<{
 
             const { data: packageData } = await sendGetPackageInfoByKey(
               _packageInfo!.name,
-              _packageInfo!.version
+              _packageInfo!.version,
+              { prerelease, full: true }
             );
 
             if (packageData?.item) {
@@ -292,7 +305,7 @@ export const EditPackagePolicyForm = memo<{
       setIsLoadingData(false);
     };
     getData();
-  }, [policyId, packagePolicyId, isUpgrade]);
+  }, [policyId, packagePolicyId, isUpgrade, prerelease]);
 
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);

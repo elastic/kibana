@@ -30,7 +30,7 @@ export interface ThreatSummaryDescription {
   eventId: string;
   index: number;
   feedName: string | undefined;
-  timelineId: string;
+  scopeId: string;
   value: string | undefined;
   isDraggable?: boolean;
   isReadOnly?: boolean;
@@ -63,19 +63,19 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   eventId,
   index,
   feedName,
-  timelineId,
+  scopeId,
   value,
   isDraggable,
   isReadOnly,
 }) => {
   if (!data || !value) return null;
-  const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${data.field}-${value}-${index}-${feedName}`;
+  const key = `alert-details-value-formatted-field-value-${scopeId}-${eventId}-${data.field}-${value}-${index}-${feedName}`;
   return (
     <StyledEuiFlexGroup key={key} direction="row" gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
         <div>
           <FormattedFieldValue
-            contextId={timelineId}
+            contextId={scopeId}
             eventId={key}
             fieldFormat={data.format}
             fieldName={data.field}
@@ -97,10 +97,10 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
         {value && !isReadOnly && (
           <ActionCell
             data={data}
-            contextId={timelineId}
+            contextId={scopeId}
             eventId={key}
             fieldFromBrowserField={browserField}
-            timelineId={timelineId}
+            scopeId={scopeId}
             values={[value]}
             applyWidthAndPadding={false}
           />
@@ -114,11 +114,11 @@ const EnrichmentSummaryComponent: React.FC<{
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   enrichments: CtiEnrichment[];
-  timelineId: string;
+  scopeId: string;
   eventId: string;
   isDraggable?: boolean;
   isReadOnly?: boolean;
-}> = ({ browserFields, data, enrichments, timelineId, eventId, isDraggable, isReadOnly }) => {
+}> = ({ browserFields, data, enrichments, scopeId, eventId, isDraggable, isReadOnly }) => {
   const parsedEnrichments = enrichments.map((enrichment, index) => {
     const { field, type, feedName, value } = getEnrichmentIdentifiers(enrichment);
     const eventData = data.find((item) => item.field === field);
@@ -166,7 +166,7 @@ const EnrichmentSummaryComponent: React.FC<{
                     eventId={eventId}
                     index={index}
                     feedName={feedName}
-                    timelineId={timelineId}
+                    scopeId={scopeId}
                     value={value}
                     data={fieldsData}
                     browserField={browserField}
@@ -197,7 +197,7 @@ const EnrichmentSummaryComponent: React.FC<{
                     eventId={eventId}
                     index={index}
                     feedName={feedName}
-                    timelineId={timelineId}
+                    scopeId={scopeId}
                     value={value}
                     data={fieldsData}
                     browserField={browserField}

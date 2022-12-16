@@ -11,18 +11,15 @@ import { safeLoad } from 'js-yaml';
 import type {
   FullAgentPolicy,
   PackagePolicy,
-  Settings,
   Output,
   FullAgentPolicyOutput,
+  FleetProxy,
+  FleetServerHost,
 } from '../../types';
-import { agentPolicyService } from '../agent_policy';
-import { outputService } from '../output';
-import { dataTypes, outputType } from '../../../common/constants';
 import type { FullAgentPolicyOutputPermissions, PackageInfo } from '../../../common/types';
-import { getSettings } from '../settings';
+import { agentPolicyService } from '../agent_policy';
+import { dataTypes, outputType } from '../../../common/constants';
 import { DEFAULT_OUTPUT } from '../../constants';
-
-import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils';
 
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
@@ -33,55 +30,33 @@ import {
   storedPackagePoliciesToAgentPermissions,
   DEFAULT_CLUSTER_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
+import { fetchRelatedSavedObjects } from './related_saved_objects';
+
+async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
+  try {
+    return await agentPolicyService.get(soClient, id);
+  } catch (err) {
+    if (!err.isBoom || err.output.statusCode !== 404) {
+      throw err;
+    }
+  }
+  return null;
+}
 
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
   options?: { standalone: boolean }
 ): Promise<FullAgentPolicy | null> {
-  let agentPolicy;
   const standalone = options?.standalone ?? false;
 
-  try {
-    agentPolicy = await agentPolicyService.get(soClient, id);
-  } catch (err) {
-    if (!err.isBoom || err.output.statusCode !== 404) {
-      throw err;
-    }
-  }
-
+  const agentPolicy = await fetchAgentPolicy(soClient, id);
   if (!agentPolicy) {
     return null;
   }
 
-  const defaultDataOutputId = await outputService.getDefaultDataOutputId(soClient);
-
-  if (!defaultDataOutputId) {
-    throw new Error('Default output is not setup');
-  }
-
-  const dataOutputId: string = agentPolicy.data_output_id || defaultDataOutputId;
-  const monitoringOutputId: string =
-    agentPolicy.monitoring_output_id ||
-    (await outputService.getDefaultMonitoringOutputId(soClient)) ||
-    dataOutputId;
-
-  const outputs = await Promise.all(
-    Array.from(new Set([dataOutputId, monitoringOutputId])).map((outputId) =>
-      outputService.get(soClient, outputId)
-    )
-  );
-
-  const dataOutput = outputs.find((output) => output.id === dataOutputId);
-  if (!dataOutput) {
-    throw new Error(`Data output not found ${dataOutputId}`);
-  }
-  const monitoringOutput = outputs.find((output) => output.id === monitoringOutputId);
-  if (!monitoringOutput) {
-    throw new Error(`Monitoring output not found ${monitoringOutputId}`);
-  }
-
-  const sourceUri = await getSourceUriForAgentPolicy(soClient, agentPolicy);
+  const { outputs, proxies, dataOutput, fleetServerHosts, monitoringOutput, sourceUri } =
+    await fetchRelatedSavedObjects(soClient, agentPolicy);
 
   // Build up an in-memory object for looking up Package Info, so we don't have
   // call `getPackageInfo` for every single policy, which incurs performance costs
@@ -117,6 +92,7 @@ export async function getFullAgentPolicy(
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
+          output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
           standalone
         );
 
@@ -131,7 +107,7 @@ export async function getFullAgentPolicy(
     revision: agentPolicy.revision,
     agent: {
       download: {
-        source_uri: sourceUri,
+        sourceURI: sourceUri,
       },
       monitoring:
         agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
@@ -188,25 +164,42 @@ export async function getFullAgentPolicy(
     return outputPermissions;
   }, {});
 
-  // only add settings if not in standalone
-  if (!standalone) {
-    let settings: Settings;
-    try {
-      settings = await getSettings(soClient);
-    } catch (error) {
-      throw new Error('Default settings is not setup');
-    }
-    if (settings.fleet_server_hosts && settings.fleet_server_hosts.length) {
-      fullAgentPolicy.fleet = {
-        hosts: settings.fleet_server_hosts,
-      };
-    }
+  // only add fleet server hosts if not in standalone
+  if (!standalone && fleetServerHosts) {
+    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHosts, proxies);
   }
   return fullAgentPolicy;
 }
 
+export function generateFleetConfig(
+  fleetServerHosts: FleetServerHost,
+  proxies: FleetProxy[]
+): FullAgentPolicy['fleet'] {
+  const config: FullAgentPolicy['fleet'] = {
+    hosts: fleetServerHosts.host_urls,
+  };
+  const fleetServerHostproxy = fleetServerHosts.proxy_id
+    ? proxies.find((proxy) => proxy.id === fleetServerHosts.proxy_id)
+    : null;
+  if (fleetServerHostproxy) {
+    config.proxy_url = fleetServerHostproxy.url;
+    if (fleetServerHostproxy.proxy_headers) {
+      config.proxy_headers = fleetServerHostproxy.proxy_headers;
+    }
+    if (fleetServerHostproxy.certificate_authorities) {
+      config.ssl = {
+        certificate_authorities: [fleetServerHostproxy.certificate_authorities],
+        renegotiation: 'never',
+        verification_mode: '',
+      };
+    }
+  }
+  return config;
+}
+
 export function transformOutputToFullPolicyOutput(
   output: Output,
+  proxy?: FleetProxy,
   standalone = false
 ): FullAgentPolicyOutput {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -220,6 +213,35 @@ export function transformOutputToFullPolicyOutput(
     ...(ssl ? { ssl } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };
+
+  if (proxy) {
+    newOutput.proxy_url = proxy.url;
+    if (proxy.proxy_headers) {
+      newOutput.proxy_headers = proxy.proxy_headers;
+    }
+
+    if (proxy.certificate_authorities) {
+      if (!newOutput.ssl) {
+        newOutput.ssl = {};
+      }
+      if (!newOutput.ssl.certificate_authorities) {
+        newOutput.ssl.certificate_authorities = [];
+      }
+      newOutput.ssl.certificate_authorities.push(proxy.certificate_authorities);
+    }
+    if (proxy.certificate) {
+      if (!newOutput.ssl) {
+        newOutput.ssl = {};
+      }
+      newOutput.ssl.certificate = proxy.certificate;
+    }
+    if (proxy.certificate_key) {
+      if (!newOutput.ssl) {
+        newOutput.ssl = {};
+      }
+      newOutput.ssl.key = proxy.certificate_key;
+    }
+  }
 
   if (output.type === outputType.Elasticsearch && standalone) {
     newOutput.username = '${ES_USERNAME}';

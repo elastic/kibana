@@ -38,6 +38,7 @@ import {
   LensDocShape850,
   LensDocShape840,
   VisState850,
+  LensDocShape860,
 } from './types';
 import {
   commonRenameOperationsForFormula,
@@ -59,6 +60,8 @@ import {
   getLensDataViewMigrations,
   commonMigrateMetricIds,
   commonMigratePartitionChartGroups,
+  commonMigratePartitionMetrics,
+  commonMigrateIndexPatternDatasource,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -533,6 +536,13 @@ const migrateMetricIds: SavedObjectMigrationFn<LensDocShape850, LensDocShape850>
   attributes: commonMigrateMetricIds(doc.attributes),
 });
 
+const migrateIndexPatternDatasource: SavedObjectMigrationFn<LensDocShape850, LensDocShape860> = (
+  doc
+) => ({
+  ...doc,
+  attributes: commonMigrateIndexPatternDatasource(doc.attributes),
+});
+
 const migratePartitionChartGroups: SavedObjectMigrationFn<LensDocShape840, LensDocShape840> = (
   doc
 ) => ({
@@ -543,6 +553,13 @@ const migratePartitionChartGroups: SavedObjectMigrationFn<LensDocShape840, LensD
       layers: Array<{ groups?: string[] }>;
     }>
   ),
+});
+
+const migratePartitionMetrics: SavedObjectMigrationFn<LensDocShape860, LensDocShape860> = (
+  doc
+) => ({
+  ...doc,
+  attributes: commonMigratePartitionMetrics(doc.attributes),
 });
 
 const lensMigrations: SavedObjectMigrationMap = {
@@ -566,6 +583,9 @@ const lensMigrations: SavedObjectMigrationMap = {
   ),
   '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
   '8.5.0': flow(migrateMetricIds, enrichAnnotationLayers, migratePartitionChartGroups),
+  '8.6.0': flow(migrateIndexPatternDatasource, migratePartitionMetrics),
+  // FOLLOW THESE GUIDELINES IF YOU ARE ADDING A NEW MIGRATION!
+  // 1. Make sure you are applying migrations for a given version in the same order here as they are applied in x-pack/plugins/lens/server/embeddable/make_lens_embeddable_factory.ts
 };
 
 export const getAllMigrations = (

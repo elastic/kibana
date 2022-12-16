@@ -10,14 +10,12 @@ import JSON5 from 'json5';
 import fs from 'fs/promises';
 import { safeLoad, safeDump } from 'js-yaml';
 
-import { readCliArgs } from '../args';
 import { Task, read, downloadToDisk, unzipBuffer, createZipFile } from '../lib';
 
 const BUNDLED_PACKAGES_DIR = 'x-pack/plugins/fleet/target/bundled_packages';
 
-// APM needs to directly request its versions from Package Storage v2 - this should
-// be removed when Package Storage v2 is in production
-const PACKAGE_STORAGE_V2_URL = 'https://epr-v2.ea-web.elastic.dev';
+// Package storage v2 url
+export const PACKAGE_STORAGE_REGISTRY_URL = 'https://epr.elastic.co';
 
 interface FleetPackage {
   name: string;
@@ -31,13 +29,6 @@ export const BundleFleetPackages: Task = {
   async run(config, log, build) {
     log.info('Fetching fleet packages from package registry');
     log.indent(4);
-
-    // Support the `--epr-registry` command line argument to fetch from the snapshot or production registry
-    const { buildOptions } = readCliArgs(process.argv);
-    const eprUrl =
-      buildOptions?.eprRegistry === 'snapshot'
-        ? 'https://epr-snapshot.elastic.co'
-        : 'https://epr.elastic.co';
 
     const configFilePath = config.resolveFromRepo('fleet_packages.json');
     const fleetPackages = (await read(configFilePath)) || '[]';
@@ -68,12 +59,7 @@ export const BundleFleetPackages: Task = {
         }
 
         const archivePath = `${fleetPackage.name}-${versionToWrite}.zip`;
-        let archiveUrl = `${eprUrl}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
-
-        // Point APM to package storage v2
-        if (fleetPackage.name === 'apm') {
-          archiveUrl = `${PACKAGE_STORAGE_V2_URL}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
-        }
+        const archiveUrl = `${PACKAGE_STORAGE_REGISTRY_URL}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
 
         const destination = build.resolvePath(BUNDLED_PACKAGES_DIR, archivePath);
 

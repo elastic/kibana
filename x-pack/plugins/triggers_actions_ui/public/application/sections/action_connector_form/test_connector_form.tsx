@@ -23,7 +23,12 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
+import {
+  ActionConnector,
+  ActionConnectorMode,
+  ActionTypeRegistryContract,
+  IErrorObject,
+} from '../../../types';
 
 export interface TestConnectorFormProps {
   connector: ActionConnector;
@@ -90,6 +95,7 @@ export const TestConnectorForm = ({
               }
               messageVariables={[]}
               actionConnector={connector}
+              executionMode={ActionConnectorMode.Test}
             />
           </Suspense>
         </EuiErrorBoundary>

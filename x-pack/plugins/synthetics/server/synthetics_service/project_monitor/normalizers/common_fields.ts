@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import { formatLocation } from '../../../../common/utils/location_formatter';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import {
   BrowserFields,
@@ -73,6 +74,7 @@ export const getNormalizeCommonFields = ({
     [ConfigKey.TIMEOUT]: monitor.timeout
       ? getValueInSeconds(monitor.timeout)
       : defaultFields[ConfigKey.TIMEOUT],
+    [ConfigKey.CONFIG_HASH]: monitor.hash || defaultFields[ConfigKey.CONFIG_HASH],
   };
   return normalizedFields;
 };
@@ -107,9 +109,9 @@ export const getMonitorLocations = ({
       );
     }) || [];
 
-  return [...publicLocs, ...privateLocs].filter(
-    (location) => location !== undefined
-  ) as BrowserFields[ConfigKey.LOCATIONS];
+  return [...publicLocs, ...privateLocs]
+    .filter((location) => location !== undefined)
+    .map((loc) => formatLocation(loc!)) as BrowserFields[ConfigKey.LOCATIONS];
 };
 
 export const getUnsupportedKeysError = (

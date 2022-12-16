@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { getSimpleRule } from './get_simple_rule';
 
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
  */
-export const getSimpleRuleWithoutRuleId = (): CreateRulesSchema => {
+export const getSimpleRuleWithoutRuleId = (): RuleCreateProps => {
   const simpleRule = getSimpleRule();
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...ruleWithoutId } = simpleRule;

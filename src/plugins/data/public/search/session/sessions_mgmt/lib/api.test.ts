@@ -80,8 +80,10 @@ describe('Search Sessions Management API', () => {
             ],
             "appId": "pizza",
             "created": undefined,
+            "errors": undefined,
             "expires": undefined,
             "id": "hello-pizza-123",
+            "idMapping": Array [],
             "initialState": Object {},
             "name": "Veggie",
             "numSearches": 0,
@@ -192,7 +194,7 @@ describe('Search Sessions Management API', () => {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
       });
-      await api.sendCancel('abc-123-cool-session-ID');
+      await api.sendDelete('abc-123-cool-session-ID');
 
       expect(mockCoreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'The search session was deleted.',
@@ -207,7 +209,7 @@ describe('Search Sessions Management API', () => {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
       });
-      await api.sendCancel('abc-123-cool-session-ID');
+      await api.sendDelete('abc-123-cool-session-ID');
 
       expect(mockCoreStart.notifications.toasts.addError).toHaveBeenCalledWith(
         new Error('implementation is so bad'),

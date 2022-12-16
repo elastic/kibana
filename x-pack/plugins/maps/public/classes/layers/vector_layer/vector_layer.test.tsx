@@ -87,7 +87,9 @@ describe('cloneDescriptor', () => {
         source: new MockSource() as unknown as IVectorSource,
         customIcons: [],
       });
-      const clonedDescriptor = await layer.cloneDescriptor();
+      const clones = await layer.cloneDescriptor();
+      expect(clones.length).toBe(1);
+      const clonedDescriptor = clones[0];
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
       // Should update style field belonging to join
       // @ts-expect-error
@@ -124,7 +126,9 @@ describe('cloneDescriptor', () => {
         source: new MockSource() as unknown as IVectorSource,
         customIcons: [],
       });
-      const clonedDescriptor = await layer.cloneDescriptor();
+      const clones = await layer.cloneDescriptor();
+      expect(clones.length).toBe(1);
+      const clonedDescriptor = clones[0];
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
       // Should update style field belonging to join
       // @ts-expect-error

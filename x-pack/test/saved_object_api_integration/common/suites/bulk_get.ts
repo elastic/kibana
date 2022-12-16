@@ -117,8 +117,8 @@ export function bulkGetTestSuiteFactory(context: FtrProviderContext) {
         });
 
         after(async () => {
-          await testDataLoader.deleteFtrSpaces();
           await testDataLoader.deleteFtrSavedObjectsData();
+          await testDataLoader.deleteFtrSpaces();
         });
 
         for (const test of tests) {

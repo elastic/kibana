@@ -12,8 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, find, pickBy } from 'lodash';
 
-import { AddToCaseWrapper } from '../../cases/add_to_cases';
-import type { AddToTimelinePayload } from '../../timelines/get_add_to_timeline';
+import { PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../../common';
 import { QueryPackSelectable } from './query_pack_selectable';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
 import { useKibana } from '../../common/lib/kibana';
@@ -35,6 +34,7 @@ export interface LiveQueryFormFields {
   savedQueryId?: string | null;
   ecs_mapping: ECSMapping;
   packId: string[];
+  queryType: 'query' | 'pack';
 }
 
 interface DefaultLiveQueryFormFields {
@@ -56,7 +56,6 @@ interface LiveQueryFormProps {
   formType?: FormType;
   enabled?: boolean;
   hideAgentsField?: boolean;
-  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -66,9 +65,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   formType = 'steps',
   enabled = true,
   hideAgentsField = false,
-  addToTimeline,
 }) => {
-  const permissions = useKibana().services.application.capabilities.osquery;
+  const { application, appName } = useKibana().services;
+  const permissions = application.capabilities.osquery;
   const canRunPacks = useMemo(
     () =>
       !!((permissions.runSavedQueries || permissions.writeLiveQueries) && permissions.readPacks),
@@ -97,7 +96,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const [showSavedQueryFlyout, setShowSavedQueryFlyout] = useState(false);
-  const [queryType, setQueryType] = useState<string>('query');
   const [isLive, setIsLive] = useState(false);
 
   const queryState = getFieldState('query');
@@ -105,6 +103,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const handleShowSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(true), []);
   const handleCloseSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(false), []);
 
+  const { queryType } = watchedValues;
   const {
     data,
     isLoading,
@@ -211,26 +210,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const singleQueryDetails = useMemo(() => liveQueryDetails?.queries?.[0], [liveQueryDetails]);
   const liveQueryActionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails]);
-  const agentIds = useMemo(() => liveQueryDetails?.agents, [liveQueryDetails?.agents]);
-
-  const addToCaseButton = useCallback(
-    (payload) => {
-      if (liveQueryActionId) {
-        return (
-          <AddToCaseWrapper
-            queryId={payload.queryId}
-            agentIds={agentIds}
-            actionId={liveQueryActionId}
-            isIcon={payload.isIcon}
-            isDisabled={payload.isDisabled}
-          />
-        );
-      }
-
-      return <></>;
-    },
-    [agentIds, liveQueryActionId]
-  );
 
   const resultsStepContent = useMemo(
     () =>
@@ -240,8 +219,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           ecsMapping={serializedData.ecs_mapping}
           endDate={singleQueryDetails?.expiration}
           agentIds={singleQueryDetails?.agents}
-          addToTimeline={addToTimeline}
-          addToCase={addToCaseButton}
+          liveQueryActionId={liveQueryActionId}
         />
       ) : null,
     [
@@ -249,8 +227,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       singleQueryDetails?.expiration,
       singleQueryDetails?.agents,
       serializedData.ecs_mapping,
-      addToTimeline,
-      addToCaseButton,
+      liveQueryActionId,
     ]
   );
 
@@ -265,7 +242,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       }
 
       if (defaultValue?.packId && canRunPacks) {
-        setQueryType('pack');
+        setValue('queryType', 'pack');
 
         if (!isPackDataFetched) return;
         const selectedPackOption = find(packsData?.data, ['id', defaultValue.packId]);
@@ -285,11 +262,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       }
 
       if (canRunSingleQuery) {
-        return setQueryType('query');
+        return setValue('queryType', 'query');
       }
 
       if (canRunPacks) {
-        return setQueryType('pack');
+        return setValue('queryType', 'pack');
       }
     }
   }, [canRunPacks, canRunSingleQuery, defaultValue, isPackDataFetched, packsData?.data, setValue]);
@@ -310,17 +287,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     }
   }, [queryType, cleanupLiveQuery, resetField, setValue, clearErrors, defaultValue]);
 
+  const groupStyles = useMemo(() => ({ gap: 16 }), []);
+
   return (
     <>
       <FormProvider {...hooksForm}>
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup direction="column" css={groupStyles}>
           {queryField && (
-            <QueryPackSelectable
-              queryType={queryType}
-              setQueryType={setQueryType}
-              canRunPacks={canRunPacks}
-              canRunSingleQuery={canRunSingleQuery}
-            />
+            <QueryPackSelectable canRunPacks={canRunPacks} canRunSingleQuery={canRunSingleQuery} />
           )}
           {!hideAgentsField && (
             <EuiFlexItem>
@@ -330,9 +304,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           {queryType === 'pack' ? (
             <PackFieldWrapper
               liveQueryDetails={liveQueryDetails}
-              addToTimeline={addToTimeline}
               submitButtonContent={submitButtonContent}
-              addToCase={addToCaseButton}
               showResultsHeader
             />
           ) : (
@@ -349,7 +321,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
-          isExternal={!!addToTimeline}
+          isExternal={appName !== OSQUERY_PLUGIN_NAME}
           onClose={handleCloseSaveQueryFlyout}
           defaultValue={serializedData}
         />

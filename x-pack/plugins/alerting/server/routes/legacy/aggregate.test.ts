@@ -54,6 +54,11 @@ describe('aggregateAlertRoute', () => {
         pending: 1,
         unknown: 0,
       },
+      ruleLastRunOutcome: {
+        succeeded: 1,
+        failed: 2,
+        warning: 3,
+      },
     };
     rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
@@ -76,6 +81,11 @@ describe('aggregateAlertRoute', () => {
             "ok": 15,
             "pending": 1,
             "unknown": 0,
+          },
+          "ruleLastRunOutcome": Object {
+            "failed": 2,
+            "succeeded": 1,
+            "warning": 3,
           },
         },
       }
@@ -112,6 +122,11 @@ describe('aggregateAlertRoute', () => {
         active: 23,
         pending: 1,
         unknown: 0,
+      },
+      ruleLastRunOutcome: {
+        succeeded: 1,
+        failed: 2,
+        warning: 3,
       },
     });
 

@@ -8,7 +8,6 @@
 import { curry } from 'lodash';
 import { TypeOf } from '@kbn/config-schema';
 
-import { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -54,10 +53,6 @@ export { ServiceNowSIRConnectorTypeId, serviceNowSIRTable };
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchemaSIR>;
 
-interface GetConnectorTypeParams {
-  logger: Logger;
-}
-
 export type ServiceNowConnectorType<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
   T extends Record<string, unknown> = ExecutorParams
@@ -69,10 +64,10 @@ export type ServiceNowConnectorTypeExecutorOptions<
 > = ConnectorTypeExecutorOptions<C, ServiceNowSecretConfigurationType, T>;
 
 // connector type definition
-export function getServiceNowSIRConnectorType(
-  params: GetConnectorTypeParams
-): ServiceNowConnectorType<ServiceNowPublicConfigurationType, ExecutorParams> {
-  const { logger } = params;
+export function getServiceNowSIRConnectorType(): ServiceNowConnectorType<
+  ServiceNowPublicConfigurationType,
+  ExecutorParams
+> {
   return {
     id: ServiceNowSIRConnectorTypeId,
     minimumLicenseRequired: 'platinum',
@@ -97,7 +92,6 @@ export function getServiceNowSIRConnectorType(
       },
     },
     executor: curry(executor)({
-      logger,
       actionTypeId: ServiceNowSIRConnectorTypeId,
       createService: createExternalService,
       api: apiSIR,
@@ -109,12 +103,10 @@ export function getServiceNowSIRConnectorType(
 const supportedSubActions: string[] = ['getFields', 'pushToService', 'getChoices', 'getIncident'];
 async function executor(
   {
-    logger,
     actionTypeId,
     createService,
     api,
   }: {
-    logger: Logger;
     actionTypeId: string;
     createService: ServiceFactory;
     api: ExternalServiceAPI;
@@ -124,7 +116,8 @@ async function executor(
     ExecutorParams
   >
 ): Promise<ConnectorTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
-  const { actionId, config, params, secrets, services, configurationUtilities } = execOptions;
+  const { actionId, config, params, secrets, services, configurationUtilities, logger } =
+    execOptions;
   const { subAction, subActionParams } = params;
   const connectorTokenClient = services.connectorTokenClient;
   const externalServiceConfig = snExternalServiceConfig[actionTypeId];

@@ -9,7 +9,6 @@ import type { EuiCommentProps } from '@elastic/eui';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getFormattedComments } from '../../utils/helpers';
 import type { ExceptionListItemIdentifiers } from '../../utils/types';
@@ -17,14 +16,14 @@ import * as i18n from './translations';
 import { ExceptionItemCardHeader } from './header';
 import { ExceptionItemCardConditions } from './conditions';
 import { ExceptionItemCardMetaInfo } from './meta';
-import type { ExceptionListRuleReferencesSchema } from '../../../../../common/detection_engine/schemas/response';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../common/detection_engine/rule_exceptions';
 import { ExceptionItemCardComments } from './comments';
 
 export interface ExceptionItemProps {
   exceptionItem: ExceptionListItemSchema;
-  listType: ExceptionListTypeEnum;
+  isEndpoint: boolean;
   disableActions: boolean;
-  ruleReferences: ExceptionListRuleReferencesSchema | null;
+  listAndReferences: ExceptionListRuleReferencesSchema | null;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
   dataTestSubj: string;
@@ -33,8 +32,8 @@ export interface ExceptionItemProps {
 const ExceptionItemCardComponent = ({
   disableActions,
   exceptionItem,
-  listType,
-  ruleReferences,
+  isEndpoint,
+  listAndReferences,
   onDeleteException,
   onEditException,
   dataTestSubj,
@@ -65,19 +64,17 @@ const ExceptionItemCardComponent = ({
               {
                 key: 'edit',
                 icon: 'controlsHorizontal',
-                label:
-                  listType === ExceptionListTypeEnum.ENDPOINT
-                    ? i18n.ENDPOINT_EXCEPTION_ITEM_EDIT_BUTTON
-                    : i18n.EXCEPTION_ITEM_EDIT_BUTTON,
+                label: isEndpoint
+                  ? i18n.ENDPOINT_EXCEPTION_ITEM_EDIT_BUTTON
+                  : i18n.EXCEPTION_ITEM_EDIT_BUTTON,
                 onClick: handleEdit,
               },
               {
                 key: 'delete',
                 icon: 'trash',
-                label:
-                  listType === ExceptionListTypeEnum.ENDPOINT
-                    ? i18n.ENDPOINT_EXCEPTION_ITEM_DELETE_BUTTON
-                    : i18n.EXCEPTION_ITEM_DELETE_BUTTON,
+                label: isEndpoint
+                  ? i18n.ENDPOINT_EXCEPTION_ITEM_DELETE_BUTTON
+                  : i18n.EXCEPTION_ITEM_DELETE_BUTTON,
                 onClick: handleDelete,
               },
             ]}
@@ -88,7 +85,7 @@ const ExceptionItemCardComponent = ({
         <EuiFlexItem data-test-subj={`${dataTestSubj}-meta`}>
           <ExceptionItemCardMetaInfo
             item={exceptionItem}
-            references={ruleReferences}
+            listAndReferences={listAndReferences}
             dataTestSubj="exceptionItemCardMetaInfo"
           />
         </EuiFlexItem>

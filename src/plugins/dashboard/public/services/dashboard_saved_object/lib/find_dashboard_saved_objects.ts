@@ -13,11 +13,12 @@ import {
   SimpleSavedObject,
 } from '@kbn/core/public';
 
-import { DashboardConstants } from '../../..';
-import type { DashboardAttributes } from '../../../application';
+import { DashboardAttributes } from '../../../../common';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../dashboard_constants';
 
 export interface FindDashboardSavedObjectsArgs {
   hasReference?: SavedObjectsFindOptionsReference[];
+  hasNoReference?: SavedObjectsFindOptionsReference[];
   savedObjectsClient: SavedObjectsClientContract;
   search: string;
   size: number;
@@ -31,16 +32,18 @@ export interface FindDashboardSavedObjectsResponse {
 export async function findDashboardSavedObjects({
   savedObjectsClient,
   hasReference,
+  hasNoReference,
   search,
   size,
 }: FindDashboardSavedObjectsArgs): Promise<FindDashboardSavedObjectsResponse> {
   const { total, savedObjects } = await savedObjectsClient.find<DashboardAttributes>({
-    type: DashboardConstants.DASHBOARD_SAVED_OBJECT_TYPE,
+    type: DASHBOARD_SAVED_OBJECT_TYPE,
     search: search ? `${search}*` : undefined,
     searchFields: ['title^3', 'description'],
     defaultSearchOperator: 'AND' as 'AND',
     perPage: size,
     hasReference,
+    hasNoReference,
     page: 1,
   });
   return {
@@ -59,7 +62,7 @@ export async function findDashboardSavedObjectsByIds(
   ids: string[]
 ): Promise<FindDashboardBySavedObjectIdsResult[]> {
   const { savedObjects } = await savedObjectsClient.bulkGet(
-    ids.map((id) => ({ id, type: DashboardConstants.DASHBOARD_SAVED_OBJECT_TYPE }))
+    ids.map((id) => ({ id, type: DASHBOARD_SAVED_OBJECT_TYPE }))
   );
 
   return savedObjects.map((savedObjectResult) => {

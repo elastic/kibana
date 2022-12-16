@@ -5,20 +5,26 @@
  * 2.0.
  */
 
-import { SLO } from '../../types/models';
-import { GetSLOResponse } from '../../types/rest_specs';
+import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
+import { GetSLOResponse, getSLOResponseSchema } from '../../types/rest_specs';
 import { SLORepository } from './slo_repository';
+import { SLIClient } from './sli_client';
+import { computeSLI, computeErrorBudget } from '../../domain/services';
 
 export class GetSLO {
-  constructor(private repository: SLORepository) {}
+  constructor(private repository: SLORepository, private sliClient: SLIClient) {}
 
   public async execute(sloId: string): Promise<GetSLOResponse> {
     const slo = await this.repository.findById(sloId);
-    return this.toResponse(slo);
+
+    const indicatorDataBySlo = await this.sliClient.fetchCurrentSLIData([slo]);
+    const sloWithSummary = computeSloWithSummary(slo, indicatorDataBySlo);
+
+    return this.toResponse(sloWithSummary);
   }
 
-  private toResponse(slo: SLO): GetSLOResponse {
-    return {
+  private toResponse(slo: SLOWithSummary): GetSLOResponse {
+    return getSLOResponseSchema.encode({
       id: slo.id,
       name: slo.name,
       description: slo.description,
@@ -26,9 +32,20 @@ export class GetSLO {
       time_window: slo.time_window,
       budgeting_method: slo.budgeting_method,
       objective: slo.objective,
+      settings: slo.settings,
+      summary: slo.summary,
       revision: slo.revision,
       created_at: slo.created_at,
       updated_at: slo.updated_at,
-    };
+    });
   }
+}
+
+function computeSloWithSummary(
+  slo: SLO,
+  indicatorDataBySlo: Record<SLOId, IndicatorData>
+): SLOWithSummary {
+  const sliValue = computeSLI(indicatorDataBySlo[slo.id]);
+  const errorBudget = computeErrorBudget(slo, indicatorDataBySlo[slo.id]);
+  return { ...slo, summary: { sli_value: sliValue, error_budget: errorBudget } };
 }

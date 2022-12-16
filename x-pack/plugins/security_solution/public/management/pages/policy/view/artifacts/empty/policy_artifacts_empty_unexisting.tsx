@@ -13,7 +13,6 @@ import {
 } from '@elastic/eui';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import type { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
-import type { EventFiltersPageLocation } from '../../../../event_filters/types';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface CommonProps {
@@ -21,9 +20,7 @@ interface CommonProps {
   policyName: string;
   labels: typeof POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS;
   getPolicyArtifactsPath: (policyId: string) => string;
-  getArtifactPath: (
-    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
-  ) => string;
+  getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
 }
 
 export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(

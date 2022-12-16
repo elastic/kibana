@@ -66,6 +66,7 @@ const alert = {
     end: '2020-01-01T03:00:00.000Z',
     duration: '2343252346',
   },
+  flapping: false,
 };
 
 const action = {
@@ -79,7 +80,7 @@ describe('AlertingEventLogger', () => {
   let alertingEventLogger: AlertingEventLogger;
 
   beforeAll(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(new Date(mockNow));
   });
 
@@ -223,6 +224,12 @@ describe('AlertingEventLogger', () => {
           ...event.rule,
           name: 'my-super-cool-rule',
         },
+        kibana: {
+          ...event.kibana,
+          alerting: {
+            outcome: 'success',
+          },
+        },
         message: 'success!',
       });
     });
@@ -259,6 +266,12 @@ describe('AlertingEventLogger', () => {
         },
         error: {
           message: 'something went wrong!',
+        },
+        kibana: {
+          ...event.kibana,
+          alerting: {
+            outcome: 'failure',
+          },
         },
         message: 'rule failed!',
       });
@@ -446,6 +459,7 @@ describe('AlertingEventLogger', () => {
           ...event?.kibana,
           alerting: {
             status: 'error',
+            outcome: 'failure',
           },
         },
         message: 'test:123: execution failed',
@@ -484,6 +498,7 @@ describe('AlertingEventLogger', () => {
           ...event?.kibana,
           alerting: {
             status: 'error',
+            outcome: 'failure',
           },
         },
         message: 'test:123: execution failed',
@@ -526,6 +541,7 @@ describe('AlertingEventLogger', () => {
           ...event?.kibana,
           alerting: {
             status: 'error',
+            outcome: 'failure',
           },
         },
         message: 'i am an existing error message',
@@ -560,6 +576,7 @@ describe('AlertingEventLogger', () => {
           ...event?.kibana,
           alerting: {
             status: 'warning',
+            outcome: 'warning',
           },
         },
         message: 'something funky happened',
@@ -594,6 +611,7 @@ describe('AlertingEventLogger', () => {
           ...event?.kibana,
           alerting: {
             status: 'warning',
+            outcome: 'warning',
           },
         },
         message: 'something funky happened',
@@ -630,6 +648,7 @@ describe('AlertingEventLogger', () => {
           ...event?.kibana,
           alerting: {
             status: 'warning',
+            outcome: 'success',
           },
         },
         message: 'success!',

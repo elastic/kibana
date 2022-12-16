@@ -10,12 +10,12 @@ import { ROLES } from '../../../common/test';
 
 import { expandFirstAlertActions } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
-import { cleanKibana, waitForPageToBeLoaded } from '../../tasks/common';
+import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login, visit, waitForPageWithoutDateRange } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
-import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../screens/alerts';
+import { ATTACH_ALERT_TO_CASE_BUTTON, ATTACH_TO_NEW_CASE_BUTTON } from '../../screens/alerts';
 import { LOADING_INDICATOR } from '../../screens/security_header';
 
 const loadDetectionsPage = (role: ROLES) => {
@@ -37,12 +37,18 @@ describe('Alerts timeline', () => {
     beforeEach(() => {
       login(ROLES.reader);
       loadDetectionsPage(ROLES.reader);
-      waitForPageToBeLoaded();
     });
 
-    it('should not allow user with read only privileges to attach alerts to cases', () => {
-      // Disabled actions for read only users are hidden, so actions button should not show
-      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
+    it('should not allow user with read only privileges to attach alerts to existing cases', () => {
+      // Disabled actions for read only users are hidden, so only open alert details button should show
+      expandFirstAlertActions();
+      cy.get(ATTACH_ALERT_TO_CASE_BUTTON).should('not.exist');
+    });
+
+    it('should not allow user with read only privileges to attach alerts to a new case', () => {
+      // Disabled actions for read only users are hidden, so only open alert details button should show
+      expandFirstAlertActions();
+      cy.get(ATTACH_TO_NEW_CASE_BUTTON).should('not.exist');
     });
   });
 

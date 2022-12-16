@@ -7,25 +7,31 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
-import { useLoadRuleAlertsAggs } from '../../../../hooks/use_load_rule_alerts_aggregations';
+import { useLoadAlertSummary } from '../../../../hooks/use_load_alert_summary';
 import { useLoadRuleTypes } from '../../../../hooks/use_load_rule_types';
 import { RuleAlertsSummaryProps } from '.';
 import { AlertSummaryWidgetError, AlertsSummaryWidgetUI } from './components';
 
-export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummaryProps) => {
+export const RuleAlertsSummary = ({
+  filter,
+  filteredRuleTypes,
+  onClick,
+  rule,
+  timeRange,
+}: RuleAlertsSummaryProps) => {
   const [features, setFeatures] = useState<string>('');
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
   });
   const {
-    ruleAlertsAggs: { active, recovered },
-    isLoadingRuleAlertsAggs,
-    errorRuleAlertsAggs,
-  } = useLoadRuleAlertsAggs({
-    ruleId: rule.id,
+    alertSummary: { active, recovered },
+    isLoading,
+    error,
+  } = useLoadAlertSummary({
     features,
+    filter,
+    timeRange,
   });
 
   useEffect(() => {
@@ -35,18 +41,14 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
     } else setFeatures(rule.consumer);
   }, [rule, ruleTypes]);
 
-  if (isLoadingRuleAlertsAggs) return <EuiLoadingSpinner />;
-  if (errorRuleAlertsAggs) return <AlertSummaryWidgetError />;
+  if (isLoading) return <EuiLoadingSpinner />;
+  if (error) return <AlertSummaryWidgetError />;
   return (
     <AlertsSummaryWidgetUI
       active={active}
+      onClick={onClick}
       recovered={recovered}
-      timeRange={
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.last30days"
-          defaultMessage="Last 30 days"
-        />
-      }
+      timeRangeTitle={timeRange.title}
     />
   );
 };

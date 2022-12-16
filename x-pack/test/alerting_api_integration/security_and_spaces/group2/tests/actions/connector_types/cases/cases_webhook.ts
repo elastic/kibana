@@ -456,7 +456,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: false,
+                retry: true,
                 message: 'an error occurred while running the action',
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create case. Error: JSON Error: Create case JSON body must be valid JSON.  ',
@@ -486,7 +486,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: false,
+                retry: true,
                 message: 'an error occurred while running the action',
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to update case with id 12345. Error: JSON Error: Update case JSON body must be valid JSON.  ',
@@ -553,7 +553,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: false,
+                retry: true,
                 message: 'an error occurred while running the action',
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create comment at case with id 123. Error: JSON Error: Create comment JSON body must be valid JSON.  ',
@@ -620,7 +620,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: false,
+                retry: true,
                 message: 'an error occurred while running the action',
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create case. Error: Invalid Create case URL: Error: Invalid protocol.  ',
@@ -650,7 +650,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: false,
+                retry: true,
                 message: 'an error occurred while running the action',
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to update case with id 12345. Error: Invalid Update case URL: Error: Invalid URL.  ',
@@ -717,7 +717,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: false,
+                retry: true,
                 message: 'an error occurred while running the action',
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create comment at case with id 123. Error: Invalid Create comment URL: Error: Invalid URL.  ',

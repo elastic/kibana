@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import { KueryNode } from '@kbn/core-saved-objects-api-server';
+import { KueryNode } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
-import { flatMap, get } from 'lodash';
+import { flatMap, get, isEmpty } from 'lodash';
 import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { parseDuration } from '.';
 import { IExecutionLog, IExecutionLogResult, EMPTY_EXECUTION_KPI_RESULT } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
+const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
 
 const RULE_ID_FIELD = 'rule.id';
+const SPACE_ID_FIELD = 'kibana.space_ids';
 const RULE_NAME_FIELD = 'rule.name';
 const PROVIDER_FIELD = 'event.provider';
 const START_FIELD = 'event.start';
 const ACTION_FIELD = 'event.action';
+const ALERTING_OUTCOME_FIELD = 'kibana.alerting.outcome';
 const OUTCOME_FIELD = 'event.outcome';
 const DURATION_FIELD = 'event.duration';
 const MESSAGE_FIELD = 'message';
@@ -148,13 +151,14 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
           // Bucket by execution UUID
           terms: {
             field: EXECUTION_UUID_FIELD,
-            size: DEFAULT_MAX_BUCKETS_LIMIT,
+            size: DEFAULT_MAX_KPI_BUCKETS_LIMIT,
+            order: formatSortForTermSort([{ timestamp: { order: 'desc' } }]),
           },
           aggs: {
             executionUuidSorted: {
               bucket_sort: {
                 from: 0,
-                size: 1000,
+                size: DEFAULT_MAX_KPI_BUCKETS_LIMIT,
                 gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
               },
             },
@@ -167,7 +171,7 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
               aggs: {
                 actionOutcomes: {
                   terms: {
-                    field: 'event.outcome',
+                    field: OUTCOME_FIELD,
                     size: 2,
                   },
                 },
@@ -181,6 +185,11 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
                 },
               },
               aggs: {
+                executeStartTime: {
+                  min: {
+                    field: START_FIELD,
+                  },
+                },
                 numTriggeredActions: {
                   sum: {
                     field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
@@ -212,9 +221,17 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
                   },
                 },
                 ruleExecutionOutcomes: {
-                  terms: {
-                    field: 'event.outcome',
-                    size: 2,
+                  multi_terms: {
+                    size: 3,
+                    terms: [
+                      {
+                        field: ALERTING_OUTCOME_FIELD,
+                        missing: '',
+                      },
+                      {
+                        field: OUTCOME_FIELD,
+                      },
+                    ],
                   },
                 },
               },
@@ -394,7 +411,9 @@ export function getExecutionLogAggregation({
                         ERROR_MESSAGE_FIELD,
                         VERSION_FIELD,
                         RULE_ID_FIELD,
+                        SPACE_ID_FIELD,
                         RULE_NAME_FIELD,
+                        ALERTING_OUTCOME_FIELD,
                       ],
                     },
                   },
@@ -426,7 +445,7 @@ export function getExecutionLogAggregation({
 function buildDslFilterQuery(filter: IExecutionLogAggOptions['filter']) {
   try {
     const filterKueryNode = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
-    return filter ? toElasticsearchQuery(filterKueryNode) : undefined;
+    return filterKueryNode ? toElasticsearchQuery(filterKueryNode) : undefined;
   } catch (err) {
     throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
   }
@@ -466,16 +485,20 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const actionExecutionError =
     actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
 
-  const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source;
-  const status = outcomeAndMessage ? outcomeAndMessage?.event?.outcome ?? '' : '';
+  const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source ?? {};
+  let status = outcomeAndMessage.kibana?.alerting?.outcome ?? '';
+  if (isEmpty(status)) {
+    status = outcomeAndMessage.event?.outcome ?? '';
+  }
+  const outcomeMessage = outcomeAndMessage.message ?? '';
+  const outcomeErrorMessage = outcomeAndMessage.error?.message ?? '';
   const message =
-    status === 'failure'
-      ? `${outcomeAndMessage?.message ?? ''} - ${outcomeAndMessage?.error?.message ?? ''}`
-      : outcomeAndMessage?.message ?? '';
-  const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
+    status === 'failure' ? `${outcomeMessage} - ${outcomeErrorMessage}` : outcomeMessage;
+  const version = outcomeAndMessage.kibana?.version ?? '';
 
   const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
-  const ruleName = outcomeAndMessage ? outcomeAndMessage?.rule?.name ?? '' : '';
+  const spaceIds = outcomeAndMessage ? outcomeAndMessage?.kibana?.space_ids ?? [] : [];
+  const ruleName = outcomeAndMessage ? outcomeAndMessage.rule?.name ?? '' : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
@@ -495,6 +518,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     schedule_delay_ms: scheduleDelayUs / Millis2Nanos,
     timed_out: timedOut,
     rule_id: ruleId,
+    space_ids: spaceIds,
     rule_name: ruleName,
   };
 }
@@ -504,6 +528,7 @@ function formatExecutionKPIAggBuckets(buckets: IExecutionUuidKpiAggBucket[]) {
     success: 0,
     unknown: 0,
     failure: 0,
+    warning: 0,
     activeAlerts: 0,
     newAlerts: 0,
     recoveredAlerts: 0,
@@ -516,14 +541,31 @@ function formatExecutionKPIAggBuckets(buckets: IExecutionUuidKpiAggBucket[]) {
     const actionExecutionOutcomes = bucket?.actionExecution?.actionOutcomes?.buckets ?? [];
 
     const ruleExecutionCount = bucket?.ruleExecution?.doc_count ?? 0;
-    const successRuleExecution =
-      ruleExecutionOutcomes.find((subBucket) => subBucket?.key === 'success')?.doc_count ?? 0;
-    const failureRuleExecution =
-      ruleExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
+    const outcomes = {
+      successRuleExecution: 0,
+      failureRuleExecution: 0,
+      warningRuleExecution: 0,
+    };
+    ruleExecutionOutcomes.reduce((acc, subBucket) => {
+      const key = subBucket.key[0] ? subBucket.key[0] : subBucket.key[1];
+      if (key === 'success') {
+        acc.successRuleExecution = subBucket.doc_count ?? 0;
+      } else if (key === 'failure') {
+        acc.failureRuleExecution = subBucket.doc_count ?? 0;
+      } else if (key === 'warning') {
+        acc.warningRuleExecution = subBucket.doc_count ?? 0;
+      }
+      return acc;
+    }, outcomes);
 
-    objToReturn.success += successRuleExecution;
-    objToReturn.unknown += ruleExecutionCount - (successRuleExecution + failureRuleExecution);
-    objToReturn.failure += failureRuleExecution;
+    objToReturn.success += outcomes.successRuleExecution;
+    objToReturn.unknown +=
+      ruleExecutionCount -
+      (outcomes.successRuleExecution +
+        outcomes.failureRuleExecution +
+        outcomes.warningRuleExecution);
+    objToReturn.failure += outcomes.failureRuleExecution;
+    objToReturn.warning += outcomes.warningRuleExecution;
     objToReturn.activeAlerts += bucket?.ruleExecution?.numActiveAlerts.value ?? 0;
     objToReturn.newAlerts += bucket?.ruleExecution?.numNewAlerts.value ?? 0;
     objToReturn.recoveredAlerts += bucket?.ruleExecution?.numRecoveredAlerts.value ?? 0;
