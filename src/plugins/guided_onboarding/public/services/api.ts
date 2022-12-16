@@ -17,10 +17,16 @@ import {
   concat,
   from,
 } from 'rxjs';
-import type { GuideState, GuideId, GuideStep, GuideStepIds } from '@kbn/guided-onboarding';
+import type {
+  GuideState,
+  GuideId,
+  GuideStep,
+  GuideStepIds,
+  GuideConfig,
+} from '@kbn/guided-onboarding';
 
 import { API_BASE_PATH } from '../../common';
-import type { PluginState, PluginStatus, GuideConfig } from '../../common';
+import type { PluginState, PluginStatus } from '../../common';
 import { GuidedOnboardingApi } from '../types';
 import {
   getInProgressStepId,
@@ -169,7 +175,7 @@ export class ApiService implements GuidedOnboardingApi {
   /**
    * Activates a guide by guideId.
    * This is useful for the onboarding landing page, when a user selects a guide to start or continue.
-   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
+   * @param {GuideId} guideId the id of the guide (one of search, kubernetes, siem)
    * @param {GuideState} guide (optional) the selected guide state, if it exists (i.e., if a user is continuing a guide)
    * @return {Promise} a promise with the updated plugin state
    */
@@ -247,7 +253,7 @@ export class ApiService implements GuidedOnboardingApi {
    * Completes a guide.
    * Updates the overall guide status to 'complete', and marks it as inactive.
    * This is useful for the dropdown panel, when the user clicks the "Continue using Elastic" button after completing all steps.
-   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
+   * @param {GuideId} guideId the id of the guide (one of search, kubernetes, siem)
    * @return {Promise} a promise with the updated plugin state
    */
   public async completeGuide(guideId: GuideId): Promise<{ pluginState: PluginState } | undefined> {
@@ -277,7 +283,7 @@ export class ApiService implements GuidedOnboardingApi {
    * An observable with the boolean value if the step is in progress (i.e., user clicked "Start" on a step).
    * Returns true, if the passed params identify the guide step that is currently in progress.
    * Returns false otherwise.
-   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
+   * @param {GuideId} guideId the id of the guide (one of search, kubernetes, siem)
    * @param {GuideStepIds} stepId the id of the step in the guide
    * @return {Observable} an observable with the boolean value
    */
@@ -294,7 +300,7 @@ export class ApiService implements GuidedOnboardingApi {
    * An observable with the boolean value if the step is ready_to_complete (i.e., user needs to click the "Mark done" button).
    * Returns true, if the passed params identify the guide step that is currently ready_to_complete.
    * Returns false otherwise.
-   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
+   * @param {GuideId} guideId the id of the guide (one of search, kubernetes, siem)
    * @param {GuideStepIds} stepId the id of the step in the guide
    * @return {Observable} an observable with the boolean value
    */
@@ -310,7 +316,7 @@ export class ApiService implements GuidedOnboardingApi {
   /**
    * Updates the selected step to 'in_progress' state.
    * This is useful for the dropdown panel, when the user clicks the "Start" button for the active step.
-   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
+   * @param {GuideId} guideId the id of the guide (one of search, kubernetes, siem)
    * @param {GuideStepIds} stepId the id of the step
    * @return {Promise} a promise with the updated plugin state
    */
@@ -352,7 +358,7 @@ export class ApiService implements GuidedOnboardingApi {
   /**
    * Completes the guide step identified by the passed params.
    * A noop if the passed step is not active.
-   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
+   * @param {GuideId} guideId the id of the guide (one of search, kubernetes, siem)
    * @param {GuideStepIds} stepId the id of the step in the guide
    * @return {Promise} a promise with the updated state or undefined if the operation fails
    */

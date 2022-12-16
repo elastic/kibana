@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-import { GuidedOnboardingPlugin } from './plugin';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GuidedOnboardingExamplePluginSetup {}
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new GuidedOnboardingPlugin(initializerContext);
-}
-
-export type { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GuidedOnboardingExamplePluginStart {}

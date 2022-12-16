@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { testGuideConfig, testGuideId } from '../../common';
+import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
 import type { GuidesConfig } from '../../common';
 import {
   findGuideConfigByGuideId,

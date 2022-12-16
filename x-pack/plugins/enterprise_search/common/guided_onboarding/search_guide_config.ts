@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GuideConfig } from '@kbn/guided-onboarding-plugin/common';
+import type { GuideConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
 
 export const searchGuideId = 'search';

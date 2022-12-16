@@ -7,8 +7,9 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
+import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { API_BASE_PATH, testGuideConfig, testGuideId } from '../../common';
+import { API_BASE_PATH } from '../../common';
 import {
   testGuideNotActiveState,
   testGuideStep1InProgressState,

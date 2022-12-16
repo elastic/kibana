@@ -7,10 +7,6 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { GuidedOnboardingPlugin } from './plugin';
+import { GuidedOnboardingExamplePlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new GuidedOnboardingPlugin(initializerContext);
-}
-
-export type { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
+export const plugin = (ctx: PluginInitializerContext) => new GuidedOnboardingExamplePlugin(ctx);
