@@ -339,8 +339,6 @@ async function installPackageFromRegistry({
 
     // if the requested version is out-of-date of the latest package version, check if we allow it
     // if we don't allow it, return an error
-
-    console.log('Resolve Endpoint', pkgVersion, latestPackage.version);
     if (semverLt(pkgVersion, latestPackage.version)) {
       if (!installOutOfDateVersionOk) {
         throw new PackageOutdatedError(
