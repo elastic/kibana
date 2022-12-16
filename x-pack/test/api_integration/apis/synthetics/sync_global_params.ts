@@ -142,6 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(apiResponse.status).eql(200);
     });
+
     it('get list of params', async () => {
       const apiResponse = await supertestAPI
         .get(SYNTHETICS_API_URLS.PARAMS)
@@ -179,6 +180,32 @@ export default function ({ getService }: FtrProviderContext) {
       comparePolicies(
         packagePolicy,
         getTestBrowserSyntheticsPolicy({ name: browserMonitorJson.name, id: newMonitorId, params })
+      );
+    });
+
+    it('delete all params and sync again', async () => {
+      await kServer.savedObjects.clean({ types: [syntheticsParamType] });
+      const apiResponseK = await supertestAPI
+        .get(SYNTHETICS_API_URLS.SYNC_GLOBAL_PARAMS)
+        .set('kbn-xsrf', 'true')
+        .send({ key: 'test', value: 'test' });
+
+      expect(apiResponseK.status).eql(200);
+
+      const apiResponse = await supertestAPI.get(
+        '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+      );
+
+      const packagePolicy = apiResponse.body.items.find(
+        (pkgPolicy: PackagePolicy) =>
+          pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
+      );
+
+      expect(packagePolicy.policy_id).eql(testFleetPolicyID);
+
+      comparePolicies(
+        packagePolicy,
+        getTestBrowserSyntheticsPolicy({ name: browserMonitorJson.name, id: newMonitorId })
       );
     });
   });
