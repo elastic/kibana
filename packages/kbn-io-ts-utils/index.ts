@@ -19,3 +19,4 @@ export { toNumberRt } from './src/to_number_rt';
 export { toBooleanRt } from './src/to_boolean_rt';
 export { toJsonSchema } from './src/to_json_schema';
 export { nonEmptyStringRt } from './src/non_empty_string_rt';
+export { createLiteralValueFromUndefinedRT } from './src/literal_value_from_undefined_rt';
