@@ -32,6 +32,7 @@ export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttri
  *
  * @public
  * @deprecated This type reduces the type safety of your code. Create an interface for your specific saved object type or use `unknown` instead.
+ * @removeBy 9.0.0
  */
 export interface SavedObjectAttributes {
   [key: string]: SavedObjectAttribute;
