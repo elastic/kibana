@@ -12,7 +12,7 @@ import { calculateMetricInterval } from '../../../utils/calculate_metric_interva
 
 export const calculatedInterval = async (search: ESSearchClient, options: MetricsAPIRequest) => {
   const useModuleInterval =
-    options.timerange.interval === 'modules' &&
+    options.timerange.bucketCalculationMode === 'modules' &&
     isArray(options.modules) &&
     options.modules.length > 0;
 
@@ -27,8 +27,5 @@ export const calculatedInterval = async (search: ESSearchClient, options: Metric
       )
     : false;
 
-  const defaultInterval =
-    options.timerange.interval === 'modules' ? 'auto' : options.timerange.interval;
-
-  return isNumber(calcualatedInterval) ? `>=${calcualatedInterval}s` : defaultInterval;
+  return isNumber(calcualatedInterval) ? `>=${calcualatedInterval}s` : options.timerange.interval;
 };

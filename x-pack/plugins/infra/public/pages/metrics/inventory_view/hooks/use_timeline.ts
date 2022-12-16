@@ -16,10 +16,10 @@ import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
   SnapshotNodeResponseRT,
   SnapshotNodeResponse,
-  SnapshotRequest,
-  InfraTimerangeInput,
+  type SnapshotRequest,
+  type SnapshotTimerangeInput,
 } from '../../../../../common/http_api/snapshot_api';
-import {
+import type {
   InventoryItemType,
   SnapshotMetricType,
 } from '../../../../../common/inventory_models/types';
@@ -84,11 +84,10 @@ export function useTimeline(
 
   const endTime = currentTime + intervalInSeconds * 1000;
   const startTime = currentTime - timeLength * 1000;
-  const timerange: InfraTimerangeInput = {
+  const timerange: SnapshotTimerangeInput = {
     interval: displayInterval ?? '',
     to: endTime,
     from: startTime,
-    ignoreLookback: true,
     forceInterval: true,
   };
 

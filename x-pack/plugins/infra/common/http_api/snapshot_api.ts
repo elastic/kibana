@@ -56,16 +56,26 @@ export const SnapshotNodeResponseRT = rt.intersection([
   rt.partial({ interval: rt.string }),
 ]);
 
-export const InfraTimerangeInputRT = rt.intersection([
+export const InfraTimerangeInputRT = rt.type({
+  to: rt.number,
+  from: rt.number,
+  interval: rt.string,
+});
+
+export const SnapshotTimerangeInputRT = rt.intersection([
   rt.type({
-    interval: rt.string,
     to: rt.number,
     from: rt.number,
   }),
   rt.partial({
-    lookbackSize: rt.number,
-    ignoreLookback: rt.boolean,
+    interval: rt.string,
     forceInterval: rt.boolean,
+    lookbackSize: rt.union([
+      rt.number,
+      rt.literal('modules'),
+      rt.literal('auto'),
+      rt.literal('maxFixed'),
+    ]),
   }),
 ]);
 
@@ -107,27 +117,30 @@ export const SnapshotMetricInputRT = rt.union([
   SnapshotCustomMetricInputRT,
 ]);
 
-export const SnapshotRequestRT = rt.intersection([
-  rt.type({
-    timerange: InfraTimerangeInputRT,
-    metrics: rt.array(SnapshotMetricInputRT),
-    groupBy: rt.union([SnapshotGroupByRT, rt.null]),
-    nodeType: ItemTypeRT,
-    sourceId: rt.string,
-    includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(true)]),
-  }),
-  rt.partial({
-    accountId: rt.string,
-    region: rt.string,
-    filterQuery: rt.union([rt.string, rt.null]),
-    overrideCompositeSize: rt.number,
-  }),
-]);
+export const SnapshotRequestRT = rt.exact(
+  rt.intersection([
+    rt.type({
+      timerange: SnapshotTimerangeInputRT,
+      metrics: rt.array(SnapshotMetricInputRT),
+      groupBy: rt.union([SnapshotGroupByRT, rt.null]),
+      nodeType: ItemTypeRT,
+      sourceId: rt.string,
+      includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(true)]),
+    }),
+    rt.partial({
+      accountId: rt.string,
+      region: rt.string,
+      filterQuery: rt.union([rt.string, rt.null]),
+      overrideCompositeSize: rt.number,
+    }),
+  ])
+);
 
+export type InfraTimerangeInput = rt.TypeOf<typeof InfraTimerangeInputRT>;
 export type SnapshotNodePath = rt.TypeOf<typeof SnapshotNodePathRT>;
 export type SnapshotMetricInput = rt.TypeOf<typeof SnapshotMetricInputRT>;
 export type SnapshotCustomMetricInput = rt.TypeOf<typeof SnapshotCustomMetricInputRT>;
-export type InfraTimerangeInput = rt.TypeOf<typeof InfraTimerangeInputRT>;
+export type SnapshotTimerangeInput = rt.TypeOf<typeof SnapshotTimerangeInputRT>;
 export type SnapshotNodeMetric = rt.TypeOf<typeof SnapshotNodeMetricRT>;
 export type SnapshotGroupBy = rt.TypeOf<typeof SnapshotGroupByRT>;
 export type SnapshotRequest = rt.TypeOf<typeof SnapshotRequestRT>;

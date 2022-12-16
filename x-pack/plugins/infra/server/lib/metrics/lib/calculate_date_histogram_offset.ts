@@ -13,7 +13,7 @@ export const calculateDateHistogramOffset = (timerange: MetricsAPITimerange): st
   const { bucketSize } = calculateBucketSize(timerange);
 
   // negative offset to align buckets with full intervals (e.g. minutes)
-  const offset = (fromInSeconds % bucketSize) - bucketSize;
+  const offset = Math.floor((fromInSeconds % bucketSize) - bucketSize);
 
   // Because everything is being rounded to the nearest second, except the timerange,
   // we need to adjust the buckets to account for the millisecond offset otherwise

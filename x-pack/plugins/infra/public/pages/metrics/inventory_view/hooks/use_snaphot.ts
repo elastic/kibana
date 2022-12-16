@@ -13,9 +13,8 @@ import { throwErrors, createPlainError } from '../../../../../common/runtime_typ
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
   SnapshotNodeResponseRT,
-  SnapshotNodeResponse,
   SnapshotRequest,
-  InfraTimerangeInput,
+  SnapshotTimerangeInput,
 } from '../../../../../common/http_api/snapshot_api';
 
 export interface UseSnapshotRequest
@@ -24,11 +23,12 @@ export interface UseSnapshotRequest
   currentTime: number;
   sendRequestImmediately?: boolean;
   includeTimeseries?: boolean;
-  timerange?: InfraTimerangeInput;
+  timerange?: SnapshotTimerangeInput;
 }
 export function useSnapshot({
   timerange,
   currentTime,
+  groupBy = null,
   sendRequestImmediately = true,
   includeTimeseries = true,
   ...args
@@ -42,8 +42,8 @@ export function useSnapshot({
 
   const payload: Omit<SnapshotRequest, 'filterQuery'> = {
     ...args,
+    groupBy,
     timerange: timerange ?? {
-      interval: '1m',
       to: currentTime,
       from: currentTime - 1200 * 1000,
       lookbackSize: 5,
@@ -51,7 +51,7 @@ export function useSnapshot({
     includeTimeseries,
   };
 
-  const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(
+  const { error, loading, response, makeRequest } = useHTTPRequest(
     '/api/metrics/snapshot',
     'POST',
     JSON.stringify(payload),

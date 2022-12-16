@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { TimeRange } from '@kbn/es-query';
 import DateMath from '@kbn/datemath';
 import deepEqual from 'fast-deep-equal';
@@ -15,6 +15,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { FilterStateStore } from '@kbn/es-query';
+import { Subject } from 'rxjs';
 import { useUrlState } from '../../../../utils/use_url_state';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 
@@ -70,6 +71,7 @@ const reducer = (state: HostsState, action: Action): HostsState => {
 };
 
 export const useHostsUrlState = () => {
+  const refetch$ = useMemo(() => new Subject<string>(), []);
   const [urlState, setUrlState] = useUrlState<HostsState>({
     defaultState: INITIAL_HOSTS_STATE,
     decodeUrlState,
@@ -94,14 +96,17 @@ export const useHostsUrlState = () => {
   useEffect(() => {
     if (!deepEqual(state, urlState)) {
       setUrlState(state);
+    } else {
+      refetch$.next('reload');
     }
-  }, [setUrlState, state, urlState]);
+  }, [setUrlState, state, urlState, refetch$]);
 
   return {
     state,
     dispatch,
     getRangeInTimestamp,
     getTime,
+    refetch$,
   };
 };
 
@@ -133,36 +138,31 @@ const HostsFilterRT = rt.intersection([
 
 const HostsFiltersRT = rt.array(HostsFilterRT);
 
-export const HostsQueryStateRT = rt.type({
+const HostsQueryStateRT = rt.type({
   language: rt.string,
   query: rt.any,
 });
 
-export const StringDateRangeRT = rt.type({
+const StringDateRangeRT = rt.type({
   from: rt.string,
   to: rt.string,
 });
 
-export const DateRangeRT = rt.type({
+const DateRangeRT = rt.type({
   from: rt.number,
   to: rt.number,
 });
 
-export const HostsStateRT = rt.type({
+const HostsStateRT = rt.type({
   filters: HostsFiltersRT,
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
   dateRangeTimestamp: DateRangeRT,
 });
 
-export type HostsState = rt.TypeOf<typeof HostsStateRT>;
+type HostsState = rt.TypeOf<typeof HostsStateRT>;
 
-const SetQueryType = rt.partial({
-  query: HostsQueryStateRT,
-  dateRange: StringDateRangeRT,
-  filters: HostsFiltersRT,
-  dateRangeTimestamp: DateRangeRT,
-});
+const SetQueryType = rt.partial(HostsStateRT.props);
 
 const encodeUrlState = HostsStateRT.encode;
 const decodeUrlState = (value: unknown) => {

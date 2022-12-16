@@ -96,7 +96,7 @@ export const HistogramBucketRT = rt.intersection([
   HistogramRT,
 ]);
 
-export const AggregationResponseRT = HistogramRT;
+export const AggregationResponseRT = rt.union([HistogramRT, MetricsBucketRT]);
 
 export const CompositeResponseRT = rt.type({
   groupings: rt.intersection([

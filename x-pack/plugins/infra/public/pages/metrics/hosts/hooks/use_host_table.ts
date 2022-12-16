@@ -5,27 +5,61 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import type { SnapshotNode, SnapshotNodeMetric } from '../../../../../common/http_api';
-import { HostMetics } from '../components/hosts_table_columns';
+import { useCallback, useRef } from 'react';
+import createContainer from 'constate';
+import { BehaviorSubject } from 'rxjs';
+import { useSourceContext } from '../../../../containers/metrics_source';
+import type { SnapshotTimerangeInput } from '../../../../../common/http_api';
+import { UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
 
-type MappedMetrics = Record<keyof HostMetics, SnapshotNodeMetric>;
+import { useUnifiedSearchContext } from './use_unified_search';
 
-export const useHostTable = (nodes: SnapshotNode[]) => {
-  const items = useMemo(() => {
-    return nodes.map(({ metrics, path, name }) => ({
-      name,
-      os: path.at(-1)?.os ?? '-',
-      title: {
-        name,
-        cloudProvider: path.at(-1)?.cloudProvider ?? null,
-      },
-      ...metrics.reduce((data, metric) => {
-        data[metric.name as keyof HostMetics] = metric;
-        return data;
-      }, {} as MappedMetrics),
-    }));
-  }, [nodes]);
+export interface HostViewState {
+  totalHits: number;
+  loading: boolean;
+  error: string | null;
+}
 
-  return items;
+export const INITAL_VALUE = {
+  error: null,
+  loading: true,
+  totalHits: 0,
 };
+
+export const useHostsView = () => {
+  const stateRef = useRef<BehaviorSubject<HostViewState> | null>(null);
+
+  const getStateSubject$ = useCallback(() => {
+    if (!stateRef.current) {
+      stateRef.current = new BehaviorSubject<HostViewState>(INITAL_VALUE);
+    }
+    return stateRef.current;
+  }, []);
+
+  const { sourceId } = useSourceContext();
+  const { buildQuery, dateRangeTimestamp, refetch$ } = useUnifiedSearchContext();
+
+  const timeRange: SnapshotTimerangeInput = {
+    from: dateRangeTimestamp.from,
+    to: dateRangeTimestamp.to,
+    lookbackSize: 'maxFixed',
+  };
+
+  const esQuery = buildQuery();
+
+  const baseRequest: UseSnapshotRequest = {
+    filterQuery: esQuery ? JSON.stringify(esQuery) : null,
+    metrics: [],
+    groupBy: [],
+    nodeType: 'host',
+    sourceId,
+    currentTime: dateRangeTimestamp.to,
+    timerange: timeRange,
+    includeTimeseries: false,
+  };
+
+  return { baseRequest, refetch$, state$: getStateSubject$() };
+};
+
+export const HostsView = createContainer(useHostsView);
+export const [HostsViewProvider, useHostsViewContext] = HostsView;

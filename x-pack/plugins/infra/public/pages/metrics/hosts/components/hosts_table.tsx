@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { HostsTableColumns } from './hosts_table_columns';
+import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
+import { SnapshotNodeMetric } from '../../../../../common/http_api';
+import { HostMetics, HostsTableColumns } from './hosts_table_columns';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
-import { useHostTable } from '../hooks/use_host_table';
-import { useSnapshot } from '../../inventory_view/hooks/use_snaphot';
-import type { SnapshotMetricType } from '../../../../../common/inventory_models/types';
-import type { InfraTimerangeInput } from '../../../../../common/http_api';
-import { useUnifiedSearchContext } from '../hooks/use_unified_search';
-import { useSourceContext } from '../../../../containers/metrics_source';
+import { useHostsViewContext } from '../hooks/use_host_table';
 import { useTableProperties } from '../hooks/use_table_properties_url_state';
+import { useUnifiedSearchContext } from '../hooks/use_unified_search';
+import { useSnapshot } from '../../inventory_view/hooks/use_snaphot';
 
-const HOST_METRICS: Array<{ type: SnapshotMetricType }> = [
+type MappedMetrics = Record<keyof HostMetics, SnapshotNodeMetric>;
+
+const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
   { type: 'rx' },
   { type: 'tx' },
   { type: 'memory' },
@@ -30,37 +31,56 @@ const HOST_METRICS: Array<{ type: SnapshotMetricType }> = [
 ];
 
 export const HostsTable = () => {
-  const { sourceId } = useSourceContext();
-  const { buildQuery, dateRangeTimestamp, panelFilters } = useUnifiedSearchContext();
+  const { panelFilters } = useUnifiedSearchContext();
+  const { baseRequest, refetch$, state$ } = useHostsViewContext();
   const [properties, setProperties] = useTableProperties();
-
-  const timeRange: InfraTimerangeInput = {
-    from: dateRangeTimestamp.from,
-    to: dateRangeTimestamp.to,
-    interval: '1m',
-    ignoreLookback: true,
-  };
-
-  const esQuery = buildQuery();
 
   // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
   // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
   // if we introduce data view selection, we'll have to change this hook and the endpoint to accept a new parameter for the indices
-  const { loading, nodes, reload } = useSnapshot({
-    filterQuery: esQuery ? JSON.stringify(esQuery) : null,
-    metrics: HOST_METRICS,
-    groupBy: [],
-    nodeType: 'host',
-    sourceId,
-    currentTime: dateRangeTimestamp.to,
-    accountId: '',
-    region: '',
-    timerange: timeRange,
-    includeTimeseries: false,
+  const { loading, nodes, error, reload } = useSnapshot({
+    ...baseRequest,
+    metrics: HOST_TABLE_METRICS,
   });
 
-  const items = useHostTable(nodes);
-  const noData = items.length === 0;
+  const onReload = () => {
+    refetch$.next('reload');
+  };
+
+  useEffect(() => {
+    if (!loading) {
+      state$.next({
+        loading,
+        totalHits: nodes.length,
+        error,
+      });
+    }
+  }, [error, loading, nodes.length, state$]);
+
+  useEffect(() => {
+    const refetch = refetch$.subscribe(() => {
+      reload();
+      state$.next({ loading: true, totalHits: 0, error: null });
+    });
+    return () => {
+      refetch.unsubscribe();
+    };
+  }, [reload, refetch$, state$]);
+
+  const getTableRows = useCallback(() => {
+    return nodes.map(({ metrics, path, name }) => ({
+      name,
+      os: path.at(-1)?.os ?? '-',
+      title: {
+        name,
+        cloudProvider: path.at(-1)?.cloudProvider ?? null,
+      },
+      ...metrics.reduce((data, metric) => {
+        data[metric.name as keyof HostMetics] = metric;
+        return data;
+      }, {} as MappedMetrics),
+    }));
+  }, [nodes]);
 
   const onTableChange = useCallback(
     ({ page = {}, sort = {} }) => {
@@ -80,47 +100,48 @@ export const HostsTable = () => {
     [setProperties, properties.pagination, properties.sorting]
   );
 
+  const items = getTableRows();
+  const noData = !!error || items.length === 0;
+
+  if (loading || !panelFilters) {
+    return (
+      <InfraLoadingPanel
+        height="100%"
+        width="auto"
+        text={i18n.translate('xpack.infra.waffle.loadingDataText', {
+          defaultMessage: 'Loading data',
+        })}
+      />
+    );
+  }
+
+  if (noData) {
+    return (
+      <NoData
+        titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
+          defaultMessage: 'There is no data to display.',
+        })}
+        bodyText={i18n.translate('xpack.infra.waffle.noDataDescription', {
+          defaultMessage: 'Try adjusting your time or filter.',
+        })}
+        refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
+          defaultMessage: 'Check for new data',
+        })}
+        onRefetch={onReload}
+        testString="noMetricsDataPrompt"
+      />
+    );
+  }
+
   return (
-    <>
-      {loading || !panelFilters ? (
-        <InfraLoadingPanel
-          height="100%"
-          width="auto"
-          text={i18n.translate('xpack.infra.waffle.loadingDataText', {
-            defaultMessage: 'Loading data',
-          })}
-        />
-      ) : noData ? (
-        <div>
-          <NoData
-            titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
-              defaultMessage: 'There is no data to display.',
-            })}
-            bodyText={i18n.translate('xpack.infra.waffle.noDataDescription', {
-              defaultMessage: 'Try adjusting your time or filter.',
-            })}
-            refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
-              defaultMessage: 'Check for new data',
-            })}
-            onRefetch={() => {
-              reload();
-            }}
-            testString="noMetricsDataPrompt"
-          />
-        </div>
-      ) : (
-        <EuiInMemoryTable
-          pagination={properties.pagination}
-          sorting={
-            typeof properties.sorting === 'boolean'
-              ? properties.sorting
-              : { sort: properties.sorting }
-          }
-          items={items}
-          columns={HostsTableColumns}
-          onTableChange={onTableChange}
-        />
-      )}
-    </>
+    <EuiInMemoryTable
+      pagination={properties.pagination}
+      sorting={
+        typeof properties.sorting === 'boolean' ? properties.sorting : { sort: properties.sorting }
+      }
+      items={items}
+      columns={HostsTableColumns}
+      onTableChange={onTableChange}
+    />
   );
 };

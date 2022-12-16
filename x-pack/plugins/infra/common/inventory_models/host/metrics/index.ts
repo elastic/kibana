@@ -9,6 +9,7 @@ import { cpu } from './snapshot/cpu';
 import { cpuCores } from './snapshot/cpu_cores';
 import { diskLatency } from './snapshot/disk_latency';
 import { count } from '../../shared/metrics/snapshot/count';
+import { hostsCount } from './snapshot/hosts_count';
 import { load } from './snapshot/load';
 import { logRate } from './snapshot/log_rate';
 import { memory } from './snapshot/memory';
@@ -38,14 +39,15 @@ import { InventoryMetrics } from '../../types';
 
 const exposedHostSnapshotMetrics = {
   cpu,
+  cpuCores,
+  diskLatency,
+  hostsCount,
   load,
   logRate,
   memory,
+  memoryTotal,
   rx,
   tx,
-  cpuCores,
-  memoryTotal,
-  diskLatency,
 };
 // not sure why this is the only model with "count"
 const hostSnapshotMetrics = { count, ...exposedHostSnapshotMetrics };

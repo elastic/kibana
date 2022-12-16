@@ -248,7 +248,7 @@ export const ESPercentileAggRT = rt.type({
 export const ESCaridnalityAggRT = rt.type({
   cardinality: rt.partial({
     field: rt.string,
-    script: rt.string,
+    precision_threshold: rt.number,
   }),
 });
 
@@ -347,6 +347,7 @@ export const SnapshotMetricTypeKeys = {
   cpu: null,
   cpuCores: null,
   diskLatency: null,
+  hostsCount: null,
   load: null,
   memory: null,
   memoryTotal: null,

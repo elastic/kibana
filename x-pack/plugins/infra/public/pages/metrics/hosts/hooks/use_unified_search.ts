@@ -17,8 +17,7 @@ import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_hosts_url_state';
 
 export const useUnifiedSearch = () => {
   const [panelFilters, setPanelFilters] = useState<Filter[] | null>(null);
-
-  const { state, dispatch, getRangeInTimestamp, getTime } = useHostsUrlState();
+  const { state, dispatch, getRangeInTimestamp, getTime, refetch$ } = useHostsUrlState();
   const { metricsDataView } = useMetricsDataViewContext();
   const { services } = useKibana<InfraClientStartDeps>();
   const {
@@ -106,6 +105,7 @@ export const useUnifiedSearch = () => {
     unifiedSearchFilters: state.filters,
     setPanelFilters,
     panelFilters,
+    refetch$,
   };
 };
 

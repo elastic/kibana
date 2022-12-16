@@ -38,9 +38,7 @@ export const transformRequestToMetricsAPIRequest = async ({
   const metricsApiRequest: MetricsAPIRequest = {
     indexPattern: sourceOverrides?.indexPattern ?? source.configuration.metricAlias,
     timerange: {
-      from: timeRangeWithIntervalApplied.from,
-      to: timeRangeWithIntervalApplied.to,
-      interval: timeRangeWithIntervalApplied.interval,
+      ...timeRangeWithIntervalApplied,
     },
     metrics: transformSnapshotMetricsToMetricsAPIMetrics(snapshotRequest),
     limit: snapshotRequest.overrideCompositeSize
@@ -71,6 +69,7 @@ export const transformRequestToMetricsAPIRequest = async ({
   }
 
   const inventoryFields = findInventoryFields(snapshotRequest.nodeType);
+
   if (snapshotRequest.groupBy) {
     const groupBy = snapshotRequest.groupBy.map((g) => g.field).filter(Boolean) as string[];
     metricsApiRequest.groupBy = [...groupBy, inventoryFields.id];

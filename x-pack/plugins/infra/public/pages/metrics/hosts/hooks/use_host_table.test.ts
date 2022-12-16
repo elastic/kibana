@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useHostTable } from './use_host_table';
+import { useHostsView } from './use_host_table';
 import { renderHook } from '@testing-library/react-hooks';
 import { SnapshotNode } from '../../../../../common/http_api';
 
@@ -128,7 +128,7 @@ describe('useHostTable hook', () => {
         },
       },
     ];
-    const result = renderHook(() => useHostTable(nodes));
+    const result = renderHook(() => useHostsView(nodes));
 
     expect(result.result.current).toStrictEqual(items);
   });

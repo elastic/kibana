@@ -26,6 +26,7 @@ import { Color } from '../../../../../../../../common/color_palette';
 import {
   MetricsExplorerAggregation,
   MetricsExplorerSeries,
+  SnapshotTimerangeInput,
 } from '../../../../../../../../common/http_api';
 import { createInventoryMetricFormatter } from '../../../../lib/create_inventory_metric_formatter';
 import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
@@ -99,11 +100,10 @@ const TabComponent = (props: TabProps) => {
     [setTime]
   );
 
-  const timeRange = {
-    interval: '1m',
+  const timeRange: SnapshotTimerangeInput = {
     to: currentTime,
     from: currentTime - time,
-    ignoreLookback: true,
+    lookbackSize: 'auto',
   };
 
   const defaultMetrics: Array<{ type: SnapshotMetricType }> = [
