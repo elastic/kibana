@@ -166,7 +166,7 @@ describe('createGetSummarizedAlertsFn', () => {
       executionUuid: 'abc',
       ruleId: 'rule-id',
       spaceId: 'space-id',
-      excludedAlertInstanceIds: [],
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(3);
@@ -190,6 +190,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [EVENT_ACTION]: 'open',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
                 },
               },
             ],
@@ -219,6 +228,15 @@ describe('createGetSummarizedAlertsFn', () => {
                   [EVENT_ACTION]: 'active',
                 },
               },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
@@ -244,6 +262,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [EVENT_ACTION]: 'close',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
                 },
               },
             ],
@@ -416,7 +443,7 @@ describe('createGetSummarizedAlertsFn', () => {
       end: new Date('2020-01-01T12:25:00.000Z'),
       ruleId: 'rule-id',
       spaceId: 'space-id',
-      excludedAlertInstanceIds: [],
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(3);
@@ -438,6 +465,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
                 },
               },
               {
@@ -470,6 +506,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
                 },
               },
               {
@@ -511,6 +556,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
                 },
               },
               {
@@ -667,7 +721,7 @@ describe('createGetSummarizedAlertsFn', () => {
       executionUuid: 'abc',
       ruleId: 'rule-id',
       spaceId: 'space-id',
-      excludedAlertInstanceIds: [],
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
@@ -686,6 +740,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
                 },
               },
             ],
@@ -820,7 +883,7 @@ describe('createGetSummarizedAlertsFn', () => {
       end: new Date('2020-01-01T12:25:00.000Z'),
       ruleId: 'rule-id',
       spaceId: 'space-id',
-      excludedAlertInstanceIds: [],
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
@@ -842,6 +905,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
                 },
               },
             ],
