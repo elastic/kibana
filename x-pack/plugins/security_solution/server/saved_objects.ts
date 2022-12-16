@@ -12,6 +12,9 @@ import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_ob
 import { legacyType as legacyRuleActionsType } from './lib/detection_engine/rule_actions_legacy';
 import { ruleExecutionType } from './lib/detection_engine/rule_monitoring';
 import { ruleAssetType } from './lib/detection_engine/prebuilt_rules/logic/rule_asset/rule_asset_saved_object_mappings';
+import { ruleAssetCompositeType } from './lib/detection_engine/prebuilt_rules/logic/poc/saved_objects/rule_asset_composite_saved_objects_type';
+import { ruleAssetComposite2Type } from './lib/detection_engine/prebuilt_rules/logic/poc/saved_objects/rule_asset_composite2_saved_objects_type';
+import { ruleAssetFlatType } from './lib/detection_engine/prebuilt_rules/logic/poc/saved_objects/rule_asset_flat_saved_objects_type';
 import { type as signalsMigrationType } from './lib/detection_engine/migrations/saved_objects';
 import {
   exceptionsArtifactType,
@@ -24,6 +27,9 @@ const types = [
   legacyRuleActionsType,
   ruleExecutionType,
   ruleAssetType,
+  ruleAssetCompositeType,
+  ruleAssetComposite2Type,
+  ruleAssetFlatType,
   timelineType,
   exceptionsArtifactType,
   manifestType,
