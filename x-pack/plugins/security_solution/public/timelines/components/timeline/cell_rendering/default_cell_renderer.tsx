@@ -47,7 +47,6 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     data,
     fieldName: header.id,
   });
-
   const styledContentClassName = isDetails
     ? 'eui-textBreakWord'
     : 'eui-displayInlineBlock eui-textTruncate';

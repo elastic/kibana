@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { EuiDataGridColumnActions } from '@elastic/eui';
 import { keyBy } from 'lodash/fp';
 import React from 'react';
@@ -16,7 +17,6 @@ import type {
 import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 import { DEFAULT_TABLE_COLUMN_MIN_WIDTH, DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import { defaultColumnHeaderType } from '../../../store/data_table/defaults';
-import { i18n } from '@kbn/i18n';
 
 const defaultActions: EuiDataGridColumnActions = {
   showSortAsc: true,
@@ -156,8 +156,10 @@ const eventRenderedViewColumns: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
-    initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH + 50,
-    //actions: false,
+    initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,
+    actions: false,
+    isExpandable: false,
+    isResizable: true,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -168,9 +170,11 @@ const eventRenderedViewColumns: ColumnHeaderOptions[] = [
       }
     ),
     id: 'kibana.alert.rule.name',
-    initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH + 50,
+    initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
     linkField: 'kibana.alert.rule.uuid',
-    //actions: false,
+    actions: false,
+    isExpandable: false,
+    isResizable: true,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -180,6 +184,7 @@ const eventRenderedViewColumns: ColumnHeaderOptions[] = [
     }),
     actions: false,
     isExpandable: false,
+    isResizable: true,
   },
 ];
 

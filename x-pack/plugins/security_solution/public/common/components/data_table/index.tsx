@@ -299,10 +299,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
 
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
-        columnHeaders.map((header) => {
-          if (isEventRenderedView) {
-            return header;
-          }
+      !isEventRenderedView ? columnHeaders.map((header) => {
           const buildAction = (dataTableCellAction: DataTableCellAction) =>
             dataTableCellAction({
               browserFields,
@@ -340,7 +337,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
                 }
               : {}),
           };
-        }),
+        }) : columnHeaders,
       [
         browserFields,
         columnHeaders,
