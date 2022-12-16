@@ -239,7 +239,10 @@ export const getDataGridSchemaFromKibanaFieldType = (
       break;
   }
 
-  if (schema === undefined && field?.aggregatable === false) {
+  if (
+    (schema === undefined && field?.aggregatable === false) ||
+    (schema === 'numeric' && field?.esTypes?.every((d) => d === 'aggregate_metric_double'))
+  ) {
     return NON_AGGREGATABLE;
   }
 
