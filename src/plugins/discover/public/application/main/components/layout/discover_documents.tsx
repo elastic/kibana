@@ -103,7 +103,7 @@ function DiscoverDocumentsComponent({
   // but the data view in internal state was not set. due to the change of the timefield, this can lead to a change
   // of state, EuiDataGrid pushing an onSort event, because the next timefield is already used a sorting param
   // but it's not an available column
-  const dataViewChanged = index !== dataView.id;
+  const dataViewChanged = index && dataView.id && index !== dataView.id;
   const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 

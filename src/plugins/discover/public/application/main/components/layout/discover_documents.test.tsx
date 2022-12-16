@@ -38,6 +38,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
   const stateContainer = getDiscoverStateMock({});
+  stateContainer.setAppState({ index: dataViewMock.id });
 
   const props = {
     expandedDoc: undefined,
