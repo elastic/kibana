@@ -215,10 +215,7 @@ describe('Custom query rules', () => {
       cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(INDEX_PATTERNS_DETAILS).should(
-          'have.text',
-          ruleFields.defaultIndexPatterns.join('')
-        );
+        getDetails(INDEX_PATTERNS_DETAILS).should('have.text', 'auditbeat-*');
         getDetails(CUSTOM_QUERY_DETAILS).should('have.text', ruleFields.ruleQuery);
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
@@ -290,12 +287,25 @@ describe('Custom query rules', () => {
             deleteSelectedRules();
 
             cy.get(RULES_TABLE)
+              .get(RULES_ROW)
+              .first()
+              .within(() => {
+                cy.get(RULE_SWITCH).should('not.exist');
+              });
+
+            cy.get(RULES_TABLE)
               .find(RULES_ROW)
               .should('have.length', expectedNumberOfRulesAfterDeletion);
             cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
               const numberOfRules = body.data.length;
               expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
             });
+            cy.get(RULES_TABLE)
+              .get(RULES_ROW)
+              .first()
+              .within(() => {
+                cy.get(RULE_SWITCH).should('exist');
+              });
             cy.get(CUSTOM_RULES_BTN).should(
               'have.text',
               `Custom rules (${expectedNumberOfRulesAfterDeletion})`

@@ -1,15 +1,24 @@
-1,92c1,24
+1,4c1,6
 < describe('compiler', function() {
 <   if (!Handlebars.compile) {
 <     return;
 <   }
-< 
+---
+> /*
+>  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+>  * and may include modifications made by Elasticsearch B.V.
+>  * Elasticsearch B.V. licenses this file to you under the MIT License.
+>  * See `packages/kbn-handlebars/LICENSE` for more information.
+>  */
+6,10c8
 <   describe('#equals', function() {
 <     function compile(string) {
 <       var ast = Handlebars.parse(string);
 <       return new Handlebars.Compiler().compile(ast, {});
 <     }
-< 
+---
+> import Handlebars from '../..';
+12,60c10,13
 <     it('should treat as equal', function() {
 <       equal(compile('foo').equals(compile('foo')), true);
 <       equal(compile('{{foo}}').equals(compile('{{foo}}')), true);
@@ -59,7 +68,12 @@
 <       );
 <     });
 <   });
-< 
+---
+> describe('compiler', () => {
+>   const compileFns = ['compile', 'compileAST'];
+>   if (process.env.AST) compileFns.splice(0, 1);
+>   else if (process.env.EVAL) compileFns.splice(1, 1);
+62,78c15,17
 <   describe('#compile', function() {
 <     it('should fail with invalid input', function() {
 <       shouldThrow(
@@ -77,7 +91,11 @@
 <         'You must pass a string or Handlebars AST to Handlebars.compile. You passed [object Object]'
 <       );
 <     });
-< 
+---
+>   compileFns.forEach((compileName) => {
+>     // @ts-expect-error
+>     const compile = Handlebars[compileName];
+80,92c19,24
 <     it('should include the location in the error (row and column)', function() {
 <       try {
 <         Handlebars.compile(' \n  {{#if}}\n{{/def}}')();
@@ -92,24 +110,6 @@
 <           "if doesn't match def - 2:5",
 <           'Checking error message'
 ---
-> /*
->  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
->  * and may include modifications made by Elasticsearch B.V.
->  * Elasticsearch B.V. licenses this file to you under the MIT License.
->  * See `packages/kbn-handlebars/LICENSE` for more information.
->  */
-> 
-> import Handlebars from '../..';
-> 
-> describe('compiler', () => {
->   const compileFns = ['compile', 'compileAST'];
->   if (process.env.AST) compileFns.splice(0, 1);
->   else if (process.env.EVAL) compileFns.splice(1, 1);
-> 
->   compileFns.forEach((compileName) => {
->     // @ts-expect-error
->     const compile = Handlebars[compileName];
-> 
 >     describe(`#${compileName}`, () => {
 >       it('should fail with invalid input', () => {
 >         expect(function () {
@@ -160,29 +160,10 @@
 <     });
 ---
 >       });
-131,152c34,48
+131,133c34,48
 <     it('can pass through an empty string', function() {
 <       equal(Handlebars.compile('')(), '');
 <     });
-< 
-<     it('should not modify the options.data property(GH-1327)', function() {
-<       var options = { data: [{ a: 'foo' }, { a: 'bar' }] };
-<       Handlebars.compile('{{#each data}}{{@index}}:{{a}} {{/each}}', options)();
-<       equal(
-<         JSON.stringify(options, 0, 2),
-<         JSON.stringify({ data: [{ a: 'foo' }, { a: 'bar' }] }, 0, 2)
-<       );
-<     });
-< 
-<     it('should not modify the options.knownHelpers property(GH-1327)', function() {
-<       var options = { knownHelpers: {} };
-<       Handlebars.compile('{{#each data}}{{@index}}:{{a}} {{/each}}', options)();
-<       equal(
-<         JSON.stringify(options, 0, 2),
-<         JSON.stringify({ knownHelpers: {} }, 0, 2)
-<       );
-<     });
-<   });
 ---
 >       it('should include the location in the error (row and column)', () => {
 >         try {
@@ -199,7 +180,44 @@
 >           expect(err.lineNumber).toEqual(2);
 >         }
 >       });
-154,170c50,57
+135,142c50,57
+<     it('should not modify the options.data property(GH-1327)', function() {
+<       var options = { data: [{ a: 'foo' }, { a: 'bar' }] };
+<       Handlebars.compile('{{#each data}}{{@index}}:{{a}} {{/each}}', options)();
+<       equal(
+<         JSON.stringify(options, 0, 2),
+<         JSON.stringify({ data: [{ a: 'foo' }, { a: 'bar' }] }, 0, 2)
+<       );
+<     });
+---
+>       it('should include the location as enumerable property', () => {
+>         try {
+>           compile(' \n  {{#if}}\n{{/def}}')({});
+>           expect(true).toEqual(false);
+>         } catch (err) {
+>           expect(Object.prototype.propertyIsEnumerable.call(err, 'column')).toEqual(true);
+>         }
+>       });
+144,152c59,66
+<     it('should not modify the options.knownHelpers property(GH-1327)', function() {
+<       var options = { knownHelpers: {} };
+<       Handlebars.compile('{{#each data}}{{@index}}:{{a}} {{/each}}', options)();
+<       equal(
+<         JSON.stringify(options, 0, 2),
+<         JSON.stringify({ knownHelpers: {} }, 0, 2)
+<       );
+<     });
+<   });
+---
+>       it('can utilize AST instance', () => {
+>         expect(
+>           compile({
+>             type: 'Program',
+>             body: [{ type: 'ContentStatement', value: 'Hello' }],
+>           })({})
+>         ).toEqual('Hello');
+>       });
+154,170c68,70
 <   describe('#precompile', function() {
 <     it('should fail with invalid input', function() {
 <       shouldThrow(
@@ -218,24 +236,15 @@
 <       );
 <     });
 ---
->       it('should include the location as enumerable property', () => {
->         try {
->           compile(' \n  {{#if}}\n{{/def}}')({});
->           expect(true).toEqual(false);
->         } catch (err) {
->           expect(Object.prototype.propertyIsEnumerable.call(err, 'column')).toEqual(true);
->         }
+>       it('can pass through an empty string', () => {
+>         expect(compile('')({})).toEqual('');
 >       });
-172,175c59,61
+172,182c72,78
 <     it('can utilize AST instance', function() {
 <       equal(
 <         /return "Hello"/.test(
 <           Handlebars.precompile({
----
->       it('can utilize AST instance', () => {
->         expect(
->           compile({
-177,182c63,78
+<             type: 'Program',
 <             body: [{ type: 'ContentStatement', value: 'Hello' }]
 <           })
 <         ),
@@ -243,15 +252,6 @@
 <       );
 <     });
 ---
->             body: [{ type: 'ContentStatement', value: 'Hello' }],
->           })({})
->         ).toEqual('Hello');
->       });
-> 
->       it('can pass through an empty string', () => {
->         expect(compile('')({})).toEqual('');
->       });
-> 
 >       it('should not modify the options.data property(GH-1327)', () => {
 >         const options = { data: [{ a: 'foo' }, { a: 'bar' }] };
 >         compile('{{#each data}}{{@index}}:{{a}} {{/each}}', options)({});

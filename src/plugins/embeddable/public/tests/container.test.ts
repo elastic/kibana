@@ -45,7 +45,7 @@ import { EmbeddableContainerSettings } from '../lib/containers/i_container';
 async function createHelloWorldContainerAndEmbeddable(
   containerInput: ContainerInput = { id: 'hello', panels: {} },
   embeddableInput = {},
-  settings?: EmbeddableContainerSettings
+  settings?: EmbeddableContainerSettings<ContainerInput<{ firstName: string; lastName: string }>>
 ) {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();

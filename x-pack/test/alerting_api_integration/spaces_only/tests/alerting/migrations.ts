@@ -484,7 +484,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       );
     });
 
-    it('8.5.0 doesnt reformat ES Query rules that dot have a runetime field on them', async () => {
+    it('8.5.0 doesnt reformat ES Query rules that dot have a runtime field on them', async () => {
       const response = await es.get<{
         alert: {
           params: {
@@ -580,6 +580,33 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(alert?.lastRun?.outcome).to.eql('warning');
       expect(alert?.lastRun?.warning).to.eql('warning reason');
       expect(alert?.lastRun?.outcomeMsg).to.eql('warning message');
+    });
+
+    it('8.7.0 adds aggType and groupBy to ES query rules', async () => {
+      const response = await es.search<RawRule>(
+        {
+          index: '.kibana',
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'alert.alertTypeId': '.es-query',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      response.body.hits.hits.forEach((hit) => {
+        expect((hit?._source?.alert as RawRule)?.params?.aggType).to.eql('count');
+        expect((hit?._source?.alert as RawRule)?.params?.groupBy).to.eql('all');
+      });
     });
   });
 }

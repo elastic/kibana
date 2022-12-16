@@ -18,7 +18,7 @@ import { useLegacyUrlParams } from '../../../../context/url_params_context/use_u
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
@@ -64,7 +64,10 @@ export function FailedTransactionRateChart({
 
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
