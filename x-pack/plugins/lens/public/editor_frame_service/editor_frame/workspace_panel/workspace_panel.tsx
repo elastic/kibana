@@ -631,6 +631,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       visualizationMap={visualizationMap}
       isFullscreen={isFullscreen}
       lensInspector={lensInspector}
+      getUserMessages={getUserMessages}
     >
       {renderWorkspace()}
     </WorkspacePanelWrapper>

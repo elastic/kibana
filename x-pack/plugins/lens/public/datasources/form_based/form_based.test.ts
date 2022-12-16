@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { SavedObjectReference } from '@kbn/core/public';
 import { isFragment } from 'react-is';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -27,6 +27,7 @@ import {
   FramePublicAPI,
   OperationDescriptor,
   FrameDatasourceAPI,
+  UserMessage,
 } from '../../types';
 import { getFieldByNameFactory } from './pure_helpers';
 import {
@@ -2980,297 +2981,307 @@ describe('IndexPattern Data Source', () => {
   });
 
   describe('#getUserMessages', () => {
-    it('should generate error messages for a single layer', () => {
-      (getErrorMessages as jest.Mock).mockClear();
-      (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
-      const state: FormBasedPrivateState = {
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: [],
-            columns: {},
-          },
-        },
-        currentIndexPatternId: '1',
-      };
-      expect(
-        FormBasedDatasource.getUserMessages(state, {
-          frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
-          setState: () => {},
-        })
-      ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "displayLocations": Array [
-              Object {
-                "id": "workspace",
-              },
-              Object {
-                "id": "suggestionPanel",
-              },
-            ],
-            "fixableInEditor": true,
-            "longMessage": "error 1",
-            "severity": "error",
-            "shortMessage": "",
-          },
-          Object {
-            "displayLocations": Array [
-              Object {
-                "id": "workspace",
-              },
-              Object {
-                "id": "suggestionPanel",
-              },
-            ],
-            "fixableInEditor": true,
-            "longMessage": "error 2",
-            "severity": "error",
-            "shortMessage": "",
-          },
-        ]
-      `);
-      expect(getErrorMessages).toHaveBeenCalledTimes(1);
-    });
-
-    it('should prepend each error with its layer number on multi-layer chart', () => {
-      (getErrorMessages as jest.Mock).mockClear();
-      (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
-      const state: FormBasedPrivateState = {
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: [],
-            columns: {},
-          },
-          second: {
-            indexPatternId: '1',
-            columnOrder: [],
-            columns: {},
-          },
-        },
-        currentIndexPatternId: '1',
-      };
-      expect(
-        FormBasedDatasource.getUserMessages(state, {
-          frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
-          setState: () => {},
-        })
-      ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "displayLocations": Array [
-              Object {
-                "id": "workspace",
-              },
-              Object {
-                "id": "suggestionPanel",
-              },
-            ],
-            "fixableInEditor": true,
-            "longMessage": <FormattedMessage
-              defaultMessage="Layer {position} error: {wrappedMessage}"
-              id="xpack.lens.indexPattern.layerErrorWrapper"
-              values={
-                Object {
-                  "position": 1,
-                  "wrappedMessage": <React.Fragment>
-                    error 1
-                  </React.Fragment>,
-                }
-              }
-            />,
-            "severity": "error",
-            "shortMessage": "Layer 1 error: ",
-          },
-          Object {
-            "displayLocations": Array [
-              Object {
-                "id": "workspace",
-              },
-              Object {
-                "id": "suggestionPanel",
-              },
-            ],
-            "fixableInEditor": true,
-            "longMessage": <FormattedMessage
-              defaultMessage="Layer {position} error: {wrappedMessage}"
-              id="xpack.lens.indexPattern.layerErrorWrapper"
-              values={
-                Object {
-                  "position": 1,
-                  "wrappedMessage": <React.Fragment>
-                    error 2
-                  </React.Fragment>,
-                }
-              }
-            />,
-            "severity": "error",
-            "shortMessage": "Layer 1 error: ",
-          },
-        ]
-      `);
-      expect(getErrorMessages).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('#getWarningMessages', () => {
-    let state: FormBasedPrivateState;
-    let framePublicAPI: FramePublicAPI;
-
-    beforeEach(() => {
-      const termsColumn: TermsIndexPatternColumn = {
-        operationType: 'terms',
-        dataType: 'number',
-        isBucketed: true,
-        label: '123211',
-        sourceField: 'foo',
-        params: {
-          size: 10,
-          orderBy: {
-            type: 'alphabetical',
-          },
-          orderDirection: 'asc',
-        },
-      };
-
-      state = {
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
-            columns: {
-              col1: {
-                operationType: 'date_histogram',
-                params: {
-                  interval: '12h',
-                },
-                label: '',
-                dataType: 'date',
-                isBucketed: true,
-                sourceField: 'timestamp',
-              } as DateHistogramIndexPatternColumn,
-              col2: {
-                operationType: 'count',
-                label: '',
-                dataType: 'number',
-                isBucketed: false,
-                sourceField: 'records',
-              },
-              col3: {
-                operationType: 'count',
-                timeShift: '1h',
-                label: '',
-                dataType: 'number',
-                isBucketed: false,
-                sourceField: 'records',
-              },
-              col4: {
-                operationType: 'count',
-                timeShift: '13h',
-                label: '',
-                dataType: 'number',
-                isBucketed: false,
-                sourceField: 'records',
-              },
-              col5: {
-                operationType: 'count',
-                timeShift: '1w',
-                label: '',
-                dataType: 'number',
-                isBucketed: false,
-                sourceField: 'records',
-              },
-              col6: {
-                operationType: 'count',
-                timeShift: 'previous',
-                label: '',
-                dataType: 'number',
-                isBucketed: false,
-                sourceField: 'records',
-              },
-              termsCol: termsColumn,
+    describe('error messages', () => {
+      it('should generate error messages for a single layer', () => {
+        (getErrorMessages as jest.Mock).mockClear();
+        (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
+        const state: FormBasedPrivateState = {
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {},
             },
           },
-        },
-        currentIndexPatternId: '1',
-      };
+          currentIndexPatternId: '1',
+        };
+        expect(
+          FormBasedDatasource.getUserMessages(state, {
+            frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+            setState: () => {},
+          })
+        ).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "displayLocations": Array [
+                Object {
+                  "id": "workspace",
+                },
+                Object {
+                  "id": "suggestionPanel",
+                },
+              ],
+              "fixableInEditor": true,
+              "longMessage": "error 1",
+              "severity": "error",
+              "shortMessage": "",
+            },
+            Object {
+              "displayLocations": Array [
+                Object {
+                  "id": "workspace",
+                },
+                Object {
+                  "id": "suggestionPanel",
+                },
+              ],
+              "fixableInEditor": true,
+              "longMessage": "error 2",
+              "severity": "error",
+              "shortMessage": "",
+            },
+          ]
+        `);
+        expect(getErrorMessages).toHaveBeenCalledTimes(1);
+      });
 
-      framePublicAPI = {
-        activeData: {
-          first: {
-            type: 'datatable',
-            rows: [],
-            columns: [
-              {
-                id: 'col1',
-                name: 'col1',
-                meta: {
-                  type: 'date',
-                  source: 'esaggs',
-                  sourceParams: {
-                    type: 'date_histogram',
-                    params: {
-                      used_interval: '12h',
+      it('should prepend each error with its layer number on multi-layer chart', () => {
+        (getErrorMessages as jest.Mock).mockClear();
+        (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
+        const state: FormBasedPrivateState = {
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {},
+            },
+            second: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {},
+            },
+          },
+          currentIndexPatternId: '1',
+        };
+        expect(
+          FormBasedDatasource.getUserMessages(state, {
+            frame: { dataViews: { indexPatterns } } as unknown as FrameDatasourceAPI,
+            setState: () => {},
+          })
+        ).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "displayLocations": Array [
+                Object {
+                  "id": "workspace",
+                },
+                Object {
+                  "id": "suggestionPanel",
+                },
+              ],
+              "fixableInEditor": true,
+              "longMessage": <FormattedMessage
+                defaultMessage="Layer {position} error: {wrappedMessage}"
+                id="xpack.lens.indexPattern.layerErrorWrapper"
+                values={
+                  Object {
+                    "position": 1,
+                    "wrappedMessage": <React.Fragment>
+                      error 1
+                    </React.Fragment>,
+                  }
+                }
+              />,
+              "severity": "error",
+              "shortMessage": "Layer 1 error: ",
+            },
+            Object {
+              "displayLocations": Array [
+                Object {
+                  "id": "workspace",
+                },
+                Object {
+                  "id": "suggestionPanel",
+                },
+              ],
+              "fixableInEditor": true,
+              "longMessage": <FormattedMessage
+                defaultMessage="Layer {position} error: {wrappedMessage}"
+                id="xpack.lens.indexPattern.layerErrorWrapper"
+                values={
+                  Object {
+                    "position": 1,
+                    "wrappedMessage": <React.Fragment>
+                      error 2
+                    </React.Fragment>,
+                  }
+                }
+              />,
+              "severity": "error",
+              "shortMessage": "Layer 1 error: ",
+            },
+          ]
+        `);
+        expect(getErrorMessages).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('warning messages', () => {
+      let state: FormBasedPrivateState;
+      let framePublicAPI: FramePublicAPI;
+
+      beforeEach(() => {
+        (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
+
+        const termsColumn: TermsIndexPatternColumn = {
+          operationType: 'terms',
+          dataType: 'number',
+          isBucketed: true,
+          label: '123211',
+          sourceField: 'foo',
+          params: {
+            size: 10,
+            orderBy: {
+              type: 'alphabetical',
+            },
+            orderDirection: 'asc',
+          },
+        };
+
+        state = {
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
+              columns: {
+                col1: {
+                  operationType: 'date_histogram',
+                  params: {
+                    interval: '12h',
+                  },
+                  label: '',
+                  dataType: 'date',
+                  isBucketed: true,
+                  sourceField: 'timestamp',
+                } as DateHistogramIndexPatternColumn,
+                col2: {
+                  operationType: 'count',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'records',
+                },
+                col3: {
+                  operationType: 'count',
+                  timeShift: '1h',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'records',
+                },
+                col4: {
+                  operationType: 'count',
+                  timeShift: '13h',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'records',
+                },
+                col5: {
+                  operationType: 'count',
+                  timeShift: '1w',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'records',
+                },
+                col6: {
+                  operationType: 'count',
+                  timeShift: 'previous',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'records',
+                },
+                termsCol: termsColumn,
+              },
+            },
+          },
+          currentIndexPatternId: '1',
+        };
+
+        framePublicAPI = {
+          activeData: {
+            first: {
+              type: 'datatable',
+              rows: [],
+              columns: [
+                {
+                  id: 'col1',
+                  name: 'col1',
+                  meta: {
+                    type: 'date',
+                    source: 'esaggs',
+                    sourceParams: {
+                      type: 'date_histogram',
+                      params: {
+                        used_interval: '12h',
+                      },
                     },
                   },
                 },
-              },
-              {
-                id: 'termsCol',
-                name: 'termsCol',
-                meta: {
-                  type: 'string',
-                  source: 'esaggs',
-                  sourceParams: {
-                    type: 'terms',
+                {
+                  id: 'termsCol',
+                  name: 'termsCol',
+                  meta: {
+                    type: 'string',
+                    source: 'esaggs',
+                    sourceParams: {
+                      type: 'terms',
+                    },
                   },
-                },
-              } as DatatableColumn,
-            ],
+                } as DatatableColumn,
+              ],
+            },
           },
-        },
-        dataViews: {
-          ...createMockFramePublicAPI().dataViews,
-          indexPatterns: expectedIndexPatterns,
-          indexPatternRefs: Object.values(expectedIndexPatterns).map(({ id, title }) => ({
-            id,
-            title,
-          })),
-        },
-      } as unknown as FramePublicAPI;
-    });
+          dataViews: {
+            ...createMockFramePublicAPI().dataViews,
+            indexPatterns: expectedIndexPatterns,
+            indexPatternRefs: Object.values(expectedIndexPatterns).map(({ id, title }) => ({
+              id,
+              title,
+            })),
+          },
+        } as unknown as FramePublicAPI;
+      });
 
-    const extractTranslationIdsFromWarnings = (warnings: React.ReactNode[] | undefined) =>
-      warnings?.map((item) =>
-        isFragment(item)
-          ? (item as ReactElement).props.children[0].props.id
-          : (item as ReactElement).props.id
-      );
+      const extractTranslationIdsFromWarnings = (warnings: UserMessage[]) =>
+        warnings?.map(({ longMessage }) =>
+          isFragment(longMessage)
+            ? (longMessage as ReactElement).props.children[0].props.id
+            : (longMessage as ReactElement).props.id
+        );
 
-    it('should return mismatched time shifts', () => {
-      const warnings = FormBasedDatasource.getWarningMessages!(state, framePublicAPI, {}, () => {});
+      it('should return mismatched time shifts', () => {
+        const warnings = FormBasedDatasource.getUserMessages!(state, {
+          frame: framePublicAPI as FrameDatasourceAPI,
+          setState: () => {},
+        });
 
-      expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
+        expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
         Array [
           "xpack.lens.indexPattern.timeShiftSmallWarning",
           "xpack.lens.indexPattern.timeShiftMultipleWarning",
         ]
       `);
-    });
+      });
 
-    it('should show different types of warning messages', () => {
-      framePublicAPI.activeData!.first.columns[1].meta.sourceParams!.hasPrecisionError = true;
+      it('should show different types of warning messages', () => {
+        framePublicAPI.activeData!.first.columns[1].meta.sourceParams!.hasPrecisionError = true;
 
-      const warnings = FormBasedDatasource.getWarningMessages!(state, framePublicAPI, {}, () => {});
+        const warnings = FormBasedDatasource.getUserMessages!(state, {
+          frame: framePublicAPI as FrameDatasourceAPI,
+          setState: () => {},
+        });
 
-      expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
+        expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
         Array [
           "xpack.lens.indexPattern.timeShiftSmallWarning",
           "xpack.lens.indexPattern.timeShiftMultipleWarning",
           "xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled",
         ]
       `);
+      });
     });
   });
 

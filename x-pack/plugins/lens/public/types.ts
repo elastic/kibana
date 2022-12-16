@@ -18,7 +18,6 @@ import type {
   Datatable,
 } from '@kbn/expressions-plugin/public';
 import type { Configuration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
@@ -469,16 +468,6 @@ export interface Datasource<T = unknown, P = unknown> {
       setState: StateSetter<T>;
     }
   ) => UserMessage[];
-
-  /**
-   * The frame calls this function to display warnings about visualization
-   */
-  getWarningMessages?: (
-    state: T,
-    frame: FramePublicAPI,
-    adapters: Adapters,
-    setState: StateSetter<T>
-  ) => React.ReactNode[] | undefined;
 
   getDeprecationMessages?: (state: T) => React.ReactNode[] | undefined;
 

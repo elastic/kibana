@@ -866,53 +866,65 @@ export function getFormBasedDatasource({
           })
         );
 
-      // Single layer case, no need to explain more
+      let errorMessages: UserMessage[];
       if (layerErrors.length <= 1) {
-        return layerErrors[0]?.length ? layerErrors[0] : [];
+        // Single layer case, no need to explain more
+        errorMessages = layerErrors[0]?.length ? layerErrors[0] : [];
+      } else {
+        // For multiple layers we will prepend each error with the layer number
+        errorMessages = layerErrors.flatMap((errors, index) => {
+          return errors.map((error) => {
+            const message: UserMessage = {
+              ...error,
+              shortMessage: i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
+                defaultMessage: 'Layer {position} error: {wrappedMessage}',
+                values: {
+                  position: index + 1,
+                  wrappedMessage: error.shortMessage,
+                },
+              }),
+              longMessage: (
+                <FormattedMessage
+                  id="xpack.lens.indexPattern.layerErrorWrapper"
+                  defaultMessage="Layer {position} error: {wrappedMessage}"
+                  values={{
+                    position: index + 1,
+                    wrappedMessage: <>{error.longMessage}</>,
+                  }}
+                />
+              ),
+            };
+
+            return message;
+          });
+        });
       }
 
-      // For multiple layers we will prepend each error with the layer number
-      const messages: UserMessage[] = layerErrors.flatMap((errors, index) => {
-        return errors.map((error) => {
-          const message: UserMessage = {
-            ...error,
-            shortMessage: i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
-              defaultMessage: 'Layer {position} error: {wrappedMessage}',
-              values: {
-                position: index + 1,
-                wrappedMessage: error.shortMessage,
-              },
-            }),
-            longMessage: (
-              <FormattedMessage
-                id="xpack.lens.indexPattern.layerErrorWrapper"
-                defaultMessage="Layer {position} error: {wrappedMessage}"
-                values={{
-                  position: index + 1,
-                  wrappedMessage: <>{error.longMessage}</>,
-                }}
-              />
-            ),
-          };
-
-          return message;
-        });
-      });
-      return messages;
-    },
-
-    getWarningMessages: (state, frame, adapters, setState) => {
-      return [
-        ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frame) || []),
+      const warningMessages = [
+        ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frameDatasourceAPI) ||
+          []),
         ...getPrecisionErrorWarningMessages(
           data.datatableUtilities,
           state,
-          frame,
+          frameDatasourceAPI,
           core.docLinks,
           setState
         ),
-      ];
+      ].map((longMessage) => {
+        const message: UserMessage = {
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }],
+          shortMessage: '',
+          longMessage,
+        };
+
+        return message;
+      });
+
+      return [...errorMessages, ...warningMessages];
     },
+
     getSearchWarningMessages: (state, warning, request, response) => {
       return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
     },

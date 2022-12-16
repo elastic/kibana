@@ -457,10 +457,10 @@ export function App({
           datasourceStates[activeDatasourceId].state,
           {
             frame: frameDatasourceAPI,
-            setState: (newState) =>
+            setState: (newStateOrUpdater) =>
               dispatch(
                 updateDatasourceState({
-                  updater: () => newState,
+                  updater: newStateOrUpdater,
                   datasourceId: activeDatasourceId,
                 })
               ),
