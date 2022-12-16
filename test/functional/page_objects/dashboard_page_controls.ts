@@ -331,25 +331,13 @@ export class DashboardPageControls extends FtrService {
 
   // Options list functions
   public async optionsListSetAdditionalSettings({
-    defaultSortType,
     ignoreTimeout,
     allowMultiple,
-    hideExclude,
-    hideExists,
-    hideSort,
   }: OptionsListAdditionalSettings) {
     const getSettingTestSubject = (setting: string) =>
       `optionsListControl__${setting}AdditionalSetting`;
 
     if (allowMultiple) await this.testSubjects.click(getSettingTestSubject('allowMultiple'));
-    if (hideExclude) await this.testSubjects.click(getSettingTestSubject('hideExclude'));
-    if (hideExists) await this.testSubjects.click(getSettingTestSubject('hideExists'));
-    if (hideSort) await this.testSubjects.click(getSettingTestSubject('hideSort'));
-    if (defaultSortType) {
-      await this.testSubjects.click(`optionsListEditor__sortOrder_${defaultSortType.direction}`);
-      await this.testSubjects.click('optionsListControl__chooseSortBy');
-      await this.testSubjects.click(`optionsListEditor__sortBy_${defaultSortType.by}`);
-    }
     if (ignoreTimeout) await this.testSubjects.click(getSettingTestSubject('runPastTimeout'));
   }
 

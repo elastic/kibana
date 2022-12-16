@@ -1,62 +1,63 @@
 {
-    "job_type": "anomaly_detector",
-    "description": "Security: Linux - Looks for sudo activity from an unusual user context. Unusual user context changes can be due to privilege escalation.",
-    "groups": [
-      "security",
-      "auditbeat",
-      "endpoint",
-      "linux",
-      "process"
+  "job_type": "anomaly_detector",
+  "description": "Security: Linux - Looks for sudo activity from an unusual user context. Unusual user context changes can be due to privilege escalation.",
+  "groups": [
+    "security",
+    "auditbeat",
+    "endpoint",
+    "linux",
+    "process"
+  ],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "Detects rare user.name values.",
+        "function": "rare",
+        "by_field_name": "user.name"
+      }
     ],
-    "analysis_config": {
-      "bucket_span": "15m",
-      "detectors": [
-        {
-          "detector_description": "Detects rare user.name values.",
-          "function": "rare",
-          "by_field_name": "user.name"
-        }
-      ],
-      "influencers": [
-        "process.name",
-        "host.name",
-        "process.args",
-        "user.name"
-      ]
-    },
-    "allow_lazy_open": true,
-    "analysis_limits": {
-      "model_memory_limit": "32mb"
-    },
-    "data_description": {
-      "time_field": "@timestamp"
-    },
-    "custom_settings": {
+    "influencers": [
+      "process.name",
+      "host.name",
+      "process.args",
+      "user.name"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "32mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
     "job_tags": {
       "euid": "4017",
       "maturity": "release",
       "author": "@randomuserid/Elastic",
       "version": "3",
       "updated_date": "5/16/2022"
-  },
-      "created_by": "ml-module-security-linux-v3",
-      "custom_urls": [
-        {
-          "url_name": "Host Details by process name",
-          "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
-        },
-        {
-          "url_name": "Host Details by user name",
-          "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
-        },
-        {
-          "url_name": "Hosts Overview by process name",
-          "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
-        },
-        {
-          "url_name": "Hosts Overview by user name",
-          "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
-        }
-      ]
-    }
+    },
+    "created_by": "ml-module-security-linux-v3",
+    "custom_urls": [
+      {
+        "url_name": "Host Details by process name",
+        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      },
+      {
+        "url_name": "Host Details by user name",
+        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      },
+      {
+        "url_name": "Hosts Overview by process name",
+        "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      },
+      {
+        "url_name": "Hosts Overview by user name",
+        "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      }
+    ],
+    "security_app_display_name": "Unusual Sudo Activity"
+  }
 }

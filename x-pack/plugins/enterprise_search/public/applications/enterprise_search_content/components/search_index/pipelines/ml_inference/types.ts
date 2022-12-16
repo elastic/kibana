@@ -19,3 +19,9 @@ export interface AddInferencePipelineFormErrors {
   pipelineName?: string;
   sourceField?: string;
 }
+
+export enum AddInferencePipelineSteps {
+  Configuration,
+  Test,
+  Review,
+}
