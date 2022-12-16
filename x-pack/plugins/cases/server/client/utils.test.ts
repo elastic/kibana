@@ -407,7 +407,7 @@ describe('utils', () => {
       `);
     });
 
-    it.only('creates a filter for the severity', () => {
+    it('creates a filter for the severity', () => {
       Object.values(CaseSeverity).map((severity) => {
         expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
         Object {
