@@ -283,10 +283,7 @@ export class AlertingPlugin {
       this.createRouteHandlerContext(core)
     );
 
-    console.log('dsds1111111111111111111121121212121')
     if (plugins.monitoringCollection) {
-      console.log('03030303030030303')
-
       registerNodeCollector({
         monitoringCollection: plugins.monitoringCollection,
         inMemoryMetrics: this.inMemoryMetrics,

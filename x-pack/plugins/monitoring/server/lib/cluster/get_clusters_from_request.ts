@@ -61,9 +61,8 @@ export async function getClustersFromRequest(
     moduleType: 'elasticsearch',
     ccs: CCS_REMOTE_PATTERN,
   });
-console.log(logsIndexPattern + '    ' + Globals.app.config);
+
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
-  console.log(isStandaloneCluster);
 
   let clusters: Cluster[] = [];
 

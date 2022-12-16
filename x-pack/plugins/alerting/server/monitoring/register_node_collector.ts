@@ -29,7 +29,6 @@ export function registerNodeCollector({
       },
     },
     fetch: async () => {
-      console.log(inMemoryMetrics);
       return {
         failures: inMemoryMetrics.getInMemoryMetric(IN_MEMORY_METRICS.RULE_FAILURES),
         executions: inMemoryMetrics.getInMemoryMetric(IN_MEMORY_METRICS.RULE_EXECUTIONS),
