@@ -2610,7 +2610,7 @@ describe('migrations v2 model', () => {
         versionAlias: '.kibana_7.12.0',
         versionIndex: '.kibana_7.11.0_001',
       };
-      it('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT when desired mappings match current mappings', () => {
+      it('INIT -> PREPARE_COMPATIBLE_MIGRATION when desired mappings match current mappings', () => {
         const res: ResponseType<'INIT'> = Either.right({
           '.kibana_7.11.0_001': {
             aliases: {
@@ -2623,7 +2623,7 @@ describe('migrations v2 model', () => {
         });
         const newState = model(unchangedMappingsState, res) as PostInitState;
 
-        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
 
         expect(newState.versionAlias).toEqual('.kibana_7.12.0');
         expect(newState.currentAlias).toEqual('.kibana');
