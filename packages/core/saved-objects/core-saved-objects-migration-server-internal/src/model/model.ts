@@ -100,13 +100,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // The source index .kibana is pointing to. E.g: ".kibana_8.7.0_001"
       const source = aliases[stateP.currentAlias];
 
-      const versionMigrationIsComplete = versionMigrationCompleted(
-        stateP.currentAlias,
-        stateP.versionAlias,
-        aliases
-      );
-
-      if (versionMigrationIsComplete) {
+      if (
+        // This version's migration has already been completed.
+        versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliases)
+      ) {
         return {
           ...stateP,
           // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
@@ -128,9 +125,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ),
           versionIndexReadyActions: Option.none,
         };
-      }
-
-      if (
+      } else if (
         // `.kibana` is pointing to an index that belongs to a later
         // version of Kibana .e.g. a 7.11.0 instance found the `.kibana` alias
         // pointing to `.kibana_7.12.0_001`
@@ -145,9 +140,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             aliases[stateP.currentAlias]
           )}`,
         };
-      }
-
-      if (
+      } else if (
         // Don't actively participate in this migration but wait for another instance to complete it
         stateP.waitForMigrationCompletion === true
       ) {
@@ -164,10 +157,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             },
           ],
         };
-      }
-
-      const mappingsAreUnchanged =
-        // the source exists
+      } else if (
+        // source exists
         Boolean(indices[source!]?.mappings?._meta?.migrationMappingPropertyHashes) &&
         // ...and mappings are unchanged
         !diffMappings(
@@ -175,9 +166,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           indices[source!].mappings,
           /* expected */
           stateP.targetIndexMappings
-        );
-
-      if (mappingsAreUnchanged) {
+        )
+      ) {
         const targetIndex = source!;
 
         return {
@@ -200,9 +190,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             { add: { index: source!, alias: stateP.versionAlias } },
           ]),
         };
-      }
-
-      if (
+      } else if (
         // If the `.kibana` alias exists
         source != null
       ) {
@@ -212,9 +200,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           sourceIndex: Option.some(source!) as Option.Some<string>,
           sourceIndexMappings: indices[source!].mappings,
         };
-      }
-
-      if (indices[stateP.legacyIndex] != null) {
+      } else if (indices[stateP.legacyIndex] != null) {
         // Migrate from a legacy index
 
         // If the user used default index names we can narrow the version
@@ -263,21 +249,21 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             { remove_index: { index: stateP.tempIndex } },
           ]),
         };
+      } else {
+        // This cluster doesn't have an existing Saved Object index, create a
+        // new version specific index.
+        const target = stateP.versionIndex;
+        return {
+          ...stateP,
+          controlState: 'CREATE_NEW_TARGET',
+          sourceIndex: Option.none as Option.None,
+          targetIndex: target,
+          versionIndexReadyActions: Option.some([
+            { add: { index: target, alias: stateP.currentAlias } },
+            { add: { index: target, alias: stateP.versionAlias } },
+          ]) as Option.Some<AliasAction[]>,
+        };
       }
-
-      // This cluster doesn't have an existing Saved Object index, create a
-      // new version specific index.
-      const target = stateP.versionIndex;
-      return {
-        ...stateP,
-        controlState: 'CREATE_NEW_TARGET',
-        sourceIndex: Option.none as Option.None,
-        targetIndex: target,
-        versionIndexReadyActions: Option.some([
-          { add: { index: target, alias: stateP.currentAlias } },
-          { add: { index: target, alias: stateP.versionAlias } },
-        ]) as Option.Some<AliasAction[]>,
-      };
     } else {
       return throwBadResponse(stateP, res);
     }
