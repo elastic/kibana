@@ -24,11 +24,7 @@ import { useEffect, useMemo } from 'react';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
 import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
-import {
-  MLHttpFetchError,
-  MLResponseError,
-  extractErrorMessage,
-} from '../../../../../../../common/util/errors';
+import { MLHttpFetchError, extractErrorMessage } from '../../../../../../../common/util/errors';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { JobCreator } from '../job_creator';
 
@@ -41,10 +37,10 @@ export const modelMemoryEstimatorProvider = (
   jobValidator: JobValidator
 ) => {
   const modelMemoryCheck$ = new Subject<CalculatePayload>();
-  const error$ = new Subject<MLHttpFetchError<MLResponseError>>();
+  const error$ = new Subject<MLHttpFetchError>();
 
   return {
-    get error$(): Observable<MLHttpFetchError<MLResponseError>> {
+    get error$(): Observable<MLHttpFetchError> {
       return error$.asObservable();
     },
     get updates$(): Observable<string> {
@@ -96,7 +92,7 @@ export const useModelMemoryEstimator = (
   // Initialize model memory estimator only once
   const modelMemoryEstimator = useMemo<ModelMemoryEstimator>(
     () => modelMemoryEstimatorProvider(jobCreator, jobValidator),
-    []
+    [jobCreator, jobValidator]
   );
 
   // Listen for estimation results and errors
@@ -133,7 +129,8 @@ export const useModelMemoryEstimator = (
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modelMemoryEstimator]);
 
   // Update model memory estimation payload on the job creator updates
   useEffect(() => {
@@ -146,5 +143,6 @@ export const useModelMemoryEstimator = (
       earliestMs: jobCreator.start,
       latestMs: jobCreator.end,
     });
-  }, [jobCreatorUpdated]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreator, jobCreatorUpdated]);
 };

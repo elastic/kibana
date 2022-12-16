@@ -6,20 +6,21 @@
  */
 
 import React, { memo } from 'react';
-import { EuiEmptyPrompt, EuiButton, EuiPageTemplate } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiButton,
+  EuiPageTemplate_Deprecated as EuiPageTemplate,
+} from '@elastic/eui';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
-import { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
-import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
+import type { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
+import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface CommonProps {
   policyId: string;
   policyName: string;
   labels: typeof POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS;
   getPolicyArtifactsPath: (policyId: string) => string;
-  getArtifactPath: (
-    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
-  ) => string;
+  getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
 }
 
 export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(

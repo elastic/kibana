@@ -6,27 +6,26 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useUpdateCase, UseUpdateCase } from './use_update_case';
+import type { UseUpdateCase } from './use_update_case';
+import { useUpdateCase } from './use_update_case';
 import { basicCase } from './mock';
 import * as api from './api';
-import { UpdateKey } from './types';
+import type { UpdateKey } from './types';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
+jest.mock('../components/case_view/use_on_refresh_case_view_page');
 
 describe('useUpdateCase', () => {
   const abortCtrl = new AbortController();
-  const fetchCaseUserActions = jest.fn();
-  const updateCase = jest.fn();
   const updateKey: UpdateKey = 'description';
   const onSuccess = jest.fn();
   const onError = jest.fn();
 
   const sampleUpdate = {
-    fetchCaseUserActions,
     updateKey,
     updateValue: 'updated description',
-    updateCase,
     caseData: basicCase,
     onSuccess,
     onError,
@@ -39,7 +38,7 @@ describe('useUpdateCase', () => {
   it('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase({ caseId: basicCase.id })
+        useUpdateCase()
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -56,7 +55,7 @@ describe('useUpdateCase', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase({ caseId: basicCase.id })
+        useUpdateCase()
       );
       await waitForNextUpdate();
 
@@ -71,10 +70,10 @@ describe('useUpdateCase', () => {
     });
   });
 
-  it('patch case', async () => {
+  it('patch case and refresh the case page', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase({ caseId: basicCase.id })
+        useUpdateCase()
       );
       await waitForNextUpdate();
       result.current.updateCaseProperty(sampleUpdate);
@@ -85,8 +84,7 @@ describe('useUpdateCase', () => {
         isError: false,
         updateCaseProperty: result.current.updateCaseProperty,
       });
-      expect(fetchCaseUserActions).toBeCalledWith(basicCase.id, 'none');
-      expect(updateCase).toBeCalledWith(basicCase);
+      expect(useRefreshCaseViewPage()).toHaveBeenCalled();
       expect(onSuccess).toHaveBeenCalled();
     });
   });
@@ -94,7 +92,7 @@ describe('useUpdateCase', () => {
   it('set isLoading to true when posting case', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase({ caseId: basicCase.id })
+        useUpdateCase()
       );
       await waitForNextUpdate();
       result.current.updateCaseProperty(sampleUpdate);
@@ -112,7 +110,7 @@ describe('useUpdateCase', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase({ caseId: basicCase.id })
+        useUpdateCase()
       );
       await waitForNextUpdate();
       result.current.updateCaseProperty(sampleUpdate);

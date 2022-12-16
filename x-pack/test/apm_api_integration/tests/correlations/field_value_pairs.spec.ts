@@ -12,7 +12,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const registry = getService('registry');
 
-  const endpoint = 'POST /internal/apm/correlations/field_value_pairs';
+  const endpoint = 'POST /internal/apm/correlations/field_value_pairs/transactions';
 
   const getOptions = () => ({
     params: {

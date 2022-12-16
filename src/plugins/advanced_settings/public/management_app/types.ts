@@ -15,7 +15,7 @@ export interface FieldSetting {
   name: string;
   value: unknown;
   description?: string | ReactElement;
-  options?: string[];
+  options?: string[] | number[];
   optionLabels?: Record<string, string>;
   requiresPageReload: boolean;
   type: UiSettingsType;

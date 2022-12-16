@@ -16,7 +16,7 @@ the <<gs-get-data-into-kibana, sample web logs data>>, or you can use your own d
 
 . Open the main menu, and click *Discover*.
 
-. Expand the {data-source} dropdown, and select *kibana_sample_data_logs*.
+. Expand the {data-source} dropdown, and select *Kibana Sample Data Logs*.
 
 . If you don’t see any results, expand the time range, for example, to *Last 7 days*.
 

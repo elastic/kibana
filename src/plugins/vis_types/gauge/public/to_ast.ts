@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { getStopsWithColorsFromRanges } from '@kbn/visualizations-plugin/common/utils';
 import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import type {
@@ -13,8 +14,6 @@ import type {
   GaugeShape,
 } from '@kbn/expression-gauge-plugin/common';
 import { GaugeType, GaugeVisParams } from './types';
-import { getStopsWithColorsFromRanges } from './utils';
-import { getEsaggsFn } from './to_ast_esaggs';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -90,7 +89,7 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
     gauge.addArgument('palette', buildExpression([palette]));
   }
 
-  const ast = buildExpression([getEsaggsFn(vis), gauge]);
+  const ast = buildExpression([gauge]);
 
   return ast.toAst();
 };

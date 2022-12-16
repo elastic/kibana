@@ -5,95 +5,40 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
-import { TimelineTabs } from '../../../../../common/types/timeline';
 import { FlyoutBottomBar } from '.';
 
 describe('FlyoutBottomBar', () => {
   test('it renders the expected bottom bar', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
-        <FlyoutBottomBar
-          timelineId="test"
-          showDataproviders={true}
-          activeTab={TimelineTabs.query}
-        />
+        <FlyoutBottomBar timelineId="test" showTimelineHeaderPanel={true} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="flyoutBottomBar"]').exists()).toBeTruthy();
-  });
-
-  test('it renders the data providers drop target area', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FlyoutBottomBar
-          timelineId="test"
-          showDataproviders={true}
-          activeTab={TimelineTabs.query}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toBe(true);
+    expect(screen.getByTestId('flyoutBottomBar')).toBeInTheDocument();
   });
 
   test('it renders the flyout header panel', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
-        <FlyoutBottomBar
-          timelineId="test"
-          showDataproviders={true}
-          activeTab={TimelineTabs.query}
-        />
+        <FlyoutBottomBar timelineId="test" showTimelineHeaderPanel={true} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="timeline-flyout-header-panel"]').exists()).toBe(true);
-  });
-
-  test('it hides the data providers drop target area', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FlyoutBottomBar
-          timelineId="test"
-          showDataproviders={false}
-          activeTab={TimelineTabs.query}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toBe(false);
+    expect(screen.getByTestId('timeline-flyout-header-panel')).toBeInTheDocument();
   });
 
   test('it hides the flyout header panel', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
-        <FlyoutBottomBar
-          timelineId="test"
-          showDataproviders={false}
-          activeTab={TimelineTabs.query}
-        />
+        <FlyoutBottomBar timelineId="test" showTimelineHeaderPanel={false} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="timeline-flyout-header-panel"]').exists()).toBe(false);
-  });
-
-  test('it renders the data providers drop target area when showDataproviders=false and tab is not query', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FlyoutBottomBar
-          timelineId="test"
-          showDataproviders={false}
-          activeTab={TimelineTabs.notes}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toBe(true);
+    expect(screen.queryByTestId('timeline-flyout-header-panel')).not.toBeInTheDocument();
   });
 });

@@ -7,44 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { PreconfiguredAgentPolicy } from '../../../common';
-
 import type { FleetRequestHandler } from '../../types';
-import type {
-  PutPreconfigurationSchema,
-  PostResetOnePreconfiguredAgentPoliciesSchema,
-} from '../../types';
-import { defaultIngestErrorHandler } from '../../errors';
-import { ensurePreconfiguredPackagesAndPolicies, outputService } from '../../services';
+import type { PostResetOnePreconfiguredAgentPoliciesSchema } from '../../types';
+import { defaultFleetErrorHandler } from '../../errors';
 import { resetPreconfiguredAgentPolicies } from '../../services/preconfiguration/reset_agent_policies';
-
-export const updatePreconfigurationHandler: FleetRequestHandler<
-  undefined,
-  undefined,
-  TypeOf<typeof PutPreconfigurationSchema.body>
-> = async (context, request, response) => {
-  const coreContext = await context.core;
-  const fleetContext = await context.fleet;
-  const soClient = coreContext.savedObjects.client;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const defaultOutput = await outputService.ensureDefaultOutput(soClient);
-  const spaceId = fleetContext.spaceId;
-  const { agentPolicies, packages } = request.body;
-
-  try {
-    const body = await ensurePreconfiguredPackagesAndPolicies(
-      soClient,
-      esClient,
-      (agentPolicies as PreconfiguredAgentPolicy[]) ?? [],
-      packages ?? [],
-      defaultOutput,
-      spaceId
-    );
-    return response.ok({ body });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
 
 export const resetOnePreconfigurationHandler: FleetRequestHandler<
   TypeOf<typeof PostResetOnePreconfiguredAgentPoliciesSchema.params>,
@@ -59,7 +25,7 @@ export const resetOnePreconfigurationHandler: FleetRequestHandler<
     await resetPreconfiguredAgentPolicies(soClient, esClient, request.params.agentPolicyId);
     return response.ok({});
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -76,6 +42,6 @@ export const resetPreconfigurationHandler: FleetRequestHandler<
     await resetPreconfiguredAgentPolicies(soClient, esClient);
     return response.ok({});
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

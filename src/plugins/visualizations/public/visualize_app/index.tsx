@@ -11,7 +11,13 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 
 import { AppMountParameters } from '@kbn/core/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  toMountPoint,
+} from '@kbn/kibana-react-plugin/public';
+import { FormattedRelative } from '@kbn/i18n-react';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
 import { VisualizeApp } from './app';
 import { VisualizeServices } from './types';
 import { addHelpMenuToAppChrome, addBadgeToAppChrome } from './utils';
@@ -33,7 +39,16 @@ export const renderApp = (
         <KibanaContextProvider services={services}>
           <services.presentationUtil.ContextProvider>
             <services.i18n.Context>
-              <VisualizeApp onAppLeave={onAppLeave} />
+              <TableListViewKibanaProvider
+                {...{
+                  core: services.core,
+                  toMountPoint,
+                  savedObjectsTagging: services.savedObjectsTagging,
+                  FormattedRelative,
+                }}
+              >
+                <VisualizeApp onAppLeave={onAppLeave} />
+              </TableListViewKibanaProvider>
             </services.i18n.Context>
           </services.presentationUtil.ContextProvider>
         </KibanaContextProvider>

@@ -7,9 +7,9 @@
   border-radius: 50%;
   background-color: $euiColorLightestShade;
   &--disabled {
-    margin-top: $euiSizeS;
     width: $euiSize;
     height: $euiSize;
+    margin: $euiSizeS;
   }
   &--delete {
     background-color: $euiColorLightShade;

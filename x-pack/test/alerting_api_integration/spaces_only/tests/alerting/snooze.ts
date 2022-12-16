@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import uuid from 'uuid';
 import { Spaces } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -17,7 +18,15 @@ import {
   getEventLog,
 } from '../../../common/lib';
 
-const FUTURE_SNOOZE_TIME = '9999-12-31T06:00:00.000Z';
+const NOW = new Date().toISOString();
+const SNOOZE_SCHEDULE = {
+  duration: 864000000,
+  rRule: {
+    dtstart: NOW,
+    tzid: 'UTC',
+    count: 1,
+  },
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function createSnoozeRuleTests({ getService }: FtrProviderContext) {
@@ -66,7 +75,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
       const response = await alertUtils
         .getSnoozeRequest(createdRule.id)
-        .send({ snooze_end_time: FUTURE_SNOOZE_TIME });
+        .send({ snooze_schedule: SNOOZE_SCHEDULE });
 
       expect(response.statusCode).to.eql(204);
       expect(response.body).to.eql('');
@@ -74,7 +83,10 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
-      expect(updatedAlert.snooze_end_time).to.eql(FUTURE_SNOOZE_TIME);
+      expect(updatedAlert.snooze_schedule.length).to.eql(1);
+      const { rRule, duration } = updatedAlert.snooze_schedule[0];
+      expect(rRule.dtstart).to.eql(NOW);
+      expect(duration).to.eql(SNOOZE_SCHEDULE.duration);
       expect(updatedAlert.mute_all).to.eql(false);
       // Ensure AAD isn't broken
       await checkAAD({
@@ -85,7 +97,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       });
     });
 
-    it('should handle snooze rule request appropriately when snoozeEndTime is -1', async () => {
+    it('should handle snooze rule request appropriately when duration is -1', async () => {
       const { body: createdAction } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
@@ -116,9 +128,12 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      const response = await alertUtils
-        .getSnoozeRequest(createdRule.id)
-        .send({ snooze_end_time: -1 });
+      const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        snooze_schedule: {
+          ...SNOOZE_SCHEDULE,
+          duration: -1,
+        },
+      });
 
       expect(response.statusCode).to.eql(204);
       expect(response.body).to.eql('');
@@ -126,7 +141,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
-      expect(updatedAlert.snooze_end_time).to.eql(null);
+      expect(updatedAlert.snooze_schedule).to.eql([]);
       expect(updatedAlert.mute_all).to.eql(true);
       // Ensure AAD isn't broken
       await checkAAD({
@@ -181,11 +196,19 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       await getRuleEvents(createdRule.id);
 
       log.info('start snoozing');
+      const now = new Date().toISOString();
       const snoozeSeconds = 10;
-      const snoozeEndDate = new Date(Date.now() + 1000 * snoozeSeconds);
-      await alertUtils
-        .getSnoozeRequest(createdRule.id)
-        .send({ snooze_end_time: snoozeEndDate.toISOString() });
+      const snoozeDuration = snoozeSeconds * 1000;
+      await alertUtils.getSnoozeRequest(createdRule.id).send({
+        snooze_schedule: {
+          duration: snoozeDuration,
+          rRule: {
+            dtstart: now,
+            tzid: 'UTC',
+            count: 1,
+          },
+        },
+      });
 
       // could be an action execution while calling snooze, so set snooze start
       // to a value that we know it will be in effect (after this call)
@@ -217,6 +240,79 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       expect(actionsBefore).to.be.greaterThan(0, 'no actions triggered before snooze');
       expect(actionsAfter).to.be.greaterThan(0, 'no actions triggered after snooze');
       expect(actionsDuring).to.be(0);
+    });
+
+    it('should prevent more than 5 schedules from being added to a rule', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: false,
+          })
+        )
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      // Creating 5 snooze schedules, using Promise.all is very flaky, therefore
+      // the schedules are being created 1 at a time
+      await alertUtils
+        .getSnoozeRequest(createdRule.id)
+        .send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: uuid.v4(),
+          },
+        })
+        .expect(204);
+      await alertUtils
+        .getSnoozeRequest(createdRule.id)
+        .send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: uuid.v4(),
+          },
+        })
+        .expect(204);
+      await alertUtils
+        .getSnoozeRequest(createdRule.id)
+        .send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: uuid.v4(),
+          },
+        })
+        .expect(204);
+
+      await alertUtils
+        .getSnoozeRequest(createdRule.id)
+        .send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: uuid.v4(),
+          },
+        })
+        .expect(204);
+
+      await alertUtils
+        .getSnoozeRequest(createdRule.id)
+        .send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: uuid.v4(),
+          },
+        })
+        .expect(204);
+
+      // Adding the 6th snooze schedule, should fail
+      const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        snooze_schedule: {
+          ...SNOOZE_SCHEDULE,
+          id: uuid.v4(),
+        },
+      });
+      expect(response.statusCode).to.eql(400);
+      expect(response.body.message).to.eql('Rule cannot have more than 5 snooze schedules');
     });
   });
 

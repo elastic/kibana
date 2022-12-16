@@ -6,7 +6,7 @@
  */
 
 import React, { useContext } from 'react';
-import { StartPlugins } from '../../../../types';
+import type { StartPlugins } from '../../../../types';
 
 /**
  * For use with the Fleet UI extensions, where `useKibana().services.**` does not return the services

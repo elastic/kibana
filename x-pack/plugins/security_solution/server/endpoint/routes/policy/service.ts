@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
-import { Agent } from '@kbn/fleet-plugin/common/types/models';
+import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { Agent } from '@kbn/fleet-plugin/common/types/models';
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
-import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
+import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { INITIAL_POLICY_ID } from '.';
-import { EndpointAppContext } from '../../types';
+import type { EndpointAppContext } from '../../types';
 
 export const getESQueryPolicyResponseByAgentID = (
   agentID: string,
@@ -51,7 +51,7 @@ export async function getPolicyResponseByAgentId(
   dataClient: IScopedClusterClient
 ): Promise<GetHostPolicyResponse | undefined> {
   const query = getESQueryPolicyResponseByAgentID(agentID, index);
-  const response = await dataClient.asCurrentUser.search<HostPolicyResponse>(query);
+  const response = await dataClient.asInternalUser.search<HostPolicyResponse>(query);
 
   if (response.hits.hits.length > 0 && response.hits.hits[0]._source != null) {
     return {

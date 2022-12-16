@@ -26,9 +26,9 @@ const Wrapper = styled.div<{ maxWidth?: number }>`
   max-width: ${(props) => props.maxWidth || 1200}px;
   margin-left: auto;
   margin-right: auto;
-  padding-top: ${(props) => props.theme.eui.paddingSizes.xl};
-  padding-left: ${(props) => props.theme.eui.paddingSizes.m};
-  padding-right: ${(props) => props.theme.eui.paddingSizes.m};
+  padding-top: ${(props) => props.theme.eui.euiSizeXL};
+  padding-left: ${(props) => props.theme.eui.euiSizeM};
+  padding-right: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 const Tabs = styled(EuiTabs)`

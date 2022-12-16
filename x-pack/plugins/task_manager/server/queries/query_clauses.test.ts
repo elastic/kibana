@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { MustCondition, shouldBeOneOf, mustBeAllOf, matchesClauses } from './query_clauses';
 
 describe('matchesClauses', () => {

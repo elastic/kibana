@@ -30,6 +30,7 @@
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeVislib",
@@ -39,10 +40,11 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"goal\" | \"heatmap\" | \"gauge\" | \"metric\" | \"pie\""
+              "\"metric\" | \"goal\" | \"gauge\" | \"heatmap\""
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -52,7 +54,8 @@
             "label": "addLegend",
             "description": [],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -62,7 +65,8 @@
             "label": "addTimeMarker",
             "description": [],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -82,7 +86,8 @@
               "[]"
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -95,7 +100,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -114,7 +120,8 @@
               }
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -133,7 +140,8 @@
               }
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -153,7 +161,8 @@
               "[]"
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -172,7 +181,8 @@
               }
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -185,7 +195,8 @@
               "{ percentageMode: boolean; } | undefined"
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -205,7 +216,8 @@
               "[]"
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -219,7 +231,8 @@
               "[]"
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -229,7 +242,8 @@
             "label": "radiusRatio",
             "description": [],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -243,6 +257,7 @@
         "description": [],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeVislib",
@@ -252,7 +267,8 @@
             "label": "addTooltip",
             "description": [],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -262,7 +278,8 @@
             "label": "addLegend",
             "description": [],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -275,7 +292,8 @@
               "\"top\" | \"bottom\" | \"left\" | \"right\""
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeVislib",
@@ -294,7 +312,8 @@
               }
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -314,6 +333,7 @@
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -328,6 +348,7 @@
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -338,10 +359,11 @@
         "label": "VislibChartType",
         "description": [],
         "signature": [
-          "\"goal\" | \"heatmap\" | \"gauge\" | \"metric\" | \"pie\""
+          "\"metric\" | \"goal\" | \"gauge\" | \"heatmap\""
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -360,6 +382,7 @@
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -374,6 +397,7 @@
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -384,10 +408,11 @@
         "label": "VislibChartType",
         "description": [],
         "signature": [
-          "{ readonly Pie: \"pie\"; readonly Heatmap: \"heatmap\"; readonly Gauge: \"gauge\"; readonly Goal: \"goal\"; readonly Metric: \"metric\"; }"
+          "{ readonly Heatmap: \"heatmap\"; readonly Gauge: \"gauge\"; readonly Goal: \"goal\"; readonly Metric: \"metric\"; }"
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]
@@ -418,6 +443,7 @@
         ],
         "path": "src/plugins/vis_types/vislib/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

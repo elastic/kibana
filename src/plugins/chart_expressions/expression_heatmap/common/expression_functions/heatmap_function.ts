@@ -161,6 +161,9 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     validateAccessor(args.splitColumnAccessor, data.columns);
 
     if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
       const argsTable: Dimension[] = [];
       if (args.valueAccessor) {
         prepareHeatmapLogTable(
@@ -227,6 +230,9 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
             (handlers.variables?.embeddableTitle as string) ??
             handlers.getExecutionContext?.()?.description,
         },
+        syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
+        syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
+        canNavigateToLens: Boolean(handlers?.variables?.canNavigateToLens),
       },
     };
   },

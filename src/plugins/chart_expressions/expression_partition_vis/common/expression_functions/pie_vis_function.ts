@@ -8,6 +8,7 @@
 
 import { Position } from '@elastic/charts';
 import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { EmptySizeRatios, LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
 import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
 import {
@@ -24,10 +25,15 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   inputTypes: ['datatable'],
   help: strings.getPieVisFunctionName(),
   args: {
-    metric: {
+    metrics: {
       types: ['vis_dimension', 'string'],
       help: strings.getMetricArgHelp(),
       required: true,
+      multi: true,
+    },
+    metricsToLabels: {
+      types: ['string'],
+      help: strings.getMetricToLabelHelp(),
     },
     buckets: {
       types: ['vis_dimension', 'string'],
@@ -64,8 +70,17 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       strict: true,
     },
     legendSize: {
-      types: ['number'],
+      types: ['string'],
+      default: DEFAULT_LEGEND_SIZE,
       help: strings.getLegendSizeArgHelp(),
+      options: [
+        LegendSize.AUTO,
+        LegendSize.SMALL,
+        LegendSize.MEDIUM,
+        LegendSize.LARGE,
+        LegendSize.EXTRA_LARGE,
+      ],
+      strict: true,
     },
     nestedLegend: {
       types: ['boolean'],
@@ -127,9 +142,10 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
     }
 
-    validateAccessor(args.metric, context.columns);
+    args.metrics.forEach((accessor) => validateAccessor(accessor, context.columns));
+
     if (args.buckets) {
-      args.buckets.forEach((bucket) => validateAccessor(bucket, context.columns));
+      args.buckets.forEach((accessor) => validateAccessor(accessor, context.columns));
     }
     if (args.splitColumn) {
       args.splitColumn.forEach((splitColumn) => validateAccessor(splitColumn, context.columns));
@@ -140,13 +156,14 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
 
     const visConfig: PartitionVisParams = {
       ...args,
+      metricsToLabels: args.metricsToLabels ? JSON.parse(args.metricsToLabels) : {},
       ariaLabel:
         args.ariaLabel ??
         (handlers.variables?.embeddableTitle as string) ??
         handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
-        metric: args.metric,
+        metrics: args.metrics,
         buckets: args.buckets,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
@@ -154,10 +171,13 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
     };
 
     if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
       const logTable = prepareLogTable(
         context,
         [
-          [[args.metric], strings.getSliceSizeHelp()],
+          [args.metrics, strings.getSliceSizeHelp()],
           [args.buckets, strings.getSliceHelp()],
           [args.splitColumn, strings.getColumnSplitHelp()],
           [args.splitRow, strings.getRowSplitHelp()],
@@ -175,6 +195,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         visType: args.isDonut ? ChartTypes.DONUT : ChartTypes.PIE,
+        canNavigateToLens: Boolean(handlers?.variables?.canNavigateToLens),
         params: {
           listenOnChange: true,
         },

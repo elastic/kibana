@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import {
   IRouter,
-  StartServicesAccessor,
   RequestHandler,
   RouteValidatorFullConfig,
+  StartServicesAccessor,
 } from '@kbn/core/server';
-import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 import { IndexPatternsFetcher } from '../fetcher';
+import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 
 const parseMetaFields = (metaFields: string | string[]) => {
   let parsedFields: string[] = [];
@@ -28,13 +29,14 @@ const parseMetaFields = (metaFields: string | string[]) => {
 
 const path = '/api/index_patterns/_fields_for_wildcard';
 
-type IBody = { index_filter?: any } | undefined;
+type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
 interface IQuery {
   pattern: string;
   meta_fields: string[];
   type?: string;
   rollup_index?: string;
   allow_no_index?: boolean;
+  include_unmapped?: boolean;
 }
 
 const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
@@ -46,6 +48,7 @@ const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
     type: schema.maybe(schema.string()),
     rollup_index: schema.maybe(schema.string()),
     allow_no_index: schema.maybe(schema.boolean()),
+    include_unmapped: schema.maybe(schema.boolean()),
   }),
   // not available to get request
   body: schema.maybe(schema.object({ index_filter: schema.any() })),
@@ -59,10 +62,11 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
     type,
     rollup_index: rollupIndex,
     allow_no_index: allowNoIndex,
+    include_unmapped: includeUnmapped,
   } = request.query;
 
   // not available to get request
-  const filter = request.body?.index_filter;
+  const indexFilter = request.body?.index_filter;
 
   let parsedFields: string[] = [];
   try {
@@ -72,19 +76,20 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
   }
 
   try {
-    const fields = await indexPatterns.getFieldsForWildcard({
+    const { fields, indices } = await indexPatterns.getFieldsForWildcard({
       pattern,
       metaFields: parsedFields,
       type,
       rollupIndex,
       fieldCapsOptions: {
         allow_no_indices: allowNoIndex || false,
+        includeUnmapped,
       },
-      filter,
+      indexFilter,
     });
 
     return response.ok({
-      body: { fields },
+      body: { fields, indices },
       headers: {
         'content-type': 'application/json',
       },
@@ -117,5 +122,6 @@ export const registerFieldForWildcard = (
   >
 ) => {
   router.put({ path, validate }, handler);
+  router.post({ path, validate }, handler);
   router.get({ path, validate }, handler);
 };

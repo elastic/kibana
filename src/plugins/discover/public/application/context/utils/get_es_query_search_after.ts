@@ -5,11 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { EsQuerySearchAfter } from '@kbn/data-plugin/common';
 import { SurrDocType } from '../services/context';
-import { EsHitRecord, EsHitRecordList } from '../../types';
-
-export type EsQuerySearchAfter = [string | number, string | number];
+import type { DataTableRecord } from '../../../types';
 
 /**
  * Get the searchAfter query value for elasticsearch
@@ -19,9 +17,9 @@ export type EsQuerySearchAfter = [string | number, string | number];
  */
 export function getEsQuerySearchAfter(
   type: SurrDocType,
-  documents: EsHitRecordList,
+  documents: DataTableRecord[],
   timeFieldName: string,
-  anchor: EsHitRecord,
+  anchor: DataTableRecord,
   nanoSeconds: string,
   useNewFieldsApi?: boolean
 ): EsQuerySearchAfter {
@@ -30,23 +28,24 @@ export function getEsQuerySearchAfter(
     const afterTimeRecIdx =
       type === SurrDocType.SUCCESSORS && documents.length ? documents.length - 1 : 0;
     const afterTimeDoc = documents[afterTimeRecIdx];
-    let afterTimeValue = afterTimeDoc.sort[0] as string | number;
+    const afterTimeDocRaw = afterTimeDoc.raw;
+    let afterTimeValue = afterTimeDocRaw.sort?.[0] as string | number;
     if (nanoSeconds) {
       afterTimeValue = useNewFieldsApi
-        ? afterTimeDoc.fields[timeFieldName][0]
-        : afterTimeDoc._source?.[timeFieldName];
+        ? afterTimeDocRaw.fields?.[timeFieldName][0]
+        : afterTimeDocRaw._source?.[timeFieldName];
     }
-    return [afterTimeValue, afterTimeDoc.sort[1] as string | number];
+    return [afterTimeValue, afterTimeDoc.raw.sort?.[1] as string | number];
   }
   // if data_nanos adapt timestamp value for sorting, since numeric value was rounded by browser
   // ES search_after also works when number is provided as string
   const searchAfter = new Array(2) as EsQuerySearchAfter;
-  searchAfter[0] = anchor.sort[0] as string | number;
+  searchAfter[0] = anchor.raw.sort?.[0] as string | number;
   if (nanoSeconds) {
     searchAfter[0] = useNewFieldsApi
-      ? anchor.fields[timeFieldName][0]
-      : anchor._source?.[timeFieldName];
+      ? anchor.raw.fields?.[timeFieldName][0]
+      : anchor.raw._source?.[timeFieldName];
   }
-  searchAfter[1] = anchor.sort[1] as string | number;
+  searchAfter[1] = anchor.raw.sort?.[1] as string | number;
   return searchAfter;
 }

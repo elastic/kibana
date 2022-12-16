@@ -5,149 +5,42 @@
  * 2.0.
  */
 
-import { useCallback, useReducer, useRef, useEffect } from 'react';
-import { CaseStatuses } from '../../common/api';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 import * as i18n from './translations';
-import { patchCasesStatus } from './api';
-import { BulkUpdateStatus, Case } from './types';
-import { useToasts } from '../common/lib/kibana';
+import { updateCases } from './api';
+import type { CaseUpdateRequest } from './types';
+import { useCasesToast } from '../common/use_cases_toast';
+import type { ServerError } from '../types';
+import { casesQueriesKeys, casesMutationsKeys } from './constants';
 
-interface UpdateState {
-  isUpdated: boolean;
-  isLoading: boolean;
-  isError: boolean;
-}
-type Action =
-  | { type: 'FETCH_INIT' }
-  | { type: 'FETCH_SUCCESS'; payload: boolean }
-  | { type: 'FETCH_FAILURE' }
-  | { type: 'RESET_IS_UPDATED' };
-
-const dataFetchReducer = (state: UpdateState, action: Action): UpdateState => {
-  switch (action.type) {
-    case 'FETCH_INIT':
-      return {
-        ...state,
-        isLoading: true,
-        isError: false,
-      };
-    case 'FETCH_SUCCESS':
-      return {
-        ...state,
-        isLoading: false,
-        isError: false,
-        isUpdated: action.payload,
-      };
-    case 'FETCH_FAILURE':
-      return {
-        ...state,
-        isLoading: false,
-        isError: true,
-      };
-    case 'RESET_IS_UPDATED':
-      return {
-        ...state,
-        isUpdated: false,
-      };
-    default:
-      return state;
-  }
-};
-export interface UseUpdateCases extends UpdateState {
-  updateBulkStatus: (cases: Case[], status: string) => void;
-  dispatchResetIsUpdated: () => void;
+interface MutationArgs {
+  cases: CaseUpdateRequest[];
+  successToasterTitle: string;
 }
 
-const getStatusToasterMessage = (
-  status: CaseStatuses,
-  messageArgs: {
-    totalCases: number;
-    caseTitle?: string;
-  }
-): string => {
-  if (status === CaseStatuses.open) {
-    return i18n.REOPENED_CASES(messageArgs);
-  } else if (status === CaseStatuses['in-progress']) {
-    return i18n.MARK_IN_PROGRESS_CASES(messageArgs);
-  } else if (status === CaseStatuses.closed) {
-    return i18n.CLOSED_CASES(messageArgs);
-  }
+export const useUpdateCases = () => {
+  const queryClient = useQueryClient();
+  const { showErrorToast, showSuccessToast } = useCasesToast();
 
-  return '';
-};
+  return useMutation(
+    ({ cases }: MutationArgs) => {
+      const abortCtrlRef = new AbortController();
+      return updateCases(cases, abortCtrlRef.signal);
+    },
+    {
+      mutationKey: casesMutationsKeys.updateCases,
+      onSuccess: (_, { successToasterTitle }) => {
+        queryClient.invalidateQueries(casesQueriesKeys.casesList());
+        queryClient.invalidateQueries(casesQueriesKeys.tags());
+        queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
 
-export const useUpdateCases = (): UseUpdateCases => {
-  const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: false,
-    isError: false,
-    isUpdated: false,
-  });
-  const toasts = useToasts();
-  const isCancelledRef = useRef(false);
-  const abortCtrlRef = useRef(new AbortController());
-
-  const dispatchUpdateCases = useCallback(async (cases: BulkUpdateStatus[], action: string) => {
-    try {
-      isCancelledRef.current = false;
-      abortCtrlRef.current.abort();
-      abortCtrlRef.current = new AbortController();
-
-      dispatch({ type: 'FETCH_INIT' });
-      const patchResponse = await patchCasesStatus(cases, abortCtrlRef.current.signal);
-
-      if (!isCancelledRef.current) {
-        const resultCount = Object.keys(patchResponse).length;
-        const firstTitle = patchResponse[0].title;
-
-        dispatch({ type: 'FETCH_SUCCESS', payload: true });
-        const messageArgs = {
-          totalCases: resultCount,
-          caseTitle: resultCount === 1 ? firstTitle : '',
-        };
-
-        const message =
-          action === 'status' ? getStatusToasterMessage(patchResponse[0].status, messageArgs) : '';
-
-        toasts.addSuccess(message);
-      }
-    } catch (error) {
-      if (!isCancelledRef.current) {
-        if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            { title: i18n.ERROR_TITLE }
-          );
-        }
-        dispatch({ type: 'FETCH_FAILURE' });
-      }
+        showSuccessToast(successToasterTitle);
+      },
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.ERROR_UPDATING });
+      },
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const dispatchResetIsUpdated = useCallback(() => {
-    dispatch({ type: 'RESET_IS_UPDATED' });
-  }, []);
-
-  const updateBulkStatus = useCallback(
-    (cases: Case[], status: string) => {
-      const updateCasesStatus: BulkUpdateStatus[] = cases.map((theCase) => ({
-        status,
-        id: theCase.id,
-        version: theCase.version,
-      }));
-      dispatchUpdateCases(updateCasesStatus, 'status');
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
   );
-
-  useEffect(
-    () => () => {
-      isCancelledRef.current = true;
-      abortCtrlRef.current.abort();
-    },
-    []
-  );
-
-  return { ...state, updateBulkStatus, dispatchResetIsUpdated };
 };
+
+export type UseUpdateCases = ReturnType<typeof useUpdateCases>;

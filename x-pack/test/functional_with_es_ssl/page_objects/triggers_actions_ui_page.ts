@@ -18,6 +18,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const rules = getService('rules');
 
   function getRowItemData(row: CustomCheerio, $: CustomCheerioStatic) {
     return {
@@ -48,6 +49,10 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         await createBtn.click();
       }
     },
+    async getRulesListTitle() {
+      const noPermissionsTitle = await find.byCssSelector('[data-test-subj="rulesList"] .euiTitle');
+      return await noPermissionsTitle.getVisibleText();
+    },
     async clickCreateConnectorButton() {
       const createBtn = await testSubjects.find('createActionButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
@@ -56,6 +61,11 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       } else {
         await this.clickCreateFirstConnectorButton();
       }
+    },
+    async tableFinishedLoading() {
+      await find.byCssSelector(
+        '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)'
+      );
     },
     async searchConnectors(searchText: string) {
       const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
@@ -155,10 +165,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await switchBtn.click();
     },
     async clickCreateAlertButton() {
-      const createBtn = await find.byCssSelector(
-        '[data-test-subj="createRuleButton"],[data-test-subj="createFirstRuleButton"]'
-      );
-      await createBtn.click();
+      await rules.common.clickCreateAlertButton();
     },
     async setAlertName(value: string) {
       await testSubjects.setValue('ruleNameInput', value);

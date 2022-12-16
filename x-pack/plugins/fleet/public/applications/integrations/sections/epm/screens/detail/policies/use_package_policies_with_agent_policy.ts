@@ -14,7 +14,6 @@ import type {
   GetPackagePoliciesResponse,
 } from '../../../../../types';
 import { agentPolicyRouteService } from '../../../../../services';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import { useGetPackagePolicies, useConditionalRequest } from '../../../../../hooks';
 import type { SendConditionalRequestConfig } from '../../../../../hooks';
 
@@ -52,37 +51,31 @@ export const usePackagePoliciesWithAgentPolicy = (
     resendRequest,
   } = useGetPackagePolicies(query);
 
-  const agentPoliciesFilter = useMemo<string>(() => {
+  const agentPoliciesIds = useMemo<string[]>(() => {
     if (!packagePoliciesData?.items.length) {
-      return '';
+      return [];
     }
 
     // Build a list of package_policies for which we need Agent Policies for. Since some package
     // policies can exist within the same Agent Policy, we don't need to (in some cases) include
     // the entire list of package_policy ids.
-    const includedAgentPolicies = new Set<string>();
-
-    return `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${packagePoliciesData.items
-      .filter((packagePolicy) => {
-        if (includedAgentPolicies.has(packagePolicy.policy_id)) {
-          return false;
-        }
-        includedAgentPolicies.add(packagePolicy.policy_id);
-        return true;
-      })
-      .map((packagePolicy) => packagePolicy.id)
-      .join(' or ')}) `;
+    return Array.from(
+      new Set<string>(
+        packagePoliciesData.items.map((packagePolicy) => packagePolicy.policy_id)
+      ).values()
+    );
   }, [packagePoliciesData]);
 
   const { data: agentPoliciesData, isLoading: isLoadingAgentPolicies } =
     useConditionalRequest<GetAgentPoliciesResponse>({
-      path: agentPolicyRouteService.getListPath(),
-      method: 'get',
-      query: {
-        perPage: 100,
-        kuery: agentPoliciesFilter,
+      path: agentPolicyRouteService.getBulkGetPath(),
+      method: 'post',
+      body: {
+        ids: agentPoliciesIds,
+        full: true,
+        ignoreMissing: true,
       },
-      shouldSendRequest: !!packagePoliciesData?.items.length,
+      shouldSendRequest: agentPoliciesIds.length > 0,
     } as SendConditionalRequestConfig);
 
   const [enrichedData, setEnrichedData] = useState<GetPackagePoliciesWithAgentPolicy | undefined>();

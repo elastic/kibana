@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { DASH } from '../../constants';
 import { getProcessExecutableCopyText, formatProcessArgs, getIsInterativeString } from './helpers';
 
 describe('detail panel process tab helpers tests', () => {
@@ -36,7 +37,7 @@ describe('detail panel process tab helpers tests', () => {
 
   it("formatProcessArgs returns '-' when given empty args array", () => {
     const result = formatProcessArgs([]);
-    expect(result).toEqual('-');
+    expect(result).toEqual(DASH);
   });
 
   it('formatProcessArgs returns formatted args string', () => {

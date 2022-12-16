@@ -5,26 +5,31 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import type { SavedObjectsFindResponse } from '@kbn/core/public';
+import { useQuery } from '@tanstack/react-query';
 
 import { useKibana } from '../common/lib/kibana';
 import { PACKS_ID } from './constants';
+import type { PackSavedObject } from './types';
 
 export const usePacks = ({
   isLive = false,
   pageIndex = 0,
-  pageSize = 10000,
+  pageSize = 100,
   sortField = 'updated_at',
-  sortDirection = 'desc',
+  sortOrder = 'desc',
 }) => {
   const { http } = useKibana().services;
 
-  return useQuery(
-    [PACKS_ID, { pageIndex, pageSize, sortField, sortDirection }],
-    async () =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      http.get<any>('/internal/osquery/packs', {
-        query: { pageIndex, pageSize, sortField, sortDirection },
+  return useQuery<
+    Omit<SavedObjectsFindResponse, 'savedObjects'> & {
+      data: PackSavedObject[];
+    }
+  >(
+    [PACKS_ID, { pageIndex, pageSize, sortField, sortOrder }],
+    () =>
+      http.get('/api/osquery/packs', {
+        query: { pageIndex, pageSize, sortField, sortOrder },
       }),
     {
       keepPreviousData: true,

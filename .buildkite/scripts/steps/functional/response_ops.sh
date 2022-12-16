@@ -8,10 +8,7 @@ export JOB=kibana-security-solution-chrome
 
 echo "--- Response Ops Cypress Tests on Security Solution"
 
-cd "$XPACK_DIR"
-
-checks-reporter-with-killswitch "Response Ops Cypress Tests on Security Solution" \
- node scripts/functional_tests \
-   --debug --bail \
-   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-   --config test/security_solution_cypress/response_ops_cli_config.ts
+node scripts/functional_tests \
+  --debug --bail \
+  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+  --config x-pack/test/security_solution_cypress/response_ops_cli_config.ts

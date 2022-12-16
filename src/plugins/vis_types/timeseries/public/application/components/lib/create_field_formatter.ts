@@ -8,18 +8,17 @@
 
 import { isNumber } from 'lodash';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import type { FieldFormatMap } from '@kbn/data-plugin/common';
+import type { FieldFormatMap, DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsContentType } from '@kbn/field-formats-plugin/common';
 import { isEmptyValue, DISPLAY_EMPTY_VALUE } from '../../../../common/last_value_utils';
 import { getFieldFormats } from '../../../services';
-
-const DEFAULT_FIELD_FORMAT = { id: 'number' };
 
 export const createFieldFormatter = (
   fieldName: string = '',
   fieldFormatMap?: FieldFormatMap,
   contextType?: FieldFormatsContentType,
-  hasColorRules: boolean = false
+  hasColorRules: boolean = false,
+  dataView?: DataView
 ) => {
   const serializedFieldFormat = fieldFormatMap?.[fieldName];
   // field formatting should be skipped either there's no such field format in fieldFormatMap
@@ -28,15 +27,25 @@ export const createFieldFormatter = (
     !serializedFieldFormat ||
     (hasColorRules && serializedFieldFormat?.id === FIELD_FORMAT_IDS.COLOR);
 
+  const fieldType = dataView?.getFieldByName(fieldName)?.type || 'number';
+  const defaultFieldFormat =
+    fieldType === 'date'
+      ? { id: 'date' }
+      : fieldType === 'string'
+      ? { id: 'string' }
+      : fieldType === 'boolean'
+      ? { id: 'boolean' }
+      : { id: 'number' };
+
   const fieldFormat = getFieldFormats().deserialize(
-    shouldSkipFormatting ? DEFAULT_FIELD_FORMAT : serializedFieldFormat
+    shouldSkipFormatting ? defaultFieldFormat : serializedFieldFormat
   );
 
   return (value: unknown) => {
     if (isEmptyValue(value)) {
       return DISPLAY_EMPTY_VALUE;
     }
-    return isNumber(value) || !shouldSkipFormatting
+    return fieldType !== 'number' || isNumber(value) || !shouldSkipFormatting
       ? fieldFormat.convert(value, contextType)
       : value;
   };

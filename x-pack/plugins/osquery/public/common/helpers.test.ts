@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESQuery } from '../../common/typed_json';
+import type { ESQuery } from '../../common/typed_json';
 
 import { createFilter } from './helpers';
 

@@ -58,6 +58,7 @@ export const markdownVisDefinition: VisTypeDefinition<MarkdownVisParams> = {
   options: {
     showTimePicker: false,
     showFilterBar: false,
+    showQueryInput: false,
   },
   inspectorAdapters: {},
 };

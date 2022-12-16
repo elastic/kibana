@@ -7,11 +7,12 @@
 
 import moment from 'moment';
 
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import {
   createQueryFilterClauses,
   calculateTimeSeriesInterval,
 } from '../../../../../utils/build_query';
-import { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy/security_solution/matrix_histogram';
+import type { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy/security_solution/matrix_histogram';
 
 export const buildPreviewHistogramQuery = ({
   filterQuery,
@@ -23,7 +24,7 @@ export const buildPreviewHistogramQuery = ({
     ...createQueryFilterClauses(filterQuery),
     {
       range: {
-        'signal.original_time': {
+        [TIMESTAMP]: {
           gte: from,
           lte: to,
           format: 'strict_date_optional_time',
@@ -34,7 +35,7 @@ export const buildPreviewHistogramQuery = ({
 
   const getHistogramAggregation = () => {
     const interval = calculateTimeSeriesInterval(from, to);
-    const histogramTimestampField = 'signal.original_time';
+    const histogramTimestampField = TIMESTAMP;
     const dateHistogram = {
       date_histogram: {
         field: histogramTimestampField,

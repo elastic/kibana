@@ -1,0 +1,20 @@
+.dshDashboardViewport {
+  width: 100%;
+}
+
+.dshDashboardViewport-withMargins {
+  width: 100%;
+}
+
+.dshDashboardViewport-controls {
+  margin: 0 $euiSizeS 0 $euiSizeS;
+  padding-bottom: $euiSizeXS;
+}
+
+.dshDashboardEmptyScreen {
+  margin-top: $euiSizeS;
+}
+
+.dashboardViewport--screenshotMode  .controlsWrapper--empty {
+  display:none
+}

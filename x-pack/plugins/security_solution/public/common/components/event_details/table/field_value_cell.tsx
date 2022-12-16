@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { CSSProperties } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { CSSObject } from 'styled-components';
-import { BrowserField } from '../../../containers/source';
+import type { BrowserField } from '../../../containers/source';
 import { OverflowField } from '../../tables/helpers';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { MESSAGE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { EventFieldsData, FieldsData } from '../types';
+import type { EventFieldsData, FieldsData } from '../types';
 
 export interface FieldValueCellProps {
   contextId: string;
@@ -22,7 +22,7 @@ export interface FieldValueCellProps {
   getLinkValue?: (field: string) => string | null;
   isDraggable?: boolean;
   linkValue?: string | null | undefined;
-  style?: CSSObject | undefined;
+  style?: CSSProperties | undefined;
   values: string[] | null | undefined;
 }
 
@@ -72,6 +72,7 @@ export const FieldValueCell = React.memo(
                     fieldFormat={data.format}
                     fieldName={data.field}
                     fieldType={data.type}
+                    isAggregatable={fieldFromBrowserField.aggregatable}
                     isDraggable={isDraggable}
                     isObjectArray={data.isObjectArray}
                     value={value}

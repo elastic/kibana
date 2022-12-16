@@ -9,8 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Dev Tools', function () {
-    this.tags('ciGroup13');
-
     loadTestFile(require.resolve('./breadcrumbs'));
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./searchprofiler_editor'));

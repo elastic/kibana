@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BrowserField } from '../../containers/source';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import type { BrowserField } from '../../containers/source';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 export type EventFieldsData = BrowserField & TimelineEventsDetailsItem;
 
@@ -21,7 +21,7 @@ export interface EnrichedFieldInfo {
   data: FieldsData | EventFieldsData;
   eventId: string;
   fieldFromBrowserField?: BrowserField;
-  timelineId: string;
+  scopeId: string;
   values: string[] | null | undefined;
   linkValue?: string;
 }

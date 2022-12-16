@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 
-import { FilterMode as RecentTimelinesFilterMode } from '../recent_timelines/types';
+import type { FilterMode as RecentTimelinesFilterMode } from '../recent_timelines/types';
 
 import { Sidebar } from './sidebar';
 

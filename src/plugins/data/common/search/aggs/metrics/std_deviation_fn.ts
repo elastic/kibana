@@ -48,6 +48,14 @@ export const aggStdDeviation = (): FunctionDefinition => ({
         defaultMessage: 'Schema to use for this aggregation',
       }),
     },
+    showBounds: {
+      types: ['boolean'],
+      default: true,
+      help: i18n.translate('data.search.aggs.metrics.std_deviation.showBounds.help', {
+        defaultMessage:
+          'Specifies whether this aggregation should return upper and lower bound or the standard deviation itself',
+      }),
+    },
     field: {
       types: ['string'],
       required: true,

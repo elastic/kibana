@@ -28,7 +28,7 @@ export class IndexPatternFieldEditorPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: StartPlugins) {
+  public start(core: CoreStart, plugins: StartPlugins): PluginStart {
     const { fieldFormatEditors } = this.formatEditorService.start();
     const { http } = core;
     const { data, usageCollection, dataViews, fieldFormats } = plugins;

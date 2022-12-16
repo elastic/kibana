@@ -1,0 +1,557 @@
+{
+  "id": "@kbn/core-ui-settings-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-ui-settings-browser",
+        "id": "def-common.IUiSettingsClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "IUiSettingsClient",
+        "description": [
+          "\nClient-side client that provides access to the advanced settings stored in elasticsearch.\nThe settings provide control over the behavior of the Kibana application.\nFor example, a user can specify how to display numeric or date fields.\nUsers can adjust the settings via Management UI.\n{@link IUiSettingsClient}\n"
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.IUiSettingsClient.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nGets the value for a specific uiSetting. If this setting has no user-defined value\nthen the `defaultOverride` parameter is returned (and parsed if setting is of type\n\"json\" or \"number). If the parameter is not defined and the key is not registered\nby any plugin then an error is thrown, otherwise reads the default value defined by a plugin."
+            ],
+            "signature": [
+              "<T = any>(key: string, defaultOverride?: T | undefined) => T"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.get.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "defaultOverride",
+                "description": [],
+                "signature": [
+                  "T | undefined"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.IUiSettingsClient.get$",
+            "type": "Function",
+            "tags": [],
+            "label": "get$",
+            "description": [
+              "\nGets an observable of the current value for a config key, and all updates to that config\nkey in the future. Providing a `defaultOverride` argument behaves the same as it does in #get()"
+            ],
+            "signature": [
+              "<T = any>(key: string, defaultOverride?: T | undefined) => ",
+              "Observable",
+              "<T>"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.get$.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.get$.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "defaultOverride",
+                "description": [],
+                "signature": [
+                  "T | undefined"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.IUiSettingsClient.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [
+              "\nGets the metadata about all uiSettings, including the type, default value, and user value\nfor each key."
+            ],
+            "signature": [
+              "() => Readonly<Record<string, ",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.PublicUiSettingsParams",
+                "text": "PublicUiSettingsParams"
+              },
+              " & ",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UserProvidedValues",
+                "text": "UserProvidedValues"
+              },
+              "<any>>>"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.IUiSettingsClient.set",
+            "type": "Function",
+            "tags": [],
+            "label": "set",
+            "description": [
+              "\nSets the value for a uiSetting. If the setting is not registered by any plugin\nit will be stored as a custom setting. The new value will be synchronously available via\nthe `get()` method and sent to the server in the background. If the request to the\nserver fails then a updateErrors$ will be notified and the setting will be\nreverted to its value before `set()` was called."
+            ],
+            "signature": [
+              "(key: string, value: any) => Promise<boolean>"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.set.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.set.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.IUiSettingsClient.remove",
+            "type": "Function",
+            "tags": [],
+            "label": "remove",
+            "description": [
+              "\nRemoves the user-defined value for a setting, causing it to revert to the default. This\nmethod behaves the same as calling `set(key, null)`, including the synchronization, custom\nsetting, and error behavior of that method."
+            ],
+            "signature": [
+              "(key: string) => Promise<boolean>"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.remove.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.IUiSettingsClient.isDeclared",
+            "type": "Function",
+            "tags": [],
+            "label": "isDeclared",
+            "description": [
+              "\nReturns true if the key is a \"known\" uiSetting, meaning it is either registered\nby any plugin or was previously added as a custom setting via the `set()` method."
+            ],
+            "signature": [
+              "(key: string) => boolean"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.isDeclared.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.IUiSettingsClient.isDefault",
+            "type": "Function",
+            "tags": [],
+            "label": "isDefault",
+            "description": [
+              "\nReturns true if the setting has no user-defined value or is unknown"
+            ],
+            "signature": [
+              "(key: string) => boolean"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.isDefault.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.IUiSettingsClient.isCustom",
+            "type": "Function",
+            "tags": [],
+            "label": "isCustom",
+            "description": [
+              "\nReturns true if the setting wasn't registered by any plugin, but was either\nadded directly via `set()`, or is an unknown setting found in the uiSettings saved\nobject"
+            ],
+            "signature": [
+              "(key: string) => boolean"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.isCustom.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.IUiSettingsClient.isOverridden",
+            "type": "Function",
+            "tags": [],
+            "label": "isOverridden",
+            "description": [
+              "\nShows whether the uiSettings value set by the user."
+            ],
+            "signature": [
+              "(key: string) => boolean"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.isOverridden.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.IUiSettingsClient.getUpdate$",
+            "type": "Function",
+            "tags": [],
+            "label": "getUpdate$",
+            "description": [
+              "\nReturns an Observable that notifies subscribers of each update to the uiSettings,\nincluding the key, newValue, and oldValue of the setting that changed."
+            ],
+            "signature": [
+              "<T = any>() => ",
+              "Observable",
+              "<{ key: string; newValue: T; oldValue: T; }>"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.IUiSettingsClient.getUpdateErrors$",
+            "type": "Function",
+            "tags": [],
+            "label": "getUpdateErrors$",
+            "description": [
+              "\nReturns an Observable that notifies subscribers of each error while trying to update\nthe settings, containing the actual Error class."
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<Error>"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-browser",
+        "id": "def-common.SettingsStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "SettingsStart",
+        "description": [],
+        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.SettingsStart.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.SettingsStart.globalClient",
+            "type": "Object",
+            "tags": [],
+            "label": "globalClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-browser",
+        "id": "def-common.UiSettingsState",
+        "type": "Interface",
+        "tags": [],
+        "label": "UiSettingsState",
+        "description": [],
+        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.UiSettingsState.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: PublicUiSettingsParams & UserProvidedValues<any>",
+            "description": [],
+            "signature": [
+              "[key: string]:  ",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.PublicUiSettingsParams",
+                "text": "PublicUiSettingsParams"
+              },
+              " & ",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UserProvidedValues",
+                "text": "UserProvidedValues"
+              },
+              "<any>"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-ui-settings-browser",
+        "id": "def-common.SettingsSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "SettingsSetup",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-common.SettingsStart",
+            "text": "SettingsStart"
+          }
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -15,7 +15,7 @@ import { USER } from '../../../../functional/services/ml/security_common';
 const idSpaceWithMl = 'space_with_ml';
 const idSpaceNoMl = 'space_no_ml';
 
-const NUMBER_OF_CAPABILITIES = 36;
+const NUMBER_OF_CAPABILITIES = 38;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -105,7 +105,8 @@ export default ({ getService }: FtrProviderContext) => {
           canStartStopDataFrameAnalytics: false,
           canCreateMlAlerts: false,
           canUseMlAlerts: true,
-          canAccessML: true,
+          canGetFieldInfo: true,
+          canGetMlInfo: true,
           canGetJobs: true,
           canGetDatafeeds: true,
           canGetCalendars: true,
@@ -116,6 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: true,
           canViewMlNodes: false,
           canGetTrainedModels: true,
+          canTestTrainedModels: true,
           canCreateTrainedModels: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
@@ -147,7 +149,8 @@ export default ({ getService }: FtrProviderContext) => {
           canStartStopDataFrameAnalytics: false,
           canCreateMlAlerts: false,
           canUseMlAlerts: false,
-          canAccessML: false,
+          canGetFieldInfo: false,
+          canGetMlInfo: false,
           canGetJobs: false,
           canGetDatafeeds: false,
           canGetCalendars: false,
@@ -158,6 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: false,
           canViewMlNodes: false,
           canGetTrainedModels: false,
+          canTestTrainedModels: false,
           canCreateTrainedModels: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
@@ -189,7 +193,8 @@ export default ({ getService }: FtrProviderContext) => {
           canStartStopDataFrameAnalytics: true,
           canCreateMlAlerts: true,
           canUseMlAlerts: true,
-          canAccessML: true,
+          canGetFieldInfo: true,
+          canGetMlInfo: true,
           canGetJobs: true,
           canGetDatafeeds: true,
           canGetCalendars: true,
@@ -200,6 +205,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: true,
           canViewMlNodes: true,
           canGetTrainedModels: true,
+          canTestTrainedModels: true,
           canCreateTrainedModels: true,
           canDeleteTrainedModels: true,
           canStartStopTrainedModels: true,
@@ -231,7 +237,8 @@ export default ({ getService }: FtrProviderContext) => {
           canStartStopDataFrameAnalytics: false,
           canCreateMlAlerts: false,
           canUseMlAlerts: false,
-          canAccessML: false,
+          canGetFieldInfo: false,
+          canGetMlInfo: false,
           canGetJobs: false,
           canGetDatafeeds: false,
           canGetCalendars: false,
@@ -242,6 +249,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: false,
           canViewMlNodes: false,
           canGetTrainedModels: false,
+          canTestTrainedModels: false,
           canCreateTrainedModels: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,

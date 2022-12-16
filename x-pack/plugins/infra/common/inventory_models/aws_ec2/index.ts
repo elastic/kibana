@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
 
+export { awsEC2SnapshotMetricTypes } from './metrics';
+
 export const awsEC2: InventoryModel = {
   id: 'awsEC2',
   displayName: i18n.translate('xpack.infra.inventoryModels.awsEC2.displayName', {

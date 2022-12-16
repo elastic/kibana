@@ -7,6 +7,7 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -23,6 +24,7 @@ import {
   EuiPopover,
   EuiContextMenu,
   EuiButton,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
@@ -110,9 +112,24 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
       maxWidth={550}
     >
       <EuiFlyoutHeader>
-        <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
-          <h2>{pipeline.name}</h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
+              <h2>{pipeline.name}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {pipeline.isManaged ? (
+            <EuiFlexItem grow={false}>
+              {' '}
+              <EuiBadge color="hollow">
+                <FormattedMessage
+                  id="xpack.ingestPipelines.list.pipelineDetails.managedBadgeLabel"
+                  defaultMessage="Managed"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

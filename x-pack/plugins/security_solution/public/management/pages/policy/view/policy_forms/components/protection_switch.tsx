@@ -12,15 +12,15 @@ import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { policyConfig } from '../../../store/policy_details/selectors';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
-import { AppAction } from '../../../../../../common/store/actions';
-import {
+import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
+import type { AppAction } from '../../../../../../common/store/actions';
+import type {
   ImmutableArray,
-  ProtectionModes,
   UIPolicyConfig,
   AdditionalOnSwitchChangeParams,
 } from '../../../../../../../common/endpoint/types';
-import { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 
 export const ProtectionSwitch = React.memo(
   ({
@@ -40,6 +40,7 @@ export const ProtectionSwitch = React.memo(
   }) => {
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const showEditableFormFields = useShowEditableFormFields();
     const dispatch = useDispatch<(action: AppAction) => void>();
     const selected = policyDetailsConfig && policyDetailsConfig.windows[protection].mode;
 
@@ -123,6 +124,7 @@ export const ProtectionSwitch = React.memo(
         })}
         checked={selected !== ProtectionModes.off}
         onChange={handleSwitchChange}
+        disabled={!showEditableFormFields}
       />
     );
   }

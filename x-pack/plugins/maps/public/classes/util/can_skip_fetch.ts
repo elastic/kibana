@@ -86,6 +86,10 @@ export async function canSkipSourceUpdate({
     return false;
   }
 
+  if (prevMeta.isFeatureEditorOpenForLayer !== nextRequestMeta.isFeatureEditorOpenForLayer) {
+    return false;
+  }
+
   let updateDueToApplyGlobalTime = false;
   let updateDueToTime = false;
   let updateDueToTimeslice = false;

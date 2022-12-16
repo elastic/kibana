@@ -31,3 +31,7 @@ POST /_sql?format=txt
   "query": "SELECT prenom FROM claude_index WHERE prenom = 'claude' ",
   "fetch_size": 1
 }
+
+GET <index_1-{now/d-2d}>,<index_1-{now/d-1d}>,<index_1-{now/d}>/_search?pretty
+
+GET kbn:/api/spaces/space

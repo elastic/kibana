@@ -14,10 +14,9 @@ describe('service logs', () => {
       expect(
         getInfrastructureKQLFilter(
           {
-            serviceInfrastructure: {
-              containerIds: [],
-              hostNames: [],
-            },
+            containerIds: [],
+            hostNames: [],
+            podNames: [],
           },
           serviceName
         )
@@ -28,10 +27,9 @@ describe('service logs', () => {
       expect(
         getInfrastructureKQLFilter(
           {
-            serviceInfrastructure: {
-              containerIds: ['foo', 'bar'],
-              hostNames: ['baz', `quz`],
-            },
+            containerIds: ['foo', 'bar'],
+            hostNames: ['baz', `quz`],
+            podNames: [],
           },
           serviceName
         )
@@ -44,10 +42,9 @@ describe('service logs', () => {
       expect(
         getInfrastructureKQLFilter(
           {
-            serviceInfrastructure: {
-              containerIds: [],
-              hostNames: ['baz', `quz`],
-            },
+            containerIds: [],
+            hostNames: ['baz', `quz`],
+            podNames: [],
           },
           serviceName
         )

@@ -5,25 +5,30 @@
  * 2.0.
  */
 
-import { combineReducers, AnyAction, Reducer } from 'redux';
+import type { AnyAction, Reducer } from 'redux';
+import { combineReducers } from 'redux';
 
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
 import { sourcererReducer, sourcererModel } from './sourcerer';
 
-import { HostsPluginReducer } from '../../hosts/store';
-import { NetworkPluginReducer } from '../../network/store';
-import { UsersPluginReducer } from '../../users/store';
-import { TimelinePluginReducer } from '../../timelines/store/timeline';
+import type { HostsPluginReducer } from '../../explore/hosts/store';
+import type { NetworkPluginReducer } from '../../explore/network/store';
+import type { UsersPluginReducer } from '../../explore/users/store';
+import type { TimelinePluginReducer } from '../../timelines/store/timeline';
 
-import { SecuritySubPlugins } from '../../app/types';
-import { ManagementPluginReducer } from '../../management';
-import { State } from './types';
-import { AppAction } from './actions';
-import { initDataView, SourcererModel, SourcererScopeName } from './sourcerer/model';
-import { ExperimentalFeatures } from '../../../common/experimental_features';
+import type { SecuritySubPlugins } from '../../app/types';
+import type { ManagementPluginReducer } from '../../management';
+import type { State } from './types';
+import type { AppAction } from './actions';
+import type { SourcererModel } from './sourcerer/model';
+import { initDataView, SourcererScopeName } from './sourcerer/model';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
+import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
+import type { DataTableState } from './data_table/types';
+import { dataTableReducer } from './data_table/reducer';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   UsersPluginReducer &
@@ -36,7 +41,7 @@ export type SubPluginsInitReducer = HostsPluginReducer &
 export const createInitialState = (
   pluginsInitState: Omit<
     SecuritySubPlugins['store']['initialState'],
-    'app' | 'dragAndDrop' | 'inputs' | 'sourcerer'
+    'app' | 'dragAndDrop' | 'inputs' | 'sourcerer' | 'globalUrlParam'
   >,
   {
     defaultDataView,
@@ -48,7 +53,8 @@ export const createInitialState = (
     kibanaDataViews: SourcererModel['kibanaDataViews'];
     signalIndexName: SourcererModel['signalIndexName'];
     enableExperimental: ExperimentalFeatures;
-  }
+  },
+  dataTableState: DataTableState
 ): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
@@ -75,7 +81,7 @@ export const createInitialState = (
     ...pluginsInitState,
     app: { ...initialAppState, enableExperimental },
     dragAndDrop: initialDragAndDropState,
-    inputs: createInitialInputsState(),
+    inputs: createInitialInputsState(enableExperimental.socTrendsEnabled),
     sourcerer: {
       ...sourcererModel.initialSourcererState,
       sourcererScopes: {
@@ -100,6 +106,8 @@ export const createInitialState = (
       kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
       signalIndexName,
     },
+    globalUrlParam: initialGlobalUrlParam,
+    dataTable: dataTableState.dataTable,
   };
 
   return preloadedState;
@@ -116,5 +124,7 @@ export const createReducer: (
     dragAndDrop: dragAndDropReducer,
     inputs: inputsReducer,
     sourcerer: sourcererReducer,
+    globalUrlParam: globalUrlParamReducer,
+    dataTable: dataTableReducer,
     ...pluginsReducer,
   });

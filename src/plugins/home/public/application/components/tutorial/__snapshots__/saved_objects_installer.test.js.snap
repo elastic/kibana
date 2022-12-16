@@ -1,475 +1,117 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`bulkCreate should display error message when bulkCreate request fails 1`] = `
-<SavedObjectsInstallerUi
-  bulkCreate={[Function]}
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  savedObjects={
-    Array [
-      Object {
-        "attributes": Object {},
-        "id": "1",
-        "type": "index-pattern",
-      },
-    ]
-  }
->
-  <EuiTitle
-    size="m"
+Array [
+  <h2
+    class="euiTitle emotion-euiTitle-m"
   >
-    <h2
-      className="euiTitle euiTitle--medium"
-    >
-      Load Kibana objects
-    </h2>
-  </EuiTitle>
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
+    Load Kibana objects
+  </h2>,
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-    >
-      <EuiFlexItem>
-        <div
-          className="euiFlexItem"
-        >
-          <EuiText>
-            <div
-              className="euiText euiText--medium"
-            >
-              <p>
-                Imports index pattern, visualizations and pre-defined dashboards.
-              </p>
-            </div>
-          </EuiText>
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <EuiButton
-            data-test-subj="loadSavedObjects"
-            isLoading={false}
-            onClick={[Function]}
-          >
-            <EuiButtonDisplay
-              baseClassName="euiButton"
-              data-test-subj="loadSavedObjects"
-              disabled={false}
-              element="button"
-              isDisabled={false}
-              isLoading={false}
-              onClick={[Function]}
-              type="button"
-            >
-              <button
-                className="euiButton euiButton--primary"
-                data-test-subj="loadSavedObjects"
-                disabled={false}
-                onClick={[Function]}
-                style={
-                  Object {
-                    "minWidth": undefined,
-                  }
-                }
-                type="button"
-              >
-                <EuiButtonContent
-                  className="euiButton__content"
-                  iconSide="left"
-                  isLoading={false}
-                  textProps={
-                    Object {
-                      "className": "euiButton__text",
-                    }
-                  }
-                >
-                  <span
-                    className="euiButtonContent euiButton__content"
-                  >
-                    <span
-                      className="euiButton__text"
-                    >
-                      Load Kibana objects
-                    </span>
-                  </span>
-                </EuiButtonContent>
-              </button>
-            </EuiButtonDisplay>
-          </EuiButton>
-        </div>
-      </EuiFlexItem>
-    </div>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="s"
-  >
-    <div
-      className="euiSpacer euiSpacer--s"
-    />
-  </EuiSpacer>
-  <EuiCallOut
-    color="warning"
-    data-test-subj="loadSavedObjects_failed"
-    title="Request failed, Error: simulated bulkRequest error"
-  >
-    <div
-      className="euiCallOut euiCallOut--warning"
-      data-test-subj="loadSavedObjects_failed"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <div
-        className="euiCallOutHeader"
+        class="euiText emotion-euiText-m"
       >
-        <span
-          className="euiCallOutHeader__title"
-        >
-          Request failed, Error: simulated bulkRequest error
-        </span>
+        <p>
+          Imports index pattern, visualizations and pre-defined dashboards.
+        </p>
       </div>
     </div>
-  </EuiCallOut>
-</SavedObjectsInstallerUi>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+        data-test-subj="loadSavedObjects"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="eui-textTruncate"
+          >
+            Load Kibana objects
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />,
+  <div
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
+    data-test-subj="loadSavedObjects_failed"
+  >
+    <p
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+    >
+      Request failed, Error: simulated bulkRequest error
+    </p>
+  </div>,
+]
 `;
 
 exports[`bulkCreate should display success message when bulkCreate is successful 1`] = `
-<SavedObjectsInstallerUi
-  bulkCreate={[Function]}
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  savedObjects={
-    Array [
-      Object {
-        "attributes": Object {},
-        "id": "1",
-        "type": "index-pattern",
-      },
-    ]
-  }
->
-  <EuiTitle
-    size="m"
+Array [
+  <h2
+    class="euiTitle emotion-euiTitle-m"
   >
-    <h2
-      className="euiTitle euiTitle--medium"
-    >
-      Load Kibana objects
-    </h2>
-  </EuiTitle>
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
+    Load Kibana objects
+  </h2>,
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-    >
-      <EuiFlexItem>
-        <div
-          className="euiFlexItem"
-        >
-          <EuiText>
-            <div
-              className="euiText euiText--medium"
-            >
-              <p>
-                Imports index pattern, visualizations and pre-defined dashboards.
-              </p>
-            </div>
-          </EuiText>
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <EuiButton
-            data-test-subj="loadSavedObjects"
-            isLoading={false}
-            onClick={[Function]}
-          >
-            <EuiButtonDisplay
-              baseClassName="euiButton"
-              data-test-subj="loadSavedObjects"
-              disabled={false}
-              element="button"
-              isDisabled={false}
-              isLoading={false}
-              onClick={[Function]}
-              type="button"
-            >
-              <button
-                className="euiButton euiButton--primary"
-                data-test-subj="loadSavedObjects"
-                disabled={false}
-                onClick={[Function]}
-                style={
-                  Object {
-                    "minWidth": undefined,
-                  }
-                }
-                type="button"
-              >
-                <EuiButtonContent
-                  className="euiButton__content"
-                  iconSide="left"
-                  isLoading={false}
-                  textProps={
-                    Object {
-                      "className": "euiButton__text",
-                    }
-                  }
-                >
-                  <span
-                    className="euiButtonContent euiButton__content"
-                  >
-                    <span
-                      className="euiButton__text"
-                    >
-                      Load Kibana objects
-                    </span>
-                  </span>
-                </EuiButtonContent>
-              </button>
-            </EuiButtonDisplay>
-          </EuiButton>
-        </div>
-      </EuiFlexItem>
-    </div>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="s"
-  >
-    <div
-      className="euiSpacer euiSpacer--s"
-    />
-  </EuiSpacer>
-  <EuiCallOut
-    color="success"
-    data-test-subj="loadSavedObjects_success"
-    title="1 saved objects successfully added"
-  >
-    <div
-      className="euiCallOut euiCallOut--success"
-      data-test-subj="loadSavedObjects_success"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <div
-        className="euiCallOutHeader"
+        class="euiText emotion-euiText-m"
       >
-        <span
-          className="euiCallOutHeader__title"
-        >
-          1 saved objects successfully added
-        </span>
+        <p>
+          Imports index pattern, visualizations and pre-defined dashboards.
+        </p>
       </div>
     </div>
-  </EuiCallOut>
-</SavedObjectsInstallerUi>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+        data-test-subj="loadSavedObjects"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="eui-textTruncate"
+          >
+            Load Kibana objects
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />,
+  <div
+    class="euiPanel euiPanel--success euiPanel--paddingMedium euiCallOut euiCallOut--success emotion-euiPanel-none-m-success-euiCallOut"
+    data-test-subj="loadSavedObjects_success"
+  >
+    <p
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-success"
+    >
+      1 saved objects successfully added
+    </p>
+  </div>,
+]
 `;
 
 exports[`renders 1`] = `
@@ -496,9 +138,11 @@ exports[`renders 1`] = `
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="loadSavedObjects"
         isLoading={false}
         onClick={[Function]}
+        size="m"
       >
         Load Kibana objects
       </EuiButton>

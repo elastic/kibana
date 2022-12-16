@@ -11,6 +11,7 @@ import { ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
+import { createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient }) =>
@@ -22,9 +23,13 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
           ...options,
           services: {
             ...options.services,
-            alertWithPersistence: async (alerts, refresh) => {
+            alertWithPersistence: async (alerts, refresh, maxAlerts = undefined, enrichAlerts) => {
               const numAlerts = alerts.length;
               logger.debug(`Found ${numAlerts} alerts.`);
+
+              const ruleDataClientWriter = await ruleDataClient.getWriter({
+                namespace: options.spaceId,
+              });
 
               // Only write alerts if:
               // - writing is enabled
@@ -78,10 +83,28 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }
 
                 if (filteredAlerts.length === 0) {
-                  return { createdAlerts: [], errors: {} };
+                  return { createdAlerts: [], errors: {}, alertsWereTruncated: false };
                 }
 
-                const augmentedAlerts = filteredAlerts.map((alert) => {
+                let enrichedAlerts = filteredAlerts;
+
+                if (enrichAlerts) {
+                  try {
+                    enrichedAlerts = await enrichAlerts(filteredAlerts, {
+                      spaceId: options.spaceId,
+                    });
+                  } catch (e) {
+                    logger.debug('Enrichemnts failed');
+                  }
+                }
+
+                let alertsWereTruncated = false;
+                if (maxAlerts && enrichedAlerts.length > maxAlerts) {
+                  enrichedAlerts.length = maxAlerts;
+                  alertsWereTruncated = true;
+                }
+
+                const augmentedAlerts = enrichedAlerts.map((alert) => {
                   return {
                     ...alert,
                     _source: {
@@ -92,18 +115,16 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   };
                 });
 
-                const response = await ruleDataClient
-                  .getWriter({ namespace: options.spaceId })
-                  .bulk({
-                    body: augmentedAlerts.flatMap((alert) => [
-                      { create: { _id: alert._id } },
-                      alert._source,
-                    ]),
-                    refresh,
-                  });
+                const response = await ruleDataClientWriter.bulk({
+                  body: augmentedAlerts.flatMap((alert) => [
+                    { create: { _id: alert._id } },
+                    alert._source,
+                  ]),
+                  refresh,
+                });
 
                 if (response == null) {
-                  return { createdAlerts: [], errors: {} };
+                  return { createdAlerts: [], errors: {}, alertsWereTruncated };
                 }
 
                 return {
@@ -118,10 +139,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     })
                     .filter((_, idx) => response.body.items[idx].create?.status === 201),
                   errors: errorAggregator(response.body, [409]),
+                  alertsWereTruncated,
                 };
               } else {
                 logger.debug('Writing is disabled.');
-                return { createdAlerts: [], errors: {} };
+                return { createdAlerts: [], errors: {}, alertsWereTruncated: false };
               }
             },
           },
@@ -129,5 +151,10 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
         return state;
       },
+      getSummarizedAlerts: createGetSummarizedAlertsFn({
+        ruleDataClient,
+        useNamespace: true,
+        isLifecycleAlert: false,
+      })(),
     };
   };

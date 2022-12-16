@@ -84,7 +84,6 @@ export function BreakdownFilter({
 
   return (
     <EuiSuperSelect
-      fullWidth
       compressed
       options={options}
       valueOfSelected={selectedBreakdown?.fieldName ?? NO_BREAKDOWN}

@@ -1,0 +1,485 @@
+{
+  "metrics": {
+    "kibana_os_load": [
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana_stats.os.load.1m",
+          "metricAgg": "max",
+          "label": "1m",
+          "title": "System Load",
+          "description": "Load average over the last minute.",
+          "units": "",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1654023060000,
+            5.27734375
+          ],
+          [
+            1654023120000,
+            4.78125
+          ]
+        ]
+      },
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana_stats.os.load.5m",
+          "metricAgg": "max",
+          "label": "5m",
+          "title": "System Load",
+          "description": "Load average over the last 5 minutes.",
+          "units": "",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1654023060000,
+            6.7734375
+          ],
+          [
+            1654023120000,
+            6.5625
+          ]
+        ]
+      },
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana_stats.os.load.15m",
+          "metricAgg": "max",
+          "label": "15m",
+          "title": "System Load",
+          "description": "Load average over the last 15 minutes.",
+          "units": "",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1654023060000,
+            5.8359375
+          ],
+          [
+            1654023120000,
+            5.78125
+          ]
+        ]
+      }
+    ],
+    "kibana_average_concurrent_connections": [
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana_stats.concurrent_connections",
+          "metricAgg": "max",
+          "label": "HTTP Connections",
+          "description": "Total number of open socket connections to the Kibana instance.",
+          "units": "",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1654023060000,
+            10
+          ],
+          [
+            1654023120000,
+            17
+          ]
+        ]
+      }
+    ],
+    "kibana_process_delay": [
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana_stats.process.event_loop_delay",
+          "metricAgg": "max",
+          "label": "Event Loop Delay",
+          "description": "Delay in Kibana server event loops. Longer delays may indicate blocking events in server thread, such as synchronous functions taking large amount of CPU time.",
+          "units": "ms",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1654023060000,
+            10.624
+          ],
+          [
+            1654023120000,
+            11.916
+          ]
+        ]
+      }
+    ],
+    "kibana_memory": [
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana_stats.process.memory.heap.size_limit",
+          "metricAgg": "max",
+          "label": "Heap Size Limit",
+          "title": "Memory Size",
+          "description": "Limit of memory usage before garbage collection.",
+          "units": "B",
+          "format": "0,0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1654023060000,
+            8438939648
+          ],
+          [
+            1654023120000,
+            8438939648
+          ]
+        ]
+      },
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana_stats.process.memory.resident_set_size_in_bytes",
+          "metricAgg": "max",
+          "label": "Memory Size",
+          "title": "Memory Size",
+          "description": "Total heap used by Kibana running in Node.js.",
+          "units": "B",
+          "format": "0,0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1654023060000,
+            568397824
+          ],
+          [
+            1654023120000,
+            632569856
+          ]
+        ]
+      }
+    ],
+    "kibana_response_times": [
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana_stats.response_times.max",
+          "metricAgg": "max",
+          "label": "Max",
+          "title": "Client Response Time",
+          "description": "Maximum response time for client requests to the Kibana instance.",
+          "units": "ms",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1654023060000,
+            77
+          ],
+          [
+            1654023120000,
+            418
+          ]
+        ]
+      },
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana_stats.response_times.average",
+          "metricAgg": "max",
+          "label": "Average",
+          "title": "Client Response Time",
+          "description": "Average response time for client requests to the Kibana instance.",
+          "units": "ms",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1654023060000,
+            37
+          ],
+          [
+            1654023120000,
+            40
+          ]
+        ]
+      }
+    ],
+    "kibana_requests": [
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana_stats.requests.total",
+          "metricAgg": "max",
+          "label": "Client Requests",
+          "description": "Total number of client requests received by the Kibana instance.",
+          "units": "",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1654023060000,
+            3
+          ],
+          [
+            1654023120000,
+            59
+          ]
+        ]
+      },
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana_stats.requests.disconnects",
+          "metricAgg": "max",
+          "label": "Client Disconnects",
+          "description": "Total number of client disconnects to the Kibana instance.",
+          "units": "",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1654023060000,
+            0
+          ],
+          [
+            1654023120000,
+            0
+          ]
+        ]
+      }
+    ],
+    "kibana_instance_rule_failures": [
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.node_rules.failures",
+          "metricAgg": "max",
+          "label": "Rule Failures",
+          "description": "Total rule failures for the Kibana instance.",
+          "units": "",
+          "format": "0.[00]",
+          "technicalPreview": true,
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "indices_found": {
+          "internal": false,
+          "ecs": true
+        },
+        "data": [
+          [
+            1654023060000,
+            null
+          ],
+          [
+            1654023120000,
+            0
+          ]
+        ]
+      }
+    ],
+    "kibana_instance_rule_executions": [
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.node_rules.executions",
+          "metricAgg": "max",
+          "label": "Rule Executions",
+          "description": "Total rule executions for the Kibana instance.",
+          "units": "",
+          "format": "0.[00]",
+          "technicalPreview": true,
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "indices_found": {
+          "internal": false,
+          "ecs": true
+        },
+        "data": [
+          [
+            1654023060000,
+            null
+          ],
+          [
+            1654023120000,
+            2
+          ]
+        ]
+      }
+    ],
+    "kibana_instance_action_failures": [
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.node_actions.failures",
+          "metricAgg": "max",
+          "label": "Action Failures",
+          "description": "Total action failures for the Kibana instance.",
+          "units": "",
+          "format": "0.[00]",
+          "technicalPreview": true,
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "indices_found": {
+          "internal": false,
+          "ecs": true
+        },
+        "data": [
+          [
+            1654023060000,
+            null
+          ],
+          [
+            1654023120000,
+            0
+          ]
+        ]
+      }
+    ],
+    "kibana_instance_action_executions": [
+      {
+        "bucket_size": "1 min",
+        "timeRange": {
+          "min": 1654022659267,
+          "max": 1654027159267
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.node_actions.executions",
+          "metricAgg": "max",
+          "label": "Action Executions",
+          "description": "Total action executions for the Kibana instance.",
+          "units": "",
+          "format": "0.[00]",
+          "technicalPreview": true,
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "indices_found": {
+          "internal": false,
+          "ecs": true
+        },
+        "data": [
+          [
+            1654023060000,
+            null
+          ],
+          [
+            1654023120000,
+            2
+          ]
+        ]
+      }
+    ]
+  },
+  "kibanaSummary": {
+    "name": "CBR-MBP.local",
+    "host": "localhost",
+    "status": "green",
+    "transport_address": "localhost:5601",
+    "uuid": "5b2de169-2785-441b-ae8c-186a1936b17d",
+    "snapshot": false,
+    "index": ".kibana",
+    "version": "8.4.0",
+    "statusIsStale": true,
+    "lastSeenTimestamp": "2022-05-31T18:52:10.179Z",
+    "os_memory_free": 1504448512,
+    "uptime": 1845765
+  }
+}

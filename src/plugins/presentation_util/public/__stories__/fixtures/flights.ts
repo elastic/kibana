@@ -8,6 +8,11 @@
 
 import { map, uniq } from 'lodash';
 import { DataView, DataViewField, IIndexPatternFieldList } from '@kbn/data-views-plugin/public';
+import {
+  FieldFormatsGetConfigFn,
+  NumberFormat,
+  StringFormat,
+} from '@kbn/field-formats-plugin/common';
 import { flights } from './flights_data';
 
 export type Flight = typeof flights[number];
@@ -53,6 +58,8 @@ const numberFields = [
   'FlightTimeMin',
 ];
 
+const getConfig = (() => {}) as FieldFormatsGetConfigFn;
+
 export const flightFieldByName: { [key: string]: DataViewField } = {};
 flightFieldNames.forEach(
   (flightFieldName) =>
@@ -72,6 +79,10 @@ export const storybookFlightsDataView: DataView = {
   title: 'demo data flights',
   fields: flightFields as unknown as IIndexPatternFieldList,
   getFieldByName: (name: string) => flightFieldByName[name],
+  getFormatterForField: (field: DataViewField) => {
+    if (numberFields.includes(field.name)) return new NumberFormat({}, getConfig);
+    return new StringFormat({}, getConfig);
+  },
 } as unknown as DataView;
 
 export const getFlightOptions = (field: string) => uniq(map(flights, field)).sort();

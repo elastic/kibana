@@ -48,8 +48,10 @@ export function validateCiGroupTags(log, mocha) {
   const queue = [mocha.suite];
   while (queue.length) {
     const suite = queue.shift();
-    if (getCiGroups(suite).length > 1) {
-      suitesWithMultipleCiGroups.push(suite);
+    if (getCiGroups(suite).length) {
+      throw new Error(
+        'ciGroups are no longer needed and should be removed. If you need to split up your FTR config because it is taking too long to complete then create one or more a new FTR config files and split your test files amoungst them'
+      );
     } else {
       queue.push(...(suite.suites ?? []));
     }

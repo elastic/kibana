@@ -10,7 +10,7 @@ import useInterval from 'react-use/lib/useInterval';
 import datemath from '@kbn/datemath';
 import moment from 'moment';
 import * as rt from 'io-ts';
-import { TimeRange as KibanaTimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange as KibanaTimeRange } from '@kbn/es-query';
 import { TimeRange } from '../../../../common/time/time_range';
 import { useUrlState } from '../../../utils/use_url_state';
 import {

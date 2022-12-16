@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import {
-  TimelineExpandedDetail,
-  TimelineExpandedDetailType,
-  TimelineTabs,
-} from '../../../common/types/timeline';
-import {
+import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../common/types';
+import { TimelineTabs } from '../../../common/types/timeline';
+import type {
   TimelineEqlRequestOptions,
   TimelineEventsAllRequestOptions,
 } from '../../../common/search_strategy/timeline';
-import { TimelineArgs } from '.';
+import type { TimelineArgs } from '.';
 
 /*
  * Future Engineer
@@ -29,7 +26,7 @@ import { TimelineArgs } from '.';
 
 class ActiveTimelineEvents {
   private _activePage: number = 0;
-  private _expandedDetail: TimelineExpandedDetail = {};
+  private _expandedDetail: ExpandedDetailTimeline = {};
   private _pageName: string = '';
   private _request: TimelineEventsAllRequestOptions | null = null;
   private _response: TimelineArgs | null = null;
@@ -48,7 +45,7 @@ class ActiveTimelineEvents {
     return this._expandedDetail;
   }
 
-  toggleExpandedDetail(expandedDetail: TimelineExpandedDetailType) {
+  toggleExpandedDetail(expandedDetail: ExpandedDetailType) {
     const queryTab = TimelineTabs.query;
     const currentExpandedDetail = this._expandedDetail[queryTab];
     let isSameExpandedDetail;
@@ -76,7 +73,7 @@ class ActiveTimelineEvents {
     }
   }
 
-  setExpandedDetail(expandedDetail: TimelineExpandedDetail) {
+  setExpandedDetail(expandedDetail: ExpandedDetailTimeline) {
     this._expandedDetail = expandedDetail;
   }
 

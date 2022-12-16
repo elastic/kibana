@@ -373,6 +373,7 @@ export const MultiRowInput: FunctionComponent<MultiRowInputProps> = ({
         {displayErrors(globalErrors)}
         <EuiSpacer size="m" />
         <EuiButtonEmpty
+          data-test-subj="fleetServerHosts.multiRowInput.addRowButton"
           disabled={disabled}
           size="xs"
           flush="left"

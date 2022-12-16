@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '../../../common/processor_event';
-import { Setup } from '../../lib/helpers/setup_request';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
-export async function getHasData({ setup }: { setup: Setup }) {
-  const { apmEventClient } = setup;
+export async function getHasData({
+  indices,
+  apmEventClient,
+}: {
+  indices: ApmIndicesConfig;
+  apmEventClient: APMEventClient;
+}) {
   try {
     const params = {
       apm: {
@@ -21,6 +27,7 @@ export async function getHasData({ setup }: { setup: Setup }) {
       },
       terminate_after: 1,
       body: {
+        track_total_hits: 1,
         size: 0,
       },
     };
@@ -31,12 +38,12 @@ export async function getHasData({ setup }: { setup: Setup }) {
     );
     return {
       hasData: response.hits.total.value > 0,
-      indices: setup.indices,
+      indices,
     };
   } catch (e) {
     return {
       hasData: false,
-      indices: setup.indices,
+      indices,
     };
   }
 }

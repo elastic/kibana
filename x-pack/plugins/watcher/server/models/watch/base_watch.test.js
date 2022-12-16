@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildClientWatchStatusModel } from '../watch_status_model';
 import { BaseWatch } from './base_watch';
 
 describe('BaseWatch', () => {
@@ -160,7 +161,7 @@ describe('BaseWatch', () => {
         name: props.name,
         type: props.type,
         isSystemWatch: false,
-        watchStatus: props.watchStatus.downstreamJson,
+        watchStatus: buildClientWatchStatusModel(props.watchStatus),
         watchErrors: props.watchErrors.downstreamJson,
         actions: props.actions.map((a) => a.downstreamJson),
       };

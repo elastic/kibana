@@ -12,10 +12,8 @@ import { merge } from 'lodash';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
-import {
-  useMessagesStorage,
-  UseMessagesStorage,
-} from '../../common/containers/local_storage/use_messages_storage';
+import type { UseMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
+import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { Overview } from '.';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
@@ -25,8 +23,8 @@ import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_
 import { useCtiDashboardLinks } from '../containers/overview_cti_links';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
-import { EndpointPrivileges } from '../../../common/endpoint/types';
-import { useHostRiskScore } from '../../risk_score/containers';
+import type { EndpointPrivileges } from '../../../common/endpoint/types';
+import { useRiskScore } from '../../explore/containers/risk_score';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { LandingPageComponent } from '../../common/components/landing_page';
 
@@ -100,9 +98,9 @@ jest.mock('../containers/overview_cti_links/use_all_ti_data_sources');
 const useAllTiDataSourcesMock = useAllTiDataSources as jest.Mock;
 useAllTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
-jest.mock('../../risk_score/containers');
-const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
-useHostRiskScoreMock.mockReturnValue([false, { data: [], isModuleEnabled: false }]);
+jest.mock('../../explore/containers/risk_score');
+const useRiskScoreMock = useRiskScore as jest.Mock;
+useRiskScoreMock.mockReturnValue({ loading: false, data: [], isModuleEnabled: false });
 
 jest.mock('../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;

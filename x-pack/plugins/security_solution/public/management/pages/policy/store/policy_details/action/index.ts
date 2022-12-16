@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { PolicySettingsAction } from './policy_settings_action';
+import type { PolicySettingsAction } from './policy_settings_action';
 
 export type PolicyDetailsAction = PolicySettingsAction;

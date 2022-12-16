@@ -24,7 +24,7 @@ export interface ParseResult {
   annotations: Annotation[];
 }
 
-/* eslint-disable */
+/* eslint-disable prettier/prettier,no-var,prefer-const,no-throw-literal,@typescript-eslint/no-shadow,one-var,@typescript-eslint/no-unused-expressions,object-shorthand,eqeqeq */
 
 export const createParser = () => {
   'use strict';

@@ -11,9 +11,8 @@ import {
   notificationServiceMock,
   fatalErrorsServiceMock,
   docLinksServiceMock,
-  executionContextServiceMock,
 } from '@kbn/core/public/mocks';
-
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { AppContextProvider } from '../../../public/application/app_context';
 

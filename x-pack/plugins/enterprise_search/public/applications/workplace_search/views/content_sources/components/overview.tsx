@@ -81,7 +81,6 @@ import {
   SOURCE_SYNC_CONFIRM_TITLE,
   SOURCE_SYNC_CONFIRM_MESSAGE,
 } from '../constants';
-import { getSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
 
 import { CustomSourceDeployment } from './custom_source_deployment';
@@ -105,12 +104,9 @@ export const Overview: React.FC = () => {
     hasPermissions,
     isFederatedSource,
     isIndexedSource,
-    name,
+    serviceType,
+    baseServiceType,
   } = contentSource;
-
-  const serviceType = contentSource.baseServiceType || contentSource.serviceType;
-
-  const sourceData = getSourceData(serviceType);
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -431,7 +427,7 @@ export const Overview: React.FC = () => {
         </h6>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <CustomSourceDeployment source={contentSource} sourceData={sourceData} small />
+      <CustomSourceDeployment source={contentSource} baseServiceType={baseServiceType} small />
     </>
   );
 
@@ -569,8 +565,7 @@ export const Overview: React.FC = () => {
                       'xpack.enterpriseSearch.workplaceSearch.sources.feedbackCallOutText',
                       {
                         defaultMessage:
-                          'Have feedback about deploying a {name} Connector Package? Let us know.',
-                        values: { name },
+                          'Have feedback about deploying a connector package? Let us know.',
                       }
                     )}
                   </EuiLink>

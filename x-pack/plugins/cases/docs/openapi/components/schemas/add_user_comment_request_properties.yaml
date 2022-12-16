@@ -1,0 +1,20 @@
+title: Add case comment request properties for user comments
+description: Defines properties for case comment requests when type is user.
+type: object
+properties:
+  comment:
+    description: The new comment. It is required only when `type` is `user`.
+    type: string
+    example: A new comment.
+  owner:
+    $ref: 'owners.yaml'
+  type: 
+    type: string
+    description: The type of comment.
+    example: user
+    enum:
+      - user
+required:
+  - comment
+  - owner
+  - type

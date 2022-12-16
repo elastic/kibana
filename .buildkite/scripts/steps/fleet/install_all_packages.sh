@@ -2,10 +2,10 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
-
-.buildkite/scripts/bootstrap.sh
+source .buildkite/scripts/steps/functional/common.sh
 
 echo '--- Installing all packages'
-cd x-pack/plugins/fleet
-node scripts/install_all_packages
+
+node scripts/functional_tests \
+  --debug --bail \
+  --config x-pack/test/fleet_packages/config.ts

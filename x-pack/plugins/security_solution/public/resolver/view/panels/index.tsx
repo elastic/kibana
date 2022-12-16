@@ -15,7 +15,7 @@ import { NodeEvents } from './node_events';
 import { NodeDetail } from './node_detail';
 import { NodeList } from './node_list';
 import { EventDetail } from './event_detail';
-import { PanelViewAndParameters } from '../../types';
+import type { PanelViewAndParameters } from '../../types';
 
 /**
  * Show the panel that matches the `panelViewAndParameters` (derived from the browser's location.search)

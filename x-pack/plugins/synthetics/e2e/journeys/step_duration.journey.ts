@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { journey, step, expect, before } from '@elastic/synthetics';
-import { waitForLoadingToFinish } from './utils';
+import { journey, step, expect } from '@elastic/synthetics';
 import { loginPageProvider } from '../page_objects/login';
 
 journey('StepsDuration', async ({ page, params }) => {
   const login = loginPageProvider({ page });
-  before(async () => {
-    await waitForLoadingToFinish({ page });
-  });
 
   const queryParams = new URLSearchParams({
     dateRangeStart: '2021-11-21T22:06:06.502Z',
@@ -30,7 +26,6 @@ journey('StepsDuration', async ({ page, params }) => {
   });
 
   step('Go to monitor details', async () => {
-    await page.click('text=Dismiss');
     await page.click('button:has-text("test-monitor - inline")');
     expect(page.url()).toBe(`${baseUrl}/monitor/dGVzdC1tb25pdG9yLWlubGluZQ==/?${queryParams}`);
   });

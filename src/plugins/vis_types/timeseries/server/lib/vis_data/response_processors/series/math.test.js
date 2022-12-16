@@ -108,6 +108,91 @@ describe('math(resp, panel, series)', () => {
     });
   });
 
+  test('works with percentiles and percentile rank', async () => {
+    series.metrics = [
+      {
+        id: 'percentile_cpu',
+        type: 'percentile',
+        field: 'cpu',
+        percentiles: [{ value: 50, id: 'p50' }],
+      },
+      {
+        id: 'rank_cpu',
+        type: 'percentile_rank',
+        field: 'cpu',
+        percentiles: [{ value: 500, id: 'p500' }],
+      },
+      {
+        id: 'mathagg',
+        type: 'math',
+        script: 'divide(params.a, params.b)',
+        variables: [
+          { name: 'a', field: 'percentile_cpu[50.0]' },
+          { name: 'b', field: 'rank_cpu[500.0]' },
+        ],
+      },
+    ];
+    resp.aggregations.test.buckets[0].timeseries.buckets[0].percentile_cpu = {
+      values: { '50.0': 0.25 },
+    };
+    resp.aggregations.test.buckets[0].timeseries.buckets[0].rank_cpu = {
+      values: { '500.0': 0.125 },
+    };
+    resp.aggregations.test.buckets[0].timeseries.buckets[1].percentile_cpu = {
+      values: { '50.0': 0.25 },
+    };
+    resp.aggregations.test.buckets[0].timeseries.buckets[1].rank_cpu = {
+      values: { '500.0': 0.25 },
+    };
+
+    const next = await mathAgg(resp, panel, series)((results) => results);
+    const results = await stdMetric(resp, panel, series)(next)([]);
+
+    expect(results).toHaveLength(1);
+
+    expect(results[0]).toEqual({
+      id: 'test╰┄►example-01',
+      label: 'example-01',
+      color: 'rgb(255, 0, 0)',
+      stack: false,
+      seriesId: 'test',
+      lines: { show: true, fill: 0, lineWidth: 1, steps: false },
+      points: { show: true, radius: 1, lineWidth: 1 },
+      bars: { fill: 0, lineWidth: 1, show: false },
+      data: [
+        [1, 2],
+        [2, 1],
+      ],
+    });
+  });
+
+  test('handles math even if there is a series agg', async () => {
+    series.metrics.push({
+      id: 'myid',
+      type: 'series_agg',
+      function: 'sum',
+    });
+    const next = await mathAgg(resp, panel, series)((results) => results);
+    const results = await stdMetric(resp, panel, series)(next)([]);
+
+    expect(results).toHaveLength(1);
+
+    expect(results[0]).toEqual({
+      id: 'test╰┄►example-01',
+      label: 'example-01',
+      color: 'rgb(255, 0, 0)',
+      stack: false,
+      seriesId: 'test',
+      lines: { show: true, fill: 0, lineWidth: 1, steps: false },
+      points: { show: true, radius: 1, lineWidth: 1 },
+      bars: { fill: 0, lineWidth: 1, show: false },
+      data: [
+        [1, 2],
+        [2, 1],
+      ],
+    });
+  });
+
   test('turns division by zero into null values', async () => {
     resp.aggregations.test.buckets[0].timeseries.buckets[0].mincpu = 0;
     const next = await mathAgg(resp, panel, series)((results) => results);
@@ -168,7 +253,7 @@ describe('math(resp, panel, series)', () => {
       )(await mathAgg(resp, panel, series)((results) => results))([]);
     } catch (e) {
       expect(e.message).toEqual(
-        'Failed to parse expression. Expected "*", "+", "-", "/", end of input, or whitespace but "(" found.'
+        'Failed to parse expression. Expected "*", "+", "-", "/", "<", "=", ">", end of input, or whitespace but "(" found.'
       );
     }
   });

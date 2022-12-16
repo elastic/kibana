@@ -3,18 +3,14 @@
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "./target_types",
+    "outDir": "target_types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@kbn/ambient-common-types"
     ]
   },
   "include": [
-    "src/**/*",
-    "src/kuery/grammar/grammar.d.ts"
-  ],
-  "exclude": [
-    "**/__fixtures__/**/*",
-    "**/__mocks__/**/grammar.js",
+    "**/*.ts",
   ]
 }

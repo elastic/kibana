@@ -9,7 +9,7 @@ import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { ColumnHeaderOptions } from '../../../../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../../../../common/types';
 import { defaultHeaders } from '../../../../../../common/mock';
 import { HeaderToolTipContent } from '.';
 
@@ -42,7 +42,24 @@ describe('HeaderToolTipContent', () => {
   test('it renders the type of the field', () => {
     const wrapper = mount(<HeaderToolTipContent header={header} />);
 
-    expect(wrapper.find('[data-test-subj="type-value"]').first().text()).toEqual(header.type);
+    expect(
+      wrapper
+        .find(`[data-test-subj="type-value-${header.esTypes?.at(0)}"]`)
+        .first()
+        .text()
+    ).toEqual(header.esTypes?.at(0));
+  });
+
+  test('it renders multiple `esTypes`', () => {
+    const hasMultipleTypes = { ...header, esTypes: ['long', 'date'] };
+
+    const wrapper = mount(<HeaderToolTipContent header={hasMultipleTypes} />);
+
+    hasMultipleTypes.esTypes.forEach((esType) => {
+      expect(wrapper.find(`[data-test-subj="type-value-${esType}"]`).first().text()).toEqual(
+        esType
+      );
+    });
   });
 
   test('it renders the description of the field', () => {

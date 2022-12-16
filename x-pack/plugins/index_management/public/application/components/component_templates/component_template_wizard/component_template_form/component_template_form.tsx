@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
@@ -25,6 +25,12 @@ import { StepLogisticsContainer, StepReviewContainer } from './steps';
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
 
+export interface WizardContent extends CommonWizardSteps {
+  logistics: Omit<ComponentTemplateDeserialized, '_kbnMeta' | 'template'>;
+}
+
+export type WizardSection = keyof WizardContent | 'review';
+
 interface Props {
   onSave: (componentTemplate: ComponentTemplateDeserialized) => void;
   clearSaveError: () => void;
@@ -32,13 +38,10 @@ interface Props {
   saveError: any;
   defaultValue?: ComponentTemplateDeserialized;
   isEditing?: boolean;
+  defaultActiveWizardSection?: WizardSection;
+  onStepChange?: (stepId: string) => void;
+  dataStreams?: string[];
 }
-
-export interface WizardContent extends CommonWizardSteps {
-  logistics: Omit<ComponentTemplateDeserialized, '_kbnMeta' | 'template'>;
-}
-
-export type WizardSection = keyof WizardContent | 'review';
 
 const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
   logistics: {
@@ -83,11 +86,14 @@ export const ComponentTemplateForm = ({
       isManaged: false,
     },
   },
+  dataStreams,
   isEditing,
   isSaving,
   saveError,
   clearSaveError,
+  defaultActiveWizardSection,
   onSave,
+  onStepChange,
 }: Props) => {
   const {
     template: { settings, mappings, aliases },
@@ -194,6 +200,17 @@ export const ComponentTemplateForm = ({
     [buildComponentTemplateObject, defaultValue, onSave, clearSaveError]
   );
 
+  const defaultActiveStepIndex = useMemo(
+    () =>
+      Math.max(
+        defaultActiveWizardSection
+          ? Object.keys(wizardSections).indexOf(defaultActiveWizardSection)
+          : 0,
+        0
+      ),
+    [defaultActiveWizardSection]
+  );
+
   return (
     <FormWizard<WizardContent>
       defaultValue={wizardDefaultValue}
@@ -202,6 +219,8 @@ export const ComponentTemplateForm = ({
       isSaving={isSaving}
       apiError={apiError}
       texts={i18nTexts}
+      defaultActiveStep={defaultActiveStepIndex}
+      onStepChange={onStepChange}
     >
       <FormWizardStep
         id={wizardSections.logistics.id}
@@ -226,6 +245,7 @@ export const ComponentTemplateForm = ({
       <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
         <StepReviewContainer
           getComponentTemplateData={buildComponentTemplateObject(defaultValue)}
+          dataStreams={dataStreams}
         />
       </FormWizardStep>
     </FormWizard>

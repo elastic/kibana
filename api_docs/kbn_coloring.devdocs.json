@@ -1,0 +1,1903 @@
+{
+  "id": "@kbn/coloring",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.checkIsMaxContinuity",
+        "type": "Function",
+        "tags": [],
+        "label": "checkIsMaxContinuity",
+        "description": [],
+        "signature": [
+          "(continuity: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteContinuity",
+            "text": "PaletteContinuity"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.checkIsMaxContinuity.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "continuity",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteContinuity",
+                "text": "PaletteContinuity"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.checkIsMinContinuity",
+        "type": "Function",
+        "tags": [],
+        "label": "checkIsMinContinuity",
+        "description": [],
+        "signature": [
+          "(continuity: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteContinuity",
+            "text": "PaletteContinuity"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.checkIsMinContinuity.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "continuity",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteContinuity",
+                "text": "PaletteContinuity"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.CustomizablePalette",
+        "type": "Function",
+        "tags": [],
+        "label": "CustomizablePalette",
+        "description": [
+          "\nA `CustomizablePalette` component that is wrapped by the `withSuspense` HOC. This component can\nbe used directly by consumers and will load the `KibanaPageTemplateSolutionNavAvatarLazy` component lazily with\na predefined fallback and error boundary."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "CustomizablePaletteProps",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-coloring/src/shared_components/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.CustomizablePalette.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.CustomizablePaletteLazy",
+        "type": "Function",
+        "tags": [],
+        "label": "CustomizablePaletteLazy",
+        "description": [
+          "\nThe Lazily-loaded `CustomizablePalette` component.  Consumers should use `React.Suspense` or\nthe withSuspense` HOC to load this component."
+        ],
+        "signature": [
+          "React.ExoticComponent<",
+          "CustomizablePaletteProps",
+          "> & { readonly _result: ({ palettes, activePalette, setPalette, dataBounds, showExtraActions, showRangeTypeSelector, disableSwitchingContinuity, }: ",
+          "CustomizablePaletteProps",
+          ") => JSX.Element; }"
+        ],
+        "path": "packages/kbn-coloring/src/shared_components/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.CustomizablePaletteLazy.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.getDataMinMax",
+        "type": "Function",
+        "tags": [],
+        "label": "getDataMinMax",
+        "description": [],
+        "signature": [
+          "(rangeType: \"number\" | \"percent\" | undefined, dataBounds: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.DataBounds",
+            "text": "DataBounds"
+          },
+          ") => { min: number; max: number; }"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getDataMinMax.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rangeType",
+            "description": [],
+            "signature": [
+              "\"number\" | \"percent\" | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getDataMinMax.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataBounds",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.DataBounds",
+                "text": "DataBounds"
+              }
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.getFallbackDataBounds",
+        "type": "Function",
+        "tags": [],
+        "label": "getFallbackDataBounds",
+        "description": [],
+        "signature": [
+          "(rangeType?: \"number\" | \"percent\" | undefined) => ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.DataBounds",
+            "text": "DataBounds"
+          }
+        ],
+        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getFallbackDataBounds.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rangeType",
+            "description": [],
+            "signature": [
+              "\"number\" | \"percent\" | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.getPaletteStops",
+        "type": "Function",
+        "tags": [],
+        "label": "getPaletteStops",
+        "description": [
+          "\nThis is a generic function to compute stops from the current parameters."
+        ],
+        "signature": [
+          "(palettes: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteRegistry",
+            "text": "PaletteRegistry"
+          },
+          ", activePaletteParams: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
+          ", {\n    prevPalette,\n    dataBounds,\n    mapFromMinValue,\n    defaultPaletteName,\n  }: { prevPalette?: string | undefined; dataBounds: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.DataBounds",
+            "text": "DataBounds"
+          },
+          "; mapFromMinValue?: boolean | undefined; defaultPaletteName?: string | undefined; }) => { stop: number; color: string; }[]"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getPaletteStops.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "palettes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteRegistry",
+                "text": "PaletteRegistry"
+              }
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getPaletteStops.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "activePaletteParams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              }
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getPaletteStops.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n    prevPalette,\n    dataBounds,\n    mapFromMinValue,\n    defaultPaletteName,\n  }",
+            "description": [],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.getPaletteStops.$3.prevPalette",
+                "type": "string",
+                "tags": [],
+                "label": "prevPalette",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.getPaletteStops.$3.dataBounds",
+                "type": "Object",
+                "tags": [],
+                "label": "dataBounds",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/coloring",
+                    "scope": "common",
+                    "docId": "kibKbnColoringPluginApi",
+                    "section": "def-common.DataBounds",
+                    "text": "DataBounds"
+                  }
+                ],
+                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.getPaletteStops.$3.mapFromMinValue",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "mapFromMinValue",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.getPaletteStops.$3.defaultPaletteName",
+                "type": "string",
+                "tags": [],
+                "label": "defaultPaletteName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.getStepValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getStepValue",
+        "description": [],
+        "signature": [
+          "(colorStops: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.ColorStop",
+            "text": "ColorStop"
+          },
+          "[], newColorStops: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.ColorStop",
+            "text": "ColorStop"
+          },
+          "[], max: number) => number"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getStepValue.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "colorStops",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.ColorStop",
+                "text": "ColorStop"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getStepValue.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "newColorStops",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.ColorStop",
+                "text": "ColorStop"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getStepValue.$3",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.remapStopsByNewInterval",
+        "type": "Function",
+        "tags": [],
+        "label": "remapStopsByNewInterval",
+        "description": [],
+        "signature": [
+          "(controlStops: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.ColorStop",
+            "text": "ColorStop"
+          },
+          "[], {\n    newInterval,\n    oldInterval,\n    newMin,\n    oldMin,\n  }: { newInterval: number; oldInterval: number; newMin: number; oldMin: number; }) => { color: string; stop: number; }[]"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.remapStopsByNewInterval.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "controlStops",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.ColorStop",
+                "text": "ColorStop"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.remapStopsByNewInterval.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n    newInterval,\n    oldInterval,\n    newMin,\n    oldMin,\n  }",
+            "description": [],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.remapStopsByNewInterval.$2.newInterval",
+                "type": "number",
+                "tags": [],
+                "label": "newInterval",
+                "description": [],
+                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.remapStopsByNewInterval.$2.oldInterval",
+                "type": "number",
+                "tags": [],
+                "label": "oldInterval",
+                "description": [],
+                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.remapStopsByNewInterval.$2.newMin",
+                "type": "number",
+                "tags": [],
+                "label": "newMin",
+                "description": [],
+                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.remapStopsByNewInterval.$2.oldMin",
+                "type": "number",
+                "tags": [],
+                "label": "oldMin",
+                "description": [],
+                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.reversePalette",
+        "type": "Function",
+        "tags": [],
+        "label": "reversePalette",
+        "description": [],
+        "signature": [
+          "(paletteColorRepresentation: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.ColorStop",
+            "text": "ColorStop"
+          },
+          "[]) => { color: string; stop: number; }[]"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.reversePalette.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "paletteColorRepresentation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.ColorStop",
+                "text": "ColorStop"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.roundValue",
+        "type": "Function",
+        "tags": [],
+        "label": "roundValue",
+        "description": [],
+        "signature": [
+          "(value: number, fractionDigits: number) => number"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.roundValue.$1",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.roundValue.$2",
+            "type": "number",
+            "tags": [],
+            "label": "fractionDigits",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.shiftPalette",
+        "type": "Function",
+        "tags": [],
+        "label": "shiftPalette",
+        "description": [],
+        "signature": [
+          "(stops: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.ColorStop",
+            "text": "ColorStop"
+          },
+          "[], max: number) => { stop: number; color: string; }[]"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.shiftPalette.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "stops",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.ColorStop",
+                "text": "ColorStop"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.shiftPalette.$2",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.ChartColorConfiguration",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChartColorConfiguration",
+        "description": [
+          "\nInformation about the structure of a chart to determine the color of a series within it."
+        ],
+        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.ChartColorConfiguration.totalSeries",
+            "type": "number",
+            "tags": [],
+            "label": "totalSeries",
+            "description": [
+              "\nOverall number of series in the current chart"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.ChartColorConfiguration.maxDepth",
+            "type": "number",
+            "tags": [],
+            "label": "maxDepth",
+            "description": [
+              "\nMax nesting depth of the series tree"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.ChartColorConfiguration.behindText",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "behindText",
+            "description": [
+              "\nFlag whether the color will be used behind text. The palette can use this information to\nadjust colors for better a11y. Might be ignored depending on the palette."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.ChartColorConfiguration.syncColors",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "syncColors",
+            "description": [
+              "\nFlag whether a color assignment to a given key should be remembered and re-used the next time the key shows up.\nThis setting might be ignored based on the palette."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.ColorStop",
+        "type": "Interface",
+        "tags": [],
+        "label": "ColorStop",
+        "description": [],
+        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.ColorStop.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.ColorStop.stop",
+            "type": "number",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.CustomPaletteParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomPaletteParams",
+        "description": [],
+        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.CustomPaletteParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.CustomPaletteParams.reverse",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "reverse",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.CustomPaletteParams.rangeType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rangeType",
+            "description": [],
+            "signature": [
+              "\"number\" | \"percent\" | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.CustomPaletteParams.continuity",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "continuity",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteContinuity",
+                "text": "PaletteContinuity"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.CustomPaletteParams.progression",
+            "type": "string",
+            "tags": [],
+            "label": "progression",
+            "description": [],
+            "signature": [
+              "\"fixed\" | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.CustomPaletteParams.rangeMin",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMin",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.CustomPaletteParams.rangeMax",
+            "type": "number",
+            "tags": [],
+            "label": "rangeMax",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.CustomPaletteParams.stops",
+            "type": "Array",
+            "tags": [],
+            "label": "stops",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.ColorStop",
+                "text": "ColorStop"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.CustomPaletteParams.colorStops",
+            "type": "Array",
+            "tags": [],
+            "label": "colorStops",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.ColorStop",
+                "text": "ColorStop"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.CustomPaletteParams.steps",
+            "type": "number",
+            "tags": [],
+            "label": "steps",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.CustomPaletteParams.maxSteps",
+            "type": "number",
+            "tags": [],
+            "label": "maxSteps",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.DataBounds",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataBounds",
+        "description": [],
+        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.DataBounds.min",
+            "type": "number",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.DataBounds.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.DataBounds.fallback",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fallback",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.PaletteDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "PaletteDefinition",
+        "description": [
+          "\nDefinition of a global palette.\n\nA palette controls the appearance of Lens charts on an editor level.\nThe palette wont get reset when switching charts.\n\nA palette can hold internal state (e.g. for customizations) and also includes\nan editor component to edit the internal state."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteDefinition",
+            "text": "PaletteDefinition"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique id of the palette (this will be persisted along with the visualization state)"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteDefinition.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "\nUser facing title (should be i18n-ized)"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteDefinition.internal",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "internal",
+            "description": [
+              "\nFlag indicating whether users should be able to pick this palette manually."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteDefinition.toExpression",
+            "type": "Function",
+            "tags": [],
+            "label": "toExpression",
+            "description": [
+              "\nSerialize the internal state of the palette into an expression function.\nThis function should be used to pass the palette to the expression function applying color and other styles"
+            ],
+            "signature": [
+              "(state?: T | undefined) => ",
+              {
+                "pluginId": "@kbn/interpreter",
+                "scope": "common",
+                "docId": "kibKbnInterpreterPluginApi",
+                "section": "def-common.Ast",
+                "text": "Ast"
+              }
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.PaletteDefinition.toExpression.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [
+                  "The internal state of the palette"
+                ],
+                "signature": [
+                  "T | undefined"
+                ],
+                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteDefinition.getCategoricalColor",
+            "type": "Function",
+            "tags": [],
+            "label": "getCategoricalColor",
+            "description": [
+              "\nColor a series according to the internal rules of the palette."
+            ],
+            "signature": [
+              "(series: ",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.SeriesLayer",
+                "text": "SeriesLayer"
+              },
+              "[], chartConfiguration?: ",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.ChartColorConfiguration",
+                "text": "ChartColorConfiguration"
+              },
+              " | undefined, state?: T | undefined) => string | null"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.PaletteDefinition.getCategoricalColor.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "series",
+                "description": [
+                  "The current series along with its ancestors."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/coloring",
+                    "scope": "common",
+                    "docId": "kibKbnColoringPluginApi",
+                    "section": "def-common.SeriesLayer",
+                    "text": "SeriesLayer"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.PaletteDefinition.getCategoricalColor.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "chartConfiguration",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/coloring",
+                    "scope": "common",
+                    "docId": "kibKbnColoringPluginApi",
+                    "section": "def-common.ChartColorConfiguration",
+                    "text": "ChartColorConfiguration"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.PaletteDefinition.getCategoricalColor.$3",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [
+                  "The internal state of the palette"
+                ],
+                "signature": [
+                  "T | undefined"
+                ],
+                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteDefinition.getCategoricalColors",
+            "type": "Function",
+            "tags": [],
+            "label": "getCategoricalColors",
+            "description": [
+              "\nGet a spectrum of colors of the current palette.\nThis can be used if the chart wants to control color assignment locally."
+            ],
+            "signature": [
+              "(size: number, state?: T | undefined) => string[]"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.PaletteDefinition.getCategoricalColors.$1",
+                "type": "number",
+                "tags": [],
+                "label": "size",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.PaletteDefinition.getCategoricalColors.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T | undefined"
+                ],
+                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteDefinition.canDynamicColoring",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "canDynamicColoring",
+            "description": [
+              "\nDefine whether a palette supports dynamic coloring (i.e. gradient colors mapped to number values)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteDefinition.getColorForValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getColorForValue",
+            "description": [
+              "\nGet the assigned color for the given value based on its data domain and state settings.\nThis can be used for dynamic coloring based on uniform color distribution or custom stops."
+            ],
+            "signature": [
+              "((value: number | undefined, state: T, { min, max }: { min: number; max: number; }) => string | undefined) | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.PaletteDefinition.getColorForValue.$1",
+                "type": "number",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.PaletteDefinition.getColorForValue.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.PaletteDefinition.getColorForValue.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "{ min, max }",
+                "description": [],
+                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/coloring",
+                    "id": "def-common.PaletteDefinition.getColorForValue.$3.min",
+                    "type": "number",
+                    "tags": [],
+                    "label": "min",
+                    "description": [],
+                    "path": "packages/kbn-coloring/src/palettes/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/coloring",
+                    "id": "def-common.PaletteDefinition.getColorForValue.$3.max",
+                    "type": "number",
+                    "tags": [],
+                    "label": "max",
+                    "description": [],
+                    "path": "packages/kbn-coloring/src/palettes/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.PaletteOutput",
+        "type": "Interface",
+        "tags": [],
+        "label": "PaletteOutput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteOutput.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"palette\" | \"system_palette\""
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteOutput.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteOutput.params",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.PaletteRegistry",
+        "type": "Interface",
+        "tags": [],
+        "label": "PaletteRegistry",
+        "description": [],
+        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteRegistry.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(name: string) => ",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteDefinition",
+                "text": "PaletteDefinition"
+              },
+              "<unknown>"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.PaletteRegistry.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteRegistry.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteDefinition",
+                "text": "PaletteDefinition"
+              },
+              "<unknown>[]"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.SeriesLayer",
+        "type": "Interface",
+        "tags": [],
+        "label": "SeriesLayer",
+        "description": [
+          "\nInformation about a series in a chart used to determine its color.\nSeries layers can be nested, this means each series layer can have an ancestor."
+        ],
+        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.SeriesLayer.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the series (can be used for lookup-based coloring)"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.SeriesLayer.rankAtDepth",
+            "type": "number",
+            "tags": [],
+            "label": "rankAtDepth",
+            "description": [
+              "\nRank of the series compared to siblings with the same ancestor"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.SeriesLayer.totalSeriesAtDepth",
+            "type": "number",
+            "tags": [],
+            "label": "totalSeriesAtDepth",
+            "description": [
+              "\nTotal number of series with the same ancestor"
+            ],
+            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.CUSTOM_PALETTE",
+        "type": "string",
+        "tags": [],
+        "label": "CUSTOM_PALETTE",
+        "description": [],
+        "signature": [
+          "\"custom\""
+        ],
+        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.DEFAULT_COLOR_STEPS",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_COLOR_STEPS",
+        "description": [],
+        "signature": [
+          "5"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.DEFAULT_CONTINUITY",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_CONTINUITY",
+        "description": [],
+        "signature": [
+          "\"above\""
+        ],
+        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.DEFAULT_MAX_STOP",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_MAX_STOP",
+        "description": [],
+        "signature": [
+          "100"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.DEFAULT_MIN_STOP",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_MIN_STOP",
+        "description": [],
+        "signature": [
+          "0"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.DEFAULT_PALETTE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_PALETTE_NAME",
+        "description": [],
+        "signature": [
+          "\"positive\""
+        ],
+        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.DEFAULT_RANGE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_RANGE_TYPE",
+        "description": [],
+        "signature": [
+          "\"percent\""
+        ],
+        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.FIXED_PROGRESSION",
+        "type": "string",
+        "tags": [],
+        "label": "FIXED_PROGRESSION",
+        "description": [],
+        "signature": [
+          "\"fixed\""
+        ],
+        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.PaletteContinuity",
+        "type": "Type",
+        "tags": [],
+        "label": "PaletteContinuity",
+        "description": [],
+        "signature": [
+          "\"above\" | \"below\" | \"none\" | \"all\""
+        ],
+        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.RequiredPaletteParamTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "RequiredPaletteParamTypes",
+        "description": [],
+        "signature": [
+          "{ name: string; rangeMin: number; reverse: boolean; rangeType: \"number\" | \"percent\"; continuity: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteContinuity",
+            "text": "PaletteContinuity"
+          },
+          "; progression: \"fixed\"; rangeMax: number; stops: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.ColorStop",
+            "text": "ColorStop"
+          },
+          "[]; colorStops: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.ColorStop",
+            "text": "ColorStop"
+          },
+          "[]; steps: number; maxSteps?: number | undefined; }"
+        ],
+        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

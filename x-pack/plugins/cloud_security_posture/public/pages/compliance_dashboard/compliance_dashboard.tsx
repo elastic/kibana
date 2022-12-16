@@ -6,51 +6,55 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiIcon } from '@elastic/eui';
-import { type KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
-import { allNavigationItems } from '../../common/navigation/constants';
-import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
-import { SummarySection } from './dashboard_sections/summary_section';
-import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
+import { EuiSpacer, EuiPageHeader } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { CloudSummarySection } from './dashboard_sections/cloud_summary_section';
+import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
+import { DASHBOARD_CONTAINER } from './test_subjects';
 import { useComplianceDashboardDataApi } from '../../common/api';
-import { CspPageTemplate } from '../../components/csp_page_template';
-import { CLOUD_POSTURE, NO_DATA_CONFIG_TEXT } from './translations';
-
-const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataConfig'] => ({
-  pageTitle: NO_DATA_CONFIG_TEXT.PAGE_TITLE,
-  solution: NO_DATA_CONFIG_TEXT.SOLUTION,
-  // TODO: Add real docs link once we have it
-  docsLink: 'https://www.elastic.co/guide/index.html',
-  logo: 'logoSecurity',
-  actions: {
-    dashboardNoDataCard: {
-      icon: <EuiIcon type="refresh" size="xxl" />,
-      onClick,
-      title: NO_DATA_CONFIG_TEXT.BUTTON_TITLE,
-      description: NO_DATA_CONFIG_TEXT.DESCRIPTION,
-    },
-  },
-});
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { NoFindingsStates } from '../../components/no_findings_states';
+import { CloudBenchmarksSection } from './dashboard_sections/cloud_benchmarks_section';
 
 export const ComplianceDashboard = () => {
-  const getDashboardDataQuery = useComplianceDashboardDataApi();
-  useCspBreadcrumbs([allNavigationItems.dashboard]);
+  const getSetupStatus = useCspSetupStatusApi();
+  const hasFindings = getSetupStatus.data?.status === 'indexed';
+  const getDashboardData = useComplianceDashboardDataApi({
+    enabled: hasFindings,
+  });
+
+  if (!hasFindings) return <NoFindingsStates />;
 
   return (
-    <CspPageTemplate
-      pageHeader={{ pageTitle: CLOUD_POSTURE }}
-      restrictWidth={1600}
-      query={getDashboardDataQuery}
-      noDataConfig={getNoDataConfig(getDashboardDataQuery.refetch)}
-    >
-      {getDashboardDataQuery.data && (
+    <CloudPosturePage query={getDashboardData}>
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={
+          <CloudPosturePageTitle
+            title={i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
+              defaultMessage: 'Cloud Posture',
+            })}
+          />
+        }
+      />
+      <EuiSpacer />
+      <div
+        data-test-subj={DASHBOARD_CONTAINER}
+        css={css`
+          max-width: 1440px;
+          margin-left: auto;
+          margin-right: auto;
+        `}
+      >
         <>
-          <SummarySection complianceData={getDashboardDataQuery.data} />
+          <CloudSummarySection complianceData={getDashboardData.data!} />
           <EuiSpacer />
-          <BenchmarksSection complianceData={getDashboardDataQuery.data} />
+          <CloudBenchmarksSection complianceData={getDashboardData.data!} />
           <EuiSpacer />
         </>
-      )}
-    </CspPageTemplate>
+      </div>
+    </CloudPosturePage>
   );
 };

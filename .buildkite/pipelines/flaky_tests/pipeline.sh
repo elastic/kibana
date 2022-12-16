@@ -2,4 +2,7 @@
 
 set -euo pipefail
 
-node .buildkite/pipelines/flaky_tests/pipeline.js | buildkite-agent pipeline upload
+UUID="$(cat /proc/sys/kernel/random/uuid)"
+export UUID
+
+ts-node .buildkite/pipelines/flaky_tests/pipeline.ts | buildkite-agent pipeline upload

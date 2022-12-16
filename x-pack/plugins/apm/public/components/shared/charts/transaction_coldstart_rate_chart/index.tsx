@@ -14,11 +14,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
+import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { TimeseriesChart } from '../timeseries_chart';
+import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -90,7 +92,10 @@ export function TransactionColdstartRateChart({
               start,
               end,
               transactionType,
-              offset: comparisonEnabled ? offset : undefined,
+              offset:
+                comparisonEnabled && isTimeComparison(offset)
+                  ? offset
+                  : undefined,
               ...(transactionName ? { transactionName } : {}),
             },
           },
@@ -110,6 +115,7 @@ export function TransactionColdstartRateChart({
       comparisonEnabled,
     ]
   );
+  const previousPeriodLabel = usePreviousPeriodLabel();
 
   const timeseries = [
     {
@@ -126,10 +132,7 @@ export function TransactionColdstartRateChart({
             data: data.previousPeriod.transactionColdstartRate,
             type: 'area',
             color: theme.eui.euiColorMediumShade,
-            title: i18n.translate(
-              'xpack.apm.coldstartRate.chart.coldstartRate.previousPeriodLabel',
-              { defaultMessage: 'Previous period' }
-            ),
+            title: previousPeriodLabel,
           },
         ]
       : []),
@@ -158,7 +161,7 @@ export function TransactionColdstartRateChart({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <TimeseriesChart
+      <TimeseriesChartWithContext
         id="coldstartRate"
         height={height}
         showAnnotations={showAnnotations}

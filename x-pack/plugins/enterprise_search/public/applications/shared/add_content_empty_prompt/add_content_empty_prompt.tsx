@@ -19,29 +19,40 @@ import {
   EuiTitle,
   EuiText,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../common/constants';
-import { SEARCH_INDICES_PATH } from '../../enterprise_search_content/routes';
+import welcomeGraphicDark from '../../../assets/images/welcome_dark.svg';
+import welcomeGraphicLight from '../../../assets/images/welcome_light.svg';
+import { NEW_INDEX_PATH } from '../../enterprise_search_content/routes';
+import { docLinks } from '../doc_links';
 import { EuiLinkTo } from '../react_router_helpers';
 
-import searchIndicesIllustration from './search_indices.svg';
 import './add_content_empty_prompt.scss';
 
-export const AddContentEmptyPrompt: React.FC = () => {
+interface EmptyPromptProps {
+  title?: string;
+  buttonLabel?: string;
+}
+
+export const AddContentEmptyPrompt: React.FC<EmptyPromptProps> = ({ title, buttonLabel }) => {
+  const { colorMode } = useEuiTheme();
+
   return (
-    <EuiPanel color="transparent" paddingSize="l">
+    <EuiPanel color="transparent" paddingSize="none">
       <EuiFlexGroup className="addContentEmptyPrompt" justifyContent="spaceBetween" direction="row">
         <EuiFlexItem grow>
           <EuiFlexGroup direction="column" responsive={false}>
             <EuiFlexItem grow>
               <EuiTitle>
                 <h2>
-                  {i18n.translate('xpack.enterpriseSearch.overview.emptyState.heading', {
-                    defaultMessage: 'Add content to Enterprise Search',
-                  })}
+                  {title ||
+                    i18n.translate('xpack.enterpriseSearch.overview.emptyState.heading', {
+                      defaultMessage: 'Add content to Enterprise Search',
+                    })}
                 </h2>
               </EuiTitle>
               <EuiSpacer size="l" />
@@ -49,7 +60,13 @@ export const AddContentEmptyPrompt: React.FC = () => {
                 <p>
                   {i18n.translate('xpack.enterpriseSearch.emptyState.description', {
                     defaultMessage:
-                      "Data you add in Enterprise Search is called a Search index and it's searchable in both App and Workplace Search. Now you can use your connectors in App Search and your web crawlers in Workplace Search.",
+                      'Your content is stored in an Elasticsearch index. Get started by creating an Elasticsearch index and selecting an ingestion method. Options include the Elastic web crawler, third party data integrations, or using Elasticsearch API endpoints.',
+                  })}
+                </p>
+                <p>
+                  {i18n.translate('xpack.enterpriseSearch.emptyState.description.line2', {
+                    defaultMessage:
+                      "Whether you're building a search experience with App Search or Elasticsearch, you can now get started here.",
                   })}
                 </p>
               </EuiText>
@@ -58,19 +75,19 @@ export const AddContentEmptyPrompt: React.FC = () => {
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiLinkTo
-                    to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH)}
+                    to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_PATH)}
                     shouldNotCreateHref
                   >
                     <EuiButton color="primary" fill>
-                      {i18n.translate('xpack.enterpriseSearch.overview.emptyState.buttonTitle', {
-                        defaultMessage: 'Add content to Enterprise Search',
-                      })}
+                      {buttonLabel ||
+                        i18n.translate('xpack.enterpriseSearch.overview.emptyState.buttonTitle', {
+                          defaultMessage: 'Add content to Enterprise Search',
+                        })}
                     </EuiButton>
                   </EuiLinkTo>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  {/* TODO need link for Learn More link*/}
-                  <EuiLink href="#" target="_blank">
+                  <EuiLink href={docLinks.start} target="_blank">
                     {i18n.translate('xpack.enterpriseSearch.overview.emptyState.footerLinkTitle', {
                       defaultMessage: 'Learn more',
                     })}
@@ -82,9 +99,9 @@ export const AddContentEmptyPrompt: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiImage
-            size="l"
+            size="xl"
             float="right"
-            src={searchIndicesIllustration}
+            src={colorMode === 'LIGHT' ? welcomeGraphicLight : welcomeGraphicDark}
             alt={i18n.translate('xpack.enterpriseSearch.overview.searchIndices.image.altText', {
               defaultMessage: 'Search indices illustration',
             })}

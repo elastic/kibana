@@ -41,6 +41,23 @@ export class KibanaTilemapSource extends AbstractSource {
       },
     ];
   }
+  async hasLegendDetails() {
+    return false;
+  }
+
+  renderLegendDetails() {
+    return null;
+  }
+  isSourceStale(mbSource, sourceData) {
+    if (!sourceData.url) {
+      return false;
+    }
+    return mbSource.tiles?.[0] !== sourceData.url;
+  }
+
+  async canSkipSourceUpdate() {
+    return false;
+  }
 
   async getUrlTemplate() {
     const tilemap = getKibanaTileMap();

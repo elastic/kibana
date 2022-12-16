@@ -56,6 +56,22 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           enabled: false,
           type: 'object',
         },
+        frequency: {
+          properties: {
+            summary: {
+              index: false,
+              type: 'boolean',
+            },
+            notifyWhen: {
+              index: false,
+              type: 'keyword',
+            },
+            throttle: {
+              index: false,
+              type: 'keyword',
+            },
+          },
+        },
       },
     },
     params: {
@@ -114,7 +130,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     },
     monitoring: {
       properties: {
-        execution: {
+        run: {
           properties: {
             history: {
               properties: {
@@ -126,6 +142,9 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
                 },
                 timestamp: {
                   type: 'date',
+                },
+                outcome: {
+                  type: 'keyword',
                 },
               },
             },
@@ -145,10 +164,113 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
                 },
               },
             },
+            last_run: {
+              properties: {
+                timestamp: {
+                  type: 'date',
+                },
+                metrics: {
+                  properties: {
+                    duration: {
+                      type: 'long',
+                    },
+                    total_search_duration_ms: {
+                      type: 'long',
+                    },
+                    total_indexing_duration_ms: {
+                      type: 'long',
+                    },
+                    total_alerts_detected: {
+                      type: 'float',
+                    },
+                    total_alerts_created: {
+                      type: 'float',
+                    },
+                    gap_duration_s: {
+                      type: 'float',
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
     },
+    snoozeSchedule: {
+      type: 'nested',
+      properties: {
+        id: {
+          type: 'keyword',
+        },
+        duration: {
+          type: 'long',
+        },
+        skipRecurrences: {
+          type: 'date',
+          format: 'strict_date_time',
+        },
+        rRule: {
+          type: 'nested',
+          properties: {
+            freq: {
+              type: 'keyword',
+            },
+            dtstart: {
+              type: 'date',
+              format: 'strict_date_time',
+            },
+            tzid: {
+              type: 'keyword',
+            },
+            until: {
+              type: 'date',
+              format: 'strict_date_time',
+            },
+            count: {
+              type: 'long',
+            },
+            interval: {
+              type: 'long',
+            },
+            wkst: {
+              type: 'keyword',
+            },
+            byweekday: {
+              type: 'keyword',
+            },
+            bymonth: {
+              type: 'short',
+            },
+            bysetpos: {
+              type: 'long',
+            },
+            bymonthday: {
+              type: 'short',
+            },
+            byyearday: {
+              type: 'short',
+            },
+            byweekno: {
+              type: 'short',
+            },
+            byhour: {
+              type: 'long',
+            },
+            byminute: {
+              type: 'long',
+            },
+            bysecond: {
+              type: 'long',
+            },
+          },
+        },
+      },
+    },
+    nextRun: {
+      type: 'date',
+    },
+    // Deprecated, if you need to add new property please do it in `last_run`
     executionStatus: {
       properties: {
         numberOfTriggeredActions: {
@@ -185,9 +307,37 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
-    snoozeEndTime: {
-      type: 'date',
-      format: 'strict_date_time',
+    lastRun: {
+      properties: {
+        outcome: {
+          type: 'keyword',
+        },
+        outcomeOrder: {
+          type: 'float',
+        },
+        warning: {
+          type: 'text',
+        },
+        outcomeMsg: {
+          type: 'text',
+        },
+        alertsCount: {
+          properties: {
+            active: {
+              type: 'float',
+            },
+            new: {
+              type: 'float',
+            },
+            recovered: {
+              type: 'float',
+            },
+            ignored: {
+              type: 'float',
+            },
+          },
+        },
+      },
     },
   },
 };

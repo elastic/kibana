@@ -14,7 +14,7 @@ import {
   farequoteKQLSearchTestData,
   farequoteLuceneSearchTestData,
   sampleLogTestData,
-} from './index_test_data';
+} from './index_test_data_random_sampler';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
@@ -62,7 +62,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       }
 
       await ml.dataVisualizerTable.assertSearchPanelExist();
-      await ml.dataVisualizerTable.assertSampleSizeInputExists();
       await ml.dataVisualizerTable.assertFieldTypeInputExists();
       await ml.dataVisualizerTable.assertFieldNameInputExists();
 
@@ -113,18 +112,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         );
       }
 
-      await ml.testExecution.logTestStep(
-        `${testData.suiteTitle} sample size control changes non-metric fields`
-      );
-      for (const sampleSizeCase of testData.sampleSizeValidations) {
-        const { size, expected } = sampleSizeCase;
-        await ml.dataVisualizerTable.setSampleSizeInputValue(
-          size,
-          expected.field,
-          expected.docCountFormatted
-        );
-      }
-
       await ml.testExecution.logTestStep('sets and resets field type filter correctly');
       await ml.dataVisualizerTable.setFieldTypeFilter(
         testData.fieldTypeFilters,
@@ -154,7 +141,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   }
 
   describe('index based', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
@@ -256,7 +243,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         if (lensMetricField) {
           await ml.dataVisualizerTable.assertLensActionShowChart(
             lensMetricField.fieldName,
-            'mtrVis'
+            'legacyMtrVis'
           );
           await ml.navigation.browserBackTo('dataVisualizerTable');
         }
@@ -267,7 +254,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         if (lensNonMetricField) {
           await ml.dataVisualizerTable.assertLensActionShowChart(
             lensNonMetricField.fieldName,
-            'mtrVis'
+            'legacyMtrVis'
           );
           await ml.navigation.browserBackTo('dataVisualizerTable');
         }

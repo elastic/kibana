@@ -29,6 +29,7 @@ export const INPUT_VAR_NAME_TO_SCHEMA_PATH: Record<string, string> = {
   max_connections: 'apm-server.max_connections',
   response_headers: 'apm-server.response_headers',
   expvar_enabled: 'apm-server.expvar.enabled',
+  pprof_enabled: 'apm-server.pprof.enabled',
   tls_enabled: 'apm-server.ssl.enabled',
   tls_certificate: 'apm-server.ssl.certificate',
   tls_key: 'apm-server.ssl.key',

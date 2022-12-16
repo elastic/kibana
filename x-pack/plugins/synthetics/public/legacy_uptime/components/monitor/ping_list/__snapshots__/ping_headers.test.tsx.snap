@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Ping Headers shallow renders expected elements for valid props 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiAccordionClass
+    buttonContent={
+      <EuiText
+        size="s"
+      >
+        <h3>
+          Response headers
+        </h3>
+      </EuiText>
+    }
+    id="responseHeaderAccord"
+  >
+    <EuiSpacer
+      size="s"
+    />
+    <EuiDescriptionList
+      compressed={true}
+      listItems={
+        Array [
+          Object {
+            "description": "bytes",
+            "title": "Accept-Ranges",
+          },
+          Object {
+            "description": "h3-Q050=\\":443\\"; ma=2592000,h3-29=\\":443\\"; ma=2592000,h3-T051=\\":443\\"; ma=2592000,h3-T050=\\":443\\"; ma=2592000,h3-Q046=\\":443\\"; ma=2592000,h3-Q043=\\":443\\"; ma=2592000,quic=\\":443\\"; ma=2592000; v=\\"46,43\\"",
+            "title": "Alt-Svc",
+          },
+          Object {
+            "description": "private, max-age=0",
+            "title": "Cache-Control",
+          },
+          Object {
+            "description": "174781",
+            "title": "Content-Length",
+          },
+          Object {
+            "description": "text/html",
+            "title": "Content-Type",
+          },
+          Object {
+            "description": "Mon, 02 Nov 2020 17:22:03 GMT",
+            "title": "Date",
+          },
+          Object {
+            "description": "Mon, 02 Nov 2020 17:22:03 GMT",
+            "title": "Expires",
+          },
+          Object {
+            "description": "Wed, 28 Oct 2020 18:45:00 GMT",
+            "title": "Last-Modified",
+          },
+          Object {
+            "description": "sffe",
+            "title": "Server",
+          },
+          Object {
+            "description": "Accept-Encoding",
+            "title": "Vary",
+          },
+          Object {
+            "description": "nosniff",
+            "title": "X-Content-Type-Options",
+          },
+          Object {
+            "description": "0",
+            "title": "X-Xss-Protection",
+          },
+        ]
+      }
+      titleProps={
+        Object {
+          "style": Object {
+            "paddingLeft": 30,
+            "width": "30%",
+          },
+        }
+      }
+      type="responsiveColumn"
+    />
+  </EuiAccordionClass>
+</Fragment>
+`;

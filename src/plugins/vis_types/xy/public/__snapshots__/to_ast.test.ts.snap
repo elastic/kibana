@@ -4,80 +4,41 @@ exports[`xy vis toExpressionAst function should match basic snapshot 1`] = `
 Object {
   "addArgument": [Function],
   "arguments": Object {
-    "addLegend": Array [
-      true,
-    ],
     "addTimeMarker": Array [
       false,
     ],
-    "addTooltip": Array [
+    "layers": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+    "legend": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+    "showTooltip": Array [
       true,
     ],
-    "categoryAxes": Array [
-      Object {
-        "toAst": [Function],
-      },
-    ],
-    "chartType": Array [
-      "area",
-    ],
-    "gridCategoryLines": Array [
-      false,
-    ],
-    "labels": Array [
-      Object {
-        "toAst": [Function],
-      },
-    ],
-    "legendPosition": Array [
-      "top",
-    ],
-    "maxLegendLines": Array [
-      1,
-    ],
-    "palette": Array [
-      "default",
-    ],
-    "seriesDimension": Array [
-      Object {
-        "toAst": [Function],
-      },
-    ],
-    "seriesParams": Array [
-      Object {
-        "toAst": [Function],
-      },
-    ],
-    "thresholdLine": Array [
-      Object {
-        "toAst": [Function],
-      },
-    ],
-    "times": Array [],
-    "truncateLegend": Array [
+    "singleTable": Array [
       true,
     ],
-    "type": Array [
-      "area",
+    "valueLabels": Array [
+      "hide",
     ],
-    "valueAxes": Array [
+    "xAxisConfig": Array [
       Object {
         "toAst": [Function],
       },
     ],
-    "xDimension": Array [
-      Object {
-        "toAst": [Function],
-      },
-    ],
-    "yDimension": Array [
+    "yAxisConfigs": Array [
       Object {
         "toAst": [Function],
       },
     ],
   },
   "getArgument": [Function],
-  "name": "xy_vis",
+  "name": "layeredXyVis",
   "removeArgument": [Function],
   "replaceArgument": [Function],
   "toAst": [Function],

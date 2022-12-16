@@ -8,21 +8,19 @@
 import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { setSignalStatusValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/set_signal_status_type_dependents';
-import {
-  SetSignalsStatusSchemaDecoded,
-  setSignalsStatusSchema,
-} from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
+import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
+import { setSignalsStatusSchema } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
 } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { ITelemetryEventsSender } from '../../../telemetry/sender';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import {
   getSessionIDfromKibanaRequest,

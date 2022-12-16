@@ -1,0 +1,259 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#toExpression should map to a valid AST 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "addTimeMarker": Array [
+          false,
+        ],
+        "annotations": Array [],
+        "emphasizeFitting": Array [
+          true,
+        ],
+        "endValue": Array [
+          "Nearest",
+        ],
+        "fillOpacity": Array [
+          0.3,
+        ],
+        "fittingFunction": Array [
+          "Carry",
+        ],
+        "hideEndzones": Array [
+          true,
+        ],
+        "layers": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessors": Array [
+                    "b",
+                    "c",
+                  ],
+                  "columnToLabel": Array [
+                    "{\\"b\\":\\"col_b\\",\\"c\\":\\"col_c\\",\\"d\\":\\"col_d\\"}",
+                  ],
+                  "curveType": Array [
+                    "LINEAR",
+                  ],
+                  "isHistogram": Array [
+                    false,
+                  ],
+                  "isHorizontal": Array [
+                    false,
+                  ],
+                  "isPercentage": Array [
+                    false,
+                  ],
+                  "isStacked": Array [
+                    false,
+                  ],
+                  "layerId": Array [
+                    "first",
+                  ],
+                  "palette": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "name": Array [
+                              "default",
+                            ],
+                          },
+                          "function": "system_palette",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                  ],
+                  "seriesType": Array [
+                    "area",
+                  ],
+                  "showLines": Array [
+                    true,
+                  ],
+                  "simpleView": Array [
+                    false,
+                  ],
+                  "splitAccessors": Array [
+                    "d",
+                  ],
+                  "xAccessor": Array [
+                    "a",
+                  ],
+                  "xScaleType": Array [
+                    "linear",
+                  ],
+                },
+                "function": "extendedDataLayer",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "legend": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "floatingColumns": Array [],
+                  "isVisible": Array [
+                    true,
+                  ],
+                  "position": Array [
+                    "left",
+                  ],
+                  "shouldTruncate": Array [
+                    true,
+                  ],
+                },
+                "function": "legendConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "showTooltip": Array [],
+        "valueLabels": Array [
+          "hide",
+        ],
+        "valuesInLegend": Array [
+          false,
+        ],
+        "xAxisConfig": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "extent": Array [],
+                  "id": Array [
+                    "x",
+                  ],
+                  "labelsOrientation": Array [
+                    0,
+                  ],
+                  "position": Array [
+                    "bottom",
+                  ],
+                  "showGridLines": Array [
+                    false,
+                  ],
+                  "showLabels": Array [
+                    false,
+                  ],
+                  "showTitle": Array [
+                    true,
+                  ],
+                  "title": Array [
+                    "",
+                  ],
+                },
+                "function": "xAxisConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "yAxisConfigs": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "labelsOrientation": Array [
+                    -90,
+                  ],
+                  "position": Array [
+                    "left",
+                  ],
+                  "scaleType": Array [
+                    "linear",
+                  ],
+                  "showGridLines": Array [
+                    true,
+                  ],
+                  "showLabels": Array [
+                    true,
+                  ],
+                  "showTitle": Array [
+                    true,
+                  ],
+                  "title": Array [
+                    "",
+                  ],
+                },
+                "function": "yAxisConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "extent": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "lowerBound": Array [
+                              123,
+                            ],
+                            "mode": Array [
+                              "custom",
+                            ],
+                            "upperBound": Array [
+                              456,
+                            ],
+                          },
+                          "function": "axisExtentConfig",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                  ],
+                  "labelsOrientation": Array [
+                    -45,
+                  ],
+                  "position": Array [
+                    "right",
+                  ],
+                  "scaleType": Array [
+                    "linear",
+                  ],
+                  "showGridLines": Array [
+                    true,
+                  ],
+                  "showLabels": Array [
+                    true,
+                  ],
+                  "showTitle": Array [
+                    true,
+                  ],
+                  "title": Array [
+                    "",
+                  ],
+                },
+                "function": "yAxisConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+      },
+      "function": "layeredXyVis",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

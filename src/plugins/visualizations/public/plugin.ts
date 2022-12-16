@@ -25,6 +25,8 @@ import {
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -33,13 +35,14 @@ import type {
   ApplicationStart,
   SavedObjectsClientContract,
 } from '@kbn/core/public';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   Setup as InspectorSetup,
   Start as InspectorStart,
 } from '@kbn/inspector-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -49,13 +52,17 @@ import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/naviga
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
-import { visualizeEditorTrigger } from './triggers';
+import {
+  aggBasedVisualizationTrigger,
+  dashboardVisualizationPanelTrigger,
+  visualizeEditorTrigger,
+} from './triggers';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 import { showNewVisModal } from './wizard';
 import { VisualizeLocatorDefinition } from '../common/locator';
@@ -76,7 +83,6 @@ import {
   setHttp,
   setSearch,
   setSavedObjects,
-  setUsageCollector,
   setExpressions,
   setUiActions,
   setTimeFilter,
@@ -88,8 +94,12 @@ import {
   setSpaces,
   setTheme,
   setExecutionContext,
+  setFieldFormats,
+  setSavedObjectTagging,
+  setUsageCollection,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
+import { EditInLensAction } from './actions/edit_in_lens_action';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -109,7 +119,6 @@ export interface VisualizationsSetupDeps {
   expressions: ExpressionsSetup;
   inspector: InspectorSetup;
   uiActions: UiActionsSetup;
-  usageCollection: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
   share?: SharePluginSetup;
@@ -118,6 +127,7 @@ export interface VisualizationsSetupDeps {
 export interface VisualizationsStartDeps {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   expressions: ExpressionsStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
@@ -132,8 +142,10 @@ export interface VisualizationsStartDeps {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   share?: SharePluginStart;
   urlForwarding: UrlForwardingStart;
-  usageCollection?: UsageCollectionStart;
   screenshotMode: ScreenshotModePluginStart;
+  fieldFormats: FieldFormatsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  usageCollection: UsageCollectionStart;
 }
 
 /**
@@ -166,7 +178,6 @@ export class VisualizationsPlugin
     {
       expressions,
       embeddable,
-      usageCollection,
       data,
       home,
       urlForwarding,
@@ -239,9 +250,6 @@ export class VisualizationsPlugin
 
         // make sure the index pattern list is up to date
         pluginsStart.dataViews.clearCache();
-        // make sure a default index pattern exists
-        // if not, the page will be redirected to management and visualize won't be rendered
-        await pluginsStart.dataViews.ensureDefaultDataView();
 
         appMounted();
 
@@ -269,6 +277,8 @@ export class VisualizationsPlugin
           pluginInitializerContext: this.initializerContext,
           chrome: coreStart.chrome,
           data: pluginsStart.data,
+          core: coreStart,
+          dataViewEditor: pluginsStart.dataViewEditor,
           dataViews: pluginsStart.dataViews,
           localStorage: new Storage(localStorage),
           navigation: pluginsStart.navigation,
@@ -285,10 +295,10 @@ export class VisualizationsPlugin
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
           presentationUtil: pluginsStart.presentationUtil,
-          usageCollection: pluginsStart.usageCollection,
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
           visEditorsRegistry,
+          unifiedSearch: pluginsStart.unifiedSearch,
         };
 
         params.element.classList.add('visAppWrapper');
@@ -331,13 +341,16 @@ export class VisualizationsPlugin
     }
 
     setUISettings(core.uiSettings);
-    setUsageCollector(usageCollection);
     setTheme(core.theme);
 
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     expressions.registerFunction(xyDimensionExpressionFunction);
+    uiActions.registerTrigger(aggBasedVisualizationTrigger);
     uiActions.registerTrigger(visualizeEditorTrigger);
+    uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
+    const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
+    uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
@@ -357,6 +370,7 @@ export class VisualizationsPlugin
       savedObjects,
       spaces,
       savedObjectsTaggingOss,
+      fieldFormats,
       usageCollection,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
@@ -376,9 +390,15 @@ export class VisualizationsPlugin
     setOverlays(core.overlays);
     setExecutionContext(core.executionContext);
     setChrome(core.chrome);
+    setFieldFormats(fieldFormats);
+    setUsageCollection(usageCollection);
 
     if (spaces) {
       setSpaces(spaces);
+    }
+
+    if (savedObjectsTaggingOss) {
+      setSavedObjectTagging(savedObjectsTaggingOss);
     }
 
     return {

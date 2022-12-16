@@ -8,11 +8,11 @@
 
 import { hashedItemStore, getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
-import { FilterStateStore } from '@kbn/data-plugin/public';
+import { FilterStateStore } from '@kbn/es-query';
 import { DiscoverAppLocatorDefinition } from './locator';
 import { SerializableRecord } from '@kbn/utility-types';
 
-const indexPatternId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
+const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
 
 interface SetupParams {
@@ -20,9 +20,7 @@ interface SetupParams {
 }
 
 const setup = async ({ useHash = false }: SetupParams = {}) => {
-  const locator = new DiscoverAppLocatorDefinition({
-    useHash,
-  });
+  const locator = new DiscoverAppLocatorDefinition({ useHash });
 
   return {
     locator,
@@ -55,15 +53,13 @@ describe('Discover url generator', () => {
     expect(_g).toEqual({});
   });
 
-  test('can specify specific index pattern', async () => {
+  test('can specify specific data view', async () => {
     const { locator } = await setup();
-    const { path } = await locator.getLocation({
-      indexPatternId,
-    });
+    const { path } = await locator.getLocation({ dataViewId });
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(_a).toEqual({
-      index: indexPatternId,
+      index: dataViewId,
     });
     expect(_g).toEqual({});
   });
@@ -224,46 +220,64 @@ describe('Discover url generator', () => {
     );
   });
 
+  test('should use legacy locator params', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({ dataViewId });
+    const { path: legacyParamsPath } = await locator.getLocation({ indexPatternId: dataViewId });
+
+    expect(path).toEqual(legacyParamsPath);
+  });
+
+  test('should create data view when dataViewSpec is used', async () => {
+    const dataViewSpecMock = {
+      id: 'mock-id',
+      title: 'mock-title',
+      timeFieldName: 'mock-time-field-name',
+    };
+    const { locator } = await setup();
+    const { state } = await locator.getLocation({ dataViewSpec: dataViewSpecMock });
+
+    expect(state.dataViewSpec).toEqual(dataViewSpecMock);
+  });
+
   describe('useHash property', () => {
     describe('when default useHash is set to false', () => {
-      test('when using default, sets index pattern ID in the generated URL', async () => {
+      test('when using default, sets data view ID in the generated URL', async () => {
         const { locator } = await setup();
-        const { path } = await locator.getLocation({
-          indexPatternId,
-        });
+        const { path } = await locator.getLocation({ dataViewId });
 
-        expect(path.indexOf(indexPatternId) > -1).toBe(true);
+        expect(path.indexOf(dataViewId) > -1).toBe(true);
       });
 
-      test('when enabling useHash, does not set index pattern ID in the generated URL', async () => {
+      test('when enabling useHash, does not set data view ID in the generated URL', async () => {
         const { locator } = await setup();
         const { path } = await locator.getLocation({
           useHash: true,
-          indexPatternId,
+          dataViewId,
         });
 
-        expect(path.indexOf(indexPatternId) > -1).toBe(false);
+        expect(path.indexOf(dataViewId) > -1).toBe(false);
       });
     });
 
     describe('when default useHash is set to true', () => {
-      test('when using default, does not set index pattern ID in the generated URL', async () => {
+      test('when using default, does not set data view ID in the generated URL', async () => {
         const { locator } = await setup({ useHash: true });
         const { path } = await locator.getLocation({
-          indexPatternId,
+          dataViewId,
         });
 
-        expect(path.indexOf(indexPatternId) > -1).toBe(false);
+        expect(path.indexOf(dataViewId) > -1).toBe(false);
       });
 
-      test('when disabling useHash, sets index pattern ID in the generated URL', async () => {
+      test('when disabling useHash, sets data view ID in the generated URL', async () => {
         const { locator } = await setup({ useHash: true });
         const { path } = await locator.getLocation({
           useHash: false,
-          indexPatternId,
+          dataViewId,
         });
 
-        expect(path.indexOf(indexPatternId) > -1).toBe(true);
+        expect(path.indexOf(dataViewId) > -1).toBe(true);
       });
     });
   });

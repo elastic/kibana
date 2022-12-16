@@ -1,0 +1,608 @@
+1c1,6
+< global.handlebarsEnv = null;
+---
+> /*
+>  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+>  * and may include modifications made by Elasticsearch B.V.
+>  * Elasticsearch B.V. licenses this file to you under the MIT License.
+>  * See `packages/kbn-handlebars/LICENSE` for more information.
+>  */
+3,5c8,9
+< beforeEach(function() {
+<   global.handlebarsEnv = Handlebars.create();
+< });
+---
+> import Handlebars from '../..';
+> import { expectTemplate } from '../__jest__/test_bench';
+7,11c11,13
+< describe('basic context', function() {
+<   it('most basic', function() {
+<     expectTemplate('{{foo}}')
+<       .withInput({ foo: 'foo' })
+<       .toCompileTo('foo');
+---
+> describe('basic context', () => {
+>   it('most basic', () => {
+>     expectTemplate('{{foo}}').withInput({ foo: 'foo' }).toCompileTo('foo');
+14,33c16,21
+<   it('escaping', function() {
+<     expectTemplate('\\{{foo}}')
+<       .withInput({ foo: 'food' })
+<       .toCompileTo('{{foo}}');
+< 
+<     expectTemplate('content \\{{foo}}')
+<       .withInput({ foo: 'food' })
+<       .toCompileTo('content {{foo}}');
+< 
+<     expectTemplate('\\\\{{foo}}')
+<       .withInput({ foo: 'food' })
+<       .toCompileTo('\\food');
+< 
+<     expectTemplate('content \\\\{{foo}}')
+<       .withInput({ foo: 'food' })
+<       .toCompileTo('content \\food');
+< 
+<     expectTemplate('\\\\ {{foo}}')
+<       .withInput({ foo: 'food' })
+<       .toCompileTo('\\\\ food');
+---
+>   it('escaping', () => {
+>     expectTemplate('\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('{{foo}}');
+>     expectTemplate('content \\{{foo}}').withInput({ foo: 'food' }).toCompileTo('content {{foo}}');
+>     expectTemplate('\\\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('\\food');
+>     expectTemplate('content \\\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('content \\food');
+>     expectTemplate('\\\\ {{foo}}').withInput({ foo: 'food' }).toCompileTo('\\\\ food');
+36c24
+<   it('compiling with a basic context', function() {
+---
+>   it('compiling with a basic context', () => {
+40c28
+<         world: 'world'
+---
+>         world: 'world',
+42d29
+<       .withMessage('It works if all the required keys are provided')
+46,49c33,34
+<   it('compiling with a string context', function() {
+<     expectTemplate('{{.}}{{length}}')
+<       .withInput('bye')
+<       .toCompileTo('bye3');
+---
+>   it('compiling with a string context', () => {
+>     expectTemplate('{{.}}{{length}}').withInput('bye').toCompileTo('bye3');
+52c37
+<   it('compiling with an undefined context', function() {
+---
+>   it('compiling with an undefined context', () => {
+62c47
+<   it('comments', function() {
+---
+>   it('comments', () => {
+66c51
+<         world: 'world'
+---
+>         world: 'world',
+68d52
+<       .withMessage('comments are ignored')
+72,76c56
+< 
+<     expectTemplate('    {{~!-- long-comment --~}}      blah').toCompileTo(
+<       'blah'
+<     );
+< 
+---
+>     expectTemplate('    {{~!-- long-comment --~}}      blah').toCompileTo('blah');
+78,82c58
+< 
+<     expectTemplate('    {{!-- long-comment --~}}      blah').toCompileTo(
+<       '    blah'
+<     );
+< 
+---
+>     expectTemplate('    {{!-- long-comment --~}}      blah').toCompileTo('    blah');
+84,87c60
+< 
+<     expectTemplate('    {{~!-- long-comment --}}      blah').toCompileTo(
+<       '      blah'
+<     );
+---
+>     expectTemplate('    {{~!-- long-comment --}}      blah').toCompileTo('      blah');
+90,91c63,64
+<   it('boolean', function() {
+<     var string = '{{#goodbye}}GOODBYE {{/goodbye}}cruel {{world}}!';
+---
+>   it('boolean', () => {
+>     const string = '{{#goodbye}}GOODBYE {{/goodbye}}cruel {{world}}!';
+95c68
+<         world: 'world'
+---
+>         world: 'world',
+97d69
+<       .withMessage('booleans show the contents when true')
+103c75
+<         world: 'world'
+---
+>         world: 'world',
+105d76
+<       .withMessage('booleans do not show the contents when false')
+109c80
+<   it('zeros', function() {
+---
+>   it('zeros', () => {
+113c84
+<         num2: 0
+---
+>         num2: 0,
+117,119c88
+<     expectTemplate('num: {{.}}')
+<       .withInput(0)
+<       .toCompileTo('num: 0');
+---
+>     expectTemplate('num: {{.}}').withInput(0).toCompileTo('num: 0');
+126c95
+<   it('false', function() {
+---
+>   it('false', () => {
+131c100
+<         val2: new Boolean(false)
+---
+>         val2: new Boolean(false),
+135,137c104
+<     expectTemplate('val: {{.}}')
+<       .withInput(false)
+<       .toCompileTo('val: false');
+---
+>     expectTemplate('val: {{.}}').withInput(false).toCompileTo('val: false');
+146c113
+<         val2: new Boolean(false)
+---
+>         val2: new Boolean(false),
+156c123
+<   it('should handle undefined and null', function() {
+---
+>   it('should handle undefined and null', () => {
+159,167c126,128
+<         awesome: function(_undefined, _null, options) {
+<           return (
+<             (_undefined === undefined) +
+<             ' ' +
+<             (_null === null) +
+<             ' ' +
+<             typeof options
+<           );
+<         }
+---
+>         awesome(_undefined: any, _null: any, options: any) {
+>           return (_undefined === undefined) + ' ' + (_null === null) + ' ' + typeof options;
+>         },
+173c134
+<         undefined: function() {
+---
+>         undefined() {
+175c136
+<         }
+---
+>         },
+181c142
+<         null: function() {
+---
+>         null() {
+183c144
+<         }
+---
+>         },
+188c149
+<   it('newlines', function() {
+---
+>   it('newlines', () => {
+190d150
+< 
+194,216c154,159
+<   it('escaping text', function() {
+<     expectTemplate("Awesome's")
+<       .withMessage(
+<         "text is escaped so that it doesn't get caught on single quotes"
+<       )
+<       .toCompileTo("Awesome's");
+< 
+<     expectTemplate('Awesome\\')
+<       .withMessage("text is escaped so that the closing quote can't be ignored")
+<       .toCompileTo('Awesome\\');
+< 
+<     expectTemplate('Awesome\\\\ foo')
+<       .withMessage("text is escaped so that it doesn't mess up backslashes")
+<       .toCompileTo('Awesome\\\\ foo');
+< 
+<     expectTemplate('Awesome {{foo}}')
+<       .withInput({ foo: '\\' })
+<       .withMessage("text is escaped so that it doesn't mess up backslashes")
+<       .toCompileTo('Awesome \\');
+< 
+<     expectTemplate(" ' ' ")
+<       .withMessage('double quotes never produce invalid javascript')
+<       .toCompileTo(" ' ' ");
+---
+>   it('escaping text', () => {
+>     expectTemplate("Awesome's").toCompileTo("Awesome's");
+>     expectTemplate('Awesome\\').toCompileTo('Awesome\\');
+>     expectTemplate('Awesome\\\\ foo').toCompileTo('Awesome\\\\ foo');
+>     expectTemplate('Awesome {{foo}}').withInput({ foo: '\\' }).toCompileTo('Awesome \\');
+>     expectTemplate(" ' ' ").toCompileTo(" ' ' ");
+219,223c162,163
+<   it('escaping expressions', function() {
+<     expectTemplate('{{{awesome}}}')
+<       .withInput({ awesome: "&'\\<>" })
+<       .withMessage("expressions with 3 handlebars aren't escaped")
+<       .toCompileTo("&'\\<>");
+---
+>   it('escaping expressions', () => {
+>     expectTemplate('{{{awesome}}}').withInput({ awesome: "&'\\<>" }).toCompileTo("&'\\<>");
+225,228c165
+<     expectTemplate('{{&awesome}}')
+<       .withInput({ awesome: "&'\\<>" })
+<       .withMessage("expressions with {{& handlebars aren't escaped")
+<       .toCompileTo("&'\\<>");
+---
+>     expectTemplate('{{&awesome}}').withInput({ awesome: "&'\\<>" }).toCompileTo("&'\\<>");
+232d168
+<       .withMessage('by default expressions should be escaped')
+237d172
+<       .withMessage('escaping should properly handle amperstands')
+241c176
+<   it("functions returning safestrings shouldn't be escaped", function() {
+---
+>   it("functions returning safestrings shouldn't be escaped", () => {
+244c179
+<         awesome: function() {
+---
+>         awesome() {
+246c181
+<         }
+---
+>         },
+248d182
+<       .withMessage("functions returning safestrings aren't escaped")
+252c186
+<   it('functions', function() {
+---
+>   it('functions', () => {
+255c189
+<         awesome: function() {
+---
+>         awesome() {
+257c191
+<         }
+---
+>         },
+259d192
+<       .withMessage('functions are called and render their output')
+264c197
+<         awesome: function() {
+---
+>         awesome() {
+267c200
+<         more: 'More awesome'
+---
+>         more: 'More awesome',
+269d201
+<       .withMessage('functions are bound to the context')
+273c205
+<   it('functions with context argument', function() {
+---
+>   it('functions with context argument', () => {
+276c208
+<         awesome: function(context) {
+---
+>         awesome(context: any) {
+279c211
+<         frank: 'Frank'
+---
+>         frank: 'Frank',
+281d212
+<       .withMessage('functions are called with context arguments')
+285c216
+<   it('pathed functions with context argument', function() {
+---
+>   it('pathed functions with context argument', () => {
+289c220
+<           awesome: function(context) {
+---
+>           awesome(context: any) {
+291c222
+<           }
+---
+>           },
+293c224
+<         frank: 'Frank'
+---
+>         frank: 'Frank',
+295d225
+<       .withMessage('functions are called with context arguments')
+299c229
+<   it('depthed functions with context argument', function() {
+---
+>   it('depthed functions with context argument', () => {
+302c232
+<         awesome: function(context) {
+---
+>         awesome(context: any) {
+305c235
+<         frank: 'Frank'
+---
+>         frank: 'Frank',
+307d236
+<       .withMessage('functions are called with context arguments')
+311c240
+<   it('block functions with context argument', function() {
+---
+>   it('block functions with context argument', () => {
+314c243
+<         awesome: function(context, options) {
+---
+>         awesome(context: any, options: any) {
+316c245
+<         }
+---
+>         },
+318d246
+<       .withMessage('block functions are called with context and options')
+322,325c250,251
+<   it('depthed block functions with context argument', function() {
+<     expectTemplate(
+<       '{{#with value}}{{#../awesome 1}}inner {{.}}{{/../awesome}}{{/with}}'
+<     )
+---
+>   it('depthed block functions with context argument', () => {
+>     expectTemplate('{{#with value}}{{#../awesome 1}}inner {{.}}{{/../awesome}}{{/with}}')
+328c254
+<         awesome: function(context, options) {
+---
+>         awesome(context: any, options: any) {
+330c256
+<         }
+---
+>         },
+332d257
+<       .withMessage('block functions are called with context and options')
+336c261
+<   it('block functions without context argument', function() {
+---
+>   it('block functions without context argument', () => {
+339c264
+<         awesome: function(options) {
+---
+>         awesome(options: any) {
+341c266
+<         }
+---
+>         },
+343d267
+<       .withMessage('block functions are called with options')
+347c271
+<   it('pathed block functions without context argument', function() {
+---
+>   it('pathed block functions without context argument', () => {
+351c275
+<           awesome: function() {
+---
+>           awesome() {
+353,354c277,278
+<           }
+<         }
+---
+>           },
+>         },
+356d279
+<       .withMessage('block functions are called with options')
+360,363c283,284
+<   it('depthed block functions without context argument', function() {
+<     expectTemplate(
+<       '{{#with value}}{{#../awesome}}inner{{/../awesome}}{{/with}}'
+<     )
+---
+>   it('depthed block functions without context argument', () => {
+>     expectTemplate('{{#with value}}{{#../awesome}}inner{{/../awesome}}{{/with}}')
+366c287
+<         awesome: function() {
+---
+>         awesome() {
+368c289
+<         }
+---
+>         },
+370d290
+<       .withMessage('block functions are called with options')
+374,378c294,295
+<   it('paths with hyphens', function() {
+<     expectTemplate('{{foo-bar}}')
+<       .withInput({ 'foo-bar': 'baz' })
+<       .withMessage('Paths can contain hyphens (-)')
+<       .toCompileTo('baz');
+---
+>   it('paths with hyphens', () => {
+>     expectTemplate('{{foo-bar}}').withInput({ 'foo-bar': 'baz' }).toCompileTo('baz');
+382d298
+<       .withMessage('Paths can contain hyphens (-)')
+387d302
+<       .withMessage('Paths can contain hyphens (-)')
+391c306
+<   it('nested paths', function() {
+---
+>   it('nested paths', () => {
+394d308
+<       .withMessage('Nested paths access nested objects')
+398c312
+<   it('nested paths with empty string value', function() {
+---
+>   it('nested paths with empty string value', () => {
+401d314
+<       .withMessage('Nested paths access nested objects with empty string')
+405c318
+<   it('literal paths', function() {
+---
+>   it('literal paths', () => {
+408d320
+<       .withMessage('Literal paths can be used')
+413d324
+<       .withMessage('Literal paths can be used')
+417c328
+<   it('literal references', function() {
+---
+>   it('literal references', () => {
+443c354
+<   it("that current context path ({{.}}) doesn't hit helpers", function() {
+---
+>   it("that current context path ({{.}}) doesn't hit helpers", () => {
+445a357
+>       // @ts-expect-error Setting the helper to a string instead of a function doesn't make sense normally, but here it doesn't matter
+450c362
+<   it('complex but empty paths', function() {
+---
+>   it('complex but empty paths', () => {
+455,457c367
+<     expectTemplate('{{person/name}}')
+<       .withInput({ person: {} })
+<       .toCompileTo('');
+---
+>     expectTemplate('{{person/name}}').withInput({ person: {} }).toCompileTo('');
+460c370
+<   it('this keyword in paths', function() {
+---
+>   it('this keyword in paths', () => {
+463d372
+<       .withMessage('This keyword in paths evaluates to current context')
+468c377
+<         hellos: [{ text: 'hello' }, { text: 'Hello' }, { text: 'HELLO' }]
+---
+>         hellos: [{ text: 'hello' }, { text: 'Hello' }, { text: 'HELLO' }],
+470d378
+<       .withMessage('This keyword evaluates in more complex paths')
+474c382
+<   it('this keyword nested inside path', function() {
+---
+>   it('this keyword nested inside path', () => {
+476d383
+<       Error,
+480,482c387
+<     expectTemplate('{{[this]}}')
+<       .withInput({ this: 'bar' })
+<       .toCompileTo('bar');
+---
+>     expectTemplate('{{[this]}}').withInput({ this: 'bar' }).toCompileTo('bar');
+489,491c394,396
+<   it('this keyword in helpers', function() {
+<     var helpers = {
+<       foo: function(value) {
+---
+>   it('this keyword in helpers', () => {
+>     const helpers = {
+>       foo(value: any) {
+493c398
+<       }
+---
+>       },
+499d403
+<       .withMessage('This keyword in paths evaluates to current context')
+504c408
+<         hellos: [{ text: 'hello' }, { text: 'Hello' }, { text: 'HELLO' }]
+---
+>         hellos: [{ text: 'hello' }, { text: 'Hello' }, { text: 'HELLO' }],
+507d410
+<       .withMessage('This keyword evaluates in more complex paths')
+511c414
+<   it('this keyword nested inside helpers param', function() {
+---
+>   it('this keyword nested inside helpers param', () => {
+513d415
+<       Error,
+519c421
+<         foo: function(value) {
+---
+>         foo(value: any) {
+522c424
+<         this: 'bar'
+---
+>         this: 'bar',
+528c430
+<         foo: function(value) {
+---
+>         foo(value: any) {
+531c433
+<         text: { this: 'bar' }
+---
+>         text: { this: 'bar' },
+536c438
+<   it('pass string literals', function() {
+---
+>   it('pass string literals', () => {
+538,541c440
+< 
+<     expectTemplate('{{"foo"}}')
+<       .withInput({ foo: 'bar' })
+<       .toCompileTo('bar');
+---
+>     expectTemplate('{{"foo"}}').withInput({ foo: 'bar' }).toCompileTo('bar');
+545c444
+<         foo: ['bar', 'baz']
+---
+>         foo: ['bar', 'baz'],
+550c449
+<   it('pass number literals', function() {
+---
+>   it('pass number literals', () => {
+552,556c451
+< 
+<     expectTemplate('{{12}}')
+<       .withInput({ '12': 'bar' })
+<       .toCompileTo('bar');
+< 
+---
+>     expectTemplate('{{12}}').withInput({ '12': 'bar' }).toCompileTo('bar');
+558,562c453
+< 
+<     expectTemplate('{{12.34}}')
+<       .withInput({ '12.34': 'bar' })
+<       .toCompileTo('bar');
+< 
+---
+>     expectTemplate('{{12.34}}').withInput({ '12.34': 'bar' }).toCompileTo('bar');
+565c456
+<         '12.34': function(arg) {
+---
+>         '12.34'(arg: any) {
+567c458
+<         }
+---
+>         },
+572c463
+<   it('pass boolean literals', function() {
+---
+>   it('pass boolean literals', () => {
+574,581c465,466
+< 
+<     expectTemplate('{{true}}')
+<       .withInput({ '': 'foo' })
+<       .toCompileTo('');
+< 
+<     expectTemplate('{{false}}')
+<       .withInput({ false: 'foo' })
+<       .toCompileTo('foo');
+---
+>     expectTemplate('{{true}}').withInput({ '': 'foo' }).toCompileTo('');
+>     expectTemplate('{{false}}').withInput({ false: 'foo' }).toCompileTo('foo');
+584c469
+<   it('should handle literals in subexpression', function() {
+---
+>   it('should handle literals in subexpression', () => {
+587c472
+<         false: function() {
+---
+>         false() {
+589c474
+<         }
+---
+>         },
+591c476
+<       .withHelper('foo', function(arg) {
+---
+>       .withHelper('foo', function (arg) {

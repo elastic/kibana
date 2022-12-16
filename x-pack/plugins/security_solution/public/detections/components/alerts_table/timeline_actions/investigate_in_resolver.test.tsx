@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ecs } from '../../../../../common/ecs';
+import type { Ecs } from '../../../../../common/ecs';
 import { isInvestigateInResolverActionEnabled } from './investigate_in_resolver';
 
 describe('InvestigateInResolverAction', () => {

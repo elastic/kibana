@@ -7,17 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
-import {
+import type {
   MacosLinuxConditionEntry,
   WindowsConditionEntry,
   OperatorFieldIds,
 } from '../../../../../common/endpoint/types';
-
-export const ABOUT_TRUSTED_APPS = i18n.translate('xpack.securitySolution.trustedapps.aboutInfo', {
-  defaultMessage:
-    'Add a trusted application to improve performance or alleviate conflicts with other applications running on ' +
-    'your hosts.',
-});
 
 export const NAME_LABEL = i18n.translate('xpack.securitySolution.trustedApps.name.label', {
   defaultMessage: 'Name',
@@ -31,7 +25,7 @@ export const DETAILS_HEADER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.trustedApps.details.header.description',
   {
     defaultMessage:
-      'Trusted applications improve performance or alleviate conflicts with other applications running on your hosts.',
+      'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications may still generate alerts in some cases.',
   }
 );
 

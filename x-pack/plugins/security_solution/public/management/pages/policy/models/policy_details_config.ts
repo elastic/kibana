@@ -6,20 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { UIPolicyConfig } from '../../../../../common/endpoint/types';
-
-/**
- * Returns value from `configuration`
- */
-export const getIn =
-  (a: UIPolicyConfig) =>
-  <Key extends keyof UIPolicyConfig>(key: Key) =>
-  <SubKey extends keyof UIPolicyConfig[Key]>(subKey: SubKey) =>
-  <LeafKey extends keyof UIPolicyConfig[Key][SubKey]>(
-    leafKey: LeafKey
-  ): UIPolicyConfig[Key][SubKey][LeafKey] => {
-    return a[key][subKey][leafKey];
-  };
+import type { UIPolicyConfig } from '../../../../../common/endpoint/types';
 
 /**
  * Returns cloned `configuration` with `value` set by the `keyPath`.

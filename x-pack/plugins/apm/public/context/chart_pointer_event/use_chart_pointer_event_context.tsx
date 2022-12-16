@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useCallback, useRef } from 'react';
 import { Chart } from '@elastic/charts';
-import { ChartPointerEventContext } from './chart_pointer_event_context';
+import { PointerEvent } from '@elastic/charts';
+import {
+  ChartPointerEventContext,
+  UPDATE_POINTER_EVENT,
+} from './chart_pointer_event_context';
 
 export function useChartPointerEventContext() {
   const context = useContext(ChartPointerEventContext);
@@ -16,14 +20,36 @@ export function useChartPointerEventContext() {
     throw new Error('Missing ChartPointerEventContext provider');
   }
 
-  const { pointerEvent } = context;
+  const { pointerEventTargetRef } = context;
   const chartRef = React.createRef<Chart>();
+  const requestIdRef = useRef(0);
+  const updatePointerEventHandler = useCallback(
+    (event: Event) => {
+      cancelAnimationFrame(requestIdRef.current);
+      requestIdRef.current = requestAnimationFrame(() => {
+        const pointerEvent = (
+          event instanceof CustomEvent ? event.detail : null
+        ) as PointerEvent | null;
+        if (chartRef.current && pointerEvent) {
+          chartRef.current.dispatchExternalPointerEvent(pointerEvent);
+        }
+      });
+    },
+    [chartRef]
+  );
 
   useEffect(() => {
-    if (pointerEvent && chartRef.current) {
-      chartRef.current.dispatchExternalPointerEvent(pointerEvent);
-    }
-  }, [pointerEvent, chartRef]);
-
+    const pointerEventTarget = pointerEventTargetRef.current;
+    pointerEventTarget.addEventListener(
+      UPDATE_POINTER_EVENT,
+      updatePointerEventHandler
+    );
+    return () => {
+      pointerEventTarget.removeEventListener(
+        UPDATE_POINTER_EVENT,
+        updatePointerEventHandler
+      );
+    };
+  }, [updatePointerEventHandler, pointerEventTargetRef]);
   return { ...context, chartRef };
 }

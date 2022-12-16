@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { flow } from 'lodash';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -23,7 +22,7 @@ import { XJsonEditor, DragAndDropTextList } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, to, from, EDITOR_PX_HEIGHT, isJSONStringValidator } from './shared';
+import { FieldsConfig, to, from, EDITOR_PX_HEIGHT } from './shared';
 
 const { isJsonField, emptyField } = fieldValidators;
 
@@ -49,7 +48,6 @@ const patternsValidation: ValidationFunc<any, string, ArrayItem[]> = ({ value, f
 
 const patternValidations: Array<ValidationFunc<any, string, string>> = [
   emptyField(valueRequiredMessage),
-  isJSONStringValidator,
 ];
 
 const fieldsConfig: FieldsConfig = {
@@ -58,8 +56,7 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.patternsFieldLabel', {
       defaultMessage: 'Patterns',
     }),
-    deserializer: flow(String, to.escapeBackslashes),
-    serializer: from.unescapeBackslashes,
+    deserializer: String,
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.patternsHelpText', {
       defaultMessage:
         'Grok expressions used to match and extract named capture groups. Uses the first matching expression.',

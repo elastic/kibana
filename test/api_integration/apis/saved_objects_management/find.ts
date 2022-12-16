@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   describe('find', () => {
@@ -158,17 +157,54 @@ export default function ({ getService }: FtrProviderContext) {
             });
         });
       });
+
+      describe('`sortField` and `sortOrder` parameters', () => {
+        it('sort objects by "type" in "asc" order', async () => {
+          await supertest
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: ['visualization', 'dashboard'],
+              sortField: 'type',
+              sortOrder: 'asc',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.length).be.greaterThan(1); // Need more than 1 result for our test
+              expect(objects[0].type).to.be('dashboard');
+            });
+        });
+
+        it('sort objects by "type" in "desc" order', async () => {
+          await supertest
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: ['visualization', 'dashboard'],
+              sortField: 'type',
+              sortOrder: 'desc',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects[0].type).to.be('visualization');
+            });
+        });
+      });
     });
 
     describe('meta attributes injected properly', () => {
-      before(() =>
-        esArchiver.load('test/api_integration/fixtures/es_archiver/management/saved_objects/search')
-      );
-      after(() =>
-        esArchiver.unload(
-          'test/api_integration/fixtures/es_archiver/management/saved_objects/search'
-        )
-      );
+      before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
+        );
+      });
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
+        );
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
 
       it('should inject meta attributes for searches', async () =>
         await supertest

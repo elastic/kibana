@@ -8,7 +8,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 
-import { EuiFormRow, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
@@ -109,9 +109,6 @@ function RawJsonParamEditor({
             automaticLayout: true,
           }}
         />
-        <EuiScreenReaderOnly>
-          <p id="jsonEditorDescription">{editorTooltipText}</p>
-        </EuiScreenReaderOnly>
       </>
     </EuiFormRow>
   );

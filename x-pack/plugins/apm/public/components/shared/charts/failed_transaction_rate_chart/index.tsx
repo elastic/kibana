@@ -9,14 +9,16 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
+import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { TimeseriesChart } from '../timeseries_chart';
+import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
@@ -47,6 +49,10 @@ const INITIAL_STATE: ErrorRate = {
   },
 };
 
+export const errorRateI18n = i18n.translate('xpack.apm.errorRate.tip', {
+  defaultMessage:
+    "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+});
 export function FailedTransactionRateChart({
   height,
   showAnnotations = true,
@@ -58,7 +64,10 @@ export function FailedTransactionRateChart({
 
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -89,7 +98,10 @@ export function FailedTransactionRateChart({
                 end,
                 transactionType,
                 transactionName,
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
               },
             },
           }
@@ -113,6 +125,7 @@ export function FailedTransactionRateChart({
     ChartType.FAILED_TRANSACTION_RATE
   );
 
+  const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
     {
       data: data.currentPeriod.timeseries,
@@ -128,10 +141,7 @@ export function FailedTransactionRateChart({
             data: data.previousPeriod.timeseries,
             type: 'area',
             color: previousPeriodColor,
-            title: i18n.translate(
-              'xpack.apm.errorRate.chart.errorRate.previousPeriodLabel',
-              { defaultMessage: 'Previous period' }
-            ),
+            title: previousPeriodLabel,
           },
         ]
       : []),
@@ -151,17 +161,11 @@ export function FailedTransactionRateChart({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiIconTip
-            content={i18n.translate('xpack.apm.errorRate.tip', {
-              defaultMessage:
-                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
-            })}
-            position="right"
-          />
+          <EuiIconTip content={errorRateI18n} position="right" />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <TimeseriesChart
+      <TimeseriesChartWithContext
         id="errorRate"
         height={height}
         showAnnotations={showAnnotations}
@@ -170,7 +174,14 @@ export function FailedTransactionRateChart({
         yLabelFormat={yLabelFormat}
         yDomain={{ min: 0, max: 1 }}
         customTheme={comparisonChartTheme}
-        anomalyTimeseries={preferredAnomalyTimeseries}
+        anomalyTimeseries={
+          preferredAnomalyTimeseries
+            ? {
+                ...preferredAnomalyTimeseries,
+                color: previousPeriodColor,
+              }
+            : undefined
+        }
       />
     </EuiPanel>
   );

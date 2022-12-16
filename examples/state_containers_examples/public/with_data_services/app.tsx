@@ -13,19 +13,18 @@ import { Router } from 'react-router-dom';
 import {
   EuiFieldText,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { CoreStart } from '@kbn/core/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import {
   connectToQueryState,
   DataPublicPluginStart,
-  Query,
   QueryState,
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';

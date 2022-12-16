@@ -6,30 +6,36 @@
  */
 
 import { merge } from 'lodash';
-import { CaseMetricsResponse } from '../../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../../common/api';
 import { Operations } from '../../../authorization';
 import { createCaseError } from '../../../common/error';
-import { AggregationHandler } from '../aggregation_handler';
-import { AggregationBuilder, BaseHandlerCommonOptions } from '../types';
+import { SingleCaseAggregationHandler } from '../single_case_aggregation_handler';
+import type { AggregationBuilder, SingleCaseBaseHandlerCommonOptions } from '../types';
 import { IsolateHostActions } from './aggregations/isolate_host';
 
-export class Actions extends AggregationHandler {
-  constructor(options: BaseHandlerCommonOptions) {
+export class Actions extends SingleCaseAggregationHandler {
+  constructor(options: SingleCaseBaseHandlerCommonOptions) {
     super(
       options,
-      new Map<string, AggregationBuilder>([['actions.isolateHost', new IsolateHostActions()]])
+      new Map<string, AggregationBuilder<SingleCaseMetricsResponse>>([
+        ['actions.isolateHost', new IsolateHostActions()],
+      ])
     );
   }
 
-  public async compute(): Promise<CaseMetricsResponse> {
-    const { unsecuredSavedObjectsClient, authorization, attachmentService, logger } =
-      this.options.clientArgs;
-    const { caseId, casesClient } = this.options;
+  public async compute(): Promise<SingleCaseMetricsResponse> {
+    const {
+      unsecuredSavedObjectsClient,
+      authorization,
+      services: { attachmentService },
+      logger,
+    } = this.options.clientArgs;
+    const { casesClient } = this.options;
 
     try {
       // This will perform an authorization check to ensure the user has access to the parent case
       const theCase = await casesClient.cases.get({
-        id: caseId,
+        id: this.caseId,
         includeComments: false,
       });
 
@@ -48,13 +54,13 @@ export class Actions extends AggregationHandler {
         aggregations,
       });
 
-      return this.aggregationBuilders.reduce<CaseMetricsResponse>(
+      return this.aggregationBuilders.reduce<SingleCaseMetricsResponse>(
         (acc, aggregator) => merge(acc, aggregator.formatResponse(response)),
         {}
       );
     } catch (error) {
       throw createCaseError({
-        message: `Failed to compute actions attached case id: ${caseId}: ${error}`,
+        message: `Failed to compute actions attached case id: ${this.caseId}: ${error}`,
         error,
         logger,
       });

@@ -9,7 +9,7 @@
 import React, { MouseEvent } from 'react';
 import { mount } from 'enzyme';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
+/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */
 import { RedirectAppLinks } from './redirect_app_link';
 import { BehaviorSubject } from 'rxjs';
 

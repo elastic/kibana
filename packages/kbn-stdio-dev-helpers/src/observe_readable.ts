@@ -9,7 +9,6 @@
 import { Readable } from 'stream';
 
 import * as Rx from 'rxjs';
-import { first, ignoreElements, mergeMap } from 'rxjs/operators';
 
 /**
  *  Produces an Observable from a ReadableSteam that:
@@ -18,11 +17,12 @@ import { first, ignoreElements, mergeMap } from 'rxjs/operators';
  */
 export function observeReadable(readable: Readable): Rx.Observable<never> {
   return Rx.race(
-    Rx.fromEvent(readable, 'end').pipe(first(), ignoreElements()),
-
+    Rx.fromEvent(readable, 'end').pipe(Rx.first(), Rx.ignoreElements()),
     Rx.fromEvent(readable, 'error').pipe(
-      first(),
-      mergeMap((err) => Rx.throwError(err))
+      Rx.first(),
+      Rx.map((err) => {
+        throw err;
+      })
     )
   );
 }

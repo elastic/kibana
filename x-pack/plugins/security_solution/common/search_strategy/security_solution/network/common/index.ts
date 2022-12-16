@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GeoEcs } from '../../../../ecs/geo';
-import { Maybe } from '../../..';
+import type { GeoEcs } from '../../../../ecs/geo';
+import type { Maybe } from '../../..';
 
 export enum NetworkDirectionEcs {
   inbound = 'inbound',

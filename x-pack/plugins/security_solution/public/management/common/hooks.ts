@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { ListPageRouteState } from '../../../common/endpoint/types';
+import type { ListPageRouteState } from '../../../common/endpoint/types';
 
 export function useMemoizedRouteState(routeState: ListPageRouteState | undefined) {
   const [memoizedRouteState, setMemoizedRouteState] = useState<ListPageRouteState | undefined>();

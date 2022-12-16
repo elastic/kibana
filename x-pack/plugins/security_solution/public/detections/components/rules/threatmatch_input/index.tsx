@@ -8,17 +8,17 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
-import { ThreatMapEntries } from '../../../../common/components/threat_match/types';
+import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
 import { ThreatMatchComponent } from '../../../../common/components/threat_match';
-import { BrowserField } from '../../../../common/containers/source';
+import type { BrowserField } from '../../../../common/containers/source';
+import type { FieldHook } from '../../../../shared_imports';
 import {
-  FieldHook,
   Field,
   getUseField,
   UseField,
   getFieldValidityAndErrorMessage,
 } from '../../../../shared_imports';
-import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { schema } from '../step_define_rule/schema';
 import { QueryBarDefineRule } from '../query_bar';
 import * as i18n from '../step_define_rule/translations';
@@ -34,7 +34,7 @@ interface ThreatMatchInputProps {
   threatIndexPatternsLoading: boolean;
   threatIndexModified: boolean;
   handleResetThreatIndices: () => void;
-  onValidityChange: (isValid: boolean) => void;
+  onValidityChange?: (isValid: boolean) => void;
 }
 
 const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
@@ -54,7 +54,9 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
   const [isThreatIndexPatternValid, setIsThreatIndexPatternValid] = useState(false);
 
   useEffect(() => {
-    onValidityChange(!isThreatMappingInvalid && isThreatIndexPatternValid);
+    if (onValidityChange) {
+      onValidityChange(!isThreatMappingInvalid && isThreatIndexPatternValid);
+    }
   }, [isThreatIndexPatternValid, isThreatMappingInvalid, onValidityChange]);
 
   const handleBuilderOnChange = useCallback(

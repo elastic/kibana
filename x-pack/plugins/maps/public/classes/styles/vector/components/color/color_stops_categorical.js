@@ -8,23 +8,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiFieldText } from '@elastic/eui';
 import {
   addCategoricalRow,
   isCategoricalStopsInvalid,
   DEFAULT_CUSTOM_COLOR,
-  DEFAULT_NEXT_COLOR,
 } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
 import { ColorStops } from './color_stops';
-import { getOtherCategoryLabel } from '../../style_util';
 import { StopInput } from '../stop_input';
 
 export const ColorStopsCategorical = ({
-  colorStops = [
-    { stop: null, color: DEFAULT_CUSTOM_COLOR }, //first stop is the "other" color
-    { stop: '', color: DEFAULT_NEXT_COLOR },
-  ],
+  colorStops = [{ stop: '', color: DEFAULT_CUSTOM_COLOR }],
   field,
   onChange,
   getValueSuggestions,
@@ -47,17 +41,6 @@ export const ColorStopsCategorical = ({
 
   const renderStopInput = (stop, onStopChange, index) => {
     const stopValue = typeof stop === 'string' ? stop : '';
-    if (index === 0) {
-      return (
-        <EuiFieldText
-          aria-label={getOtherCategoryLabel()}
-          placeholder={getOtherCategoryLabel()}
-          disabled
-          compressed
-        />
-      );
-    }
-
     return (
       <StopInput
         key={field.getName()} // force new component instance when field changes
@@ -70,10 +53,6 @@ export const ColorStopsCategorical = ({
     );
   };
 
-  const canDeleteStop = (colorStops, index) => {
-    return colorStops.length > 2 && index !== 0;
-  };
-
   return (
     <ColorStops
       onChange={onChange}
@@ -81,7 +60,6 @@ export const ColorStopsCategorical = ({
       isStopsInvalid={isCategoricalStopsInvalid}
       getStopError={getStopError}
       renderStopInput={renderStopInput}
-      canDeleteStop={canDeleteStop}
       addNewRow={addCategoricalRow}
       swatches={swatches}
     />

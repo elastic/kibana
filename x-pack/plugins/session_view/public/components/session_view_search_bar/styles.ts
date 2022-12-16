@@ -31,7 +31,7 @@ export const useStyles = ({ hasSearchResults }: StylesDeps) => {
 
     const noResults: CSSObject = {
       position: 'absolute',
-      color: euiTheme.colors.subdued,
+      color: euiTheme.colors.subduedText,
       top: euiTheme.size.m,
       right: euiTheme.size.xxl,
     };

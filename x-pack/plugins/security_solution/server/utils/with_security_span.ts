@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SpanOptions, withSpan } from '@kbn/apm-utils';
-import agent from 'elastic-apm-node';
+import type { SpanOptions } from '@kbn/apm-utils';
+import { withSpan } from '@kbn/apm-utils';
+import type agent from 'elastic-apm-node';
 import { APP_ID } from '../../common/constants';
 
 type Span = Exclude<typeof agent.currentSpan, undefined | null>;

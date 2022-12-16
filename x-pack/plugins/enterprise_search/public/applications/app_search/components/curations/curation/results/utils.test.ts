@@ -21,15 +21,12 @@ describe('convertToResultFormat', () => {
       },
       id: {
         raw: 'some-id',
-        snippet: null,
       },
       someField: {
         raw: 'some flat string',
-        snippet: null,
       },
       anotherField: {
         raw: '123456',
-        snippet: null,
       },
     });
   });

@@ -8,7 +8,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { Filter } from '../../../../common';
+import {
+  Filter,
+  isPhraseFilter,
+  isPhrasesFilter,
+  isRangeFilter,
+  isScriptedPhraseFilter,
+  isScriptedRangeFilter,
+  getFilterField,
+} from '@kbn/es-query';
+import { getPhraseDisplayValue } from './mappers/map_phrase';
+import { getPhrasesDisplayValue } from './mappers/map_phrases';
+import { getRangeDisplayValue } from './mappers/map_range';
 import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 
 function getValueFormatter(indexPattern?: DataView, key?: string) {
@@ -20,23 +31,35 @@ function getValueFormatter(indexPattern?: DataView, key?: string) {
   if (!field) {
     throw new Error(
       i18n.translate('data.filter.filterBar.fieldNotFound', {
-        defaultMessage: 'Field {key} not found in index pattern {indexPattern}',
-        values: { key, indexPattern: indexPattern.title },
+        defaultMessage: 'Field {key} not found in data view {dataView}',
+        values: { key, dataView: indexPattern.title },
       })
     );
   }
   return indexPattern.getFormatterForField(field);
 }
 
+export function getFieldDisplayValueFromFilter(filter: Filter, indexPatterns: DataView[]): string {
+  const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
+  if (!indexPattern) return '';
+
+  const fieldName = getFilterField(filter);
+  if (!fieldName) return '';
+
+  const field = indexPattern.fields.find((f: DataViewField) => f.name === fieldName);
+  return field?.customLabel ?? '';
+}
+
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataView[]): string {
-  const { key, value } = filter.meta;
-  if (typeof value === 'function') {
-    const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
-    const valueFormatter = getValueFormatter(indexPattern, key);
-    // TODO: distinguish between FilterMeta which is serializable to mapped FilterMeta
-    // Where value can be a function.
-    return (value as any)(valueFormatter);
-  } else {
-    return value || '';
-  }
+  const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
+  const fieldName = getFilterField(filter);
+  const valueFormatter = getValueFormatter(indexPattern, fieldName);
+
+  if (isPhraseFilter(filter) || isScriptedPhraseFilter(filter)) {
+    return getPhraseDisplayValue(filter, valueFormatter);
+  } else if (isPhrasesFilter(filter)) {
+    return getPhrasesDisplayValue(filter, valueFormatter);
+  } else if (isRangeFilter(filter) || isScriptedRangeFilter(filter)) {
+    return getRangeDisplayValue(filter, valueFormatter);
+  } else return filter.meta.value ?? '';
 }

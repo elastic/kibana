@@ -1,313 +1,225 @@
 {
-  "type": "doc",
-  "value": {
-    "id": "space:default",
-    "index": ".kibana",
-    "source": {
-      "space": {
-        "_reserved": true,
-        "description": "This is the default space",
-        "name": "Default Space"
-      },
-      "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
-  }
+  "id": "tag-1",
+  "type": "tag",
+  "attributes": {
+    "name": "tag-1",
+    "description": "My first tag!",
+    "color": "#FF00FF"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "tag:tag-1",
-    "index": ".kibana",
-    "source": {
-      "tag": {
-        "name": "tag-1",
-        "description": "My first tag!",
-        "color": "#FF00FF"
-      },
+  "id": "tag-2",
+  "type": "tag",
+  "attributes": {
+    "name": "tag-2",
+    "description": "Another awesome tag",
+    "color": "#123456"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
+}
+
+{
+  "id": "tag-3",
+  "type": "tag",
+  "attributes": {
+    "name": "tag-3",
+    "description": "Last but not least",
+    "color": "#000000"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
+}
+
+{
+  "id": "tag-4",
+  "type": "tag",
+  "attributes": {
+    "name": "tag-4",
+    "description": "Last",
+    "color": "#7A32F9"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
+}
+
+{
+  "id": "unused-tag",
+  "type": "tag",
+  "attributes": {
+    "name": "unused-tag",
+    "description": "This tag is unused and should only appear in totalTags",
+    "color": "#123456"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
+}
+
+
+{
+  "id": "ref-to-tag-1",
+  "type": "visualization",
+  "attributes": {
+    "title": "Vis with ref to tag-1",
+    "visState": "{}",
+    "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+    "description": "",
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+    }
+  },
+  "references": [
+    {
       "type": "tag",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+      "id": "tag-1",
+      "name": "tag-1"
+    }
+  ],
+  "updated_at": "2021-06-17T18:57:58.076Z"
+}
+
+{
+  "id": "ref-to-tag-1-and-tag-3",
+  "type": "visualization",
+  "attributes": {
+    "title": "Vis with ref to tag-1 and tag-3",
+    "visState": "{}",
+    "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+    "description": "",
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+    }
+  },
+  "references": [
+    {
+      "id": "tag-1",
+      "name": "tag-1-ref",
+      "type": "tag"
     },
-    "type": "doc"
-  }
+    {
+      "id": "tag-3",
+      "name": "tag-3-ref",
+      "type": "tag"
+    }
+  ],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
+
 {
-  "type": "doc",
-  "value": {
-    "id": "tag:tag-2",
-    "index": ".kibana",
-    "source": {
-      "tag": {
-        "name": "tag-2",
-        "description": "Another awesome tag",
-        "color": "#FFFFFF"
-      },
-      "type": "tag",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+  "id": "ref-to-tag-3",
+  "type": "visualization",
+  "attributes": {
+    "title": "Vis with ref to tag-3",
+    "visState": "{}",
+    "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+    "description": "",
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+    }
+  },
+  "references": [
+    {
+      "id": "tag-1",
+      "name": "tag-1-ref",
+      "type": "tag"
     },
-    "type": "doc"
-  }
+    {
+      "id": "tag-3",
+      "name": "tag-3-ref",
+      "type": "tag"
+    }
+  ],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "tag:tag-3",
-    "index": ".kibana",
-    "source": {
-      "tag": {
-        "name": "tag-3",
-        "description": "Last but not least",
-        "color": "#000000"
-      },
-      "type": "tag",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+  "id": "ref-to-tag-1-and-tag-2",
+  "type": "dashboard",
+  "attributes": {
+    "title": "dashboard 1 (tag-1 and tag-2)",
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
     },
-    "type": "doc"
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "tag:tag-4",
-    "index": ".kibana",
-    "source": {
-      "tag": {
-        "name": "tag-4",
-        "description": "Last",
-        "color": "#000000"
-      },
-      "type": "tag",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[]",
+    "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
+    "timeRestore": true,
+    "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
+    "version": 1
+  },
+  "references": [
+    {
+      "id": "tag-1",
+      "name": "tag-1-ref",
+      "type": "tag"
     },
-    "type": "doc"
-  }
+    {
+      "id": "tag-2",
+      "name": "tag-2-ref",
+      "type": "tag"
+    }
+  ],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "tag:unused-tag",
-    "index": ".kibana",
-    "source": {
-      "tag": {
-        "name": "unused-tag",
-        "description": "This tag is unused and should only appear in totalTags",
-        "color": "#123456"
-      },
-      "type": "tag",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+  "id": "ref-to-tag-2-and-tag-4",
+  "type": "dashboard",
+  "attributes": {
+    "title": "dashboard 2 (tag-2 and tag-4)",
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
     },
-    "type": "doc"
-  }
+    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[]",
+    "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
+    "timeRestore": true,
+    "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
+    "version": 1
+  },
+  "references": [
+    {
+      "id": "tag-2",
+      "name": "tag-2-ref",
+      "type": "tag"
+    },
+    {
+      "id": "tag-4",
+      "name": "tag-4-ref",
+      "type": "tag"
+    }
+  ],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "index": ".kibana",
-    "id": "visualization:ref-to-tag-1",
-    "source": {
-      "type": "visualization",
-      "updated_at": "2017-09-21T18:51:23.794Z",
-      "visualization": {
-        "title": "Vis with ref to tag-1",
-        "visState": "{}",
-        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-        }
-      },
-      "references": [
-        {
-          "type": "tag",
-          "id": "tag-1",
-          "name": "tag-1"
-        }
-      ]
-    }
-  }
+  "id": "no-tag-reference",
+  "type": "dashboard",
+  "attributes": {
+    "title": "dashboard 2 (no tag)",
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[]",
+    "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
+    "timeRestore": true,
+    "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
+    "version": 1
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
-
-{
-  "type": "doc",
-  "value": {
-    "index": ".kibana",
-    "id": "visualization:ref-to-tag-1-and-tag-3",
-    "source": {
-      "type": "visualization",
-      "updated_at": "2017-09-21T18:51:23.794Z",
-      "visualization": {
-        "title": "Vis with ref to tag-1 and tag-2",
-        "visState": "{}",
-        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-        }
-      },
-      "references": [
-        {
-          "type": "tag",
-          "id": "tag-1",
-          "name": "tag-1"
-        },
-        {
-          "type": "tag",
-          "id": "tag-3",
-          "name": "tag-3"
-        }
-      ]
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "index": ".kibana",
-    "id": "visualization:ref-to-tag-3",
-    "source": {
-      "type": "visualization",
-      "updated_at": "2017-09-21T18:51:23.794Z",
-      "visualization": {
-        "title": "Vis with ref to tag-2",
-        "visState": "{}",
-        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-        }
-      },
-      "references": [
-        {
-          "type": "tag",
-          "id": "tag-3",
-          "name": "tag-3"
-        }
-      ]
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "dashboard:ref-to-tag-1-and-tag-2",
-    "index": ".kibana",
-    "source": {
-      "dashboard": {
-        "title": "dashboard 1 (tag-2)",
-        "description": "",
-        "hits": 0,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
-        },
-        "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-        "panelsJSON": "[]",
-        "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
-        "timeRestore": true,
-        "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
-        "version": 1
-      },
-      "migrationVersion": {
-        "dashboard": "7.3.0"
-      },
-      "references": [
-        {
-          "id": "tag-1",
-          "name": "tag-1-ref",
-          "type": "tag"
-        },
-        {
-          "id": "tag-2",
-          "name": "tag-2-ref",
-          "type": "tag"
-        }
-      ],
-      "type": "dashboard",
-      "updated_at": "2018-04-11T21:57:52.253Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "dashboard:ref-to-tag-2-and-tag-4",
-    "index": ".kibana",
-    "source": {
-      "dashboard": {
-        "title": "dashboard 2 (tag-2 and tag-4)",
-        "description": "",
-        "hits": 0,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
-        },
-        "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-        "panelsJSON": "[]",
-        "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
-        "timeRestore": true,
-        "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
-        "version": 1
-      },
-      "migrationVersion": {
-        "dashboard": "7.3.0"
-      },
-      "references": [
-        {
-          "id": "tag-2",
-          "name": "tag-2-ref",
-          "type": "tag"
-        },
-        {
-          "id": "tag-4",
-          "name": "tag-4-ref",
-          "type": "tag"
-        }
-      ],
-      "type": "dashboard",
-      "updated_at": "2018-04-11T21:57:52.253Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "dashboard:no-tag-reference",
-    "index": ".kibana",
-    "source": {
-      "dashboard": {
-        "title": "dashboard 2 (tag-2 and tag-4)",
-        "description": "",
-        "hits": 0,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
-        },
-        "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-        "panelsJSON": "[]",
-        "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
-        "timeRestore": true,
-        "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
-        "version": 1
-      },
-      "migrationVersion": {
-        "dashboard": "7.3.0"
-      },
-      "references": [
-      ],
-      "type": "dashboard",
-      "updated_at": "2018-04-11T21:57:52.253Z"
-    }
-  }
-}
-

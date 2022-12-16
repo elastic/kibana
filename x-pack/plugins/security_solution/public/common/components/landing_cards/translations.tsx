@@ -33,6 +33,7 @@ export const SIEM_CTA = i18n.translate(
     defaultMessage: 'Add security integrations',
   }
 );
+
 export const ENDPOINT_TITLE = i18n.translate(
   'xpack.securitySolution.overview.landingCards.box.endpoint.title',
   {
@@ -42,7 +43,7 @@ export const ENDPOINT_TITLE = i18n.translate(
 export const ENDPOINT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.overview.landingCards.box.endpoint.desc',
   {
-    defaultMessage: 'Prevent, collect, detect and respond -- all with Elastic Agent.',
+    defaultMessage: 'Prevent, collect, detect and respond — all with Elastic Agent.',
   }
 );
 
@@ -55,7 +56,20 @@ export const SIEM_CARD_TITLE = i18n.translate(
 export const SIEM_CARD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.overview.landingCards.box.siemCard.desc',
   {
-    defaultMessage: 'Detect, investigate, and respond to evolving threats',
+    defaultMessage: 'Detect, investigate, and respond to evolving threats in your environment.',
+  }
+);
+
+export const CLOUD_CARD_TITLE = i18n.translate(
+  'xpack.securitySolution.overview.landingCards.box.cloudCard.title',
+  {
+    defaultMessage: 'Cloud protection end-to-end',
+  }
+);
+export const CLOUD_CARD_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.overview.landingCards.box.cloudCard.desc',
+  {
+    defaultMessage: 'Assess your Cloud Posture and protect your workloads from attacks.',
   }
 );
 
@@ -69,6 +83,6 @@ export const UNIFY_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.overview.landingCards.box.unify.desc',
   {
     defaultMessage:
-      'Elastic Security modernizes security operations — enabling analytics across years of data, automating key processes, and bringing native endpoint security to every host.',
+      'Elastic Security modernizes security operations — enabling analytics across years of data, automating key processes, and protecting every host.',
   }
 );

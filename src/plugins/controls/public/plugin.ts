@@ -8,7 +8,18 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { pluginServices } from './services';
+
+import {
+  ControlGroupContainerFactory,
+  CONTROL_GROUP_TYPE,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
+} from '.';
+import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from './options_list';
+import { RangeSliderEmbeddableFactory, RangeSliderEmbeddableInput } from './range_slider';
+import { TimeSliderEmbeddableFactory, TimeSliderControlEmbeddableInput } from './time_slider';
+import { controlsService } from './services/controls/controls_service';
 import {
   ControlsPluginSetup,
   ControlsPluginStart,
@@ -17,26 +28,6 @@ import {
   IEditableControlFactory,
   ControlInput,
 } from './types';
-import {
-  OptionsListEmbeddableFactory,
-  OptionsListEmbeddableInput,
-} from './control_types/options_list';
-import {
-  RangeSliderEmbeddableFactory,
-  RangeSliderEmbeddableInput,
-} from './control_types/range_slider';
-import {
-  ControlGroupContainerFactory,
-  CONTROL_GROUP_TYPE,
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  TIME_SLIDER_CONTROL,
-} from '.';
-import {
-  TimesliderEmbeddableFactory,
-  TimeSliderControlEmbeddableInput,
-} from './control_types/time_slider';
-import { controlsService } from './services/kibana/controls';
 
 export class ControlsPlugin
   implements
@@ -51,7 +42,7 @@ export class ControlsPlugin
     coreStart: CoreStart,
     startPlugins: ControlsPluginStartDeps
   ) {
-    const { registry } = await import('./services/kibana');
+    const { registry, pluginServices } = await import('./services/plugin_services');
     pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
   }
 
@@ -59,10 +50,11 @@ export class ControlsPlugin
     factoryDef: IEditableControlFactory<I>,
     factory: EmbeddableFactory
   ) {
-    (factory as IEditableControlFactory<I>).controlEditorComponent =
-      factoryDef.controlEditorComponent;
+    (factory as IEditableControlFactory<I>).controlEditorOptionsComponent =
+      factoryDef.controlEditorOptionsComponent ?? undefined;
     (factory as IEditableControlFactory<I>).presaveTransformFunction =
       factoryDef.presaveTransformFunction;
+    (factory as IEditableControlFactory<I>).isFieldCompatible = factoryDef.isFieldCompatible;
   }
 
   public setup(
@@ -103,8 +95,7 @@ export class ControlsPlugin
       );
       registerControlType(rangeSliderFactory);
 
-      // Time Slider Control Factory Setup
-      const timeSliderFactoryDef = new TimesliderEmbeddableFactory();
+      const timeSliderFactoryDef = new TimeSliderEmbeddableFactory();
       const timeSliderFactory = embeddable.registerEmbeddableFactory(
         TIME_SLIDER_CONTROL,
         timeSliderFactoryDef
@@ -113,7 +104,6 @@ export class ControlsPlugin
         timeSliderFactoryDef,
         timeSliderFactory
       );
-
       registerControlType(timeSliderFactory);
     });
 

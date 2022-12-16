@@ -10,13 +10,13 @@ import memoizeOne from 'memoize-one';
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { OpenTimelineResult } from '../../components/open_timeline/types';
+import { InputsModelId } from '../../../common/store/inputs/constants';
+import type { OpenTimelineResult } from '../../components/open_timeline/types';
 import { errorToToaster, useStateToaster } from '../../../common/components/toasters';
 import { inputsActions } from '../../../common/store/inputs';
 
 import * as i18n from '../../pages/translations';
-import {
-  TimelineType,
+import type {
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
   PageInfoTimeline,
@@ -24,6 +24,7 @@ import {
   SortTimeline,
   GetAllTimelineVariables,
 } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline';
 import { getAllTimelines } from '../api';
 
 export interface AllTimelinesArgs {
@@ -149,7 +150,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
           if (!didCancel) {
             dispatch(
               inputsActions.setQuery({
-                inputId: 'global',
+                inputId: InputsModelId.global,
                 id: ALL_TIMELINE_QUERY_ID,
                 loading: false,
                 refetch: fetchData,
@@ -198,7 +199,9 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
 
   useEffect(
     () => () => {
-      dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: ALL_TIMELINE_QUERY_ID }));
+      dispatch(
+        inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id: ALL_TIMELINE_QUERY_ID })
+      );
     },
     [dispatch]
   );

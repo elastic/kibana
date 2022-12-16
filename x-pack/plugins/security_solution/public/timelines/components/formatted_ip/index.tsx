@@ -10,9 +10,11 @@ import React, { useCallback, useMemo, useContext } from 'react';
 import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { StatefulEventContext } from '@kbn/timelines-plugin/public';
-import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import type { ExpandedDetailType } from '../../../../common/types';
+import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
+import { getScopedActions } from '../../../helpers';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import {
   DragEffects,
   DraggableWrapper,
@@ -21,15 +23,11 @@ import { escapeDataProviderId } from '../../../common/components/drag_and_drop/h
 import { Content } from '../../../common/components/draggables';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 import { parseQueryValue } from '../timeline/body/renderers/parse_query_value';
-import { DataProvider, IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import type { DataProvider } from '../timeline/data_providers/data_provider';
+import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
-import {
-  TimelineExpandedDetailType,
-  TimelineId,
-  TimelineTabs,
-} from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { activeTimeline } from '../../containers/active_timeline_context';
-import { timelineActions } from '../../store/timeline';
 import { NetworkDetailsLink } from '../../../common/components/links';
 
 const getUniqueId = ({
@@ -80,10 +78,21 @@ const NonDecoratedIpComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   truncate?: boolean;
   value: string | object | null | undefined;
-}> = ({ contextId, eventId, fieldName, isDraggable, truncate, value }) => {
+}> = ({
+  contextId,
+  eventId,
+  fieldName,
+  fieldType,
+  isAggregatable,
+  isDraggable,
+  truncate,
+  value,
+}) => {
   const key = useMemo(
     () =>
       `non-decorated-ip-draggable-wrapper-${getUniqueId({
@@ -127,6 +136,8 @@ const NonDecoratedIpComponent: React.FC<{
   return (
     <DraggableWrapper
       dataProvider={dataProviderProp}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
       isDraggable={isDraggable}
       key={key}
       render={render}
@@ -147,6 +158,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isButton,
   isDraggable,
   onClick,
@@ -179,23 +192,25 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
 
       if (eventContext && isInTimelineContext) {
         const { tabType, timelineID } = eventContext;
-        const updatedExpandedDetail: TimelineExpandedDetailType = {
+        const updatedExpandedDetail: ExpandedDetailType = {
           panelView: 'networkDetail',
           params: {
             ip: address,
-            flowTarget: fieldName.includes(FlowTarget.destination)
-              ? FlowTarget.destination
-              : FlowTarget.source,
+            flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
+              ? FlowTargetSourceDest.destination
+              : FlowTargetSourceDest.source,
           },
         };
-
-        dispatch(
-          timelineActions.toggleDetailPanel({
-            ...updatedExpandedDetail,
-            tabType,
-            timelineId: timelineID,
-          })
-        );
+        const scopedActions = getScopedActions(timelineID);
+        if (scopedActions) {
+          dispatch(
+            scopedActions.toggleDetailPanel({
+              ...updatedExpandedDetail,
+              id: timelineID,
+              tabType: tabType as TimelineTabs,
+            })
+          );
+        }
 
         if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
           activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
@@ -259,6 +274,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     <DraggableWrapper
       dataProvider={dataProviderProp}
       isDraggable={isDraggable}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
       key={key}
       render={render}
       truncate={truncate}
@@ -274,6 +291,8 @@ interface AddressLinksProps {
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isButton?: boolean;
   isDraggable: boolean;
   onClick?: () => void;
@@ -287,6 +306,8 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isButton,
   isDraggable,
   onClick,
@@ -305,6 +326,8 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
           contextId={contextId}
           eventId={eventId}
           fieldName={fieldName}
+          fieldType={fieldType}
+          isAggregatable={isAggregatable}
           isButton={isButton}
           isDraggable={isDraggable}
           onClick={onClick}
@@ -317,6 +340,8 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
       contextId,
       eventId,
       fieldName,
+      fieldType,
+      isAggregatable,
       isButton,
       isDraggable,
       onClick,
@@ -335,6 +360,8 @@ const AddressLinks = React.memo(
     prevProps.contextId === nextProps.contextId &&
     prevProps.eventId === nextProps.eventId &&
     prevProps.fieldName === nextProps.fieldName &&
+    prevProps.isAggregatable === nextProps.isAggregatable &&
+    prevProps.fieldType === nextProps.fieldType &&
     prevProps.isDraggable === nextProps.isDraggable &&
     prevProps.truncate === nextProps.truncate &&
     deepEqual(prevProps.addresses, nextProps.addresses)
@@ -345,6 +372,8 @@ const FormattedIpComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isButton?: boolean;
   isDraggable: boolean;
   onClick?: () => void;
@@ -356,6 +385,8 @@ const FormattedIpComponent: React.FC<{
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isDraggable,
   isButton,
   onClick,
@@ -374,6 +405,8 @@ const FormattedIpComponent: React.FC<{
             contextId={contextId}
             eventId={eventId}
             fieldName={fieldName}
+            fieldType={fieldType}
+            isAggregatable={isAggregatable}
             isButton={isButton}
             isDraggable={isDraggable}
             onClick={onClick}
@@ -397,6 +430,8 @@ const FormattedIpComponent: React.FC<{
         isDraggable={isDraggable}
         onClick={onClick}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         truncate={truncate}
         title={title}
       />
@@ -407,6 +442,8 @@ const FormattedIpComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         isDraggable={isDraggable}
         truncate={truncate}
         value={value}
@@ -421,6 +458,8 @@ export const FormattedIp = React.memo(
     prevProps.contextId === nextProps.contextId &&
     prevProps.eventId === nextProps.eventId &&
     prevProps.fieldName === nextProps.fieldName &&
+    prevProps.isAggregatable === nextProps.isAggregatable &&
+    prevProps.fieldType === nextProps.fieldType &&
     prevProps.isDraggable === nextProps.isDraggable &&
     prevProps.truncate === nextProps.truncate &&
     deepEqual(prevProps.value, nextProps.value)

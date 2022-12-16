@@ -20,8 +20,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-// @ts-expect-error untyped dependency
-import Style from 'style-it';
 import { ConfirmModal } from '../confirm_modal';
 import { RoutingLink } from '../routing';
 import { WorkpadRoutingContext } from '../../routes/workpad';
@@ -178,7 +176,7 @@ export class PageManager extends Component<Props, State> {
   };
 
   renderPage = (page: CanvasPage, i: number) => {
-    const { isWriteable, selectedPage, workpadCSS } = this.props;
+    const { isWriteable, selectedPage } = this.props;
     const pageNumber = i + 1;
 
     return (
@@ -201,12 +199,9 @@ export class PageManager extends Component<Props, State> {
             <WorkpadRoutingContext.Consumer>
               {({ getUrl }) => (
                 <RoutingLink to={getUrl(pageNumber)}>
-                  {Style.it(
-                    workpadCSS,
-                    <div>
-                      <PagePreview height={100} page={page} onRemove={this.onConfirmRemove} />
-                    </div>
-                  )}
+                  <div>
+                    <PagePreview height={100} page={page} onRemove={this.onConfirmRemove} />
+                  </div>
                 </RoutingLink>
               )}
             </WorkpadRoutingContext.Consumer>

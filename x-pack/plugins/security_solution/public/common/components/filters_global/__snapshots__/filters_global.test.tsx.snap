@@ -2,12 +2,21 @@
 
 exports[`rendering renders correctly 1`] = `
 <InPortal
-  node={<div />}
+  node={
+    Object {
+      "element": <div />,
+      "elementType": "html",
+      "getInitialPortalProps": [Function],
+      "mount": [Function],
+      "setPortalProps": [Function],
+      "unmount": [Function],
+    }
+  }
 >
   <EuiPanel
     borderRadius="none"
     color="subdued"
-    paddingSize="s"
+    paddingSize="none"
   >
     <FiltersGlobalContainer
       data-test-subj="filters-global-container"

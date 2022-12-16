@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { CCRReadExceptionsStats } from '../../../common/types/alerts';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 
@@ -20,7 +20,7 @@ export async function fetchCCRReadExceptions(
   size: number,
   filterQuery?: string
 ): Promise<CCRReadExceptionsStats[]> {
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'ccr',
@@ -63,7 +63,7 @@ export async function fetchCCRReadExceptions(
                 minimum_should_match: 1,
               },
             },
-            createDatasetFilter('ccr_stats', 'ccr', 'elasticsearch.ccr'),
+            createDatasetFilter('ccr_stats', 'ccr', getElasticsearchDataset('ccr')),
             {
               range: {
                 timestamp: {
@@ -133,8 +133,13 @@ export async function fetchCCRReadExceptions(
 
   const response = await esClient.search(params);
   const stats: CCRReadExceptionsStats[] = [];
+
+  if (!response.aggregations) {
+    return stats;
+  }
+
   // @ts-expect-error declare aggegations type explicitly
-  const { buckets: remoteClusterBuckets = [] } = response.aggregations?.remote_clusters;
+  const { buckets: remoteClusterBuckets = [] } = response.aggregations.remote_clusters;
 
   if (!remoteClusterBuckets?.length) {
     return stats;

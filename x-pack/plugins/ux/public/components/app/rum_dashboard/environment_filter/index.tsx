@@ -73,7 +73,7 @@ export function EnvironmentFilter({
 }: EnvironmentFilterProps) {
   const history = useHistory();
   const location = useLocation();
-  const { environments, status = 'loading' } = useEnvironmentsFetcher({
+  const { environments, loading } = useEnvironmentsFetcher({
     serviceName,
     start,
     end,
@@ -97,7 +97,7 @@ export function EnvironmentFilter({
       onChange={(event) => {
         updateEnvironmentUrl(history, location, event.target.value);
       }}
-      isLoading={status === 'loading'}
+      isLoading={loading}
       style={{ minWidth }}
     />
   );

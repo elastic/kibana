@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ElasticSearchHit } from '../../types';
 import { DocView, DocViewInput, DocViewInputFn } from './doc_views_types';
+import { DataTableRecord } from '../../types';
 
 export class DocViewsRegistry {
   private docViews: DocView[] = [];
@@ -25,7 +25,7 @@ export class DocViewsRegistry {
   /**
    * Returns a sorted array of doc_views for rendering tabs
    */
-  getDocViewsSorted(hit: ElasticSearchHit) {
+  getDocViewsSorted(hit: DataTableRecord) {
     return this.docViews
       .filter((docView) => docView.shouldShow(hit))
       .sort((a, b) => (Number(a.order) > Number(b.order) ? 1 : -1));

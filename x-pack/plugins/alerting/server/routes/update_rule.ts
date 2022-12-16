@@ -15,6 +15,9 @@ import {
   RewriteResponseCase,
   RewriteRequestCase,
   handleDisabledApiKeysError,
+  rewriteActions,
+  actionsSchema,
+  rewriteRuleLastRun,
 } from './lib';
 import {
   RuleTypeParams,
@@ -34,17 +37,10 @@ const bodySchema = schema.object({
   schedule: schema.object({
     interval: schema.string({ validate: validateDurationSchema }),
   }),
-  throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
+  throttle: schema.nullable(schema.maybe(schema.string({ validate: validateDurationSchema }))),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  actions: schema.arrayOf(
-    schema.object({
-      group: schema.string(),
-      id: schema.string(),
-      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-    }),
-    { defaultValue: [] }
-  ),
-  notify_when: schema.string({ validate: validateNotifyWhenType }),
+  actions: actionsSchema,
+  notify_when: schema.maybe(schema.string({ validate: validateNotifyWhenType })),
 });
 
 const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
@@ -70,12 +66,18 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   muteAll,
   mutedInstanceIds,
   executionStatus,
+  snoozeSchedule,
+  isSnoozedUntil,
+  lastRun,
+  nextRun,
   ...rest
 }) => ({
   ...rest,
   api_key_owner: apiKeyOwner,
   created_by: createdBy,
   updated_by: updatedBy,
+  snooze_schedule: snoozeSchedule,
+  ...(isSnoozedUntil ? { is_snoozed_until: isSnoozedUntil } : {}),
   ...(alertTypeId ? { rule_type_id: alertTypeId } : {}),
   ...(scheduledTaskId ? { scheduled_task_id: scheduledTaskId } : {}),
   ...(createdAt ? { created_at: createdAt } : {}),
@@ -102,6 +104,8 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
         })),
       }
     : {}),
+  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+  ...(nextRun ? { next_run: nextRun } : {}),
 });
 
 export const updateRuleRoute = (
@@ -128,6 +132,7 @@ export const updateRuleRoute = (
                 id,
                 data: {
                   ...rule,
+                  actions: rewriteActions(rule.actions),
                   notify_when: rule.notify_when as RuleNotifyWhenType,
                 },
               })

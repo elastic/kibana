@@ -17,7 +17,7 @@ let osqueryTables: TablesJSON | null = null;
 export const getOsqueryTables = () => {
   if (!osqueryTables) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    osqueryTables = normalizeTables(require('../common/schemas/osquery/v5.2.2.json'));
+    osqueryTables = normalizeTables(require('../common/schemas/osquery/v5.5.1.json'));
   }
 
   return osqueryTables;

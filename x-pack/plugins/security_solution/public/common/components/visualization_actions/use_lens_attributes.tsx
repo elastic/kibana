@@ -7,16 +7,16 @@
 
 import { useMemo } from 'react';
 import { SecurityPageName } from '../../../../common/constants';
-import { HostsTableType } from '../../../hosts/store/model';
-import { NetworkRouteType } from '../../../network/pages/navigation/types';
+import { HostsTableType } from '../../../explore/hosts/store/model';
+import { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { LensAttributes, GetLensAttributes } from './types';
+import type { LensAttributes, GetLensAttributes } from './types';
 import {
   getHostDetailsPageFilter,
-  filterNetworkExternalAlertData,
+  sourceOrDestinationIpExistsFilter,
   hostNameExistsFilter,
   getIndexFilters,
 } from './utils';
@@ -25,10 +25,12 @@ export const useLensAttributes = ({
   lensAttributes,
   getLensAttributes,
   stackByField,
+  title,
 }: {
   lensAttributes?: LensAttributes | null;
   getLensAttributes?: GetLensAttributes;
   stackByField?: string;
+  title?: string;
 }): LensAttributes | null => {
   const { selectedPatterns, dataViewId } = useSourcererDataView();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
@@ -41,15 +43,12 @@ export const useLensAttributes = ({
   const [{ detailName, pageName, tabName }] = useRouteSpy();
 
   const tabsFilters = useMemo(() => {
-    if (
-      pageName === SecurityPageName.hosts &&
-      (tabName === HostsTableType.alerts || tabName === HostsTableType.events)
-    ) {
+    if (pageName === SecurityPageName.hosts && tabName === HostsTableType.events) {
       return hostNameExistsFilter;
     }
 
-    if (pageName === SecurityPageName.network && tabName === NetworkRouteType.alerts) {
-      return filterNetworkExternalAlertData;
+    if (pageName === SecurityPageName.network && tabName === NetworkRouteType.events) {
+      return sourceOrDestinationIpExistsFilter;
     }
 
     return [];
@@ -74,6 +73,7 @@ export const useLensAttributes = ({
 
     return {
       ...attrs,
+      ...(title != null ? { title } : {}),
       state: {
         ...attrs.state,
         query,
@@ -94,6 +94,7 @@ export const useLensAttributes = ({
     lensAttributes,
     getLensAttributes,
     stackByField,
+    title,
     query,
     filters,
     pageFilters,

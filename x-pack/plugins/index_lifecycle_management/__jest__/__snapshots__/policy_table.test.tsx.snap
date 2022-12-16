@@ -7,26 +7,26 @@ Array [
   "testy10",
   "testy100",
   "testy101",
-  "testy102",
   "testy103",
   "testy104",
   "testy11",
-  "testy12",
+  "testy13",
+  "testy14",
 ]
 `;
 
 exports[`policy table changes pages when a pagination link is clicked on 2`] = `
 Array [
+  "testy0",
+  "testy1",
+  "testy10",
+  "testy100",
+  "testy101",
+  "testy103",
+  "testy104",
+  "testy11",
   "testy13",
   "testy14",
-  "testy15",
-  "testy16",
-  "testy17",
-  "testy18",
-  "testy19",
-  "testy2",
-  "testy20",
-  "testy21",
 ]
 `;
 
@@ -38,11 +38,11 @@ Array [
 
 exports[`policy table shows empty state when there are no policies 1`] = `
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-subdued"
   role="main"
 >
   <div
-    class="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+    class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
   >
     <div
       class="euiEmptyPrompt__main"
@@ -62,45 +62,36 @@ exports[`policy table shows empty state when there are no policies 1`] = `
           class="euiEmptyPrompt__contentInner"
         >
           <h1
-            class="euiTitle euiTitle--medium"
+            class="euiTitle emotion-euiTitle-m"
           >
             Create your first index lifecycle policy
           </h1>
-          <span
-            class="euiTextColor euiTextColor--subdued"
-          >
-            <div
-              class="euiSpacer euiSpacer--m"
-            />
-            <div
-              class="euiText euiText--medium"
-            >
-              <p>
-                 An index lifecycle policy helps you manage your indices as they age.
-              </p>
-            </div>
-          </span>
           <div
-            class="euiSpacer euiSpacer--l"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiText emotion-euiText-m-euiTextColor-subdued"
+          >
+            <p>
+               An index lifecycle policy helps you manage your indices as they age.
+            </p>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
           <button
-            class="euiButton euiButton--primary euiButton--fill"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="createPolicyButton"
             type="button"
           >
             <span
-              class="euiButtonContent euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
               <span
-                class="euiButtonContent__icon"
                 color="inherit"
                 data-euiicon-type="plusInCircle"
               />
-              <span
-                class="euiButton__text"
-              >
-                Create policy
-              </span>
+              Create policy
             </span>
           </button>
         </div>
@@ -113,15 +104,15 @@ exports[`policy table shows empty state when there are no policies 1`] = `
 exports[`policy table sorts when linked index templates header is clicked 1`] = `
 Array [
   "testy1",
-  "testy3",
   "testy5",
   "testy7",
-  "testy9",
   "testy11",
   "testy13",
-  "testy15",
   "testy17",
   "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
 ]
 `;
 
@@ -130,28 +121,28 @@ Array [
   "testy0",
   "testy2",
   "testy4",
-  "testy6",
   "testy8",
   "testy10",
-  "testy12",
   "testy14",
   "testy16",
-  "testy18",
+  "testy20",
+  "testy22",
+  "testy26",
 ]
 `;
 
 exports[`policy table sorts when linked indices header is clicked 1`] = `
 Array [
   "testy1",
-  "testy3",
   "testy5",
   "testy7",
-  "testy9",
   "testy11",
   "testy13",
-  "testy15",
   "testy17",
   "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
 ]
 `;
 
@@ -160,13 +151,13 @@ Array [
   "testy0",
   "testy2",
   "testy4",
-  "testy6",
   "testy8",
   "testy10",
-  "testy12",
   "testy14",
   "testy16",
-  "testy18",
+  "testy20",
+  "testy22",
+  "testy26",
 ]
 `;
 
@@ -175,13 +166,13 @@ Array [
   "testy0",
   "testy104",
   "testy103",
-  "testy102",
   "testy101",
   "testy100",
-  "testy99",
   "testy98",
   "testy97",
-  "testy96",
+  "testy95",
+  "testy94",
+  "testy92",
 ]
 `;
 
@@ -189,29 +180,29 @@ exports[`policy table sorts when modified date header is clicked 2`] = `
 Array [
   "testy1",
   "testy2",
-  "testy3",
   "testy4",
   "testy5",
-  "testy6",
   "testy7",
   "testy8",
-  "testy9",
   "testy10",
+  "testy11",
+  "testy13",
+  "testy14",
 ]
 `;
 
 exports[`policy table sorts when name header is clicked 1`] = `
 Array [
-  "testy99",
   "testy98",
   "testy97",
-  "testy96",
   "testy95",
   "testy94",
-  "testy93",
   "testy92",
   "testy91",
-  "testy90",
+  "testy89",
+  "testy88",
+  "testy86",
+  "testy85",
 ]
 `;
 
@@ -220,12 +211,12 @@ Array [
   "testy0",
   "testy1",
   "testy2",
-  "testy3",
   "testy4",
   "testy5",
-  "testy6",
   "testy7",
   "testy8",
-  "testy9",
+  "testy10",
+  "testy11",
+  "testy13",
 ]
 `;

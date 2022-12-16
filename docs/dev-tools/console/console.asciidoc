@@ -1,9 +1,9 @@
 [[console-kibana]]
-== Run {es} API requests
+== Run API requests
 
-Interact with the REST API of {es} with *Console*. You can:
+Interact with the REST APIs of {es} and {kib} with *Console*. With *Console*, you can:
 
-* Send requests to {es} and view the responses
+* Send requests and view the responses
 * View API documentation
 * Get your request history
 
@@ -11,8 +11,6 @@ To get started, open the main menu, click *Dev Tools*, then click *Console*.
 
 [role="screenshot"]
 image::dev-tools/console/images/console.png["Console"]
-
-NOTE: You cannot to interact with the REST API of {kib} with the Console.
 
 [float]
 [[console-api]]
@@ -43,6 +41,13 @@ curl -XGET "http://localhost:9200/_search" -d'
 }'
 ----------------------------------
 
+Prepend requests to a {kib} API endpoint with `kbn:`
+
+[source,bash]
+--------------------------------------------------
+GET kbn:/api/index_management/indices
+--------------------------------------------------
+
 When you paste the command into *Console*, {kib} automatically converts it
 to *Console* syntax.  Alternatively, if you want to see *Console* syntax in cURL,
 click the action icon (image:dev-tools/console/images/wrench.png[]) and select *Copy as cURL*.
@@ -59,8 +64,68 @@ To configure your preferences for autocomplete, go to
 <<configuring-console, Settings>>.
 
 [float]
+[[console-comments]]
+==== Comments
+
+You can write comments or temporarily disable parts of a request by using double forward slashes
+or pound signs to create single-line comments.
+
+[source,js]
+----------------------------------
+# This request searches all of your indices.
+GET /_search
+{
+  // The query parameter indicates query context.
+  "query": {
+    "match_all": {} // Matches all documents.
+  }
+}
+----------------------------------
+
+You can also use a forward slash followed by an asterisk to mark the beginning of multi-line
+comments. An asterisk followed by a forward slash marks the end.
+
+[source,js]
+----------------------------------
+GET /_search
+{
+  "query": {
+    /*"match_all": {
+      "boost": 1.2
+    }*/
+    "match_none": {}
+  }
+}
+----------------------------------
+
+[float]
+[[console-variables]]
+==== Variables
+
+Click *Variables* to create, edit, and delete variables.
+
+[role="screenshot"]
+image::dev-tools/console/images/variables.png["Variables", width=60%]
+
+You can refer to these variables in the paths and bodies of your requests.
+Each variable can be referenced multiple times.
+
+[source,js]
+----------------------------------
+GET ${pathVariable}
+{
+  "query": {
+    "match": {
+      "${bodyNameVariable}": "${bodyValueVariable}"
+    }
+  }
+}
+----------------------------------
+
+[float]
 [[auto-formatting]]
 ==== Auto-formatting
+
 The auto-formatting
 capability can help you format requests. Select one or more requests that you
 want to format, click the action icon (image:dev-tools/console/images/wrench.png[]),
@@ -69,33 +134,28 @@ and then select *Auto indent*.
 For example, you might have a request formatted like this:
 
 [role="screenshot"]
-image::dev-tools/console/images/copy-curl.png["Console close-up", width=75%]
-]
+image::dev-tools/console/images/unformatted-request.png["Unformatted request", width=75%]
 
 *Console* adjusts the JSON body of the request to apply the indents.
 
 [role="screenshot"]
-image::dev-tools/console/images/request.png["Console close-up", width=75%]
+image::dev-tools/console/images/formatted-request.png["Formatted request", width=75%]
 
 If you select *Auto indent* on a request that is already well formatted,
 *Console* collapses the request body to a single line per document.
 This is helpful when working with the {es} {ref}/docs-bulk.html[bulk APIs].
 
-
-
 [float]
 [[console-request]]
 === Submit requests
 
-When you're ready to submit the request to {es}, click the
-green triangle.
+When you're ready to submit the request to {es}, click the green triangle.
 
 You can select multiple requests and submit them together.
 *Console* sends the requests to {es} one by one and shows the output
 in the response pane. Submitting multiple requests is helpful
 when you're debugging an issue or trying query
 combinations in multiple scenarios.
-
 
 [float]
 [[console-view-api]]

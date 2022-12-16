@@ -6,7 +6,15 @@ exports[`GaugeComponent renders the chart 1`] = `
 >
   <Settings
     ariaUseDefaultSummary={true}
+    baseTheme={Object {}}
     debugState={false}
+    noResults={
+      <EmptyPlaceholder
+        icon={[Function]}
+        renderComplete={[Function]}
+      />
+    }
+    onRenderChange={[Function]}
     theme={
       Array [
         Object {
@@ -39,14 +47,6 @@ exports[`GaugeComponent renders the chart 1`] = `
     labelMinor=""
     subtype="verticalBullet"
     tickValueFormatter={[Function]}
-    ticks={
-      Array [
-        0,
-        1.33,
-        2.67,
-        4,
-      ]
-    }
     tooltipValueFormatter={[Function]}
   />
 </Chart>

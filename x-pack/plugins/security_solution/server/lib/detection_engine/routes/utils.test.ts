@@ -6,7 +6,8 @@
  */
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { transformBulkError, BulkError, convertToSnakeCase, SiemResponseFactory } from './utils';
+import type { BulkError } from './utils';
+import { transformBulkError, convertToSnakeCase, SiemResponseFactory } from './utils';
 import { responseMock } from './__mocks__';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 

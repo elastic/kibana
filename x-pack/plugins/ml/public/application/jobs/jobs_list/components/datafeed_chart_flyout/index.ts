@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DatafeedChartFlyout } from './datafeed_chart_flyout';
+export { DatafeedChartFlyout, JobListDatafeedChartFlyout } from './datafeed_chart_flyout';

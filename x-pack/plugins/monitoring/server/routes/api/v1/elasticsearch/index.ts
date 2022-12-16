@@ -5,11 +5,23 @@
  * 2.0.
  */
 
-export { esIndexRoute } from './index_detail';
-export { esIndicesRoute } from './indices';
-export { esNodeRoute } from './node_detail';
-export { esNodesRoute } from './nodes';
-export { esOverviewRoute } from './overview';
-export { mlJobRoute } from './ml_jobs';
-export { ccrRoute } from './ccr';
-export { ccrShardRoute } from './ccr_shard';
+import { MonitoringCore } from '../../../../types';
+import { ccrRoute } from './ccr';
+import { ccrShardRoute } from './ccr_shard';
+import { esIndexRoute } from './index_detail';
+import { esIndicesRoute } from './indices';
+import { mlJobRoute } from './ml_jobs';
+import { esNodesRoute } from './nodes';
+import { esNodeRoute } from './node_detail';
+import { esOverviewRoute } from './overview';
+
+export function registerV1ElasticsearchRoutes(server: MonitoringCore) {
+  esIndexRoute(server);
+  esIndicesRoute(server);
+  esNodeRoute(server);
+  esNodesRoute(server);
+  esOverviewRoute(server);
+  mlJobRoute(server);
+  ccrRoute(server);
+  ccrShardRoute(server);
+}

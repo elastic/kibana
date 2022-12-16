@@ -20,9 +20,10 @@ import styled from 'styled-components';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
 
-import { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
+import type { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
-import { ActionTypeConnector, ConnectorTypes } from '../../../common/api';
+import type { ActionTypeConnector } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/api';
 import { DeprecatedCallout } from '../connectors/deprecated_callout';
 import { isDeprecatedConnector } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
@@ -43,7 +44,7 @@ export interface Props {
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
   onChangeConnector: (id: string) => void;
-  selectedConnector: { id: string; type: string };
+  selectedConnector: { id: string; type: ConnectorTypes };
   updateConnectorDisabled: boolean;
 }
 const ConnectorsComponent: React.FC<Props> = ({
@@ -129,6 +130,7 @@ const ConnectorsComponent: React.FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <Mapping
                   actionTypeName={actionTypeName}
+                  connectorType={selectedConnector.type}
                   isLoading={isLoading}
                   mappings={mappings}
                 />

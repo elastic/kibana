@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { SingleCaseMetricsResponse } from '../../../../../common/api';
 import { IsolateHostActionType } from '../../../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../../../common/constants';
-import { AggregationBuilder, AggregationResponse } from '../../types';
+import type { AggregationBuilder, AggregationResponse } from '../../types';
 
 interface ActionsAggregation {
   actions?: {
@@ -16,7 +17,7 @@ interface ActionsAggregation {
 }
 type ActionsAggregationResponse = ActionsAggregation | undefined;
 
-export class IsolateHostActions implements AggregationBuilder {
+export class IsolateHostActions implements AggregationBuilder<SingleCaseMetricsResponse> {
   // uniqueValuesLimit should not be lower than the number of actions.type values (currently 2) or some information could be lost
   constructor(private readonly uniqueValuesLimit: number = 10) {}
 

@@ -6,10 +6,10 @@
  */
 
 import { parse } from '@kbn/datemath';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
+  MetricsExplorerRequestBody,
   MetricsExplorerResponse,
   MetricsExplorerSeries,
 } from '../../../../../common/http_api/metrics_explorer';
@@ -19,6 +19,7 @@ import type {
   MetricsExplorerTimeOptions,
 } from '../../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
+import { NodeMetricsTableData } from '../types';
 
 export interface SortState<T> {
   field: keyof T;
@@ -28,7 +29,6 @@ export interface SortState<T> {
 interface UseInfrastructureNodeMetricsOptions<T> {
   metricsExplorerOptions: MetricsExplorerOptions;
   timerange: Pick<MetricsExplorerTimeOptions, 'from' | 'to'>;
-  filterClauseDsl?: QueryDslQueryContainer;
   transform: (series: MetricsExplorerSeries) => T;
   sortState: SortState<T>;
   currentPageIndex: number;
@@ -48,33 +48,26 @@ const nullData: MetricsExplorerResponse = {
 export const useInfrastructureNodeMetrics = <T>(
   options: UseInfrastructureNodeMetricsOptions<T>
 ) => {
-  const {
-    metricsExplorerOptions,
-    timerange,
-    filterClauseDsl,
-    transform,
-    sortState,
-    currentPageIndex,
-  } = options;
+  const { metricsExplorerOptions, timerange, transform, sortState, currentPageIndex } = options;
 
   const [transformedNodes, setTransformedNodes] = useState<T[]>([]);
   const fetch = useKibanaHttpFetch();
-  const { source, isLoadingSource } = useSourceContext();
+  const { source, isLoadingSource, loadSourceRequest, metricIndicesExist } = useSourceContext();
   const timerangeWithInterval = useTimerangeWithInterval(timerange);
 
-  const [{ state: promiseState }, fetchNodes] = useTrackedPromise(
+  const [fetchNodesRequest, fetchNodes] = useTrackedPromise(
     {
       createPromise: (): Promise<MetricsExplorerResponse> => {
         if (!source) {
           return Promise.resolve(nullData);
         }
 
-        const request = {
+        const request: MetricsExplorerRequestBody = {
           metrics: metricsExplorerOptions.metrics,
           groupBy: metricsExplorerOptions.groupBy,
           limit: NODE_COUNT_LIMIT,
           indexPattern: source.configuration.metricAlias,
-          filterQuery: JSON.stringify(filterClauseDsl),
+          filterQuery: metricsExplorerOptions.filterQuery,
           timerange: timerangeWithInterval,
         };
 
@@ -86,16 +79,22 @@ export const useInfrastructureNodeMetrics = <T>(
       onResolve: (response: MetricsExplorerResponse) => {
         setTransformedNodes(response.series.map(transform));
       },
-      onReject: (error) => {
-        // What to do about this?
-        // eslint-disable-next-line no-console
-        console.log(error);
-      },
       cancelPreviousOn: 'creation',
     },
-    [source, metricsExplorerOptions, timerangeWithInterval, filterClauseDsl]
+    [source, metricsExplorerOptions, timerangeWithInterval]
   );
-  const isLoadingNodes = promiseState === 'pending' || promiseState === 'uninitialized';
+
+  const isLoadingNodes =
+    fetchNodesRequest.state === 'pending' || fetchNodesRequest.state === 'uninitialized';
+  const isLoading = isLoadingSource || isLoadingNodes;
+
+  const errors = useMemo<Error[]>(
+    () => [
+      ...(loadSourceRequest.state === 'rejected' ? [wrapAsError(loadSourceRequest.value)] : []),
+      ...(fetchNodesRequest.state === 'rejected' ? [wrapAsError(fetchNodesRequest.value)] : []),
+    ],
+    [fetchNodesRequest, loadSourceRequest]
+  );
 
   useEffect(() => {
     fetchNodes();
@@ -117,10 +116,23 @@ export const useInfrastructureNodeMetrics = <T>(
 
   const pageCount = useMemo(() => Math.ceil(top100Nodes.length / TABLE_PAGE_SIZE), [top100Nodes]);
 
+  const data = useMemo<NodeMetricsTableData<T>>(
+    () =>
+      errors.length > 0
+        ? { state: 'error', errors }
+        : metricIndicesExist == null
+        ? { state: 'unknown' }
+        : !metricIndicesExist
+        ? { state: 'no-indices' }
+        : nodes.length <= 0
+        ? { state: 'empty-indices' }
+        : { state: 'data', currentPageIndex, pageCount, rows: nodes },
+    [currentPageIndex, errors, metricIndicesExist, nodes, pageCount]
+  );
+
   return {
-    isLoading: isLoadingSource || isLoadingNodes,
-    nodes,
-    pageCount,
+    isLoading,
+    data,
   };
 };
 
@@ -153,22 +165,48 @@ function makeSortNodes<T>(sortState: SortState<T>) {
     const nodeAValue = nodeA[sortState.field];
     const nodeBValue = nodeB[sortState.field];
 
-    if (typeof nodeAValue === 'string' && typeof nodeBValue === 'string') {
-      if (sortState.direction === 'asc') {
-        return nodeAValue.localeCompare(nodeBValue);
-      } else {
-        return nodeBValue.localeCompare(nodeAValue);
-      }
+    if (sortState.direction === 'asc') {
+      return sortAscending(nodeAValue, nodeBValue);
     }
 
-    if (typeof nodeAValue === 'number' && typeof nodeBValue === 'number') {
-      if (sortState.direction === 'asc') {
-        return nodeAValue - nodeBValue;
-      } else {
-        return nodeBValue - nodeAValue;
-      }
-    }
-
-    return 0;
+    return sortDescending(nodeAValue, nodeBValue);
   };
 }
+
+function sortAscending(nodeAValue: unknown, nodeBValue: unknown) {
+  if (nodeAValue === null) {
+    return -1;
+  } else if (nodeBValue === null) {
+    return 1;
+  }
+
+  if (typeof nodeAValue === 'string' && typeof nodeBValue === 'string') {
+    return nodeAValue.localeCompare(nodeBValue);
+  }
+
+  if (typeof nodeAValue === 'number' && typeof nodeBValue === 'number') {
+    return nodeAValue - nodeBValue;
+  }
+
+  return 0;
+}
+
+function sortDescending(nodeAValue: unknown, nodeBValue: unknown) {
+  if (nodeAValue === null) {
+    return 1;
+  } else if (nodeBValue === null) {
+    return -1;
+  }
+
+  if (typeof nodeAValue === 'string' && typeof nodeBValue === 'string') {
+    return nodeBValue.localeCompare(nodeAValue);
+  }
+
+  if (typeof nodeAValue === 'number' && typeof nodeBValue === 'number') {
+    return nodeBValue - nodeAValue;
+  }
+
+  return 0;
+}
+
+const wrapAsError = (value: any): Error => (value instanceof Error ? value : new Error(`${value}`));

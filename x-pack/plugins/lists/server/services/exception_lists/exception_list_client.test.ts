@@ -26,7 +26,7 @@ import { ExceptionListClient } from './exception_list_client';
 import { DataValidationError } from './utils/errors';
 
 describe('exception_list_client', () => {
-  describe('Mock client sanity checks', () => {
+  describe('Mock client checks', () => {
     test('it returns the exception list as expected', async () => {
       const mock = getExceptionListClientMock();
       const list = await mock.getExceptionList({
@@ -299,6 +299,7 @@ describe('exception_list_client', () => {
         (): ReturnType<ExceptionListClient['importExceptionListAndItems']> => {
           return exceptionListClient.importExceptionListAndItems({
             exceptionsToImport: toReadable([getExceptionListItemSchemaMock()]),
+            generateNewListId: false,
             maxExceptionsImportSize: 10_000,
             overwrite: true,
           });

@@ -4,31 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { SecurityPageName } from '../../app/types';
 import { withSecuritySolutionLink } from '../../common/components/links';
-import * as i18n from './translations';
+import { NavItemBetaBadge } from '../../common/components/navigation/nav_item_beta_badge';
+import type { NavLinkItem } from '../../common/components/navigation/types';
 
-interface LandingLinksImagesProps {
-  items: NavItem[];
+interface LandingImagesProps {
+  items: NavLinkItem[];
 }
 
-export interface NavItem {
-  id: SecurityPageName;
-  label: string;
-  image: string;
-  description: string;
-  path?: string;
-}
-
-const PrimatyEuiTitle = styled(EuiTitle)`
+const PrimaryEuiTitle = styled(EuiTitle)`
   color: ${(props) => props.theme.eui.euiColorPrimary};
 `;
 
 const LandingLinksDescripton = styled(EuiText)`
-  padding-top: ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding-top: ${({ theme }) => theme.eui.euiSizeXS};
   max-width: 550px;
 `;
 
@@ -40,27 +40,47 @@ const StyledFlexItem = styled(EuiFlexItem)`
   align-items: center;
 `;
 
-const SecuritySolutionLink = withSecuritySolutionLink(Link);
-
 const Content = styled(EuiFlexItem)`
-  padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const LandingLinksImages: React.FC<LandingLinksImagesProps> = ({ items }) => (
+const FlexTitle = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const TitleText = styled.h2`
+  display: inline;
+`;
+
+const SecuritySolutionLink = withSecuritySolutionLink(Link);
+
+export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
   <EuiFlexGroup direction="column">
-    {items.map(({ label, description, path, image, id }) => (
-      <EuiFlexItem key={id}>
-        <SecuritySolutionLink deepLinkId={id} path={path}>
+    {items.map(({ title, description, image, id, isBeta, betaOptions }) => (
+      <EuiFlexItem key={id} data-test-subj="LandingItem">
+        <SecuritySolutionLink deepLinkId={id} tabIndex={-1}>
           {/* Empty onClick is to force hover style on `EuiPanel` */}
           <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={() => {}}>
             <EuiFlexGroup>
               <StyledFlexItem grow={false}>
-                <EuiImage size="l" alt={i18n.SCREENSHOT_IMAGE_ALT(label)} src={image} />
+                {image && (
+                  <EuiImage
+                    data-test-subj="LandingLinksImage"
+                    size="l"
+                    role="presentation"
+                    alt=""
+                    src={image}
+                  />
+                )}
               </StyledFlexItem>
               <Content>
-                <PrimatyEuiTitle size="s">
-                  <h2>{label}</h2>
-                </PrimatyEuiTitle>
+                <PrimaryEuiTitle size="s">
+                  <FlexTitle>
+                    <TitleText>{title}</TitleText>
+                    {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
+                  </FlexTitle>
+                </PrimaryEuiTitle>
                 <LandingLinksDescripton size="s" color="text">
                   {description}
                 </LandingLinksDescripton>
@@ -72,3 +92,59 @@ export const LandingLinksImages: React.FC<LandingLinksImagesProps> = ({ items })
     ))}
   </EuiFlexGroup>
 );
+
+const CARD_WIDTH = 320;
+const LandingImageCardItem = styled(EuiFlexItem)`
+  max-width: ${CARD_WIDTH}px;
+`;
+
+const LandingCardDescription = styled.span`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  padding-top: ${({ theme }) => theme.eui.euiSizeXS};
+`;
+
+// Needed to use the primary color in the title underlining on hover
+const PrimaryTitleCard = styled(EuiCard)`
+  .euiCard__title {
+    color: ${(props) => props.theme.eui.euiColorPrimary};
+  }
+`;
+
+const SecuritySolutionCard = withSecuritySolutionLink(PrimaryTitleCard);
+
+export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ items }) => (
+  <EuiFlexGroup direction="row" wrap>
+    {items.map(({ id, image, title, description, isBeta, betaOptions }) => (
+      <LandingImageCardItem key={id} data-test-subj="LandingImageCard-item" grow={false}>
+        <SecuritySolutionCard
+          deepLinkId={id}
+          hasBorder
+          textAlign="left"
+          paddingSize="m"
+          image={
+            image && (
+              <EuiImage
+                data-test-subj="LandingImageCard-image"
+                role="presentation"
+                size={CARD_WIDTH}
+                alt={title}
+                src={image}
+              />
+            )
+          }
+          title={
+            <PrimaryEuiTitle size="xs">
+              <FlexTitle>
+                <TitleText>{title}</TitleText>
+                {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
+              </FlexTitle>
+            </PrimaryEuiTitle>
+          }
+          description={<LandingCardDescription>{description}</LandingCardDescription>}
+        />
+      </LandingImageCardItem>
+    ))}
+  </EuiFlexGroup>
+));
+
+LandingImageCards.displayName = 'LandingImageCards';

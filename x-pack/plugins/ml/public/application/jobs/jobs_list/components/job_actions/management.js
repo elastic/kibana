@@ -23,6 +23,7 @@ import { isManagedJob } from '../../../jobs_utils';
 
 export function actionsMenuContent(
   showEditJobFlyout,
+  showDatafeedChartFlyout,
   showDeleteJobModal,
   showResetJobModal,
   showStartDatafeedModal,
@@ -34,6 +35,7 @@ export function actionsMenuContent(
   const canCreateJob = checkPermission('canCreateJob') && mlNodesAvailable();
   const canUpdateJob = checkPermission('canUpdateJob');
   const canDeleteJob = checkPermission('canDeleteJob');
+  const canGetDatafeeds = checkPermission('canGetDatafeeds');
   const canUpdateDatafeed = checkPermission('canUpdateDatafeed');
   const canStartStopDatafeed = checkPermission('canStartStopDatafeed') && mlNodesAvailable();
   const canCloseJob = checkPermission('canCloseJob') && mlNodesAvailable();
@@ -151,6 +153,25 @@ export function actionsMenuContent(
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonCloneJob',
+    },
+    {
+      name: i18n.translate('xpack.ml.jobsList.managementActions.viewDatafeedCountsLabel', {
+        defaultMessage: 'View datafeed counts',
+      }),
+      description: i18n.translate(
+        'xpack.ml.jobsList.managementActions.viewDatafeedCountsDescription',
+        {
+          defaultMessage: 'View datafeed counts',
+        }
+      ),
+      icon: 'visAreaStacked',
+      enabled: () => canGetDatafeeds,
+      available: () => canGetDatafeeds,
+      onClick: (item) => {
+        showDatafeedChartFlyout(item);
+        closeMenu();
+      },
+      'data-test-subj': 'mlActionButtonViewDatafeedChart',
     },
     {
       name: i18n.translate('xpack.ml.jobsList.managementActions.editJobLabel', {

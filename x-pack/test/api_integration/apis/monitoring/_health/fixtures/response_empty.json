@@ -1,0 +1,16 @@
+{
+  "monitoredClusters": {
+    "clusters": {},
+    "execution": {
+      "timedOut": false,
+      "errors": []
+    }
+  },
+  "metricbeatErrors": {
+    "execution": {
+      "errors": [],
+      "timedOut": false
+    },
+    "products": {}
+  }
+}

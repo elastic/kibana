@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { IncomingHttpHeaders } from 'http';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
-import { SqlGetAsyncRequest, SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
@@ -19,8 +20,10 @@ import type {
 import { pollSearch } from '../../../../common';
 import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
+import { SearchConfigSchema } from '../../../../config';
 
 export const sqlSearchStrategyProvider = (
+  searchConfig: SearchConfigSchema,
   logger: Logger,
   useInternalUser: boolean = false
 ): ISearchStrategy<SqlSearchStrategyRequest, SqlSearchStrategyResponse> => {
@@ -39,40 +42,44 @@ export const sqlSearchStrategyProvider = (
     { esClient }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-
-    // disable search sessions until session task manager supports SQL
-    // https://github.com/elastic/kibana/issues/127880
-    // const sessionConfig = searchSessionsClient.getConfig();
-    const sessionConfig = null;
+    const startTime = Date.now();
 
     const search = async () => {
+      const { keep_cursor: keepCursor, ...params } = request.params ?? {};
+      let body: SqlQueryResponse;
+      let headers: IncomingHttpHeaders;
+
       if (id) {
-        const params: SqlGetAsyncRequest = {
-          format: request.params?.format ?? 'json',
-          ...getDefaultAsyncGetParams(sessionConfig, options),
-          id,
-        };
-
-        const { body, headers } = await client.sql.getAsync(params, {
-          signal: options.abortSignal,
-          meta: true,
-        });
-
-        return toAsyncKibanaSearchResponse(body, headers?.warning);
+        ({ body, headers } = await client.sql.getAsync(
+          {
+            format: params?.format ?? 'json',
+            ...getDefaultAsyncGetParams(searchConfig, options),
+            id,
+          },
+          { ...options.transport, signal: options.abortSignal, meta: true }
+        ));
       } else {
-        const params: SqlQueryRequest = {
-          format: request.params?.format ?? 'json',
-          ...getDefaultAsyncSubmitParams(sessionConfig, options),
-          ...request.params,
-        };
-
-        const { headers, body } = await client.sql.query(params, {
-          signal: options.abortSignal,
-          meta: true,
-        });
-
-        return toAsyncKibanaSearchResponse(body, headers?.warning);
+        ({ headers, body } = await client.sql.query(
+          {
+            format: params.format ?? 'json',
+            ...getDefaultAsyncSubmitParams(searchConfig, options),
+            ...params,
+          },
+          { ...options.transport, signal: options.abortSignal, meta: true }
+        ));
       }
+
+      if (!body.is_partial && !body.is_running && body.cursor && !keepCursor) {
+        try {
+          await client.sql.clearCursor({ cursor: body.cursor });
+        } catch (error) {
+          logger.warn(
+            `sql search: failed to clear cursor=${body.cursor} for async_search_id=${id}: ${error.message}`
+          );
+        }
+      }
+
+      return toAsyncKibanaSearchResponse(body, startTime, headers?.warning);
     };
 
     const cancel = async () => {
@@ -81,7 +88,10 @@ export const sqlSearchStrategyProvider = (
       }
     };
 
-    return pollSearch(search, cancel, options).pipe(
+    return pollSearch(search, cancel, {
+      pollInterval: searchConfig.asyncSearch.pollInterval,
+      ...options,
+    }).pipe(
       tap((response) => (id = response.id)),
       catchError((e) => {
         throw getKbnServerError(e);

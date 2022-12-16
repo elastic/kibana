@@ -7,9 +7,8 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import type { Query } from '@kbn/data-plugin/public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import {
   EmbeddableInput,
@@ -18,16 +17,36 @@ import {
   IEmbeddable,
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
-import type { SavedSearch } from '../../../../services/saved_searches';
 import type { GetStateReturn } from '../../services/discover_state';
-import { AvailableFields$, DataRefetch$ } from '../../utils/use_saved_search';
+import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../hooks/use_saved_search';
+export interface RandomSamplingOption {
+  mode: 'random_sampling';
+  seed: string;
+  probability: number;
+}
+
+export interface NormalSamplingOption {
+  mode: 'normal_sampling';
+  seed: string;
+  shardSize: number;
+}
+
+export interface NoSamplingOption {
+  mode: 'no_sampling';
+  seed: string;
+}
+
+export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   dataView: DataView;
   savedSearch?: SavedSearch;
-  query?: Query;
+  query?: Query | AggregateQuery;
   visibleFieldNames?: string[];
   filters?: Filter[];
   showPreviewByDefault?: boolean;
@@ -37,6 +56,8 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   sessionId?: string;
   fieldsToFetch?: string[];
+  totalDocuments?: number;
+  samplingOption?: SamplingOption;
 }
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
@@ -48,9 +69,9 @@ export interface FieldStatisticsTableProps {
    */
   columns: string[];
   /**
-   * The used index pattern
+   * The used data view
    */
-  indexPattern: DataView;
+  dataView: DataView;
   /**
    * Saved search description
    */
@@ -66,7 +87,7 @@ export interface FieldStatisticsTableProps {
   /**
    * Optional query to update the table content
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * Filters query to update the table content
    */
@@ -88,12 +109,13 @@ export interface FieldStatisticsTableProps {
   savedSearchRefetch$?: DataRefetch$;
   availableFields$?: AvailableFields$;
   searchSessionId?: string;
+  savedSearchDataTotalHits$?: DataTotalHits$;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
     availableFields$,
-    indexPattern,
+    dataView,
     savedSearch,
     query,
     columns,
@@ -103,6 +125,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     trackUiMetric,
     savedSearchRefetch$,
     searchSessionId,
+    savedSearchDataTotalHits$,
   } = props;
   const services = useDiscoverServices();
   const [embeddable, setEmbeddable] = useState<
@@ -148,7 +171,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
-        dataView: indexPattern,
+        dataView,
         savedSearch,
         query,
         filters,
@@ -156,12 +179,20 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         onAddFilter,
         sessionId: searchSessionId,
         fieldsToFetch: availableFields$?.getValue().fields,
+        totalDocuments: savedSearchDataTotalHits$
+          ? savedSearchDataTotalHits$.getValue()?.result
+          : undefined,
+        samplingOption: {
+          mode: 'normal_sampling',
+          shardSize: 5000,
+          seed: searchSessionId,
+        } as NormalSamplingOption,
       });
       embeddable.reload();
     }
   }, [
     embeddable,
-    indexPattern,
+    dataView,
     savedSearch,
     query,
     columns,
@@ -169,6 +200,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     onAddFilter,
     searchSessionId,
     availableFields$,
+    savedSearchDataTotalHits$,
   ]);
 
   useEffect(() => {
@@ -194,7 +226,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
           // Initialize embeddable with information available at mount
           const initializedEmbeddable = await factory.create({
             id: 'discover_data_visualizer_grid',
-            dataView: indexPattern,
+            dataView,
             savedSearch,
             query,
             showPreviewByDefault,
@@ -227,13 +259,22 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     };
   }, [embeddable, embeddableRoot, trackUiMetric]);
 
+  const statsTableCss = css`
+    overflow-y: auto;
+
+    .kbnDocTableWrapper {
+      overflow-x: hidden;
+    }
+  `;
+
   return (
-    <div
-      data-test-subj="dscFieldStatsEmbeddedContent"
-      ref={embeddableRoot}
-      style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
-      // Match the scroll bar of the Discover doc table
-      className="kbnDocTableWrapper"
-    />
+    <EuiFlexItem css={statsTableCss}>
+      <div
+        data-test-subj="dscFieldStatsEmbeddedContent"
+        ref={embeddableRoot}
+        // Match the scroll bar of the Discover doc table
+        className="kbnDocTableWrapper"
+      />
+    </EuiFlexItem>
   );
 };

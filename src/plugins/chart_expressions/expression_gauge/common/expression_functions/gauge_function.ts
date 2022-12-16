@@ -194,6 +194,9 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     }
 
     if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
       const logTable = prepareLogTable(
         data,
         [
@@ -228,6 +231,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
             (handlers.variables?.embeddableTitle as string) ??
             handlers.getExecutionContext?.()?.description,
         },
+        canNavigateToLens: Boolean(handlers?.variables?.canNavigateToLens),
       },
     };
   },

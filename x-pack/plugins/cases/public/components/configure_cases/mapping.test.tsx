@@ -9,12 +9,15 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { TestProviders } from '../../common/mock';
-import { Mapping, MappingProps } from './mapping';
+import type { MappingProps } from './mapping';
+import { Mapping } from './mapping';
 import { mappings } from './__mock__';
+import { ConnectorTypes } from '../../../common/api';
 
 describe('Mapping', () => {
   const props: MappingProps = {
     actionTypeName: 'ServiceNow ITSM',
+    connectorType: ConnectorTypes.serviceNowITSM,
     isLoading: false,
     mappings,
   };

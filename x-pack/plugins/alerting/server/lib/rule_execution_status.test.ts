@@ -31,6 +31,7 @@ const executionMetrics = {
   numberOfActiveAlerts: 2,
   numberOfNewAlerts: 3,
   numberOfRecoveredAlerts: 13,
+  hasReachedAlertLimit: false,
   triggeredActionsStatus: ActionsCompletion.COMPLETE,
 };
 
@@ -48,6 +49,7 @@ describe('RuleExecutionStatus', () => {
     expect(received.numberOfActiveAlerts).toEqual(expected.numberOfActiveAlerts);
     expect(received.numberOfRecoveredAlerts).toEqual(expected.numberOfRecoveredAlerts);
     expect(received.numberOfNewAlerts).toEqual(expected.numberOfNewAlerts);
+    expect(received.hasReachedAlertLimit).toEqual(expected.hasReachedAlertLimit);
     expect(received.triggeredActionsStatus).toEqual(expected.triggeredActionsStatus);
   }
 
@@ -89,7 +91,7 @@ describe('RuleExecutionStatus', () => {
       testExpectedMetrics(metrics!, executionMetrics);
     });
 
-    test('task state with warning', () => {
+    test('task state with max executable actions warning', () => {
       const { status, metrics } = executionStatusFromState({
         alertInstances: { a: {} },
         metrics: { ...executionMetrics, triggeredActionsStatus: ActionsCompletion.PARTIAL },
@@ -105,6 +107,25 @@ describe('RuleExecutionStatus', () => {
       testExpectedMetrics(metrics!, {
         ...executionMetrics,
         triggeredActionsStatus: ActionsCompletion.PARTIAL,
+      });
+    });
+
+    test('task state with max alerts warning', () => {
+      const { status, metrics } = executionStatusFromState({
+        alertInstances: { a: {} },
+        metrics: { ...executionMetrics, hasReachedAlertLimit: true },
+      });
+      checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.warning).toEqual({
+        message: translations.taskRunner.warning.maxAlerts,
+        reason: RuleExecutionStatusWarningReasons.MAX_ALERTS,
+      });
+      expect(status.status).toBe('warning');
+      expect(status.error).toBe(undefined);
+
+      testExpectedMetrics(metrics!, {
+        ...executionMetrics,
+        hasReachedAlertLimit: true,
       });
     });
   });

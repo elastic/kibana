@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { useUrlParams } from '../../hooks/use_url_params';
-import { ArtifactListPageUrlParams } from '../types';
+import { useUrlParams } from '../../../hooks/use_url_params';
+import type { ArtifactListPageUrlParams } from '../types';
 
 const SHOW_VALUES: readonly string[] = ['create', 'edit'];
 

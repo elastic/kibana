@@ -1,0 +1,6 @@
+type: string
+description: The status of the case.
+enum:
+  - closed
+  - in-progress
+  - open

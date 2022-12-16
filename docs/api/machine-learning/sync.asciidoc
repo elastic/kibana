@@ -6,6 +6,12 @@
 
 Synchronizes {kib} saved objects for {ml} jobs and trained models.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/ml/common/openapi[open API specification]. For a preview, check out <<machine-learning-apis>>.
+====
+
 [[machine-learning-api-sync-request]]
 ==== {api-request-title}
 
@@ -74,7 +80,7 @@ Retrieve the list of {ml} saved objects that require synchronization:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/ml/saved_objects/sync?simulate=true
+GET api/ml/saved_objects/sync?simulate=true
 --------------------------------------------------
 // KIBANA
 
@@ -83,7 +89,7 @@ the following response:
 
 [source,sh]
 --------------------------------------------------
-{{"savedObjectsCreated":{"anomaly_detector":{"myjob1":{"success":true},"myjob2":{"success":true}}},"savedObjectsDeleted":{},"datafeedsAdded":{},"datafeedsRemoved":{}}
+{"savedObjectsCreated":{"anomaly_detector":{"myjob1":{"success":true},"myjob2":{"success":true}}},"savedObjectsDeleted":{},"datafeedsAdded":{},"datafeedsRemoved":{}}
 --------------------------------------------------
 
 To perform the synchronization, re-run the API and omit the `simulate` parameter.

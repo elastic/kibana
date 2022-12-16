@@ -9,14 +9,14 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
 
-import { ConnectorFieldsProps } from '../types';
-import { ConnectorTypes, ServiceNowITSMFieldsType } from '../../../../common/api';
+import type { ConnectorFieldsProps } from '../types';
+import type { ServiceNowITSMFieldsType } from '../../../../common/api';
+import { ConnectorTypes } from '../../../../common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';
-import { Fields, Choice } from './types';
+import type { Fields, Choice } from './types';
 import { choicesToEuiOptions } from './helpers';
-import { connectorValidator } from './validator';
 import { DeprecatedCallout } from '../deprecated_callout';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
@@ -44,7 +44,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
     } = fields ?? {};
     const { http, notifications } = useKibana().services;
     const [choices, setChoices] = useState<Fields>(defaultFields);
-    const showConnectorWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
+    const showConnectorWarning = connector.isDeprecated;
 
     const categoryOptions = useMemo(
       () => choicesToEuiOptions(choices.category),

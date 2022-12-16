@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MostRecentError component renders properly with mock data 1`] = `
+<dl
+  class="euiDescriptionList emotion-euiDescriptionList-row-left"
+  data-type="row"
+>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+  >
+    Most recent error (5 days ago)
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+  >
+    <button
+      class="euiLink emotion-euiLink-primary"
+      type="button"
+    >
+      <a
+        data-test-subj="monitor-page-link-bad-ssl"
+        href="/monitor/YmFkLXNzbA==/?statusFilter=down"
+      >
+        Get https://expired.badssl.com: x509: certificate has expired or is not yet valid
+      </a>
+    </button>
+  </dd>
+</dl>
+`;
+
+exports[`MostRecentError component validates props with shallow render 1`] = `
+<Router
+  history={
+    Object {
+      "action": "POP",
+      "block": [Function],
+      "createHref": [Function],
+      "go": [Function],
+      "goBack": [Function],
+      "goForward": [Function],
+      "length": 1,
+      "listen": [Function],
+      "location": Object {
+        "hash": "",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "push": [Function],
+      "replace": [Function],
+    }
+  }
+>
+  <MostRecentError
+    error={
+      Object {
+        "message": "Get https://expired.badssl.com: x509: certificate has expired or is not yet valid",
+        "type": "io",
+      }
+    }
+    monitorId="bad-ssl"
+    timestamp="2019-11-30T01:57:37.792Z"
+  />
+</Router>
+`;

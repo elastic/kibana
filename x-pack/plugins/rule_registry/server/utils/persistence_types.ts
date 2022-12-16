@@ -24,12 +24,26 @@ export type PersistenceAlertService = <T>(
     _id: string;
     _source: T;
   }>,
-  refresh: boolean | 'wait_for'
+  refresh: boolean | 'wait_for',
+  maxAlerts?: number,
+  enrichAlerts?: (
+    alerts: Array<{
+      _id: string;
+      _source: T;
+    }>,
+    params: { spaceId: string }
+  ) => Promise<
+    Array<{
+      _id: string;
+      _source: T;
+    }>
+  >
 ) => Promise<PersistenceAlertServiceResult<T>>;
 
 export interface PersistenceAlertServiceResult<T> {
   createdAlerts: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: BulkResponseErrorAggregation;
+  alertsWereTruncated: boolean;
 }
 
 export interface PersistenceServices {

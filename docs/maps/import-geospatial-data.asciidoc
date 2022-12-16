@@ -96,12 +96,6 @@ To open an existing index for drawing:
 
 . Click *Add layer*.
 
-. Set *Scaling* to *Limit results to 10,000*.
-
-. In **Filtering**:
-** Clear the *Apply global search to layer data* checkbox.
-** If your data view contains a default time field, clear the *Apply global time to layer data* checkbox.
-
 . Click *Save & close*.
 
 . In the legend, click the layer name and select *Edit features*.

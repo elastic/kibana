@@ -1,0 +1,74 @@
+{
+  "id": "@kbn/core-base-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-base-browser-mocks",
+        "id": "def-common.coreContextMock",
+        "type": "Object",
+        "tags": [],
+        "label": "coreContextMock",
+        "description": [],
+        "path": "packages/core/base/core-base-browser-mocks/src/core_context.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-base-browser-mocks",
+            "id": "def-common.coreContextMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "({ production }?: { production?: boolean | undefined; }) => ",
+              "CoreContext"
+            ],
+            "path": "packages/core/base/core-base-browser-mocks/src/core_context.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-base-browser-mocks",
+                "id": "def-common.coreContextMock.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ production?: boolean | undefined; }"
+                ],
+                "path": "packages/core/base/core-base-browser-mocks/src/core_context.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

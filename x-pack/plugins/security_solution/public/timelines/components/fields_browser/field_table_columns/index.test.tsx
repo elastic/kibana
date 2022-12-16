@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { useFieldTableColumns, UseFieldTableColumnsProps, UseFieldTableColumns } from '.';
+import type { UseFieldTableColumnsProps, UseFieldTableColumns } from '.';
+import { useFieldTableColumns } from '.';
 
 import { TestProviders } from '../../../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
-import { BrowserFieldItem } from '@kbn/timelines-plugin/common/types';
 import { EuiInMemoryTable } from '@elastic/eui';
+import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 const mockOnHide = jest.fn();
 const mockOpenFieldEditor = jest.fn();

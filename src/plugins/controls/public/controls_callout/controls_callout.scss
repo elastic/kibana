@@ -1,5 +1,5 @@
 @include euiBreakpoint('xs', 's') {
-  .controlsIllustration {
+  .controlsIllustration, .emptyStateBadge {
     display: none;
   }
 }
@@ -15,14 +15,15 @@
     }
 
     @include euiBreakpoint('m', 'l', 'xl') {
-      height: $euiSize * 4;
+      height: $euiSizeS * 6;
 
-      .emptyStateText {
+      .emptyStateBadge {
         padding-left: $euiSize * 2;
+        text-transform: uppercase;
       }
     }
     @include euiBreakpoint('xs', 's') {
-      min-height: $euiSize * 4;
+      min-height: $euiSizeS * 6;
 
       .emptyStateText {
         padding-left: 0;

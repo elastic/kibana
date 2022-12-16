@@ -7,11 +7,11 @@
 
 import type ResizeObserver from 'resize-observer-polyfill';
 import type React from 'react';
-import { Store, Middleware, Dispatch } from 'redux';
-import { BBox } from 'rbush';
-import { Provider } from 'react-redux';
-import { ResolverAction } from './store/actions';
-import {
+import type { Store, Middleware, Dispatch } from 'redux';
+import type { BBox } from 'rbush';
+import type { Provider } from 'react-redux';
+import type { ResolverAction } from './store/actions';
+import type {
   ResolverNode,
   ResolverRelatedEvents,
   ResolverEntityIndex,
@@ -20,7 +20,7 @@ import {
   NewResolverTree,
   ResolverSchema,
 } from '../../common/endpoint/types';
-import { Tree } from '../../common/endpoint/generate_data';
+import type { Tree } from '../../common/endpoint/generate_data';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -175,22 +175,6 @@ export interface IndexedTreeNode extends BBox {
 }
 
 /**
- * A type describing the shape of section titles and entries for description lists
- */
-export type SectionData = Array<{
-  sectionTitle: string;
-  entries: Array<{ title: string; description: string }>;
-}>;
-
-/**
- * The two query parameters we read/write on to control which view the table presents:
- */
-export interface CrumbInfo {
-  crumbId: string;
-  crumbEvent: string;
-}
-
-/**
  * A type containing all things to actually be rendered to the DOM.
  */
 export interface VisibleEntites {
@@ -322,6 +306,8 @@ export interface DataState {
     loading: boolean;
     data: SafeResolverEvent | null;
   };
+
+  readonly detectedBounds?: TimeFilters;
 
   readonly tree?: {
     /**
@@ -686,8 +672,8 @@ export interface IsometricTaxiLayout {
  * Defines the type for bounding a search by a time box.
  */
 export interface TimeRange {
-  from: string;
-  to: string;
+  from: string | number;
+  to: string | number;
 }
 
 /**
@@ -706,7 +692,7 @@ export interface DataAccessLayer {
     indexPatterns,
   }: {
     entityID: string;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
   }) => Promise<ResolverRelatedEvents>;
 
@@ -724,7 +710,7 @@ export interface DataAccessLayer {
     entityID: string;
     category: string;
     after?: string;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
   }) => Promise<ResolverPaginatedEvents>;
 
@@ -739,7 +725,7 @@ export interface DataAccessLayer {
     limit,
   }: {
     ids: string[];
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
     limit: number;
   }): Promise<SafeResolverEvent[]>;
@@ -761,7 +747,7 @@ export interface DataAccessLayer {
     eventTimestamp: string;
     eventID?: string | number;
     winlogRecordID: string;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
   }) => Promise<SafeResolverEvent | null>;
 
@@ -778,7 +764,7 @@ export interface DataAccessLayer {
   }: {
     dataId: string;
     schema: ResolverSchema;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indices: string[];
     ancestors: number;
     descendants: number;

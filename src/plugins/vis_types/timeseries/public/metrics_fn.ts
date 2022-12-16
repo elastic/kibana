@@ -26,6 +26,9 @@ export interface TimeseriesRenderValue {
   visData: TimeseriesVisData | {};
   visParams: TimeseriesVisParams;
   syncColors: boolean;
+  syncCursor: boolean;
+  syncTooltips: boolean;
+  canNavigateToLens?: boolean;
 }
 
 export type TimeseriesExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -60,14 +63,19 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
     {
       getSearchSessionId,
       isSyncColorsEnabled,
+      isSyncTooltipsEnabled,
+      isSyncCursorEnabled,
       getExecutionContext,
       inspectorAdapters,
       abortSignal: expressionAbortSignal,
+      variables,
     }
   ) {
     const visParams: TimeseriesVisParams = JSON.parse(args.params);
     const uiState = JSON.parse(args.uiState);
     const syncColors = isSyncColorsEnabled?.() ?? false;
+    const syncTooltips = isSyncTooltipsEnabled?.() ?? false;
+    const syncCursor = isSyncCursorEnabled?.() ?? true;
 
     const response = await metricsRequestHandler({
       input,
@@ -86,6 +94,9 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
         visParams,
         visData: response,
         syncColors,
+        syncTooltips,
+        syncCursor,
+        canNavigateToLens: variables.canNavigateToLens as boolean,
       },
     };
   },

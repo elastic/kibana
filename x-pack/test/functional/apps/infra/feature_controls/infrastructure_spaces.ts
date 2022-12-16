@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'infraHome', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
@@ -17,11 +17,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('infrastructure spaces', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('space with no features disabled', () => {
@@ -39,15 +39,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await spacesService.delete('custom_space');
       });
 
-      it('shows Metrics navlink', async () => {
+      it('shows Infrastructure navlink', async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Metrics');
+        expect(navLinks).to.contain('Infrastructure');
       });
 
-      it(`Metrics app is accessible`, async () => {
+      it(`Infrastructure app is accessible`, async () => {
         await PageObjects.common.navigateToApp('infraOps', {
           basePath: '/s/custom_space',
         });
@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -69,18 +69,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
-      it(`doesn't show metrics navlink`, async () => {
+      it(`doesn't show infrastructure navlink`, async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).not.to.contain('Metrics');
+        expect(navLinks).not.to.contain('Infrastructure');
       });
 
-      it(`metrics app is inaccessible and Application Not Found message is rendered`, async () => {
+      it(`infrastructure app is inaccessible and Application Not Found message is rendered`, async () => {
         await PageObjects.common.navigateToActualUrl('infraOps', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
@@ -101,7 +101,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -111,10 +111,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
-      it(`Metrics app is accessible`, async () => {
+      it(`Infrastructure app is accessible`, async () => {
         await PageObjects.common.navigateToApp('infraOps', {
           basePath: '/s/custom_space',
         });
@@ -126,7 +126,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -136,10 +136,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
-      it(`Metrics app is accessible`, async () => {
+      it(`Infrastructure app is accessible`, async () => {
         await PageObjects.common.navigateToApp('infraOps', {
           basePath: '/s/custom_space',
         });

@@ -131,11 +131,13 @@ const InfluencersByName: FC<InfluencersByNameProps> = ({
 
   return (
     <React.Fragment key={influencerFieldName}>
-      <EuiTitle size="xs" data-test-subj={`mlInfluencerFieldName ${influencerFieldName}`}>
+      <EuiTitle size="xxs" data-test-subj={`mlInfluencerFieldName ${influencerFieldName}`}>
         <h3>{influencerFieldName}</h3>
       </EuiTitle>
       <EuiSpacer size="xs" />
       {influencerValues}
+
+      <EuiSpacer size="m" />
     </React.Fragment>
   );
 };
@@ -146,7 +148,7 @@ export const InfluencersList: FC<InfluencersListProps> = ({ influencers, influen
       <EuiFlexGroup justifyContent="spaceAround" className="ml-influencers-list">
         <EuiFlexItem grow={false}>
           <EuiSpacer size="xxl" />
-          <EuiTitle size="xs" className="influencer-title">
+          <EuiTitle size="xxs" className="influencer-title">
             <h3>
               <FormattedMessage
                 id="xpack.ml.influencersList.noInfluencersFoundTitle"

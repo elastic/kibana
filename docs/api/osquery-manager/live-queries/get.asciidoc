@@ -1,0 +1,83 @@
+[[osquery-manager-live-queries-api-get]]
+=== Get live query API
+++++
+<titleabbrev>Get live query</titleabbrev>
+++++
+
+experimental[] Retrieves a single live query by ID.
+
+
+[[osquery-manager-live-queries-api-get-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/osquery/live_queries/<id>`
+
+`GET <kibana host>:<port>/s/<space_id>/api/osquery/live_queries/<id>`
+
+
+[[osquery-manager-live-queries-api-get-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
+
+`id`::
+(Required, string) The ID of the live query you want to retrieve.
+
+
+[[osquery-manager-live-queries-api-get-codes]]
+==== Response code
+
+`200`::
+Indicates a successful call.
+
+`404`::
+The specified live query and ID doesn't exist.
+
+
+[[osquery-manager-live-queries-api-get-example]]
+==== Example
+
+Retrieve the live query object with the `bbe5b070-0c51-11ed-b0f8-ad31b008e832` ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/osquery/live_queries/bbe5b070-0c51-11ed-b0f8-ad31b008e832
+--------------------------------------------------
+// KIBANA
+
+The API returns a live query object:
+
+[source,sh]
+--------------------------------------------------
+{
+  "data": {
+    "action_id": "3c42c847-eb30-4452-80e0-728584042334",
+    "expiration": "2022-07-26T10:04:32.220Z",
+    "@timestamp": "2022-07-26T09:59:32.220Z",
+    "agents": ["16d7caf5-efd2-4212-9b62-73dafc91fa13"],
+    "user_id": "elastic",
+    "queries": [
+      {
+        "action_id": "609c4c66-ba3d-43fa-afdd-53e244577aa0",
+        "id": "6724a474-cbba-41ef-a1aa-66aebf0879e2",
+        "query": "select * from uptime;",
+        "saved_query_id": "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d",
+        "ecs_mapping": {
+            "host.uptime": {
+                "field": "total_seconds"
+            }
+        },
+        "agents": ["16d7caf5-efd2-4212-9b62-73dafc91fa13"],
+        "docs": 0, # results count
+        "failed": 1, # failed queries 
+        "pending": 0, # pending agents
+        "responded": 1, # total responded agents 
+        "successful": 0, # successful agents
+        "status": "completed" # single query status
+      }
+    ],
+    "status": "completed" # global status of the live query (completed, pending)
+  }
+}
+--------------------------------------------------

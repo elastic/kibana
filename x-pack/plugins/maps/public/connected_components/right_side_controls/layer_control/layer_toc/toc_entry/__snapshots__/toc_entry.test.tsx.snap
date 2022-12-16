@@ -5,13 +5,100 @@ exports[`TOCEntry is rendered 1`] = `
   className="mapTocEntry"
   data-layerid="1"
   id="1"
+  style={Object {}}
 >
   <div
     className="mapTocEntry-visible"
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editModeActiveForLayer={false}
+      escapedDisplayName="layer_1"
+      isEditButtonDisabled={false}
+      layer={
+        Object {
+          "getDisplayName": [Function],
+          "getId": [Function],
+          "hasErrors": [Function],
+          "hasLegendDetails": [Function],
+          "isPreviewLayer": [Function],
+          "isVisible": [Function],
+          "renderLegendDetails": [Function],
+          "showAtZoomLevel": [Function],
+          "supportsFitToBounds": [Function],
+        }
+      }
+      openLayerSettings={[Function]}
+      supportsFitToBounds={true}
+    />
+    <div
+      className="mapTocEntry__layerIcons"
+    >
+      <EuiButtonIcon
+        aria-label="Hide layer"
+        iconType="eyeClosed"
+        key="toggleVisiblity"
+        onClick={[Function]}
+        title="Hide layer"
+      />
+      <EuiButtonIcon
+        aria-label="Fit to data"
+        iconType="expand"
+        key="fitToBounds"
+        onClick={[Function]}
+        title="Fit to data"
+      />
+      <EuiButtonIcon
+        aria-label="Edit layer settings"
+        iconType="pencil"
+        isDisabled={false}
+        key="settings"
+        onClick={[Function]}
+        title="Edit layer settings"
+      />
+      <EuiButtonIcon
+        aria-label="Reorder layer"
+        className="mapTocEntry__grab"
+        iconType="grab"
+        key="reorder"
+        title="Reorder layer"
+      />
+    </div>
+  </div>
+  <span
+    className="mapTocEntry__detailsToggle"
+  >
+    <button
+      aria-label="Show layer details"
+      className="mapTocEntry__detailsToggleButton"
+      onClick={[Function]}
+      title="Show layer details"
+    >
+      <EuiIcon
+        className="eui-alignBaseline"
+        size="s"
+        type="arrowDown"
+      />
+    </button>
+  </span>
+</div>
+`;
+
+exports[`TOCEntry props Should indent child layer 1`] = `
+<div
+  className="mapTocEntry"
+  data-layerid="1"
+  id="1"
+  style={
+    Object {
+      "paddingLeft": "56px",
+    }
+  }
+>
+  <div
+    className="mapTocEntry-visible"
+  >
+    <Connect(TOCEntryActionsPopover)
+      displayName="layer 1"
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -88,13 +175,13 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
   className="mapTocEntry"
   data-layerid="1"
   id="1"
+  style={Object {}}
 >
   <div
     className="mapTocEntry-visible"
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -171,13 +258,13 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
   className="mapTocEntry mapTocEntry-isSelected"
   data-layerid="1"
   id="1"
+  style={Object {}}
 >
   <div
     className="mapTocEntry-visible"
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -254,13 +341,13 @@ exports[`TOCEntry props isReadOnly 1`] = `
   className="mapTocEntry"
   data-layerid="1"
   id="1"
+  style={Object {}}
 >
   <div
     className="mapTocEntry-visible"
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -322,13 +409,13 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
   className="mapTocEntry"
   data-layerid="1"
   id="1"
+  style={Object {}}
 >
   <div
     className="mapTocEntry-visible"
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={

@@ -76,6 +76,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
 
   useEffect(function initialPageLoad() {
     setCurrentDataViewTitle(jobCreator.indexPatternTitle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(
@@ -165,6 +166,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                         defaultMessage: 'Data view',
                       }
                     ),
+                    defaultSearchField: 'name',
                   },
                 ]}
                 fixedPageSize={fixedPageSize}

@@ -13,11 +13,10 @@ import {
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { Filter } from '@kbn/es-query';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Query } from '@kbn/data-plugin/public';
+import type { Query, Filter } from '@kbn/es-query';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,
@@ -30,6 +29,16 @@ import {
   VisState716,
   CustomVisualizationMigrations,
   LensDocShape810,
+  LensDocShape830,
+  XYVisualizationStatePre830,
+  XYVisualizationState830,
+  VisState810,
+  VisState820,
+  XYVisStatePre850,
+  LensDocShape850,
+  LensDocShape840,
+  VisState850,
+  LensDocShape860,
 } from './types';
 import {
   commonRenameOperationsForFormula,
@@ -44,7 +53,15 @@ import {
   commonSetLastValueShowArrayValues,
   commonEnhanceTableRowHeight,
   commonSetIncludeEmptyRowsDateHistogram,
+  commonFixValueLabelsInXY,
   commonLockOldMetricVisSettings,
+  commonPreserveOldLegendSizeDefault,
+  commonEnrichAnnotationLayer,
+  getLensDataViewMigrations,
+  commonMigrateMetricIds,
+  commonMigratePartitionChartGroups,
+  commonMigratePartitionMetrics,
+  commonMigrateIndexPatternDatasource,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -96,6 +113,7 @@ export interface LensDocShape<VisualizationState = unknown> {
     visualization: VisualizationState;
     query: Query;
     filters: PersistableFilter[];
+    adHocDataViews?: Record<string, DataViewSpec>;
   };
 }
 
@@ -193,7 +211,7 @@ const removeLensAutoDate: SavedObjectMigrationFn<LensDocShapePre710, LensDocShap
       },
     };
   } catch (e) {
-    context.log.warning(e.message);
+    context.log.warn(e.message);
     return { ...doc };
   }
 };
@@ -260,7 +278,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShapePre710, LensDocSh
       },
     };
   } catch (e) {
-    context.log.warning(e.message);
+    context.log.warn(e.message);
     return { ...doc };
   }
 };
@@ -475,7 +493,10 @@ const setLastValueShowArrayValues: SavedObjectMigrationFn<LensDocShape810, LensD
   return { ...doc, attributes: commonSetLastValueShowArrayValues(doc.attributes) };
 };
 
-const enhanceTableRowHeight: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (doc) => {
+const enhanceTableRowHeight: SavedObjectMigrationFn<
+  LensDocShape810<VisState810>,
+  LensDocShape810<VisState820>
+> = (doc) => {
   const newDoc = cloneDeep(doc);
   return { ...newDoc, attributes: commonEnhanceTableRowHeight(newDoc.attributes) };
 };
@@ -486,9 +507,60 @@ const setIncludeEmptyRowsDateHistogram: SavedObjectMigrationFn<LensDocShape810, 
   return { ...doc, attributes: commonSetIncludeEmptyRowsDateHistogram(doc.attributes) };
 };
 
+const fixValueLabelsInXY: SavedObjectMigrationFn<
+  LensDocShape830<XYVisualizationStatePre830>,
+  LensDocShape830<XYVisualizationState830 | unknown>
+> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonFixValueLabelsInXY(newDoc.attributes) };
+};
+
 const lockOldMetricVisSettings: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
   doc
 ) => ({ ...doc, attributes: commonLockOldMetricVisSettings(doc.attributes) });
+
+const preserveOldLegendSizeDefault: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+  doc
+) => ({ ...doc, attributes: commonPreserveOldLegendSizeDefault(doc.attributes) });
+
+const enrichAnnotationLayers: SavedObjectMigrationFn<
+  LensDocShape850<XYVisStatePre850>,
+  LensDocShape850<VisState850>
+> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonEnrichAnnotationLayer(newDoc.attributes) };
+};
+
+const migrateMetricIds: SavedObjectMigrationFn<LensDocShape850, LensDocShape850> = (doc) => ({
+  ...doc,
+  attributes: commonMigrateMetricIds(doc.attributes),
+});
+
+const migrateIndexPatternDatasource: SavedObjectMigrationFn<LensDocShape850, LensDocShape860> = (
+  doc
+) => ({
+  ...doc,
+  attributes: commonMigrateIndexPatternDatasource(doc.attributes),
+});
+
+const migratePartitionChartGroups: SavedObjectMigrationFn<LensDocShape840, LensDocShape840> = (
+  doc
+) => ({
+  ...doc,
+  attributes: commonMigratePartitionChartGroups(
+    doc.attributes as LensDocShape840<{
+      shape: string;
+      layers: Array<{ groups?: string[] }>;
+    }>
+  ),
+});
+
+const migratePartitionMetrics: SavedObjectMigrationFn<LensDocShape860, LensDocShape860> = (
+  doc
+) => ({
+  ...doc,
+  attributes: commonMigratePartitionMetrics(doc.attributes),
+});
 
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
@@ -509,17 +581,25 @@ const lensMigrations: SavedObjectMigrationMap = {
     setIncludeEmptyRowsDateHistogram,
     enhanceTableRowHeight
   ),
-  '8.3.0': lockOldMetricVisSettings,
+  '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
+  '8.5.0': flow(migrateMetricIds, enrichAnnotationLayers, migratePartitionChartGroups),
+  '8.6.0': flow(migrateIndexPatternDatasource, migratePartitionMetrics),
+  // FOLLOW THESE GUIDELINES IF YOU ARE ADDING A NEW MIGRATION!
+  // 1. Make sure you are applying migrations for a given version in the same order here as they are applied in x-pack/plugins/lens/server/embeddable/make_lens_embeddable_factory.ts
 };
 
 export const getAllMigrations = (
   filterMigrations: MigrateFunctionsObject,
+  dataViewMigrations: MigrateFunctionsObject,
   customVisualizationMigrations: CustomVisualizationMigrations
 ): SavedObjectMigrationMap =>
   mergeSavedObjectMigrationMaps(
     mergeSavedObjectMigrationMaps(
-      lensMigrations,
-      getLensFilterMigrations(filterMigrations) as unknown as SavedObjectMigrationMap
+      mergeSavedObjectMigrationMaps(
+        lensMigrations,
+        getLensFilterMigrations(filterMigrations) as unknown as SavedObjectMigrationMap
+      ),
+      getLensCustomVisualizationMigrations(customVisualizationMigrations)
     ),
-    getLensCustomVisualizationMigrations(customVisualizationMigrations)
+    getLensDataViewMigrations(dataViewMigrations) as unknown as SavedObjectMigrationMap
   );

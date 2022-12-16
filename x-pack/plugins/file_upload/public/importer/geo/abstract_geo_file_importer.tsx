@@ -14,7 +14,6 @@ import { CreateDocsResponse, ImportResults } from '../types';
 import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';
 import { MB } from '../../../common/constants';
 import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common/types';
-// @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 import { createChunks } from './create_chunks';
 
@@ -34,6 +33,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
   private _invalidFeatures: ImportFailure[] = [];
   private _geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE =
     ES_FIELD_TYPES.GEO_SHAPE;
+  private _smallChunks = false;
 
   constructor(file: File) {
     super();
@@ -57,6 +57,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
     await this._readUntil(rowLimit, sizeLimit);
     return {
       features: [...this._features],
+      invalidFeatures: [...this._invalidFeatures],
       previewCoverage: this._hasNext
         ? Math.round(this._getProgress(this._features.length, this._blockSizeInBytes))
         : 100,
@@ -74,6 +75,10 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
     this._geoFieldType = geoFieldType;
   }
 
+  public setSmallChunks(smallChunks: boolean) {
+    this._smallChunks = smallChunks;
+  }
+
   public async import(
     id: string,
     index: string,
@@ -89,6 +94,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       };
     }
 
+    const maxChunkCharCount = this._smallChunks ? MAX_CHUNK_CHAR_COUNT / 10 : MAX_CHUNK_CHAR_COUNT;
     let success = true;
     const failures: ImportFailure[] = [...this._invalidFeatures];
     let error;
@@ -120,7 +126,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       }
 
       // Import block in chunks to avoid sending too much data to Elasticsearch at a time.
-      const chunks = createChunks(this._features, this._geoFieldType, MAX_CHUNK_CHAR_COUNT);
+      const chunks = createChunks(this._features, this._geoFieldType, maxChunkCharCount);
       const blockSizeInBytes = this._blockSizeInBytes;
 
       // reset block for next read

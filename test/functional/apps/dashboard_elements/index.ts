@@ -12,26 +12,25 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('dashboard elements', () => {
     before(async () => {
       log.debug('Starting before method');
       await browser.setWindowSize(1280, 800);
-      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
 
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
     });
 
-    describe('dashboard elements ciGroup10', function () {
-      this.tags('ciGroup10');
-
+    describe('dashboard elements', function () {
       loadTestFile(require.resolve('./input_control_vis'));
       loadTestFile(require.resolve('./controls'));
       loadTestFile(require.resolve('./_markdown_vis'));

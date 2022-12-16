@@ -7,12 +7,14 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
+import type { FleetAuthzRouter } from '../../services/security';
+
 import type {
   DeletePackageResponse,
   GetInfoResponse,
   InstallPackageResponse,
   UpdatePackageResponse,
-} from '../../../common';
+} from '../../../common/types';
 
 import { EPM_API_ROUTES } from '../../constants';
 import { splitPkgKey } from '../../services/epm/registry';
@@ -32,7 +34,6 @@ import {
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
 } from '../../types';
-import type { FleetAuthzRouter } from '../security';
 
 import {
   getCategoriesHandler,

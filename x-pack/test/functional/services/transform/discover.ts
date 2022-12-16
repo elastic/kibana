@@ -15,9 +15,11 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
 
   return {
     async assertDiscoverQueryHits(expectedDiscoverQueryHits: string) {
-      await testSubjects.existOrFail('discoverQueryHits');
+      await testSubjects.existOrFail('unifiedHistogramQueryHits');
 
-      const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText(
+        'unifiedHistogramQueryHits'
+      );
 
       expect(actualDiscoverQueryHits).to.eql(
         expectedDiscoverQueryHits,
@@ -28,7 +30,7 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
     async assertNoResults(expectedDestinationIndex: string) {
       // Discover should use the destination index pattern
       const actualIndexPatternSwitchLinkText = await (
-        await testSubjects.find('indexPattern-switch-link')
+        await testSubjects.find('discover-dataView-switch-link')
       ).getVisibleText();
       expect(actualIndexPatternSwitchLinkText).to.eql(
         expectedDestinationIndex,
@@ -59,7 +61,7 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
       expect(actualApplyButtonText).to.be('Apply');
 
       await applyButton.click();
-      await testSubjects.existOrFail('discoverQueryHits');
+      await testSubjects.existOrFail('unifiedHistogramQueryHits');
     },
   };
 }

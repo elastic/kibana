@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CriteriaFields } from '../types';
-import { NetworkType } from '../../../../network/store/model';
+import type { CriteriaFields } from '../types';
+import { NetworkType } from '../../../../explore/network/store/model';
 import { FlowTarget } from '../../../../../common/search_strategy';
 
 export const getCriteriaFromNetworkType = (

@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CertMonitors renders expected elements for valid props 1`] = `
+<span>
+  <span>
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+    >
+      <button
+        class="euiLink emotion-euiLink-primary"
+        type="button"
+      >
+        <a
+          data-test-subj="monitor-page-link-bad-ssl-dashboard"
+          href="/monitor/YmFkLXNzbC1kYXNoYm9hcmQ="
+        >
+          bad-ssl-dashboard
+        </a>
+      </button>
+    </span>
+  </span>
+  <span>
+    , 
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+    >
+      <button
+        class="euiLink emotion-euiLink-primary"
+        type="button"
+      >
+        <a
+          data-test-subj="monitor-page-link-elastic-co"
+          href="/monitor/ZWxhc3RpYy1jbw=="
+        >
+          elastic
+        </a>
+      </button>
+    </span>
+  </span>
+  <span>
+    , 
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+    >
+      <button
+        class="euiLink emotion-euiLink-primary"
+        type="button"
+      >
+        <a
+          data-test-subj="monitor-page-link-extended-validation"
+          href="/monitor/ZXh0ZW5kZWQtdmFsaWRhdGlvbg=="
+        >
+          extended-validation
+        </a>
+      </button>
+    </span>
+  </span>
+</span>
+`;
+
+exports[`CertMonitors shallow renders expected elements for valid props 1`] = `
+<ContextProvider
+  value={
+    Object {
+      "history": Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      },
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "match": Object {
+        "isExact": true,
+        "params": Object {},
+        "path": "/",
+        "url": "/",
+      },
+      "staticContext": undefined,
+    }
+  }
+>
+  <ContextProvider
+    value={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      }
+    }
+  >
+    <CertMonitors
+      monitors={
+        Array [
+          Object {
+            "id": "bad-ssl-dashboard",
+            "name": "",
+            "url": "https://badssl.com/dashboard/",
+          },
+          Object {
+            "id": "elastic-co",
+            "name": "elastic",
+            "url": "https://www.elastic.co/",
+          },
+          Object {
+            "id": "extended-validation",
+            "name": "",
+            "url": "https://extended-validation.badssl.com/",
+          },
+        ]
+      }
+    />
+  </ContextProvider>
+</ContextProvider>
+`;

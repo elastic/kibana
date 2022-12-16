@@ -1,0 +1,365 @@
+{
+  "id": "@kbn/shared-ux-storybook-mock",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook-mock",
+        "id": "def-common.AbstractStorybookMock",
+        "type": "Class",
+        "tags": [],
+        "label": "AbstractStorybookMock",
+        "description": [
+          "\nAn abstract class that allows one to strictly define the arguments\nand values for a component story in Storybook."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.AbstractStorybookMock",
+            "text": "AbstractStorybookMock"
+          },
+          "<Props, Services, PropArguments, ServiceArguments>"
+        ],
+        "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook-mock",
+            "id": "def-common.AbstractStorybookMock.propArguments",
+            "type": "Object",
+            "tags": [],
+            "label": "propArguments",
+            "description": [
+              "Define the arguments for prop values in this object.\n\nFor example:\n\n```\npropArguments = {\n  someTextProp: {\n    control: 'text',\n    defaultValue: 'Elastic',\n  },\n};\n```"
+            ],
+            "signature": [
+              "{ [name in keyof PropArguments]: ",
+              "InputType",
+              "; }"
+            ],
+            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook-mock",
+            "id": "def-common.AbstractStorybookMock.serviceArguments",
+            "type": "Object",
+            "tags": [],
+            "label": "serviceArguments",
+            "description": [
+              "\nDefine the arguments for service values in this object.\n\nFor example:\n\n```\nserviceArguments = {\n  isServiceTrue: {\n    control: 'boolean',\n    defaultValue: true,\n  },\n};\n```"
+            ],
+            "signature": [
+              "{ [name in keyof ServiceArguments]: ",
+              "InputType",
+              "; }"
+            ],
+            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook-mock",
+            "id": "def-common.AbstractStorybookMock.dependencies",
+            "type": "Array",
+            "tags": [],
+            "label": "dependencies",
+            "description": [
+              "Provide dependency `StorybookMock` objects in this array."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-storybook-mock",
+                "scope": "common",
+                "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                "section": "def-common.AbstractStorybookMock",
+                "text": "AbstractStorybookMock"
+              },
+              "<",
+              "Args",
+              ", Partial<Services>, {}, {}>[]"
+            ],
+            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook-mock",
+            "id": "def-common.AbstractStorybookMock.getPropArgumentTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getPropArgumentTypes",
+            "description": [
+              "\nReturns the list of Storybook arguments pertaining to Props for a given story.\nThis collection will be unique to this component, and will not include any\nprops from dependencies."
+            ],
+            "signature": [
+              "() => ",
+              "ArgTypes",
+              "<PropArguments>"
+            ],
+            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook-mock",
+            "id": "def-common.AbstractStorybookMock.getServiceArgumentTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getServiceArgumentTypes",
+            "description": [
+              "\nReturns the list of Storybook arguments pertaining to Services for a given story.\nThis method will incorporate Service arguments from dependencies, as they are\nincluded in a component's service interface."
+            ],
+            "signature": [
+              "() => ",
+              "ArgTypes",
+              "<ServiceArguments & ",
+              "ArgTypes",
+              "<",
+              "Args",
+              ">>"
+            ],
+            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook-mock",
+            "id": "def-common.AbstractStorybookMock.getArgumentTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getArgumentTypes",
+            "description": [
+              "\nReturn a categorized list of Storybook arguments for a given component."
+            ],
+            "signature": [
+              "() => ",
+              "ArgTypes",
+              "<PropArguments> & ",
+              "ArgTypes",
+              "<ServiceArguments & ",
+              "ArgTypes",
+              "<",
+              "Args",
+              ">>"
+            ],
+            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook-mock",
+            "id": "def-common.AbstractStorybookMock.getArgumentValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getArgumentValue",
+            "description": [
+              "\nGiven a collection of parameters, return either the value provided by the story,\nor the default value for the argument definition."
+            ],
+            "signature": [
+              "(arg: keyof PropArguments | keyof ServiceArguments, params?: ",
+              {
+                "pluginId": "@kbn/shared-ux-storybook-mock",
+                "scope": "common",
+                "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                "section": "def-common.ArgumentParams",
+                "text": "ArgumentParams"
+              },
+              "<PropArguments, ServiceArguments> | undefined) => any"
+            ],
+            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-storybook-mock",
+                "id": "def-common.AbstractStorybookMock.getArgumentValue.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "arg",
+                "description": [],
+                "signature": [
+                  "keyof PropArguments | keyof ServiceArguments"
+                ],
+                "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-storybook-mock",
+                "id": "def-common.AbstractStorybookMock.getArgumentValue.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/shared-ux-storybook-mock",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                    "section": "def-common.ArgumentParams",
+                    "text": "ArgumentParams"
+                  },
+                  "<PropArguments, ServiceArguments> | undefined"
+                ],
+                "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook-mock",
+            "id": "def-common.AbstractStorybookMock.getProps",
+            "type": "Function",
+            "tags": [],
+            "label": "getProps",
+            "description": [
+              "\nReturn the props for a component for a story, given the parameters provided by\ncontrols and their values within the story."
+            ],
+            "signature": [
+              "(params?: ",
+              {
+                "pluginId": "@kbn/shared-ux-storybook-mock",
+                "scope": "common",
+                "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                "section": "def-common.ArgumentParams",
+                "text": "ArgumentParams"
+              },
+              "<PropArguments, {}> | undefined) => Props"
+            ],
+            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-storybook-mock",
+                "id": "def-common.AbstractStorybookMock.getProps.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/shared-ux-storybook-mock",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                    "section": "def-common.ArgumentParams",
+                    "text": "ArgumentParams"
+                  },
+                  "<PropArguments, {}> | undefined"
+                ],
+                "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook-mock",
+            "id": "def-common.AbstractStorybookMock.getServices",
+            "type": "Function",
+            "tags": [],
+            "label": "getServices",
+            "description": [
+              "\nReturn the services for a component for a story, given the parameters provided by\ncontrols and their values within the story."
+            ],
+            "signature": [
+              "(params?: ",
+              {
+                "pluginId": "@kbn/shared-ux-storybook-mock",
+                "scope": "common",
+                "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                "section": "def-common.ArgumentParams",
+                "text": "ArgumentParams"
+              },
+              "<PropArguments, ServiceArguments> | undefined) => Services"
+            ],
+            "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-storybook-mock",
+                "id": "def-common.AbstractStorybookMock.getServices.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/shared-ux-storybook-mock",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                    "section": "def-common.ArgumentParams",
+                    "text": "ArgumentParams"
+                  },
+                  "<PropArguments, ServiceArguments> | undefined"
+                ],
+                "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook-mock",
+        "id": "def-common.ArgumentParams",
+        "type": "Type",
+        "tags": [],
+        "label": "ArgumentParams",
+        "description": [
+          "\nType that expresses the arguments available to a story based on the\nprops and services the component consumes."
+        ],
+        "signature": [
+          "{ [P in keyof PropArguments | keyof ServiceArguments]: any; }"
+        ],
+        "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -14,7 +14,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
 } from '../../../../../common/constants';
-import { PolicyDetailsSelector, PolicyDetailsState } from '../../../types';
+import type { PolicyDetailsSelector, PolicyDetailsState } from '../../../types';
 
 /**
  * Returns current artifacts location

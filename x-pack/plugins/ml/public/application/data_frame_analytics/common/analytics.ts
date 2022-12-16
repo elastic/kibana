@@ -12,6 +12,11 @@ import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
 import { extractErrorMessage } from '../../../../common/util/errors';
+import {
+  ClassificationEvaluateResponse,
+  EvaluateMetrics,
+  TrackTotalHitsSearchResponse,
+} from '../../../../common/types/data_frame_analytics';
 import { SavedSearchQuery } from '../../contexts/ml';
 import {
   AnalysisConfig,
@@ -106,23 +111,6 @@ export enum INDEX_STATUS {
   ERROR,
 }
 
-export interface FieldSelectionItem {
-  name: string;
-  mappings_types?: string[];
-  is_included: boolean;
-  is_required: boolean;
-  feature_type?: string;
-  reason?: string;
-}
-
-export interface DfAnalyticsExplainResponse {
-  field_selection?: FieldSelectionItem[];
-  memory_estimation: {
-    expected_memory_without_disk: string;
-    expected_memory_with_disk: string;
-  };
-}
-
 export interface Eval {
   mse: number | string;
   msle: number | string;
@@ -143,49 +131,6 @@ export interface RegressionEvaluateResponse {
       value: number;
     };
     r_squared: {
-      value: number;
-    };
-  };
-}
-
-export interface PredictedClass {
-  predicted_class: string;
-  count: number;
-}
-
-export interface ConfusionMatrix {
-  actual_class: string;
-  actual_class_doc_count: number;
-  predicted_classes: PredictedClass[];
-  other_predicted_class_doc_count: number;
-}
-
-export interface RocCurveItem {
-  fpr: number;
-  threshold: number;
-  tpr: number;
-}
-
-interface EvalClass {
-  class_name: string;
-  value: number;
-}
-
-export interface ClassificationEvaluateResponse {
-  classification: {
-    multiclass_confusion_matrix?: {
-      confusion_matrix: ConfusionMatrix[];
-    };
-    recall?: {
-      classes: EvalClass[];
-      avg_recall: number;
-    };
-    accuracy?: {
-      classes: EvalClass[];
-      overall_accuracy: number;
-    };
-    auc_roc?: {
-      curve?: RocCurveItem[];
       value: number;
     };
   };
@@ -279,13 +224,6 @@ export const isClassificationEvaluateResponse = (
   );
 };
 
-export interface UpdateDataFrameAnalyticsConfig {
-  allow_lazy_start?: string;
-  description?: string;
-  model_memory_limit?: string;
-  max_num_threads?: number;
-}
-
 export enum REFRESH_ANALYTICS_LIST_STATE {
   ERROR = 'error',
   IDLE = 'idle',
@@ -300,8 +238,7 @@ export const useRefreshAnalyticsList = (
   callback: {
     isLoading?(d: boolean): void;
     onRefresh?(): void;
-  } = {},
-  isManagementTable = false
+  } = {}
 ) => {
   useEffect(() => {
     const distinct$ = refreshAnalyticsList$.pipe(distinctUntilChanged());
@@ -309,9 +246,6 @@ export const useRefreshAnalyticsList = (
     const subscriptions: Subscription[] = [];
 
     if (typeof callback.onRefresh === 'function') {
-      // required in order to fetch the DFA jobs on the management page
-      if (isManagementTable) callback.onRefresh();
-
       subscriptions.push(
         distinct$
           .pipe(filter((state) => state === REFRESH_ANALYTICS_LIST_STATE.REFRESH))
@@ -336,6 +270,7 @@ export const useRefreshAnalyticsList = (
     return () => {
       subscriptions.map((sub) => sub.unsubscribe());
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callback.onRefresh]);
 
   return {
@@ -451,21 +386,6 @@ export enum REGRESSION_STATS {
   HUBER = 'huber',
 }
 
-interface EvaluateMetrics {
-  classification: {
-    accuracy?: object;
-    recall?: object;
-    multiclass_confusion_matrix?: object;
-    auc_roc?: { include_curve: boolean; class_name: string };
-  };
-  regression: {
-    r_squared: object;
-    mse: object;
-    msle: object;
-    huber: object;
-  };
-}
-
 interface LoadEvalDataConfig {
   isTraining?: boolean;
   index: string;
@@ -547,16 +467,6 @@ export const loadEvalData = async ({
     return results;
   }
 };
-
-interface TrackTotalHitsSearchResponse {
-  hits: {
-    total: {
-      value: number;
-      relation: string;
-    };
-    hits: any[];
-  };
-}
 
 interface LoadDocsCountConfig {
   ignoreDefaultQuery?: boolean;

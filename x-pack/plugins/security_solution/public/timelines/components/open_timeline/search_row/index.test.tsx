@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFilterButtonProps } from '@elastic/eui';
+import type { EuiFilterButtonProps } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';

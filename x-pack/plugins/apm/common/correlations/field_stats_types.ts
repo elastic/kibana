@@ -6,9 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CorrelationsParams } from './types';
-
-export type FieldStatsCommonRequestParams = CorrelationsParams;
 
 export interface Field {
   fieldName: string;
@@ -33,25 +30,5 @@ export interface TopValuesStats {
   isTopValuesSampled?: boolean;
   topValuesSamplerShardSize?: number;
 }
-
-export interface NumericFieldStats extends TopValuesStats {
-  min: number;
-  max: number;
-  avg: number;
-  median?: number;
-}
-
-export type KeywordFieldStats = TopValuesStats;
-
-export interface BooleanFieldStats {
-  fieldName: string;
-  count: number;
-  [key: string]: number | string;
-}
-
-export type FieldStats =
-  | NumericFieldStats
-  | KeywordFieldStats
-  | BooleanFieldStats;
 
 export type FieldValueFieldStats = TopValuesStats;

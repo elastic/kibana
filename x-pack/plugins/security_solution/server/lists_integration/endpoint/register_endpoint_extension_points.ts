@@ -6,7 +6,7 @@
  */
 
 import type { ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
-import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { getExceptionsPreCreateItemHandler } from './handlers/exceptions_pre_create_handler';
 import { getExceptionsPreUpdateItemHandler } from './handlers/exceptions_pre_update_handler';
 import { getExceptionsPreGetOneHandler } from './handlers/exceptions_pre_get_one_handler';

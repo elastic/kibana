@@ -14,4 +14,10 @@ export const plugin = () => new EventAnnotationPlugin();
 export type { EventAnnotationPluginSetup, EventAnnotationPluginStart } from './plugin';
 export * from './event_annotation_service/types';
 export { EventAnnotationService } from './event_annotation_service';
-export { defaultAnnotationColor } from './event_annotation_service/helpers';
+export {
+  defaultAnnotationColor,
+  defaultAnnotationRangeColor,
+  isRangeAnnotationConfig,
+  isManualPointAnnotationConfig,
+  isQueryAnnotationConfig,
+} from './event_annotation_service/helpers';

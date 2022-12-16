@@ -12,7 +12,7 @@ import '../../../../common/mock/formatted_relative';
 import { NoteCards } from '.';
 import { TimelineStatus } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock';
-import { TimelineResultNote } from '../../open_timeline/types';
+import type { TimelineResultNote } from '../../open_timeline/types';
 
 const getNotesByIds = () => ({
   abc: {

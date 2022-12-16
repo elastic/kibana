@@ -66,6 +66,10 @@ export const AutomatedCurationHistory: React.FC<Props> = ({ query, engineName })
       hasBorder
     >
       <EntSearchLogStream
+        logView={{
+          type: 'log-view-reference',
+          logViewId: 'default',
+        }}
         hoursAgo={720}
         endTimestamp={endTimestamp}
         query={filters.join(' and ')}

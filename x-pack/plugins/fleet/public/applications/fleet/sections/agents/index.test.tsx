@@ -9,7 +9,6 @@ import React from 'react';
 
 import { createFleetTestRendererMock } from '../../../../mock';
 import { useFleetStatus } from '../../../../hooks/use_fleet_status';
-import { useGetSettings } from '../../../../hooks/use_request/settings';
 import { useAuthz } from '../../../../hooks/use_authz';
 
 import { AgentsApp } from '.';
@@ -35,7 +34,6 @@ jest.mock('./agent_list_page', () => {
 });
 
 const mockedUsedFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
-const mockedUseGetSettings = useGetSettings as jest.MockedFunction<typeof useGetSettings>;
 const mockedUseAuthz = useAuthz as jest.MockedFunction<typeof useAuthz>;
 
 function renderAgentsApp() {
@@ -48,14 +46,6 @@ function renderAgentsApp() {
 }
 describe('AgentApp', () => {
   beforeEach(() => {
-    mockedUseGetSettings.mockReturnValue({
-      isLoading: false,
-      data: {
-        item: {
-          has_seen_fleet_migration_notice: true,
-        },
-      },
-    } as any);
     mockedUseAuthz.mockReturnValue({
       fleet: {
         all: true,
@@ -69,6 +59,8 @@ describe('AgentApp', () => {
       enabled: true,
       isReady: false,
       refresh: async () => {},
+      forceDisplayInstructions: false,
+      setForceDisplayInstructions: () => {},
     });
     const { utils } = renderAgentsApp();
 
@@ -82,6 +74,8 @@ describe('AgentApp', () => {
       isReady: false,
       missingRequirements: ['api_keys'],
       refresh: async () => {},
+      forceDisplayInstructions: false,
+      setForceDisplayInstructions: () => {},
     });
     const { utils } = renderAgentsApp();
     expect(utils.queryByText('MissingESRequirementsPage')).not.toBeNull();
@@ -95,6 +89,8 @@ describe('AgentApp', () => {
       isReady: false,
       missingRequirements: ['fleet_server'],
       refresh: async () => {},
+      forceDisplayInstructions: false,
+      setForceDisplayInstructions: () => {},
     });
     const { utils } = renderAgentsApp();
     expect(utils.queryByText('FleetServerRequirementPage')).not.toBeNull();
@@ -109,6 +105,8 @@ describe('AgentApp', () => {
       missingRequirements: [],
       missingOptionalFeatures: ['encrypted_saved_object_encryption_key_required'],
       refresh: async () => {},
+      forceDisplayInstructions: false,
+      setForceDisplayInstructions: () => {},
     });
     const { utils } = renderAgentsApp();
 

@@ -5,26 +5,23 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useDynamicDataViewFetcher } from '../../../../hooks/use_dynamic_data_view';
+import { useContext, useEffect } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { CsmSharedContext } from '../csm_shared_context';
 
 export function useDataView() {
-  const { dataView } = useDynamicDataViewFetcher();
+  const { dataView } = useContext(CsmSharedContext);
 
-  const {
-    services: { dataViews },
-  } = useKibana<{ dataViews: DataViewsPublicPluginStart }>();
+  const [dataViewTitle, setDataViewTitle] = useLocalStorage(
+    'uxAppDataViewTitle',
+    ''
+  );
 
-  const { data } = useFetcher<Promise<DataView | undefined>>(async () => {
-    if (dataView?.title) {
-      return dataViews.create({
-        title: dataView?.title,
-      });
-    }
-  }, [dataView?.title, dataViews]);
+  const updatedDataViewTitle = dataView?.title;
 
-  return { dataViewTitle: dataView?.title, dataView: data };
+  useEffect(() => {
+    setDataViewTitle(updatedDataViewTitle);
+  }, [setDataViewTitle, updatedDataViewTitle]);
+
+  return { dataViewTitle, dataView };
 }

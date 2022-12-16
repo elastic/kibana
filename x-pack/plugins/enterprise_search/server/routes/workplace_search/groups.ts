@@ -51,7 +51,6 @@ export function registerSearchGroupsRoute({
           search: schema.object({
             query: schema.string(),
             content_source_ids: schema.arrayOf(schema.string()),
-            user_ids: schema.arrayOf(schema.string()),
           }),
         }),
       },

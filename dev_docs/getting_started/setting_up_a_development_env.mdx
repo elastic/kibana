@@ -2,21 +2,16 @@
 id: kibDevTutorialSetupDevEnv
 slug: /kibana-dev-docs/getting-started/setup-dev-env
 title: Set up a Development Environment
-summary: Learn how to setup a development environment for contributing to the Kibana repository
-date: 2021-04-26
+description: Learn how to setup a development environment for contributing to the Kibana repository
+date: 2022-07-07
 tags: ['kibana', 'onboarding', 'dev', 'architecture', 'setup']
 ---
 
 Setting up a development environment is pretty easy.
 
 <DocCallOut title="A note about Windows">
-  In order to support Windows development we currently require you to use one of the following:
-
-- [Git Bash](https://git-scm.com/download/win)
-- [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about)
-
-Before running the steps below, please make sure you have installed [Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145) and that you are running all commands in either Git Bash or WSL.
-
+  We do not support Windows native development anymore and in order to develop Kibana on Windows you must use **WSL** which will give you a much better experience.
+  Please check our <DocLink id="kibDevTutorialSetupWindowsDevWSL" text="tutorial"/> to know how to setup the environment and then follow the rest of this guide inside **WSL**.
 </DocCallOut>
 
 ## Get the code
@@ -32,7 +27,7 @@ cd kibana
 
 ## Install dependencies
 
-Install the version of Node.js listed in the `.node-version` file. This can be automated with tools such as [nvm](https://github.com/creationix/nvm) or [nvm-windows](https://github.com/coreybutler/nvm-windows). As we also include a `.nvmrc` file you can switch to the correct version when using nvm by running:
+Install the version of Node.js listed in the `.node-version` file. This can be automated with tools such as [nvm](https://github.com/creationix/nvm). As we also include a `.nvmrc` file you can switch to the correct version when using nvm by running:
 
 ```sh
 nvm use
@@ -42,6 +37,14 @@ Then, install the latest version of yarn using:
 
 ```sh
 npm install -g yarn
+```
+
+If you have Yarn installed, make sure you are using 1.22.19 or later. 2.0 and later are unsupported.
+
+. If you are using an unsupported Yarn version, run:
++
+```sh
+yarn set version 1.22.19
 ```
 
 Finally, bootstrap Kibana and install all of the remaining dependencies:
@@ -72,7 +75,7 @@ In another terminal tab/window you can start Kibana.
 yarn start
 ```
 
-If you include the `--run-examples` flag then all of the [developer examples](https://github.com/elastic/kibana/tree/{branch}/examples). Read more about the advanced options for [Running Kibana](https://www.elastic.co/guide/en/kibana/current/running-kibana-advanced.html).
+Include developer examples](https://github.com/elastic/kibana/tree/main/examples) by adding an optional `--run-examples` flag. Read more about the advanced options for [Running Kibana](https://www.elastic.co/guide/en/kibana/current/running-kibana-advanced.html).
 
 ## Code away!
 

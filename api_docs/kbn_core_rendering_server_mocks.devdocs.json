@@ -1,0 +1,95 @@
+{
+  "id": "@kbn/core-rendering-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-rendering-server-mocks",
+        "id": "def-server.renderingServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "renderingServiceMock",
+        "description": [],
+        "path": "packages/core/rendering/core-rendering-server-mocks/src/rendering_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-rendering-server-mocks",
+            "id": "def-server.renderingServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => ",
+              "RenderingServiceMock"
+            ],
+            "path": "packages/core/rendering/core-rendering-server-mocks/src/rendering_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-rendering-server-mocks",
+            "id": "def-server.renderingServiceMock.createPrebootContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createPrebootContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalRenderingServiceSetup",
+              ">"
+            ],
+            "path": "packages/core/rendering/core-rendering-server-mocks/src/rendering_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-rendering-server-mocks",
+            "id": "def-server.renderingServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalRenderingServiceSetup",
+              ">"
+            ],
+            "path": "packages/core/rendering/core-rendering-server-mocks/src/rendering_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

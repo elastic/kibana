@@ -182,6 +182,66 @@ describe('schema types', () => {
       });
     });
 
+    describe('Date value', () => {
+      test('it should allow the correct type and enforce the _meta.description', () => {
+        let valueType: SchemaValue<Date> = {
+          type: 'date',
+          _meta: {
+            description: 'Some description',
+          },
+        };
+
+        valueType = {
+          type: 'keyword',
+          _meta: {
+            description: 'Some description',
+            optional: false,
+          },
+        };
+
+        valueType = {
+          // @ts-expect-error because the type does not match
+          type: 'long',
+          _meta: {
+            description: 'Some description',
+            optional: false,
+          },
+        };
+
+        valueType = {
+          type: 'keyword',
+          _meta: {
+            description: 'Some description',
+            // @ts-expect-error optional can't be true when the types don't set the value as optional
+            optional: true,
+          },
+        };
+
+        // @ts-expect-error because it's missing the _meta.description
+        valueType = { type: 'date' };
+        expect(valueType).not.toBeUndefined(); // <-- Only to stop the var-not-used complain
+      });
+      test('it should enforce `_meta.optional: true`', () => {
+        let valueType: SchemaValue<Date | undefined> = {
+          type: 'date',
+          _meta: {
+            description: 'Some description',
+            optional: true,
+          },
+        };
+
+        valueType = {
+          type: 'date',
+          _meta: {
+            description: 'Some description',
+            // @ts-expect-error because optional can't be false when the value can be undefined
+            optional: false,
+          },
+        };
+        expect(valueType).not.toBeUndefined(); // <-- Only to stop the var-not-used complain
+      });
+    });
+
     describe('Object value', () => {
       test('it should allow "pass_through" and enforce the _meta.description', () => {
         let valueType: SchemaValue<{ a_value: string }> = {
@@ -419,6 +479,48 @@ describe('schema types', () => {
             },
           },
         };
+        expect(valueType).not.toBeUndefined(); // <-- Only to stop the var-not-used complain
+      });
+
+      test('it should expect support readonly arrays', () => {
+        let valueType: SchemaValue<ReadonlyArray<{ a_value: string }>> = {
+          type: 'array',
+          items: {
+            properties: {
+              a_value: {
+                type: 'keyword',
+                _meta: {
+                  description: 'Some description',
+                },
+              },
+            },
+          },
+        };
+
+        valueType = {
+          type: 'array',
+          items: {
+            properties: {
+              a_value: {
+                type: 'keyword',
+                _meta: {
+                  description: 'Some description',
+                  optional: false,
+                },
+              },
+            },
+            _meta: {
+              description: 'Description at the object level',
+            },
+          },
+        };
+
+        // @ts-expect-error because it's missing the items definition
+        valueType = { type: 'array' };
+        // @ts-expect-error because it's missing the items definition
+        valueType = { type: 'array', items: {} };
+        // @ts-expect-error because it's missing the items' properties definition
+        valueType = { type: 'array', items: { properties: {} } };
         expect(valueType).not.toBeUndefined(); // <-- Only to stop the var-not-used complain
       });
     });

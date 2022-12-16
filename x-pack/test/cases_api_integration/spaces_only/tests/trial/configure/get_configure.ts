@@ -8,7 +8,7 @@
 import http from 'http';
 import expect from '@kbn/expect';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
@@ -27,6 +27,7 @@ import { nullUser } from '../../../../common/lib/mock';
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const actionsRemover = new ActionsRemover(supertest);
   const authSpace1 = getAuthWithSuperUser();
 
@@ -50,7 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return a configuration with a mapping from space1', async () => {
       const connector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: {
           ...getServiceNowConnector(),
           config: { apiUrl: serviceNowSimulatorURL },
@@ -60,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
       actionsRemover.add('space1', connector.id, 'action', 'actions');
 
       await createConfiguration(
-        supertest,
+        supertestWithoutAuth,
         getConfigurationRequest({
           id: connector.id,
           name: connector.name,
@@ -105,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should not return a configuration with a mapping from a different space', async () => {
       const connector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: {
           ...getServiceNowConnector(),
           config: { apiUrl: serviceNowSimulatorURL },

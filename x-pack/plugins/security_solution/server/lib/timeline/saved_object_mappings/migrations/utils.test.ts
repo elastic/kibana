@@ -7,7 +7,7 @@
 
 import { timelineSavedObjectType } from '../timelines';
 import { TIMELINE_ID_REF_NAME } from '../../constants';
-import { TimelineId } from './types';
+import type { TimelineId } from './types';
 import { createMigratedDoc, createReference, migrateTimelineIdToReferences } from './utils';
 
 describe('migration utils', () => {

@@ -7,18 +7,20 @@
 
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
-import { MemoryRouterProps } from 'react-router';
-import { render, screen } from '@testing-library/react';
+import type { MemoryRouterProps } from 'react-router';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { TestProviders } from '../../common/mock';
+import {
+  noCreateCasesPermissions,
+  noUpdateCasesPermissions,
+  readCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
 import { CasesRoutes } from './routes';
+import type { CasesPermissions } from '../../../common';
 
 jest.mock('../all_cases', () => ({
   AllCases: () => <div>{'All cases'}</div>,
-}));
-
-jest.mock('../case_view', () => ({
-  CaseView: () => <div>{'Case view'}</div>,
 }));
 
 jest.mock('../create', () => ({
@@ -33,10 +35,10 @@ const getCaseViewPaths = () => ['/cases/test-id', '/cases/test-id/comment-id'];
 
 const renderWithRouter = (
   initialEntries: MemoryRouterProps['initialEntries'] = ['/cases'],
-  userCanCrud = true
+  permissions?: CasesPermissions
 ) => {
   return render(
-    <TestProviders userCanCrud={userCanCrud}>
+    <TestProviders permissions={permissions}>
       <MemoryRouter initialEntries={initialEntries}>
         <CasesRoutes useFetchAlertData={(alertIds) => [false, {}]} />
       </MemoryRouter>
@@ -52,24 +54,32 @@ describe('Cases routes', () => {
     });
 
     // User has read only privileges
-    it('user can navigate to the all cases page with userCanCrud = false', () => {
-      renderWithRouter(['/cases'], false);
+    it('user can navigate to the all cases page with only read permissions', () => {
+      renderWithRouter(['/cases'], readCasesPermissions());
       expect(screen.getByText('All cases')).toBeInTheDocument();
     });
   });
 
   describe('Case view', () => {
-    it.each(getCaseViewPaths())('navigates to the cases view page for path: %s', (path: string) => {
-      renderWithRouter([path]);
-      expect(screen.getByText('Case view')).toBeInTheDocument();
-      // User has read only privileges
-    });
+    it.each(getCaseViewPaths())(
+      'navigates to the cases view page for path: %s',
+      async (path: string) => {
+        renderWithRouter([path]);
+        await waitFor(() => {
+          expect(screen.getByTestId('case-view-loading')).toBeInTheDocument();
+        });
+
+        // User has read only privileges
+      }
+    );
 
     it.each(getCaseViewPaths())(
-      'user can navigate to the cases view page with userCanCrud = false and path: %s',
-      (path: string) => {
-        renderWithRouter([path], false);
-        expect(screen.getByText('Case view')).toBeInTheDocument();
+      'user can navigate to the cases view page with read permissions and path: %s',
+      async (path: string) => {
+        renderWithRouter([path], readCasesPermissions());
+        await waitFor(() => {
+          expect(screen.getByTestId('case-view-loading')).toBeInTheDocument();
+        });
       }
     );
   });
@@ -80,8 +90,8 @@ describe('Cases routes', () => {
       expect(screen.getByText('Create case')).toBeInTheDocument();
     });
 
-    it('shows the no privileges page if userCanCrud = false', () => {
-      renderWithRouter(['/cases/create'], false);
+    it('shows the no privileges page if the user does not have create privileges', () => {
+      renderWithRouter(['/cases/create'], noCreateCasesPermissions());
       expect(screen.getByText('Privileges required')).toBeInTheDocument();
     });
   });
@@ -92,8 +102,8 @@ describe('Cases routes', () => {
       expect(screen.getByText('Configure cases')).toBeInTheDocument();
     });
 
-    it('shows the no privileges page if userCanCrud = false', () => {
-      renderWithRouter(['/cases/configure'], false);
+    it('shows the no privileges page if the user does not have update privileges', () => {
+      renderWithRouter(['/cases/configure'], noUpdateCasesPermissions());
       expect(screen.getByText('Privileges required')).toBeInTheDocument();
     });
   });

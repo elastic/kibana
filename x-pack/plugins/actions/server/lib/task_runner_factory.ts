@@ -14,6 +14,7 @@ import {
   Logger,
   SavedObjectsClientContract,
   KibanaRequest,
+  CoreKibanaRequest,
   SavedObjectReference,
   IBasePath,
   SavedObject,
@@ -170,7 +171,8 @@ export class TaskRunnerFactory {
             // Once support for legacy alert RBAC is dropped, this can be secured
             await getUnsecuredSavedObjectsClient(request).delete(
               ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-              actionTaskExecutorParams.actionTaskParamsId
+              actionTaskExecutorParams.actionTaskParamsId,
+              { refresh: false }
             );
           } catch (e) {
             // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
@@ -226,7 +228,7 @@ function getFakeRequest(apiKey?: string) {
 
   // Since we're using API keys and accessing elasticsearch can only be done
   // via a request, we're faking one with the proper authorization headers.
-  const fakeRequest = KibanaRequest.from({
+  const fakeRequest = CoreKibanaRequest.from({
     headers: requestHeaders,
     path: '/',
     route: { settings: {} },

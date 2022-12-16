@@ -107,7 +107,6 @@ describe('groups routes', () => {
             search: {
               query: 'foo',
               content_source_ids: ['123', '234'],
-              user_ids: ['345', '456'],
             },
           },
         };

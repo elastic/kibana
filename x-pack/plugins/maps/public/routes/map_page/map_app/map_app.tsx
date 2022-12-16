@@ -12,13 +12,15 @@ import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from '@kbn/core/public';
 import { Adapters } from '@kbn/embeddable-plugin/public';
 import { Subscription } from 'rxjs';
-import { type Filter, FilterStateStore } from '@kbn/es-query';
-import type { Query, TimeRange, DataView } from '@kbn/data-plugin/common';
+import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-plugin/common';
 import { SavedQuery, QueryStateChange, QueryState } from '@kbn/data-plugin/public';
 import {
   getData,
   getExecutionContext,
   getCoreChrome,
+  getIndexPatternService,
   getMapsCapabilities,
   getNavigation,
   getSpacesApi,
@@ -200,7 +202,17 @@ export class MapApp extends React.Component<Props, State> {
 
     this._prevIndexPatternIds = nextIndexPatternIds;
 
-    const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
+    let indexPatterns: DataView[] = [];
+    if (nextIndexPatternIds.length === 0) {
+      // Use default data view to always show filter bar when filters are present
+      // Example scenario, global state has pinned filters and new map is created
+      const defaultDataView = await getIndexPatternService().getDefaultDataView();
+      if (defaultDataView) {
+        indexPatterns = [defaultDataView];
+      }
+    } else {
+      indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
+    }
     if (this._isMounted) {
       this.setState({ indexPatterns });
     }
@@ -262,6 +274,7 @@ export class MapApp extends React.Component<Props, State> {
       filters: [..._.get(globalState, 'filters', []), ...appFilters, ...savedObjectFilters],
       query,
       time: getInitialTimeFilters({
+        hasSaveAndReturnConfig: this.props.savedMap.hasSaveAndReturnConfig(),
         serializedMapState,
         globalState,
       }),
@@ -321,6 +334,24 @@ export class MapApp extends React.Component<Props, State> {
   };
 
   async _initMap() {
+    // Handle redirect with adhoc data view spec provided via history location state (MAPS_APP_LOCATOR)
+    const historyLocationState = this.props.history.location?.state as
+      | {
+          dataViewSpec: DataViewSpec;
+        }
+      | undefined;
+    if (historyLocationState?.dataViewSpec?.id) {
+      const dataViewService = getIndexPatternService();
+      try {
+        const dataView = await dataViewService.get(historyLocationState.dataViewSpec.id);
+        if (!dataView.isPersisted()) {
+          await dataViewService.create(historyLocationState.dataViewSpec);
+        }
+      } catch (error) {
+        // ignore errors, not a critical error for viewing map - layer(s) using data view will surface error
+      }
+    }
+
     try {
       await this.props.savedMap.whenReady();
     } catch (err) {

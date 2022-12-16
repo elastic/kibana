@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MutableRefObject } from 'react';
-import { CasesTimelineIntegration } from '../timeline_context';
-import { CasesNavigation } from '../links';
-import { CaseViewRefreshPropInterface, Case } from '../../../common';
-import { UseGetCase } from '../../containers/use_get_case';
-import { UseFetchAlertData } from '../../../common/ui';
+import type { MutableRefObject } from 'react';
+import type { CasesTimelineIntegration } from '../timeline_context';
+import type { CasesNavigation } from '../links';
+import type { CaseViewRefreshPropInterface, Case } from '../../../common';
+import type { UseFetchAlertData } from '../../../common/ui';
 
 export interface CaseViewBaseProps {
   onComponentInitialized?: () => void;
@@ -30,9 +29,8 @@ export interface CaseViewProps extends CaseViewBaseProps {
 
 export interface CaseViewPageProps extends CaseViewBaseProps {
   caseId: string;
-  fetchCase: UseGetCase['fetchCase'];
+  fetchCase: () => void;
   caseData: Case;
-  updateCase: (newCase: Case) => void;
 }
 
 export interface OnUpdateFields {

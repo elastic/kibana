@@ -13,8 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { NodeSubMenu } from './styles';
 import { applyMatrix3 } from '../models/vector2';
-import { Vector2, Matrix3, ResolverState } from '../types';
-import { ResolverNode } from '../../../common/endpoint/types';
+import type { Vector2, Matrix3, ResolverState } from '../types';
+import type { ResolverNode } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import { SideEffectContext } from './side_effect_context';
 import * as nodeModel from '../../../common/endpoint/models/node';
@@ -482,16 +482,16 @@ const UnstyledProcessEventDot = React.memo(
             >
               <StyledEuiButtonContent
                 isShowingIcon={nodeState === 'loading' || nodeState === 'error'}
+                className="eui-textTruncate"
+                data-test-subj={'euiButton__text'}
               >
-                <span className="euiButton__text" data-test-subj={'euiButton__text'}>
-                  {i18n.translate('xpack.securitySolution.resolver.node_button_name', {
-                    defaultMessage: `{nodeState, select, error {Reload {nodeName}} other {{nodeName}}}`,
-                    values: {
-                      nodeState,
-                      nodeName: processName,
-                    },
-                  })}
-                </span>
+                {i18n.translate('xpack.securitySolution.resolver.node_button_name', {
+                  defaultMessage: `{nodeState, select, error {Reload {nodeName}} other {{nodeName}}}`,
+                  values: {
+                    nodeState,
+                    nodeName: processName,
+                  },
+                })}
               </StyledEuiButtonContent>
             </EuiButton>
           </div>

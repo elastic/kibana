@@ -1,0 +1,368 @@
+{
+  "id": "@kbn/core-application-browser-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-application-browser-internal",
+        "id": "def-common.appendAppPath",
+        "type": "Function",
+        "tags": [],
+        "label": "appendAppPath",
+        "description": [],
+        "signature": [
+          "(appBasePath: string, path?: string) => string"
+        ],
+        "path": "packages/core/application/core-application-browser-internal/src/utils/append_app_path.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-application-browser-internal",
+            "id": "def-common.appendAppPath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "appBasePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/application/core-application-browser-internal/src/utils/append_app_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser-internal",
+            "id": "def-common.appendAppPath.$2",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/application/core-application-browser-internal/src/utils/append_app_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-application-browser-internal",
+        "id": "def-common.getAppInfo",
+        "type": "Function",
+        "tags": [],
+        "label": "getAppInfo",
+        "description": [],
+        "signature": [
+          "(app: ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.App",
+            "text": "App"
+          },
+          "<unknown>) => ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.PublicAppInfo",
+            "text": "PublicAppInfo"
+          }
+        ],
+        "path": "packages/core/application/core-application-browser-internal/src/utils/get_app_info.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-application-browser-internal",
+            "id": "def-common.getAppInfo.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "app",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.App",
+                "text": "App"
+              },
+              "<unknown>"
+            ],
+            "path": "packages/core/application/core-application-browser-internal/src/utils/get_app_info.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-application-browser-internal",
+        "id": "def-common.parseAppUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "parseAppUrl",
+        "description": [
+          "\nParse given URL and return the associated app id and path if any app matches, or undefined if none do.\nInput can either be:\n\n- an absolute path containing the basePath,\n  e.g `/base-path/app/my-app/some-path`\n\n- an absolute URL matching the `origin` of the Kibana instance (as seen by the browser),\n  e.g `https://kibana:8080/base-path/app/my-app/some-path`\n\n- a path relative to the provided `currentUrl`.\n  e.g with `currentUrl` being `https://kibana:8080/base-path/app/current-app/some-path`\n  `../other-app/other-path` will be converted to `/base-path/app/other-app/other-path`"
+        ],
+        "signature": [
+          "(url: string, basePath: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.IBasePath",
+            "text": "IBasePath"
+          },
+          ", apps: Map<string, ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.App",
+            "text": "App"
+          },
+          "<unknown>>, currentUrl?: string) => ",
+          "ParsedAppUrl",
+          " | undefined"
+        ],
+        "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-application-browser-internal",
+            "id": "def-common.parseAppUrl.$1",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser-internal",
+            "id": "def-common.parseAppUrl.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.IBasePath",
+                "text": "IBasePath"
+              }
+            ],
+            "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser-internal",
+            "id": "def-common.parseAppUrl.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "apps",
+            "description": [],
+            "signature": [
+              "Map<string, ",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.App",
+                "text": "App"
+              },
+              "<unknown>>"
+            ],
+            "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser-internal",
+            "id": "def-common.parseAppUrl.$4",
+            "type": "string",
+            "tags": [],
+            "label": "currentUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-application-browser-internal",
+        "id": "def-common.relativeToAbsolute",
+        "type": "Function",
+        "tags": [],
+        "label": "relativeToAbsolute",
+        "description": [
+          "\nConverts a relative path to an absolute url.\nImplementation is based on a specified behavior of the browser to automatically convert\na relative url to an absolute one when setting the `href` attribute of a `<a>` html element.\n"
+        ],
+        "signature": [
+          "(url: string) => string"
+        ],
+        "path": "packages/core/application/core-application-browser-internal/src/utils/relative_to_absolute.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-application-browser-internal",
+            "id": "def-common.relativeToAbsolute.$1",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/application/core-application-browser-internal/src/utils/relative_to_absolute.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-application-browser-internal",
+        "id": "def-common.removeSlashes",
+        "type": "Function",
+        "tags": [],
+        "label": "removeSlashes",
+        "description": [
+          "\nUtility to remove trailing, leading or duplicate slashes.\nBy default will only remove duplicates."
+        ],
+        "signature": [
+          "(url: string, { trailing, leading, duplicates, }?: { trailing?: boolean | undefined; leading?: boolean | undefined; duplicates?: boolean | undefined; }) => string"
+        ],
+        "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-application-browser-internal",
+            "id": "def-common.removeSlashes.$1",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser-internal",
+            "id": "def-common.removeSlashes.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n    trailing = false,\n    leading = false,\n    duplicates = true,\n  }",
+            "description": [],
+            "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-application-browser-internal",
+                "id": "def-common.removeSlashes.$2.trailing",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "trailing",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-application-browser-internal",
+                "id": "def-common.removeSlashes.$2.leading",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "leading",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-application-browser-internal",
+                "id": "def-common.removeSlashes.$2.duplicates",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "duplicates",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

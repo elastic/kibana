@@ -9,7 +9,6 @@ import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import { LayoutTypes } from '@kbn/screenshotting-plugin/common';
 import type { ReportingCore } from '../..';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import type { PngMetrics } from '../../../common/types';
@@ -38,10 +37,7 @@ export function generatePngObservable(
     .getScreenshots({
       ...options,
       format: 'png',
-      layout: {
-        id: LayoutTypes.PRESERVE_LAYOUT,
-        ...options.layout,
-      },
+      layout: { id: 'preserve_layout', ...options.layout },
     })
     .pipe(
       tap(({ metrics }) => {

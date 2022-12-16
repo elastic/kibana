@@ -7,7 +7,13 @@
 
 import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiLink, EuiPageContent } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiIcon,
+  EuiLink,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../../common';
 import { reactRouterNavigate, WithPrivileges } from '../../../../../shared_imports';

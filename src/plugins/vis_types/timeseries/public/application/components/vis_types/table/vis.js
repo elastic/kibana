@@ -10,7 +10,7 @@ import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import { parse as parseUrl } from 'url';
 import PropTypes from 'prop-types';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
@@ -29,6 +29,7 @@ import {
   getMultiFieldLabel,
   MULTI_FIELD_VALUES_SEPARATOR,
 } from '../../../../../common/fields_utils';
+import { RenderCounter } from '../../render_counter';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -245,7 +246,7 @@ class TableVis extends Component {
   closeExternalUrlErrorModal = () => this.setState({ accessDeniedDrilldownUrl: null });
 
   render() {
-    const { visData, model, indexPattern } = this.props;
+    const { visData, model, indexPattern, initialRender } = this.props;
     const { accessDeniedDrilldownUrl } = this.state;
     const fields = (model.pivot_type ? [model.pivot_type ?? null].flat() : []).map(
       (type, index) => ({
@@ -257,6 +258,7 @@ class TableVis extends Component {
       indexPattern,
       fields,
       this.fieldFormatsService,
+      undefined,
       model.drilldown_url ? [FIELD_FORMAT_IDS.URL] : []
     );
     const pivotIds = getFieldsForTerms(model.pivot_id);
@@ -268,16 +270,14 @@ class TableVis extends Component {
     }
 
     return (
-      <>
-        <RedirectAppLinks
-          application={getCoreStart().application}
-          className="tvbVis"
-          data-test-subj="tableView"
-        >
-          <table className="table">
-            <thead>{header}</thead>
-            <tbody>{rows}</tbody>
-          </table>
+      <RenderCounter initialRender={initialRender}>
+        <RedirectAppLinks coreStart={getCoreStart()} className="tvbVis" data-test-subj="tableView">
+          <div className="tvbVis" data-test-subj="tableView">
+            <table className="table">
+              <thead>{header}</thead>
+              <tbody>{rows}</tbody>
+            </table>
+          </div>
         </RedirectAppLinks>
         {accessDeniedDrilldownUrl && (
           <ExternalUrlErrorModal
@@ -285,7 +285,7 @@ class TableVis extends Component {
             handleClose={this.closeExternalUrlErrorModal}
           />
         )}
-      </>
+      </RenderCounter>
     );
   }
 }

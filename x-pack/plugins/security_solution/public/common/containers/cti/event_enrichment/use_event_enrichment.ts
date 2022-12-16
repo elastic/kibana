@@ -7,11 +7,7 @@
 
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 
-import { getEventEnrichment, getEventEnrichmentComplete } from './api';
-
-const getEventEnrichmentOptionalSignal = withOptionalSignal(getEventEnrichment);
-
-export const useEventEnrichment = () => useObservable(getEventEnrichmentOptionalSignal);
+import { getEventEnrichmentComplete } from './api';
 
 const getEventEnrichmentCompleteWithOptionalSignal = withOptionalSignal(getEventEnrichmentComplete);
 

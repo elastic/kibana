@@ -10,8 +10,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { EuiPageBody } from '@elastic/eui';
-import { EuiPageContent } from '@elastic/eui';
-import { EuiPageContentBody } from '@elastic/eui';
+import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
 import { Route, Switch, Redirect, Router, useLocation } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import { EuiText } from '@elastic/eui';

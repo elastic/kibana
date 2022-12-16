@@ -7,15 +7,15 @@
 
 import React from 'react';
 
-import { Columns } from '../../paginated_table';
-import { Anomaly, AnomaliesByNetwork } from '../types';
+import type { Columns } from '../../../../explore/components/paginated_table';
+import type { Anomaly, AnomaliesByNetwork } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { createCompoundAnomalyKey } from './create_compound_key';
 import { NetworkDetailsLink } from '../../links';
 
 import * as i18n from './translations';
-import { NetworkType } from '../../../../network/store/model';
-import { FlowTarget } from '../../../../../common/search_strategy';
+import { NetworkType } from '../../../../explore/network/store/model';
+import type { FlowTarget } from '../../../../../common/search_strategy';
 import { getAnomaliesDefaultTableColumns } from './get_anomalies_table_columns';
 
 export const getAnomaliesNetworkTableColumns = (
@@ -42,6 +42,8 @@ export const getAnomaliesNetworkTableColumns = (
           anomaliesByNetwork.anomaly
         )}`,
         render: (item) => <NetworkDetailsLink ip={item} flowTarget={flowTarget} />,
+        isAggregatable: true,
+        fieldType: 'ip',
       }),
   },
   ...getAnomaliesDefaultTableColumns(startDate, endDate),

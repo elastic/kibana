@@ -11,7 +11,7 @@ import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../../common/ty
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 
 const invalidNumberValue = (value: number) => {
   return isNaN(value) || value === undefined || value === null;
@@ -48,7 +48,7 @@ export async function fetchThreadPoolRejectionStats(
   filterQuery?: string
 ): Promise<AlertThreadPoolRejectionsStats[]> {
   const clustersIds = clusters.map((cluster) => cluster.clusterUuid);
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'node_stats',
@@ -67,7 +67,7 @@ export async function fetchThreadPoolRejectionStats(
                 cluster_uuid: clustersIds,
               },
             },
-            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
+            createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
             {
               range: {
                 timestamp: {
@@ -116,8 +116,13 @@ export async function fetchThreadPoolRejectionStats(
 
   const response = await esClient.search(params);
   const stats: AlertThreadPoolRejectionsStats[] = [];
+
+  if (!response.aggregations) {
+    return stats;
+  }
+
   // @ts-expect-error declare type for aggregations explicitly
-  const { buckets: clusterBuckets } = response.aggregations?.clusters;
+  const { buckets: clusterBuckets } = response.aggregations.clusters;
 
   if (!clusterBuckets?.length) {
     return stats;

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { RiskScore, RiskScoreMappingOrUndefined } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RiskScore, RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { sampleDocRiskScore } from '../__mocks__/es_results';
-import {
-  buildRiskScoreFromMapping,
-  BuildRiskScoreFromMappingReturn,
-} from './build_risk_score_from_mapping';
+import type { BuildRiskScoreFromMappingReturn } from './build_risk_score_from_mapping';
+import { buildRiskScoreFromMapping } from './build_risk_score_from_mapping';
 
 describe('buildRiskScoreFromMapping', () => {
   beforeEach(() => {
@@ -186,7 +184,7 @@ describe('buildRiskScoreFromMapping', () => {
 interface TestCase {
   fieldValue: unknown;
   scoreDefault: RiskScore;
-  scoreMapping: RiskScoreMappingOrUndefined;
+  scoreMapping: RiskScoreMapping | undefined;
   expected: BuildRiskScoreFromMappingReturn;
 }
 

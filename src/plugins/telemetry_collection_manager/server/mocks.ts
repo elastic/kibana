@@ -24,6 +24,7 @@ function createSetupContract(): Setup {
     getStats: jest.fn(),
     getOptInStats: jest.fn(),
     setCollectionStrategy: jest.fn(),
+    shouldGetTelemetry: jest.fn(),
   };
 
   return setupContract;
@@ -33,6 +34,7 @@ function createStartContract(): Start {
   const startContract: Start = {
     getOptInStats: jest.fn(),
     getStats: jest.fn(),
+    shouldGetTelemetry: jest.fn(),
   };
 
   return startContract;

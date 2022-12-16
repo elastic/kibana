@@ -43,6 +43,15 @@ const defaultActionsConfig: ActionsConfig = {
 };
 
 describe('ensureUriAllowed', () => {
+  test('throws an error when the Uri is an empty string', () => {
+    const config: ActionsConfig = defaultActionsConfig;
+    expect(() =>
+      getActionsConfigurationUtilities(config).ensureUriAllowed('')
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"target url \\"\\" is not added to the Kibana config xpack.actions.allowedHosts"`
+    );
+  });
+
   test('returns true when "any" hostnames are allowed', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
@@ -127,6 +136,17 @@ describe('isUriAllowed', () => {
     expect(
       getActionsConfigurationUtilities(config).isUriAllowed('https://github.com/elastic/kibana')
     ).toEqual(true);
+  });
+
+  test('returns true for network path references', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['my-domain.com'],
+      enabledActionTypes: [],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('//my-domain.com/foo')).toEqual(
+      true
+    );
   });
 
   test('throws when the hostname in the requested uri is not in the allowedHosts', () => {

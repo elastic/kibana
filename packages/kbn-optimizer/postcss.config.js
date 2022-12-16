@@ -6,6 +6,15 @@
  * Side Public License, v 1.
  */
 
+const autoprefixer = require('autoprefixer');
+const cssnano = require('cssnano');
+const preset = require('cssnano-preset-default');
+
 module.exports = {
-  plugins: [require('autoprefixer')()],
+  plugins: [
+    autoprefixer(),
+    cssnano({
+      preset: preset({ discardComments: false }),
+    }),
+  ],
 };

@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { DatatableRow } from '@kbn/expressions-plugin';
+import { DatatableRow } from '@kbn/expressions-plugin/common';
 import { ExpectExpression, expectExpressionProvider } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 

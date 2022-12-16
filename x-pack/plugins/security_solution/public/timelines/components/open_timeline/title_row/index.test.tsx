@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonProps } from '@elastic/eui';
+import type { EuiButtonProps } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -19,7 +19,7 @@ const mockTheme = getMockTheme({
     euiLineHeight: 10,
     euiBreakpoints: { s: '10px' },
     euiSize: '10px',
-    paddingSizes: { m: '16px' },
+    euiSizeM: '16px',
   },
 });
 
@@ -112,7 +112,7 @@ describe('TitleRow', () => {
         </ThemeProvider>
       );
 
-      wrapper.find('[data-test-subj="favorite-selected"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="favorite-selected"]').first().simulate('click');
 
       expect(onAddTimelinesToFavorites).toHaveBeenCalled();
     });

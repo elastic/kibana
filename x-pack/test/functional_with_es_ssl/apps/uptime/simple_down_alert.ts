@@ -47,7 +47,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('displays to define default connector', async () => {
-      await testSubjects.click('uptimeDismissSyntheticsCallout');
       await hideErrorToast();
       await testSubjects.click('uptimeDisplayDefineConnector');
       await testSubjects.existOrFail('uptimeSettingsDefineConnector');
@@ -107,7 +106,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
           params: {
             message:
-              'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} from {{state.observerLocation}} {{{state.statusMessage}}} The latest error message is {{{state.latestErrorMessage}}}',
+              'Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} {{{context.statusMessage}}} The latest error message is {{{context.latestErrorMessage}}}',
           },
           id: 'my-slack1',
         },

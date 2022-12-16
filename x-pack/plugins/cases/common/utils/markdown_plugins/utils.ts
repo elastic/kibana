@@ -11,8 +11,8 @@ import markdown from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import unified from 'unified';
 
-import { SerializableRecord } from '@kbn/utility-types';
-import type { TimeRange } from '@kbn/data-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { TimeRange } from '@kbn/es-query';
 import { LENS_ID, LensParser, LensSerializer } from './lens';
 import { TimelineSerializer, TimelineParser } from './timeline';
 

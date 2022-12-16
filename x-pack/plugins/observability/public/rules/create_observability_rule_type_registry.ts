@@ -35,6 +35,7 @@ export function createObservabilityRuleTypeRegistry(ruleTypeRegistry: RuleTypeRe
     getFormatter: (typeId: string) => {
       return formatters.find((formatter) => formatter.typeId === typeId)?.fn;
     },
+    list: () => formatters.map((formatter) => formatter.typeId),
   };
 }
 

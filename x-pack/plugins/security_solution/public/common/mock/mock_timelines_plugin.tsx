@@ -4,15 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+
+const useAddToTimeline = () => ({
+  beginDrag: jest.fn(),
+  cancelDrag: jest.fn(),
+  dragToLocation: jest.fn(),
+  endDrag: jest.fn(),
+  hasDraggableLock: jest.fn(),
+  startDragToTimeline: jest.fn(),
+});
 
 export const mockTimelines = {
   getLastUpdated: jest.fn(),
   getLoadingPanel: jest.fn(),
-  getFieldBrowser: jest.fn().mockReturnValue(<div data-test-subj="field-browser" />),
-  getUseDraggableKeyboardWrapper: () =>
-    jest.fn().mockReturnValue({
-      onBlur: jest.fn(),
-      onKeyDown: jest.fn(),
-    }),
+  getFieldBrowser: jest.fn(),
+  getUseAddToTimeline: () => useAddToTimeline,
 };

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
   const testSubjects = getService('testSubjects');
@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
     });
@@ -71,6 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Overview',
           'Alerts',
           'Uptime',
+          'Synthetics',
           'Stack Management',
         ]);
       });
@@ -123,7 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows uptime navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Alerts', 'Uptime', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Uptime', 'Synthetics', 'Stack Management']);
       });
 
       it('can navigate to Uptime app', async () => {
@@ -136,8 +137,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/104249
-    describe.skip('no uptime privileges', () => {
+    describe('no uptime privileges', () => {
       before(async () => {
         await security.role.create('no_uptime_privileges_role', {
           elasticsearch: {

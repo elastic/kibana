@@ -1,0 +1,11 @@
+type: string
+description: The type of connector.
+enum:
+  - .cases-webhook
+  - .jira
+  - .none
+  - .resilient
+  - .servicenow
+  - .servicenow-sir
+  - .swimlane
+example: .none

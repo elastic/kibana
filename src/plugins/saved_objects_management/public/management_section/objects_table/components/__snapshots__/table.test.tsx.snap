@@ -32,6 +32,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           iconType="trash"
           isDisabled={true}
           onClick={[Function]}
+          size="m"
           title="Unable to delete saved objects"
         >
           <FormattedMessage
@@ -44,10 +45,12 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           anchorPosition="downCenter"
           button={
             <EuiButton
+              color="primary"
               iconSide="right"
               iconType="arrowDown"
               isDisabled={false}
               onClick={[Function]}
+              size="m"
             >
               <FormattedMessage
                 defaultMessage="Export"
@@ -57,7 +60,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             </EuiButton>
           }
           closePopover={[Function]}
-          display="inlineBlock"
+          display="inline-block"
           hasArrow={true}
           isOpen={false}
           ownFocus={true}
@@ -66,7 +69,6 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           <EuiFormRow
             describedByIds={Array []}
             display="row"
-            fullWidth={false}
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
@@ -94,15 +96,16 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           <EuiFormRow
             describedByIds={Array []}
             display="row"
-            fullWidth={false}
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
             labelType="label"
           >
             <EuiButton
+              color="primary"
               fill={true}
               iconType="exportAction"
               onClick={[Function]}
+              size="m"
             >
               <FormattedMessage
                 defaultMessage="Export"
@@ -131,7 +134,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "field": "type",
             "name": "Type",
             "render": [Function],
-            "sortable": false,
+            "sortable": true,
             "width": "50px",
           },
           Object {
@@ -142,6 +145,13 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "name": "Title",
             "render": [Function],
             "sortable": false,
+          },
+          Object {
+            "field": "updated_at",
+            "name": "Last updated",
+            "render": [Function],
+            "sortable": true,
+            "width": "150px",
           },
           Object {
             "actions": Array [
@@ -213,6 +223,14 @@ exports[`Table prevents saved objects from being deleted 1`] = `
       selection={
         Object {
           "onSelectionChange": [Function],
+        }
+      }
+      sorting={
+        Object {
+          "sort": Object {
+            "direction": "desc",
+            "field": "updated_at",
+          },
         }
       }
       tableLayout="fixed"
@@ -253,6 +271,7 @@ exports[`Table should render normally 1`] = `
           iconType="trash"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Delete"
@@ -264,10 +283,12 @@ exports[`Table should render normally 1`] = `
           anchorPosition="downCenter"
           button={
             <EuiButton
+              color="primary"
               iconSide="right"
               iconType="arrowDown"
               isDisabled={false}
               onClick={[Function]}
+              size="m"
             >
               <FormattedMessage
                 defaultMessage="Export"
@@ -277,7 +298,7 @@ exports[`Table should render normally 1`] = `
             </EuiButton>
           }
           closePopover={[Function]}
-          display="inlineBlock"
+          display="inline-block"
           hasArrow={true}
           isOpen={false}
           ownFocus={true}
@@ -286,7 +307,6 @@ exports[`Table should render normally 1`] = `
           <EuiFormRow
             describedByIds={Array []}
             display="row"
-            fullWidth={false}
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
@@ -314,15 +334,16 @@ exports[`Table should render normally 1`] = `
           <EuiFormRow
             describedByIds={Array []}
             display="row"
-            fullWidth={false}
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
             labelType="label"
           >
             <EuiButton
+              color="primary"
               fill={true}
               iconType="exportAction"
               onClick={[Function]}
+              size="m"
             >
               <FormattedMessage
                 defaultMessage="Export"
@@ -351,7 +372,7 @@ exports[`Table should render normally 1`] = `
             "field": "type",
             "name": "Type",
             "render": [Function],
-            "sortable": false,
+            "sortable": true,
             "width": "50px",
           },
           Object {
@@ -362,6 +383,13 @@ exports[`Table should render normally 1`] = `
             "name": "Title",
             "render": [Function],
             "sortable": false,
+          },
+          Object {
+            "field": "updated_at",
+            "name": "Last updated",
+            "render": [Function],
+            "sortable": true,
+            "width": "150px",
           },
           Object {
             "actions": Array [
@@ -433,6 +461,14 @@ exports[`Table should render normally 1`] = `
       selection={
         Object {
           "onSelectionChange": [Function],
+        }
+      }
+      sorting={
+        Object {
+          "sort": Object {
+            "direction": "desc",
+            "field": "updated_at",
+          },
         }
       }
       tableLayout="fixed"

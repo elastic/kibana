@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SetSignalsStatusSchema } from './set_signal_status_schema';
+import type { SetSignalsStatusSchema } from './set_signal_status_schema';
 
 export const validateId = (signalStatus: SetSignalsStatusSchema): string[] => {
   if (signalStatus.signal_ids != null && signalStatus.query != null) {

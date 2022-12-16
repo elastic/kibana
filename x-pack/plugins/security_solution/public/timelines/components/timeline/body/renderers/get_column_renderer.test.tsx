@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import '../../../../../common/mock/match_media';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
@@ -20,6 +20,7 @@ import { columnRenderers } from '.';
 import { getColumnRenderer } from './get_column_renderer';
 import { getValues, findItem, deleteItemIdx } from './helpers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { TimelineId } from '../../../../../../common/types';
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -48,7 +49,7 @@ describe('get_column_renderer', () => {
       eventId: _id,
       values: getValues(columnName, nonSuricata),
       field: defaultHeaders[1],
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
 
     const wrapper = shallow(<span>{column}</span>);
@@ -63,7 +64,7 @@ describe('get_column_renderer', () => {
       eventId: _id,
       values: getValues(columnName, nonSuricata),
       field: defaultHeaders[1],
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <TestProviders>
@@ -83,7 +84,7 @@ describe('get_column_renderer', () => {
       eventId: _id,
       values: getValues(columnName, nonSuricata),
       field: defaultHeaders[7],
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <TestProviders>
@@ -101,7 +102,7 @@ describe('get_column_renderer', () => {
       eventId: _id,
       values: getValues(columnName, nonSuricata),
       field: defaultHeaders[7],
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <TestProviders>

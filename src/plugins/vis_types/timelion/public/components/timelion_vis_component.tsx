@@ -16,6 +16,7 @@ import {
   TooltipType,
   LegendPositionConfig,
   LayoutDirection,
+  Placement,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
@@ -23,7 +24,7 @@ import { RangeFilterParams } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 
-import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
 import {
@@ -57,6 +58,8 @@ interface TimelionVisComponentProps {
   onBrushEvent: (rangeFilterParams: RangeFilterParams) => void;
   renderComplete: IInterpreterRenderHandlers['done'];
   ariaLabel?: string;
+  syncTooltips?: boolean;
+  syncCursor?: boolean;
 }
 
 const DefaultYAxis = () => (
@@ -101,6 +104,8 @@ export const TimelionVisComponent = ({
   renderComplete,
   onBrushEvent,
   ariaLabel,
+  syncTooltips,
+  syncCursor,
 }: TimelionVisComponentProps) => {
   const kibana = useKibana<TimelionVisDependencies>();
   const chartRef = useRef<Chart>(null);
@@ -200,7 +205,10 @@ export const TimelionVisComponent = ({
           showLegendExtra={true}
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
-          onPointerUpdate={handleCursorUpdate}
+          onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
+          externalPointerEvents={{
+            tooltip: { visible: syncTooltips, placement: Placement.Right },
+          }}
           theme={chartTheme}
           baseTheme={chartBaseTheme}
           tooltip={{
@@ -208,7 +216,6 @@ export const TimelionVisComponent = ({
             headerFormatter: ({ value }) => tickFormat(value),
             type: TooltipType.VerticalCursor,
           }}
-          externalPointerEvents={{ tooltip: { visible: false } }}
           ariaLabel={ariaLabel}
           ariaUseDefaultSummary={!ariaLabel}
         />

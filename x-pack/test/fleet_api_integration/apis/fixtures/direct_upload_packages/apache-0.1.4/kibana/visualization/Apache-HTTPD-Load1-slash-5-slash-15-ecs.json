@@ -1,0 +1,25 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[]}"
+    },
+    "savedSearchRefName": "search_0",
+    "title": "Load1/5/15 [Metrics Apache] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[{\"id\":\"1\",\"params\":{\"customLabel\":\"Load 5\",\"field\":\"apache.status.load.5\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"id\":\"2\",\"params\":{\"extended_bounds\":{},\"field\":\"@timestamp\",\"interval\":\"auto\",\"min_doc_count\":1},\"schema\":\"segment\",\"type\":\"date_histogram\"},{\"id\":\"3\",\"params\":{\"customLabel\":\"Load 1\",\"field\":\"apache.status.load.1\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"id\":\"4\",\"params\":{\"customLabel\":\"Load 15\",\"field\":\"apache.status.load.15\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"id\":\"5\",\"params\":{\"customLabel\":\"Hostname\",\"field\":\"apache.status.hostname\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"split\",\"type\":\"terms\"}],\"listeners\":{},\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,\"interpolate\":\"linear\",\"radiusRatio\":9,\"row\":true,\"scale\":\"linear\",\"setYExtents\":false,\"shareYAxis\":true,\"showCircles\":true,\"smoothLines\":false,\"times\":[],\"yAxis\":{}},\"title\":\"Apache HTTPD - Load1/5/15 ECS\",\"type\":\"line\"}"
+  },
+  "id": "Apache-HTTPD-Load1-slash-5-slash-15-ecs",
+  "migrationVersion": {
+    "visualization": "7.8.0"
+  },
+  "references": [
+    {
+      "id": "Apache-HTTPD-ecs",
+      "name": "search_0",
+      "type": "search"
+    }
+  ],
+  "type": "visualization"
+}

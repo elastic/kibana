@@ -7,11 +7,12 @@
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { CaseStatuses, CommentType, ConnectorTypes } from '../../../common/api';
+import type { CasePostRequest } from '../../../common/api';
+import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../../../common/api';
 import { createCaseSavedObjectResponse } from '../test_utils';
 import { transformSavedObjectToExternalModel } from '../cases/transform';
 
-export const casePayload = {
+export const casePayload: CasePostRequest = {
   title: 'Case SIR',
   tags: ['sir'],
   description: 'testing sir',
@@ -30,7 +31,9 @@ export const casePayload = {
     },
   },
   settings: { syncAlerts: true },
+  severity: CaseSeverity.LOW,
   owner: SECURITY_SOLUTION_OWNER,
+  assignees: [{ uid: '1' }],
 };
 
 export const externalService = {
@@ -69,8 +72,33 @@ export const updatedCases = [
       description: 'updated desc',
       tags: ['one', 'two'],
       settings: { syncAlerts: false },
+      severity: CaseSeverity.CRITICAL,
     },
     references: [],
+  },
+];
+
+export const originalCasesWithAssignee = [
+  { ...createCaseSavedObjectResponse({ overrides: { assignees: [{ uid: '1' }] } }), id: '1' },
+].map((so) => transformSavedObjectToExternalModel(so));
+
+export const updatedAssigneesCases = [
+  {
+    ...createCaseSavedObjectResponse(),
+    id: '1',
+    attributes: {
+      assignees: [{ uid: '1' }],
+    },
+  },
+];
+
+export const updatedTagsCases = [
+  {
+    ...createCaseSavedObjectResponse(),
+    id: '1',
+    attributes: {
+      tags: ['a', 'b'],
+    },
   },
 ];
 

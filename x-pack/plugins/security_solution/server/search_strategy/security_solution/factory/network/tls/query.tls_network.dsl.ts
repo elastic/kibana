@@ -8,12 +8,12 @@
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
-import {
+import type {
   Direction,
   NetworkTlsRequestOptions,
-  NetworkTlsFields,
   SortField,
 } from '../../../../../../common/search_strategy';
+import { NetworkTlsFields } from '../../../../../../common/search_strategy';
 
 const getAggs = (querySize: number, sort: SortField<NetworkTlsFields>) => ({
   count: {

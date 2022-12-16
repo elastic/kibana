@@ -4,7 +4,7 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
+    "allowJs": true
   },
   "include": [
     "common/**/*",
@@ -13,7 +13,7 @@
     "../../../../typings/**/*",
     "*.ts"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../core/tsconfig.json" },
     { "path": "../../charts/tsconfig.json" },
     { "path": "../../data/tsconfig.json" },
@@ -23,7 +23,6 @@
     { "path": "../../dashboard/tsconfig.json" },
     { "path": "../../kibana_utils/tsconfig.json" },
     { "path": "../../kibana_react/tsconfig.json" },
-    { "path": "../../usage_collection/tsconfig.json" },
     { "path": "../../unified_search/tsconfig.json" }
   ]
 }

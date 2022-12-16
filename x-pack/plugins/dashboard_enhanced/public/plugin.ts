@@ -30,10 +30,10 @@ export interface StartDependencies {
   dashboard: DashboardStart;
 }
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupContract {}
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartContract {}
 
 export class DashboardEnhancedPlugin

@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`indexpattern_datasource utils cloneLayer should clone layer with renewing ids 1`] = `
+Object {
+  "a": Object {
+    "columnOrder": Array [
+      "899ee4b6-3147-4d45-94bf-ea9c02e55d28",
+      "ae62cfc8-faa5-4096-a30c-f92ac59922a0",
+    ],
+    "columns": Object {
+      "899ee4b6-3147-4d45-94bf-ea9c02e55d28": Object {
+        "params": Object {
+          "orderBy": Object {
+            "columnId": "ae62cfc8-faa5-4096-a30c-f92ac59922a0",
+            "type": "column",
+          },
+          "orderDirection": "desc",
+        },
+      },
+      "ae62cfc8-faa5-4096-a30c-f92ac59922a0": Object {
+        "params": Object {
+          "emptyAsNull": true,
+        },
+      },
+    },
+    "incompleteColumns": Object {},
+    "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+  },
+  "b": Object {
+    "columnOrder": Array [
+      "899ee4b6-3147-4d45-94bf-ea9c02e55d28C",
+      "ae62cfc8-faa5-4096-a30c-f92ac59922a0C",
+    ],
+    "columns": Object {
+      "899ee4b6-3147-4d45-94bf-ea9c02e55d28C": Object {
+        "params": Object {
+          "orderBy": Object {
+            "columnId": "ae62cfc8-faa5-4096-a30c-f92ac59922a0C",
+            "type": "column",
+          },
+          "orderDirection": "desc",
+        },
+      },
+      "ae62cfc8-faa5-4096-a30c-f92ac59922a0C": Object {
+        "params": Object {
+          "emptyAsNull": true,
+        },
+      },
+    },
+    "incompleteColumns": Object {},
+    "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+  },
+}
+`;

@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
-import { SavedObject } from '@kbn/core/public';
+import type { SavedObject } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import {
@@ -72,8 +72,8 @@ export class SampleDataRegistry {
     const router = core.http.createRouter();
     const logger = this.initContext.logger.get('sampleData');
     createListRoute(router, this.sampleDatasets, this.appLinksMap, logger);
-    createInstallRoute(router, this.sampleDatasets, logger, usageTracker);
-    createUninstallRoute(router, this.sampleDatasets, logger, usageTracker);
+    createInstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
+    createUninstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
 
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);

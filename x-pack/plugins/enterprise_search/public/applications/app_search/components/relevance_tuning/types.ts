@@ -65,9 +65,13 @@ export interface SearchField {
   weight: number;
 }
 
-export interface SearchSettings {
+export interface SearchSettingsRequest {
   boosts: Record<string, Boost[]>;
   search_fields: Record<string, SearchField>;
   result_fields?: object;
   precision: number;
+}
+
+export interface SearchSettings extends SearchSettingsRequest {
+  precision_enabled: boolean;
 }

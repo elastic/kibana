@@ -76,7 +76,7 @@ function MetricVisualization(props) {
 
   return (
     <div className="tvbVis" style={style}>
-      <Metric {...params} />
+      <Metric {...params} initialRender={props.initialRender} />
     </div>
   );
 }

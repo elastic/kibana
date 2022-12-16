@@ -8,45 +8,12 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { HostsTableType } from '../../../hosts/store/model';
-import { RouteSpyState } from './types';
+import { HostsTableType } from '../../../explore/hosts/store/model';
 import { ManageRoutesSpy } from './manage_spy_routes';
 import { SpyRouteComponent } from './spy_routes';
 import { useRouteSpy } from './use_route_spy';
-
-type Action = 'PUSH' | 'POP' | 'REPLACE';
-const pop: Action = 'POP';
-
-const defaultLocation = {
-  hash: '',
-  pathname: '/hosts',
-  search: '',
-  state: '',
-};
-
-export const mockHistory = {
-  action: pop,
-  block: jest.fn(),
-  createHref: jest.fn(),
-  go: jest.fn(),
-  goBack: jest.fn(),
-  goForward: jest.fn(),
-  length: 2,
-  listen: jest.fn(),
-  location: defaultLocation,
-  push: jest.fn(),
-  replace: jest.fn(),
-};
-
-const dispatchMock = jest.fn();
-const mockRoutes: RouteSpyState = {
-  pageName: '',
-  detailName: undefined,
-  tabName: undefined,
-  search: '',
-  pathName: '/',
-  history: mockHistory,
-};
+import { generateHistoryMock, generateRoutesMock } from './mocks';
+import { SecurityPageName } from '../../../app/types';
 
 const mockUseRouteSpy: jest.Mock = useRouteSpy as jest.Mock;
 jest.mock('./use_route_spy', () => ({
@@ -54,19 +21,25 @@ jest.mock('./use_route_spy', () => ({
 }));
 
 describe('Spy Routes', () => {
+  let mockRoutes: ReturnType<typeof generateRoutesMock>;
+  let mockHistoryValue: ReturnType<typeof generateHistoryMock>;
+  let dispatchMock: jest.Mock;
+
+  beforeEach(() => {
+    mockRoutes = generateRoutesMock();
+    mockHistoryValue = generateHistoryMock();
+    dispatchMock = jest.fn();
+    mockUseRouteSpy.mockImplementation(() => [mockRoutes, dispatchMock]);
+  });
+
   describe('At Initialization of the app', () => {
-    beforeEach(() => {
-      dispatchMock.mockReset();
-      dispatchMock.mockClear();
-    });
-    test('Make sure we update search state first', () => {
+    test('Make sure we update search state first', async () => {
       const pathname = '/';
-      mockUseRouteSpy.mockImplementation(() => [mockRoutes, dispatchMock]);
       mount(
         <ManageRoutesSpy>
           <SpyRouteComponent
             location={{ hash: '', pathname, search: '?importantQueryString="really"', state: '' }}
-            history={mockHistory}
+            history={mockHistoryValue}
             match={{
               isExact: false,
               path: pathname,
@@ -93,12 +66,11 @@ describe('Spy Routes', () => {
 
     test('Make sure we update search state first and then update the route but keeping the initial search', () => {
       const pathname = '/hosts/allHosts';
-      mockUseRouteSpy.mockImplementation(() => [mockRoutes, dispatchMock]);
       mount(
         <ManageRoutesSpy>
           <SpyRouteComponent
             location={{ hash: '', pathname, search: '?importantQueryString="really"', state: '' }}
-            history={mockHistory}
+            history={mockHistoryValue}
             match={{
               isExact: false,
               path: pathname,
@@ -110,7 +82,7 @@ describe('Spy Routes', () => {
                 flowTarget: undefined,
               },
             }}
-            pageName="hosts"
+            pageName={SecurityPageName.hosts}
           />
         </ManageRoutesSpy>
       );
@@ -127,7 +99,7 @@ describe('Spy Routes', () => {
           route: {
             pageName: 'hosts',
             detailName: undefined,
-            history: mockHistory,
+            history: mockHistoryValue,
             pathName: pathname,
             tabName: HostsTableType.hosts,
           },
@@ -138,18 +110,13 @@ describe('Spy Routes', () => {
   });
 
   describe('When app is running', () => {
-    beforeEach(() => {
-      dispatchMock.mockReset();
-      dispatchMock.mockClear();
-    });
     test('Update route should be updated when there is changed detected', () => {
       const pathname = '/hosts/allHosts';
       const newPathname = `hosts/${HostsTableType.authentications}`;
-      mockUseRouteSpy.mockImplementation(() => [mockRoutes, dispatchMock]);
       const wrapper = mount(
         <SpyRouteComponent
           location={{ hash: '', pathname, search: '?importantQueryString="really"', state: '' }}
-          history={mockHistory}
+          history={mockHistoryValue}
           match={{
             isExact: false,
             path: pathname,
@@ -161,7 +128,7 @@ describe('Spy Routes', () => {
               flowTarget: undefined,
             },
           }}
-          pageName="hosts"
+          pageName={SecurityPageName.hosts}
         />
       );
 
@@ -180,7 +147,7 @@ describe('Spy Routes', () => {
           path: newPathname,
           url: newPathname,
           params: {
-            pageName: 'hosts',
+            pageName: SecurityPageName.hosts,
             detailName: undefined,
             tabName: HostsTableType.authentications,
             search: '',
@@ -195,8 +162,8 @@ describe('Spy Routes', () => {
         {
           route: {
             detailName: undefined,
-            history: mockHistory,
-            pageName: 'hosts',
+            history: mockHistoryValue,
+            pageName: SecurityPageName.hosts,
             pathName: newPathname,
             tabName: HostsTableType.authentications,
             search: '?updated="true"',

@@ -58,7 +58,8 @@ describe('Geohash Agg', () => {
       ],
       {
         typesRegistry: mockAggTypesRegistry(),
-      }
+      },
+      jest.fn()
     );
   };
 

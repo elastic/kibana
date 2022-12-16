@@ -12,7 +12,6 @@ import {
 } from '../../../__mocks__/kea_logic';
 import { contentSources } from '../../__mocks__/content_sources.mock';
 import { groups } from '../../__mocks__/groups.mock';
-import { users } from '../../__mocks__/users.mock';
 import { mockGroupsValues } from './__mocks__/groups_logic.mock';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -49,13 +48,12 @@ describe('GroupsLogic', () => {
   describe('actions', () => {
     describe('onInitializeGroups', () => {
       it('sets reducers', () => {
-        GroupsLogic.actions.onInitializeGroups({ contentSources, users });
+        GroupsLogic.actions.onInitializeGroups({ contentSources });
 
         expect(GroupsLogic.values).toEqual({
           ...mockGroupsValues,
           groupsDataLoading: false,
           contentSources,
-          users,
         });
       });
     });
@@ -103,59 +101,6 @@ describe('GroupsLogic', () => {
       });
     });
 
-    describe('addFilteredUser', () => {
-      it('sets reducers', () => {
-        GroupsLogic.actions.addFilteredUser('foo');
-        GroupsLogic.actions.addFilteredUser('bar');
-        GroupsLogic.actions.addFilteredUser('baz');
-
-        expect(GroupsLogic.values).toEqual({
-          ...mockGroupsValues,
-          hasFiltersSet: true,
-          filteredUsers: ['bar', 'baz', 'foo'],
-        });
-      });
-    });
-
-    describe('removeFilteredUser', () => {
-      it('sets reducers', () => {
-        GroupsLogic.actions.addFilteredUser('foo');
-        GroupsLogic.actions.addFilteredUser('bar');
-        GroupsLogic.actions.addFilteredUser('baz');
-        GroupsLogic.actions.removeFilteredUser('foo');
-
-        expect(GroupsLogic.values).toEqual({
-          ...mockGroupsValues,
-          hasFiltersSet: true,
-          filteredUsers: ['bar', 'baz'],
-        });
-      });
-    });
-
-    describe('setGroupUsers', () => {
-      it('sets reducers', () => {
-        GroupsLogic.actions.setGroupUsers(users);
-
-        expect(GroupsLogic.values).toEqual({
-          ...mockGroupsValues,
-          allGroupUsersLoading: false,
-          allGroupUsers: users,
-        });
-      });
-    });
-
-    describe('setAllGroupLoading', () => {
-      it('sets reducer', () => {
-        GroupsLogic.actions.setAllGroupLoading(true);
-
-        expect(GroupsLogic.values).toEqual({
-          ...mockGroupsValues,
-          allGroupUsersLoading: true,
-          allGroupUsers: [],
-        });
-      });
-    });
-
     describe('setFilterValue', () => {
       it('sets reducer', () => {
         GroupsLogic.actions.setFilterValue('foo');
@@ -190,7 +135,6 @@ describe('GroupsLogic', () => {
           newGroup: groups[0],
           newGroupNameErrors: [],
           filteredSources: [],
-          filteredUsers: [],
           groupsMeta: DEFAULT_META,
         });
       });
@@ -230,19 +174,6 @@ describe('GroupsLogic', () => {
         expect(GroupsLogic.values).toEqual({
           ...mockGroupsValues,
           filterSourcesDropdownOpen: false,
-        });
-      });
-    });
-
-    describe('closeFilterUsersDropdown', () => {
-      it('sets reducer', () => {
-        // Open dropdown first
-        GroupsLogic.actions.toggleFilterUsersDropdown();
-        GroupsLogic.actions.closeFilterUsersDropdown();
-
-        expect(GroupsLogic.values).toEqual({
-          ...mockGroupsValues,
-          filterUsersDropdownOpen: false,
         });
       });
     });
@@ -294,7 +225,6 @@ describe('GroupsLogic', () => {
       const search = {
         query: '',
         content_source_ids: [],
-        user_ids: [],
       };
 
       const payload = {
@@ -309,7 +239,7 @@ describe('GroupsLogic', () => {
       };
 
       beforeAll(() => {
-        jest.useFakeTimers();
+        jest.useFakeTimers({ legacyFakeTimers: true });
       });
 
       afterAll(() => {
@@ -349,22 +279,6 @@ describe('GroupsLogic', () => {
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-      });
-    });
-
-    describe('fetchGroupUsers', () => {
-      it('calls API and sets values', async () => {
-        const setGroupUsersSpy = jest.spyOn(GroupsLogic.actions, 'setGroupUsers');
-        http.get.mockReturnValue(Promise.resolve(users));
-
-        GroupsLogic.actions.fetchGroupUsers('123');
-        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/groups/123/group_users');
-        await nextTick();
-        expect(setGroupUsersSpy).toHaveBeenCalledWith(users);
-      });
-
-      itShowsServerErrorAsFlashMessage(http.get, () => {
-        GroupsLogic.actions.fetchGroupUsers('123');
       });
     });
 
@@ -430,7 +344,6 @@ describe('GroupsLogic', () => {
         expect(GroupsLogic.values).toEqual({
           ...mockGroupsValues,
           filteredSources: [],
-          filteredUsers: [],
           filterValue: '',
           groupsMeta: DEFAULT_META,
         });
@@ -445,18 +358,6 @@ describe('GroupsLogic', () => {
         expect(GroupsLogic.values).toEqual({
           ...mockGroupsValues,
           filterSourcesDropdownOpen: true,
-        });
-        expect(clearFlashMessages).toHaveBeenCalled();
-      });
-    });
-
-    describe('toggleFilterUsersDropdown', () => {
-      it('sets reducer and clears flash messages', () => {
-        GroupsLogic.actions.toggleFilterUsersDropdown();
-
-        expect(GroupsLogic.values).toEqual({
-          ...mockGroupsValues,
-          filterUsersDropdownOpen: true,
         });
         expect(clearFlashMessages).toHaveBeenCalled();
       });

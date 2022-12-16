@@ -1,0 +1,108 @@
+1,55c1,6
+< describe('utils', function() {
+<   describe('#SafeString', function() {
+<     it('constructing a safestring from a string and checking its type', function() {
+<       var safe = new Handlebars.SafeString('testing 1, 2, 3');
+<       if (!(safe instanceof Handlebars.SafeString)) {
+<         throw new Error('Must be instance of SafeString');
+<       }
+<       equals(
+<         safe.toString(),
+<         'testing 1, 2, 3',
+<         'SafeString is equivalent to its underlying string'
+<       );
+<     });
+< 
+<     it('it should not escape SafeString properties', function() {
+<       var name = new Handlebars.SafeString('<em>Sean O&#x27;Malley</em>');
+< 
+<       expectTemplate('{{name}}')
+<         .withInput({ name: name })
+<         .toCompileTo('<em>Sean O&#x27;Malley</em>');
+<     });
+<   });
+< 
+<   describe('#escapeExpression', function() {
+<     it('shouhld escape html', function() {
+<       equals(
+<         Handlebars.Utils.escapeExpression('foo<&"\'>'),
+<         'foo&lt;&amp;&quot;&#x27;&gt;'
+<       );
+<       equals(Handlebars.Utils.escapeExpression('foo='), 'foo&#x3D;');
+<     });
+<     it('should not escape SafeString', function() {
+<       var string = new Handlebars.SafeString('foo<&"\'>');
+<       equals(Handlebars.Utils.escapeExpression(string), 'foo<&"\'>');
+< 
+<       var obj = {
+<         toHTML: function() {
+<           return 'foo<&"\'>';
+<         }
+<       };
+<       equals(Handlebars.Utils.escapeExpression(obj), 'foo<&"\'>');
+<     });
+<     it('should handle falsy', function() {
+<       equals(Handlebars.Utils.escapeExpression(''), '');
+<       equals(Handlebars.Utils.escapeExpression(undefined), '');
+<       equals(Handlebars.Utils.escapeExpression(null), '');
+< 
+<       equals(Handlebars.Utils.escapeExpression(false), 'false');
+<       equals(Handlebars.Utils.escapeExpression(0), '0');
+<     });
+<     it('should handle empty objects', function() {
+<       equals(Handlebars.Utils.escapeExpression({}), {}.toString());
+<       equals(Handlebars.Utils.escapeExpression([]), [].toString());
+<     });
+<   });
+---
+> /*
+>  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+>  * and may include modifications made by Elasticsearch B.V.
+>  * Elasticsearch B.V. licenses this file to you under the MIT License.
+>  * See `packages/kbn-handlebars/LICENSE` for more information.
+>  */
+57,64c8,9
+<   describe('#isEmpty', function() {
+<     it('should not be empty', function() {
+<       equals(Handlebars.Utils.isEmpty(undefined), true);
+<       equals(Handlebars.Utils.isEmpty(null), true);
+<       equals(Handlebars.Utils.isEmpty(false), true);
+<       equals(Handlebars.Utils.isEmpty(''), true);
+<       equals(Handlebars.Utils.isEmpty([]), true);
+<     });
+---
+> import Handlebars from '../..';
+> import { expectTemplate } from '../__jest__/test_bench';
+66,70c11,16
+<     it('should be empty', function() {
+<       equals(Handlebars.Utils.isEmpty(0), false);
+<       equals(Handlebars.Utils.isEmpty([1]), false);
+<       equals(Handlebars.Utils.isEmpty('foo'), false);
+<       equals(Handlebars.Utils.isEmpty({ bar: 1 }), false);
+---
+> describe('utils', function () {
+>   describe('#SafeString', function () {
+>     it('constructing a safestring from a string and checking its type', function () {
+>       const safe = new Handlebars.SafeString('testing 1, 2, 3');
+>       expect(safe).toBeInstanceOf(Handlebars.SafeString);
+>       expect(safe.toString()).toEqual('testing 1, 2, 3');
+72,83d17
+<   });
+< 
+<   describe('#extend', function() {
+<     it('should ignore prototype values', function() {
+<       function A() {
+<         this.a = 1;
+<       }
+<       A.prototype.b = 4;
+< 
+<       var b = { b: 2 };
+< 
+<       Handlebars.Utils.extend(b, new A());
+85,86c19,21
+<       equals(b.a, 1);
+<       equals(b.b, 2);
+---
+>     it('it should not escape SafeString properties', function () {
+>       const name = new Handlebars.SafeString('<em>Sean O&#x27;Malley</em>');
+>       expectTemplate('{{name}}').withInput({ name }).toCompileTo('<em>Sean O&#x27;Malley</em>');

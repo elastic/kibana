@@ -14,8 +14,10 @@ import type {
   ISearchOptions,
   ISearchStart,
 } from '@kbn/data-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { getUniqGeoOrStrExamples } from '../../../common/util/example_utils';
 import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type {
   Field,
   FieldExamples,
@@ -90,20 +92,11 @@ export const fetchFieldsExamples = (
 
             if (body.hits.total > 0) {
               const hits = body.hits.hits;
-              for (let i = 0; i < hits.length; i++) {
-                // Use lodash get() to support field names containing dots.
-                const doc: object[] | undefined = get(hits[i].fields, field.fieldName);
-                // the results from fields query is always an array
-                if (Array.isArray(doc) && doc.length > 0) {
-                  const example = doc[0];
-                  if (example !== undefined && stats.examples.indexOf(example) === -1) {
-                    stats.examples.push(example);
-                    if (stats.examples.length === maxExamples) {
-                      break;
-                    }
-                  }
-                }
-              }
+              const processedDocs = hits.map((hit: SearchHit) => {
+                const doc: object[] | undefined = get(hit.fields, field.fieldName);
+                return Array.isArray(doc) && doc.length > 0 ? doc[0] : doc;
+              });
+              stats.examples = getUniqGeoOrStrExamples(processedDocs, maxExamples);
             }
 
             return stats;

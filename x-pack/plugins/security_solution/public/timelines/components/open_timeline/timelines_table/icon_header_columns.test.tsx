@@ -12,8 +12,9 @@ import { ThemeProvider } from 'styled-components';
 
 import '../../../../common/mock/match_media';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
-import { TimelinesTable, TimelinesTableProps } from '.';
-import { OpenTimelineResult } from '../types';
+import type { TimelinesTableProps } from '.';
+import { TimelinesTable } from '.';
+import type { OpenTimelineResult } from '../types';
 import { getMockTimelinesTableProps } from './mocks';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 

@@ -37,6 +37,11 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
           unknown: 0,
           warning: 0,
         },
+        rule_last_run_outcome: {
+          succeeded: 0,
+          warning: 0,
+          failed: 0,
+        },
         rule_muted_status: {
           muted: 0,
           unmuted: 0,
@@ -44,6 +49,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         rule_snoozed_status: {
           snoozed: 0,
         },
+        rule_tags: [],
       });
     });
 
@@ -115,6 +121,11 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
           unknown: 0,
           warning: 0,
         },
+        rule_last_run_outcome: {
+          succeeded: 5,
+          warning: 0,
+          failed: 2,
+        },
         rule_muted_status: {
           muted: 0,
           unmuted: 7,
@@ -122,6 +133,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         rule_snoozed_status: {
           snoozed: 0,
         },
+        rule_tags: ['foo'],
       });
     });
 
@@ -137,6 +149,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
               {
                 rule_type_id: 'test.noop',
                 schedule: { interval: '1s' },
+                tags: ['a', 'b'],
               },
               'ok'
             );
@@ -153,6 +166,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
                 params: {
                   pattern: { instance: new Array(100).fill(true) },
                 },
+                tags: ['a', 'c', 'f'],
               },
               'active'
             );
@@ -166,6 +180,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
               {
                 rule_type_id: 'test.throw',
                 schedule: { interval: '1s' },
+                tags: ['b', 'c', 'd'],
               },
               'error'
             );
@@ -195,6 +210,11 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
             disabled: 0,
             enabled: 7,
           },
+          ruleLastRunOutcome: {
+            succeeded: 5,
+            warning: 0,
+            failed: 2,
+          },
           ruleMutedStatus: {
             muted: 0,
             unmuted: 7,
@@ -202,6 +222,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
           ruleSnoozedStatus: {
             snoozed: 0,
           },
+          ruleTags: ['a', 'b', 'c', 'd', 'f'],
         });
       });
     });

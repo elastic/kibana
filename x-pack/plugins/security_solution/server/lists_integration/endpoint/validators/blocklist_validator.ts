@@ -7,15 +7,16 @@
 
 import { cloneDeep, uniq } from 'lodash';
 import { ENDPOINT_BLOCKLISTS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { schema, Type, TypeOf } from '@kbn/config-schema';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { Type, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import {
+import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import { BaseValidator } from './base_validator';
-import { ExceptionItemLikeOptions } from '../types';
+import type { ExceptionItemLikeOptions } from '../types';
 import { isValidHash } from '../../../../common/endpoint/service/artifacts/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
@@ -212,10 +213,18 @@ export class BlocklistValidator extends BaseValidator {
     return item.listId === ENDPOINT_BLOCKLISTS_LIST_ID;
   }
 
+  protected async validateHasWritePrivilege(): Promise<void> {
+    return super.validateHasPrivilege('canWriteBlocklist');
+  }
+
+  protected async validateHasReadPrivilege(): Promise<void> {
+    return super.validateHasPrivilege('canReadBlocklist');
+  }
+
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
 
     item.entries = removeDuplicateEntryValues(item.entries as BlocklistConditionEntry[]);
 
@@ -227,27 +236,27 @@ export class BlocklistValidator extends BaseValidator {
   }
 
   async validatePreDeleteItem(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
   }
 
   async validatePreGetOneItem(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreMultiListFind(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreExport(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreSingleListFind(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreGetListSummary(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreUpdateItem(
@@ -256,7 +265,7 @@ export class BlocklistValidator extends BaseValidator {
   ): Promise<UpdateExceptionListItemOptions> {
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
 
     _updatedItem.entries = removeDuplicateEntryValues(
       _updatedItem.entries as BlocklistConditionEntry[]

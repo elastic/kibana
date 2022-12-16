@@ -35,6 +35,10 @@ export interface SaveModalDashboardProps {
  */
 export type ExpressionInputEditorRef = MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
 
+export type OnExpressionInputEditorDidMount = (
+  editor: monaco.editor.IStandaloneCodeEditor | null
+) => void;
+
 /**
  * React Props for the ExpressionInput component.
  */
@@ -64,4 +68,6 @@ export interface ExpressionInputProps
    * (e.g. to determine if the editor is focused, etc).
    */
   editorRef?: ExpressionInputEditorRef;
+
+  onEditorDidMount?: OnExpressionInputEditorDidMount;
 }

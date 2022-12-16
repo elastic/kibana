@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortalProps } from './types';
 
@@ -16,7 +16,7 @@ export default function HeaderMenuPortal({
   setHeaderActionMenu,
   theme$,
 }: HeaderMenuPortalProps) {
-  const portalNode = useMemo(() => createPortalNode(), []);
+  const portalNode = useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {
     setHeaderActionMenu((element) => {

@@ -10,10 +10,12 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import { EuiResizeObserver } from '@elastic/eui';
-import reactcss from 'reactcss';
 
 import { getLastValue } from '../../../../common/last_value_utils';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
+import { RenderCounter } from '../../components/render_counter';
+
+import './_metric.scss';
 
 export class Metric extends Component {
   constructor(props) {
@@ -24,6 +26,7 @@ export class Metric extends Component {
       top: 0,
       translateX: 1,
       translateY: 1,
+      resized: false,
     };
     this.handleResize = this.handleResize.bind(this);
     this.checkResizeThrottled = _.throttle(() => {
@@ -44,35 +47,28 @@ export class Metric extends Component {
 
   handleResize() {
     // Bingo!
-    const newState = calculateCoordinates(this.inner, this.resize, this.state);
-    this.setState(newState);
+    this.setState({
+      ...calculateCoordinates(this.inner, this.resize, this.state),
+      resized: true,
+    });
   }
 
   render() {
-    const { metric, secondary } = this.props;
-    const { scale, translateX, translateY } = this.state;
+    const { metric, secondary, initialRender } = this.props;
+    const { scale, translateX, translateY, resized } = this.state;
     const primaryFormatter = (metric && (metric.tickFormatter || metric.formatter)) || ((n) => n);
     const primaryValue = primaryFormatter(getLastValue(metric?.data));
 
-    const styles = reactcss(
-      {
-        default: {
-          container: {},
-          inner: {
-            top: this.state.top || 0,
-            left: this.state.left || 0,
-            transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`,
-          },
-          primary_value: {},
-          secondary_value: {},
-        },
-        reversed: {
-          primary_value: {},
-          secondary_value: {},
-        },
+    const styles = {
+      container: {},
+      inner: {
+        top: `${this.state.top || 0}px`,
+        left: `${this.state.left || 0}px`,
+        transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`,
       },
-      this.props
-    );
+      primary_value: {},
+      secondary_value: {},
+    };
 
     if (this.props.backgroundColor) styles.container.backgroundColor = this.props.backgroundColor;
     if (metric && metric.color) styles.primary_value.color = metric.color;
@@ -110,7 +106,7 @@ export class Metric extends Component {
     }
 
     let className = 'tvbVisMetric';
-    if (!styles.container.backgroundColor) {
+    if (!this.props.backgroundColor) {
       className += ' tvbVisMetric--noBackground';
     }
     if (this.props.reversed) {
@@ -119,29 +115,31 @@ export class Metric extends Component {
     return (
       <EuiResizeObserver onResize={this.checkResizeThrottled}>
         {(resizeRef) => (
-          <div className={className} ref={resizeRef} style={styles.container}>
-            <div ref={(el) => (this.resize = el)} className="tvbVisMetric__resize">
-              <div
-                ref={(el) => (this.inner = el)}
-                className="tvbVisMetric__inner"
-                style={styles.inner}
-              >
-                <div className="tvbVisMetric__primary">
-                  {primaryLabel}
-                  <div
-                    style={styles.primary_value}
-                    data-test-subj="tsvbMetricValue"
-                    className="tvbVisMetric__value--primary"
-                  >
-                    {/* eslint-disable-next-line react/no-danger */}
-                    <span dangerouslySetInnerHTML={{ __html: primaryValue }} />
+          <RenderCounter initialRender={initialRender} postponeExecution={!resized}>
+            <div className={className} ref={resizeRef} style={styles.container}>
+              <div ref={(el) => (this.resize = el)} className="tvbVisMetric__resize">
+                <div
+                  ref={(el) => (this.inner = el)}
+                  className="tvbVisMetric__inner"
+                  style={styles.inner}
+                >
+                  <div className="tvbVisMetric__primary">
+                    {primaryLabel}
+                    <div
+                      style={styles.primary_value}
+                      data-test-subj="tsvbMetricValue"
+                      className="tvbVisMetric__value--primary"
+                    >
+                      {/* eslint-disable-next-line react/no-danger */}
+                      <span dangerouslySetInnerHTML={{ __html: primaryValue }} />
+                    </div>
                   </div>
+                  {secondarySnippet}
+                  {additionalLabel}
                 </div>
-                {secondarySnippet}
-                {additionalLabel}
               </div>
             </div>
-          </div>
+          </RenderCounter>
         )}
       </EuiResizeObserver>
     );

@@ -76,7 +76,7 @@ export interface DataArg {
   nextArgType?: ArgType;
   nextExpressionType?: ExpressionType;
   onValueAdd: (argName: string, argValue: ArgValue | null) => () => void;
-  onAssetAdd: (type: AssetType['type'], content: AssetType['value']) => string;
+  onAssetAdd: (type: AssetType['type'], content: AssetType['value']) => Promise<void | string>;
   onValueChange: (value: Ast | string) => void;
   onValueRemove: () => void;
   updateContext: (element?: CanvasElement) => void;

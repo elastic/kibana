@@ -15,14 +15,14 @@ import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { EqlTabContentComponent, Props as EqlTabContentComponentProps } from '.';
+import type { Props as EqlTabContentComponentProps } from '.';
+import { EqlTabContentComponent } from '.';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
-import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '@kbn/timelines-plugin/public/components';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
 jest.mock('../../../containers', () => ({
@@ -46,6 +46,15 @@ jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
+
+const useAddToTimeline = () => ({
+  beginDrag: jest.fn(),
+  cancelDrag: jest.fn(),
+  dragToLocation: jest.fn(),
+  endDrag: jest.fn(),
+  hasDraggableLock: jest.fn(),
+  startDragToTimeline: jest.fn(),
+});
 
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
@@ -74,8 +83,10 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
         timelines: {
           getLastUpdated: jest.fn(),
+          getUseAddToTimeline: () => useAddToTimeline,
+        },
+        triggersActionsUi: {
           getFieldBrowser: jest.fn(),
-          getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
         },
       },
     }),
@@ -191,7 +202,6 @@ describe('Timeline', () => {
     test('it does render the timeline table when the source is loading with no events', () => {
       (useSourcererDataView as jest.Mock).mockReturnValue({
         browserFields: {},
-        docValueFields: [],
         loading: true,
         indexPattern: {},
         selectedPatterns: [],

@@ -16,16 +16,23 @@ export const EnvironmentsContext = React.createContext<{
   environment: Environment;
   environments: Environment[];
   status: FETCH_STATUS;
+  preferredEnvironment: Environment;
+  serviceName?: string;
+  rangeFrom?: string;
+  rangeTo?: string;
 }>({
   environment: ENVIRONMENT_ALL.value,
   environments: [],
   status: FETCH_STATUS.NOT_INITIATED,
+  preferredEnvironment: ENVIRONMENT_ALL.value,
 });
 
 export function EnvironmentsContextProvider({
   children,
+  customTimeRange,
 }: {
   children: React.ReactElement;
+  customTimeRange?: { rangeFrom: string; rangeTo: string };
 }) {
   const { path, query } = useApmParams('/*');
 
@@ -34,8 +41,11 @@ export function EnvironmentsContextProvider({
     ('environment' in query && (query.environment as Environment)) ||
     ENVIRONMENT_ALL.value;
 
-  const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
-  const rangeTo = 'rangeTo' in query ? query.rangeTo : undefined;
+  const queryRangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
+  const queryRangeTo = 'rangeTo' in query ? query.rangeTo : undefined;
+
+  const rangeFrom = customTimeRange?.rangeFrom || queryRangeFrom;
+  const rangeTo = customTimeRange?.rangeTo || queryRangeTo;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
@@ -44,13 +54,21 @@ export function EnvironmentsContextProvider({
     start,
     end,
   });
+  const preferredEnvironment =
+    environment === ENVIRONMENT_ALL.value && environments.length === 1
+      ? environments[0]
+      : environment;
 
   return (
     <EnvironmentsContext.Provider
       value={{
+        environment,
         environments,
         status,
-        environment,
+        preferredEnvironment,
+        serviceName,
+        rangeFrom,
+        rangeTo,
       }}
     >
       {children}

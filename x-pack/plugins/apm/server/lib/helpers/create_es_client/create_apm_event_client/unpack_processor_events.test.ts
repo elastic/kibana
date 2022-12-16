@@ -15,6 +15,7 @@ describe('unpackProcessorEvents', () => {
     const request = {
       apm: { events: ['transaction', 'error'] },
       body: {
+        track_total_hits: false,
         size: 0,
         query: { bool: { filter: [{ terms: { foo: 'bar' } }] } },
       },
@@ -26,7 +27,6 @@ describe('unpackProcessorEvents', () => {
       error: 'my-apm-*-error-*',
       span: 'my-apm-*-span-*',
       onboarding: 'my-apm-*-onboarding-*',
-      sourcemap: 'my-apm-*-sourcemap-*',
     } as ApmIndicesConfig;
 
     res = unpackProcessorEvents(request, indices);

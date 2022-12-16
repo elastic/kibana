@@ -57,7 +57,12 @@ const NewLiveQueryButton = React.memo(() => {
       fill
       {...newQueryLinkProps}
       iconType="plusInCircle"
-      isDisabled={!(permissions.writeLiveQueries || permissions.runSavedQueries)}
+      isDisabled={
+        !(
+          permissions.writeLiveQueries ||
+          (permissions.runSavedQueries && (permissions.readSavedQueries || permissions.readPacks))
+        )
+      }
     >
       <FormattedMessage
         id="xpack.osquery.liveQueriesHistory.newLiveQueryButtonLabel"

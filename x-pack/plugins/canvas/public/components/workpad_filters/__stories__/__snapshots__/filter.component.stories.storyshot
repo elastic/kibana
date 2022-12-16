@@ -2,13 +2,14 @@
 
 exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
 <div
-  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--flexGrowZero"
+  className="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain"
 >
   <dl
-    className="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed workpadFilter"
+    className="euiDescriptionList workpadFilter emotion-euiDescriptionList-column-left"
+    data-type="column"
   >
     <dt
-      className="euiDescriptionList__title eui-textBreakWord"
+      className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-m-compressed"
       style={
         Object {
           "width": "30%",
@@ -16,7 +17,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <h4>
           Type
@@ -24,7 +25,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
       </div>
     </dt>
     <dd
-      className="euiDescriptionList__description eui-textBreakWord"
+      className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal-m"
       style={
         Object {
           "width": "70%",
@@ -32,13 +33,13 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         exactly
       </div>
     </dd>
     <dt
-      className="euiDescriptionList__title eui-textBreakWord"
+      className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-m-compressed"
       style={
         Object {
           "width": "30%",
@@ -46,7 +47,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <h4>
           Column
@@ -54,7 +55,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
       </div>
     </dt>
     <dd
-      className="euiDescriptionList__description eui-textBreakWord"
+      className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal-m"
       style={
         Object {
           "width": "70%",
@@ -62,13 +63,13 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         project
       </div>
     </dd>
     <dt
-      className="euiDescriptionList__title eui-textBreakWord"
+      className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-m-compressed"
       style={
         Object {
           "width": "30%",
@@ -76,7 +77,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <h4>
           Value
@@ -84,7 +85,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
       </div>
     </dt>
     <dd
-      className="euiDescriptionList__description eui-textBreakWord"
+      className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal-m"
       style={
         Object {
           "width": "70%",
@@ -92,13 +93,13 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         kibana
       </div>
     </dd>
     <dt
-      className="euiDescriptionList__title eui-textBreakWord"
+      className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-m-compressed"
       style={
         Object {
           "width": "30%",
@@ -106,7 +107,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <h4>
           Filter group
@@ -114,7 +115,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
       </div>
     </dt>
     <dd
-      className="euiDescriptionList__description eui-textBreakWord"
+      className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal-m"
       style={
         Object {
           "width": "70%",
@@ -122,7 +123,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         Group 1
       </div>
@@ -133,13 +134,14 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent default 1`] = `
 
 exports[`Storyshots components/WorkpadFilters/FilterComponent with component field 1`] = `
 <div
-  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--flexGrowZero"
+  className="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain"
 >
   <dl
-    className="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed workpadFilter"
+    className="euiDescriptionList workpadFilter emotion-euiDescriptionList-column-left"
+    data-type="column"
   >
     <dt
-      className="euiDescriptionList__title eui-textBreakWord"
+      className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-m-compressed"
       style={
         Object {
           "width": "30%",
@@ -147,7 +149,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <h4>
           Type
@@ -155,7 +157,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
       </div>
     </dt>
     <dd
-      className="euiDescriptionList__description eui-textBreakWord"
+      className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal-m"
       style={
         Object {
           "width": "70%",
@@ -163,13 +165,13 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         exactly
       </div>
     </dd>
     <dt
-      className="euiDescriptionList__title eui-textBreakWord"
+      className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-m-compressed"
       style={
         Object {
           "width": "30%",
@@ -177,7 +179,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <h4>
           Column
@@ -185,7 +187,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
       </div>
     </dt>
     <dd
-      className="euiDescriptionList__description eui-textBreakWord"
+      className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal-m"
       style={
         Object {
           "width": "70%",
@@ -193,13 +195,13 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         project
       </div>
     </dd>
     <dt
-      className="euiDescriptionList__title eui-textBreakWord"
+      className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-m-compressed"
       style={
         Object {
           "width": "30%",
@@ -207,7 +209,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <h4>
           Value
@@ -215,7 +217,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
       </div>
     </dt>
     <dd
-      className="euiDescriptionList__description eui-textBreakWord"
+      className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal-m"
       style={
         Object {
           "width": "70%",
@@ -223,13 +225,13 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <div
-          className="euiText euiText--medium"
+          className="euiText emotion-euiText-m"
         >
           <span
-            className="euiTextColor euiTextColor--success"
+            className="emotion-euiTextColor-success"
             style={Object {}}
           >
             <h3>
@@ -240,7 +242,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
       </div>
     </dd>
     <dt
-      className="euiDescriptionList__title eui-textBreakWord"
+      className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-m-compressed"
       style={
         Object {
           "width": "30%",
@@ -248,7 +250,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <h4>
           Filter group
@@ -256,7 +258,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
       </div>
     </dt>
     <dd
-      className="euiDescriptionList__description eui-textBreakWord"
+      className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal-m"
       style={
         Object {
           "width": "70%",
@@ -264,7 +266,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         Group 1
       </div>
@@ -275,13 +277,14 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with component fie
 
 exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter fields 1`] = `
 <div
-  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--flexGrowZero"
+  className="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain"
 >
   <dl
-    className="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed workpadFilter"
+    className="euiDescriptionList workpadFilter emotion-euiDescriptionList-column-left"
+    data-type="column"
   >
     <dt
-      className="euiDescriptionList__title eui-textBreakWord"
+      className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-m-compressed"
       style={
         Object {
           "width": "30%",
@@ -289,7 +292,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <h4>
           Type
@@ -297,7 +300,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       </div>
     </dt>
     <dd
-      className="euiDescriptionList__description eui-textBreakWord"
+      className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal-m"
       style={
         Object {
           "width": "70%",
@@ -305,13 +308,13 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         exactly
       </div>
     </dd>
     <dt
-      className="euiDescriptionList__title eui-textBreakWord"
+      className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-m-compressed"
       style={
         Object {
           "width": "30%",
@@ -319,7 +322,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <h4>
           Column
@@ -327,7 +330,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       </div>
     </dt>
     <dd
-      className="euiDescriptionList__description eui-textBreakWord"
+      className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal-m"
       style={
         Object {
           "width": "70%",
@@ -335,13 +338,13 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         project
       </div>
     </dd>
     <dt
-      className="euiDescriptionList__title eui-textBreakWord"
+      className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-m-compressed"
       style={
         Object {
           "width": "30%",
@@ -349,7 +352,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <h4>
           Value
@@ -357,7 +360,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       </div>
     </dt>
     <dd
-      className="euiDescriptionList__description eui-textBreakWord"
+      className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal-m"
       style={
         Object {
           "width": "70%",
@@ -365,13 +368,13 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         kibana
       </div>
     </dd>
     <dt
-      className="euiDescriptionList__title eui-textBreakWord"
+      className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-m-compressed"
       style={
         Object {
           "width": "30%",
@@ -379,7 +382,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <h4>
           Filter group
@@ -387,7 +390,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       </div>
     </dt>
     <dd
-      className="euiDescriptionList__description eui-textBreakWord"
+      className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal-m"
       style={
         Object {
           "width": "70%",
@@ -395,13 +398,13 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         Group 1
       </div>
     </dd>
     <dt
-      className="euiDescriptionList__title eui-textBreakWord"
+      className="euiDescriptionList__title eui-textBreakWord emotion-euiDescriptionList__title-column-m-compressed"
       style={
         Object {
           "width": "30%",
@@ -409,7 +412,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         <h4>
           Custom Field
@@ -417,7 +420,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       </div>
     </dt>
     <dd
-      className="euiDescriptionList__description eui-textBreakWord"
+      className="euiDescriptionList__description eui-textBreakWord emotion-euiDescriptionList__description-column-normal-m"
       style={
         Object {
           "width": "70%",
@@ -425,7 +428,7 @@ exports[`Storyshots components/WorkpadFilters/FilterComponent with custom filter
       }
     >
       <div
-        className="euiText euiText--small"
+        className="euiText emotion-euiText-s"
       >
         Some unknown field
       </div>

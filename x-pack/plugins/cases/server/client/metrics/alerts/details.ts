@@ -5,33 +5,34 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
-
-import { CaseMetricsResponse } from '../../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 
-import { AggregationHandler } from '../aggregation_handler';
-import { AggregationBuilder, AggregationResponse, BaseHandlerCommonOptions } from '../types';
+import { SingleCaseAggregationHandler } from '../single_case_aggregation_handler';
+import type { AggregationBuilder, SingleCaseBaseHandlerCommonOptions } from '../types';
 import { AlertHosts, AlertUsers } from './aggregations';
 
-export class AlertDetails extends AggregationHandler {
-  constructor(options: BaseHandlerCommonOptions) {
+export class AlertDetails extends SingleCaseAggregationHandler {
+  constructor(options: SingleCaseBaseHandlerCommonOptions) {
     super(
       options,
-      new Map<string, AggregationBuilder>([
+      new Map<string, AggregationBuilder<SingleCaseMetricsResponse>>([
         ['alerts.hosts', new AlertHosts()],
         ['alerts.users', new AlertUsers()],
       ])
     );
   }
 
-  public async compute(): Promise<CaseMetricsResponse> {
-    const { alertsService, logger } = this.options.clientArgs;
-    const { caseId, casesClient } = this.options;
+  public async compute(): Promise<SingleCaseMetricsResponse> {
+    const {
+      services: { alertsService },
+      logger,
+    } = this.options.clientArgs;
+    const { casesClient } = this.options;
 
     try {
       const alerts = await casesClient.attachments.getAllAlertsAttachToCase({
-        caseId,
+        caseId: this.caseId,
       });
 
       if (alerts.length <= 0 || this.aggregationBuilders.length <= 0) {
@@ -43,20 +44,13 @@ export class AlertDetails extends AggregationHandler {
         alerts,
       });
 
-      return this.formatResponse(aggregationsResponse);
+      return this.formatResponse<SingleCaseMetricsResponse>(aggregationsResponse);
     } catch (error) {
       throw createCaseError({
-        message: `Failed to retrieve alerts details attached case id: ${caseId}: ${error}`,
+        message: `Failed to retrieve alerts details attached case id: ${this.caseId}: ${error}`,
         error,
         logger,
       });
     }
-  }
-
-  private formatResponse(aggregationsResponse?: AggregationResponse): CaseMetricsResponse {
-    return this.aggregationBuilders.reduce(
-      (acc, feature) => merge(acc, feature.formatResponse(aggregationsResponse)),
-      {}
-    );
   }
 }

@@ -1,0 +1,106 @@
+---
+id: kibDevDocsOpsEslintPluginEslint
+slug: /kibana-dev-docs/ops/eslint-plugin-eslint
+title: "@kbn/eslint-plugin-eslint"
+description: A package holding an eslint plugin with custom rules used on Kibana
+date: 2022-05-17
+tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'plugin']
+---
+
+An ESLint plugin exposing custom rules used and built specifically for development within Kibana. 
+Next you can find information on each on.
+
+## disallow-license-headers
+
+Disallows a given group of license header texts on a group of files.
+
+```javascript
+module.exports = {
+  overrides: [
+    {    
+      files: ['**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              "LICENSE_TEXT"
+            ],
+          },
+        ],
+      }
+    }
+  ]    
+}
+```
+
+## module_migration
+
+Offers a way to force a migration from a given node module into another as an alternative.
+
+```javascript
+module.exports = {
+  overrides: [
+    {    
+      files: ['**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/module_migration': [
+          'error',
+          [
+            {
+              from: 'expect.js',
+              to: '@kbn/expect',
+            }
+          ],
+        ],
+      }
+    }
+  ]    
+}
+```
+
+## no_async_foreach
+
+Disallows passing an async function to .forEach which will avoid promise rejections from being handled. asyncForEach() or a similar helper from "@kbn/std" should be used instead.
+
+## no_async_promise_body
+
+Disallows the usage of an async function as a constructor for a Promise function without a try catch in place.
+
+## no_constructor_args_in_property_initializers
+
+Disallows the usage of constructor arguments into class property initializers.
+
+## no_export_all
+
+Disables the usage of `export *`.
+
+## no_this_in_property_initializers
+
+Disallows the usage of `this` into class property initializers and enforce to define the property value into the constructor.
+
+## no_trailing_import_slash
+
+Disables the usage of a trailing slash in a node module import.
+
+## require-license-header
+
+Requires a given license header text on a group of files.
+
+```javascript
+module.exports = {
+  overrides: [
+    {    
+      files: ['**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: "LICENSE_TEXT"
+          },
+        ],
+      }
+    }
+  ]    
+}
+```

@@ -51,7 +51,7 @@ export interface IPermissionsModalProps {
   additionalConfiguration: boolean;
 }
 
-type CombinedDataItem = SourceDataItem & { connected: boolean };
+type CombinedDataItem = SourceDataItem & Partial<Connector> & { connected: boolean };
 
 export interface ISourcesValues {
   contentSources: ContentSourceDetails[];
@@ -145,17 +145,22 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   selectors: ({ selectors }) => ({
     availableSources: [
       () => [selectors.sourceData],
-      (sourceData: SourceDataItem[]) =>
-        sortByName(sourceData.filter(({ configured }) => !configured)),
+      (sourceData: CombinedDataItem[]) =>
+        sortByName(
+          sourceData.filter(
+            ({ configured, serviceType, externalConnectorServiceDescribed }) =>
+              !configured && (serviceType !== 'external' || externalConnectorServiceDescribed)
+          )
+        ),
     ],
     configuredSources: [
       () => [selectors.sourceData],
-      (sourceData: SourceDataItem[]) =>
+      (sourceData: CombinedDataItem[]) =>
         sortByName(sourceData.filter(({ configured }) => configured)),
     ],
     externalConfigured: [
       () => [selectors.configuredSources],
-      (configuredSources: SourceDataItem[]) =>
+      (configuredSources: CombinedDataItem[]) =>
         !!configuredSources.find((item) => item.serviceType === 'external'),
     ],
     sourceData: [
@@ -312,9 +317,12 @@ export const mergeServerAndStaticData = (
   contentSources: ContentSourceDetails[]
 ): CombinedDataItem[] => {
   const unsortedData = staticData.map((staticItem) => {
-    const serverItem = serverData.find(({ serviceType }) => serviceType === staticItem.serviceType);
+    const serverItem = staticItem.baseServiceType
+      ? undefined // static items with base service types will never have matching external connectors, BE doesn't pass us a baseServiceType
+      : serverData.find(({ serviceType }) => serviceType === staticItem.serviceType);
     const connectedSource = contentSources.find(
-      ({ serviceType }) => serviceType === staticItem.serviceType
+      ({ baseServiceType, serviceType }) =>
+        serviceType === staticItem.serviceType && baseServiceType === staticItem.baseServiceType
     );
     return {
       ...staticItem,

@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-export interface AlertsStackByOption {
-  text: AlertsStackByField;
-  value: AlertsStackByField;
-}
-
 export type AlertsStackByField =
   | 'kibana.alert.risk_score'
   | 'kibana.alert.severity'

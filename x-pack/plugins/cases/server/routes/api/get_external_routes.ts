@@ -15,7 +15,7 @@ import { pushCaseRoute } from './cases/push_case';
 import { getReportersRoute } from './cases/reporters/get_reporters';
 import { getStatusRoute } from './stats/get_status';
 import { getUserActionsRoute } from './user_actions/get_all_user_actions';
-import { CaseRoute } from './types';
+import type { CaseRoute } from './types';
 import { getTagsRoute } from './cases/tags/get_tags';
 import { deleteAllCommentsRoute } from './comments/delete_all_comments';
 import { deleteCommentRoute } from './comments/delete_comment';
@@ -30,6 +30,7 @@ import { patchCaseConfigureRoute } from './configure/patch_configure';
 import { postCaseConfigureRoute } from './configure/post_configure';
 import { getAllAlertsAttachedToCaseRoute } from './comments/get_alerts';
 import { getCaseMetricRoute } from './metrics/get_case_metrics';
+import { getCasesMetricRoute } from './metrics/get_cases_metrics';
 
 export const getExternalRoutes = () =>
   [
@@ -58,4 +59,5 @@ export const getExternalRoutes = () =>
     postCaseConfigureRoute,
     getAllAlertsAttachedToCaseRoute,
     getCaseMetricRoute,
+    getCasesMetricRoute,
   ] as CaseRoute[];

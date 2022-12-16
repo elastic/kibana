@@ -4,16 +4,17 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
     "isolatedModules": true
   },
   "include": [
     "common/*",
+    "public/**/**/*",
     "server/**/**/*",
     "../../../typings/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../../plugins/usage_collection/tsconfig.json" },
+    { "path": "../../plugins/telemetry/tsconfig.json" },
   ]
 }

@@ -14,7 +14,7 @@ jest.mock('@kbn/utils', () => ({
   getLogsPath: () => '/mock/kibana/logs/path',
 }));
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { ConfigSchema, createConfig } from './config';
 
@@ -2202,6 +2202,32 @@ describe('createConfig()', () => {
           "lifespan": "PT0.546S",
         }
       `);
+    });
+  });
+
+  describe('Global Access Agreement', () => {
+    it('should require `message` for globally configured `accessAgreement`', () => {
+      expect(() => {
+        createConfig(
+          ConfigSchema.validate({
+            accessAgreement: {},
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: true }
+        );
+      }).toThrow('[accessAgreement.message]: expected value of type [string] but got [undefined]');
+    });
+
+    it('should accept string `message` for globally configured `accessAgreement`', () => {
+      expect(
+        createConfig(
+          ConfigSchema.validate({
+            accessAgreement: { message: 'Foo' },
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: true }
+        )?.accessAgreement?.message
+      ).toEqual('Foo');
     });
   });
 });

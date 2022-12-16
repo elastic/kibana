@@ -1,0 +1,6 @@
+type: object
+properties:
+  connector: 
+    type: object
+    properties:
+      $ref: 'connector_properties.yaml'

@@ -18,13 +18,14 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 const unifiedSearch = {
   ui: {
     SearchBar: () => <div className="searchBar" />,
+    AggregateQuerySearchBar: () => <div className="searchBar" />,
   },
 } as unknown as UnifiedSearchPublicPluginStart;
 
 describe('TopNavMenu', () => {
   const WRAPPER_SELECTOR = '.kbnTopNavMenu__wrapper';
   const TOP_NAV_ITEM_SELECTOR = 'TopNavMenuItem';
-  const SEARCH_BAR_SELECTOR = 'SearchBar';
+  const SEARCH_BAR_SELECTOR = 'AggregateQuerySearchBar';
   const menuItems: TopNavMenuData[] = [
     {
       id: 'test',
@@ -159,7 +160,6 @@ describe('TopNavMenu', () => {
 
       await refresh();
 
-      expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
       expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
 
       // menu is rendered outside of the component

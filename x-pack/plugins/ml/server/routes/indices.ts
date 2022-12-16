@@ -29,7 +29,7 @@ export function indicesRoutes({ router, routeGuard }: RouteInitialization) {
         body: indicesSchema,
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetFieldInfo'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
@@ -38,10 +38,8 @@ export function indicesRoutes({ router, routeGuard }: RouteInitialization) {
           body: { index, fields: requestFields },
         } = request;
         const fields =
-          requestFields !== undefined && Array.isArray(requestFields)
-            ? requestFields.join(',')
-            : '*';
-        const body = await client.asCurrentUser.fieldCaps({ index, fields });
+          requestFields !== undefined && Array.isArray(requestFields) ? requestFields : '*';
+        const body = await client.asCurrentUser.fieldCaps({ index, fields }, { maxRetries: 0 });
         return response.ok({ body });
       } catch (e) {
         return response.customError(wrapError(e));

@@ -111,6 +111,7 @@ export const useValidateIds = (
       setJobIdObjects([...jobIdObjects]);
       setValidatingJobs(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idsMash, jobIdObjects]);
 
   return [validateIds];

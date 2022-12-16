@@ -206,3 +206,95 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:7d04bc30-c4c0-11ec-ae29-917aa31a5b75",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId" : ".servicenow-sir",
+        "name" : "test servicenow SecOps",
+        "isMissingSecrets" : false,
+        "config" : {
+          "apiUrl": "https://devtestsecops.service-now.com",
+          "usesTableApi": false
+        },
+        "secrets" : "kPp4tl4ueQ2ZNWSfATR3dFrbxd+NNBo4MY8izS6GJf358Lmeg/YaYjb2rIymrbPktR6HnPBRaVyXWlRTvBGstRicJc0LJHZbx3wNJlTRIj4UFlVqZLGQWQ/GcSqFLSZ1JQbKwgAvyfLtF6BhjAhGYEovK3/OLUNzGc3gvUOOHBiPWjiAY8A="
+      },
+      "migrationVersion": {
+        "action": "8.0.0"
+      },
+      "coreMigrationVersion" : "8.2.0",
+      "references": [
+      ],
+      "namespaces": [
+        "default"
+      ],
+      "type": "action",
+      "updated_at": "2022-04-25T17:52:35.201Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:8a9331b0-c4c0-11ec-ae29-917aa31a5b75",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId" : ".servicenow-itom",
+        "name" : "test servicenow ITOM",
+        "isMissingSecrets" : false,
+        "config" : {
+          "apiUrl": "https://devtestsecops.service-now.com"
+        },
+        "secrets" : "yYThM4vbrSTIg5IjKWE+eMDrxzL7UO0JQIyh6FvEMgqoNREUxRrIavSo25v+DXQIX1DyfsvjjKg97pNPlZhvS3siCwDZZafSFrwkCKDl+S4KHORgIMX+slilcQeuEnzwit7bFxcY7Y/AcNF8Ks6jO0Gs1UR58ibSPUALXoK2VOlJnHSgtvE="
+      },
+      "migrationVersion": {
+        "action": "8.0.0"
+      },
+      "coreMigrationVersion" : "8.2.0",
+      "references": [
+      ],
+      "namespaces": [
+        "default"
+      ],
+      "type": "action",
+      "updated_at": "2022-04-25T17:52:35.201Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:6d3a1250-c4c0-11ec-ae29-917aa31a5b75",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId" : ".servicenow",
+        "name" : "test servicenow ITSM",
+        "isMissingSecrets" : false,
+        "config" : {
+          "usesTableApi": false,
+          "apiUrl": "https://devtestsecops.service-now.com"
+        },
+        "secrets" : "zfXUDtG0CyJkJUKnQ8rSqo75hb6ZhbRUWkV1NiFEjApM87b72Rcqz3Fv+sbm8eBDOO1Fdd9CVyK+Bfly4ZwVCgL2lR0qIbPzz34q36r267dnGVsaERyJIVv2WPy+EGdiRZKgfpy4XFbMNT1R3gyIsUkd4TT+McqGfVTont2XTFIpMW2A9y8="
+      },
+      "migrationVersion": {
+        "action": "8.0.0"
+      },
+      "coreMigrationVersion" : "8.2.0",
+      "references": [
+      ],
+      "namespaces": [
+        "default"
+      ],
+      "type": "action",
+      "updated_at": "2022-04-25T17:52:35.201Z"
+    }
+  }
+}

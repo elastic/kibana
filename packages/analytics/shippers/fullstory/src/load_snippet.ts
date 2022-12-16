@@ -8,6 +8,9 @@
 
 import type { FullStoryApi } from './types';
 
+/**
+ * FullStory basic configuration.
+ */
 export interface FullStorySnippetConfig {
   /**
    * The FullStory account id.
@@ -45,7 +48,7 @@ export function loadSnippet({
   window._fs_org = fullStoryOrgId;
   window._fs_namespace = namespace;
 
-  /* eslint-disable */
+  /* eslint-disable dot-notation,prettier/prettier,@typescript-eslint/no-shadow,prefer-rest-params,@typescript-eslint/no-unused-expressions */
   (function(m,n,e,t,l,o,g,y){
     if (e in m) {if(m.console && m.console.log) { m.console.log('FullStory namespace conflict. Please set window["_fs_namespace"].');} return;}
     // @ts-expect-error

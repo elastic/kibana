@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import DateMath from '@kbn/datemath';
 import { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CertificatesResults } from '../../server/lib/requests/get_certs';
+import type { CertificatesResults } from '../../server/legacy_uptime/lib/requests/get_certs';
 import { asMutableArray } from '../utils/as_mutable_array';
 
 enum SortFields {
@@ -22,8 +23,12 @@ enum SortFields {
 export const DEFAULT_SORT = 'not_after';
 export const DEFAULT_DIRECTION = 'asc';
 export const DEFAULT_SIZE = 20;
-export const DEFAULT_FROM = 'now-5m';
+export const DEFAULT_FROM = 'now-20m';
 export const DEFAULT_TO = 'now';
+
+function absoluteDate(relativeDate: string) {
+  return DateMath.parse(relativeDate)?.valueOf() ?? relativeDate;
+}
 
 export const getCertsRequestBody = ({
   pageIndex,
@@ -80,8 +85,8 @@ export const getCertsRequestBody = ({
             {
               range: {
                 'monitor.timespan': {
-                  gte: from,
-                  lte: to,
+                  gte: absoluteDate(from),
+                  lte: absoluteDate(to),
                 },
               },
             },
@@ -96,7 +101,7 @@ export const getCertsRequestBody = ({
                         {
                           range: {
                             'tls.certificate_not_valid_before': {
-                              lte: notValidBefore,
+                              lte: absoluteDate(notValidBefore),
                             },
                           },
                         },
@@ -107,7 +112,7 @@ export const getCertsRequestBody = ({
                         {
                           range: {
                             'tls.certificate_not_valid_after': {
-                              lte: notValidAfter,
+                              lte: absoluteDate(notValidAfter),
                             },
                           },
                         },

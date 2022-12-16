@@ -16,7 +16,12 @@ describe('useSorting', () => {
 
   it('should return the sorted columns and the callback function to call when sort changes', () => {
     const { result } = renderHook(() => useSorting(onSortChange));
-    expect(result.current.sortingColumns).toStrictEqual([]);
+    expect(result.current.sortingColumns).toStrictEqual([
+      {
+        direction: 'asc',
+        id: '@timestamp',
+      },
+    ]);
     expect(result.current.onSort).toBeDefined();
   });
 

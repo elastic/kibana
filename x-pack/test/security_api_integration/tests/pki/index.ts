@@ -9,8 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security APIs - PKI', function () {
-    this.tags('ciGroup22');
-
     loadTestFile(require.resolve('./pki_auth'));
   });
 }

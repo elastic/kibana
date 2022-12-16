@@ -20,9 +20,16 @@ import {
   batchTelemetryRecords,
   isPackagePolicyList,
   templateExceptionList,
+  addDefaultAdvancedPolicyConfigSettings,
+  metricsResponseToValueListMetaData,
+  tlog,
+  setIsElasticCloudDeployment,
+  createTaskMetric,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
-import { PolicyData } from '../../../common/endpoint/types';
+import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
+import { cloneDeep, set } from 'lodash';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -302,5 +309,666 @@ describe('test endpoint policy data config extraction', () => {
   test('can succeed when policy config is null or empty', async () => {
     const endpointPolicyConfig = extractEndpointPolicyConfig(stubPolicyData);
     expect(endpointPolicyConfig).toBeNull();
+  });
+});
+
+describe('test advanced policy config overlap ', () => {
+  const defaultStubPolicyConfig = {
+    windows: {
+      events: {
+        dll_and_driver_load: true,
+        dns: true,
+        file: true,
+        network: true,
+        process: true,
+        registry: true,
+        security: true,
+      },
+      malware: {
+        mode: 'prevent',
+        blocklist: true,
+      },
+      ransomware: {
+        mode: 'prevent',
+        supported: true,
+      },
+      memory_protection: {
+        mode: 'prevent',
+        supported: true,
+      },
+      behavior_protection: {
+        mode: 'prevent',
+        supported: true,
+      },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
+        ransomware: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+      },
+      logging: {
+        file: 'info',
+      },
+      antivirus_registration: {
+        enabled: false,
+      },
+    },
+    mac: {
+      events: {
+        process: true,
+        file: true,
+        network: true,
+      },
+      malware: {
+        mode: 'prevent',
+        blocklist: true,
+      },
+      behavior_protection: {
+        mode: 'prevent',
+        supported: true,
+      },
+      memory_protection: {
+        mode: 'prevent',
+        supported: true,
+      },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
+      },
+      logging: {
+        file: 'info',
+      },
+    },
+    linux: {
+      events: {
+        process: true,
+        file: true,
+        network: true,
+        session_data: false,
+      },
+      malware: {
+        mode: 'prevent',
+        blocklist: true,
+      },
+      behavior_protection: {
+        mode: 'prevent',
+        supported: true,
+      },
+      memory_protection: {
+        mode: 'prevent',
+        supported: true,
+      },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
+      },
+      logging: {
+        file: 'info',
+      },
+    },
+  } as unknown as PolicyConfig;
+  const defaultStubPolicyConfigResponse = {
+    linux: {
+      events: {
+        process: true,
+        file: true,
+        network: true,
+        session_data: false,
+      },
+      malware: {
+        mode: 'prevent',
+        blocklist: true,
+      },
+      behavior_protection: {
+        mode: 'prevent',
+        supported: true,
+      },
+      memory_protection: {
+        mode: 'prevent',
+        supported: true,
+      },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
+      },
+      logging: {
+        file: 'info',
+      },
+      advanced: {
+        agent: {
+          connection_delay: null,
+        },
+        alerts: {
+          require_user_artifacts: null,
+        },
+        artifacts: {
+          global: {
+            base_url: null,
+            manifest_relative_url: null,
+            public_key: null,
+            interval: null,
+            ca_cert: null,
+          },
+          user: {
+            public_key: null,
+            ca_cert: null,
+            base_url: null,
+            interval: null,
+          },
+        },
+        elasticsearch: {
+          delay: null,
+          tls: {
+            verify_peer: null,
+            verify_hostname: null,
+            ca_cert: null,
+          },
+        },
+        fanotify: {
+          ignore_unknown_filesystems: null,
+          monitored_filesystems: null,
+          ignored_filesystems: null,
+        },
+        logging: {
+          file: null,
+          stdout: null,
+          stderr: null,
+          syslog: null,
+        },
+        diagnostic: {
+          enabled: null,
+        },
+        malware: {
+          quarantine: null,
+        },
+        memory_protection: {
+          memory_scan_collect_sample: null,
+          memory_scan: null,
+        },
+        kernel: {
+          capture_mode: null,
+        },
+        event_filter: {
+          default: null,
+        },
+        utilization_limits: {
+          cpu: null,
+        },
+        logstash: {
+          delay: null,
+        },
+      },
+    },
+    mac: {
+      events: {
+        process: true,
+        file: true,
+        network: true,
+      },
+      malware: {
+        mode: 'prevent',
+        blocklist: true,
+      },
+      behavior_protection: {
+        mode: 'prevent',
+        supported: true,
+      },
+      memory_protection: {
+        mode: 'prevent',
+        supported: true,
+      },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
+      },
+      logging: {
+        file: 'info',
+      },
+      advanced: {
+        agent: {
+          connection_delay: null,
+        },
+        artifacts: {
+          global: {
+            base_url: null,
+            manifest_relative_url: null,
+            public_key: null,
+            interval: null,
+            ca_cert: null,
+          },
+          user: {
+            public_key: null,
+            ca_cert: null,
+            base_url: null,
+            interval: null,
+          },
+        },
+        elasticsearch: {
+          delay: null,
+          tls: {
+            verify_peer: null,
+            verify_hostname: null,
+            ca_cert: null,
+          },
+        },
+        logging: {
+          file: null,
+          stdout: null,
+          stderr: null,
+          syslog: null,
+        },
+        logstash: {
+          delay: null,
+        },
+        malware: {
+          quarantine: null,
+          threshold: null,
+        },
+        kernel: {
+          connect: null,
+          harden: null,
+          process: null,
+          filewrite: null,
+          network: null,
+          network_extension: {
+            enable_content_filtering: null,
+            enable_packet_filtering: null,
+          },
+        },
+        harden: {
+          self_protect: null,
+        },
+        diagnostic: {
+          enabled: null,
+        },
+        alerts: {
+          cloud_lookup: null,
+
+          cloud_lookup_url: null,
+        },
+        memory_protection: {
+          memory_scan_collect_sample: false,
+          memory_scan: null,
+        },
+        event_filter: {
+          default: null,
+        },
+      },
+    },
+    windows: {
+      events: {
+        dll_and_driver_load: true,
+        dns: true,
+        file: true,
+        network: true,
+        process: true,
+        registry: true,
+        security: true,
+      },
+      malware: {
+        mode: 'prevent',
+        blocklist: true,
+      },
+      ransomware: {
+        mode: 'prevent',
+        supported: true,
+      },
+      memory_protection: {
+        mode: 'prevent',
+        supported: true,
+      },
+      behavior_protection: {
+        mode: 'prevent',
+        supported: true,
+      },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
+        ransomware: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+      },
+      logging: {
+        file: 'info',
+      },
+      antivirus_registration: {
+        enabled: false,
+      },
+      advanced: {
+        agent: {
+          connection_delay: null,
+        },
+        artifacts: {
+          global: {
+            base_url: null,
+            manifest_relative_url: null,
+            public_key: null,
+            interval: null,
+            ca_cert: null,
+          },
+          user: {
+            public_key: null,
+            ca_cert: null,
+            base_url: null,
+            interval: null,
+          },
+        },
+        elasticsearch: {
+          delay: null,
+          tls: {
+            verify_peer: null,
+            verify_hostname: null,
+            ca_cert: null,
+          },
+        },
+        logging: {
+          file: null,
+          stdout: null,
+          stderr: null,
+          syslog: null,
+        },
+        malware: {
+          quarantine: null,
+          threshold: null,
+        },
+        kernel: {
+          connect: null,
+          harden: null,
+          process: null,
+          filewrite: null,
+          network: null,
+          fileopen: null,
+          asyncimageload: null,
+          syncimageload: null,
+          registry: null,
+          fileaccess: null,
+          registryaccess: null,
+          process_handle: null,
+        },
+        diagnostic: {
+          enabled: null,
+          rollback_telemetry_enabled: null,
+        },
+        alerts: {
+          cloud_lookup: null,
+          cloud_lookup_url: null,
+          require_user_artifacts: null,
+        },
+        ransomware: {
+          mbr: null,
+          canary: null,
+        },
+        memory_protection: {
+          context_manipulation_detection: null,
+          shellcode: null,
+          memory_scan: null,
+          shellcode_collect_sample: null,
+          memory_scan_collect_sample: null,
+          shellcode_enhanced_pe_parsing: null,
+          shellcode_trampoline_detection: null,
+        },
+        event_filter: {
+          default: null,
+        },
+        utilization_limits: {
+          cpu: null,
+        },
+      },
+    },
+  };
+
+  test('can succeed when policy config does not have any advanced settings already set', async () => {
+    const endpointPolicyConfig = addDefaultAdvancedPolicyConfigSettings(
+      cloneDeep(defaultStubPolicyConfig)
+    );
+    expect(endpointPolicyConfig).toEqual(defaultStubPolicyConfigResponse);
+  });
+
+  test('can succeed and preserve existing advanced settings', async () => {
+    const stubPolicyConfigWithAdvancedSettings = cloneDeep(defaultStubPolicyConfig);
+    stubPolicyConfigWithAdvancedSettings.linux.advanced = {
+      agent: {
+        connection_delay: 20,
+      },
+    };
+    const stubPolicyConfigWithAdvancedSettingsResponse = cloneDeep(defaultStubPolicyConfigResponse);
+    set(stubPolicyConfigWithAdvancedSettingsResponse, 'linux.advanced.agent.connection_delay', 20);
+    const endpointPolicyConfig = addDefaultAdvancedPolicyConfigSettings(
+      stubPolicyConfigWithAdvancedSettings
+    );
+    expect(endpointPolicyConfig).toEqual(stubPolicyConfigWithAdvancedSettingsResponse);
+  });
+});
+
+describe('test metrics response to value list meta data', () => {
+  test('can succeed when metrics response is fully populated', async () => {
+    const stubMetricResponses = {
+      listMetricsResponse: {
+        aggregations: {
+          total_value_list_count: 5,
+          type_breakdown: {
+            buckets: [
+              {
+                key: 'keyword',
+                doc_count: 5,
+              },
+              {
+                key: 'ip',
+                doc_count: 3,
+              },
+              {
+                key: 'ip_range',
+                doc_count: 2,
+              },
+              {
+                key: 'text',
+                doc_count: 1,
+              },
+            ],
+          },
+        },
+      },
+      itemMetricsResponse: {
+        aggregations: {
+          value_list_item_count: {
+            buckets: [
+              {
+                key: 'vl-test1',
+                doc_count: 23,
+              },
+              {
+                key: 'vl-test2',
+                doc_count: 45,
+              },
+            ],
+          },
+        },
+      },
+      exceptionListMetricsResponse: {
+        aggregations: {
+          vl_included_in_exception_lists_count: { value: 24 },
+        },
+      },
+      indicatorMatchMetricsResponse: {
+        aggregations: {
+          vl_used_in_indicator_match_rule_count: { value: 6 },
+        },
+      },
+    };
+    const response = metricsResponseToValueListMetaData(stubMetricResponses);
+    expect(response).toEqual({
+      total_list_count: 5,
+      types: [
+        {
+          type: 'keyword',
+          count: 5,
+        },
+        {
+          type: 'ip',
+          count: 3,
+        },
+        {
+          type: 'ip_range',
+          count: 2,
+        },
+        {
+          type: 'text',
+          count: 1,
+        },
+      ],
+      lists: [
+        {
+          id: 'vl-test1',
+          count: 23,
+        },
+        {
+          id: 'vl-test2',
+          count: 45,
+        },
+      ],
+      included_in_exception_lists_count: 24,
+      used_in_indicator_match_rule_count: 6,
+    });
+  });
+  test('can succeed when metrics response has no aggregation response', async () => {
+    const stubMetricResponses = {
+      listMetricsResponse: {},
+      itemMetricsResponse: {},
+      exceptionListMetricsResponse: {},
+      indicatorMatchMetricsResponse: {},
+    };
+    // @ts-ignore
+    const response = metricsResponseToValueListMetaData(stubMetricResponses);
+    expect(response).toEqual({
+      total_list_count: 0,
+      types: [],
+      lists: [],
+      included_in_exception_lists_count: 0,
+      used_in_indicator_match_rule_count: 0,
+    });
+  });
+});
+
+describe('test tlog', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+  });
+
+  test('should log when cloud', () => {
+    setIsElasticCloudDeployment(true);
+    tlog(logger, 'test');
+    expect(logger.info).toHaveBeenCalled();
+    setIsElasticCloudDeployment(false);
+  });
+
+  test('should NOT log when on prem', () => {
+    tlog(logger, 'test');
+    expect(logger.info).toHaveBeenCalledTimes(0);
+    expect(logger.debug).toHaveBeenCalled();
+  });
+});
+
+// FLAKY: https://github.com/elastic/kibana/issues/141356
+describe.skip('test create task metrics', () => {
+  test('can succeed when all parameters are given', async () => {
+    const stubTaskName = 'test';
+    const stubPassed = true;
+    const stubStartTime = Date.now();
+    await new Promise((r) => setTimeout(r, 11));
+    const response = createTaskMetric(stubTaskName, stubPassed, stubStartTime);
+    const {
+      time_executed_in_ms: timeExecutedInMs,
+      start_time: startTime,
+      end_time: endTime,
+      ...rest
+    } = response;
+    expect(timeExecutedInMs).toBeGreaterThan(10);
+    expect(rest).toEqual({
+      name: 'test',
+      passed: true,
+    });
+  });
+  test('can succeed when error given', async () => {
+    const stubTaskName = 'test';
+    const stubPassed = false;
+    const stubStartTime = Date.now();
+    const errorMessage = 'failed';
+    const response = createTaskMetric(stubTaskName, stubPassed, stubStartTime, errorMessage);
+    const {
+      time_executed_in_ms: timeExecutedInMs,
+      start_time: startTime,
+      end_time: endTime,
+      ...rest
+    } = response;
+    expect(rest).toEqual({
+      name: 'test',
+      passed: false,
+      error_message: 'failed',
+    });
   });
 });

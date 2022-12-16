@@ -6,14 +6,16 @@
  */
 
 import React from 'react';
-import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { Actions, ConnectorUserAction, UserAction } from '../../../common/api';
+import type { ConnectorUserAction, UserAction } from '../../../common/api';
+import { Actions } from '../../../common/api';
 import { UserActionTimestamp } from './timestamp';
-import { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from './types';
-import { UserActionUsernameWithAvatar } from './avatar_username';
+import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from './types';
 import { UserActionCopyLink } from './copy_link';
 import { UserActionMoveToReference } from './move_to_reference';
+import { HoverableUserWithAvatarResolver } from '../user_profiles/hoverable_user_with_avatar_resolver';
 
 interface Props {
   userAction: UserActionResponse<ConnectorUserAction>;
@@ -41,12 +43,16 @@ const CommentListActions: React.FC<Props> = React.memo(({ userAction, handleOutl
 
 CommentListActions.displayName = 'CommentListActions';
 
-type BuilderArgs = Pick<UserActionBuilderArgs, 'userAction' | 'handleOutlineComment'> & {
+type BuilderArgs = Pick<
+  UserActionBuilderArgs,
+  'userAction' | 'handleOutlineComment' | 'userProfiles'
+> & {
   label: EuiCommentProps['event'];
-  icon: EuiCommentProps['timelineIcon'];
+  icon: EuiCommentProps['timelineAvatar'];
 };
 
 export const createCommonUpdateUserActionBuilder = ({
+  userProfiles,
   userAction,
   label,
   icon,
@@ -57,16 +63,15 @@ export const createCommonUpdateUserActionBuilder = ({
     build: () => [
       {
         username: (
-          <UserActionUsernameWithAvatar
-            username={userAction.createdBy.username}
-            fullName={userAction.createdBy.fullName}
+          <HoverableUserWithAvatarResolver
+            user={userAction.createdBy}
+            userProfiles={userProfiles}
           />
         ),
-        type: 'update' as const,
         event: label,
         'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-        timelineIcon: icon,
+        timelineAvatar: icon,
         actions: (
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>

@@ -8,8 +8,11 @@
       "active": true,
       "policy_id": "policy1",
       "type": "PERMANENT",
-      "local_metadata": {},
-      "user_provided_metadata": {}
+      "local_metadata": { "host": {"hostname": "host1"}},
+      "user_provided_metadata": {},
+      "enrolled_at": "2022-06-21T12:14:25Z",
+      "last_checkin": "2022-06-27T12:26:29Z",
+      "tags": ["existingTag", "tag1"]
     }
   }
 }
@@ -24,8 +27,11 @@
       "active": true,
       "policy_id": "policy1",
       "type": "PERMANENT",
-      "local_metadata": {},
-      "user_provided_metadata": {}
+      "local_metadata": { "host": {"hostname": "host2"}},
+      "user_provided_metadata": {},
+      "enrolled_at": "2022-06-21T12:14:25Z",
+      "last_checkin": "2022-06-27T12:27:29Z",
+      "tags": ["existingTag"]
     }
   }
 }
@@ -40,8 +46,12 @@
       "active": true,
       "policy_id": "policy1",
       "type": "PERMANENT",
-      "local_metadata": {},
-      "user_provided_metadata": {}
+      "local_metadata": { "host": {"hostname": "host3"}},
+      "user_provided_metadata": {},
+      "enrolled_at": "2022-06-21T12:14:25Z",
+      "last_checkin": "2022-06-27T12:28:29Z",
+      "last_checkin": "2022-06-27T12:28:29Z",
+      "tags": ["tag1"]
     }
   }
 }
@@ -56,8 +66,10 @@
       "active": true,
       "policy_id": "policy1",
       "type": "PERMANENT",
-      "local_metadata": {},
-      "user_provided_metadata": {}
+      "local_metadata": { "host": {"hostname": "host4"}},
+      "user_provided_metadata": {},
+      "enrolled_at": "2022-06-21T12:17:25Z",
+      "last_checkin": "2022-06-27T12:29:29Z"
     }
   }
 }
@@ -80,6 +92,20 @@
 {
   "type": "doc",
   "value": {
+    "id": "fleet-server-host-1",
+    "index": ".fleet-fleet-server-host",
+    "source": {
+      "id": "test-default-123",
+      "name": "Default",
+      "is_default": true,
+      "host_urls": ["https://test.fr:8080", "https://test.fr:8081"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "fleet-agent-actions:b400439c-bbbf-43d5-83cb-cf8b7e32506f",
     "index": ".kibana",
     "source": {
@@ -89,40 +115,6 @@
         "type": "PAUSE",
         "created_at": "2019-09-04T15:01:07+0000",
         "sent_at": "2019-09-04T15:03:07+0000"
-      }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "fleet-agent-actions:48cebde1-c906-4893-b89f-595d943b72a1",
-    "index": ".kibana",
-    "source": {
-      "type": "fleet-agent-actions",
-      "fleet-agent-actions": {
-        "agent_id": "agent1",
-        "type": "POLICY_CHANGE",
-        "created_at": "2020-03-15T03:47:15.129Z",
-        "sent_at": "2020-03-04T15:03:07+0000"
-      }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "fleet-agent-actions:48cebde1-c906-4893-b89f-595d943b72a2",
-    "index": ".kibana",
-    "source": {
-      "type": "fleet-agent-actions",
-      "fleet-agent-actions": {
-        "agent_id": "agent1",
-        "type": "POLICY_CHANGE",
-        "created_at": "2020-03-15T03:47:15.129Z",
-        "sent_at": "2020-03-04T15:03:07+0000"
       }
     }
   }

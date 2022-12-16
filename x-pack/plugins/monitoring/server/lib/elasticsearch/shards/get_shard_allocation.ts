@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-// @ts-ignore
-import { StringOptions } from '@kbn/config-schema/target_types/types';
-// @ts-ignore
 import { createQuery } from '../../create_query';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
-import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
 export function handleResponse(response: ElasticsearchResponse) {
@@ -38,10 +34,8 @@ export function handleResponse(response: ElasticsearchResponse) {
         mbShard?.shard?.relocating_node?.id ?? legacyShard?.relocating_node ?? null;
       const node = mbShard?.node?.id ?? legacyShard?.node;
       // note: if the request is for a node, then it's enough to deduplicate without primary, but for indices it displays both
-      const shardId = `${index}-${shardNumber}-${primary}-${relocatingNode}-${node}`;
 
-      if (!uniqueShards.has(shardId)) {
-        // @ts-ignore
+      if (!uniqueShards.has(hit._id)) {
         shards.push({
           index,
           node,
@@ -50,7 +44,7 @@ export function handleResponse(response: ElasticsearchResponse) {
           shard: shardNumber,
           state: legacyShard?.state ?? mbShard?.shard?.state,
         });
-        uniqueShards.add(shardId);
+        uniqueShards.add(hit._id);
       }
     }
 
@@ -104,7 +98,7 @@ export function getShardAllocation(
   const dataset = 'shard'; // data_stream.dataset
   const type = 'shards'; // legacy
   const moduleType = 'elasticsearch';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     dataset,
@@ -118,7 +112,7 @@ export function getShardAllocation(
     body: {
       query: createQuery({
         type,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getElasticsearchDataset(dataset),
         metricset: dataset,
         clusterUuid,
         metric,

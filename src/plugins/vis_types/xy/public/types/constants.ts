@@ -40,9 +40,3 @@ export enum ThresholdLineStyle {
   Dashed = 'dashed',
   DotDashed = 'dot-dashed',
 }
-
-export enum ColorMode {
-  Background = 'Background',
-  Labels = 'Labels',
-  None = 'None',
-}

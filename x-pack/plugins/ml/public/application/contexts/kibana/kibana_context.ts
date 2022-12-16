@@ -6,6 +6,7 @@
  */
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { useKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
@@ -21,10 +22,14 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { DashboardSetup } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   security?: SecurityPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   share: SharePluginStart;
@@ -36,7 +41,12 @@ interface StartPlugins {
   fieldFormats: FieldFormatsRegistry;
   dashboard: DashboardSetup;
   spacesApi: SpacesPluginStart;
-  charts?: ChartsPluginStart;
+  charts: ChartsPluginStart;
+  cases?: CasesUiStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  core: CoreStart;
+  appName: string;
+  lens: LensPublicStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

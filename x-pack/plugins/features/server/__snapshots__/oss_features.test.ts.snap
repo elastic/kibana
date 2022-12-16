@@ -166,6 +166,14 @@ Array [
     "subFeatures": undefined,
   },
   Object {
+    "id": "filesManagement",
+    "subFeatures": undefined,
+  },
+  Object {
+    "id": "filesSharedImage",
+    "subFeatures": undefined,
+  },
+  Object {
     "id": "savedObjectsManagement",
     "subFeatures": undefined,
   },
@@ -450,6 +458,14 @@ Array [
     "subFeatures": undefined,
   },
   Object {
+    "id": "filesManagement",
+    "subFeatures": undefined,
+  },
+  Object {
+    "id": "filesSharedImage",
+    "subFeatures": undefined,
+  },
+  Object {
     "id": "savedObjectsManagement",
     "subFeatures": undefined,
   },
@@ -530,7 +546,11 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "create": Array [],
+        "delete": Array [],
+        "push": Array [],
         "read": Array [],
+        "update": Array [],
       },
       "catalogue": Array [
         "dashboard",
@@ -682,7 +702,11 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "create": Array [],
+        "delete": Array [],
+        "push": Array [],
         "read": Array [],
+        "update": Array [],
       },
       "catalogue": Array [
         "discover",
@@ -745,6 +769,102 @@ Array [
       "ui": Array [
         "show",
       ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a basic license returns the filesManagement feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:manageFiles",
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "filesManagement",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [
+          "file",
+          "fileShare",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:manageFiles",
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "filesManagement",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "file",
+          "fileShare",
+        ],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a basic license returns the filesSharedImage feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "savedObject": Object {
+        "all": Array [
+          "file",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "file",
+        ],
+      },
+      "ui": Array [],
     },
     "privilegeId": "read",
   },
@@ -893,7 +1013,11 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "create": Array [],
+        "delete": Array [],
+        "push": Array [],
         "read": Array [],
+        "update": Array [],
       },
       "catalogue": Array [
         "visualize",
@@ -1026,7 +1150,11 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "create": Array [],
+        "delete": Array [],
+        "push": Array [],
         "read": Array [],
+        "update": Array [],
       },
       "catalogue": Array [
         "dashboard",
@@ -1178,7 +1306,11 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "create": Array [],
+        "delete": Array [],
+        "push": Array [],
         "read": Array [],
+        "update": Array [],
       },
       "catalogue": Array [
         "discover",
@@ -1241,6 +1373,102 @@ Array [
       "ui": Array [
         "show",
       ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the filesManagement feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:manageFiles",
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "filesManagement",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [
+          "file",
+          "fileShare",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:manageFiles",
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "filesManagement",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "file",
+          "fileShare",
+        ],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the filesSharedImage feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "savedObject": Object {
+        "all": Array [
+          "file",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "file",
+        ],
+      },
+      "ui": Array [],
     },
     "privilegeId": "read",
   },
@@ -1389,7 +1617,11 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "create": Array [],
+        "delete": Array [],
+        "push": Array [],
         "read": Array [],
+        "update": Array [],
       },
       "catalogue": Array [
         "visualize",

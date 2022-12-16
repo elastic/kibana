@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RulesClient, ConstructorOptions, CreateOptions } from '../rules_client';
+import { CreateOptions } from '../methods/create';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -19,13 +20,22 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
-import { getDefaultRuleMonitoring } from '../../task_runner/task_runner';
+import { getDefaultMonitoring } from '../../lib/monitoring';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 
-jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
-  SavedObjectsUtils: {
-    generateId: () => 'mock-saved-object-id',
-  },
+jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock('@kbn/core-saved-objects-utils-server', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+  return {
+    ...actual,
+    SavedObjectsUtils: {
+      generateId: () => 'mock-saved-object-id',
+    },
+  };
+});
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -295,7 +305,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -412,11 +422,21 @@ describe('create()', () => {
           "versionApiKeyLastmodified": "v8.0.0",
         },
         "monitoring": Object {
-          "execution": Object {
+          "run": Object {
             "calculated_metrics": Object {
               "success_ratio": 0,
             },
             "history": Array [],
+            "last_run": Object {
+              "metrics": Object {
+                "gap_duration_s": null,
+                "total_alerts_created": null,
+                "total_alerts_detected": null,
+                "total_indexing_duration_ms": null,
+                "total_search_duration_ms": null,
+              },
+              "timestamp": "2019-02-12T21:01:22.479Z",
+            },
           },
         },
         "muteAll": false,
@@ -429,7 +449,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": "1m",
         },
-        "snoozeEndTime": null,
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -454,6 +474,7 @@ describe('create()', () => {
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
                                                                         Array [
                                                                           Object {
+                                                                            "enabled": true,
                                                                             "id": "1",
                                                                             "params": Object {
                                                                               "alertId": "1",
@@ -501,7 +522,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -561,7 +582,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -618,11 +639,21 @@ describe('create()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "monitoring": Object {
-          "execution": Object {
+          "run": Object {
             "calculated_metrics": Object {
               "success_ratio": 0,
             },
             "history": Array [],
+            "last_run": Object {
+              "metrics": Object {
+                "gap_duration_s": null,
+                "total_alerts_created": null,
+                "total_alerts_detected": null,
+                "total_indexing_duration_ms": null,
+                "total_search_duration_ms": null,
+              },
+              "timestamp": "2019-02-12T21:01:22.479Z",
+            },
           },
         },
         "muteAll": false,
@@ -635,7 +666,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": "1m",
         },
-        "snoozeEndTime": null,
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -1046,10 +1077,10 @@ describe('create()', () => {
           status: 'pending',
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1245,10 +1276,10 @@ describe('create()', () => {
           status: 'pending',
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1413,10 +1444,10 @@ describe('create()', () => {
           status: 'pending',
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1525,7 +1556,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       notifyWhen: 'onActionGroupChange',
       actions: [
@@ -1582,7 +1613,7 @@ describe('create()', () => {
         throttle: '10m',
         notifyWhen: 'onActionGroupChange',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -1591,7 +1622,7 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
       },
       {
         id: 'mock-saved-object-id',
@@ -1657,7 +1688,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       notifyWhen: 'onThrottleInterval',
       actions: [
@@ -1714,7 +1745,7 @@ describe('create()', () => {
         throttle: '10m',
         notifyWhen: 'onThrottleInterval',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -1723,7 +1754,7 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
       },
       {
         id: 'mock-saved-object-id',
@@ -1789,7 +1820,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       notifyWhen: 'onActiveAlert',
       actions: [
@@ -1846,7 +1877,7 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -1855,7 +1886,7 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
       },
       {
         id: 'mock-saved-object-id',
@@ -1930,7 +1961,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -1994,7 +2025,7 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         executionStatus: {
           status: 'pending',
@@ -2003,10 +2034,20 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: {
-          execution: {
+          run: {
             history: [],
             calculated_metrics: {
               success_ratio: 0,
+            },
+            last_run: {
+              timestamp: '2019-02-12T21:01:22.479Z',
+              metrics: {
+                gap_duration_s: null,
+                total_alerts_created: null,
+                total_alerts_detected: null,
+                total_indexing_duration_ms: null,
+                total_search_duration_ms: null,
+              },
             },
           },
         },
@@ -2119,25 +2160,17 @@ describe('create()', () => {
       result: { id: '123', name: '123', api_key: 'abc' },
     });
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
-    const createdAt = new Date().toISOString();
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt,
-      },
-      references: [],
-    });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
     );
     expect(taskManager.schedule).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[1][1]).toStrictEqual({
-      apiKeyId: '123',
-      createdAt,
-    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MTIzOmFiYw=='] },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 
   test('fails if task scheduling fails due to conflict', async () => {
@@ -2364,7 +2397,7 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -2373,7 +2406,7 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
       },
       {
         id: 'mock-saved-object-id',
@@ -2466,7 +2499,7 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -2475,7 +2508,7 @@ describe('create()', () => {
           error: null,
           warning: null,
         },
-        monitoring: getDefaultRuleMonitoring(),
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
       },
       {
         id: 'mock-saved-object-id',
@@ -2625,6 +2658,186 @@ describe('create()', () => {
     const data = getMockData({ schedule: { interval: '1s' } });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error creating rule: the interval is less than the allowed minimum interval of 1m"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws error when mixing and matching global and per-action frequency values', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: 'onActionGroupChange',
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+        {
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: default, default"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+
+    const data2 = getMockData({
+      notifyWhen: null,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+        {
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data: data2 })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: default"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws error when neither global frequency nor action frequency are defined', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Actions missing frequency parameters: default"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+  test('throws error when some actions are missing frequency params', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+        {
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Actions missing frequency parameters: default"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();

@@ -2,7 +2,7 @@
 id: kibDevTutorialCI
 slug: /kibana-dev-docs/tutorials/ci
 title: CI
-summary: CI
+description: CI
 date: 2022-02-03
 tags: ['kibana', 'onboarding', 'dev', 'ci']
 ---
@@ -31,9 +31,13 @@ Build documentation from the root `docs` folder.
 
 Labels can be added to a pull request to run conditional pipelines.
 
-#### `ci:deploy-cloud`
+#### `ci:cloud-deploy`
 
-Deploy a pull request to Elastic Cloud.  Deployment information will be available as an annotation at the top of a build.  Access credentials will be available in vault.
+Create or update a deployment on Elastic Cloud.
+
+#### `ci:cloud-redeploy`
+
+Create a new deployment on Elastic Cloud.  Previous deployments linked to a pull request will be shutdown and data will not be preserved.
 
 #### `ci:build-all-platforms`
 

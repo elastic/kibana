@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { Columns } from '../../paginated_table';
-import { AnomaliesByHost, Anomaly } from '../types';
+import type { Columns } from '../../../../explore/components/paginated_table';
+import type { AnomaliesByHost, Anomaly } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { createCompoundAnomalyKey } from './create_compound_key';
 import { HostDetailsLink } from '../../links';
 import * as i18n from './translations';
-import { HostsType } from '../../../../hosts/store/model';
+import { HostsType } from '../../../../explore/hosts/store/model';
 import { getAnomaliesDefaultTableColumns } from './get_anomalies_table_columns';
 
 export const getAnomaliesHostTableColumns = (
@@ -38,6 +38,8 @@ export const getAnomaliesHostTableColumns = (
           anomaliesByHost.anomaly
         )}-hostName`,
         render: (item) => <HostDetailsLink hostName={item} />,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   ...getAnomaliesDefaultTableColumns(startDate, endDate),

@@ -6,26 +6,34 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CaseMetricsResponse } from '../../../common/api';
-import { CasesClient } from '../client';
-import { CasesClientArgs } from '../types';
+import type { CasesClient } from '../client';
+import type { CasesClientArgs } from '../types';
 
-export interface MetricsHandler {
+export interface MetricsHandler<R> {
   getFeatures(): Set<string>;
-  compute(): Promise<CaseMetricsResponse>;
+  compute(): Promise<R>;
   setupFeature?(feature: string): void;
 }
 
-export interface AggregationBuilder {
+export interface AggregationBuilder<R> {
   build(): Record<string, estypes.AggregationsAggregationContainer>;
-  formatResponse(aggregations: AggregationResponse): CaseMetricsResponse;
+  formatResponse(aggregations: AggregationResponse): R;
   getName(): string;
 }
 
 export type AggregationResponse = Record<string, estypes.AggregationsAggregate> | undefined;
 
 export interface BaseHandlerCommonOptions {
-  caseId: string;
   casesClient: CasesClient;
   clientArgs: CasesClientArgs;
+}
+
+export interface SingleCaseBaseHandlerCommonOptions extends BaseHandlerCommonOptions {
+  caseId: string;
+}
+
+export interface AllCasesBaseHandlerCommonOptions extends BaseHandlerCommonOptions {
+  from?: string;
+  to?: string;
+  owner?: string | string[];
 }

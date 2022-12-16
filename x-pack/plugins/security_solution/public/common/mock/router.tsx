@@ -30,11 +30,4 @@ export const mockHistory = {
   listen: jest.fn(),
 };
 
-export const mockLocation = {
-  pathname: '/welcome',
-  hash: '',
-  search: '',
-  state: '',
-};
-
 export { Router, routeData };

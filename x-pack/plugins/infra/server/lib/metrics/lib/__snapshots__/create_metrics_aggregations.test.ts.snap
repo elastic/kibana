@@ -16,7 +16,7 @@ Object {
   },
   "metric_1_max": Object {
     "max": Object {
-      "field": "system.network.in.bytes",
+      "field": "test.field.that.is.a.counter",
     },
   },
 }

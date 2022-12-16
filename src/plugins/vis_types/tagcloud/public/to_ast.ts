@@ -7,10 +7,6 @@
  */
 
 import type { PaletteOutput } from '@kbn/coloring';
-import {
-  EsaggsExpressionFunctionDefinition,
-  IndexPatternLoadExpressionFunctionDefinition,
-} from '@kbn/data-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
 import { TagCloudVisParams } from './types';
@@ -34,17 +30,6 @@ const preparePalette = (palette?: PaletteOutput) => {
 };
 
 export const toExpressionAst: VisToExpressionAst<TagCloudVisParams> = (vis, params) => {
-  const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: buildExpression([
-      buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
-        id: vis.data.indexPattern!.id!,
-      }),
-    ]),
-    metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: false,
-    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
-  });
-
   const schemas = getVisSchemas(vis, params);
   const { scale, orientation, minFontSize, maxFontSize, showLabel, palette } = vis.params;
 
@@ -62,7 +47,7 @@ export const toExpressionAst: VisToExpressionAst<TagCloudVisParams> = (vis, para
     tagcloud.addArgument('bucket', prepareDimension(schemas.segment[0]));
   }
 
-  const ast = buildExpression([esaggs, tagcloud]);
+  const ast = buildExpression([tagcloud]);
 
   return ast.toAst();
 };

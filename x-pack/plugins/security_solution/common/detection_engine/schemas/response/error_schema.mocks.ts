@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ErrorSchema } from './error_schema';
+import type { ErrorSchema } from './error_schema';
 
 export const getErrorSchemaMock = (
   id: string = '819eded6-e9c8-445b-a647-519aea39e063'

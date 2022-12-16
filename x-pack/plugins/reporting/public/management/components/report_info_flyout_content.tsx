@@ -53,7 +53,14 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       : uiSettings.get('dateFormat:tz');
 
   const formatDate = createDateFormatter(uiSettings.get('dateFormat'), timezone);
+  const formatMilliseconds = (millis: number) =>
+    i18n.translate('xpack.reporting.listing.infoPanel.msToSeconds', {
+      defaultMessage: '{seconds} seconds',
+      values: { seconds: (millis / 1000).toFixed(3) },
+    });
 
+  const hasStarted = info.started_at != null;
+  const hasCompleted = info.completed_at != null;
   const cpuInPercentage = info.metrics?.pdf?.cpuInPercentage ?? info.metrics?.png?.cpuInPercentage;
   const memoryInMegabytes =
     info.metrics?.pdf?.memoryInMegabytes ?? info.metrics?.png?.memoryInMegabytes;
@@ -187,7 +194,19 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description: info.completed_at ? formatDate(info.completed_at) : NA,
     },
-  ];
+    hasStarted && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.queueTime', {
+        defaultMessage: 'Queue time',
+      }),
+      description: info.queue_time_ms ? formatMilliseconds(info.queue_time_ms) : NA,
+    },
+    hasCompleted && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.executionTime', {
+        defaultMessage: 'Execution time',
+      }),
+      description: info.execution_time_ms ? formatMilliseconds(info.execution_time_ms) : NA,
+    },
+  ].filter(Boolean) as EuiDescriptionListProps['listItems'];
 
   const warnings = info.getWarnings();
   const errored =

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { GetGuards } from '../shared_services';
 import { resultsServiceProvider } from '../../models/results_service';
-import { GetGuards } from '../shared_services';
 
 type OrigResultsServiceProvider = ReturnType<typeof resultsServiceProvider>;
 
@@ -23,9 +23,10 @@ export interface ResultsServiceProvider {
 export function getResultsServiceProvider(getGuards: GetGuards): ResultsServiceProvider {
   return {
     resultsServiceProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
+      const guards = getGuards(request, savedObjectsClient);
       return {
         async getAnomaliesTableData(...args) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(async ({ mlClient }) => {

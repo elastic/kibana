@@ -1,0 +1,3595 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".kibana": {
+        "is_hidden": true
+      },
+      ".kibana_8.2.1": {
+        "is_hidden": true
+      }
+    },
+    "index": ".kibana_1",
+    "mappings": {
+      "_meta": {
+        "migrationMappingPropertyHashes": {
+          "action": "38c91d092e0790ecd9ebe58e82145280",
+          "action_task_params": "d43ed71d8608a6406977fe093a9fbe74",
+          "alert": "cad2d0e83b1cc0a75836fe6ea8b5660e",
+          "api_key_pending_invalidation": "16f515278a295f6245149ad7c5ddedb7",
+          "apm-indices": "3d1b76c39bfb2cc8296b024d73854724",
+          "apm-server-schema": "b1d71908f324c17bf744ac72af5038fb",
+          "apm-service-group": "3694c9d280254690aecf82d1e513af4f",
+          "apm-telemetry": "3d1b76c39bfb2cc8296b024d73854724",
+          "app_search_telemetry": "3d1b76c39bfb2cc8296b024d73854724",
+          "application_usage_daily": "43b8830d5d0df85a6823d290885fc9fd",
+          "application_usage_totals": "3d1b76c39bfb2cc8296b024d73854724",
+          "application_usage_transactional": "3d1b76c39bfb2cc8296b024d73854724",
+          "canvas-element": "7390014e1091044523666d97247392fc",
+          "canvas-workpad": "b0a1706d356228dbdcb4a17e6b9eb231",
+          "canvas-workpad-template": "ae2673f678281e2c055d764b153e9715",
+          "cases": "a8ff24b330d1f7e6fbcbb53b794372c7",
+          "cases-comments": "0b9a7a24d380cd742856c5b9d1ebcf5e",
+          "cases-configure": "623baf529acc106213ba8f730d41ec7f",
+          "cases-connector-mappings": "17d2e9e0e170a21a471285a5d845353c",
+          "cases-telemetry": "3d1b76c39bfb2cc8296b024d73854724",
+          "cases-user-actions": "6bd1fa1da28cb1015547c6ff6ed7a9ab",
+          "config": "c63748b75f39d0c54de12d12c1ccbc20",
+          "connector_token": "53e34e65945ca21461be85f868495da5",
+          "core-usage-stats": "3d1b76c39bfb2cc8296b024d73854724",
+          "coreMigrationVersion": "2f4316de49999235636386fe51dc06c1",
+          "dashboard": "bc881edf161013a17165a244e0812e9f",
+          "endpoint:user-artifact": "4a11183eee21e6fbad864f7a30b39ad0",
+          "endpoint:user-artifact-manifest": "a0d7b04ad405eed54d76e279c3727862",
+          "enterprise_search_telemetry": "3d1b76c39bfb2cc8296b024d73854724",
+          "epm-packages": "623b0a90f5da58544c5d799168775ae7",
+          "epm-packages-assets": "44621b2f6052ef966da47b7c3a00f33b",
+          "event_loop_delays_daily": "5df7e292ddd5028e07c1482e130e6654",
+          "exception-list": "baf108c9934dda844921f692a513adae",
+          "exception-list-agnostic": "baf108c9934dda844921f692a513adae",
+          "file-upload-usage-collection-telemetry": "a34fbb8e3263d105044869264860c697",
+          "fleet-preconfiguration-deletion-record": "4c36f199189a367e43541f236141204c",
+          "graph-workspace": "27a94b2edcb0610c6aea54a7c56d7752",
+          "index-pattern": "45915a1ad866812242df474eb0479052",
+          "infrastructure-ui-source": "3d1b76c39bfb2cc8296b024d73854724",
+          "ingest-agent-policies": "01a9d8dffb4d5d4a3392fe016c106861",
+          "ingest-outputs": "e2fb31fe4277f4b1635494fa66c0109e",
+          "ingest-package-policies": "1a864f4b78f6f47104514768b374961a",
+          "ingest_manager_settings": "f159646d76ab261bfbf8ef504d9631e4",
+          "inventory-view": "3d1b76c39bfb2cc8296b024d73854724",
+          "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
+          "legacy-url-alias": "0750774cf16475f88f2361e99cc5c8f0",
+          "lens": "52346cfec69ff7b47d5f0c12361a2797",
+          "lens-ui-telemetry": "509bfa5978586998e05f9e303c07a327",
+          "map": "9134b47593116d7953f6adba096fc463",
+          "maps-telemetry": "5ef305b18111b77789afefbd36b66171",
+          "metrics-explorer-view": "3d1b76c39bfb2cc8296b024d73854724",
+          "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
+          "ml-job": "3bb64c31915acf93fc724af137a0891b",
+          "ml-module": "46ef4f0d6682636f0fff9799d6a2d7ac",
+          "ml-trained-model": "d2f03c1a5dd038fa58af14a56944312b",
+          "monitoring-telemetry": "2669d5ec15e82391cf58df4294ee9c68",
+          "namespace": "2f4316de49999235636386fe51dc06c1",
+          "namespaces": "2f4316de49999235636386fe51dc06c1",
+          "originId": "2f4316de49999235636386fe51dc06c1",
+          "osquery-manager-usage-metric": "4dc4f647d27247c002f56f22742175fe",
+          "osquery-pack": "6837d03984ac726c7cfcd3bc3607c6ad",
+          "osquery-pack-asset": "ef3219d7a325c167004c72ae50c5e24e",
+          "osquery-saved-query": "5f0bfa089d9c55638128fc97c2127ce4",
+          "query": "11aaeb7f5f7fa5bb43f25e18ce26e7d9",
+          "references": "7997cf5a56cc02bdc9c93361bde732b0",
+          "sample-data-telemetry": "7d3cfeb915303c9641c59681967ffeb4",
+          "search": "102e6bfa047f910ee44a3c3f5aa108d8",
+          "search-session": "f7fb3822d34a2d59349753d64c85565d",
+          "search-telemetry": "3d1b76c39bfb2cc8296b024d73854724",
+          "security-rule": "8ae39a88fc70af3375b7050e8d8d5cc7",
+          "security-solution-signals-migration": "72761fd374ca11122ac8025a92b84fca",
+          "siem-detection-engine-rule-actions": "ec8a5cc503fc8cd151a2463190e4e425",
+          "siem-detection-engine-rule-execution-info": "8c69348c62ca51aaa9a80d4a6f20dc10",
+          "siem-ui-timeline": "0f4cc81427182c41cebd7d9c640ec253",
+          "siem-ui-timeline-note": "28393dfdeb4e4413393eb5f7ec8c5436",
+          "siem-ui-timeline-pinned-event": "293fce142548281599060e07ad2c9ddb",
+          "space": "c5ca8acafa0beaa4d08d014a97b6bc6b",
+          "spaces-usage-stats": "3d1b76c39bfb2cc8296b024d73854724",
+          "tag": "83d55da58f6530f7055415717ec06474",
+          "telemetry": "36a616f7026dfa617d6655df850fe16d",
+          "type": "2f4316de49999235636386fe51dc06c1",
+          "ui-counter": "0d409297dc5ebe1e3a1da691c6ee32e3",
+          "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
+          "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
+          "upgrade-assistant-ml-upgrade-operation": "ece1011519ca8fd057364605744d75ac",
+          "upgrade-assistant-reindex-operation": "215107c281839ea9b3ad5f6419819763",
+          "upgrade-assistant-telemetry": "7443e25d76c53f49aaf2daac37d4d1f8",
+          "uptime-dynamic-settings": "3d1b76c39bfb2cc8296b024d73854724",
+          "url": "dde920c35ebae1bf43731d19f7b2194d",
+          "usage-counters": "8cc260bdceffec4ffc3ad165c97dc1b4",
+          "visualization": "f819cf6636b75c9e76ba733a0c6ef355",
+          "workplace_search_telemetry": "3d1b76c39bfb2cc8296b024d73854724"
+        }
+      },
+      "dynamic": "strict",
+      "properties": {
+        "action": {
+          "properties": {
+            "actionTypeId": {
+              "type": "keyword"
+            },
+            "config": {
+              "enabled": false,
+              "type": "object"
+            },
+            "isMissingSecrets": {
+              "type": "boolean"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "secrets": {
+              "type": "binary"
+            }
+          }
+        },
+        "action_task_params": {
+          "properties": {
+            "actionId": {
+              "type": "keyword"
+            },
+            "apiKey": {
+              "type": "binary"
+            },
+            "consumer": {
+              "type": "keyword"
+            },
+            "executionId": {
+              "type": "keyword"
+            },
+            "params": {
+              "enabled": false,
+              "type": "object"
+            },
+            "relatedSavedObjects": {
+              "enabled": false,
+              "type": "object"
+            }
+          }
+        },
+        "alert": {
+          "properties": {
+            "actions": {
+              "properties": {
+                "actionRef": {
+                  "type": "keyword"
+                },
+                "actionTypeId": {
+                  "type": "keyword"
+                },
+                "group": {
+                  "type": "keyword"
+                },
+                "params": {
+                  "enabled": false,
+                  "type": "object"
+                }
+              },
+              "type": "nested"
+            },
+            "alertTypeId": {
+              "type": "keyword"
+            },
+            "apiKey": {
+              "type": "binary"
+            },
+            "apiKeyOwner": {
+              "type": "keyword"
+            },
+            "consumer": {
+              "type": "keyword"
+            },
+            "createdAt": {
+              "type": "date"
+            },
+            "createdBy": {
+              "type": "keyword"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "executionStatus": {
+              "properties": {
+                "error": {
+                  "properties": {
+                    "message": {
+                      "type": "keyword"
+                    },
+                    "reason": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "lastDuration": {
+                  "type": "long"
+                },
+                "lastExecutionDate": {
+                  "type": "date"
+                },
+                "numberOfTriggeredActions": {
+                  "type": "long"
+                },
+                "status": {
+                  "type": "keyword"
+                },
+                "warning": {
+                  "properties": {
+                    "message": {
+                      "type": "keyword"
+                    },
+                    "reason": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "legacyId": {
+              "type": "keyword"
+            },
+            "mapped_params": {
+              "properties": {
+                "risk_score": {
+                  "type": "float"
+                },
+                "severity": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "meta": {
+              "properties": {
+                "versionApiKeyLastmodified": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "monitoring": {
+              "properties": {
+                "execution": {
+                  "properties": {
+                    "calculated_metrics": {
+                      "properties": {
+                        "p50": {
+                          "type": "long"
+                        },
+                        "p95": {
+                          "type": "long"
+                        },
+                        "p99": {
+                          "type": "long"
+                        },
+                        "success_ratio": {
+                          "type": "float"
+                        }
+                      }
+                    },
+                    "history": {
+                      "properties": {
+                        "duration": {
+                          "type": "long"
+                        },
+                        "success": {
+                          "type": "boolean"
+                        },
+                        "timestamp": {
+                          "type": "date"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "muteAll": {
+              "type": "boolean"
+            },
+            "mutedInstanceIds": {
+              "type": "keyword"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "notifyWhen": {
+              "type": "keyword"
+            },
+            "params": {
+              "ignore_above": 4096,
+              "type": "flattened"
+            },
+            "schedule": {
+              "properties": {
+                "interval": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "scheduledTaskId": {
+              "type": "keyword"
+            },
+            "snoozeEndTime": {
+              "format": "strict_date_time",
+              "type": "date"
+            },
+            "tags": {
+              "type": "keyword"
+            },
+            "throttle": {
+              "type": "keyword"
+            },
+            "updatedAt": {
+              "type": "date"
+            },
+            "updatedBy": {
+              "type": "keyword"
+            }
+          }
+        },
+        "api_key_pending_invalidation": {
+          "properties": {
+            "apiKeyId": {
+              "type": "keyword"
+            },
+            "createdAt": {
+              "type": "date"
+            }
+          }
+        },
+        "apm-indices": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "apm-server-schema": {
+          "properties": {
+            "schemaJson": {
+              "index": false,
+              "type": "text"
+            }
+          }
+        },
+        "apm-service-group": {
+          "properties": {
+            "color": {
+              "type": "text"
+            },
+            "description": {
+              "type": "text"
+            },
+            "groupName": {
+              "type": "keyword"
+            },
+            "kuery": {
+              "type": "text"
+            },
+            "serviceNames": {
+              "type": "keyword"
+            }
+          }
+        },
+        "apm-telemetry": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "app_search_telemetry": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "application_usage_daily": {
+          "dynamic": "false",
+          "properties": {
+            "timestamp": {
+              "type": "date"
+            }
+          }
+        },
+        "application_usage_totals": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "application_usage_transactional": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "canvas-element": {
+          "dynamic": "false",
+          "properties": {
+            "@created": {
+              "type": "date"
+            },
+            "@timestamp": {
+              "type": "date"
+            },
+            "content": {
+              "type": "text"
+            },
+            "help": {
+              "type": "text"
+            },
+            "image": {
+              "type": "text"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "canvas-workpad": {
+          "dynamic": "false",
+          "properties": {
+            "@created": {
+              "type": "date"
+            },
+            "@timestamp": {
+              "type": "date"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "canvas-workpad-template": {
+          "dynamic": "false",
+          "properties": {
+            "help": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "tags": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "template_key": {
+              "type": "keyword"
+            }
+          }
+        },
+        "cases": {
+          "properties": {
+            "closed_at": {
+              "type": "date"
+            },
+            "closed_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "connector": {
+              "properties": {
+                "fields": {
+                  "properties": {
+                    "key": {
+                      "type": "text"
+                    },
+                    "value": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "name": {
+                  "type": "text"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "description": {
+              "type": "text"
+            },
+            "external_service": {
+              "properties": {
+                "connector_name": {
+                  "type": "keyword"
+                },
+                "external_id": {
+                  "type": "keyword"
+                },
+                "external_title": {
+                  "type": "text"
+                },
+                "external_url": {
+                  "type": "text"
+                },
+                "pushed_at": {
+                  "type": "date"
+                },
+                "pushed_by": {
+                  "properties": {
+                    "email": {
+                      "type": "keyword"
+                    },
+                    "full_name": {
+                      "type": "keyword"
+                    },
+                    "username": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "owner": {
+              "type": "keyword"
+            },
+            "settings": {
+              "properties": {
+                "syncAlerts": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "tags": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "updated_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "cases-comments": {
+          "properties": {
+            "actions": {
+              "properties": {
+                "targets": {
+                  "properties": {
+                    "endpointId": {
+                      "type": "keyword"
+                    },
+                    "hostname": {
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "nested"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "alertId": {
+              "type": "keyword"
+            },
+            "comment": {
+              "type": "text"
+            },
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "index": {
+              "type": "keyword"
+            },
+            "owner": {
+              "type": "keyword"
+            },
+            "pushed_at": {
+              "type": "date"
+            },
+            "pushed_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "rule": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "updated_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "cases-configure": {
+          "properties": {
+            "closure_type": {
+              "type": "keyword"
+            },
+            "connector": {
+              "properties": {
+                "fields": {
+                  "properties": {
+                    "key": {
+                      "type": "text"
+                    },
+                    "value": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "name": {
+                  "type": "text"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "owner": {
+              "type": "keyword"
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "updated_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "cases-connector-mappings": {
+          "properties": {
+            "mappings": {
+              "properties": {
+                "action_type": {
+                  "type": "keyword"
+                },
+                "source": {
+                  "type": "keyword"
+                },
+                "target": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "owner": {
+              "type": "keyword"
+            }
+          }
+        },
+        "cases-telemetry": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "cases-user-actions": {
+          "properties": {
+            "action": {
+              "type": "keyword"
+            },
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "owner": {
+              "type": "keyword"
+            },
+            "payload": {
+              "dynamic": "false",
+              "properties": {
+                "connector": {
+                  "properties": {
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "config": {
+          "dynamic": "false",
+          "properties": {
+            "buildNum": {
+              "type": "keyword"
+            }
+          }
+        },
+        "connector_token": {
+          "properties": {
+            "connectorId": {
+              "type": "keyword"
+            },
+            "createdAt": {
+              "type": "date"
+            },
+            "expiresAt": {
+              "type": "date"
+            },
+            "token": {
+              "type": "binary"
+            },
+            "tokenType": {
+              "type": "keyword"
+            },
+            "updatedAt": {
+              "type": "date"
+            }
+          }
+        },
+        "core-usage-stats": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "coreMigrationVersion": {
+          "type": "keyword"
+        },
+        "dashboard": {
+          "properties": {
+            "controlGroupInput": {
+              "properties": {
+                "chainingSystem": {
+                  "doc_values": false,
+                  "index": false,
+                  "type": "keyword"
+                },
+                "controlStyle": {
+                  "doc_values": false,
+                  "index": false,
+                  "type": "keyword"
+                },
+                "ignoreParentSettingsJSON": {
+                  "index": false,
+                  "type": "text"
+                },
+                "panelsJSON": {
+                  "index": false,
+                  "type": "text"
+                }
+              }
+            },
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "doc_values": false,
+              "index": false,
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "index": false,
+                  "type": "text"
+                }
+              }
+            },
+            "optionsJSON": {
+              "index": false,
+              "type": "text"
+            },
+            "panelsJSON": {
+              "index": false,
+              "type": "text"
+            },
+            "refreshInterval": {
+              "properties": {
+                "display": {
+                  "doc_values": false,
+                  "index": false,
+                  "type": "keyword"
+                },
+                "pause": {
+                  "doc_values": false,
+                  "index": false,
+                  "type": "boolean"
+                },
+                "section": {
+                  "doc_values": false,
+                  "index": false,
+                  "type": "integer"
+                },
+                "value": {
+                  "doc_values": false,
+                  "index": false,
+                  "type": "integer"
+                }
+              }
+            },
+            "timeFrom": {
+              "doc_values": false,
+              "index": false,
+              "type": "keyword"
+            },
+            "timeRestore": {
+              "doc_values": false,
+              "index": false,
+              "type": "boolean"
+            },
+            "timeTo": {
+              "doc_values": false,
+              "index": false,
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "endpoint:user-artifact": {
+          "properties": {
+            "body": {
+              "type": "binary"
+            },
+            "compressionAlgorithm": {
+              "index": false,
+              "type": "keyword"
+            },
+            "created": {
+              "index": false,
+              "type": "date"
+            },
+            "decodedSha256": {
+              "index": false,
+              "type": "keyword"
+            },
+            "decodedSize": {
+              "index": false,
+              "type": "long"
+            },
+            "encodedSha256": {
+              "type": "keyword"
+            },
+            "encodedSize": {
+              "index": false,
+              "type": "long"
+            },
+            "encryptionAlgorithm": {
+              "index": false,
+              "type": "keyword"
+            },
+            "identifier": {
+              "type": "keyword"
+            }
+          }
+        },
+        "endpoint:user-artifact-manifest": {
+          "properties": {
+            "artifacts": {
+              "properties": {
+                "artifactId": {
+                  "index": false,
+                  "type": "keyword"
+                },
+                "policyId": {
+                  "index": false,
+                  "type": "keyword"
+                }
+              },
+              "type": "nested"
+            },
+            "created": {
+              "index": false,
+              "type": "date"
+            },
+            "schemaVersion": {
+              "type": "keyword"
+            },
+            "semanticVersion": {
+              "index": false,
+              "type": "keyword"
+            }
+          }
+        },
+        "enterprise_search_telemetry": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "epm-packages": {
+          "properties": {
+            "es_index_patterns": {
+              "enabled": false,
+              "type": "object"
+            },
+            "install_source": {
+              "type": "keyword"
+            },
+            "install_started_at": {
+              "type": "date"
+            },
+            "install_status": {
+              "type": "keyword"
+            },
+            "install_version": {
+              "type": "keyword"
+            },
+            "installed_es": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              },
+              "type": "nested"
+            },
+            "installed_kibana": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              },
+              "type": "nested"
+            },
+            "installed_kibana_space_id": {
+              "type": "keyword"
+            },
+            "internal": {
+              "type": "boolean"
+            },
+            "keep_policies_up_to_date": {
+              "index": false,
+              "type": "boolean"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "package_assets": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              },
+              "type": "nested"
+            },
+            "removable": {
+              "type": "boolean"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "epm-packages-assets": {
+          "properties": {
+            "asset_path": {
+              "type": "keyword"
+            },
+            "data_base64": {
+              "type": "binary"
+            },
+            "data_utf8": {
+              "index": false,
+              "type": "text"
+            },
+            "install_source": {
+              "type": "keyword"
+            },
+            "media_type": {
+              "type": "keyword"
+            },
+            "package_name": {
+              "type": "keyword"
+            },
+            "package_version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "event_loop_delays_daily": {
+          "dynamic": "false",
+          "properties": {
+            "lastUpdatedAt": {
+              "type": "date"
+            }
+          }
+        },
+        "exception-list": {
+          "properties": {
+            "_tags": {
+              "type": "keyword"
+            },
+            "comments": {
+              "properties": {
+                "comment": {
+                  "type": "keyword"
+                },
+                "created_at": {
+                  "type": "keyword"
+                },
+                "created_by": {
+                  "type": "keyword"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "updated_at": {
+                  "type": "keyword"
+                },
+                "updated_by": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "created_at": {
+              "type": "keyword"
+            },
+            "created_by": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "keyword"
+            },
+            "entries": {
+              "properties": {
+                "entries": {
+                  "properties": {
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "operator": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "value": {
+                      "fields": {
+                        "text": {
+                          "type": "text"
+                        }
+                      },
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "field": {
+                  "type": "keyword"
+                },
+                "list": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "operator": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "value": {
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  },
+                  "type": "keyword"
+                }
+              }
+            },
+            "immutable": {
+              "type": "boolean"
+            },
+            "item_id": {
+              "type": "keyword"
+            },
+            "list_id": {
+              "type": "keyword"
+            },
+            "list_type": {
+              "type": "keyword"
+            },
+            "meta": {
+              "type": "keyword"
+            },
+            "name": {
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              },
+              "type": "keyword"
+            },
+            "os_types": {
+              "type": "keyword"
+            },
+            "tags": {
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              },
+              "type": "keyword"
+            },
+            "tie_breaker_id": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "updated_by": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "exception-list-agnostic": {
+          "properties": {
+            "_tags": {
+              "type": "keyword"
+            },
+            "comments": {
+              "properties": {
+                "comment": {
+                  "type": "keyword"
+                },
+                "created_at": {
+                  "type": "keyword"
+                },
+                "created_by": {
+                  "type": "keyword"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "updated_at": {
+                  "type": "keyword"
+                },
+                "updated_by": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "created_at": {
+              "type": "keyword"
+            },
+            "created_by": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "keyword"
+            },
+            "entries": {
+              "properties": {
+                "entries": {
+                  "properties": {
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "operator": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "value": {
+                      "fields": {
+                        "text": {
+                          "type": "text"
+                        }
+                      },
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "field": {
+                  "type": "keyword"
+                },
+                "list": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "operator": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "value": {
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  },
+                  "type": "keyword"
+                }
+              }
+            },
+            "immutable": {
+              "type": "boolean"
+            },
+            "item_id": {
+              "type": "keyword"
+            },
+            "list_id": {
+              "type": "keyword"
+            },
+            "list_type": {
+              "type": "keyword"
+            },
+            "meta": {
+              "type": "keyword"
+            },
+            "name": {
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              },
+              "type": "keyword"
+            },
+            "os_types": {
+              "type": "keyword"
+            },
+            "tags": {
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              },
+              "type": "keyword"
+            },
+            "tie_breaker_id": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "updated_by": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "file-upload-usage-collection-telemetry": {
+          "properties": {
+            "file_upload": {
+              "properties": {
+                "index_creation_count": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "fleet-preconfiguration-deletion-record": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            }
+          }
+        },
+        "graph-workspace": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "legacyIndexPatternRef": {
+              "index": false,
+              "type": "text"
+            },
+            "numLinks": {
+              "type": "integer"
+            },
+            "numVertices": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            },
+            "wsState": {
+              "type": "text"
+            }
+          }
+        },
+        "index-pattern": {
+          "dynamic": "false",
+          "properties": {
+            "title": {
+              "type": "text"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "infrastructure-ui-source": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "ingest-agent-policies": {
+          "properties": {
+            "data_output_id": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "is_default": {
+              "type": "boolean"
+            },
+            "is_default_fleet_server": {
+              "type": "boolean"
+            },
+            "is_managed": {
+              "type": "boolean"
+            },
+            "is_preconfigured": {
+              "type": "keyword"
+            },
+            "monitoring_enabled": {
+              "index": false,
+              "type": "keyword"
+            },
+            "monitoring_output_id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "namespace": {
+              "type": "keyword"
+            },
+            "package_policies": {
+              "type": "keyword"
+            },
+            "revision": {
+              "type": "integer"
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "unenroll_timeout": {
+              "type": "integer"
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "updated_by": {
+              "type": "keyword"
+            }
+          }
+        },
+        "ingest-outputs": {
+          "properties": {
+            "ca_sha256": {
+              "index": false,
+              "type": "keyword"
+            },
+            "ca_trusted_fingerprint": {
+              "index": false,
+              "type": "keyword"
+            },
+            "config": {
+              "type": "flattened"
+            },
+            "config_yaml": {
+              "type": "text"
+            },
+            "hosts": {
+              "type": "keyword"
+            },
+            "is_default": {
+              "type": "boolean"
+            },
+            "is_default_monitoring": {
+              "type": "boolean"
+            },
+            "is_preconfigured": {
+              "index": false,
+              "type": "boolean"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "output_id": {
+              "index": false,
+              "type": "keyword"
+            },
+            "ssl": {
+              "type": "binary"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "ingest-package-policies": {
+          "properties": {
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "elasticsearch": {
+              "enabled": false,
+              "properties": {
+                "privileges": {
+                  "properties": {
+                    "cluster": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "inputs": {
+              "enabled": false,
+              "properties": {
+                "compiled_input": {
+                  "type": "flattened"
+                },
+                "config": {
+                  "type": "flattened"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "policy_template": {
+                  "type": "keyword"
+                },
+                "streams": {
+                  "properties": {
+                    "compiled_stream": {
+                      "type": "flattened"
+                    },
+                    "config": {
+                      "type": "flattened"
+                    },
+                    "data_stream": {
+                      "properties": {
+                        "dataset": {
+                          "type": "keyword"
+                        },
+                        "elasticsearch": {
+                          "properties": {
+                            "privileges": {
+                              "type": "flattened"
+                            }
+                          }
+                        },
+                        "type": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "vars": {
+                      "type": "flattened"
+                    }
+                  },
+                  "type": "nested"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "vars": {
+                  "type": "flattened"
+                }
+              },
+              "type": "nested"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "namespace": {
+              "type": "keyword"
+            },
+            "output_id": {
+              "type": "keyword"
+            },
+            "package": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                },
+                "title": {
+                  "type": "keyword"
+                },
+                "version": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "policy_id": {
+              "type": "keyword"
+            },
+            "revision": {
+              "type": "integer"
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "updated_by": {
+              "type": "keyword"
+            },
+            "vars": {
+              "type": "flattened"
+            }
+          }
+        },
+        "ingest_manager_settings": {
+          "properties": {
+            "fleet_server_hosts": {
+              "type": "keyword"
+            },
+            "has_seen_add_data_notice": {
+              "index": false,
+              "type": "boolean"
+            },
+            "has_seen_fleet_migration_notice": {
+              "index": false,
+              "type": "boolean"
+            }
+          }
+        },
+        "inventory-view": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "kql-telemetry": {
+          "properties": {
+            "optInCount": {
+              "type": "long"
+            },
+            "optOutCount": {
+              "type": "long"
+            }
+          }
+        },
+        "legacy-url-alias": {
+          "dynamic": "false",
+          "properties": {
+            "disabled": {
+              "type": "boolean"
+            },
+            "resolveCounter": {
+              "type": "long"
+            },
+            "sourceId": {
+              "type": "keyword"
+            },
+            "targetId": {
+              "type": "keyword"
+            },
+            "targetNamespace": {
+              "type": "keyword"
+            },
+            "targetType": {
+              "type": "keyword"
+            }
+          }
+        },
+        "lens": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "expression": {
+              "doc_values": false,
+              "index": false,
+              "type": "keyword"
+            },
+            "state": {
+              "type": "flattened"
+            },
+            "title": {
+              "type": "text"
+            },
+            "visualizationType": {
+              "type": "keyword"
+            }
+          }
+        },
+        "lens-ui-telemetry": {
+          "properties": {
+            "count": {
+              "type": "integer"
+            },
+            "date": {
+              "type": "date"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "map": {
+          "properties": {
+            "bounds": {
+              "dynamic": "false",
+              "type": "object"
+            },
+            "description": {
+              "type": "text"
+            },
+            "layerListJSON": {
+              "type": "text"
+            },
+            "mapStateJSON": {
+              "type": "text"
+            },
+            "title": {
+              "type": "text"
+            },
+            "uiStateJSON": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "maps-telemetry": {
+          "enabled": false,
+          "type": "object"
+        },
+        "metrics-explorer-view": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "migrationVersion": {
+          "dynamic": "true",
+          "properties": {
+            "alert": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "canvas-workpad-template": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "config": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "core-usage-stats": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "exception-list-agnostic": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "ingest-outputs": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "ingest_manager_settings": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "ml-trained-model": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "space": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "spaces-usage-stats": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "ml-job": {
+          "properties": {
+            "datafeed_id": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "job_id": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "ml-module": {
+          "dynamic": "false",
+          "properties": {
+            "datafeeds": {
+              "type": "object"
+            },
+            "defaultIndexPattern": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "description": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "id": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "jobs": {
+              "type": "object"
+            },
+            "logo": {
+              "type": "object"
+            },
+            "query": {
+              "type": "object"
+            },
+            "title": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "type": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "ml-trained-model": {
+          "properties": {
+            "job": {
+              "properties": {
+                "create_time": {
+                  "type": "date"
+                },
+                "job_id": {
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
+            },
+            "model_id": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "monitoring-telemetry": {
+          "properties": {
+            "reportedClusterUuids": {
+              "type": "keyword"
+            }
+          }
+        },
+        "namespace": {
+          "type": "keyword"
+        },
+        "namespaces": {
+          "type": "keyword"
+        },
+        "originId": {
+          "type": "keyword"
+        },
+        "osquery-manager-usage-metric": {
+          "properties": {
+            "count": {
+              "type": "long"
+            },
+            "errors": {
+              "type": "long"
+            }
+          }
+        },
+        "osquery-pack": {
+          "properties": {
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": "text"
+            },
+            "queries": {
+              "properties": {
+                "ecs_mapping": {
+                  "enabled": false,
+                  "type": "object"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "interval": {
+                  "type": "text"
+                },
+                "platform": {
+                  "type": "keyword"
+                },
+                "query": {
+                  "type": "text"
+                },
+                "version": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "updated_by": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "long"
+            }
+          }
+        },
+        "osquery-pack-asset": {
+          "dynamic": "false",
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "name": {
+              "type": "text"
+            },
+            "queries": {
+              "properties": {
+                "ecs_mapping": {
+                  "enabled": false,
+                  "type": "object"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "interval": {
+                  "type": "text"
+                },
+                "platform": {
+                  "type": "keyword"
+                },
+                "query": {
+                  "type": "text"
+                },
+                "version": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "version": {
+              "type": "long"
+            }
+          }
+        },
+        "osquery-saved-query": {
+          "properties": {
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "type": "text"
+            },
+            "description": {
+              "type": "text"
+            },
+            "ecs_mapping": {
+              "enabled": false,
+              "type": "object"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "interval": {
+              "type": "keyword"
+            },
+            "platform": {
+              "type": "keyword"
+            },
+            "query": {
+              "type": "text"
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "updated_by": {
+              "type": "text"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "query": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "filters": {
+              "enabled": false,
+              "type": "object"
+            },
+            "query": {
+              "properties": {
+                "language": {
+                  "type": "keyword"
+                },
+                "query": {
+                  "index": false,
+                  "type": "keyword"
+                }
+              }
+            },
+            "timefilter": {
+              "enabled": false,
+              "type": "object"
+            },
+            "title": {
+              "type": "text"
+            }
+          }
+        },
+        "references": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          },
+          "type": "nested"
+        },
+        "sample-data-telemetry": {
+          "properties": {
+            "installCount": {
+              "type": "long"
+            },
+            "unInstallCount": {
+              "type": "long"
+            }
+          }
+        },
+        "search": {
+          "properties": {
+            "columns": {
+              "doc_values": false,
+              "index": false,
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "grid": {
+              "enabled": false,
+              "type": "object"
+            },
+            "hideAggregatedPreview": {
+              "doc_values": false,
+              "index": false,
+              "type": "boolean"
+            },
+            "hideChart": {
+              "doc_values": false,
+              "index": false,
+              "type": "boolean"
+            },
+            "hits": {
+              "doc_values": false,
+              "index": false,
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "index": false,
+                  "type": "text"
+                }
+              }
+            },
+            "rowHeight": {
+              "type": "text"
+            },
+            "sort": {
+              "doc_values": false,
+              "index": false,
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            },
+            "viewMode": {
+              "doc_values": false,
+              "index": false,
+              "type": "keyword"
+            }
+          }
+        },
+        "search-session": {
+          "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "completed": {
+              "type": "date"
+            },
+            "created": {
+              "type": "date"
+            },
+            "expires": {
+              "type": "date"
+            },
+            "idMapping": {
+              "enabled": false,
+              "type": "object"
+            },
+            "initialState": {
+              "enabled": false,
+              "type": "object"
+            },
+            "locatorId": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "persisted": {
+              "type": "boolean"
+            },
+            "realmName": {
+              "type": "keyword"
+            },
+            "realmType": {
+              "type": "keyword"
+            },
+            "restoreState": {
+              "enabled": false,
+              "type": "object"
+            },
+            "sessionId": {
+              "type": "keyword"
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "touched": {
+              "type": "date"
+            },
+            "username": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "search-telemetry": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "security-rule": {
+          "dynamic": "false",
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "rule_id": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "long"
+            }
+          }
+        },
+        "security-solution-signals-migration": {
+          "properties": {
+            "created": {
+              "index": false,
+              "type": "date"
+            },
+            "createdBy": {
+              "index": false,
+              "type": "text"
+            },
+            "destinationIndex": {
+              "index": false,
+              "type": "keyword"
+            },
+            "error": {
+              "index": false,
+              "type": "text"
+            },
+            "sourceIndex": {
+              "type": "keyword"
+            },
+            "status": {
+              "index": false,
+              "type": "keyword"
+            },
+            "taskId": {
+              "index": false,
+              "type": "keyword"
+            },
+            "updated": {
+              "index": false,
+              "type": "date"
+            },
+            "updatedBy": {
+              "index": false,
+              "type": "text"
+            },
+            "version": {
+              "type": "long"
+            }
+          }
+        },
+        "siem-detection-engine-rule-actions": {
+          "properties": {
+            "actions": {
+              "properties": {
+                "actionRef": {
+                  "type": "keyword"
+                },
+                "action_type_id": {
+                  "type": "keyword"
+                },
+                "group": {
+                  "type": "keyword"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "params": {
+                  "enabled": false,
+                  "type": "object"
+                }
+              }
+            },
+            "alertThrottle": {
+              "type": "keyword"
+            },
+            "ruleAlertId": {
+              "type": "keyword"
+            },
+            "ruleThrottle": {
+              "type": "keyword"
+            }
+          }
+        },
+        "siem-detection-engine-rule-execution-info": {
+          "properties": {
+            "last_execution": {
+              "properties": {
+                "date": {
+                  "type": "date"
+                },
+                "message": {
+                  "type": "text"
+                },
+                "metrics": {
+                  "properties": {
+                    "execution_gap_duration_s": {
+                      "type": "long"
+                    },
+                    "total_indexing_duration_ms": {
+                      "type": "long"
+                    },
+                    "total_search_duration_ms": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "status": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "status_order": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "siem-ui-timeline": {
+          "properties": {
+            "columns": {
+              "properties": {
+                "aggregatable": {
+                  "type": "boolean"
+                },
+                "category": {
+                  "type": "keyword"
+                },
+                "columnHeaderType": {
+                  "type": "keyword"
+                },
+                "description": {
+                  "type": "text"
+                },
+                "example": {
+                  "type": "text"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "indexes": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "text"
+                },
+                "placeholder": {
+                  "type": "text"
+                },
+                "searchable": {
+                  "type": "boolean"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "created": {
+              "type": "date"
+            },
+            "createdBy": {
+              "type": "text"
+            },
+            "dataProviders": {
+              "properties": {
+                "and": {
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "excluded": {
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "kqlQuery": {
+                      "type": "text"
+                    },
+                    "name": {
+                      "type": "text"
+                    },
+                    "queryMatch": {
+                      "properties": {
+                        "displayField": {
+                          "type": "text"
+                        },
+                        "displayValue": {
+                          "type": "text"
+                        },
+                        "field": {
+                          "type": "text"
+                        },
+                        "operator": {
+                          "type": "text"
+                        },
+                        "value": {
+                          "type": "text"
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "excluded": {
+                  "type": "boolean"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "kqlQuery": {
+                  "type": "text"
+                },
+                "name": {
+                  "type": "text"
+                },
+                "queryMatch": {
+                  "properties": {
+                    "displayField": {
+                      "type": "text"
+                    },
+                    "displayValue": {
+                      "type": "text"
+                    },
+                    "field": {
+                      "type": "text"
+                    },
+                    "operator": {
+                      "type": "text"
+                    },
+                    "value": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "type": {
+                  "type": "text"
+                }
+              }
+            },
+            "dateRange": {
+              "properties": {
+                "end": {
+                  "type": "date"
+                },
+                "start": {
+                  "type": "date"
+                }
+              }
+            },
+            "description": {
+              "type": "text"
+            },
+            "eqlOptions": {
+              "properties": {
+                "eventCategoryField": {
+                  "type": "text"
+                },
+                "query": {
+                  "type": "text"
+                },
+                "size": {
+                  "type": "text"
+                },
+                "tiebreakerField": {
+                  "type": "text"
+                },
+                "timestampField": {
+                  "type": "text"
+                }
+              }
+            },
+            "eventType": {
+              "type": "keyword"
+            },
+            "excludedRowRendererIds": {
+              "type": "text"
+            },
+            "favorite": {
+              "properties": {
+                "favoriteDate": {
+                  "type": "date"
+                },
+                "fullName": {
+                  "type": "text"
+                },
+                "keySearch": {
+                  "type": "text"
+                },
+                "userName": {
+                  "type": "text"
+                }
+              }
+            },
+            "filters": {
+              "properties": {
+                "exists": {
+                  "type": "text"
+                },
+                "match_all": {
+                  "type": "text"
+                },
+                "meta": {
+                  "properties": {
+                    "alias": {
+                      "type": "text"
+                    },
+                    "controlledBy": {
+                      "type": "text"
+                    },
+                    "disabled": {
+                      "type": "boolean"
+                    },
+                    "field": {
+                      "type": "text"
+                    },
+                    "formattedValue": {
+                      "type": "text"
+                    },
+                    "index": {
+                      "type": "keyword"
+                    },
+                    "key": {
+                      "type": "keyword"
+                    },
+                    "negate": {
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "type": "text"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "value": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "missing": {
+                  "type": "text"
+                },
+                "query": {
+                  "type": "text"
+                },
+                "range": {
+                  "type": "text"
+                },
+                "script": {
+                  "type": "text"
+                }
+              }
+            },
+            "indexNames": {
+              "type": "text"
+            },
+            "kqlMode": {
+              "type": "keyword"
+            },
+            "kqlQuery": {
+              "properties": {
+                "filterQuery": {
+                  "properties": {
+                    "kuery": {
+                      "properties": {
+                        "expression": {
+                          "type": "text"
+                        },
+                        "kind": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "serializedQuery": {
+                      "type": "text"
+                    }
+                  }
+                }
+              }
+            },
+            "sort": {
+              "dynamic": "false",
+              "properties": {
+                "columnId": {
+                  "type": "keyword"
+                },
+                "columnType": {
+                  "type": "keyword"
+                },
+                "sortDirection": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "templateTimelineId": {
+              "type": "text"
+            },
+            "templateTimelineVersion": {
+              "type": "integer"
+            },
+            "timelineType": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "updated": {
+              "type": "date"
+            },
+            "updatedBy": {
+              "type": "text"
+            }
+          }
+        },
+        "siem-ui-timeline-note": {
+          "properties": {
+            "created": {
+              "type": "date"
+            },
+            "createdBy": {
+              "type": "text"
+            },
+            "eventId": {
+              "type": "keyword"
+            },
+            "note": {
+              "type": "text"
+            },
+            "updated": {
+              "type": "date"
+            },
+            "updatedBy": {
+              "type": "text"
+            }
+          }
+        },
+        "siem-ui-timeline-pinned-event": {
+          "properties": {
+            "created": {
+              "type": "date"
+            },
+            "createdBy": {
+              "type": "text"
+            },
+            "eventId": {
+              "type": "keyword"
+            },
+            "updated": {
+              "type": "date"
+            },
+            "updatedBy": {
+              "type": "text"
+            }
+          }
+        },
+        "space": {
+          "properties": {
+            "_reserved": {
+              "type": "boolean"
+            },
+            "color": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "disabledFeatures": {
+              "type": "keyword"
+            },
+            "imageUrl": {
+              "index": false,
+              "type": "text"
+            },
+            "initials": {
+              "type": "keyword"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 2048,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "spaces-usage-stats": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "tag": {
+          "properties": {
+            "color": {
+              "type": "text"
+            },
+            "description": {
+              "type": "text"
+            },
+            "name": {
+              "type": "text"
+            }
+          }
+        },
+        "telemetry": {
+          "properties": {
+            "allowChangingOptInStatus": {
+              "type": "boolean"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "lastReported": {
+              "type": "date"
+            },
+            "lastVersionChecked": {
+              "type": "keyword"
+            },
+            "reportFailureCount": {
+              "type": "integer"
+            },
+            "reportFailureVersion": {
+              "type": "keyword"
+            },
+            "sendUsageFrom": {
+              "type": "keyword"
+            },
+            "userHasSeenNotice": {
+              "type": "boolean"
+            }
+          }
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "ui-counter": {
+          "properties": {
+            "count": {
+              "type": "integer"
+            }
+          }
+        },
+        "ui-metric": {
+          "properties": {
+            "count": {
+              "type": "integer"
+            }
+          }
+        },
+        "updated_at": {
+          "type": "date"
+        },
+        "upgrade-assistant-ml-upgrade-operation": {
+          "properties": {
+            "jobId": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "nodeId": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "snapshotId": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "status": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "upgrade-assistant-reindex-operation": {
+          "properties": {
+            "errorMessage": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "indexName": {
+              "type": "keyword"
+            },
+            "lastCompletedStep": {
+              "type": "long"
+            },
+            "locked": {
+              "type": "date"
+            },
+            "newIndexName": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "reindexOptions": {
+              "properties": {
+                "openAndClose": {
+                  "type": "boolean"
+                },
+                "queueSettings": {
+                  "properties": {
+                    "queuedAt": {
+                      "type": "long"
+                    },
+                    "startedAt": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "reindexTaskId": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "reindexTaskPercComplete": {
+              "type": "float"
+            },
+            "runningReindexCount": {
+              "type": "integer"
+            },
+            "status": {
+              "type": "integer"
+            }
+          }
+        },
+        "upgrade-assistant-telemetry": {
+          "properties": {
+            "features": {
+              "properties": {
+                "deprecation_logging": {
+                  "properties": {
+                    "enabled": {
+                      "null_value": true,
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "uptime-dynamic-settings": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "url": {
+          "properties": {
+            "accessCount": {
+              "type": "long"
+            },
+            "accessDate": {
+              "type": "date"
+            },
+            "createDate": {
+              "type": "date"
+            },
+            "locatorJSON": {
+              "index": false,
+              "type": "text"
+            },
+            "slug": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "url": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 2048,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "usage-counters": {
+          "dynamic": "false",
+          "properties": {
+            "domainId": {
+              "type": "keyword"
+            }
+          }
+        },
+        "visualization": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "index": false,
+                  "type": "text"
+                }
+              }
+            },
+            "savedSearchRefName": {
+              "doc_values": false,
+              "index": false,
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "uiStateJSON": {
+              "index": false,
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            },
+            "visState": {
+              "index": false,
+              "type": "text"
+            }
+          }
+        },
+        "workplace_search_telemetry": {
+          "dynamic": "false",
+          "type": "object"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "hidden": "true",
+        "number_of_replicas": "0",
+        "number_of_shards": "1",
+        "priority": "10",
+        "refresh_interval": "1s"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": ".kibana_task_manager",
+    "mappings": {
+      "_meta": {
+        "migrationMappingPropertyHashes": {
+          "coreMigrationVersion": "2f4316de49999235636386fe51dc06c1",
+          "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
+          "namespace": "2f4316de49999235636386fe51dc06c1",
+          "namespaces": "2f4316de49999235636386fe51dc06c1",
+          "originId": "2f4316de49999235636386fe51dc06c1",
+          "references": "7997cf5a56cc02bdc9c93361bde732b0",
+          "task": "c716c8022373e7b7fea04dc9a9ff5c70",
+          "type": "2f4316de49999235636386fe51dc06c1",
+          "updated_at": "00da57df13e94e9d98437d13ace4bfe0"
+        }
+      },
+      "dynamic": "strict",
+      "properties": {
+        "coreMigrationVersion": {
+          "type": "keyword"
+        },
+        "migrationVersion": {
+          "dynamic": "true",
+          "properties": {
+            "task": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "namespace": {
+          "type": "keyword"
+        },
+        "namespaces": {
+          "type": "keyword"
+        },
+        "originId": {
+          "type": "keyword"
+        },
+        "references": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          },
+          "type": "nested"
+        },
+        "task": {
+          "properties": {
+            "attempts": {
+              "type": "integer"
+            },
+            "ownerId": {
+              "type": "keyword"
+            },
+            "params": {
+              "type": "text"
+            },
+            "retryAt": {
+              "type": "date"
+            },
+            "runAt": {
+              "type": "date"
+            },
+            "schedule": {
+              "properties": {
+                "interval": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "scheduledAt": {
+              "type": "date"
+            },
+            "scope": {
+              "type": "keyword"
+            },
+            "startedAt": {
+              "type": "date"
+            },
+            "state": {
+              "type": "text"
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "taskType": {
+              "type": "keyword"
+            },
+            "traceparent": {
+              "type": "text"
+            },
+            "user": {
+              "type": "keyword"
+            }
+          }
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "updated_at": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "hidden": "true",
+        "number_of_replicas": "0",
+        "number_of_shards": "1",
+        "priority": "10",
+        "refresh_interval": "1s"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".security": {
+        "is_hidden": true
+      }
+    },
+    "index": ".security-7",
+    "mappings": {
+      "_meta": {
+        "security-version": "8.2.1"
+      },
+      "dynamic": "strict",
+      "properties": {
+        "access_token": {
+          "properties": {
+            "invalidated": {
+              "type": "boolean"
+            },
+            "realm": {
+              "type": "keyword"
+            },
+            "user_token": {
+              "properties": {
+                "authentication": {
+                  "type": "binary"
+                },
+                "expiration_time": {
+                  "format": "epoch_millis",
+                  "type": "date"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "metadata": {
+                  "dynamic": "false",
+                  "type": "object"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "actions": {
+          "type": "keyword"
+        },
+        "api_key_hash": {
+          "doc_values": false,
+          "index": false,
+          "type": "keyword"
+        },
+        "api_key_invalidated": {
+          "type": "boolean"
+        },
+        "application": {
+          "type": "keyword"
+        },
+        "applications": {
+          "properties": {
+            "application": {
+              "type": "keyword"
+            },
+            "privileges": {
+              "type": "keyword"
+            },
+            "resources": {
+              "type": "keyword"
+            }
+          }
+        },
+        "cluster": {
+          "type": "keyword"
+        },
+        "creation_time": {
+          "format": "epoch_millis",
+          "type": "date"
+        },
+        "creator": {
+          "properties": {
+            "email": {
+              "analyzer": "email",
+              "type": "text"
+            },
+            "full_name": {
+              "type": "text"
+            },
+            "metadata": {
+              "dynamic": "false",
+              "type": "object"
+            },
+            "principal": {
+              "type": "keyword"
+            },
+            "realm": {
+              "type": "keyword"
+            },
+            "realm_domain": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                },
+                "realms": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "nested"
+                }
+              }
+            },
+            "realm_type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "doc_type": {
+          "type": "keyword"
+        },
+        "email": {
+          "analyzer": "email",
+          "type": "text"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "expiration_time": {
+          "format": "epoch_millis",
+          "type": "date"
+        },
+        "full_name": {
+          "type": "text"
+        },
+        "global": {
+          "properties": {
+            "application": {
+              "properties": {
+                "manage": {
+                  "properties": {
+                    "applications": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "profile": {
+              "properties": {
+                "write": {
+                  "properties": {
+                    "applications": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "indices": {
+          "properties": {
+            "allow_restricted_indices": {
+              "type": "boolean"
+            },
+            "field_security": {
+              "properties": {
+                "except": {
+                  "type": "keyword"
+                },
+                "grant": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "names": {
+              "type": "keyword"
+            },
+            "privileges": {
+              "type": "keyword"
+            },
+            "query": {
+              "type": "keyword"
+            }
+          }
+        },
+        "limited_by_role_descriptors": {
+          "enabled": false,
+          "type": "object"
+        },
+        "metadata": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "metadata_flattened": {
+          "type": "flattened"
+        },
+        "name": {
+          "type": "keyword"
+        },
+        "password": {
+          "doc_values": false,
+          "index": false,
+          "type": "keyword"
+        },
+        "refresh_token": {
+          "properties": {
+            "client": {
+              "properties": {
+                "realm": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "user": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "invalidated": {
+              "type": "boolean"
+            },
+            "refresh_time": {
+              "format": "epoch_millis",
+              "type": "date"
+            },
+            "refreshed": {
+              "type": "boolean"
+            },
+            "superseding": {
+              "properties": {
+                "encrypted_tokens": {
+                  "type": "binary"
+                },
+                "encryption_iv": {
+                  "type": "binary"
+                },
+                "encryption_salt": {
+                  "type": "binary"
+                }
+              }
+            },
+            "token": {
+              "type": "keyword"
+            }
+          }
+        },
+        "role_descriptors": {
+          "enabled": false,
+          "type": "object"
+        },
+        "role_templates": {
+          "properties": {
+            "format": {
+              "type": "keyword"
+            },
+            "template": {
+              "type": "text"
+            }
+          }
+        },
+        "roles": {
+          "type": "keyword"
+        },
+        "rules": {
+          "dynamic": "false",
+          "type": "object"
+        },
+        "run_as": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "username": {
+          "type": "keyword"
+        },
+        "version": {
+          "type": "integer"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "analysis": {
+          "analyzer": {
+            "email": {
+              "filter": [
+                "email",
+                "lowercase",
+                "unique"
+              ],
+              "tokenizer": "uax_url_email"
+            }
+          },
+          "filter": {
+            "email": {
+              "patterns": [
+                "([^@]+)",
+                "(\\p{L}+)",
+                "(\\d+)",
+                "@(.+)"
+              ],
+              "preserve_original": "true",
+              "type": "pattern_capture"
+            }
+          }
+        },
+        "auto_expand_replicas": "0-1",
+        "format": "6",
+        "hidden": "true",
+        "number_of_replicas": "0",
+        "number_of_shards": "1",
+        "priority": "1000",
+        "refresh_interval": "1s"
+      }
+    }
+  }
+}

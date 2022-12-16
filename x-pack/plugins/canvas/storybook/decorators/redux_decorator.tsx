@@ -9,10 +9,8 @@ import React from 'react';
 import { createStore } from 'redux';
 import { Provider as ReduxProvider } from 'react-redux';
 import { cloneDeep } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 
-// @ts-expect-error Untyped local
-import { getDefaultWorkpad } from '../../public/state/defaults';
 import { CanvasWorkpad, CanvasElement, CanvasAsset, CanvasPage } from '../../types';
 
 // @ts-expect-error untyped local
@@ -20,8 +18,8 @@ import { elementsRegistry } from '../../public/lib/elements_registry';
 import { image } from '../../canvas_plugin_src/elements/image';
 elementsRegistry.register(image);
 
-import { getInitialState, getReducer, getMiddleware, patchDispatch } from '../addon/src/state';
-export { ADDON_ID, ACTIONS_PANEL_ID } from '../addon/src/constants';
+import { getInitialState, getReducer, getMiddleware, patchDispatch } from '../addon/state';
+export { ADDON_ID, ACTIONS_PANEL_ID } from '../addon/constants';
 
 export interface Params {
   workpad?: CanvasWorkpad;

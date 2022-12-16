@@ -19,7 +19,7 @@ const NODE_TLS_REJECT_UNAUTHORIZED = '1';
 export const esArchiverLoad = (archiveName: string) => {
   const archivePath = path.join(ES_ARCHIVE_DIR, archiveName);
   execSync(
-    `node ../../../../scripts/es_archiver load "${archivePath}" --config ../../../test/functional/config.js`,
+    `node ../../../../scripts/es_archiver load "${archivePath}" --config ../../../test/functional/config.base.js`,
     { env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED }, stdio: 'inherit' }
   );
 };
@@ -27,14 +27,14 @@ export const esArchiverLoad = (archiveName: string) => {
 export const esArchiverUnload = (archiveName: string) => {
   const archivePath = path.join(ES_ARCHIVE_DIR, archiveName);
   execSync(
-    `node ../../../../scripts/es_archiver unload "${archivePath}" --config ../../../test/functional/config.js`,
+    `node ../../../../scripts/es_archiver unload "${archivePath}" --config ../../../test/functional/config.base.js`,
     { env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED }, stdio: 'inherit' }
   );
 };
 
 export const esArchiverResetKibana = () => {
   execSync(
-    `node ../../../../scripts/es_archiver empty-kibana-index --config ../../../test/functional/config.js`,
+    `node ../../../../scripts/es_archiver empty-kibana-index --config ../../../test/functional/config.base.js`,
     { env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED }, stdio: 'inherit' }
   );
 };

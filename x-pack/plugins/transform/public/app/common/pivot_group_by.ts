@@ -6,11 +6,11 @@
  */
 
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { AggName } from '../../../common/types/aggregations';
 import { Dictionary } from '../../../common/types/common';
 import { EsFieldName } from '../../../common/types/fields';
 import { GenericAgg } from '../../../common/types/pivot_group_by';
-import { isPopulatedObject } from '../../../common/shared_imports';
 import { PivotAggsConfigWithUiSupport } from './pivot_aggs';
 
 export enum PIVOT_SUPPORTED_GROUP_BY_AGGS {

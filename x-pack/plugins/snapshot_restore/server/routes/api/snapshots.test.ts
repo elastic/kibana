@@ -18,6 +18,7 @@ const defaultSnapshot = {
   indices: [],
   dataStreams: [],
   includeGlobalState: undefined,
+  featureStates: [],
   state: undefined,
   startTime: undefined,
   startTimeInMillis: undefined,

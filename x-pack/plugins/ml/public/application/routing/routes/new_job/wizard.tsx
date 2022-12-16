@@ -8,7 +8,7 @@
 import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-
+import { Redirect } from 'react-router-dom';
 import { NavigateToPath } from '../../../contexts/kibana';
 
 import { basicResolvers } from '../../resolvers';
@@ -96,6 +96,16 @@ const getRareBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) =>
   },
 ];
 
+const getGeoBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  ...getBaseBreadcrumbs(navigateToPath, basePath),
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.geoLabel', {
+      defaultMessage: 'Geo',
+    }),
+    href: '',
+  },
+];
+
 export const singleMetricRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
@@ -112,6 +122,13 @@ export const multiMetricRouteFactory = (
   path: '/jobs/new_job/multi_metric',
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.MULTI_METRIC} deps={deps} />,
   breadcrumbs: getMultiMetricBreadcrumbs(navigateToPath, basePath),
+});
+
+// redirect route to reset the job wizard when converting to multi metric job
+export const multiMetricRouteFactoryRedirect = (): MlRoute => ({
+  path: '/jobs/new_job/convert_to_multi_metric',
+  render: (props) => <Redirect to={`/jobs/new_job/multi_metric${props.location.search}`} />,
+  breadcrumbs: [],
 });
 
 export const populationRouteFactory = (
@@ -132,6 +149,13 @@ export const advancedRouteFactory = (
   breadcrumbs: getAdvancedBreadcrumbs(navigateToPath, basePath),
 });
 
+// redirect route to reset the job wizard when converting to advanced job
+export const advancedRouteFactoryRedirect = (): MlRoute => ({
+  path: '/jobs/new_job/convert_to_advanced',
+  render: (props) => <Redirect to={`/jobs/new_job/advanced${props.location.search}`} />,
+  breadcrumbs: [],
+});
+
 export const categorizationRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
@@ -145,6 +169,12 @@ export const rareRouteFactory = (navigateToPath: NavigateToPath, basePath: strin
   path: '/jobs/new_job/rare',
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.RARE} deps={deps} />,
   breadcrumbs: getRareBreadcrumbs(navigateToPath, basePath),
+});
+
+export const geoRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
+  path: '/jobs/new_job/geo',
+  render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.GEO} deps={deps} />,
+  breadcrumbs: getGeoBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {

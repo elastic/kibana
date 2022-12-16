@@ -44,7 +44,7 @@ export function filterSuites({ log, mocha, include, exclude, esVersion }: Option
 
   if (esVersion) {
     // traverse the test graph and exclude any tests which don't meet their esVersionRequirement
-    log.info('Only running suites which are compatible with ES version', esVersion.toString());
+    log.debug('Only running suites which are compatible with ES version', esVersion.toString());
     (function recurse(parentSuite: SuiteInternal) {
       const children = parentSuite.suites;
       parentSuite.suites = [];

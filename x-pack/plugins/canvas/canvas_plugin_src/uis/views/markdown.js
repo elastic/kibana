@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MarkdownLang } from '@kbn/kibana-react-plugin/public';
 import { ViewStrings } from '../../../i18n';
 
 const { Markdown: strings } = ViewStrings;
@@ -20,11 +21,8 @@ export const markdown = () => ({
       name: '_',
       displayName: strings.getContentDisplayName(),
       help: strings.getContentHelp(),
-      argType: 'textarea',
-      default: '""',
-      options: {
-        confirm: 'Apply',
-      },
+      argType: 'editor',
+      options: { language: MarkdownLang },
       multi: true,
     },
     {

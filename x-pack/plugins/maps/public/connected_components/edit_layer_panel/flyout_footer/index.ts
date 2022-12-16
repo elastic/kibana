@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { FlyoutFooter } from './flyout_footer';
 
 import { FLYOUT_STATE } from '../../../reducers/ui';
-import { hasDirtyState } from '../../../selectors/map_selectors';
+import { getSelectedLayer, hasDirtyState } from '../../../selectors/map_selectors';
 import {
   setSelectedLayer,
   removeSelectedLayer,
@@ -23,6 +23,7 @@ import { MapStoreState } from '../../../reducers/store';
 function mapStateToProps(state: MapStoreState) {
   return {
     hasStateChanged: hasDirtyState(state),
+    selectedLayer: getSelectedLayer(state),
   };
 }
 

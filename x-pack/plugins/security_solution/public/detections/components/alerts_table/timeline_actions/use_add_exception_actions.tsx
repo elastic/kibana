@@ -7,14 +7,14 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { useUserData } from '../../user_info';
 import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
 
 interface UseExceptionActionProps {
   isEndpointAlert: boolean;
-  onAddExceptionTypeClick: (type: ExceptionListType) => void;
+  onAddExceptionTypeClick: (type?: ExceptionListTypeEnum) => void;
 }
 
 export const useExceptionActions = ({
@@ -24,11 +24,11 @@ export const useExceptionActions = ({
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
 
   const handleDetectionExceptionModal = useCallback(() => {
-    onAddExceptionTypeClick('detection');
+    onAddExceptionTypeClick();
   }, [onAddExceptionTypeClick]);
 
   const handleEndpointExceptionModal = useCallback(() => {
-    onAddExceptionTypeClick('endpoint');
+    onAddExceptionTypeClick(ExceptionListTypeEnum.ENDPOINT);
   }, [onAddExceptionTypeClick]);
 
   const disabledAddEndpointException = !canUserCRUD || !hasIndexWrite || !isEndpointAlert;

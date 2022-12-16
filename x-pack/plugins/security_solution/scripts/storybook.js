@@ -7,7 +7,6 @@
 
 import { join } from 'path';
 
-// eslint-disable-next-line
 require('@kbn/storybook').runStorybookCli({
   name: 'siem',
   storyGlobs: [join(__dirname, '..', 'public', '**', '*.stories.tsx')],

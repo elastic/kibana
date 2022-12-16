@@ -44,6 +44,7 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[]) => {
 
   const invalidIds = useMemo(() => {
     return getInvalidJobIds(jobs, tmpIds);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tmpIds]);
 
   const validIds = useMemo(() => {
@@ -70,6 +71,7 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[]) => {
         })
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [invalidIds]);
 
   useEffect(() => {
@@ -89,6 +91,7 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[]) => {
           // flyout closed without selection
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobs, validIds, setGlobalState, globalState?.ml]);
 
   return jobSelection;

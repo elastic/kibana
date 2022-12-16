@@ -59,8 +59,8 @@ export class VisualizePageObject extends FtrService {
     await this.kibanaServer.uiSettings.replace({
       defaultIndex: this.defaultIndexString,
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
-      'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
       'visualization:visualize:legacyHeatmapChartsLibrary': !isNewLibrary,
+      'histogram:maxBars': 100,
     });
   }
 
@@ -69,7 +69,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickNewVisualization() {
-    await this.listingTable.clickNewButton('createVisualizationPromptButton');
+    await this.listingTable.clickNewButton();
   }
 
   public async clickAggBasedVisualizations() {
@@ -81,7 +81,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async createVisualizationPromptButton() {
-    await this.testSubjects.click('createVisualizationPromptButton');
+    await this.testSubjects.click('newItemButton');
   }
 
   public async getChartTypes() {
@@ -147,6 +147,15 @@ export class VisualizePageObject extends FtrService {
     await this.waitForVisualizationSelectPage();
   }
 
+  public async navigateToLensFromAnotherVisulization() {
+    const button = await this.testSubjects.find('visualizeEditInLensButton');
+    await button.click();
+  }
+
+  public async hasNavigateToLensButton() {
+    return await this.testSubjects.exists('visualizeEditInLensButton');
+  }
+
   public async hasVisType(type: string) {
     return await this.testSubjects.exists(`visType-${type}`);
   }
@@ -178,6 +187,10 @@ export class VisualizePageObject extends FtrService {
 
   public async clickGauge() {
     await this.clickVisType('gauge');
+  }
+
+  public async clickGoal() {
+    await this.clickVisType('goal');
   }
 
   public async clickPieChart() {
@@ -255,7 +268,7 @@ export class VisualizePageObject extends FtrService {
       await this.listingTable.checkListingSelectAllCheckbox();
       await this.listingTable.clickDeleteSelected();
       await this.common.clickConfirmOnModal();
-      await this.testSubjects.find('createVisualizationPromptButton');
+      await this.testSubjects.find('newItemButton');
     });
   }
 

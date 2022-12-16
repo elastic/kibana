@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export const TELEMETRY_MAX_BUFFER_SIZE = 100;
-
-export const MAX_PACK_TELEMETRY_BATCH = 100;
-
-export const TELEMETRY_CHANNEL_PACKS = 'osquery-packs';
-
-export const TELEMETRY_CHANNEL_SAVED_QUERIES = 'osquery-saved-queries';
+export const TELEMETRY_EBT_LIVE_QUERY_EVENT = 'osquery_live_query';
+export const TELEMETRY_EBT_PACK_EVENT = 'osquery_pack';
+export const TELEMETRY_EBT_SAVED_QUERY_EVENT = 'osquery_saved_query';
+export const TELEMETRY_EBT_CONFIG_EVENT = 'osquery_config';

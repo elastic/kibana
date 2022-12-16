@@ -42,7 +42,7 @@ const LegendItemComponent: React.FC<{
 
   return (
     <EuiText size="xs">
-      <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
         {color != null && (
           <EuiFlexItem grow={false}>
             <EuiHealth data-test-subj="legend-color" color={color} />

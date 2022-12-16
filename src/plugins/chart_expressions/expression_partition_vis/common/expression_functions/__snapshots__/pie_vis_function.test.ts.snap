@@ -26,6 +26,7 @@ Object {
   "as": "partitionVis",
   "type": "render",
   "value": Object {
+    "canNavigateToLens": false,
     "params": Object {
       "listenOnChange": true,
     },
@@ -86,14 +87,16 @@ Object {
             "type": "vis_dimension",
           },
         ],
-        "metric": Object {
-          "accessor": 0,
-          "format": Object {
-            "id": "number",
-            "params": Object {},
+        "metrics": Array [
+          Object {
+            "accessor": 0,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
           },
-          "type": "vis_dimension",
-        },
+        ],
         "splitColumn": undefined,
         "splitRow": undefined,
       },
@@ -101,6 +104,7 @@ Object {
       "emptySizeRatio": 0.3,
       "isDonut": true,
       "labels": Object {
+        "colorOverrides": Object {},
         "last_level": false,
         "percentDecimals": 2,
         "position": "default",
@@ -112,16 +116,19 @@ Object {
       },
       "legendDisplay": "show",
       "legendPosition": "right",
-      "legendSize": undefined,
+      "legendSize": "small",
       "maxLegendLines": 2,
-      "metric": Object {
-        "accessor": 0,
-        "format": Object {
-          "id": "number",
-          "params": Object {},
+      "metrics": Array [
+        Object {
+          "accessor": 0,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
         },
-        "type": "vis_dimension",
-      },
+      ],
+      "metricsToLabels": Object {},
       "nestedLegend": true,
       "palette": Object {
         "name": "kibana_palette",
@@ -160,6 +167,7 @@ Object {
   "as": "partitionVis",
   "type": "render",
   "value": Object {
+    "canNavigateToLens": false,
     "params": Object {
       "listenOnChange": true,
     },
@@ -220,14 +228,16 @@ Object {
             "type": "vis_dimension",
           },
         ],
-        "metric": Object {
-          "accessor": 0,
-          "format": Object {
-            "id": "number",
-            "params": Object {},
+        "metrics": Array [
+          Object {
+            "accessor": 0,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
           },
-          "type": "vis_dimension",
-        },
+        ],
         "splitColumn": undefined,
         "splitRow": undefined,
       },
@@ -235,6 +245,7 @@ Object {
       "emptySizeRatio": 0.3,
       "isDonut": false,
       "labels": Object {
+        "colorOverrides": Object {},
         "last_level": false,
         "percentDecimals": 2,
         "position": "default",
@@ -246,16 +257,19 @@ Object {
       },
       "legendDisplay": "show",
       "legendPosition": "right",
-      "legendSize": undefined,
+      "legendSize": "small",
       "maxLegendLines": 2,
-      "metric": Object {
-        "accessor": 0,
-        "format": Object {
-          "id": "number",
-          "params": Object {},
+      "metrics": Array [
+        Object {
+          "accessor": 0,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
         },
-        "type": "vis_dimension",
-      },
+      ],
+      "metricsToLabels": Object {},
       "nestedLegend": true,
       "palette": Object {
         "name": "kibana_palette",

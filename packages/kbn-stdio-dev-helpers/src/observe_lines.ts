@@ -9,7 +9,6 @@
 import { Readable } from 'stream';
 
 import * as Rx from 'rxjs';
-import { scan, takeUntil, share, materialize, mergeMap, last, catchError } from 'rxjs/operators';
 
 const SEP = /\r?\n/;
 
@@ -25,13 +24,13 @@ import { observeReadable } from './observe_readable';
  *  @return {Rx.Observable}
  */
 export function observeLines(readable: Readable): Rx.Observable<string> {
-  const done$ = observeReadable(readable).pipe(share());
+  const done$ = observeReadable(readable).pipe(Rx.share());
 
   const scan$: Rx.Observable<{ buffer: string; lines?: string[] }> = Rx.fromEvent(
     readable,
     'data'
   ).pipe(
-    scan(
+    Rx.scan(
       ({ buffer }, chunk) => {
         buffer += chunk;
 
@@ -53,9 +52,9 @@ export function observeLines(readable: Readable): Rx.Observable<string> {
     ),
 
     // stop if done completes or errors
-    takeUntil(done$.pipe(materialize())),
+    Rx.takeUntil(done$.pipe(Rx.materialize())),
 
-    share()
+    Rx.share()
   );
 
   return Rx.merge(
@@ -63,14 +62,12 @@ export function observeLines(readable: Readable): Rx.Observable<string> {
     done$,
 
     // merge in the "lines" from each step
-    scan$.pipe(mergeMap(({ lines }) => lines || [])),
+    scan$.pipe(Rx.mergeMap(({ lines }) => lines || [])),
 
     // inject the "unsplit" data at the end
     scan$.pipe(
-      last(),
-      mergeMap(({ buffer }) => (buffer ? [buffer] : [])),
-      // if there were no lines, last() will error, so catch and complete
-      catchError(() => Rx.empty())
+      Rx.takeLast(1),
+      Rx.mergeMap(({ buffer }) => (buffer ? [buffer] : []))
     )
   );
 }

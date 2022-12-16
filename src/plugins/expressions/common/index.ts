@@ -91,6 +91,7 @@ export {
   unboxExpressionValue,
   isDatatable,
   ExpressionType,
+  PointSeriesColumnNames,
 } from './expression_types';
 export type {
   AnyExpressionTypeDefinition,

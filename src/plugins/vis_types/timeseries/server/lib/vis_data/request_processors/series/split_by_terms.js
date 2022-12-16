@@ -37,15 +37,21 @@ export function splitByTerms(req, panel, series, esQueryConfig, seriesIndex) {
         );
       } else {
         overwrite(doc, `aggs.${series.id}.${termsType}.field`, termsIds[0]);
+        if (series.terms_include) {
+          overwrite(doc, `aggs.${series.id}.${termsType}.include`, series.terms_include);
+        }
+        if (series.terms_exclude) {
+          overwrite(doc, `aggs.${series.id}.${termsType}.exclude`, series.terms_exclude);
+        }
       }
 
       overwrite(doc, `aggs.${series.id}.${termsType}.size`, series.terms_size);
-      if (series.terms_include) {
-        overwrite(doc, `aggs.${series.id}.${termsType}.include`, series.terms_include);
+      if (series.terms_size <= 10) {
+        // 25 is the default shard size set for size:10 by Elasticsearch.
+        // Setting it to 25 for every size below 10 makes sure the shard size doesn't change for sizes 1-10, keeping the top terms stable.
+        overwrite(doc, `aggs.${series.id}.${termsType}.shard_size`, 25);
       }
-      if (series.terms_exclude) {
-        overwrite(doc, `aggs.${series.id}.${termsType}.exclude`, series.terms_exclude);
-      }
+
       if (metric && metric.type !== 'count' && ~basicAggs.indexOf(metric.type)) {
         const sortAggKey = `${orderByTerms}-SORT`;
         const fn = bucketTransform[metric.type];

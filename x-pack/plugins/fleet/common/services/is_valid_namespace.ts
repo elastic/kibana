@@ -25,7 +25,7 @@ export function isValidNamespace(namespace: string): { valid: boolean; error?: s
         defaultMessage: 'Namespace must be lowercase',
       }),
     };
-  } else if (/[\*\\/\?"<>|\s,#:-]+/.test(namespace)) {
+  } else if (INVALID_NAMESPACE_CHARACTERS.test(namespace)) {
     return {
       valid: false,
       error: i18n.translate('xpack.fleet.namespaceValidation.invalidCharactersErrorMessage', {
@@ -48,3 +48,5 @@ export function isValidNamespace(namespace: string): { valid: boolean; error?: s
 
   return { valid: true };
 }
+
+export const INVALID_NAMESPACE_CHARACTERS = /[\*\\/\?"<>|\s,#:-]+/;

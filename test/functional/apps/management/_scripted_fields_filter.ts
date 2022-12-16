@@ -14,21 +14,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['settings']);
 
   describe('filter scripted fields', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('test/functional/fixtures/es_archiver/management');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/management');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'f1e4c910-a2e6-11e7-bb30-233be9be6a15',
       });
     });
 
     after(async function () {
-      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     const scriptedPainlessFieldName = 'ram_pain1';

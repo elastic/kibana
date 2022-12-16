@@ -9,10 +9,11 @@ import { pick } from 'lodash/fp';
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { InputsModelId } from '../../store/inputs/constants';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { SetQuery, DeleteQuery } from './types';
+import type { SetQuery, DeleteQuery } from './types';
 
 export const useGlobalTime = (clearAllQuery: boolean = true) => {
   const dispatch = useDispatch();
@@ -22,26 +23,38 @@ export const useGlobalTime = (clearAllQuery: boolean = true) => {
   const [isInitializing, setIsInitializing] = useState(true);
 
   const setQuery = useCallback(
-    ({ id, inspect, loading, refetch }: SetQuery) =>
-      dispatch(inputsActions.setQuery({ inputId: 'global', id, inspect, loading, refetch })),
+    ({ id, inspect, loading, refetch, searchSessionId }: SetQuery) =>
+      dispatch(
+        inputsActions.setQuery({
+          inputId: InputsModelId.global,
+          id,
+          inspect,
+          loading,
+          refetch,
+          searchSessionId,
+        })
+      ),
     [dispatch]
   );
 
   const deleteQuery = useCallback(
-    ({ id }: DeleteQuery) => dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id })),
+    ({ id }: DeleteQuery) =>
+      dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
     [dispatch]
   );
 
   useEffect(() => {
-    if (isInitializing) {
-      setIsInitializing(false);
-    }
+    setIsInitializing(false);
+  }, []);
+
+  // This effect must not have any mutable dependencies. Otherwise, the cleanup function gets called before the component unmounts.
+  useEffect(() => {
     return () => {
       if (clearAllQuery) {
-        dispatch(inputsActions.deleteAllQuery({ id: 'global' }));
+        dispatch(inputsActions.deleteAllQuery({ id: InputsModelId.global }));
       }
     };
-  }, [clearAllQuery, dispatch, isInitializing]);
+  }, [dispatch, clearAllQuery]);
 
   const memoizedReturn = useMemo(
     () => ({

@@ -19,8 +19,9 @@ export const indexEventLogExecutionEvents = async (
   log: ToolingLog,
   events: object[]
 ): Promise<void> => {
+  const aliases = await es.cat.aliases({ format: 'json', name: '.kibana-event-log-*' });
   const operations = events.flatMap((doc: object) => [
-    { index: { _index: '.kibana-event-log-*' } },
+    { index: { _index: aliases[0].index } },
     doc,
   ]);
 

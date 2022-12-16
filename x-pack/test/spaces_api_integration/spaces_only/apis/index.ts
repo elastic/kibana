@@ -10,8 +10,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function spacesOnlyTestSuite({ loadTestFile }: FtrProviderContext) {
   describe('spaces api without security', function () {
-    this.tags('ciGroup5');
-
     loadTestFile(require.resolve('./copy_to_space'));
     loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
     loadTestFile(require.resolve('./create'));

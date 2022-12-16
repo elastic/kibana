@@ -109,6 +109,43 @@ describe('createActionEventLogRecordObject', () => {
     });
   });
 
+  test('created action event "execute" with no kibana.alert.rule fields', async () => {
+    expect(
+      createActionEventLogRecordObject({
+        actionId: '1',
+        name: 'test name',
+        action: 'execute',
+        message: 'action execution start',
+        namespace: 'default',
+        savedObjects: [
+          {
+            id: '2',
+            type: 'action',
+            typeId: '.email',
+            relation: 'primary',
+          },
+        ],
+      })
+    ).toStrictEqual({
+      event: {
+        action: 'execute',
+        kind: 'action',
+      },
+      kibana: {
+        saved_objects: [
+          {
+            id: '2',
+            namespace: 'default',
+            rel: 'primary',
+            type: 'action',
+            type_id: '.email',
+          },
+        ],
+      },
+      message: 'action execution start',
+    });
+  });
+
   test('created action event "execute-timeout"', async () => {
     expect(
       createActionEventLogRecordObject({

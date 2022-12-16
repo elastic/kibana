@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
-import type { MetricsMap, SortState, UseNodeMetricsTableOptions } from '../shared';
-import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
+import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
+import {
+  averageOfValues,
+  createMetricByFieldLookup,
+  makeUnpackMetric,
+  metricsToApiOptions,
+  scaleUpPercentage,
+  useInfrastructureNodeMetrics,
+} from '../shared';
 
 type HostMetricsField =
   | 'system.cpu.cores'
@@ -19,24 +26,29 @@ type HostMetricsField =
   | 'system.memory.total'
   | 'system.memory.used.pct';
 
-const hostMetricsMap: MetricsMap<HostMetricsField> = {
-  'system.cpu.cores': { aggregation: 'max', field: 'system.cpu.cores' },
-  'system.cpu.total.norm.pct': {
-    aggregation: 'avg',
-    field: 'system.cpu.total.norm.pct',
+const hostsMetricsQueryConfig: MetricsQueryOptions<HostMetricsField> = {
+  sourceFilter: {
+    term: {
+      'event.module': 'system',
+    },
   },
-  'system.memory.total': { aggregation: 'max', field: 'system.memory.total' },
-  'system.memory.used.pct': {
-    aggregation: 'avg',
-    field: 'system.memory.used.pct',
+  groupByField: 'host.name',
+  metricsMap: {
+    'system.cpu.cores': { aggregation: 'max', field: 'system.cpu.cores' },
+    'system.cpu.total.norm.pct': {
+      aggregation: 'avg',
+      field: 'system.cpu.total.norm.pct',
+    },
+    'system.memory.total': { aggregation: 'max', field: 'system.memory.total' },
+    'system.memory.used.pct': {
+      aggregation: 'avg',
+      field: 'system.memory.used.pct',
+    },
   },
 };
 
-const { options: hostMetricsOptions, metricByField } = metricsToApiOptions(
-  hostMetricsMap,
-  'host.name'
-);
-export { metricByField };
+export const metricByField = createMetricByFieldLookup(hostsMetricsQueryConfig.metricsMap);
+const unpackMetric = makeUnpackMetric(metricByField);
 
 export interface HostNodeMetricsRow {
   name: string;
@@ -53,70 +65,128 @@ export function useHostMetricsTable({ timerange, filterClauseDsl }: UseNodeMetri
     direction: 'desc',
   });
 
-  const {
-    isLoading,
-    nodes: hosts,
-    pageCount,
-  } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
+  const { options: hostMetricsOptions } = useMemo(
+    () => metricsToApiOptions(hostsMetricsQueryConfig, filterClauseDsl),
+    [filterClauseDsl]
+  );
+
+  const { data, isLoading } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
     metricsExplorerOptions: hostMetricsOptions,
     timerange,
-    filterClauseDsl,
     transform: seriesToHostNodeMetricsRow,
     sortState,
     currentPageIndex,
   });
 
   return {
-    timerange,
+    data,
     isLoading,
-    hosts,
-    pageCount,
-    currentPageIndex,
     setCurrentPageIndex,
-    sortState,
     setSortState,
+    sortState,
+    timerange,
   };
 }
 
 function seriesToHostNodeMetricsRow(series: MetricsExplorerSeries): HostNodeMetricsRow {
   if (series.rows.length === 0) {
-    return {
-      name: series.id,
-      cpuCount: null,
-      averageCpuUsagePercent: null,
-      totalMemoryMegabytes: null,
-      averageMemoryUsagePercent: null,
-    };
+    return rowWithoutMetrics(series.id);
   }
 
-  let cpuCount = 0;
-  let averageCpuUsagePercent = 0;
-  let totalMemoryMegabytes = 0;
-  let averageMemoryUsagePercent = 0;
-  series.rows.forEach((row) => {
-    const metricValues = unpackMetrics(row);
-    cpuCount += metricValues.cpuCount ?? 0;
-    averageCpuUsagePercent += metricValues.averageCpuUsagePercent ?? 0;
-    totalMemoryMegabytes += metricValues.totalMemoryMegabytes ?? 0;
-    averageMemoryUsagePercent += metricValues.averageMemoryUsagePercent ?? 0;
-  });
-
-  const bucketCount = series.rows.length;
-  const bytesPerMegabyte = 1000000;
   return {
     name: series.id,
-    cpuCount: cpuCount / bucketCount,
-    averageCpuUsagePercent: averageCpuUsagePercent / bucketCount,
-    totalMemoryMegabytes: Math.floor(totalMemoryMegabytes / bucketCount / bytesPerMegabyte),
-    averageMemoryUsagePercent: averageMemoryUsagePercent / bucketCount,
+    ...calculateMetricAverages(series.rows),
+  };
+}
+
+function rowWithoutMetrics(name: string) {
+  return {
+    name,
+    cpuCount: null,
+    averageCpuUsagePercent: null,
+    totalMemoryMegabytes: null,
+    averageMemoryUsagePercent: null,
+  };
+}
+
+function calculateMetricAverages(rows: MetricsExplorerRow[]) {
+  const {
+    cpuCountValues,
+    averageCpuUsagePercentValues,
+    totalMemoryMegabytesValues,
+    averageMemoryUsagePercentValues,
+  } = collectMetricValues(rows);
+
+  let cpuCount = null;
+  if (cpuCountValues.length !== 0) {
+    cpuCount = cpuCountValues.at(-1)!;
+  }
+
+  let averageCpuUsagePercent = null;
+  if (averageCpuUsagePercentValues.length !== 0) {
+    averageCpuUsagePercent = scaleUpPercentage(averageOfValues(averageCpuUsagePercentValues));
+  }
+
+  let totalMemoryMegabytes = null;
+  if (totalMemoryMegabytesValues.length !== 0) {
+    const memoryInBytes = totalMemoryMegabytesValues.at(-1);
+    const bytesPerMegabyte = 1000000;
+    totalMemoryMegabytes = Math.floor(memoryInBytes! / bytesPerMegabyte);
+  }
+
+  let averageMemoryUsagePercent = null;
+  if (averageMemoryUsagePercentValues.length !== 0) {
+    averageMemoryUsagePercent = scaleUpPercentage(averageOfValues(averageMemoryUsagePercentValues));
+  }
+
+  return {
+    cpuCount,
+    averageCpuUsagePercent,
+    totalMemoryMegabytes,
+    averageMemoryUsagePercent,
+  };
+}
+
+function collectMetricValues(rows: MetricsExplorerRow[]) {
+  const cpuCountValues: number[] = [];
+  const averageCpuUsagePercentValues: number[] = [];
+  const totalMemoryMegabytesValues: number[] = [];
+  const averageMemoryUsagePercentValues: number[] = [];
+
+  rows.forEach((row) => {
+    const { cpuCount, averageCpuUsagePercent, totalMemoryMegabytes, averageMemoryUsagePercent } =
+      unpackMetrics(row);
+
+    if (cpuCount !== null) {
+      cpuCountValues.push(cpuCount);
+    }
+
+    if (averageCpuUsagePercent !== null) {
+      averageCpuUsagePercentValues.push(averageCpuUsagePercent);
+    }
+
+    if (totalMemoryMegabytes !== null) {
+      totalMemoryMegabytesValues.push(totalMemoryMegabytes);
+    }
+
+    if (averageMemoryUsagePercent !== null) {
+      averageMemoryUsagePercentValues.push(averageMemoryUsagePercent);
+    }
+  });
+
+  return {
+    cpuCountValues,
+    averageCpuUsagePercentValues,
+    totalMemoryMegabytesValues,
+    averageMemoryUsagePercentValues,
   };
 }
 
 function unpackMetrics(row: MetricsExplorerRow): Omit<HostNodeMetricsRow, 'name'> {
   return {
-    cpuCount: row[metricByField['system.cpu.cores']] as number | null,
-    averageCpuUsagePercent: row[metricByField['system.cpu.total.norm.pct']] as number | null,
-    totalMemoryMegabytes: row[metricByField['system.memory.total']] as number | null,
-    averageMemoryUsagePercent: row[metricByField['system.memory.used.pct']] as number | null,
+    cpuCount: unpackMetric(row, 'system.cpu.cores'),
+    averageCpuUsagePercent: unpackMetric(row, 'system.cpu.total.norm.pct'),
+    totalMemoryMegabytes: unpackMetric(row, 'system.memory.total'),
+    averageMemoryUsagePercent: unpackMetric(row, 'system.memory.used.pct'),
   };
 }

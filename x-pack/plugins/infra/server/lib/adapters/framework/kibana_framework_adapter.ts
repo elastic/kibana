@@ -163,7 +163,6 @@ export class KibanaFramework {
         } as estypes.MsearchRequest);
         break;
       case 'fieldCaps':
-        // @ts-expect-error FieldCapsRequest.fields is not optional, CallWithRequestParams.fields is
         apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
           ...params,
         });
@@ -219,7 +218,7 @@ export class KibanaFramework {
     elasticsearchClient: ElasticsearchClient
   ) {
     const [, startPlugins] = await this.core.getStartServices();
-    return startPlugins.data.indexPatterns.indexPatternsServiceFactory(
+    return startPlugins.data.indexPatterns.dataViewsServiceFactory(
       savedObjectsClient,
       elasticsearchClient
     );

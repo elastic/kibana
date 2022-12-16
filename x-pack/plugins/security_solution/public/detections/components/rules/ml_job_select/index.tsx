@@ -6,9 +6,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiButton,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -18,11 +19,14 @@ import {
 
 import styled from 'styled-components';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
+import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ML_JOB_SELECT_PLACEHOLDER_TEXT } from '../step_define_rule/translations';
 import { HelpText } from './help_text';
+
+import * as i18n from './translations';
 
 interface MlJobValue {
   id: string;
@@ -40,6 +44,10 @@ type MlJobOption = EuiComboBoxOptionOption<MlJobValue>;
 
 const MlJobSelectEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 5px;
+`;
+
+const MlJobEuiButton = styled(EuiButton)`
+  margin-top: 20px;
 `;
 
 const JobDisplay: React.FC<MlJobValue> = ({ id, description }) => (
@@ -66,8 +74,9 @@ const renderJobOption = (option: MlJobOption) => (
 export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], field }) => {
   const jobIds = field.value as string[];
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const { loading, jobs } = useSecurityJobs(false);
-  const mlUrl = useKibana().services.application.getUrlForApp('ml');
+  const { loading, jobs } = useSecurityJobs();
+  const { getUrlForApp, navigateToApp } = useKibana().services.application;
+  const mlUrl = getUrlForApp('ml');
   const handleJobSelect = useCallback(
     (selectedJobOptions: MlJobOption[]): void => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -98,8 +107,8 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
   }, [jobs, jobIds]);
 
   return (
-    <MlJobSelectEuiFlexGroup>
-      <EuiFlexItem>
+    <MlJobSelectEuiFlexGroup justifyContent="flexStart">
+      <EuiFlexItem grow={false}>
         <EuiFormRow
           label={field.label}
           helpText={<HelpText href={mlUrl} notRunningJobIds={notRunningJobIds} />}
@@ -122,6 +131,15 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <MlJobEuiButton
+          iconType="popout"
+          iconSide="right"
+          onClick={() => navigateToApp('ml', { openInNewTab: true })}
+        >
+          {i18n.CREATE_CUSTOM_JOB_BUTTON_TITLE}
+        </MlJobEuiButton>
       </EuiFlexItem>
     </MlJobSelectEuiFlexGroup>
   );

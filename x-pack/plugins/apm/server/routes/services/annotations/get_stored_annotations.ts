@@ -12,12 +12,12 @@ import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '@kbn/observability-plugin/server';
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import { Annotation as ESAnnotation } from '@kbn/observability-plugin/common/annotations';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export function getStoredAnnotations({

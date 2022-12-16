@@ -123,8 +123,7 @@ exports[`CcrShard that it renders normally 1`] = `
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiHorizontalRule />
-    <EuiAccordion
-      arrowDisplay="left"
+    <EuiAccordionClass
       buttonContent={
         <EuiTitle>
           <h2>
@@ -136,12 +135,7 @@ exports[`CcrShard that it renders normally 1`] = `
           </h2>
         </EuiTitle>
       }
-      buttonElement="button"
-      element="div"
       id="ccrLatestStat"
-      initialIsOpen={false}
-      isLoading={false}
-      isLoadingMessage={false}
       paddingSize="l"
     >
       <EuiTitle
@@ -181,7 +175,7 @@ exports[`CcrShard that it renders normally 1`] = `
   "total_transferred_bytes": 234156
 }
       </EuiCodeBlock>
-    </EuiAccordion>
+    </EuiAccordionClass>
   </EuiPageBody>
 </EuiPage>
 `;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SignalsMigrationSO } from './saved_objects_schema';
-import { SignalVersion } from './get_signal_versions_by_index';
+import type { SignalsMigrationSO } from './saved_objects_schema';
+import type { SignalVersion } from './get_signal_versions_by_index';
 
 export const isMigrationPending = (migration: SignalsMigrationSO): boolean =>
   migration.attributes.status === 'pending';

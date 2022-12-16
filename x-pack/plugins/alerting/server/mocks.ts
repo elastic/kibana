@@ -9,13 +9,12 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
-  httpServerMock,
 } from '@kbn/core/server/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
-import { AlertInstanceContext, AlertInstanceState } from './types';
+import { AlertInstanceContext, AlertInstanceState, PublicRuleMonitoringService } from './types';
 
 export { rulesClientMock };
 
@@ -31,6 +30,7 @@ const createSetupMock = () => {
 const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
     listTypes: jest.fn(),
+    getAllTypes: jest.fn(),
     getAlertingAuthorizationWithRequest: jest.fn(),
     getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
     getFrameworkHealth: jest.fn(),
@@ -96,6 +96,18 @@ const createAbortableSearchServiceMock = () => {
   };
 };
 
+const createRuleMonitoringServiceMock = () => {
+  const mock = {
+    setLastRunMetricsTotalSearchDurationMs: jest.fn(),
+    setLastRunMetricsTotalIndexingDurationMs: jest.fn(),
+    setLastRunMetricsTotalAlertsDetected: jest.fn(),
+    setLastRunMetricsTotalAlertsCreated: jest.fn(),
+    setLastRunMetricsGapDurationS: jest.fn(),
+  } as unknown as jest.Mocked<PublicRuleMonitoringService>;
+
+  return mock;
+};
+
 const createRuleExecutorServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
@@ -105,6 +117,10 @@ const createRuleExecutorServicesMock = <
   return {
     alertFactory: {
       create: jest.fn().mockReturnValue(alertFactoryMockCreate),
+      alertLimit: {
+        getValue: jest.fn().mockReturnValue(1000),
+        setLimitReached: jest.fn(),
+      },
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
     savedObjectsClient: savedObjectsClientMock.create(),
@@ -113,11 +129,8 @@ const createRuleExecutorServicesMock = <
     shouldWriteAlerts: () => true,
     shouldStopExecution: () => true,
     search: createAbortableSearchServiceMock(),
-    searchSourceClient: Promise.resolve(
-      dataPluginMock
-        .createStartContract()
-        .search.searchSource.asScoped(httpServerMock.createKibanaRequest())
-    ),
+    searchSourceClient: searchSourceCommonMock,
+    ruleMonitoringService: createRuleMonitoringServiceMock(),
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;
@@ -128,3 +141,5 @@ export const alertsMock = {
   createStart: createStartMock,
   createRuleExecutorServices: createRuleExecutorServicesMock,
 };
+
+export const ruleMonitoringServiceMock = { create: createRuleMonitoringServiceMock };

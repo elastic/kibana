@@ -11,6 +11,10 @@ import { kibanaPackageJson } from '@kbn/utils';
 
 export class EsVersion {
   static getDefault() {
+    if (typeof jest === 'object' && jest) {
+      return new EsVersion('9.9.9');
+    }
+
     // example: https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.0.0/manifest-latest-verified.json
     const manifestUrl = process.env.ES_SNAPSHOT_MANIFEST;
     if (manifestUrl) {
@@ -32,6 +36,10 @@ export class EsVersion {
       throw new Error(`unable to parse es version [${version}]`);
     }
     this.parsed = parsed;
+  }
+
+  toJSON() {
+    return this.toString();
   }
 
   toString() {

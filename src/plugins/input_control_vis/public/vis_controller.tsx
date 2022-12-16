@@ -12,7 +12,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 
 import { I18nStart } from '@kbn/core/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
@@ -42,6 +42,7 @@ export const createInputControlVisController = (
     updateSubsciption: any;
     timeFilterSubscription: Subscription;
     visParams?: InputControlVisParams;
+    isDarkMode?: boolean;
 
     constructor() {
       this.controls = [];
@@ -59,6 +60,8 @@ export const createInputControlVisController = (
             isLoaded = false;
           }
         });
+
+      this.isDarkMode = deps.core.uiSettings.get('theme:darkMode');
     }
 
     async render(visParams: InputControlVisParams) {
@@ -100,6 +103,7 @@ export const createInputControlVisController = (
               hasChanges={this.hasChanges}
               hasValues={this.hasValues}
               refreshControl={this.refreshControl}
+              isDarkMode={this.isDarkMode}
             />
           </VisualizationContainer>
         </I18nContext>,

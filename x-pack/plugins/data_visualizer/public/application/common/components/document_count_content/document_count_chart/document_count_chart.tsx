@@ -22,6 +22,7 @@ import {
 import moment from 'moment';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import { EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
 
 export interface DocumentCountChartPoint {
@@ -35,6 +36,7 @@ interface Props {
   timeRangeEarliest: number;
   timeRangeLatest: number;
   interval?: number;
+  loading: boolean;
 }
 
 const SPEC_ID = 'document_count';
@@ -49,12 +51,21 @@ function getTimezone(uiSettings: IUiSettingsClient) {
   }
 }
 
+export function LoadingSpinner() {
+  return (
+    <EuiFlexItem style={{ alignItems: 'center' }}>
+      <EuiLoadingSpinner size="l" data-test-subj="loadingSpinner" />
+    </EuiFlexItem>
+  );
+}
+
 export const DocumentCountChart: FC<Props> = ({
   width,
   chartPoints,
   timeRangeEarliest,
   timeRangeLatest,
   interval,
+  loading,
 }) => {
   const {
     services: { data, uiSettings, fieldFormats, charts },
@@ -126,40 +137,46 @@ export const DocumentCountChart: FC<Props> = ({
   const timeZone = getTimezone(uiSettings);
 
   return (
-    <div style={{ width: width ?? '100%' }} data-test-subj="dataVisualizerDocumentCountChart">
-      <Chart
-        size={{
-          width: '100%',
-          height: 120,
-        }}
-      >
-        <Settings
-          xDomain={xDomain}
-          onBrushEnd={onBrushEnd as BrushEndListener}
-          onElementClick={onElementClick}
-          theme={chartTheme}
-          baseTheme={chartBaseTheme}
-        />
-        <Axis
-          id="bottom"
-          position={Position.Bottom}
-          showOverlappingTicks={true}
-          tickFormat={(value) => xAxisFormatter.convert(value)}
-          timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-          style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
-        />
-        <Axis id="left" position={Position.Left} />
-        <BarSeries
-          id={SPEC_ID}
-          name={seriesName}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="time"
-          yAccessors={['value']}
-          data={adjustedChartPoints}
-          timeZone={timeZone}
-        />
-      </Chart>
+    <div
+      style={{ width: width ?? '100%', height: 120, display: 'flex', alignItems: 'center' }}
+      data-test-subj="dataVisualizerDocumentCountChart"
+    >
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <Chart
+          size={{
+            width: '100%',
+          }}
+        >
+          <Settings
+            xDomain={xDomain}
+            onBrushEnd={onBrushEnd as BrushEndListener}
+            onElementClick={onElementClick}
+            theme={chartTheme}
+            baseTheme={chartBaseTheme}
+          />
+          <Axis
+            id="bottom"
+            position={Position.Bottom}
+            showOverlappingTicks={true}
+            tickFormat={(value) => xAxisFormatter.convert(value)}
+            timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
+            style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
+          />
+          <Axis id="left" position={Position.Left} />
+          <BarSeries
+            id={SPEC_ID}
+            name={seriesName}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="time"
+            yAccessors={['value']}
+            data={adjustedChartPoints}
+            timeZone={timeZone}
+          />
+        </Chart>
+      )}
     </div>
   );
 };

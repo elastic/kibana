@@ -11,6 +11,9 @@ exports[`PinnedTabContent rendering renders correctly against snapshot 1`] = `
         "description": "Date/time when the event originated.
 For log events this is the date/time when the event was generated, and not when it was read.
 Required field for all events.",
+        "esTypes": Array [
+          "date",
+        ],
         "example": "2016-05-23T08:05:34.853Z",
         "id": "@timestamp",
         "initialWidth": 190,
@@ -21,10 +24,13 @@ Required field for all events.",
         "category": "event",
         "columnHeaderType": "not-filtered",
         "description": "Severity describes the severity of the event. What the different severity values mean can very different between use cases. It's up to the implementer to make sure severities are consistent across events.",
+        "esTypes": Array [
+          "long",
+        ],
         "example": "7",
         "id": "event.severity",
         "initialWidth": 180,
-        "type": "long",
+        "type": "number",
       },
       Object {
         "aggregatable": true,
@@ -32,10 +38,13 @@ Required field for all events.",
         "columnHeaderType": "not-filtered",
         "description": "Event category.
 This contains high-level information about the contents of the event. It is more generic than \`event.action\`, in the sense that typically a category contains multiple actions. Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.",
+        "esTypes": Array [
+          "keyword",
+        ],
         "example": "user-management",
         "id": "event.category",
         "initialWidth": 180,
-        "type": "keyword",
+        "type": "string",
       },
       Object {
         "aggregatable": true,
@@ -43,10 +52,13 @@ This contains high-level information about the contents of the event. It is more
         "columnHeaderType": "not-filtered",
         "description": "The action captured by the event.
 This describes the information in the event. It is more specific than \`event.category\`. Examples are \`group-add\`, \`process-started\`, \`file-created\`. The value is normally defined by the implementer.",
+        "esTypes": Array [
+          "keyword",
+        ],
         "example": "user-password-change",
         "id": "event.action",
         "initialWidth": 180,
-        "type": "keyword",
+        "type": "string",
       },
       Object {
         "aggregatable": true,
@@ -54,10 +66,13 @@ This describes the information in the event. It is more specific than \`event.ca
         "columnHeaderType": "not-filtered",
         "description": "Name of the host.
 It can contain what \`hostname\` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.",
+        "esTypes": Array [
+          "keyword",
+        ],
         "example": "",
         "id": "host.name",
         "initialWidth": 180,
-        "type": "keyword",
+        "type": "string",
       },
       Object {
         "aggregatable": true,
@@ -65,6 +80,9 @@ It can contain what \`hostname\` returns on Unix systems, the fully qualified do
         "columnHeaderType": "not-filtered",
         "description": "IP address of the source.
 Can be one or multiple IPv4 or IPv6 addresses.",
+        "esTypes": Array [
+          "ip",
+        ],
         "example": "",
         "id": "source.ip",
         "initialWidth": 180,
@@ -76,6 +94,9 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "columnHeaderType": "not-filtered",
         "description": "IP address of the destination.
 Can be one or multiple IPv4 or IPv6 addresses.",
+        "esTypes": Array [
+          "ip",
+        ],
         "example": "",
         "id": "destination.ip",
         "initialWidth": 180,
@@ -86,6 +107,9 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "category": "destination",
         "columnHeaderType": "not-filtered",
         "description": "Bytes sent from the source to the destination",
+        "esTypes": Array [
+          "long",
+        ],
         "example": "123",
         "format": "bytes",
         "id": "destination.bytes",
@@ -97,20 +121,24 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "category": "user",
         "columnHeaderType": "not-filtered",
         "description": "Short name or login of the user.",
+        "esTypes": Array [
+          "keyword",
+        ],
         "example": "albert",
         "id": "user.name",
         "initialWidth": 180,
-        "type": "keyword",
+        "type": "string",
       },
       Object {
-        "aggregatable": true,
+        "aggregatable": false,
         "category": "base",
         "columnHeaderType": "not-filtered",
         "description": "Each document has an _id that uniquely identifies it",
+        "esTypes": Array [],
         "example": "Y-6TfmcB0WOhS6qyMv3s",
         "id": "_id",
         "initialWidth": 180,
-        "type": "keyword",
+        "type": "string",
       },
       Object {
         "aggregatable": false,
@@ -118,10 +146,13 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "columnHeaderType": "not-filtered",
         "description": "For log events the message field contains the log message.
 In other use cases the message field can be used to concatenate different values which are then freely searchable. If multiple messages exist, they can be combined into one message.",
+        "esTypes": Array [
+          "text",
+        ],
         "example": "Hello World",
         "id": "message",
         "initialWidth": 180,
-        "type": "text",
+        "type": "string",
       },
     ]
   }
@@ -1125,11 +1156,14 @@ In other use cases the message field can be used to concatenate different values
     Array [
       Object {
         "columnId": "@timestamp",
-        "columnType": "number",
+        "columnType": "date",
+        "esTypes": Array [
+          "date",
+        ],
         "sortDirection": "desc",
       },
     ]
   }
-  timelineId="test"
+  timelineId="timeline-test"
 />
 `;

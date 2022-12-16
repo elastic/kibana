@@ -6,30 +6,88 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { i18n } from '@kbn/i18n';
+import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
+import { InferenceBase, INPUT_TYPE } from '../inference_base';
+import type { InferResponse } from '../inference_base';
+import { getGeneralInputComponent } from '../text_input';
+import { getNerOutputComponent } from './ner_output';
+import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
 
-import { InferenceBase } from '../inference_base';
-
-export type FormattedNerResp = Array<{
+export type FormattedNerResponse = Array<{
   value: string;
   entity: estypes.MlTrainedModelEntities | null;
 }>;
 
-interface InferResponse {
-  response: FormattedNerResp;
-  rawResponse: estypes.MlInferTrainedModelDeploymentResponse;
-}
+export type NerResponse = InferResponse<FormattedNerResponse, estypes.MlInferTrainedModelResponse>;
 
-export class NerInference extends InferenceBase<InferResponse> {
-  public async infer(inputText: string) {
-    const payload = { docs: { [this.inputField]: inputText } };
-    const resp = await this.trainedModelsApi.inferTrainedModel(this.model.model_id, payload, '30s');
+export class NerInference extends InferenceBase<NerResponse> {
+  protected inferenceType = SUPPORTED_PYTORCH_TASKS.NER;
+  protected inferenceTypeLabel = i18n.translate(
+    'xpack.ml.trainedModels.testModelsFlyout.ner.label',
+    { defaultMessage: 'Named entity recognition' }
+  );
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.ner.info1', {
+      defaultMessage: 'Test how well the model identifies named entities in your input text.',
+    }),
+  ];
 
-    return { response: parseResponse(resp), rawResponse: resp };
+  constructor(
+    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    model: estypes.MlTrainedModelConfig,
+    inputType: INPUT_TYPE
+  ) {
+    super(trainedModelsApi, model, inputType);
+
+    this.initialize();
+  }
+
+  protected async inferText() {
+    return this.runInfer<estypes.MlInferTrainedModelResponse>(
+      () => {},
+      (resp, inputText) => {
+        return {
+          response: parseResponse(resp),
+          rawResponse: resp,
+          inputText,
+        };
+      }
+    );
+  }
+
+  protected async inferIndex() {
+    return this.runPipelineSimulate((doc) => {
+      return {
+        response: parseResponse({ inference_results: [doc._source[this.inferenceType]] }),
+        rawResponse: doc._source[this.inferenceType],
+        inputText: doc._source[this.getInputField()],
+      };
+    });
+  }
+
+  protected getProcessors() {
+    return this.getBasicProcessors();
+  }
+
+  public getInputComponent(): JSX.Element | null {
+    if (this.inputType === INPUT_TYPE.TEXT) {
+      const placeholder = i18n.translate('xpack.ml.trainedModels.testModelsFlyout.ner.inputText', {
+        defaultMessage: 'Enter a phrase to test',
+      });
+      return getGeneralInputComponent(this, placeholder);
+    } else {
+      return null;
+    }
+  }
+
+  public getOutputComponent(): JSX.Element {
+    return getNerOutputComponent(this);
   }
 }
 
-function parseResponse(resp: estypes.MlInferTrainedModelDeploymentResponse): FormattedNerResp {
-  const { predicted_value: predictedValue, entities } = resp;
+function parseResponse(resp: estypes.MlInferTrainedModelResponse): FormattedNerResponse {
+  const [{ predicted_value: predictedValue, entities }] = resp.inference_results;
   const splitWordsAndEntitiesRegex = /(\[.*?\]\(.*?&.*?\))/;
   const matchEntityRegex = /(\[.*?\])\((.*?)&(.*?)\)/;
   if (predictedValue === undefined || entities === undefined) {

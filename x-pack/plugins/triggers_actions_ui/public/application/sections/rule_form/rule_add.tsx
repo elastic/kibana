@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useReducer, useMemo, useState, useEffect } from 'react';
+import React, { useReducer, useMemo, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -47,11 +47,13 @@ const RuleAdd = ({
   initialValues,
   reloadRules,
   onSave,
-  metadata,
-  filteredSolutions,
+  metadata: initialMetadata,
+  filteredRuleTypes,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
+  const [metadata, setMetadata] = useState(initialMetadata);
+  const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
 
   const initialRule: InitialRule = useMemo(() => {
     return {
@@ -71,7 +73,7 @@ const RuleAdd = ({
   const [{ rule }, dispatch] = useReducer(ruleReducer as InitialRuleReducer, {
     rule: initialRule,
   });
-  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
   const [initialRuleParams, setInitialRuleParams] = useState<RuleTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmRuleSaveModalOpen, setIsConfirmRuleSaveModalOpen] = useState<boolean>(false);
@@ -177,7 +179,7 @@ const RuleAdd = ({
     ) {
       setIsConfirmRuleCloseModalOpen(true);
     } else {
-      onClose(RuleFlyoutCloseReason.CANCELED);
+      onClose(RuleFlyoutCloseReason.CANCELED, metadata);
     }
   };
 
@@ -185,9 +187,9 @@ const RuleAdd = ({
     const savedRule = await onSaveRule();
     setIsSaving(false);
     if (savedRule) {
-      onClose(RuleFlyoutCloseReason.SAVED);
+      onClose(RuleFlyoutCloseReason.SAVED, metadata);
       if (onSaveHandler) {
-        onSaveHandler();
+        onSaveHandler(metadata);
       }
     }
   };
@@ -232,7 +234,7 @@ const RuleAdd = ({
         aria-labelledby="flyoutRuleAddTitle"
         size="m"
         maxWidth={620}
-        ownFocus={false}
+        ownFocus
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="addRuleFlyoutTitle">
@@ -245,7 +247,7 @@ const RuleAdd = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <HealthContextProvider>
-          <HealthCheck inFlyout={true} waitForCheck={false}>
+          <HealthCheck inFlyout={true} waitForCheck={true}>
             <EuiFlyoutBody>
               <RuleForm
                 rule={rule}
@@ -262,7 +264,8 @@ const RuleAdd = ({
                 actionTypeRegistry={actionTypeRegistry}
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
-                filteredSolutions={filteredSolutions}
+                filteredRuleTypes={filteredRuleTypes}
+                onChangeMetaData={onChangeMetaData}
               />
             </EuiFlyoutBody>
             <RuleAddFooter
@@ -308,7 +311,7 @@ const RuleAdd = ({
           <ConfirmRuleClose
             onConfirm={() => {
               setIsConfirmRuleCloseModalOpen(false);
-              onClose(RuleFlyoutCloseReason.CANCELED);
+              onClose(RuleFlyoutCloseReason.CANCELED, metadata);
             }}
             onCancel={() => {
               setIsConfirmRuleCloseModalOpen(false);

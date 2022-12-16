@@ -7,7 +7,8 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
@@ -22,8 +23,8 @@ import {
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { cancelRequest } from '../reducers/non_serializable_instances';
-import { setDrawMode, updateFlyout } from './ui_actions';
+import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
+import { hideTOCDetails, setDrawMode, showTOCDetails, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
@@ -49,7 +50,6 @@ import {
   syncDataForLayerId,
   updateStyleMeta,
 } from './data_request_actions';
-import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   Attribution,
   JoinDescriptor,
@@ -57,16 +57,25 @@ import {
   StyleDescriptor,
   TileMetaFeature,
   VectorLayerDescriptor,
+  VectorStyleDescriptor,
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
 import { OnSourceChangeArgs } from '../classes/sources/source';
-import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE, SCALING_TYPES } from '../../common/constants';
+import {
+  DRAW_MODE,
+  LAYER_STYLE_TYPE,
+  LAYER_TYPE,
+  SCALING_TYPES,
+  STYLE_TYPE,
+} from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
-import { getDrawMode } from '../selectors/ui_selectors';
+import type { IESSource } from '../classes/sources/es_source';
+import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
+import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -152,8 +161,12 @@ export function cloneLayer(layerId: string) {
       return;
     }
 
-    const clonedDescriptor = await layer.cloneDescriptor();
-    dispatch(addLayer(clonedDescriptor));
+    (await layer.cloneDescriptor()).forEach((layerDescriptor) => {
+      dispatch(addLayer(layerDescriptor));
+      if (layer.getParent()) {
+        dispatch(moveLayerToLeftOfTarget(layerDescriptor.id, layerId));
+      }
+    });
   };
 }
 
@@ -195,6 +208,15 @@ export function addPreviewLayers(layerDescriptors: LayerDescriptor[]) {
 
     layerDescriptors.forEach((layerDescriptor) => {
       dispatch(addLayer({ ...layerDescriptor, __isPreviewLayer: true }));
+
+      // Auto open layer legend to increase legend discoverability
+      if (
+        layerDescriptor.style &&
+        (hasByValueStyling(layerDescriptor.style) ||
+          layerDescriptor.style.type === LAYER_STYLE_TYPE.HEATMAP)
+      ) {
+        dispatch(showTOCDetails(layerDescriptor.id));
+      }
     });
   };
 }
@@ -206,6 +228,9 @@ export function removePreviewLayers() {
   ) => {
     getLayerList(getState()).forEach((layer) => {
       if (layer.isPreviewLayer()) {
+        if (isLayerGroup(layer)) {
+          dispatch(ungroupLayer(layer.getId()));
+        }
         dispatch(removeLayer(layer.getId()));
       }
     });
@@ -232,17 +257,20 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    // if the current-state is invisible, we also want to sync data
-    // e.g. if a layer was invisible at start-up, it won't have any data loaded
     const layer = getLayerById(layerId, getState());
-
-    // If the layer visibility is already what we want it to be, do nothing
-    if (!layer || layer.isVisible() === makeVisible) {
+    if (!layer) {
       return;
     }
 
-    if (!makeVisible) {
-      dispatch(updateTooltipStateForLayer(layer));
+    if (isLayerGroup(layer)) {
+      (layer as LayerGroup).getChildren().forEach((childLayer) => {
+        dispatch(setLayerVisibility(childLayer.getId(), makeVisible));
+      });
+    }
+
+    // If the layer visibility is already what we want it to be, do nothing
+    if (layer.isVisible() === makeVisible) {
+      return;
     }
 
     dispatch({
@@ -250,6 +278,9 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
       layerId,
       visibility: makeVisible,
     });
+
+    // if the current-state is invisible, we also want to sync data
+    // e.g. if a layer was invisible at start-up, it won't have any data loaded
     if (makeVisible) {
       dispatch(syncDataForLayerId(layerId, false));
     }
@@ -271,29 +302,50 @@ export function toggleLayerVisible(layerId: string) {
   };
 }
 
+export function hideAllLayers() {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    getLayerList(getState()).forEach((layer: ILayer, index: number) => {
+      if (!layer.isBasemap(index)) {
+        dispatch(setLayerVisibility(layer.getId(), false));
+      }
+    });
+  };
+}
+
+export function showAllLayers() {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    getLayerList(getState()).forEach((layer: ILayer, index: number) => {
+      dispatch(setLayerVisibility(layer.getId(), true));
+    });
+  };
+}
+
 export function showThisLayerOnly(layerId: string) {
   return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
     getLayerList(getState()).forEach((layer: ILayer, index: number) => {
-      if (layer.isBasemap(index)) {
-        return;
-      }
-
-      // show target layer
-      if (layer.getId() === layerId) {
-        if (!layer.isVisible()) {
-          dispatch(setLayerVisibility(layerId, true));
-        }
+      if (layer.isBasemap(index) || layer.getId() === layerId) {
         return;
       }
 
       // hide all other layers
-      if (layer.isVisible()) {
-        dispatch(setLayerVisibility(layer.getId(), false));
-      }
+      dispatch(setLayerVisibility(layer.getId(), false));
     });
+
+    // show target layer after hiding all other layers
+    // since hiding layer group will hide its children
+    const targetLayer = getLayerById(layerId, getState());
+    if (targetLayer) {
+      dispatch(setLayerVisibility(layerId, true));
+    }
   };
 }
 
@@ -451,6 +503,7 @@ function updateLayerType(layerId: string, newLayerType: string) {
       return;
     }
     dispatch(clearDataRequests(layer));
+    clearInspectorAdapters(layer, getInspectorAdapters(getState()));
     dispatch({
       type: UPDATE_LAYER_PROP,
       id: layerId,
@@ -466,6 +519,15 @@ export function updateLayerLabel(id: string, newLabel: string) {
     id,
     propName: 'label',
     newValue: newLabel,
+  };
+}
+
+export function updateLayerLocale(id: string, locale: string) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'locale',
+    newValue: locale,
   };
 }
 
@@ -531,6 +593,15 @@ export function updateFittableFlag(id: string, includeInFitToBounds: boolean) {
   };
 }
 
+export function updateDisableTooltips(id: string, disableTooltips: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'disableTooltips',
+    newValue: disableTooltips,
+  };
+}
+
 export function setLayerQuery(id: string, query: Query) {
   return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     dispatch({
@@ -541,6 +612,25 @@ export function setLayerQuery(id: string, query: Query) {
     });
 
     dispatch(syncDataForLayerId(id, false));
+  };
+}
+
+export function setLayerParent(id: string, parent: string | undefined) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id,
+      propName: 'parent',
+      newValue: parent,
+    });
+
+    if (parent) {
+      // Open parent layer details. Without opening parent details, layer disappears from legend and this confuses users
+      dispatch(showTOCDetails(parent));
+    }
   };
 }
 
@@ -585,8 +675,7 @@ function removeLayerFromLayerList(layerId: string) {
     layerGettingRemoved.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
-    dispatch(updateTooltipStateForLayer(layerGettingRemoved));
-    layerGettingRemoved.destroy();
+    clearInspectorAdapters(layerGettingRemoved, getInspectorAdapters(getState()));
     dispatch({
       type: REMOVE_LAYER,
       id: layerId,
@@ -595,6 +684,16 @@ function removeLayerFromLayerList(layerId: string) {
     const editState = getEditState(getState());
     if (layerId === editState?.layerId) {
       dispatch(setDrawMode(DRAW_MODE.NONE));
+    }
+    const openTOCDetails = getOpenTOCDetails(getState());
+    if (openTOCDetails.includes(layerId)) {
+      dispatch(hideTOCDetails(layerId));
+    }
+
+    if (isLayerGroup(layerGettingRemoved)) {
+      (layerGettingRemoved as LayerGroup).getChildren().forEach((childLayer) => {
+        dispatch(removeLayerFromLayerList(childLayer.getId()));
+      });
     }
   };
 }
@@ -637,6 +736,11 @@ export function updateLayerStyle(layerId: string, styleDescriptor: StyleDescript
         ...styleDescriptor,
       },
     });
+
+    // Auto open layer legend to increase legend discoverability
+    if (hasByValueStyling(styleDescriptor)) {
+      dispatch(showTOCDetails(layerId));
+    }
 
     // Ensure updateStyleMeta is triggered
     // syncDataForLayer may not trigger endDataLoad if no re-fetch is required
@@ -716,5 +820,138 @@ export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFea
       newValue: mbMetaFeatures,
     });
     await dispatch(updateStyleMeta(layerId));
+  };
+}
+
+function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
+  if (isLayerGroup(layer) || !layer.getSource().isESSource()) {
+    return;
+  }
+
+  if (adapters.vectorTiles) {
+    adapters.vectorTiles.removeLayer(layer.getId());
+  }
+
+  if (adapters.requests && 'getValidJoins' in layer) {
+    const vectorLayer = layer as IVectorLayer;
+    adapters.requests!.resetRequest((layer.getSource() as IESSource).getId());
+    vectorLayer.getValidJoins().forEach((join) => {
+      adapters.requests!.resetRequest(join.getRightJoinSource().getId());
+    });
+  }
+}
+
+function hasByValueStyling(styleDescriptor: StyleDescriptor) {
+  return (
+    styleDescriptor.type === LAYER_STYLE_TYPE.VECTOR &&
+    Object.values((styleDescriptor as VectorStyleDescriptor).properties).some((styleProperty) => {
+      return (styleProperty as { type?: STYLE_TYPE })?.type === STYLE_TYPE.DYNAMIC;
+    })
+  );
+}
+
+export function createLayerGroup(draggedLayerId: string, combineLayerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const group = LayerGroup.createDescriptor({});
+    const combineLayerDescriptor = getLayerDescriptor(getState(), combineLayerId);
+    if (combineLayerDescriptor?.parent) {
+      group.parent = combineLayerDescriptor.parent;
+    }
+    dispatch({
+      type: ADD_LAYER,
+      layer: group,
+    });
+    // Move group to left of combine-layer
+    dispatch(moveLayerToLeftOfTarget(group.id, combineLayerId));
+
+    dispatch(showTOCDetails(group.id));
+    dispatch(setLayerParent(draggedLayerId, group.id));
+    dispatch(setLayerParent(combineLayerId, group.id));
+
+    // Move dragged-layer to left of combine-layer
+    dispatch(moveLayerToLeftOfTarget(draggedLayerId, combineLayerId));
+  };
+}
+
+export function ungroupLayer(layerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layer = getLayerList(getState()).find((findLayer) => findLayer.getId() === layerId);
+    if (!layer || !isLayerGroup(layer)) {
+      return;
+    }
+
+    (layer as LayerGroup).getChildren().forEach((childLayer) => {
+      dispatch(setLayerParent(childLayer.getId(), layer.getParent()));
+    });
+  };
+}
+
+export function moveLayerToLeftOfTarget(moveLayerId: string, targetLayerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layers = getLayerList(getState());
+    const moveLayerIndex = layers.findIndex((layer) => layer.getId() === moveLayerId);
+    const targetLayerIndex = layers.findIndex((layer) => layer.getId() === targetLayerId);
+    if (moveLayerIndex === -1 || targetLayerIndex === -1) {
+      return;
+    }
+    const moveLayer = layers[moveLayerIndex];
+
+    const newIndex =
+      moveLayerIndex > targetLayerIndex
+        ? // When layer is moved to the right, new left sibling index is to the left of destination
+          targetLayerIndex + 1
+        : // When layer is moved to the left, new left sibling index is the destination index
+          targetLayerIndex;
+    const newOrder = [];
+    for (let i = 0; i < layers.length; i++) {
+      newOrder.push(i);
+    }
+    newOrder.splice(moveLayerIndex, 1);
+    newOrder.splice(newIndex, 0, moveLayerIndex);
+    dispatch(updateLayerOrder(newOrder));
+
+    if (isLayerGroup(moveLayer)) {
+      (moveLayer as LayerGroup).getChildren().forEach((childLayer) => {
+        dispatch(moveLayerToLeftOfTarget(childLayer.getId(), targetLayerId));
+      });
+    }
+  };
+}
+
+export function moveLayerToBottom(moveLayerId: string) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layers = getLayerList(getState());
+    const moveLayerIndex = layers.findIndex((layer) => layer.getId() === moveLayerId);
+    if (moveLayerIndex === -1) {
+      return;
+    }
+    const moveLayer = layers[moveLayerIndex];
+
+    const newIndex = 0;
+    const newOrder = [];
+    for (let i = 0; i < layers.length; i++) {
+      newOrder.push(i);
+    }
+    newOrder.splice(moveLayerIndex, 1);
+    newOrder.splice(newIndex, 0, moveLayerIndex);
+    dispatch(updateLayerOrder(newOrder));
+
+    if (isLayerGroup(moveLayer)) {
+      (moveLayer as LayerGroup).getChildren().forEach((childLayer) => {
+        dispatch(moveLayerToBottom(childLayer.getId()));
+      });
+    }
   };
 }

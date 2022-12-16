@@ -9,7 +9,8 @@ import { Polygon } from 'geojson';
 import {
   createDistanceFilterWithMeta,
   createExtentFilter,
-  createSpatialFilterWithGeometry,
+  buildGeoGridFilter,
+  buildGeoShapeFilter,
   extractFeaturesFromFilters,
 } from './spatial_filter_utils';
 
@@ -29,6 +30,7 @@ describe('createExtentFilter', () => {
         disabled: false,
         key: 'location',
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -65,6 +67,7 @@ describe('createExtentFilter', () => {
         disabled: false,
         key: 'location',
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -101,6 +104,7 @@ describe('createExtentFilter', () => {
         disabled: false,
         key: 'location',
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -137,6 +141,7 @@ describe('createExtentFilter', () => {
         disabled: false,
         key: 'location',
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -173,6 +178,7 @@ describe('createExtentFilter', () => {
         disabled: false,
         key: 'location',
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -209,6 +215,7 @@ describe('createExtentFilter', () => {
         disabled: false,
         isMultiIndex: true,
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -258,9 +265,106 @@ describe('createExtentFilter', () => {
   });
 });
 
-describe('createSpatialFilterWithGeometry', () => {
+describe('buildGeoGridFilter', () => {
   it('should build filter for single field', () => {
-    const spatialFilter = createSpatialFilterWithGeometry({
+    const spatialFilter = buildGeoGridFilter({
+      geoFieldNames: ['geo.coordinates'],
+      gridId: '9/146/195',
+      isHex: false,
+    });
+    expect(spatialFilter).toEqual({
+      meta: {
+        alias: 'intersects cluster 9/146/195',
+        disabled: false,
+        key: 'geo.coordinates',
+        negate: false,
+        type: 'spatial_filter',
+      },
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'geo.coordinates',
+              },
+            },
+            {
+              geo_grid: {
+                'geo.coordinates': {
+                  geotile: '9/146/195',
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('should build filter for multiple field', () => {
+    const spatialFilter = buildGeoGridFilter({
+      geoFieldNames: ['geo.coordinates', 'location'],
+      gridId: '822af7fffffffff',
+      isHex: true,
+    });
+    expect(spatialFilter).toEqual({
+      meta: {
+        alias: 'intersects cluster 822af7fffffffff',
+        disabled: false,
+        isMultiIndex: true,
+        key: undefined,
+        negate: false,
+        type: 'spatial_filter',
+      },
+      query: {
+        bool: {
+          should: [
+            {
+              bool: {
+                must: [
+                  {
+                    exists: {
+                      field: 'geo.coordinates',
+                    },
+                  },
+                  {
+                    geo_grid: {
+                      'geo.coordinates': {
+                        geohex: '822af7fffffffff',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                must: [
+                  {
+                    exists: {
+                      field: 'location',
+                    },
+                  },
+                  {
+                    geo_grid: {
+                      location: {
+                        geohex: '822af7fffffffff',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    });
+  });
+});
+
+describe('buildGeoShapeFilter', () => {
+  it('should build filter for single field', () => {
+    const spatialFilter = buildGeoShapeFilter({
       geometry: {
         coordinates: [
           [
@@ -319,7 +423,7 @@ describe('createSpatialFilterWithGeometry', () => {
   });
 
   it('should build filter for multiple field', () => {
-    const spatialFilter = createSpatialFilterWithGeometry({
+    const spatialFilter = buildGeoShapeFilter({
       geometry: {
         coordinates: [
           [
@@ -566,7 +670,7 @@ describe('extractFeaturesFromFilters', () => {
   });
 
   it('should convert single field geo_shape filter to feature', () => {
-    const spatialFilter = createSpatialFilterWithGeometry({
+    const spatialFilter = buildGeoShapeFilter({
       geometry: {
         coordinates: [
           [
@@ -605,7 +709,7 @@ describe('extractFeaturesFromFilters', () => {
   });
 
   it('should convert multi field geo_shape filter to feature', () => {
-    const spatialFilter = createSpatialFilterWithGeometry({
+    const spatialFilter = buildGeoShapeFilter({
       geometry: {
         coordinates: [
           [
@@ -644,7 +748,7 @@ describe('extractFeaturesFromFilters', () => {
   });
 
   it('should ignore geo_shape filter with pre-index shape', () => {
-    const spatialFilter = createSpatialFilterWithGeometry({
+    const spatialFilter = buildGeoShapeFilter({
       preIndexedShape: {
         index: 'world_countries_v1',
         id: 's5gldXEBkTB2HMwpC8y0',

@@ -9,11 +9,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
-import { TimeseriesChart } from '../timeseries_chart';
+import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
@@ -37,7 +38,7 @@ const options: Array<{ value: LatencyAggregationType; text: string }> = [
   { value: LatencyAggregationType.p99, text: '99th percentile' },
 ];
 
-function filterNil<T>(value: T | null | undefined): value is T {
+export function filterNil<T>(value: T | null | undefined): value is T {
   return value != null;
 }
 
@@ -48,11 +49,14 @@ export function LatencyChart({ height, kuery }: Props) {
   const license = useLicenseContext();
 
   const {
-    query: { comparisonEnabled, latencyAggregationType },
+    query: { comparisonEnabled, latencyAggregationType, offset },
   } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
     '/services/{serviceName}/transactions',
-    '/services/{serviceName}/transactions/view'
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/transactions',
+    '/mobile-services/{serviceName}/transactions/view'
   );
 
   const { environment } = useEnvironmentsContext();
@@ -68,10 +72,11 @@ export function LatencyChart({ height, kuery }: Props) {
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     ApmMlDetectorType.txLatency
   );
+  const anomalyTimeseriesColor = previousPeriod?.color as string;
 
   const timeseries = [
     currentPeriod,
-    comparisonEnabled ? previousPeriod : undefined,
+    comparisonEnabled && isTimeComparison(offset) ? previousPeriod : undefined,
   ].filter(filterNil);
 
   const latencyMaxY = getMaxY(timeseries);
@@ -82,7 +87,7 @@ export function LatencyChart({ height, kuery }: Props) {
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" responsive={false}>
+            <EuiFlexGroup alignItems="center" wrap>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h2>
@@ -124,14 +129,21 @@ export function LatencyChart({ height, kuery }: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <TimeseriesChart
+        <TimeseriesChartWithContext
           height={height}
           fetchStatus={latencyChartsStatus}
           id="latencyChart"
           customTheme={comparisonChartTheme}
           timeseries={timeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-          anomalyTimeseries={preferredAnomalyTimeseries}
+          anomalyTimeseries={
+            preferredAnomalyTimeseries
+              ? {
+                  ...preferredAnomalyTimeseries,
+                  color: anomalyTimeseriesColor,
+                }
+              : undefined
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>

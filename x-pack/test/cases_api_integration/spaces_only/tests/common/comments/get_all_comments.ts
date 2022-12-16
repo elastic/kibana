@@ -19,7 +19,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -29,40 +29,44 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should get multiple comments for a single case in space1', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
       await createComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
         auth: authSpace1,
       });
       await createComment({
-        supertest,
-        caseId: postedCase.id,
-        params: postCommentUserReq,
-        auth: authSpace1,
-      });
-      const comments = await getAllComments({ supertest, caseId: postedCase.id, auth: authSpace1 });
-
-      expect(comments.length).to.eql(2);
-    });
-
-    it('should not find any comments in space2', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
-      await createComment({
-        supertest,
-        caseId: postedCase.id,
-        params: postCommentUserReq,
-        auth: authSpace1,
-      });
-      await createComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
         auth: authSpace1,
       });
       const comments = await getAllComments({
-        supertest,
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        auth: authSpace1,
+      });
+
+      expect(comments.length).to.eql(2);
+    });
+
+    it('should not find any comments in space2', async () => {
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+      await createComment({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+        auth: authSpace1,
+      });
+      await createComment({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+        auth: authSpace1,
+      });
+      const comments = await getAllComments({
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         auth: getAuthWithSuperUser('space2'),
       });

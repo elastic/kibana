@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import type { IndexPatternSavedObjectAttrs } from './data_views';
+import type { DataViewSavedObjectAttrs } from './data_views';
 import type { SavedObjectsClientCommon } from './types';
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from './constants';
 
 /**
- * Returns an object matching a given title
+ * Returns an object matching a given name
  *
  * @param client {SavedObjectsClientCommon}
- * @param title {string}
- * @returns {Promise<SavedObject|undefined>}
+ * @param name {string}
+ * @returns {SavedObject|undefined}
  */
-export async function findByTitle(client: SavedObjectsClientCommon, title: string) {
-  if (title) {
-    const savedObjects = await client.find<IndexPatternSavedObjectAttrs>({
+export async function findByName(client: SavedObjectsClientCommon, name: string) {
+  if (name) {
+    const savedObjects = await client.find<{ name: DataViewSavedObjectAttrs['name'] }>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
       perPage: 10,
-      search: `"${title}"`,
-      searchFields: ['title'],
-      fields: ['title'],
+      search: `"${name}"`,
+      searchFields: ['name.keyword'],
+      fields: ['name'],
     });
 
-    return savedObjects.find((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
+    return savedObjects ? savedObjects[0] : undefined;
   }
 }

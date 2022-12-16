@@ -44,7 +44,7 @@ describe('DocumentCreationFlyout', () => {
     const wrapper = shallow(<DocumentCreationFlyout />);
     expect(wrapper.find(EuiFlyout)).toHaveLength(1);
 
-    wrapper.find(EuiFlyout).prop('onClose')();
+    wrapper.find(EuiFlyout).prop('onClose')(new MouseEvent('click'));
     expect(actions.closeDocumentCreation).toHaveBeenCalled();
   });
 

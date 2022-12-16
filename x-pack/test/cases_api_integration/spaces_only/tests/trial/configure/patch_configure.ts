@@ -29,6 +29,7 @@ import { nullUser } from '../../../../common/lib/mock';
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
   const space = getActionsSpace(authSpace1.space);
@@ -55,7 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should patch a configuration connector and create mappings in space1', async () => {
       const connector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: {
           ...getServiceNowConnector(),
           config: { apiUrl: serviceNowSimulatorURL },
@@ -67,7 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Configuration is created with no connector so the mappings are empty
       const configuration = await createConfiguration(
-        supertest,
+        supertestWithoutAuth,
         getConfigurationRequest(),
         200,
         authSpace1
@@ -82,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const newConfiguration = await updateConfiguration(
-        supertest,
+        supertestWithoutAuth,
         configuration.id,
         {
           ...reqWithoutOwner,
@@ -125,7 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should not patch a configuration connector when it is in a different space', async () => {
       const connector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: {
           ...getServiceNowConnector(),
           config: { apiUrl: serviceNowSimulatorURL },
@@ -137,7 +138,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Configuration is created with no connector so the mappings are empty
       const configuration = await createConfiguration(
-        supertest,
+        supertestWithoutAuth,
         getConfigurationRequest(),
         200,
         authSpace1
@@ -152,7 +153,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       await updateConfiguration(
-        supertest,
+        supertestWithoutAuth,
         configuration.id,
         {
           ...reqWithoutOwner,

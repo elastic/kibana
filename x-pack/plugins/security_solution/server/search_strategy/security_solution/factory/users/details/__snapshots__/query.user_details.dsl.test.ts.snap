@@ -5,11 +5,6 @@ Object {
   "allow_no_indices": true,
   "body": Object {
     "aggregations": Object {
-      "first_seen": Object {
-        "min": Object {
-          "field": "@timestamp",
-        },
-      },
       "host_ip": Object {
         "aggs": Object {
           "timestamp": Object {
@@ -59,11 +54,6 @@ Object {
             "timestamp": "desc",
           },
           "size": 10,
-        },
-      },
-      "last_seen": Object {
-        "max": Object {
-          "field": "@timestamp",
         },
       },
       "user_domain": Object {

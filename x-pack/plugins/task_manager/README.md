@@ -1,7 +1,8 @@
 # Kibana task manager
 
 The task manager is a generic system for running background tasks.
-Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-production-considerations.html
+
+Documentation: https://www.elastic.co/guide/en/kibana/current/task-manager-production-considerations.html
 
 It supports:
 - Single-run and recurring tasks
@@ -325,7 +326,16 @@ The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's
   schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: any) => {
     // ...
   },
-  runNow: (taskId: string) =>  {
+  runSoon: (taskId: string) =>  {
+    // ...
+  },
+  bulkEnable: (taskIds: string[], runSoon: boolean = true) => {
+    // ...
+  },
+  bulkDisable: (taskIds: string[]) => {
+    // ...
+  },
+  bulkUpdateSchedules: (taskIds: string[], schedule: IntervalSchedule) =>  {
     // ...
   },
   ensureScheduled: (taskInstance: TaskInstanceWithId, options?: any) => {
@@ -391,8 +401,8 @@ The danger is that in such a situation, a Task with that same `id` might already
 
 To achieve this you should use the `ensureScheduling` api which has the exact same behavior as `schedule`, except it allows the scheduling of a Task with an `id` that's already in assigned to another Task and it will assume that the existing Task is the one you wished to `schedule`, treating this as a successful operation.
 
-#### runNow
-Using `runNow` you can instruct TaskManger to run an existing task on-demand, without waiting for its scheduled time to be reached.
+#### runSoon
+Using `runSoon` you can instruct TaskManager to run an existing task as soon as possible by updating the next scheduled run date to be now
 
 ```js
 export class Plugin {
@@ -404,12 +414,97 @@ export class Plugin {
 
   public start(core: CoreStart, plugins: { taskManager }) {
     try {
-      const taskRunResult = await taskManager.runNow('91760f10-ba42-de9799');
+      const taskRunResult = await taskManager.runSoon('91760f10-ba42-de9799');
       // If no error is thrown, the task has completed successfully.
     } catch(err: Error) {
       // If running the task has failed, we throw an error with an appropriate message.
       // For example, if the requested task doesnt exist: `Error: failed to run task "91760f10-ba42-de9799" as it does not exist`
       // Or if, for example, the task is already running: `Error: failed to run task "91760f10-ba42-de9799" as it is currently running`
+    }    
+  }
+}
+```
+
+#### bulkDisable
+Using `bulkDisable` you can instruct TaskManger to disable tasks by setting the `enabled` status of specific tasks to `false`.
+
+Example:
+```js
+export class Plugin {
+  constructor() {
+  }
+
+  public setup(core: CoreSetup, plugins: { taskManager }) {
+  }
+
+  public start(core: CoreStart, plugins: { taskManager }) {
+    try {
+      const bulkDisableResults = await taskManager.bulkDisable(
+        ['97c2c4e7-d850-11ec-bf95-895ffd19f959', 'a5ee24d1-dce2-11ec-ab8d-cf74da82133d'],
+      );
+      // If no error is thrown, the bulkDisable has completed successfully.
+      // But some updates of some tasks can be failed, due to OCC 409 conflict for example
+    } catch(err: Error) {
+      // if error is caught, means the whole method requested has failed and tasks weren't updated
+    }    
+  }
+}
+```
+
+#### bulkEnable
+Using `bulkEnable` you can instruct TaskManger to enable tasks by setting the `enabled` status of specific tasks to `true`. Specify the `runSoon` parameter to run the task immediately on enable.
+
+Example:
+```js
+export class Plugin {
+  constructor() {
+  }
+
+  public setup(core: CoreSetup, plugins: { taskManager }) {
+  }
+
+  public start(core: CoreStart, plugins: { taskManager }) {
+    try {
+      const bulkEnableResults = await taskManager.bulkEnable(
+        ['97c2c4e7-d850-11ec-bf95-895ffd19f959', 'a5ee24d1-dce2-11ec-ab8d-cf74da82133d'],
+        true,
+      );
+      // If no error is thrown, the bulkEnable has completed successfully.
+      // But some updates of some tasks can be failed, due to OCC 409 conflict for example
+    } catch(err: Error) {
+      // if error is caught, means the whole method requested has failed and tasks weren't updated
+    }    
+  }
+}
+```
+
+#### bulkUpdateSchedules
+Using `bulkUpdatesSchedules` you can instruct TaskManger to update interval of tasks that are in `idle` status
+(for the tasks which have `running` status,  `schedule` and `runAt` will be recalculated after task run finishes).
+When interval updated, new `runAt` will be computed and task will be updated with that value, using formula
+```
+newRunAt = oldRunAt - oldInterval + newInterval
+```
+
+Example:
+```js
+export class Plugin {
+  constructor() {
+  }
+
+  public setup(core: CoreSetup, plugins: { taskManager }) {
+  }
+
+  public start(core: CoreStart, plugins: { taskManager }) {
+    try {
+      const bulkUpdateResults = await taskManager.bulkUpdateSchedule(
+        ['97c2c4e7-d850-11ec-bf95-895ffd19f959', 'a5ee24d1-dce2-11ec-ab8d-cf74da82133d'],
+        { interval: '10m' },
+      );
+      // If no error is thrown, the bulkUpdateSchedule has completed successfully.
+      // But some updates of some tasks can be failed, due to OCC 409 conflict for example
+    } catch(err: Error) {
+      // if error is caught, means the whole method requested has failed and tasks weren't updated
     }    
   }
 }
@@ -471,20 +566,20 @@ Task Manager's _push_ mechanism is driven by the following operations:
 
 1. A polling interval has been reached.
 2. A new Task is scheduled.
-3. A Task is run using `runNow`.
 
 The polling interval is straight forward: TaskPoller is configured to emit an event at a fixed interval.
 That said, if there are no workers available, we want to ignore these events, so we'll throttle the interval on worker availability.
 
 Whenever a user uses the `schedule` api to schedule a new Task, we want to trigger an early polling in order to respond to the newly scheduled task as soon as possible, but this too we only wish to do if there are available workers, so we can throttle this too.
 
-When a `runNow` call is made we need to force a poll as the user will now be waiting on the result of the `runNow` call, but
-there is a complexity here- we don't want to force polling (as there might not be any worker capacity and it's possible that a polling cycle is already running), but we also can't throttle, as we can't afford to "drop" these requests, so we'll have to buffer these.
+However, besides above operations `runSoon` can be used to run a task.
+`runSoon` updates a tasks `runAt` and `scheduledAt` properties with current date-time stamp.
+So the task would be picked up at the next TaskManager polling cycle by one of the Kibana instances that has capacity.
 
-We now want to respond to all three of these push events, but we still need to balance against our worker capacity, so if there are too many requests buffered, we only want to `take` as many requests as we have capacity to handle.
-Luckily, `Polling Interval` and `Task Scheduled` simply denote a request to "poll for work as soon as possible", unlike `Run Task Now` which also means "poll for these specific tasks", so our worker capacity only needs to be applied to `Run Task Now`.
+We now want to respond to all three of these events, but we still need to balance against our worker capacity, so if there are too many requests buffered, we only want to `take` as many requests as we have capacity to handle.
+Luckily, `Polling Interval` and `Task Scheduled` simply denote a request to "poll for work as soon as possible", and `Run Task Soon` simply adds the task to the current buffer.
 
-We achieve this model by buffering requests into a queue using a Set (which removes duplicated). As we don't want an unbounded queue in our system, we have limited the size of this queue (configurable by the `xpack.task_manager.request_capacity` config, defaulting to 1,000 requests) which forces us to throw an error once this cap is reachedand to all subsequent calls to `runNow` until the queue drain bellow the cap.
+We achieve this model by buffering requests into a queue using a Set (which removes duplicated). As we don't want an unbounded queue in our system, we have limited the size of this queue (configurable by the `xpack.task_manager.request_capacity` config, defaulting to 1,000 requests) which forces us to throw an error once this cap is reached until the queue drain bellow the cap.
 
 Our current model, then, is this:
 ```

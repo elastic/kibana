@@ -103,7 +103,7 @@ export function URLSearch({
 
   const [items, setItems] = useState<UrlOption[]>([]);
 
-  const { data, status } = useUrlSearch({ query: searchValue, popoverIsOpen });
+  const { data, loading } = useUrlSearch({ query: searchValue, popoverIsOpen });
 
   useEffect(() => {
     const newItems = formatOptions(
@@ -151,8 +151,6 @@ export function URLSearch({
     setSearchValue(val);
   };
 
-  const isLoading = status !== 'success';
-
   const onApply = () => {
     const { includedItems, excludedItems } = processItems(items);
 
@@ -184,7 +182,7 @@ export function URLSearch({
 
   return (
     <SelectableUrlList
-      loading={isLoading}
+      loading={loading ?? true}
       onInputChange={onInputChange}
       data={{ items, total: data?.total ?? 0 }}
       onSelectionChange={onChange}

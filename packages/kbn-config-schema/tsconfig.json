@@ -4,7 +4,6 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
-    "rootDir": "src",
     "stripInternal": true,
     "types": [
       "jest",
@@ -12,7 +11,6 @@
     ]
   },
   "include": [
-    "types/joi.d.ts",
-    "src/**/*.ts"
+    "**/*.ts"
   ]
 }

@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type {
+  IHttpFetchError,
+  ResponseErrorBody,
+} from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
@@ -22,6 +25,10 @@ export enum FETCH_STATUS {
   FAILURE = 'failure',
   NOT_INITIATED = 'not_initiated',
 }
+
+export const isPending = (fetchStatus: FETCH_STATUS) =>
+  fetchStatus === FETCH_STATUS.LOADING ||
+  fetchStatus === FETCH_STATUS.NOT_INITIATED;
 
 export interface FetcherResult<Data> {
   data?: Data;

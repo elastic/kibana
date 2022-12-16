@@ -17,8 +17,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const retry = getService('retry');
-  const docTable = getService('docTable');
+  const dataGrid = getService('dataGrid');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['context']);
   let expectedRowLength = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
 
@@ -28,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
-        'doc_table:legacy': true,
       });
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID);
     });
@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor(
         `number of rows displayed initially is ${expectedRowLength}`,
         async function () {
-          const rows = await docTable.getRowsText();
+          const rows = await dataGrid.getRowsText();
           return rows.length === expectedRowLength;
         }
       );
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor(
         `number of rows displayed after clicking load more predecessors is ${expectedRowLength}`,
         async function () {
-          const rows = await docTable.getRowsText();
+          const rows = await dataGrid.getRowsText(true);
           return rows.length === expectedRowLength;
         }
       );
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor(
         `number of rows displayed after clicking load more successors is ${expectedRowLength}`,
         async function () {
-          const rows = await docTable.getRowsText();
+          const rows = await dataGrid.getRowsText(true);
           return rows.length === expectedRowLength;
         }
       );
@@ -91,8 +91,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor(
         `number of rows displayed after clicking load more successors is ${expectedRowLength}`,
         async function () {
-          const rows = await docTable.getRowsText();
-          return rows.length === 101;
+          const dataGridWrapper = await testSubjects.find('discoverDocTable');
+          const length = await dataGridWrapper.getAttribute('data-document-number');
+          return Number(length) === 101;
         }
       );
     });

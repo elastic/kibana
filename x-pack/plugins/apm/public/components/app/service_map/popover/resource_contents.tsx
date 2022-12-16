@@ -12,11 +12,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { NodeDataDefinition } from 'cytoscape';
 import type { ContentsProps } from '.';
-import {
-  SPAN_SUBTYPE,
-  SPAN_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { SPAN_SUBTYPE, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 
 const ItemRow = euiStyled.div`
   line-height: 2;
@@ -28,7 +26,8 @@ const SubduedDescriptionListTitle = euiStyled(EuiDescriptionListTitle)`
   }
 `;
 
-export function ResourceContents({ nodeData }: ContentsProps) {
+export function ResourceContents({ elementData }: ContentsProps) {
+  const nodeData = elementData as NodeDataDefinition;
   const subtype = nodeData[SPAN_SUBTYPE];
   const type = nodeData[SPAN_TYPE];
 

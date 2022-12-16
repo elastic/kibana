@@ -3,41 +3,21 @@
     "cluster_uuid": "6d-9tDFTRe-qT5GoBytdlQ",
     "cluster_name": "clustertwo",
     "version": "7.0.0-alpha1",
-    "license": {
-      "status": "active",
-      "type": "basic",
-      "expiry_date_in_millis": 1914278399999
-    },
+    "license": { "status": "active", "type": "basic", "expiry_date_in_millis": 1914278399999 },
     "elasticsearch": {
       "cluster_stats": {
         "indices": {
           "count": 1,
-          "docs": {
-            "deleted": 0,
-            "count": 8
-          },
-          "shards": {
-            "total": 1,
-            "primaries": 1
-          },
-          "store": {
-            "size_in_bytes": 34095
-          }
+          "docs": { "deleted": 0, "count": 8 },
+          "shards": { "total": 1, "primaries": 1 },
+          "store": { "size_in_bytes": 34095 }
         },
         "nodes": {
-          "fs": {
-            "total_in_bytes": 499065712640,
-            "available_in_bytes": 200403197952
-          },
-          "count": {
-            "total": 1
-          },
+          "fs": { "total_in_bytes": 499065712640, "available_in_bytes": 200403197952 },
+          "count": { "total": 1 },
           "jvm": {
             "max_uptime_in_millis": 701043,
-            "mem": {
-              "heap_max_in_bytes": 628555776,
-              "heap_used_in_bytes": 204299464
-            }
+            "mem": { "heap_max_in_bytes": 628555776, "heap_used_in_bytes": 204299464 }
           }
         },
         "status": "green"
@@ -51,39 +31,27 @@
       "avg_memory_used": 0,
       "max_uptime": 0,
       "pipeline_count": 0,
-      "queue_types": {
-        "memory": 0,
-        "persisted": 0
-      },
+      "queue_types": { "memory": 0, "persisted": 0 },
       "versions": []
     },
     "kibana": {
       "status": null,
+      "some_status_is_stale": true,
       "requests_total": 0,
       "concurrent_connections": 0,
       "response_time_max": 0,
       "memory_size": 0,
       "memory_limit": 0,
-      "count": 0
+      "count": 0,
+      "rules": { "cluster": null, "instance": null }
     },
-    "beats": {
-      "totalEvents": 0,
-      "bytesSent": 0,
-      "beats": {
-        "total": 0,
-        "types": []
-      }
-    },
+    "beats": { "totalEvents": 0, "bytesSent": 0, "beats": { "total": 0, "types": [] } },
     "apm": {
       "totalEvents": 0,
       "memRss": 0,
-      "apms": {
-        "total": 0
-      },
+      "apms": { "total": 0 },
       "versions": [],
-      "config": {
-        "container": false
-      }
+      "config": { "container": false }
     },
     "enterpriseSearch": {
       "clusterUuid": "6d-9tDFTRe-qT5GoBytdlQ",
@@ -99,12 +67,7 @@
         "versions": []
       }
     },
-    "alerts": {
-      "list": {},
-      "alertsMeta": {
-        "enabled": true
-      }
-    },
+    "alerts": { "list": {}, "alertsMeta": { "enabled": true } },
     "isPrimary": false,
     "status": "green",
     "isCcrEnabled": true
@@ -114,41 +77,21 @@
     "cluster_uuid": "lOF8kofiS_2DX58o9mXJ1Q",
     "cluster_name": "monitoring-one",
     "version": "7.0.0-alpha1",
-    "license": {
-      "status": "active",
-      "type": "trial",
-      "expiry_date_in_millis": 1505426308997
-    },
+    "license": { "status": "active", "type": "trial", "expiry_date_in_millis": 1505426308997 },
     "elasticsearch": {
       "cluster_stats": {
         "indices": {
           "count": 8,
-          "docs": {
-            "deleted": 69,
-            "count": 3997
-          },
-          "shards": {
-            "total": 8,
-            "primaries": 8
-          },
-          "store": {
-            "size_in_bytes": 2647163
-          }
+          "docs": { "deleted": 69, "count": 3997 },
+          "shards": { "total": 8, "primaries": 8 },
+          "store": { "size_in_bytes": 2647163 }
         },
         "nodes": {
-          "fs": {
-            "total_in_bytes": 499065712640,
-            "available_in_bytes": 200403648512
-          },
-          "count": {
-            "total": 1
-          },
+          "fs": { "total_in_bytes": 499065712640, "available_in_bytes": 200403648512 },
+          "count": { "total": 1 },
           "jvm": {
             "max_uptime_in_millis": 761002,
-            "mem": {
-              "heap_max_in_bytes": 628555776,
-              "heap_used_in_bytes": 133041176
-            }
+            "mem": { "heap_max_in_bytes": 628555776, "heap_used_in_bytes": 133041176 }
           }
         },
         "status": "yellow"
@@ -162,39 +105,27 @@
       "avg_memory_used": 0,
       "max_uptime": 0,
       "pipeline_count": 0,
-      "queue_types": {
-        "memory": 0,
-        "persisted": 0
-      },
+      "queue_types": { "memory": 0, "persisted": 0 },
       "versions": []
     },
     "kibana": {
       "status": null,
+      "some_status_is_stale": true,
       "requests_total": 0,
       "concurrent_connections": 0,
       "response_time_max": 0,
       "memory_size": 0,
       "memory_limit": 0,
-      "count": 0
+      "count": 0,
+      "rules": { "cluster": null, "instance": null }
     },
-    "beats": {
-      "totalEvents": 0,
-      "bytesSent": 0,
-      "beats": {
-        "total": 0,
-        "types": []
-      }
-    },
+    "beats": { "totalEvents": 0, "bytesSent": 0, "beats": { "total": 0, "types": [] } },
     "apm": {
       "totalEvents": 0,
       "memRss": 0,
-      "apms": {
-        "total": 0
-      },
+      "apms": { "total": 0 },
       "versions": [],
-      "config": {
-        "container": false
-      }
+      "config": { "container": false }
     },
     "enterpriseSearch": {
       "clusterUuid": "lOF8kofiS_2DX58o9mXJ1Q",
@@ -210,12 +141,7 @@
         "versions": []
       }
     },
-    "alerts": {
-      "list": {},
-      "alertsMeta": {
-        "enabled": true
-      }
-    },
+    "alerts": { "list": {}, "alertsMeta": { "enabled": true } },
     "isPrimary": false,
     "status": "yellow",
     "isCcrEnabled": true
@@ -225,41 +151,21 @@
     "cluster_uuid": "TkHOX_-1TzWwbROwQJU5IA",
     "cluster_name": "clusterone",
     "version": "7.0.0-alpha1",
-    "license": {
-      "status": "active",
-      "type": "trial",
-      "expiry_date_in_millis": 1505426327135
-    },
+    "license": { "status": "active", "type": "trial", "expiry_date_in_millis": 1505426327135 },
     "elasticsearch": {
       "cluster_stats": {
         "indices": {
           "count": 5,
-          "docs": {
-            "deleted": 0,
-            "count": 150
-          },
-          "shards": {
-            "total": 26,
-            "primaries": 13
-          },
-          "store": {
-            "size_in_bytes": 4838464
-          }
+          "docs": { "deleted": 0, "count": 150 },
+          "shards": { "total": 26, "primaries": 13 },
+          "store": { "size_in_bytes": 4838464 }
         },
         "nodes": {
-          "fs": {
-            "total_in_bytes": 499065712640,
-            "available_in_bytes": 200404209664
-          },
-          "count": {
-            "total": 2
-          },
+          "fs": { "total_in_bytes": 499065712640, "available_in_bytes": 200404209664 },
+          "count": { "total": 2 },
           "jvm": {
             "max_uptime_in_millis": 741786,
-            "mem": {
-              "heap_max_in_bytes": 1257111552,
-              "heap_used_in_bytes": 465621856
-            }
+            "mem": { "heap_max_in_bytes": 1257111552, "heap_used_in_bytes": 465621856 }
           }
         },
         "status": "green"
@@ -273,41 +179,27 @@
       "avg_memory_used": 487782224,
       "max_uptime": 570039,
       "pipeline_count": 1,
-      "queue_types": {
-        "memory": 1,
-        "persisted": 0
-      },
-      "versions": [
-        "7.0.0-alpha1"
-      ]
+      "queue_types": { "memory": 1, "persisted": 0 },
+      "versions": ["7.0.0-alpha1"]
     },
     "kibana": {
       "status": "green",
+      "some_status_is_stale": true,
       "requests_total": 571,
       "concurrent_connections": 307,
       "response_time_max": 1930,
       "memory_size": 231141376,
       "memory_limit": 1501560832,
-      "count": 1
+      "count": 1,
+      "rules": { "cluster": null, "instance": null }
     },
-    "beats": {
-      "totalEvents": 0,
-      "bytesSent": 0,
-      "beats": {
-        "total": 0,
-        "types": []
-      }
-    },
+    "beats": { "totalEvents": 0, "bytesSent": 0, "beats": { "total": 0, "types": [] } },
     "apm": {
       "totalEvents": 0,
       "memRss": 0,
-      "apms": {
-        "total": 0
-      },
+      "apms": { "total": 0 },
       "versions": [],
-      "config": {
-        "container": false
-      }
+      "config": { "container": false }
     },
     "enterpriseSearch": {
       "clusterUuid": "TkHOX_-1TzWwbROwQJU5IA",
@@ -323,12 +215,7 @@
         "versions": []
       }
     },
-    "alerts": {
-      "list": {},
-      "alertsMeta": {
-        "enabled": true
-      }
-    },
+    "alerts": { "list": {}, "alertsMeta": { "enabled": true } },
     "isPrimary": false,
     "status": "green",
     "isCcrEnabled": true

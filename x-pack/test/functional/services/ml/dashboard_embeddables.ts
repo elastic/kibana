@@ -59,7 +59,7 @@ export function MachineLearningDashboardEmbeddablesProvider(
       const subj = 'mlAnomalyChartsInitializerConfirmButton';
       await retry.tryForTime(60 * 1000, async () => {
         await this.assertInitializerConfirmButtonEnabled();
-        await testSubjects.clickWhenNotDisabled(subj);
+        await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
         await this.assertAnomalyChartsEmbeddableInitializerNotExists();
       });
     },
@@ -117,7 +117,9 @@ export function MachineLearningDashboardEmbeddablesProvider(
     async selectDiscoverIndexPattern(indexPattern: string) {
       await retry.tryForTime(2 * 1000, async () => {
         await PageObjects.discover.selectIndexPattern(indexPattern);
-        const indexPatternTitle = await testSubjects.getVisibleText('indexPattern-switch-link');
+        const indexPatternTitle = await testSubjects.getVisibleText(
+          'discover-dataView-switch-link'
+        );
         expect(indexPatternTitle).to.be(indexPattern);
       });
     },

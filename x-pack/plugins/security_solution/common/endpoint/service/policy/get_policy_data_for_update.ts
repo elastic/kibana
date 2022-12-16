@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { MaybeImmutable, NewPolicyData, PolicyData } from '../../types';
+import type { MaybeImmutable, NewPolicyData, PolicyData } from '../../types';
 
 /**
  * Given a Policy Data (package policy) object, return back a new object with only the field

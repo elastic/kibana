@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldsType } from '../types';
+import type { FieldsType } from '../types';
 
 /**
  * Returns true if we are a multiField when passed in a fields entry and a fields key,

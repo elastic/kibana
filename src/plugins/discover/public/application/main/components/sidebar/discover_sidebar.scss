@@ -2,13 +2,13 @@
   overflow: hidden;
   margin: 0 !important;
   flex-grow: 1;
-  padding-left: $euiSize;
+  padding: $euiSizeS 0 $euiSizeS $euiSizeS;
   width: $euiSize * 19;
   height: 100%;
 
   @include euiBreakpoint('xs', 's') {
     width: 100%;
-    padding: $euiSize $euiSize 0 $euiSize;
+    padding: $euiSize;
     background-color: $euiPageBackgroundColor;
   }
 }
@@ -19,7 +19,7 @@
 
 .dscSidebar__mobile {
   width: 100%;
-  padding: $euiSize $euiSize 0;
+  padding: $euiSizeS $euiSizeS 0;
 
   .dscSidebar__mobileBadge {
     margin-left: $euiSizeS;
@@ -29,20 +29,6 @@
 
 .dscSidebar__flyoutHeader {
   align-items: center;
-}
-
-.dscFieldList {
-  padding: 0 $euiSizeXS $euiSizeXS;
-}
-
-.dscFieldListHeader {
-  padding: $euiSizeS $euiSizeS 0 $euiSizeS;
-  background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
-}
-
-.dscFieldList--popular {
-  padding-bottom: $euiSizeS;
-  background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
 }
 
 .dscSidebarItem {
@@ -69,8 +55,4 @@
   &:focus {
     opacity: 1; /* 2 */
   }
-}
-
-.dscSidebar__indexPatternSwitcher {
-  min-width: 0;
 }

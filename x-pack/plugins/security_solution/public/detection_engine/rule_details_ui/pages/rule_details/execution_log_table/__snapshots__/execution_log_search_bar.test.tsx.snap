@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExecutionLogSearchBar snapshots renders correctly against snapshot 1`] = `
+<EuiFlexGroup
+  gutterSize="s"
+>
+  <EuiFlexItem
+    grow={true}
+  />
+  <EuiFlexItem
+    grow={false}
+  >
+    <ExecutionStatusFilter
+      items={
+        Array [
+          "succeeded",
+          "failed",
+          "partial failure",
+        ]
+      }
+      onChange={[Function]}
+      selectedItems={Array []}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

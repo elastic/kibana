@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
+import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
 
 export type ConditionEntriesMap<T> = {
   [K in AllConditionEntryFields]?: T;

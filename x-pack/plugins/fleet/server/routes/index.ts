@@ -5,14 +5,48 @@
  * 2.0.
  */
 
-export { registerRoutes as registerAgentPolicyRoutes } from './agent_policy';
-export { registerRoutes as registerPackagePolicyRoutes } from './package_policy';
-export { registerRoutes as registerDataStreamRoutes } from './data_streams';
-export { registerRoutes as registerEPMRoutes } from './epm';
-export { registerRoutes as registerSetupRoutes } from './setup';
-export { registerAPIRoutes as registerAgentAPIRoutes } from './agent';
-export { registerRoutes as registerEnrollmentApiKeyRoutes } from './enrollment_api_key';
-export { registerRoutes as registerOutputRoutes } from './output';
-export { registerRoutes as registerSettingsRoutes } from './settings';
-export { registerRoutes as registerAppRoutes } from './app';
-export { registerRoutes as registerPreconfigurationRoutes } from './preconfiguration';
+import type { FleetAuthzRouter } from '../services/security';
+
+import type { FleetConfigType } from '../config';
+
+import { registerRoutes as registerAgentPolicyRoutes } from './agent_policy';
+import { registerRoutes as registerPackagePolicyRoutes } from './package_policy';
+import { registerRoutes as registerDataStreamRoutes } from './data_streams';
+import { registerRoutes as registerEPMRoutes } from './epm';
+import { registerRoutes as registerSetupRoutes } from './setup';
+import { registerAPIRoutes as registerAgentAPIRoutes } from './agent';
+import { registerRoutes as registerEnrollmentApiKeyRoutes } from './enrollment_api_key';
+import { registerRoutes as registerOutputRoutes } from './output';
+import { registerRoutes as registerSettingsRoutes } from './settings';
+import { registerRoutes as registerAppRoutes } from './app';
+import { registerRoutes as registerPreconfigurationRoutes } from './preconfiguration';
+import { registerRoutes as registerDownloadSourcesRoutes } from './download_source';
+import { registerRoutes as registerHealthCheckRoutes } from './health_check';
+import { registerRoutes as registerFleetServerHostRoutes } from './fleet_server_policy_config';
+import { registerRoutes as registerFleetProxiesRoutes } from './fleet_proxies';
+
+export async function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
+  // Always register app routes for permissions checking
+  registerAppRoutes(fleetAuthzRouter);
+
+  // The upload package route is only authorized for the superuser
+  registerEPMRoutes(fleetAuthzRouter);
+
+  registerSetupRoutes(fleetAuthzRouter, config);
+  registerAgentPolicyRoutes(fleetAuthzRouter);
+  registerPackagePolicyRoutes(fleetAuthzRouter);
+  registerOutputRoutes(fleetAuthzRouter);
+  registerSettingsRoutes(fleetAuthzRouter);
+  registerDataStreamRoutes(fleetAuthzRouter);
+  registerPreconfigurationRoutes(fleetAuthzRouter);
+  registerFleetServerHostRoutes(fleetAuthzRouter);
+  registerFleetProxiesRoutes(fleetAuthzRouter);
+  registerDownloadSourcesRoutes(fleetAuthzRouter);
+  registerHealthCheckRoutes(fleetAuthzRouter);
+
+  // Conditional config routes
+  if (config.agents.enabled) {
+    registerAgentAPIRoutes(fleetAuthzRouter, config);
+    registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
+  }
+}

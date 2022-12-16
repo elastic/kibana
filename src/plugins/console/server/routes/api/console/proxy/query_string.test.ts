@@ -43,7 +43,7 @@ describe('Console Proxy Route', () => {
           await request('GET', 'http://evil.com/test');
           expect(proxyRequestMock.mock.calls.length).toBe(1);
           const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
-          expect(args.uri.href).toBe('http://localhost:9200/http://evil.com/test?pretty=true');
+          expect(args.uri.href).toBe('http://localhost:9200/http%3A//evil.com/test?pretty=true');
         });
       });
       describe('starts with a slash', () => {

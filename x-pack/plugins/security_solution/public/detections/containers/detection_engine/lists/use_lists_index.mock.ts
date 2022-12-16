@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseListsIndexReturn } from './use_lists_index';
+import type { UseListsIndexReturn } from './use_lists_index';
 
 export const getUseListsIndexMock: () => jest.Mocked<UseListsIndexReturn> = () => ({
   createIndex: jest.fn(),

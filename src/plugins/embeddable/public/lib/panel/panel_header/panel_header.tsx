@@ -30,7 +30,10 @@ export interface PanelHeaderProps {
   index?: number;
   isViewMode: boolean;
   hidePanelTitle: boolean;
-  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
+  getActionContextMenuPanel: () => Promise<{
+    panels: EuiContextMenuPanelDescriptor[];
+    actions: Action[];
+  }>;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
   notifications: Array<Action<EmbeddableContext>>;
@@ -154,7 +157,7 @@ export function PanelHeader({
 
   if (!showPanelBar) {
     return (
-      <div data-test-subj="dashboardPanelTitle__wrapper" className={classes}>
+      <div className={classes}>
         <PanelOptionsMenu
           getActionContextMenuPanel={getActionContextMenuPanel}
           isViewMode={isViewMode}
@@ -213,26 +216,26 @@ export function PanelHeader({
     );
   };
 
+  const titleClasses = classNames('embPanel__title', { 'embPanel--dragHandle': !isViewMode });
+
   return (
-    <span data-test-subj="dashboardPanelTitle__wrapper">
-      <figcaption
-        className={classes}
-        data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
-      >
-        <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
-          <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
-          {renderTitle()}
-          {renderBadges(badges, embeddable)}
-        </h2>
-        {renderNotifications(notifications, embeddable)}
-        <PanelOptionsMenu
-          isViewMode={isViewMode}
-          getActionContextMenuPanel={getActionContextMenuPanel}
-          closeContextMenu={closeContextMenu}
-          title={title}
-          index={index}
-        />
-      </figcaption>
-    </span>
+    <figcaption
+      className={classes}
+      data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
+    >
+      <h2 data-test-subj="dashboardPanelTitle" className={titleClasses}>
+        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
+        {renderTitle()}
+        {renderBadges(badges, embeddable)}
+      </h2>
+      {renderNotifications(notifications, embeddable)}
+      <PanelOptionsMenu
+        isViewMode={isViewMode}
+        getActionContextMenuPanel={getActionContextMenuPanel}
+        closeContextMenu={closeContextMenu}
+        title={title}
+        index={index}
+      />
+    </figcaption>
   );
 }

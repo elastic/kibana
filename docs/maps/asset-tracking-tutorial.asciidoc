@@ -8,7 +8,7 @@ In this tutorial, you’ll look at live urban transit data from the city of Port
 
 You’ll learn to:
 
-- Use Logstash to ingest the TriMet REST API into Elasticsearch.
+- Use {agent} to ingest the TriMet REST API into {es}.
 - Create a map with layers that visualize asset tracks and last-known locations.
 - Use symbols and colors to style data values and show which direction an asset is heading.
 - Set up tracking containment alerts to monitor moving vehicles.
@@ -23,137 +23,286 @@ image::maps/images/asset-tracking-tutorial/construction_zones.png[]
 
 - If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial]. Download the deployment credentials.
 - Obtain an API key for https://developer.trimet.org/[TriMet web services] at https://developer.trimet.org/appid/registration/.
-- https://www.elastic.co/guide/en/logstash/current/getting-started-with-logstash.html[Install Logstash].
+- {fleet-guide}/fleet-overview.html[Fleet] is enabled on your cluster, and one or more {fleet-guide}/elastic-agent-installation.html[{agent}s] is enrolled.
 
 [float]
 === Part 1: Ingest the Portland bus data
-To get to the fun of visualizing and alerting on Portland buses, you must first create a Logstash pipeline to ingest the TriMet Portland bus data into {es}.
+To get to the fun of visualizing and alerting on Portland buses, you must first add the *Custom API* integration to an Elastic Agent policy to get the TriMet Portland bus data into {es}.
 
 [float]
 ==== Step 1: Set up an Elasticsearch index
 
 . In Kibana, open the main menu, then click *Dev Tools*.
-. In *Console*, create the `tri_met_tracks` index:
+. In *Console*, create the `tri_met_tracks` index lifecyle policy. This policy will keep the events in the hot data phase for 7 days. The data then moves to the warm phase. After 365 days in the warm phase, the data is deleted. 
 +
 [source,js]
 ----------------------------------
-PUT tri_met_tracks
-----------------------------------
-
-. To configure the `tri_met_tracks` index mappings, run:
-+
-[source,js]
-----------------------------------
-PUT tri_met_tracks/_mapping
+PUT _ilm/policy/tri_met_tracks
 {
-  "properties": {
-    "in_congestion": {
-      "type": "boolean"
-    },
-    "location": {
-      "type": "geo_point"
-    },
-    "route": {
-      "type": "keyword"
-    },
-    "time": {
-      "type": "date",
-      "format": "epoch_millis"
-    },
-    "type": {
-      "type": "keyword"
-    },
-    "vehicle_id": {
-      "type": "keyword"
+  "policy": {
+    "phases": {
+      "hot": {
+        "min_age": "0ms",
+        "actions": {
+          "rollover": {
+            "max_primary_shard_size": "50gb",
+            "max_age": "7d"
+          },
+          "set_priority": {
+            "priority": 100
+          }
+        }
+      },
+      "warm": {
+        "min_age": "0d",
+        "actions": {
+          "set_priority": {
+            "priority": 50
+          }
+        }
+      },
+      "delete": {
+        "min_age": "365d",
+        "actions": {
+          "delete": {
+            "delete_searchable_snapshot": true
+          }
+        }
+      }
     }
   }
+}
+----------------------------------
+. In *Console*, create the `tri_met_tracks` index template, which is configured to use datastreams:
++
+[source,js]
+----------------------------------
+PUT _index_template/tri_met_tracks
+{
+  "template": {
+    "settings": {
+      "index": {
+        "lifecycle": {
+          "name": "tri_met_tracks"
+        }
+      }
+    },
+    "mappings": {
+      "_routing": {
+        "required": false
+      },
+      "numeric_detection": false,
+      "dynamic_date_formats": [
+        "strict_date_optional_time",
+        "yyyy/MM/dd HH:mm:ss Z||yyyy/MM/dd Z"
+      ],
+      "dynamic": true,
+      "_source": {
+        "excludes": [],
+        "includes": [],
+        "enabled": true
+      },
+      "dynamic_templates": [],
+      "date_detection": true,
+      "properties": {
+        "trimet": {
+          "type": "object",
+          "properties": {
+            "expires": {
+              "type": "date"
+            },
+            "signMessage": {
+              "type": "text"
+            },
+            "serviceDate": {
+              "type": "date"
+            },
+            "loadPercentage": {
+              "type": "float"
+            },
+            "nextStopSeq": {
+              "type": "integer"
+            },
+            "source": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "blockID": {
+              "type": "integer"
+            },
+            "signMessageLong": {
+              "type": "text"
+            },
+            "lastLocID": {
+              "type": "keyword"
+            },
+            "nextLocID": {
+              "type": "keyword"
+            },
+            "locationInScheduleDay": {
+              "type": "integer"
+            },
+            "newTrip": {
+              "type": "boolean"
+            },
+            "direction": {
+              "type": "integer"
+            },
+            "inCongestion": {
+              "type": "boolean"
+            },
+            "routeNumber": {
+              "type": "integer"
+            },
+            "bearing": {
+              "type": "integer"
+            },
+            "garage": {
+              "type": "keyword"
+            },
+            "tripID": {
+              "type": "keyword"
+            },
+            "delay": {
+              "type": "integer"
+            },
+            "extraBlockID": {
+              "type": "keyword"
+            },
+            "messageCode": {
+              "type": "integer"
+            },
+            "lastStopSeq": {
+              "type": "integer"
+            },
+            "location": {
+              "type": "geo_point"
+            },
+            "time": {
+              "index": true,
+              "ignore_malformed": false,
+              "store": false,
+              "type": "date",
+              "doc_values": true
+            },
+            "vehicleID": {
+              "type": "keyword"
+            },
+            "offRoute": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  },
+  "index_patterns": [
+    "tri_met_tracks*"
+  ],
+  "data_stream": {
+    "hidden": false,
+    "allow_custom_routing": false
+  },
+  "composed_of": []
+}
+----------------------------------
+. In **Console**, add the `tri_met_track` ingest pipeline. 
++
+[source,js]
+----------------------------------
+PUT _ingest/pipeline/tri_met_tracks
+{
+  "processors": [
+    {
+      "set": {
+        "field": "trimet.inCongestion",
+        "value": "false",
+        "if": "ctx?.trimet?.inCongestion == null"
+      }
+    },
+    {
+      "convert": {
+        "field": "trimet.bearing",
+        "type": "float"
+      }
+    },
+    {
+      "convert": {
+        "field": "trimet.inCongestion",
+        "type": "boolean"
+      }
+    },
+    {
+      "script": {
+        "source": "ctx['trimet']['location'] = ctx['trimet']['latitude'] + \",\" + ctx['trimet']['longitude']"
+      }
+    },
+    {
+      "script": {
+        "source": "ctx['_id'] = ctx['trimet']['vehicleID'] + \"_\" + ctx['trimet']['time']",
+        "description": "Generate documentID"
+      }
+    },
+    {
+      "remove": {
+        "field": [
+          "message",
+          "input",
+          "agent",
+          "ecs",
+          "host",
+          "event",
+          "trimet.longitude",
+          "trimet.latitude"
+        ]
+      }
+    },
+    {
+      "set": {
+        "field": "_index",
+        "value": "tri_met_tracks"
+      }
+    }
+  ]
 }
 ----------------------------------
 
 [float]
-==== Step 2: Start Logstash
+==== Step 2: Configure {agent}
 
-. In your `logstash/config` folder, create the file `trimet-pipeline.conf`.
-. Copy the pipeline script into your `trimet-pipeline.conf` file.
+. From the {kib} main menu, click *Fleet*, then the *Agent policies* tab.
+
+. Click the name of the agent policy where you want to add the *Custom API* integration. The configuration changes you make only apply to the policy you select.
+
+. Click the name of the *Custom API* integration, or add the integration if the agent policy does not yet have it.
+
+. From the *Edit Custom API integration* page, expand the *Change defaults* section.
+
+. Set the *Dataset name* to *httpjson.trimet*.
+
+. Set the *Ingest Pipeline* to *tri_met_pipeline*.
+
+. Set the *Request URL* to *https://developer.trimet.org/ws/v2/vehicles?appID=<tri_met_app_id>*.
+
+. Set *Response Split* to *target: body.resultSet.vehicle*.
+
+. At the bottom of the configuration, expand *Advanced options*.
+
+. Set *Processors* to:
 +
 [source,yaml]
 ----------------------------------
-input {
-  http_poller {
-    urls => {
-      trimet => "https://developer.trimet.org/ws/v2/vehicles?appID=<tri_met_app_id>"
-    }
-    request_timeout => 60
-    schedule => { cron => "* * * * * UTC"}
-    codec => "json"
-  }
-}
-
-filter {
-  split {
-    field => "[resultSet][vehicle]"
-  }
-
-  if ![resultSet][vehicle][inCongestion] {
-    mutate {
-      update => {
-        "[resultSet][vehicle][inCongestion]" => "false"
-      }
-    }
-  }
-
-  mutate {
-    add_field => {
-      "bearing" => "%{[resultSet][vehicle][bearing]}"
-      "in_congestion" => "%{[resultSet][vehicle][inCongestion]}"
-      "location" => "%{[resultSet][vehicle][latitude]},%{[resultSet][vehicle][longitude]}"
-      "route" => "%{[resultSet][vehicle][routeNumber]}"
-      "time" => "%{[resultSet][vehicle][time]}"
-      "type" => "%{[resultSet][vehicle][type]}"
-      "vehicle_id" => "%{[resultSet][vehicle][vehicleID]}"
-    }
-    remove_field => [ "resultSet", "@version", "@timestamp" ]
-  }
-
-  mutate {
-    convert => {
-      "bearing" => "float"
-  "in_congestion" => "boolean"
-      "time" => "integer"
-    }
-  }
-}
-
-output {
-  stdout {
-    codec => rubydebug
-  }
-
-  elasticsearch {
-    cloud_auth => "<username:password>"
-    cloud_id => "<cloud_id>"
-    index => "tri_met_tracks"
-    document_id => "%{[vehicle_id]}_%{[time]}"
-  }
-}
+- decode_json_fields:
+    fields: ["message"]
+    target: "trimet"
 ----------------------------------
 
-. Replace `<tri_met_app_id>` with your TriMet application id.
-. Replace `<username:password>` with your Elastic Cloud deployment credentials.
-. Replace `<cloud_id>` with your {ece}/ece-cloud-id.html[elastic cloud id].
-. Open a terminal window, and then navigate to the Logstash folder.
-. In your `logstash` folder, run Logstash with the TriMet pipeline:
-+
-[source,bash]
-----------------------------------
-bin/logstash -f config/trimet-pipeline.conf
-----------------------------------
+. Leave everything else as defaults.
 
-. Wait for Logstash to initialize and confirm data is flowing. You should see messages similar to this:
-+
-[role="screenshot"]
-image::maps/images/asset-tracking-tutorial/logstash_output.png[]
-. Leave the terminal window open and Logstash running throughout this tutorial.
+. Click *Save integration* to deploy the configuration to any {agent} with the policy assigned.
+
 
 [float]
 ==== Step 3: Create a data view for the tri_met_tracks {es} index
@@ -161,14 +310,14 @@ image::maps/images/asset-tracking-tutorial/logstash_output.png[]
 . In {kib}, open the main menu, and click *Stack Management > Data Views*.
 . Click *Create data view*.
 . Give the data view a name: *tri_met_tracks**.
-. Click *Next step*.
-. Set the *Time field* to *time*.
-. Click *Create data view*.
+. Set the index pattern as: *tri_met_tracks**.
+. Set the *Timestamp field* to *trimet.time*.
+. Click *Save data view to Kibana*.
 
 {kib} shows the fields in your data view.
 
 [role="screenshot"]
-image::maps/images/asset-tracking-tutorial/index_pattern.png[]
+image::maps/images/asset-tracking-tutorial/data_view.png[]
 
 [float]
 ==== Step 4: Explore the Portland bus data
@@ -176,14 +325,14 @@ image::maps/images/asset-tracking-tutorial/index_pattern.png[]
 . Open the main menu, and click *Discover*.
 . Set the data view to *tri_met_tracks**.
 . Open the <<set-time-filter, time filter>>, and set the time range to the last 15 minutes.
-. Expand a document and explore some of the fields that you will use later in this tutorial: `bearing`, `in_congestion`, `location`, and `vehicle_id`.
+. Expand a document and explore some of the fields that you will use later in this tutorial: `trimet.bearing`, `trimet.inCongestion`, `trimet.location`, and `trimet.vehicleID`.
 
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/discover.png[]
 
 [float]
 === Part 2: Build an operational map
-It's hard to get an overview of Portland buses by looking at individual events. Let's create a map to show the bus routes and current location for each bus, along with the direction the buses are headed.
+It's hard to get an overview of Portland buses by looking at individual events. Let's create a map to show the bus routes and current location for each bus, along with the direction the buses are heading.
 
 [float]
 ==== Step 1: Create your map
@@ -204,8 +353,8 @@ Add a layer to show the bus routes for the last 15 minutes.
 . Click *Tracks*.
 . Select the *tri_met_tracks** data view.
 . Define the tracks:
-.. Set *Entity* to *vehicle_id*.
-.. Set *Sort* to *time*.
+.. Set *Entity* to *trimet.vehicleID*.
+.. Set *Sort* to *trimet.time*.
 . Click *Add layer*.
 . In Layer settings:
 .. Set *Name* to *Buses*.
@@ -227,22 +376,22 @@ Add a layer that uses attributes in the data to set the style and orientation of
 . Click *Add layer*, and then select *Top Hits per entity*.
 . Select the *tri_met_tracks** data view.
 . To display the most recent location per bus:
-.. Set *Entity* to *vehicle_id*.
+.. Set *Entity* to *trimet.vehicleID*.
 .. Set *Documents per entity* to 1.
-.. Set *Sort field* to *time*.
+.. Set *Sort field* to *trimet.time*.
 .. Set *Sort order* to *descending*.
 . Click *Add layer*.
 . Scroll to *Layer Style*.
 .. Set *Symbol type* to *icon*.
 .. Set *Icon* to *arrow-es*.
 .. Set the *Fill color*:
-... Select *By value* styling, and set the field to *in_congestion*.
+... Select *By value* styling, and set the field to *trimet.inCongestion*.
 ... Use a *Custom color palette*.
 ... Set the *Other* color to black.
 ... Add a green class for *false*, meaning the bus is not in traffic.
 ... Add a red class for *true*, meaning the bus is in congestion.
 .. Set *Border width* to 0.
-.. Change *Symbol orientation* to use *By value* and the *bearing* field.
+.. Change *Symbol orientation* to use *By value* and the *trimet.bearing* field.
 +
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/top_hits_layer_style.png[]
@@ -265,7 +414,7 @@ Add a layer for construction zones, which you will draw on the map. The construc
 
 . Click *Add layer*.
 . Click *Create index*.
-. Set *Index name* to *construction_zones*.
+. Set *Index name* to *trimet_construction_zones*.
 . Click *Create index*.
 . Draw 2 or 3 construction zones on your map:
 .. In the toolbar on left side of the map, select the bounding box icon image:maps/images/asset-tracking-tutorial/bounding_box_icon.png[bounding box icon].
@@ -293,7 +442,7 @@ image::maps/images/asset-tracking-tutorial/construction_zones.png[]
 
 Create a new alert by defining a rule and a connector. The rule includes the conditions that will trigger the alert, and the connector defines what action takes place once the alert is triggered. In this case, each alert will log a message to the Kibana log.
 
-. Open *Stack Management*, and then click *Rules and Connectors*.
+. Open *{stack-manage-app}*, and then click *{rules-ui}*.
 . Click *Create rule*.
 . Name the rule *Bus Alerts*.
 . Set *Check every* to *5 seconds*.
@@ -304,8 +453,8 @@ image::maps/images/asset-tracking-tutorial/rule_configuration.png[]
 . Select the *Tracking containment* rule type.
 . Set *Select entity*:
 .. Set *INDEX* to *tri_met_tracks**.
-.. Set *BY* to *vehicle_id*.
-. Set *Select boundary* *INDEX* to *construction_zones*.
+.. Set *BY* to *trimet.vehicleID*.
+. Set *Select boundary* *INDEX* to *trimet_construction_zones*.
 +
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/tracking_containment_configuration.png[]
@@ -332,9 +481,6 @@ image::maps/images/asset-tracking-tutorial/tracking_containment_configuration.pn
 
 . Click *Save*.
 
-The *Bus Alert connector* is added to the *Rules and Connectors* page. For more information on common connectors, refer to the <<slack-action-type, Slack>> and <<email-action-type, Email>> connectors.
-
-[role="screenshot"]
-image::maps/images/asset-tracking-tutorial/rules_and_connectors.png[]
+The *Bus Alert connector* is added to the *{connectors-ui}* page. For more information on common connectors, refer to the <<slack-action-type, Slack>> and <<email-action-type,Email>> connectors.
 
 Congratulations! You have completed the tutorial and have the recipe for tracking assets. You can now try replicating this same analysis with your own data.

@@ -17,6 +17,7 @@ import {
   createPhpAgentInstructions,
   createRailsAgentInstructions,
   createRackAgentInstructions,
+  createOpenTelemetryAgentInstructions,
 } from '../../../../common/tutorial/instructions/apm_agent_instructions';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 // TODO: Uncomment once https://github.com/elastic/beats/issues/29631 has been closed
@@ -111,5 +112,11 @@ export const ApmAgentInstructionsMappings: Array<{
     title: 'PHP',
     variantId: 'php',
     createAgentInstructions: createPhpAgentInstructions,
+  },
+  {
+    agentName: 'otlp',
+    title: 'OpenTelemetry',
+    variantId: 'openTelemetry',
+    createAgentInstructions: createOpenTelemetryAgentInstructions,
   },
 ];

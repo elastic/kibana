@@ -8,15 +8,15 @@ import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } fr
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { InputsModelId } from '../../store/inputs/constants';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { ModalInspectQuery } from '../inspect/modal';
 
 import { useInspect } from '../inspect/use_inspect';
 import { useLensAttributes } from './use_lens_attributes';
 import { useAddToExistingCase } from './use_add_to_existing_case';
-import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { useAddToNewCase } from './use_add_to_new_case';
-import { VisualizationActionsProps } from './types';
+import type { VisualizationActionsProps } from './types';
 import {
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
@@ -30,9 +30,10 @@ const Wrapper = styled.div`
     position: absolute;
     top: 0;
     right: 0;
+    z-index: 1;
   }
   &.histogram-viz-actions {
-    padding: ${({ theme }) => theme.eui.paddingSizes.s};
+    padding: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 
@@ -41,7 +42,7 @@ export const HISTOGRAM_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
 const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   className,
   getLensAttributes,
-  inputId = 'global',
+  inputId = InputsModelId.global,
   inspectIndex = 0,
   isInspectButtonDisabled,
   isMultipleQuery,
@@ -53,8 +54,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   stackByField,
 }) => {
   const { lens } = useKibana().services;
-  const userPermissions = useGetUserCasesPermissions();
-  const userCanCrud = userPermissions?.crud ?? false;
 
   const { canUseEditor, navigateToPrefilledEditor } = lens;
   const [isPopoverOpen, setPopover] = useState(false);
@@ -81,14 +80,12 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
       onAddToCaseClicked: closePopover,
       lensAttributes: attributes,
       timeRange: timerange,
-      userCanCrud,
     });
 
   const { onAddToNewCaseClicked, disabled: isAddToNewCaseDisabled } = useAddToNewCase({
     onClick: closePopover,
     timeRange: timerange,
     lensAttributes: attributes,
-    userCanCrud,
   });
 
   const onOpenInLens = useCallback(() => {

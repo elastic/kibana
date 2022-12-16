@@ -141,6 +141,8 @@ describe('Security Plugin', () => {
               "grantAsInternalUser": [Function],
               "invalidate": [Function],
               "invalidateAsInternalUser": [Function],
+              "update": [Function],
+              "validate": [Function],
             },
             "getCurrentUser": [Function],
           },
@@ -177,6 +179,11 @@ describe('Security Plugin', () => {
             "mode": Object {
               "useRbacForRequest": [Function],
             },
+          },
+          "userProfiles": Object {
+            "bulkGet": [Function],
+            "getCurrent": [Function],
+            "suggest": [Function],
           },
         }
       `);

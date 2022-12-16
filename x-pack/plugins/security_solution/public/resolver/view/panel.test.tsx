@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
+import type { History as HistoryPackageHistoryInterface } from 'history';
+import { createMemoryHistory } from 'history';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
@@ -38,6 +39,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
     ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
     ['process.executable', 'executable'],
     ['process.pid', '0'],
+    ['process.entity_id', 'origin'],
     ['user.name', 'user.name'],
     ['user.domain', 'user.domain'],
     ['process.parent.pid', '0'],
@@ -185,6 +187,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         ['@timestamp', 'Sep 23, 2020 @ 08:25:32.317'],
         ['process.executable', 'executable'],
         ['process.pid', '1'],
+        ['process.entity_id', 'firstChild'],
         ['user.name', 'user.name'],
         ['user.domain', 'user.domain'],
         ['process.parent.pid', '0'],

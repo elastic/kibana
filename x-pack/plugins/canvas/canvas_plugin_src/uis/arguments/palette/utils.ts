@@ -6,7 +6,7 @@
  */
 
 import { getType } from '@kbn/interpreter';
-import { ExpressionAstArgument, ExpressionAstFunction } from '@kbn/expressions-plugin';
+import { ExpressionAstArgument, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { identifyPalette, ColorPalette, identifyPartialPalette } from '../../../../common/lib';
 import { ArgumentStrings } from '../../../../i18n';
 

@@ -1,0 +1,138 @@
+{
+  "id": "@kbn/shared-ux-page-solution-nav",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-solution-nav",
+        "id": "def-common.SolutionNav",
+        "type": "Function",
+        "tags": [],
+        "label": "SolutionNav",
+        "description": [
+          "\nA wrapper around `EuiSideNav` that includes the appropriate title with optional solution logo."
+        ],
+        "signature": [
+          "({ children, headingProps, icon, isOpenOnDesktop, items, mobileBreakpoints, closeFlyoutButtonPosition, name, onCollapse, canBeCollapsed, ...rest }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/shared-ux-page-solution-nav",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPageSolutionNavPluginApi",
+            "section": "def-common.SolutionNavProps",
+            "text": "SolutionNavProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/solution_nav/src/solution_nav.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-solution-nav",
+            "id": "def-common.SolutionNav.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  headingProps,\n  icon,\n  isOpenOnDesktop = false,\n  items,\n  mobileBreakpoints = ['xs', 's'],\n  closeFlyoutButtonPosition = 'outside',\n  name,\n  onCollapse,\n  canBeCollapsed = true,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/shared-ux-page-solution-nav",
+                "scope": "common",
+                "docId": "kibKbnSharedUxPageSolutionNavPluginApi",
+                "section": "def-common.SolutionNavProps",
+                "text": "SolutionNavProps"
+              },
+              ">"
+            ],
+            "path": "packages/shared-ux/page/solution_nav/src/solution_nav.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-solution-nav",
+        "id": "def-common.withSolutionNav",
+        "type": "Function",
+        "tags": [],
+        "label": "withSolutionNav",
+        "description": [],
+        "signature": [
+          "<P extends ",
+          "TemplateProps",
+          ">(WrappedComponent: React.ComponentType<P>) => { (props: Props<P>): JSX.Element; displayName: string; }"
+        ],
+        "path": "packages/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-solution-nav",
+            "id": "def-common.withSolutionNav.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "WrappedComponent",
+            "description": [],
+            "signature": [
+              "React.ComponentType<P>"
+            ],
+            "path": "packages/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-solution-nav",
+        "id": "def-common.SolutionNavProps",
+        "type": "Type",
+        "tags": [],
+        "label": "SolutionNavProps",
+        "description": [
+          "\nProps for the `SolutionNav` component."
+        ],
+        "signature": [
+          "Omit<",
+          "EuiSideNavProps",
+          "<{}>, \"children\" | \"heading\" | \"items\"> & { name: string; icon?: ",
+          "IconType",
+          " | undefined; items?: ",
+          "EuiSideNavItemType",
+          "<{}>[] | undefined; children?: React.ReactNode; closeFlyoutButtonPosition?: \"outside\" | \"inside\" | undefined; isOpenOnDesktop?: boolean | undefined; onCollapse?: (() => void) | undefined; canBeCollapsed?: boolean | undefined; }"
+        ],
+        "path": "packages/shared-ux/page/solution_nav/src/solution_nav.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

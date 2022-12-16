@@ -15,9 +15,13 @@ export type {
   XYState,
   XYReferenceLineLayerConfig,
   XYLayerConfig,
+  ValidLayer,
   XYDataLayerConfig,
   XYAnnotationLayerConfig,
-} from './xy_visualization/types';
+  YAxisMode,
+  SeriesType,
+  YConfig,
+} from './visualizations/xy/types';
 export type {
   DatasourcePublicAPI,
   DataType,
@@ -28,17 +32,19 @@ export type {
   VisualizationSuggestion,
 } from './types';
 export type {
+  LegacyMetricState as MetricState,
   ValueLabelConfig,
   PieVisualizationState,
   PieLayerState,
   SharedPieLayerState,
+  LayerType,
 } from '../common/types';
 
-export type { DatatableVisualizationState } from './datatable_visualization/visualization';
-export type { HeatmapVisualizationState } from './heatmap_visualization/types';
+export type { DatatableVisualizationState } from './visualizations/datatable/visualization';
+export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
-  IndexPatternPersistedState,
+  FormBasedPersistedState,
   PersistedIndexPatternLayer,
   OperationType,
   IncompleteColumn,
@@ -54,7 +60,9 @@ export type {
   CardinalityIndexPatternColumn,
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
+  StandardDeviationIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
@@ -67,45 +75,39 @@ export type {
   FormulaPublicApi,
   StaticValueIndexPatternColumn,
   TimeScaleIndexPatternColumn,
-} from './indexpattern_datasource/types';
+  FormBasedLayer,
+} from './datasources/form_based/types';
 export type {
   XYArgs,
-  YConfig,
   XYRender,
-  LayerType,
-  YAxisMode,
   LineStyle,
   FillStyle,
-  SeriesType,
   YScaleType,
   XScaleType,
   AxisConfig,
-  ValidLayer,
   XYCurveType,
   XYChartProps,
   LegendConfig,
   IconPosition,
-  YConfigResult,
   DataLayerArgs,
-  LensMultiTable,
   ValueLabelMode,
   AxisExtentMode,
+  DataLayerConfig,
   FittingFunction,
   AxisExtentConfig,
   LegendConfigResult,
   AxesSettingsConfig,
-  GridlinesConfigResult,
-  DataLayerConfigResult,
-  TickLabelsConfigResult,
   AxisExtentConfigResult,
   ReferenceLineLayerArgs,
-  LabelsOrientationConfig,
-  LabelsOrientationConfigResult,
-  ReferenceLineLayerConfigResult,
-  AxisTitlesVisibilityConfigResult,
+  ReferenceLineLayerConfig,
 } from '@kbn/expression-xy-plugin/common';
-export type { LensEmbeddableInput } from './embeddable';
-export { layerTypes } from '../common';
+
+export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
+
+export type { ChartInfo } from './chart_info_api';
+
+export { layerTypes } from '../common/layer_types';
+export { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';
 

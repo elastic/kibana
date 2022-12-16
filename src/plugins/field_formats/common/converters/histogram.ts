@@ -34,7 +34,7 @@ export class HistogramFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val: number) => {
+  textConvert: TextContextTypeConvert = (val: number, options) => {
     if (typeof val === 'number') {
       const subFormatId = this.param('id');
       const SubFormat =
@@ -44,7 +44,7 @@ export class HistogramFormat extends FieldFormat {
           ? PercentFormat
           : NumberFormat;
       const converter = new SubFormat(this.param('params'), this.getConfig);
-      return converter.textConvert(val);
+      return converter.textConvert(val, options);
     } else {
       return JSON.stringify(val);
     }

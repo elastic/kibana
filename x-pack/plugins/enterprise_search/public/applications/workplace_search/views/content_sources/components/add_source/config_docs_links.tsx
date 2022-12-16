@@ -10,6 +10,8 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { DOCUMENTATION_LINK_TITLE } from '../../../../constants';
 
 interface ConfigDocsLinksProps {
@@ -17,6 +19,7 @@ interface ConfigDocsLinksProps {
   documentationUrl: string;
   applicationPortalUrl?: string;
   applicationLinkTitle?: string;
+  discussUrl?: string;
 }
 
 export const ConfigDocsLinks: React.FC<ConfigDocsLinksProps> = ({
@@ -24,6 +27,7 @@ export const ConfigDocsLinks: React.FC<ConfigDocsLinksProps> = ({
   documentationUrl,
   applicationPortalUrl,
   applicationLinkTitle,
+  discussUrl,
 }) => (
   <EuiFlexGroup justifyContent="flexStart" responsive={false}>
     <EuiFlexItem grow={false}>
@@ -31,8 +35,8 @@ export const ConfigDocsLinks: React.FC<ConfigDocsLinksProps> = ({
         {DOCUMENTATION_LINK_TITLE}
       </EuiButtonEmpty>
     </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      {applicationPortalUrl && (
+    {applicationPortalUrl && (
+      <EuiFlexItem grow={false}>
         <EuiButtonEmpty flush="left" iconType="popout" href={applicationPortalUrl} target="_blank">
           {applicationLinkTitle ||
             i18n.translate(
@@ -43,7 +47,17 @@ export const ConfigDocsLinks: React.FC<ConfigDocsLinksProps> = ({
               }
             )}
         </EuiButtonEmpty>
-      )}
-    </EuiFlexItem>
+      </EuiFlexItem>
+    )}
+    {discussUrl && (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty flush="left" iconType="popout" target="_blank" href={discussUrl}>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.workplaceSearch.contentSource.configDocs.discuss.buttonLabel"
+            defaultMessage="Questions? Discuss here."
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    )}
   </EuiFlexGroup>
 );

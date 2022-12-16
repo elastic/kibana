@@ -19,8 +19,8 @@ interface FieldCapabilitiesParams {
   callCluster: ElasticsearchClient;
   indices: string | string[];
   metaFields: string[];
-  fieldCapsOptions?: { allow_no_indices: boolean };
-  filter?: QueryDslQueryContainer;
+  fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
+  indexFilter?: QueryDslQueryContainer;
 }
 
 /**
@@ -31,11 +31,16 @@ interface FieldCapabilitiesParams {
  *  @param  {Array}  [indices=[]]  the list of indexes to check
  *  @param  {Array}  [metaFields=[]] the list of internal fields to include
  *  @param  {Object} fieldCapsOptions
- *  @return {Promise<Array<FieldDescriptor>>}
+ *  @return {Promise<{ fields: Array<FieldDescriptor>, indices: Array<string>>}>}
  */
 export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
-  const { callCluster, indices = [], fieldCapsOptions, filter, metaFields = [] } = params;
-  const esFieldCaps = await callFieldCapsApi({ callCluster, indices, fieldCapsOptions, filter });
+  const { callCluster, indices = [], fieldCapsOptions, indexFilter, metaFields = [] } = params;
+  const esFieldCaps = await callFieldCapsApi({
+    callCluster,
+    indices,
+    fieldCapsOptions,
+    indexFilter,
+  });
   const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
@@ -67,5 +72,8 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     )
     .map(mergeOverrides);
 
-  return sortBy(allFieldsUnsorted, 'name');
+  return {
+    fields: sortBy(allFieldsUnsorted, 'name'),
+    indices: esFieldCaps.body.indices as string[],
+  };
 }

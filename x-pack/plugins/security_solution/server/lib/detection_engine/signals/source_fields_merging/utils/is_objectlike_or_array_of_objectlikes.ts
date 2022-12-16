@@ -6,7 +6,7 @@
  */
 
 import { isObjectLike } from 'lodash/fp';
-import { SearchTypes } from '../../../../../../common/detection_engine/types';
+import type { SearchTypes } from '../../../../../../common/detection_engine/types';
 
 /**
  * Returns true if at least one element is an object, otherwise false if they all are not objects

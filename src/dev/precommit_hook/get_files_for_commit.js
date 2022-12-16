@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import SimpleGit from 'simple-git/promise';
+import SimpleGit from 'simple-git';
 
 import { REPO_ROOT } from '@kbn/utils';
 import { File } from '../file';

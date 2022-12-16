@@ -6,13 +6,17 @@
  */
 
 import { findIndex } from 'lodash/fp';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { BrowserField, BrowserFields, getAllFieldsByName } from '../../../common/containers/source';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { DataProviderType } from '@kbn/timelines-plugin/common';
+
+import type { BrowserField, BrowserFields } from '../../../common/containers/source';
+import { getAllFieldsByName } from '../../../common/containers/source';
+import type { QueryOperator } from '../timeline/data_providers/data_provider';
 import {
-  QueryOperator,
   EXISTS_OPERATOR,
   IS_OPERATOR,
+  IS_ONE_OF_OPERATOR,
 } from '../timeline/data_providers/data_provider';
 
 import * as i18n from './translations';
@@ -24,6 +28,12 @@ export const operatorLabels: EuiComboBoxOptionOption[] = [
   },
   {
     label: i18n.IS_NOT,
+  },
+  {
+    label: i18n.IS_ONE_OF,
+  },
+  {
+    label: i18n.IS_NOT_ONE_OF,
   },
   {
     label: i18n.EXISTS,
@@ -59,18 +69,23 @@ export const selectionsAreValid = ({
   browserFields,
   selectedField,
   selectedOperator,
+  type,
 }: {
   browserFields: BrowserFields;
   selectedField: EuiComboBoxOptionOption[];
   selectedOperator: EuiComboBoxOptionOption[];
+  type: DataProviderType;
 }): boolean => {
   const fieldId = selectedField.length > 0 ? selectedField[0].label : '';
   const operator = selectedOperator.length > 0 ? selectedOperator[0].label : '';
 
   const fieldIsValid = browserFields && getAllFieldsByName(browserFields)[fieldId] != null;
   const operatorIsValid = findIndex((o) => o.label === operator, operatorLabels) !== -1;
+  const isOneOfOperatorSelectionWithTemplate =
+    type === DataProviderType.template &&
+    (operator === i18n.IS_ONE_OF || operator === i18n.IS_NOT_ONE_OF);
 
-  return fieldIsValid && operatorIsValid;
+  return fieldIsValid && operatorIsValid && !isOneOfOperatorSelectionWithTemplate;
 };
 
 /** Returns a `QueryOperator` based on the user's Operator selection */
@@ -83,6 +98,9 @@ export const getQueryOperatorFromSelection = (
     case i18n.IS: // fall through
     case i18n.IS_NOT:
       return IS_OPERATOR;
+    case i18n.IS_ONE_OF: // fall through
+    case i18n.IS_NOT_ONE_OF:
+      return IS_ONE_OF_OPERATOR;
     case i18n.EXISTS: // fall through
     case i18n.DOES_NOT_EXIST:
       return EXISTS_OPERATOR;
@@ -99,9 +117,19 @@ export const getExcludedFromSelection = (selectedOperator: EuiComboBoxOptionOpti
 
   switch (selection) {
     case i18n.IS_NOT: // fall through
+    case i18n.IS_NOT_ONE_OF:
     case i18n.DOES_NOT_EXIST:
       return true;
     default:
       return false;
   }
+};
+
+/** Ensure that a value passed to ControlledDefaultInput is not an array */
+export const sanatizeValue = (value: string | number | unknown[]): string => {
+  if (Array.isArray(value)) {
+    // fun fact: value should never be an array
+    return value.length ? `${value[0]}` : '';
+  }
+  return `${value}`;
 };

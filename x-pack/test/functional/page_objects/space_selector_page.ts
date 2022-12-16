@@ -38,17 +38,38 @@ export class SpaceSelectorPageObject extends FtrService {
       this.log.debug(`expectRoute(${spaceId}, ${route})`);
       await this.find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
       const url = await this.browser.getCurrentUrl();
+      this.log.debug(`URL: ${url})`);
       if (spaceId === 'default') {
         expect(url).to.contain(route);
       } else {
         expect(url).to.contain(`/s/${spaceId}${route}`);
       }
+      await this.common.sleep(1000);
+    });
+  }
+
+  async expectSpace(spaceId: string) {
+    return await this.retry.try(async () => {
+      this.log.debug(`expectSpace(${spaceId}`);
+      await this.find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
+      const url = await this.browser.getCurrentUrl();
+      this.log.debug(`URL: ${url})`);
+      if (spaceId === 'default') {
+        expect(url).to.not.contain(`/s/${spaceId}`);
+      } else {
+        expect(url).to.contain(`/s/${spaceId}`);
+      }
+      await this.common.sleep(1000);
     });
   }
 
   async openSpacesNav() {
     this.log.debug('openSpacesNav()');
-    return await this.testSubjects.click('spacesNavSelector');
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('spacesNavSelector');
+      await this.find.byCssSelector('#headerSpacesMenuContent');
+      await this.common.sleep(1000);
+    });
   }
 
   async clickManageSpaces() {
@@ -179,8 +200,13 @@ export class SpaceSelectorPageObject extends FtrService {
     await this.testSubjects.click('space-avatar-space_b');
   }
 
-  async goToSpecificSpace(spaceName: string) {
-    await this.testSubjects.click(`${spaceName}-gotoSpace`);
+  async goToSpecificSpace(spaceId: string) {
+    return await this.retry.try(async () => {
+      this.log.info(`SpaceSelectorPage:goToSpecificSpace(${spaceId})`);
+      await this.testSubjects.click(`${spaceId}-selectableSpaceItem`);
+      await this.common.sleep(1000);
+      expect(await this.find.existsByCssSelector('#headerSpacesMenuContent')).to.be(false);
+    });
   }
 
   async clickSpaceAvatar(spaceId: string) {
@@ -205,13 +231,13 @@ export class SpaceSelectorPageObject extends FtrService {
   }
 
   async expectToFindThatManySpace(numberOfExpectedSpace: number) {
-    const spacesFound = await this.find.allByCssSelector('div[role="dialog"] a.euiContextMenuItem');
+    const spacesFound = await this.find.allByCssSelector('div[role="dialog"] li[role="option"]');
     expect(spacesFound.length).to.be(numberOfExpectedSpace);
   }
 
   async expectNoSpacesFound() {
     const msgElem = await this.find.byCssSelector(
-      'div[role="dialog"] .euiContextMenuPanel .euiText'
+      'div[role="dialog"] div[data-test-subj="euiSelectableMessage"]'
     );
     expect(await msgElem.getVisibleText()).to.be('no spaces found');
   }

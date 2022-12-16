@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { startCase } from 'lodash/fp';
 
 export const COMPLETE_WITHOUT_ENABLING = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.completeWithoutEnablingTitle',
@@ -22,13 +21,6 @@ export const COMPLETE_WITH_ENABLING = i18n.translate(
   }
 );
 
-export const NO_CONNECTOR_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.noConnectorSelectedErrorMessage',
-  {
-    defaultMessage: 'No connector selected',
-  }
-);
-
 export const NO_ACTIONS_READ_PERMISSIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.noReadActionsPrivileges',
   {
@@ -37,13 +29,18 @@ export const NO_ACTIONS_READ_PERMISSIONS = i18n.translate(
   }
 );
 
-export const INVALID_MUSTACHE_TEMPLATE = (paramKey: string) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.invalidMustacheTemplateErrorMessage',
-    {
-      defaultMessage: '{key} is not valid mustache template',
-      values: {
-        key: startCase(paramKey),
-      },
-    }
-  );
+export const THROTTLE_FIELD_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleHelpText',
+  {
+    defaultMessage:
+      'Select when automated actions should be performed if a rule evaluates as true.',
+  }
+);
+
+export const THROTTLE_FIELD_HELP_TEXT_WHEN_QUERY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleHelpTextWhenQuery',
+  {
+    defaultMessage:
+      'Select when automated actions should be performed if a rule evaluates as true. This frequency does not apply to Response Actions.',
+  }
+);

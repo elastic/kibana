@@ -7,15 +7,14 @@
 
 import React, { useMemo, useCallback, memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import type { EuiBasicTableColumn, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiHorizontalRule,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiText,
   EuiLink,
   EuiHealth,
   EuiToolTip,
-  EuiSelectableProps,
   EuiSuperDatePicker,
   EuiSpacer,
   EuiFlexGroup,
@@ -27,20 +26,23 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
-import {
+import type {
   CreatePackagePolicyRouteState,
   AgentPolicyDetailsDeployAgentAction,
-  pagePathGetters,
 } from '@kbn/fleet-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { CreateStructuredSelector } from '../../../../common/store';
-import { Immutable, HostInfo, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
+import type { CreateStructuredSelector } from '../../../../common/store';
+import type {
+  Immutable,
+  HostInfo,
+  PolicyDetailsRouteState,
+} from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -54,7 +56,7 @@ import {
 } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { useAppUrl } from '../../../../common/lib/kibana/hooks';
-import { EndpointAction } from '../store/action';
+import type { EndpointAction } from '../store/action';
 import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
@@ -64,13 +66,11 @@ import { EndpointAgentStatus } from './components/endpoint_agent_status';
 import { CallOut } from '../../../../common/components/callouts';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 import { WARNING_TRANSFORM_STATES, APP_UI_ID } from '../../../../../common/constants';
-import {
-  BackToExternalAppButton,
-  BackToExternalAppButtonProps,
-} from '../../../components/back_to_external_app_button/back_to_external_app_button';
-import { DevConsole } from './dev_console';
+import type { BackToExternalAppButtonProps } from '../../../components/back_to_external_app_button/back_to_external_app_button';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
-
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useKibana } from '../../../../common/lib/kibana';
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
 
@@ -132,6 +132,12 @@ export const EndpointList = () => {
     endpointsTotalError,
     metadataTransformStats,
   } = useEndpointSelector(selector);
+  const {
+    canReadEndpointList,
+    canAccessFleet,
+    canReadPolicyManagement,
+    loading: endpointPrivilegesLoading,
+  } = useUserPrivileges().endpointPrivileges;
   const { search } = useFormatUrl(SecurityPageName.administration);
   const { search: searchParams } = useLocation();
   const { getAppUrl } = useAppUrl();
@@ -321,6 +327,12 @@ export const EndpointList = () => {
     [dispatch]
   );
 
+  const setTableRowProps = useCallback((endpoint: HostInfo) => {
+    return {
+      'data-endpoint-id': endpoint.metadata.agent.id,
+    };
+  }, []);
+
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
     const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
       defaultMessage: 'Last active',
@@ -378,14 +390,18 @@ export const EndpointList = () => {
           return (
             <>
               <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
-                <EndpointPolicyLink
-                  policyId={policy.id}
-                  className="eui-textTruncate"
-                  data-test-subj="policyNameCellLink"
-                  backLink={backToEndpointList}
-                >
-                  {policy.name}
-                </EndpointPolicyLink>
+                {canReadPolicyManagement ? (
+                  <EndpointPolicyLink
+                    policyId={policy.id}
+                    className="eui-textTruncate"
+                    data-test-subj="policyNameCellLink"
+                    backLink={backToEndpointList}
+                  >
+                    {policy.name}
+                  </EndpointPolicyLink>
+                ) : (
+                  <>{policy.name}</>
+                )}
               </EuiToolTip>
               {policy.endpoint_policy_version && (
                 <EuiText
@@ -525,7 +541,7 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [queryParams, search, getAppUrl, backToEndpointList, PAD_LEFT]);
+  }, [queryParams, search, getAppUrl, canReadPolicyManagement, backToEndpointList, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist || areEndpointsEnrolling) {
@@ -538,7 +554,14 @@ export const EndpointList = () => {
           pagination={paginationSetup}
           onChange={onTableChange}
           loading={loading}
+          rowProps={setTableRowProps}
         />
+      );
+    } else if (canReadEndpointList && !canAccessFleet) {
+      return (
+        <ManagementEmptyStateWrapper>
+          <PolicyEmptyState loading={endpointPrivilegesLoading} />
+        </ManagementEmptyStateWrapper>
       );
     } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
       return (
@@ -558,8 +581,8 @@ export const EndpointList = () => {
       );
     }
   }, [
-    loading,
     endpointsExist,
+    areEndpointsEnrolling,
     policyItemsLoading,
     policyItems,
     listData,
@@ -567,12 +590,16 @@ export const EndpointList = () => {
     listError?.message,
     paginationSetup,
     onTableChange,
+    loading,
+    setTableRowProps,
     handleDeployEndpointsClick,
     selectedPolicyId,
     handleSelectableOnChange,
     selectionOptions,
     handleCreatePolicyClick,
-    areEndpointsEnrolling,
+    canAccessFleet,
+    canReadEndpointList,
+    endpointPrivilegesLoading,
   ]);
 
   const hasListData = listData && listData.length > 0;
@@ -625,7 +652,7 @@ export const EndpointList = () => {
             docsPage: (
               <EuiLink
                 data-test-subj="failed-transform-docs-link"
-                href={services?.docLinks?.links.endpoints.troubleshooting}
+                href={services.docLinks.links.endpoints.troubleshooting}
                 target="_blank"
               >
                 <FormattedMessage
@@ -639,7 +666,7 @@ export const EndpointList = () => {
         <EuiSpacer size="s" />
       </>
     );
-  }, [metadataTransformStats, services?.docLinks?.links.endpoints.troubleshooting]);
+  }, [metadataTransformStats, services.docLinks.links.endpoints.troubleshooting]);
 
   const transformFailedCallout = useMemo(() => {
     if (!showTransformFailedCallout) {
@@ -684,14 +711,11 @@ export const EndpointList = () => {
       subtitle={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageSubTitle"
-          defaultMessage="Hosts running endpoint security"
+          defaultMessage="Hosts running Elastic Defend"
         />
       }
       headerBackComponent={routeState.backLink && backToPolicyList}
     >
-      {/* FIXME: Remove once Console is implemented via ConsoleManagementProvider */}
-      <DevConsole />
-
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
         {areEndpointsEnrolling && !hasErrorFindingTotals && (
@@ -707,7 +731,7 @@ export const EndpointList = () => {
                       appPath={`#${pagePathGetters.agent_list({
                         kuery: 'packages : "endpoint"',
                       })}`}
-                      href={`${services?.application?.getUrlForApp(
+                      href={`${services.application.getUrlForApp(
                         'fleet'
                       )}#${pagePathGetters.agent_list({
                         kuery: 'packages : "endpoint"',
@@ -726,7 +750,7 @@ export const EndpointList = () => {
           </>
         )}
         {transformFailedCallout}
-        <EuiFlexGroup gutterSize="s">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
           {shouldShowKQLBar && (
             <EuiFlexItem>
               <AdminSearchBar />

@@ -6,7 +6,7 @@
  */
 
 import { useConsoleStore } from '../../components/console_state/console_state';
-import { ConsoleStore } from '../../components/console_state/types';
+import type { ConsoleStore } from '../../components/console_state/types';
 
 export const useConsoleStateDispatch = (): ConsoleStore['dispatch'] => {
   return useConsoleStore().dispatch;

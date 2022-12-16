@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MlSummaryJob } from '@kbn/ml-plugin/public';
-import { MlError } from '../ml/types';
+import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { MlError } from '../ml/types';
 
 export interface Group {
   id: string;

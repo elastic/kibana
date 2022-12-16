@@ -6,11 +6,13 @@
  */
 
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import { requestContextMock } from '../../lib/detection_engine/routes/__mocks__';
-import { EndpointApiNeededAuthz, withEndpointAuthz } from './with_endpoint_authz';
-import { EndpointAuthz } from '../../../common/endpoint/types/authz';
+import type { EndpointApiNeededAuthz } from './with_endpoint_authz';
+import { withEndpointAuthz } from './with_endpoint_authz';
+import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
 import { EndpointAuthorizationError } from '../errors';
+import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 
 describe('When using `withEndpointAuthz()`', () => {
   let mockRequestHandler: jest.Mocked<RequestHandler>;
@@ -59,7 +61,10 @@ describe('When using `withEndpointAuthz()`', () => {
       { canCreateArtifactsByPolicy: false },
     ],
   ])('should grant access when needed authz is %j', async (neededAuthz, authzOverrides) => {
-    Object.assign(mockContext.securitySolution.endpointAuthz, authzOverrides);
+    mockContext.securitySolution.getEndpointAuthz.mockResolvedValue(
+      getEndpointAuthzInitialStateMock(authzOverrides)
+    );
+
     await withEndpointAuthz(neededAuthz, logger, mockRequestHandler)(
       coreMock.createCustomRequestHandlerContext(mockContext),
       mockRequest,
@@ -86,8 +91,9 @@ describe('When using `withEndpointAuthz()`', () => {
       { canCreateArtifactsByPolicy: false },
     ],
   ])('should deny access when not authorized for %j', async (neededAuthz, authzOverrides) => {
-    Object.assign(mockContext.securitySolution.endpointAuthz, authzOverrides);
-
+    mockContext.securitySolution.getEndpointAuthz.mockResolvedValue(
+      getEndpointAuthzInitialStateMock(authzOverrides)
+    );
     await withEndpointAuthz(neededAuthz, logger, mockRequestHandler)(
       coreMock.createCustomRequestHandlerContext(mockContext),
       mockRequest,

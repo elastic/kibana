@@ -99,8 +99,8 @@ describe('ExplorerChartsContainer', () => {
       </I18nProvider>
     );
 
-    expect(wrapper.html()).toBe(
-      '<div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--wrap euiFlexGrid--responsive" data-test-subj="mlExplorerChartsContainer"></div>'
+    expect(wrapper.html()).toEqual(
+      '<div class="euiFlexGrid css-17f5jta-euiFlexGrid-m-row-stretch-responsive" data-test-subj="mlExplorerChartsContainer"></div>'
     );
   });
 
@@ -125,8 +125,8 @@ describe('ExplorerChartsContainer', () => {
     );
 
     // We test child components with snapshots separately
-    // so we just do some high level sanity check here.
-    expect(wrapper.find('.ml-explorer-chart-container').children()).toHaveLength(2);
+    // so we just do a high level check here.
+    expect(wrapper.find('div.ml-explorer-chart-container').children()).toHaveLength(1);
 
     // Check if the additional y-axis information for rare charts is not part of the chart
     expect(wrapper.html().search(rareChartUniqueString)).toBe(-1);
@@ -152,8 +152,8 @@ describe('ExplorerChartsContainer', () => {
     );
 
     // We test child components with snapshots separately
-    // so we just do some high level sanity check here.
-    expect(wrapper.find('.ml-explorer-chart-container').children()).toHaveLength(2);
+    // so we just do a high level check here.
+    expect(wrapper.find('div.ml-explorer-chart-container').children()).toHaveLength(1);
 
     // Check if the additional y-axis information for rare charts is part of the chart
     expect(wrapper.html().search(rareChartUniqueString)).toBeGreaterThan(0);

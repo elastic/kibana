@@ -7,7 +7,7 @@
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SearchBar, SearchBarProps, SearchBarComponent, SearchBarStateProps } from './search_bar';
-import React, { Component, ReactElement } from 'react';
+import React, { Component } from 'react';
 import {
   DocLinksStart,
   HttpStart,
@@ -18,9 +18,8 @@ import {
 } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
 
@@ -91,7 +90,9 @@ describe('search_bar', () => {
   const defaultProps = {
     isLoading: false,
     indexPatternProvider: {
-      get: jest.fn(() => Promise.resolve({ fields: [] } as unknown as DataView)),
+      get: jest.fn(() =>
+        Promise.resolve(createStubDataView({ spec: { fields: {}, name: 'Test Name' } }))
+      ),
     },
     confirmWipeWorkspace: (callback: () => void) => {
       callback();
@@ -103,11 +104,6 @@ describe('search_bar', () => {
       });
     },
   };
-
-  beforeEach(() => {
-    const autocompleteStart = unifiedSearchPluginMock.createStartContract();
-    setAutocomplete(autocompleteStart.autocomplete);
-  });
 
   beforeEach(() => {
     store = createMockGraphStore({
@@ -203,9 +199,7 @@ describe('search_bar', () => {
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
-    (
-      instance.find(QueryStringInput).prop('prepend') as ReactElement
-    ).props.children.props.onClick();
+    instance.find('button[data-test-subj="graphDatasourceButton"]').first().simulate('click');
 
     expect(openSourceModal).toHaveBeenCalled();
   });

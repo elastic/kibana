@@ -13,8 +13,16 @@ export const AGENT = 'agent';
 export const AGENT_NAME = 'agent.name';
 export const AGENT_VERSION = 'agent.version';
 
+export const ERROR_EXC_MESSAGE = 'error.exception.message';
+export const ERROR_EXC_TYPE = 'error.exception.type';
+export const ERROR_GROUP_ID = 'error.grouping_key';
+
+export const PROCESSOR_EVENT = 'processor.event';
+
 export const URL_FULL = 'url.full';
 export const USER_AGENT_NAME = 'user_agent.name';
+
+export const SERVICE_LANGUAGE_NAME = 'service.language.name';
 
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_TYPE = 'transaction.type';

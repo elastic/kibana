@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
+  const spacesService = getService('spaces');
   const security = getService('security');
   const inspector = getService('inspector');
   const PageObjects = getPageObjects([
@@ -28,57 +28,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
 
   describe('discover in space', () => {
+    afterEach(async () => await clean());
     describe('Storing search sessions in space', () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/dashboard/session_in_space');
-
-        await kibanaServer.uiSettings.replace(
-          {
-            'timepicker:timeDefaults':
-              '{  "from": "2015-09-01T00:00:00.000Z",  "to": "2015-10-01T00:00:00.000Z"}',
-            defaultIndex: 'd1bd6c84-d9d0-56fb-8a72-63fe60020920',
-          },
-          { space: 'another-space' }
-        );
-
-        await security.role.create('data_analyst', {
-          elasticsearch: {
-            indices: [{ names: ['logstash-*'], privileges: ['all'] }],
-          },
-          kibana: [
-            {
-              feature: {
-                discover: ['all'],
-              },
-              spaces: ['another-space'],
-            },
-          ],
-        });
-
-        await security.user.create('analyst', {
-          password: 'analyst-password',
-          roles: ['data_analyst'],
-          full_name: 'test user',
-        });
-
-        await PageObjects.security.forceLogout();
-
-        await PageObjects.security.login('analyst', 'analyst-password', {
-          expectSpaceSelector: false,
-        });
-      });
-
-      after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await PageObjects.security.forceLogout();
-
-        await security.role.delete('data_analyst');
-        await security.user.delete('analyst');
-
-        await kibanaServer.uiSettings.unset('timepicker:timeDefaults', { space: 'another-space' });
-        await kibanaServer.uiSettings.unset('defaultIndex', { space: 'another-space' });
-        await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/session_in_space');
-      });
+      before(async () => await load(['all']));
 
       it('Saves and restores a session', async () => {
         await PageObjects.common.navigateToApp('discover', { basePath: 's/another-space' });
@@ -124,56 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
     describe('Disabled storing search sessions in space', () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/dashboard/session_in_space');
-
-        await kibanaServer.uiSettings.replace(
-          {
-            'timepicker:timeDefaults':
-              '{  "from": "2015-09-01T00:00:00.000Z",  "to": "2015-10-01T00:00:00.000Z"}',
-            defaultIndex: 'd1bd6c84-d9d0-56fb-8a72-63fe60020920',
-          },
-          { space: 'another-space' }
-        );
-
-        await security.role.create('data_analyst', {
-          elasticsearch: {
-            indices: [{ names: ['logstash-*'], privileges: ['all'] }],
-          },
-          kibana: [
-            {
-              feature: {
-                discover: ['read'],
-              },
-              spaces: ['another-space'],
-            },
-          ],
-        });
-
-        await security.user.create('analyst', {
-          password: 'analyst-password',
-          roles: ['data_analyst'],
-          full_name: 'test user',
-        });
-
-        await PageObjects.security.forceLogout();
-
-        await PageObjects.security.login('analyst', 'analyst-password', {
-          expectSpaceSelector: false,
-        });
-      });
-
-      after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await PageObjects.security.forceLogout();
-
-        await security.role.delete('data_analyst');
-        await security.user.delete('analyst');
-
-        await kibanaServer.uiSettings.unset('timepicker:timeDefaults', { space: 'another-space' });
-        await kibanaServer.uiSettings.unset('defaultIndex', { space: 'another-space' });
-        await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/session_in_space');
-      });
+      before(async () => await load(['read']));
 
       it("Doesn't allow to store a session", async () => {
         await PageObjects.common.navigateToApp('discover', { basePath: 's/another-space' });
@@ -192,4 +95,59 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
   });
+  async function load(discover: string[]) {
+    await kibanaServer.importExport.load(
+      `x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_space`
+    );
+    await spacesService.create({ id: 'another-space', name: 'Another Space' });
+    await kibanaServer.importExport.load(
+      `x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_another_space`,
+      { space: 'another-space' }
+    );
+    await kibanaServer.uiSettings.replace(
+      {
+        'timepicker:timeDefaults':
+          '{  "from": "2015-09-01T00:00:00.000Z",  "to": "2015-10-01T00:00:00.000Z"}',
+        defaultIndex: 'd1bd6c84-d9d0-56fb-8a72-63fe60020920',
+      },
+      { space: 'another-space' }
+    );
+
+    await security.role.create('data_analyst', {
+      elasticsearch: {
+        indices: [{ names: ['logstash-*'], privileges: ['all'] }],
+      },
+      kibana: [
+        {
+          feature: {
+            discover,
+          },
+          spaces: ['another-space'],
+        },
+      ],
+    });
+
+    await security.user.create('analyst', {
+      password: 'analyst-password',
+      roles: ['data_analyst'],
+      full_name: 'test user',
+    });
+
+    await PageObjects.security.forceLogout();
+
+    await PageObjects.security.login('analyst', 'analyst-password', {
+      expectSpaceSelector: false,
+    });
+  }
+  async function clean() {
+    await kibanaServer.importExport.unload(
+      'x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_space'
+    );
+    // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+    await PageObjects.security.forceLogout();
+    await security.role.delete('data_analyst');
+    await security.user.delete('analyst');
+    await spacesService.delete('another-space');
+    await searchSessions.deleteAllSearchSessions();
+  }
 }

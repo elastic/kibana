@@ -27,7 +27,8 @@ import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
 import { getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
-import { hasMultipleConnectorOptions } from '../../../../utils';
+
+import { hasMultipleConnectorOptions } from '../../source_data';
 
 import {
   CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP,
@@ -72,7 +73,8 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
   const visibleSources = (
     <EuiFlexGrid columns={3} gutterSize="m" className="source-grid-configured">
       {sources.map((sourceData, i) => {
-        const { connected, accountContextOnly, name, serviceType, isBeta } = sourceData;
+        const { connected, accountContextOnly, name, serviceType, isBeta, baseServiceType } =
+          sourceData;
         return (
           <React.Fragment key={i}>
             <EuiFlexItem
@@ -107,7 +109,11 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                       responsive={false}
                     >
                       <EuiFlexItem>
-                        <SourceIcon serviceType={serviceType} name={name} size="xxl" />
+                        <SourceIcon
+                          serviceType={baseServiceType ?? serviceType}
+                          name={name}
+                          size="xxl"
+                        />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiText size="s">
@@ -128,7 +134,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                       <EuiButtonEmptyTo
                         className="eui-fullWidth"
                         to={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/${
-                          hasMultipleConnectorOptions(sourceData) && isOrganization ? '' : 'connect'
+                          hasMultipleConnectorOptions(serviceType) && isOrganization ? 'choice' : ''
                         }`}
                       >
                         {!connected

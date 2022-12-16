@@ -6,7 +6,7 @@ We use functional tests to make sure the {kib} UI works as expected. It replaces
 [discrete]
 === Running functional tests
 
-The `FunctionalTestRunner` is very bare bones and gets most of its functionality from its config file, located at {blob}test/functional/config.js[test/functional/config.js] or {blob}x-pack/test/functional/config.js[x-pack/test/functional/config.js]. If you’re writing a plugin outside the {kib} repo, you will have your own config file.
+The `FunctionalTestRunner` (FTR) is very bare bones and gets most of its functionality from its config file. The {kib} repo contains many FTR config files which use slightly different configurations for the {kib} server or {es}, have different test files, and potentially other config differences. You can find a manifest of all the FTR config files in `.buildkite/ftr_configs.yml`. If you’re writing a plugin outside the {kib} repo, you will have your own config file.
  See <<external-plugin-functional-tests>> for more info.
 
 There are three ways to run the tests depending on your goals:
@@ -31,18 +31,23 @@ There are three ways to run the tests depending on your goals:
 
 3. Custom option:
 ** Description: Runs tests against instances of {es} & {kib} started some other way (like Elastic Cloud, or an instance you are managing in some other way).
-** just executes the functional tests
-** url, credentials, etc. for {es} and {kib} are specified via environment variables
-** Here's an example that runs against an Elastic Cloud instance. Note that you must run the same branch of tests as the version of {kib} you're testing.
+** Just executes the functional tests
+** URL, credentials, etc. for {es} and {kib} are specified via environment variables
+** When running against an Elastic Cloud instance, additional environment variables are required `TEST_CLOUD` and `ES_SECURITY_ENABLED`
+** You must run the same branch of tests as the version of {kib} you're testing.  To run against a previous minor version use option `--es-version <instance version>`
+** To run a specific configuration use option `--config <configuration file>`
+** Here's an example that runs against an Elastic Cloud instance
 +
 ["source","shell"]
 ----------
-export TEST_KIBANA_URL=https://kibana:password@my-kibana-instance.internal.net:443
+export TEST_KIBANA_URL=https://elastic:password@my-kbn-cluster.elastic-cloud.com:443
+export TEST_ES_URL=https://elastic:password@my-es-cluster.elastic-cloud.com:443
 
-export TEST_ES_URL=https://elastic:password@my-es-cluster.internal.net:9200
-node scripts/functional_test_runner
+export TEST_CLOUD=1
+export ES_SECURITY_ENABLED=1
+
+node scripts/functional_test_runner [--config <config>] [--es-version <instance version>]
 ----------
-
 
 ** Or you can override any or all of these individual parts of the URL and leave the others to the default values.
 +
@@ -60,14 +65,6 @@ export TEST_ES_PORT=9200
 export TEST_ES_USER=elastic
 export TEST_ES_PASS=<password>
 node scripts/functional_test_runner
-----------
-
-** If you are running x-pack functional tests, start server and runner from {blob}xpack[x-pack] folder:
-+
-["source", "shell"]
-----------
-node scripts/functional_tests_server.js
-node ../scripts/functional_test_runner.js
 ----------
 
 ** Selenium tests are run in headless mode on CI. Locally the same tests will be executed in a real browser. You can activate headless mode by setting the environment variable:
@@ -96,7 +93,8 @@ node scripts/functional_test_runner --exclude-tag skipCloud
 
 When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag. List configs with multiple --config arguments.
 
-* `--config test/functional/config.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Chrome.
+* `--config test/functional/apps/app-name/config.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Chrome for a specific app. For example, 
+`--config test/functional/apps/home/config.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Chrome for the home app.
 * `--config test/functional/config.firefox.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Firefox.
 * `--config test/api_integration/config.js` starts {es} and {kib} servers with the api integration tests configuration.
 * `--config test/accessibility/config.ts` starts {es} and {kib} servers with the WebDriver tests configured to run an accessibility audit using https://www.deque.com/axe/[axe].
@@ -218,6 +216,7 @@ export default function ({ getService, getPageObject }) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   // for historical reasons, PageObjects are loaded in a single API call
   // and returned on an object with a key/value for each requested PageObject
@@ -230,8 +229,8 @@ export default function ({ getService, getPageObject }) {
     // app/page and restores some archives into {es} with esArchiver
     before(async () => {
       await Promise.all([
-        // start with an empty .kibana index
-        esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana'),
+        // start by clearing Saved Objects from the .kibana index
+        await kibanaServer.savedObjects.cleanStandardList();
         // load some basic log data only if the index doesn't exist
         esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs')
       ]);
@@ -242,10 +241,10 @@ export default function ({ getService, getPageObject }) {
     // right after the before() hook definition, add the teardown steps
     // that will tidy up {es} for other test suites
     after(async () => {
-      // we unload the empty_kibana archive but not the makelogs
+      // we clear Kibana Saved Objects but not the makelogs
       // archive because we don't make any changes to it, and subsequent
       // suites could use it if they call `.loadIfNeeded()`.
-      await esArchiver.unload('test/functional/fixtures/es_archiver/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     // This series of tests illustrate how tests generally verify
@@ -416,7 +415,7 @@ export function SomethingUsefulProvider({ getService }) {
 -----------
 +
 * Re-export your provider from `services/index.js`
-* Import it into `src/functional/config.js` and add it to the services config:
+* Import it into `src/functional/config.base.js` and add it to the services config:
 +
 ["source","js"]
 -----------

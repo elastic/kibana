@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { CaseMetricsResponse } from '../../../common/api';
-import { BaseHandlerCommonOptions, MetricsHandler } from './types';
+import type { BaseHandlerCommonOptions, MetricsHandler } from './types';
 
-export abstract class BaseHandler implements MetricsHandler {
+export abstract class BaseHandler<R> implements MetricsHandler<R> {
   constructor(
     protected readonly options: BaseHandlerCommonOptions,
     private readonly features?: string[]
@@ -18,5 +17,5 @@ export abstract class BaseHandler implements MetricsHandler {
     return new Set(this.features);
   }
 
-  abstract compute(): Promise<CaseMetricsResponse>;
+  abstract compute(): Promise<R>;
 }

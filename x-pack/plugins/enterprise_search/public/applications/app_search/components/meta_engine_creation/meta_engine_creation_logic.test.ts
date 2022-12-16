@@ -138,7 +138,10 @@ describe('MetaEngineCreationLogic', () => {
         );
         MetaEngineCreationLogic.actions.fetchIndexedEngineNames();
         await nextTick();
-        expect(MetaEngineCreationLogic.actions.setIndexedEngineNames).toHaveBeenCalledWith(['foo']);
+        expect(MetaEngineCreationLogic.actions.setIndexedEngineNames).toHaveBeenCalledWith([
+          'foo',
+          'elasticsearch-engine',
+        ]);
       });
 
       it('if there are remaining pages it should call fetchIndexedEngineNames recursively with an incremented page', async () => {

@@ -89,10 +89,18 @@
     }
 
     if (spawnResult.signal !== null) {
-      return 128 + spawnResult.signal;
+      console.log(
+        'ensure_node_preserve_symlinks wrapper: process exitted with signal',
+        spawnResult.signal
+      );
+      return 1;
     }
 
     if (spawnResult.error) {
+      console.log(
+        'ensure_node_preserve_symlinks wrapper: process exitted with error',
+        spawnResult.error
+      );
       return 1;
     }
 

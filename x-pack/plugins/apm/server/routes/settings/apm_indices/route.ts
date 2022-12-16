@@ -25,7 +25,6 @@ const apmIndexSettingsRoute = createApmServerRoute({
         | 'span'
         | 'error'
         | 'metric'
-        | 'sourcemap'
         | 'onboarding';
       defaultValue: string;
       savedValue: string | undefined;
@@ -66,7 +65,6 @@ const saveApmIndicesRoute = createApmServerRoute({
   },
   params: t.type({
     body: t.partial({
-      sourcemap: t.string,
       error: t.string,
       onboarding: t.string,
       span: t.string,
@@ -77,7 +75,7 @@ const saveApmIndicesRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<
-    import('./../../../../../../../src/core/types/saved_objects').SavedObject<{}>
+    import('./../../../../../../../src/core/types').SavedObject<{}>
   > => {
     const { params, context } = resources;
     const { body } = params;

@@ -18,6 +18,9 @@ export const CleanNodeBuilds: Task = {
           build.resolvePathForPlatform(platform, 'node/lib/node_modules'),
           build.resolvePathForPlatform(platform, 'node/bin/npm'),
           build.resolvePathForPlatform(platform, 'node/bin/npx'),
+          build.resolvePathForPlatform(platform, 'node/bin/corepack'),
+          build.resolvePathForPlatform(platform, 'node/CHANGELOG.md'),
+          build.resolvePathForPlatform(platform, 'node/README.md'),
         ],
         log
       );

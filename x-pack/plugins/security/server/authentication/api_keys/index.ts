@@ -12,4 +12,4 @@ export type {
   InvalidateAPIKeysParams,
   GrantAPIKeyResult,
 } from './api_keys';
-export { APIKeys } from './api_keys';
+export { APIKeys, CreateApiKeyValidationError } from './api_keys';

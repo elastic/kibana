@@ -9,19 +9,16 @@ import { setMockValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
-import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 
 import { EuiButtonTo } from '../react_router_helpers';
 
 import { NotFoundPrompt } from '.';
 
 describe('NotFoundPrompt', () => {
-  const subject = (props?: object) =>
-    shallow(<NotFoundPrompt productSupportUrl="" {...props} />)
-      .find(EuiEmptyPrompt)
-      .dive();
+  const subject = (props?: object) => mount(<NotFoundPrompt productSupportUrl="" {...props} />);
 
   it('renders', () => {
     const wrapper = subject({
@@ -30,7 +27,7 @@ describe('NotFoundPrompt', () => {
 
     expect(wrapper.find('h1').text()).toEqual('404 error');
     expect(wrapper.find(EuiButtonTo).prop('to')).toEqual('/');
-    expect(wrapper.find(EuiButton).prop('href')).toContain('https://discuss.elastic.co');
+    expect(wrapper.find(EuiButton).last().prop('href')).toContain('https://discuss.elastic.co');
   });
 
   it('renders with a custom "Back to dashboard" link if passed', () => {
@@ -46,6 +43,6 @@ describe('NotFoundPrompt', () => {
     setMockValues({ hasGoldLicense: true });
     const wrapper = subject();
 
-    expect(wrapper.find(EuiButton).prop('href')).toEqual('https://support.elastic.co');
+    expect(wrapper.find(EuiButton).last().prop('href')).toEqual('https://support.elastic.co');
   });
 });

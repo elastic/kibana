@@ -4,17 +4,18 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "__packages_do_not_import__/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "static/**/*"
+    "static/**/*",
+    "../../../typings/**/*",
+    ".storybook/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../data/tsconfig.json" }
+    { "path": "../data_views/tsconfig.json" }
   ]
 }

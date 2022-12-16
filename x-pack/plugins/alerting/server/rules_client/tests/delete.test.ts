@@ -16,6 +16,11 @@ import { AlertingAuthorization } from '../../authorization/alerting_authorizatio
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup } from './lib';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+
+jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
+}));
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -100,21 +105,15 @@ describe('delete()', () => {
   });
 
   test('successfully removes an alert', async () => {
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
     const result = await rulesClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
     expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toBe(
-      'api_key_pending_invalidation'
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MTIzOmFiYw=='] },
+      expect.any(Object),
+      expect.any(Object)
     );
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
@@ -124,15 +123,6 @@ describe('delete()', () => {
 
   test('falls back to SOC.get when getDecryptedAsInternalUser throws an error', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
 
     const result = await rulesClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
@@ -159,15 +149,6 @@ describe('delete()', () => {
   });
 
   test(`doesn't invalidate API key when apiKey is null`, async () => {
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
       ...existingAlert,
       attributes: {
@@ -183,24 +164,15 @@ describe('delete()', () => {
   test('swallows error when invalidate API key throws', async () => {
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
     await rulesClient.delete({ id: '1' });
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toBe(
-      'api_key_pending_invalidation'
-    );
-    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to mark for API key [id="MTIzOmFiYw=="] for invalidation: Fail'
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MTIzOmFiYw=='] },
+      expect.any(Object),
+      expect.any(Object)
     );
   });
 
   test('swallows error when getDecryptedAsInternalUser throws an error', async () => {
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
 
     await rulesClient.delete({ id: '1' });

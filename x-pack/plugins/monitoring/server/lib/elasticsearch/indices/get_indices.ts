@@ -7,19 +7,13 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { checkParam } from '../../error_missing_required';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
-// @ts-ignore
 import { createQuery } from '../../create_query';
-// @ts-ignore
 import { calculateRate } from '../../calculate_rate';
-// @ts-ignore
 import { getUnassignedShards } from '../shards';
 import { ElasticsearchResponse } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
-import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
 export function handleResponse(
@@ -118,7 +112,7 @@ export function buildGetIndicesQuery(
   const dataset = 'index'; // data_stream.dataset
   const type = 'index_stats'; // legacy
   const moduleType = 'elasticsearch';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     dataset,
@@ -157,7 +151,7 @@ export function buildGetIndicesQuery(
     body: {
       query: createQuery({
         type,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getElasticsearchDataset(dataset),
         metricset: dataset,
         start,
         end,

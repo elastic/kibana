@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { validateDataView } from '@kbn/data-views-plugin/public';
 import { ValidationFunc } from '../../hook_form_lib';
 import { containsChars } from '../../../validators/string';
 import { ERROR_CODE } from './types';
@@ -34,7 +34,7 @@ export const indexPatternField =
     }
 
     // Validate illegal characters
-    const errors = indexPatterns.validate(value);
+    const errors = validateDataView(value);
 
     if (errors.ILLEGAL_CHARACTERS) {
       return {

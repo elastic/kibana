@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 import { ConfigureCaseButton, LinkButton } from '../links';
-import { ErrorMessage } from '../use_push_to_service/callout/types';
+import type { ErrorMessage } from '../use_push_to_service/callout/types';
 import { useCreateCaseNavigation } from '../../common/navigation';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const ButtonFlexGroup = styled(EuiFlexGroup)`
   ${({ theme }) => css`
@@ -31,6 +33,7 @@ interface OwnProps {
 type Props = OwnProps;
 
 export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
+  const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
   const navigateToCreateCaseClick = useCallback(
     (e) => {
@@ -39,29 +42,40 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
     },
     [navigateToCreateCase]
   );
+
+  if (!permissions.create && !permissions.update) {
+    return null;
+  }
+
   return (
-    <ButtonFlexGroup responsive={false}>
-      <EuiFlexItem grow={false}>
-        <ConfigureCaseButton
-          label={i18n.CONFIGURE_CASES_BUTTON}
-          isDisabled={!isEmpty(actionsErrors)}
-          showToolTip={!isEmpty(actionsErrors)}
-          msgTooltip={!isEmpty(actionsErrors) ? <>{actionsErrors[0].description}</> : <></>}
-          titleTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].title : ''}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <LinkButton
-          fill
-          onClick={navigateToCreateCaseClick}
-          href={getCreateCaseUrl()}
-          iconType="plusInCircle"
-          data-test-subj="createNewCaseBtn"
-        >
-          {i18n.CREATE_CASE_TITLE}
-        </LinkButton>
-      </EuiFlexItem>
-    </ButtonFlexGroup>
+    <EuiFlexItem>
+      <ButtonFlexGroup responsive={false}>
+        {permissions.update && (
+          <EuiFlexItem grow={false}>
+            <ConfigureCaseButton
+              label={i18n.CONFIGURE_CASES_BUTTON}
+              isDisabled={!isEmpty(actionsErrors)}
+              showToolTip={!isEmpty(actionsErrors)}
+              msgTooltip={!isEmpty(actionsErrors) ? <>{actionsErrors[0].description}</> : <></>}
+              titleTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].title : ''}
+            />
+          </EuiFlexItem>
+        )}
+        {permissions.create && (
+          <EuiFlexItem>
+            <LinkButton
+              fill
+              onClick={navigateToCreateCaseClick}
+              href={getCreateCaseUrl()}
+              iconType="plusInCircle"
+              data-test-subj="createNewCaseBtn"
+            >
+              {i18n.CREATE_CASE_TITLE}
+            </LinkButton>
+          </EuiFlexItem>
+        )}
+      </ButtonFlexGroup>
+    </EuiFlexItem>
   );
 };
 NavButtons.displayName = 'NavButtons';

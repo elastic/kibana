@@ -6,17 +6,25 @@
  */
 
 import { generatePath } from 'react-router-dom';
+import {
+  CASES_CREATE_PATH,
+  CASES_CONFIGURE_PATH,
+  CASE_VIEW_PATH,
+  CASE_VIEW_COMMENT_PATH,
+  CASE_VIEW_TAB_PATH,
+} from '../../../common/constants';
+import type { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
 export const DEFAULT_BASE_PATH = '/cases';
-export interface CaseViewPathParams {
-  detailName: string;
-  commentId?: string;
+
+export interface CaseViewPathSearchParams {
+  tabId?: CASE_VIEW_PAGE_TABS;
 }
 
-export const CASES_CREATE_PATH = '/create' as const;
-export const CASES_CONFIGURE_PATH = '/configure' as const;
-export const CASE_VIEW_PATH = '/:detailName' as const;
-export const CASE_VIEW_COMMENT_PATH = `${CASE_VIEW_PATH}/:commentId` as const;
+export type CaseViewPathParams = {
+  detailName: string;
+  commentId?: string;
+} & CaseViewPathSearchParams;
 
 const normalizePath = (path: string): string => path.replaceAll('//', '/');
 
@@ -30,12 +38,19 @@ export const getCaseViewWithCommentPath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASE_VIEW_COMMENT_PATH}`);
 
 export const generateCaseViewPath = (params: CaseViewPathParams): string => {
-  const { commentId } = params;
+  const { commentId, tabId } = params;
   // Cast for generatePath argument type constraint
   const pathParams = params as unknown as { [paramName: string]: string };
 
+  // paths with commentId have their own specific path.
+  // Effectively overwrites the tabId
   if (commentId) {
     return normalizePath(generatePath(CASE_VIEW_COMMENT_PATH, pathParams));
   }
+
+  if (tabId !== undefined) {
+    return normalizePath(generatePath(CASE_VIEW_TAB_PATH, pathParams));
+  }
+
   return normalizePath(generatePath(CASE_VIEW_PATH, pathParams));
 };

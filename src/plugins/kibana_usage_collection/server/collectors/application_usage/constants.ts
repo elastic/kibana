@@ -12,11 +12,6 @@
 export const ROLL_TOTAL_INDICES_INTERVAL = 24 * 60 * 60 * 1000;
 
 /**
- * Roll daily indices every 24h
- */
-export const ROLL_DAILY_INDICES_INTERVAL = 24 * 60 * 60 * 1000;
-
-/**
  * Start rolling indices after 5 minutes up
  */
 export const ROLL_INDICES_START = 5 * 60 * 1000;

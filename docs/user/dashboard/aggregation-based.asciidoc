@@ -140,9 +140,11 @@ a bar chart that displays the top five log traffic sources for every three hours
 
 Add the sample web logs data that you'll use to create the bar chart, then create the dashboard.
 
-. From the *Home* page, click *Try our sample data*.
+. On the home page, click *Try sample data*.
 
-. From *Sample web logs*, click *Add data*.
+. Click *Other sample data sets*. 
+
+. On the *Sample web logs* card, click *Add data*.
 
 . Open the main menu, then click *Dashboard*.
 
@@ -153,9 +155,9 @@ Add the sample web logs data that you'll use to create the bar chart, then creat
 
 Open the *Aggregation based* editor and change the time range. 
 
-. On the dashboard, click *All types > Aggregation based*, select *Vertical bar*, then select *kibana_sample_data_logs*.
+. On the dashboard, click *All types > Aggregation based*, select *Vertical bar*, then select *Kibana Sample Data Logs*.
 
-. Make sure the <<set-time-filter, time filter>>> is *Last 7 days*.
+. Make sure the <<set-time-filter, time filter>> is *Last 7 days*.
 
 [float]
 [[tutorial-configure-the-bar-chart]]
@@ -172,7 +174,7 @@ To create the bar chart, add a <<bucket-aggregations,bucket aggregation>>, then 
 .. Click *Update*.
 +
 [role="screenshot"]
-image:images/bar-chart-tutorial-1.png[Bar chart with sample logs data]
+image:images/aggBased_barChartTutorial1_8.4.png[Bar chart with sample logs data]
 
 . To show the top five log traffic sources, add a sub-bucket aggregation.
 
@@ -187,7 +189,30 @@ TIP: Aggregation-based panels support a maximum of three *Split series*.
 .. Click *Update*.
 +
 [role="screenshot"]
-image:images/bar-chart-tutorial-2.png[Bar chart with sample logs data]
+image:images/aggBased_barChartTutorial2_8.4.png[Bar chart with sample logs data]
+
+[float]
+[[edit-agg-based-visualizations-in-lens]]
+==== Open and edit aggregation-based visualizations in Lens
+
+When you open aggregation-based visualizations in *Lens*, all configuration options appear in the *Lens* visualization editor.
+
+You can open the following aggregation-based visualizations in *Lens*:
+
+* Area
+* Data table
+* Gauge
+* Goal
+* Heat map
+* Horizontal bar
+* Line
+* Metric
+* Pie
+* Vertical bar
+
+To get started, click *Edit visualization in Lens* in the toolbar.
+
+For more information, check out <<lens,Create visualizations with Lens>>.
 
 [float]
 [[save-the-aggregation-based-panel]]

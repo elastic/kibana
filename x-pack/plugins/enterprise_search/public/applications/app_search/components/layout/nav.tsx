@@ -30,7 +30,6 @@ export const useAppSearchNav = () => {
       name: ENGINES_TITLE,
       ...generateNavLink({
         to: ENGINES_PATH,
-        isRoot: true,
         shouldShowActiveForSubroutes: true,
         items: useEngineNav(),
       }),

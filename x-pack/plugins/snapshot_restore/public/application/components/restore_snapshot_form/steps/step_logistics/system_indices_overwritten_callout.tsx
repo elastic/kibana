@@ -9,7 +9,9 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
-export const SystemIndicesOverwrittenCallOut: FunctionComponent = () => {
+export const SystemIndicesOverwrittenCallOut: FunctionComponent<{
+  featureStates: string[] | undefined;
+}> = ({ featureStates }) => {
   return (
     <EuiCallOut
       data-test-subj="systemIndicesInfoCallOut"
@@ -17,7 +19,11 @@ export const SystemIndicesOverwrittenCallOut: FunctionComponent = () => {
         'xpack.snapshotRestore.restoreForm.stepLogistics.systemIndicesCallOut.title',
         {
           defaultMessage:
-            'When this snapshot is restored, system indices will be overwritten with data from the snapshot.',
+            'When this snapshot is restored, system indices {featuresCount, plural, =0 {} other {from {features}}} will be overwritten with data from the snapshot.',
+          values: {
+            featuresCount: featureStates?.length || 0,
+            features: featureStates?.join(', '),
+          },
         }
       )}
       iconType="pin"

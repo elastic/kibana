@@ -29,7 +29,7 @@ import sinon from 'sinon';
 
 import { Keystore } from '../cli/keystore';
 import { create } from './create';
-import { Logger } from '../cli_plugin/lib/logger';
+import { Logger } from '../cli/logger';
 import * as prompt from './utils/prompt';
 
 describe('Kibana keystore', () => {

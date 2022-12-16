@@ -11,7 +11,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -20,13 +20,14 @@ import {
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
-import { calculateThroughput } from '../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../lib/helpers/latency_aggregation_type';
-import { Setup } from '../../lib/helpers/setup_request';
 import { calculateFailedTransactionRate } from '../../lib/helpers/transaction_error_rate';
+import { APMConfig } from '../..';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -39,7 +40,8 @@ export async function getServiceTransactionGroups({
   environment,
   kuery,
   serviceName,
-  setup,
+  config,
+  apmEventClient,
   searchAggregatedTransactions,
   transactionType,
   latencyAggregationType,
@@ -49,14 +51,14 @@ export async function getServiceTransactionGroups({
   environment: string;
   kuery: string;
   serviceName: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
   start: number;
   end: number;
 }) {
-  const { apmEventClient, config } = setup;
   const bucketSize = config.ui.transactionGroupBucketSize;
 
   const field = getDurationFieldForTransactions(searchAggregatedTransactions);
@@ -70,6 +72,7 @@ export async function getServiceTransactionGroups({
         ],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
@@ -126,7 +129,7 @@ export async function getServiceTransactionGroups({
           latencyAggregationType,
           aggregation: bucket.latency,
         }),
-        throughput: calculateThroughput({
+        throughput: calculateThroughputWithRange({
           start,
           end,
           value: bucket.doc_count,

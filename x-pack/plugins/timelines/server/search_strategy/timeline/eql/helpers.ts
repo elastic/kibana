@@ -27,17 +27,19 @@ export const buildEqlDsl = (options: TimelineEqlRequestOptions): Record<string, 
     throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
   }
 
-  const requestFilter: unknown[] = [
-    {
-      range: {
-        [options.timestampField ?? '@timestamp']: {
-          gte: options.timerange.from,
-          lte: options.timerange.to,
-          format: 'strict_date_optional_time',
+  const requestFilter: unknown[] = options.timerange
+    ? [
+        {
+          range: {
+            [options.timestampField ?? '@timestamp']: {
+              gte: options.timerange.from,
+              lte: options.timerange.to,
+              format: 'strict_date_optional_time',
+            },
+          },
         },
-      },
-    },
-  ];
+      ]
+    : [];
 
   return {
     allow_no_indices: true,
@@ -58,6 +60,13 @@ export const buildEqlDsl = (options: TimelineEqlRequestOptions): Record<string, 
         : {}),
       size: options.size ?? 100,
       timestamp_field: options.timestampField ?? '@timestamp',
+      fields: [
+        { field: '*', include_unmapped: true },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
   };
 };

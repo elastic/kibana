@@ -27,3 +27,29 @@ export const NUMBER_ERR = i18n.translate('autocomplete.invalidNumberError', {
 export const DATE_ERR = i18n.translate('autocomplete.invalidDateError', {
   defaultMessage: 'Not a valid date',
 });
+
+export const BINARY_TYPE_NOT_SUPPORTED = i18n.translate('autocomplete.invalidBinaryType', {
+  defaultMessage: 'Binary fields are currently unsupported',
+});
+export const FIELD_SPACE_WARNING = i18n.translate('autocomplete.fieldSpaceWarning', {
+  defaultMessage: "Warning: Spaces at the start or end of this value aren't being displayed.",
+});
+
+export const LISTS_TOOLTIP_INFO = i18n.translate('autocomplete.listsTooltipWarning', {
+  defaultMessage: "Lists that aren't able to be processed by this rule type will be disabled.",
+});
+
+export const SEE_DOCUMENTATION = i18n.translate('autocomplete.seeDocumentation', {
+  defaultMessage: 'See Documentation',
+});
+
+// eslint-disable-next-line import/no-default-export
+export default {
+  LOADING,
+  SELECT_FIELD_FIRST,
+  FIELD_REQUIRED_ERR,
+  NUMBER_ERR,
+  DATE_ERR,
+  FIELD_SPACE_WARNING,
+  BINARY_TYPE_NOT_SUPPORTED,
+};

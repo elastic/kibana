@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TreeOptions } from '../../../../common/endpoint/generate_data';
-import { DataAccessLayer, GeneratedTreeMetadata, TimeRange } from '../../types';
+import type { TreeOptions } from '../../../../common/endpoint/generate_data';
+import type { DataAccessLayer, GeneratedTreeMetadata, TimeRange } from '../../types';
 
-import {
+import type {
   ResolverRelatedEvents,
   ResolverEntityIndex,
   SafeResolverEvent,
@@ -63,7 +63,7 @@ export function generateTreeWithDAL(
       indexPatterns,
     }: {
       entityID: string;
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       indexPatterns: string[];
     }): Promise<ResolverRelatedEvents> {
       const node = allNodes.get(entityID);
@@ -88,7 +88,7 @@ export function generateTreeWithDAL(
       entityID: string;
       category: string;
       after?: string;
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       indexPatterns: string[];
     }): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
       const node = allNodes.get(entityID);
@@ -119,7 +119,7 @@ export function generateTreeWithDAL(
       eventCategory: string[];
       eventTimestamp: string;
       eventID?: string | number;
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       indexPatterns: string[];
     }): Promise<SafeResolverEvent | null> {
       return null;
@@ -135,7 +135,7 @@ export function generateTreeWithDAL(
       limit,
     }: {
       ids: string[];
-      timeRange: TimeRange;
+      timeRange?: TimeRange;
       indexPatterns: string[];
       limit: number;
     }): Promise<SafeResolverEvent[]> {

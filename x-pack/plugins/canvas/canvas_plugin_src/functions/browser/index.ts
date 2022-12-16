@@ -11,6 +11,5 @@ import { markdown } from './markdown';
 import { urlparam } from './urlparam';
 import { escount } from './escount';
 import { esdocs } from './esdocs';
-import { essql } from './essql';
 
-export const functions = [location, markdown, urlparam, escount, esdocs, essql, ...commonFunctions];
+export const functions = [location, markdown, urlparam, escount, esdocs, ...commonFunctions];

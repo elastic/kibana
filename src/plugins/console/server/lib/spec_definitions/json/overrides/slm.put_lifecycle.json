@@ -4,7 +4,42 @@
       "schedule": "",
       "name": "",
       "repository": "",
-      "config": {}
+      "config": {
+        "expanded_wildcards": {
+          "__one_of": [
+            "open",
+            "closed",
+            "hidden",
+            "none",
+            "all"
+          ]
+        },
+        "ignore_unavailable": false,
+        "include_global_state": false,
+        "indices": [
+          ""
+        ],
+        "feature_states": [
+          ""
+        ],
+        "partial": false,
+        "metadata": {}
+      },
+      "retention": {
+        "expire_after": {
+          "__one_of": [
+            "d",
+            "h",
+            "m",
+            "s",
+            "ms",
+            "micros",
+            "nanos"
+          ]
+        },
+        "min_count": 0,
+        "max_count": 0
+      }
     }
   }
 }

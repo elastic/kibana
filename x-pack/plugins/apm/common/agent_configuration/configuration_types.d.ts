@@ -15,6 +15,6 @@ export type AgentConfigurationIntake = t.TypeOf<
 export type AgentConfiguration = {
   '@timestamp': number;
   applied_by_agent?: boolean;
-  etag?: string;
+  etag: string;
   agent_name?: string;
 } & AgentConfigurationIntake;

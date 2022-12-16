@@ -22,4 +22,6 @@ export {
   openOnClickTooltip,
   closeOnHoverTooltip,
   openOnHoverTooltip,
+  updateOpenTooltips,
 } from './tooltip_actions';
+export { getLayersExtent } from './get_layers_extent';

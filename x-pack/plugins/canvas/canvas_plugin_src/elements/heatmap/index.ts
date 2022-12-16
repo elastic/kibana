@@ -12,7 +12,8 @@ export const heatmap: ElementFactory = () => ({
   type: 'chart',
   help: 'Heatmap visualization',
   icon: 'heatmap',
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | head 10
 | heatmap xAccessor={visdimension "age"} yAccessor={visdimension "project"} valueAccessor={visdimension "cost"}

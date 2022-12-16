@@ -10,6 +10,8 @@ exports[`HostWorkingDir renders correctly against snapshot 1`] = `
       contextId="test"
       eventId="1"
       field="host.name"
+      fieldType="keyword"
+      isAggregatable={true}
       value="[hostname-123]"
     />
   </TokensFlexItem>
@@ -27,7 +29,9 @@ exports[`HostWorkingDir renders correctly against snapshot 1`] = `
       contextId="test"
       eventId="1"
       field="process.working_directory"
+      fieldType="keyword"
       iconType="folderOpen"
+      isAggregatable={true}
       value="[working-directory-123]"
     />
   </TokensFlexItem>

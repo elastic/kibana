@@ -14,10 +14,10 @@ import {
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import { APMPlugin, APMRouteHandlerResources } from '../..';
+import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
-import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
+import { AGENT_NAME } from '../../../common/es_fields/apm';
 import { APMPluginStartDependencies } from '../../types';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
 
 export async function registerFleetPolicyCallbacks({
@@ -39,7 +39,7 @@ export async function registerFleetPolicyCallbacks({
   const fleetPluginStart = await plugins.fleet.start();
 
   // Registers a callback invoked when a policy is created to populate the APM
-  // integration policy with pre-existing agent configurations
+  // integration policy with pre-existing agent configurations and source maps
   registerPackagePolicyExternalCallback({
     fleetPluginStart,
     callbackName: 'packagePolicyCreate',
@@ -51,7 +51,7 @@ export async function registerFleetPolicyCallbacks({
   });
 
   // Registers a callback invoked when a policy is updated to populate the APM
-  // integration policy with existing agent configurations
+  // integration policy with existing agent configurations and source maps
   registerPackagePolicyExternalCallback({
     fleetPluginStart,
     callbackName: 'packagePolicyUpdate',
@@ -97,19 +97,16 @@ function registerPackagePolicyExternalCallback({
     if (packagePolicy.package?.name !== 'apm') {
       return packagePolicy;
     }
-    const setup = await setupRequest({
+
+    const internalESClient = await createInternalESClient({
       context: context as any,
-      params: { query: { _inspect: false } },
-      core: null as any,
-      plugins,
+      debug: false,
       request,
       config,
-      logger,
-      ruleDataClient,
-      kibanaVersion,
     });
+
     return await mergePackagePolicyWithApm({
-      setup,
+      internalESClient,
       fleetPluginStart,
       packagePolicy,
     });

@@ -5,7 +5,7 @@ Functional tests on report generation are under the applications that use report
 **PDF/PNG Report testing:**
  - `x-pack/test/functional/apps/canvas/reports.ts`
  - `x-pack/test/functional/apps/dashboard/reporting/screenshots.ts`
- - `x-pack/test/functional/apps/lens/lens_reporting.ts`
+ - `x-pack/test/functional/apps/lens/group3/lens_reporting.ts`
  - `x-pack/test/functional/apps/visualize/reporting.ts`
 
 **CSV Report testing:**

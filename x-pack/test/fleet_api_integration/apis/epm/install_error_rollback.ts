@@ -13,10 +13,10 @@ import { setupFleetAndAgents } from '../agents/services';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const pkgName = 'error_handling';
   const goodPackageVersion = '0.1.0';
   const badPackageVersion = '0.2.0';
+  const kibanaServer = getService('kibanaServer');
 
   const installPackage = async (pkg: string, version: string) => {
     await supertest
@@ -25,18 +25,26 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
+  const uninstallPackage = async (pkg: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
+  };
+
   const getPackageInfo = async (pkg: string, version: string) => {
-    return await supertest.get(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
+    return await supertest
+      .get(`/api/fleet/epm/packages/${pkg}/${version}?prerelease=true`)
+      .set('kbn-xsrf', 'xxxx');
   };
 
   describe('package installation error handling and rollback', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     beforeEach(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
     afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await uninstallPackage(pkgName, goodPackageVersion);
     });
 
     it('on a fresh install, it should uninstall a broken package during rollback', async function () {

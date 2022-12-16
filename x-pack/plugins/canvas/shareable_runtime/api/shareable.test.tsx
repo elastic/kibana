@@ -36,10 +36,10 @@ describe('Canvas Shareable Workpad API', () => {
       attachTo: container,
     });
 
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(wrapper.render()).toMatchSnapshot();
     share();
     await tick();
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(wrapper.render()).toMatchSnapshot();
   });
 
   test('Placed successfully with height specified', async () => {
@@ -52,13 +52,13 @@ describe('Canvas Shareable Workpad API', () => {
       }
     );
 
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(wrapper.render()).toMatchSnapshot();
     share();
     await tick();
     expect(wrapper.html()).toMatch(
       /<div class=\"container\" style="height: 350px; width: 525px;\">/
     );
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(wrapper.render()).toMatchSnapshot();
   });
 
   test('Placed successfully with width specified', async () => {
@@ -71,13 +71,13 @@ describe('Canvas Shareable Workpad API', () => {
       }
     );
 
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(wrapper.render()).toMatchSnapshot();
     share();
     await tick();
     expect(wrapper.html()).toMatch(
       /<div class=\"container\" style="height: 267px; width: 400px;\">/
     );
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(wrapper.render()).toMatchSnapshot();
   });
 
   test('Placed successfully with width and height specified', async () => {
@@ -95,13 +95,13 @@ describe('Canvas Shareable Workpad API', () => {
       }
     );
 
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(wrapper.render()).toMatchSnapshot();
     share();
     await tick();
     expect(wrapper.html()).toMatch(
       /<div class=\"container\" style="height: 350px; width: 350px;\">/
     );
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(wrapper.render()).toMatchSnapshot();
   });
 
   test('Placed successfully with page specified', async () => {
@@ -114,9 +114,9 @@ describe('Canvas Shareable Workpad API', () => {
       }
     );
 
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(wrapper.render()).toMatchSnapshot();
     share();
     await tick();
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(wrapper.render()).toMatchSnapshot();
   });
 });

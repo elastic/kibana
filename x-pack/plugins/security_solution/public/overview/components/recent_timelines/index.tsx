@@ -15,12 +15,12 @@ import {
   queryTimelineById,
   dispatchUpdateTimeline,
 } from '../../../timelines/components/open_timeline/helpers';
-import { OnOpenTimeline } from '../../../timelines/components/open_timeline/types';
+import type { OnOpenTimeline } from '../../../timelines/components/open_timeline/types';
 import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/timeline/actions';
 
 import { RecentTimelines } from './recent_timelines';
 import * as i18n from './translations';
-import { FilterMode } from './types';
+import type { FilterMode } from './types';
 import { LoadingPlaceholders } from '../loading_placeholders';
 import { useTimelineStatus } from '../../../timelines/components/open_timeline/use_timeline_status';
 import { useKibana } from '../../../common/lib/kibana';

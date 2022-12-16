@@ -136,9 +136,19 @@ describe('HeaderPage', () => {
       'border-bottom',
       euiDarkVars.euiBorderThin
     );
-    expect(securitySolutionHeaderPage).not.toHaveStyleRule(
-      'padding-bottom',
-      euiDarkVars.paddingSizes.l
+    expect(securitySolutionHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
+  });
+
+  test('it renders the right side items', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderPage
+          title="Test title"
+          rightSideItems={[<div data-test-subj="right-side-item">{'Right side item'}</div>]}
+        />
+      </TestProviders>
     );
+
+    expect(wrapper.find('[data-test-subj="right-side-item"]').exists()).toBe(true);
   });
 });

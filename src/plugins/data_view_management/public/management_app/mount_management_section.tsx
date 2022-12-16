@@ -40,7 +40,16 @@ export async function mountManagementSection(
 ) {
   const [
     { application, chrome, uiSettings, notifications, overlays, http, docLinks, theme },
-    { data, dataViewFieldEditor, dataViewEditor, dataViews, fieldFormats, unifiedSearch, spaces },
+    {
+      data,
+      dataViewFieldEditor,
+      dataViewEditor,
+      dataViews,
+      fieldFormats,
+      unifiedSearch,
+      spaces,
+      savedObjectsManagement,
+    },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = dataViews.getCanSaveSync();
@@ -67,6 +76,8 @@ export async function mountManagementSection(
     IndexPatternEditor: dataViewEditor.IndexPatternEditorComponent,
     fieldFormats,
     spaces,
+    theme,
+    savedObjectsManagement,
   };
 
   ReactDOM.render(

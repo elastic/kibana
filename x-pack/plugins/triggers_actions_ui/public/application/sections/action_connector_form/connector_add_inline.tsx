@@ -22,7 +22,9 @@ import {
   EuiFormRow,
   EuiButtonEmpty,
   EuiIconTip,
+  EuiBetaBadge,
 } from '@elastic/eui';
+import { betaBadgeProps } from './beta_badge_props';
 import { RuleAction, ActionTypeIndex, ActionConnector } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
@@ -176,6 +178,14 @@ export const AddConnectorInline = ({
                       id="xpack.triggersActionsUI.sections.connectorAddInline.unableToLoadConnectorTitle'"
                     />
                   }
+                />
+              </EuiFlexItem>
+            )}
+            {actionTypeRegistered && actionTypeRegistered.isExperimental && (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={betaBadgeProps.label}
+                  tooltipContent={betaBadgeProps.tooltipContent}
                 />
               </EuiFlexItem>
             )}

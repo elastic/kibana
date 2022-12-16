@@ -18,16 +18,19 @@ export const DETECTION_RESPONSE = i18n.translate(
   }
 );
 
+export const ENTITY_ANALYTICS = i18n.translate(
+  'xpack.securitySolution.navigation.entityAnalytics',
+  {
+    defaultMessage: 'Entity Analytics',
+  }
+);
+
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
 
 export const GETTING_STARTED = i18n.translate('xpack.securitySolution.navigation.gettingStarted', {
-  defaultMessage: 'Getting started',
-});
-
-export const THREAT_HUNTING = i18n.translate('xpack.securitySolution.navigation.threatHunting', {
-  defaultMessage: 'Threat Hunting',
+  defaultMessage: 'Get started',
 });
 
 export const DASHBOARDS = i18n.translate('xpack.securitySolution.navigation.dashboards', {
@@ -42,12 +45,16 @@ export const USERS = i18n.translate('xpack.securitySolution.navigation.users', {
   defaultMessage: 'Users',
 });
 
+export const KUBERNETES = i18n.translate('xpack.securitySolution.navigation.kubernetes', {
+  defaultMessage: 'Kubernetes',
+});
+
 export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
   defaultMessage: 'Rules',
 });
 
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
-  defaultMessage: 'Exception lists',
+  defaultMessage: 'Rule Exceptions',
 });
 
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
@@ -96,6 +103,9 @@ export const HOST_ISOLATION_EXCEPTIONS = i18n.translate(
 export const DETECT = i18n.translate('xpack.securitySolution.navigation.detect', {
   defaultMessage: 'Detect',
 });
+export const FINDINGS = i18n.translate('xpack.securitySolution.navigation.findings', {
+  defaultMessage: 'Findings',
+});
 export const EXPLORE = i18n.translate('xpack.securitySolution.navigation.explore', {
   defaultMessage: 'Explore',
 });
@@ -110,20 +120,20 @@ export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.block
   defaultMessage: 'Blocklist',
 });
 
-export const GO_TO_DOCUMENTATION = i18n.translate(
-  'xpack.securitySolution.goToDocumentationButton',
+export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
+  'xpack.securitySolution.navigation.responseActionsHistory',
   {
-    defaultMessage: 'View documentation',
+    defaultMessage: 'Response actions history',
   }
 );
 
-export const NO_PERMISSIONS_MSG = (subPluginKey: string) =>
-  i18n.translate('xpack.securitySolution.noPermissionsMessage', {
-    values: { subPluginKey },
-    defaultMessage:
-      'To view {subPluginKey}, you must update privileges. For more information, contact your Kibana administrator.',
-  });
-
-export const NO_PERMISSIONS_TITLE = i18n.translate('xpack.securitySolution.noPermissionsTitle', {
-  defaultMessage: 'Privileges required',
+export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
+  defaultMessage: 'Create new rule',
 });
+
+export const THREAT_INTELLIGENCE = i18n.translate(
+  'xpack.securitySolution.navigation.threatIntelligence',
+  {
+    defaultMessage: 'Intelligence',
+  }
+);

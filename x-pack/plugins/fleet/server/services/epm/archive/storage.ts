@@ -13,6 +13,7 @@ import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import uuidv5 from 'uuid/v5';
 import type { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
 import type {
@@ -20,7 +21,7 @@ import type {
   InstallSource,
   PackageAssetReference,
   RegistryDataStream,
-} from '../../../../common';
+} from '../../../../common/types';
 import { pkgToPkgKey } from '../registry';
 
 import { appContextService } from '../../app_context';
@@ -123,7 +124,7 @@ export async function saveArchiveEntries(opts: {
     })
   );
 
-  const results = await savedObjectsClient.bulkCreate<PackageAsset>(bulkBody);
+  const results = await savedObjectsClient.bulkCreate<PackageAsset>(bulkBody, { refresh: false });
   return results;
 }
 
@@ -157,16 +158,24 @@ export async function getAsset(opts: {
   path: string;
 }) {
   const { savedObjectsClient, path } = opts;
-  const assetSavedObject = await savedObjectsClient.get<PackageAsset>(
-    ASSETS_SAVED_OBJECT_TYPE,
-    assetPathToObjectId(path)
-  );
-  const storedAsset = assetSavedObject?.attributes;
-  if (!storedAsset) {
-    return;
-  }
+  try {
+    const assetSavedObject = await savedObjectsClient.get<PackageAsset>(
+      ASSETS_SAVED_OBJECT_TYPE,
+      assetPathToObjectId(path)
+    );
+    const storedAsset = assetSavedObject?.attributes;
+    if (!storedAsset) {
+      return;
+    }
 
-  return storedAsset;
+    return storedAsset;
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      appContextService.getLogger().warn(error.message);
+      return;
+    }
+    throw error;
+  }
 }
 
 export const getEsPackage = async (

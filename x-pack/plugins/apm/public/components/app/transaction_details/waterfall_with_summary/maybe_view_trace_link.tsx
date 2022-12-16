@@ -13,7 +13,8 @@ import { Transaction as ITransaction } from '../../../../../typings/es_schemas/u
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { Environment } from '../../../../../common/environment_rt';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 
 function FullTraceButton({
   isLoading,
@@ -48,16 +49,26 @@ export function MaybeViewTraceLink({
   environment: Environment;
 }) {
   const {
-    query: { latencyAggregationType, comparisonEnabled, offset },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+    query,
+    query: { comparisonEnabled, offset },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer',
+    '/dependencies/operation'
+  );
+
+  const latencyAggregationType =
+    ('latencyAggregationType' in query && query.latencyAggregationType) ||
+    LatencyAggregationType.avg;
 
   if (isLoading || !transaction) {
     return <FullTraceButton isLoading={isLoading} />;
   }
 
-  const { rootTransaction } = waterfall;
+  const { rootWaterfallTransaction } = waterfall;
   // the traceroot cannot be found, so we cannot link to it
-  if (!rootTransaction) {
+  if (!rootWaterfallTransaction) {
     return (
       <EuiToolTip
         content={i18n.translate(
@@ -72,7 +83,8 @@ export function MaybeViewTraceLink({
     );
   }
 
-  const isRoot = transaction.transaction.id === rootTransaction.transaction.id;
+  const rootTransaction = rootWaterfallTransaction.doc;
+  const isRoot = transaction.transaction.id === rootWaterfallTransaction.id;
 
   // the user is already viewing the full trace, so don't link to it
   if (isRoot) {
@@ -92,7 +104,7 @@ export function MaybeViewTraceLink({
     // the user is viewing a zoomed in version of the trace. Link to the full trace
   } else {
     const nextEnvironment = getNextEnvironmentUrlParam({
-      requestedEnvironment: rootTransaction?.service.environment,
+      requestedEnvironment: rootTransaction.service.environment,
       currentEnvironmentUrlParam: environment,
     });
 

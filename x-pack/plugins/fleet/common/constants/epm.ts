@@ -16,6 +16,11 @@ export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 export const FLEET_APM_PACKAGE = 'apm';
 export const FLEET_SYNTHETICS_PACKAGE = 'synthetics';
 export const FLEET_KUBERNETES_PACKAGE = 'kubernetes';
+export const FLEET_CLOUD_SECURITY_POSTURE_PACKAGE = 'cloud_security_posture';
+export const FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE = 'kspm';
+
+export const PACKAGE_TEMPLATE_SUFFIX = '@package';
+export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
 
 export const FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID =
   'elastic_agent-f47f18cc-9c7d-4278-b2ea-a6dee816d395';
@@ -37,9 +42,20 @@ export const autoUpdatePackages = [
   FLEET_ENDPOINT_PACKAGE,
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
 ];
 
-export const autoUpgradePoliciesPackages = [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE];
+export const HIDDEN_API_REFERENCE_PACKAGES = [
+  FLEET_ENDPOINT_PACKAGE,
+  FLEET_APM_PACKAGE,
+  FLEET_SYNTHETICS_PACKAGE,
+];
+
+export const autoUpgradePoliciesPackages = [
+  FLEET_APM_PACKAGE,
+  FLEET_SYNTHETICS_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+];
 
 export const agentAssetTypes = {
   Input: 'input',
@@ -58,5 +74,4 @@ export const installationStatuses = {
   Installing: 'installing',
   InstallFailed: 'install_failed',
   NotInstalled: 'not_installed',
-  InstalledBundled: 'installed_bundled',
 } as const;

@@ -23,6 +23,8 @@ class MockedShipper implements IShipper {
   public reportEvents = jest.fn();
   public extendContext = jest.fn();
   public telemetryCounter$ = new Subject<TelemetryCounter>();
+  public flush = jest.fn();
+  public shutdown = jest.fn();
 }
 
 export const shippersMock = {

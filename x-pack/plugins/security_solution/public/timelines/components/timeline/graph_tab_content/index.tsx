@@ -10,7 +10,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { timelineSelectors } from '../../../store/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
-import { TimelineId } from '../../../../../common/types/timeline';
+import type { TimelineId } from '../../../../../common/types/timeline';
 import { GraphOverlay } from '../../graph_overlay';
 import { useSessionViewNavigation, useSessionView } from '../session_tab_content/use_session_view';
 
@@ -36,11 +36,11 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
   );
 
   const { Navigation } = useSessionViewNavigation({
-    timelineId,
+    scopeId: timelineId,
   });
 
   const { shouldShowDetailsPanel, DetailsPanel, SessionView } = useSessionView({
-    timelineId,
+    scopeId: timelineId,
   });
 
   if (!graphEventId) {
@@ -49,7 +49,7 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
 
   return (
     <>
-      <GraphOverlay timelineId={timelineId} Navigation={Navigation} SessionView={SessionView} />
+      <GraphOverlay scopeId={timelineId} Navigation={Navigation} SessionView={SessionView} />
       {shouldShowDetailsPanel && (
         <>
           <VerticalRule />

@@ -5,67 +5,28 @@
  * 2.0.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-
+import { useQuery } from '@tanstack/react-query';
 import * as i18n from '../translations';
 import { fetchActionTypes } from './api';
-import { ActionTypeConnector } from './types';
 import { useToasts } from '../../common/lib/kibana';
+import { casesQueriesKeys } from '../constants';
+import type { ServerError } from '../../types';
 
-export interface UseActionTypesResponse {
-  loading: boolean;
-  actionTypes: ActionTypeConnector[];
-  refetchActionTypes: () => void;
-}
-
-export const useActionTypes = (): UseActionTypesResponse => {
+export const useGetActionTypes = () => {
   const toasts = useToasts();
-  const [loading, setLoading] = useState(true);
-  const [actionTypes, setActionTypes] = useState<ActionTypeConnector[]>([]);
-  const isCancelledRef = useRef(false);
-  const abortCtrlRef = useRef(new AbortController());
-  const queryFirstTime = useRef(true);
-
-  const refetchActionTypes = useCallback(async () => {
-    try {
-      setLoading(true);
-      isCancelledRef.current = false;
-      abortCtrlRef.current.abort();
-      abortCtrlRef.current = new AbortController();
-
-      const res = await fetchActionTypes({ signal: abortCtrlRef.current.signal });
-
-      if (!isCancelledRef.current) {
-        setLoading(false);
-        setActionTypes(res);
-      }
-    } catch (error) {
-      if (!isCancelledRef.current) {
-        setLoading(false);
-        setActionTypes([]);
+  return useQuery(
+    casesQueriesKeys.connectorTypes(),
+    () => {
+      const abortController = new AbortController();
+      return fetchActionTypes({ signal: abortController.signal });
+    },
+    {
+      initialData: [],
+      onError: (error: ServerError) => {
         toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
           title: i18n.ERROR_TITLE,
         });
-      }
+      },
     }
-  }, [toasts]);
-
-  useEffect(() => {
-    if (queryFirstTime.current) {
-      refetchActionTypes();
-      queryFirstTime.current = false;
-    }
-
-    return () => {
-      isCancelledRef.current = true;
-      abortCtrlRef.current.abort();
-      queryFirstTime.current = true;
-    };
-  }, [refetchActionTypes]);
-
-  return {
-    loading,
-    actionTypes,
-    refetchActionTypes,
-  };
+  );
 };

@@ -22,11 +22,12 @@ const options: MetricsAPIRequest = {
     {
       id: 'metric_1',
       aggregations: {
-        metric_1_max: { max: { field: 'system.network.in.bytes' } },
+        metric_1_max: { max: { field: 'test.field.that.is.a.counter' } },
         metric_1: { derivative: { buckets_path: 'metric_1_max', gap_policy: 'skip', unit: '1s' } },
       },
     },
   ],
+  includeTimeseries: true,
 };
 
 describe('createMetricsAggregations(options)', () => {

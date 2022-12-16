@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/user-profile-components",
+  "owner": "@elastic/kibana-security",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

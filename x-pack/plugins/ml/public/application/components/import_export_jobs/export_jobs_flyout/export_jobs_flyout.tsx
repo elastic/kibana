@@ -52,6 +52,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     },
   } = useMlKibana();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const jobsExportService = useMemo(() => new JobsExportService(mlApiServices), []);
 
   const [loadingADJobs, setLoadingADJobs] = useState(true);
@@ -124,6 +125,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
           });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [showFlyout]
   );
 
@@ -186,6 +188,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
 
       switchTab(jobType);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedJobIds]
   );
 
@@ -193,6 +196,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     setSelectedJobDependencies(
       jobDependencies.filter(({ jobId }) => selectedJobIds.includes(jobId))
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedJobIds]);
 
   function switchTab(jobType: JobType) {

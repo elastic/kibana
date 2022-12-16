@@ -137,14 +137,12 @@ describe('getConnectorsTelemetryData', () => {
             {
               type: 'literal',
               value: 'cases-user-actions.attributes.type',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'connector',
-            },
-            {
-              type: 'literal',
-              value: false,
+              isQuoted: false,
             },
           ],
           function: 'is',
@@ -193,14 +191,12 @@ describe('getConnectorsTelemetryData', () => {
               {
                 type: 'literal',
                 value: 'cases-user-actions.attributes.payload.connector.type',
+                isQuoted: false,
               },
               {
                 type: 'literal',
                 value: connector,
-              },
-              {
-                type: 'literal',
-                value: false,
+                isQuoted: false,
               },
             ],
             function: 'is',

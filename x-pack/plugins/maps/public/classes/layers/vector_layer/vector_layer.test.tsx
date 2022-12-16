@@ -72,7 +72,6 @@ describe('cloneDescriptor', () => {
             right: {
               id: '557d0f15',
               indexPatternId: 'myIndexPattern',
-              indexPatternTitle: 'logs-*',
               metrics: [{ type: AGG_TYPE.COUNT }],
               term: 'myTermField',
               type: SOURCE_TYPES.ES_TERM_SOURCE,
@@ -88,7 +87,9 @@ describe('cloneDescriptor', () => {
         source: new MockSource() as unknown as IVectorSource,
         customIcons: [],
       });
-      const clonedDescriptor = await layer.cloneDescriptor();
+      const clones = await layer.cloneDescriptor();
+      expect(clones.length).toBe(1);
+      const clonedDescriptor = clones[0];
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
       // Should update style field belonging to join
       // @ts-expect-error
@@ -114,7 +115,6 @@ describe('cloneDescriptor', () => {
             right: {
               id: '557d0f15',
               indexPatternId: 'myIndexPattern',
-              indexPatternTitle: 'logs-*',
               term: 'myTermField',
               type: 'joinSource',
             } as unknown as ESTermSourceDescriptor,
@@ -126,7 +126,9 @@ describe('cloneDescriptor', () => {
         source: new MockSource() as unknown as IVectorSource,
         customIcons: [],
       });
-      const clonedDescriptor = await layer.cloneDescriptor();
+      const clones = await layer.cloneDescriptor();
+      expect(clones.length).toBe(1);
+      const clonedDescriptor = clones[0];
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
       // Should update style field belonging to join
       // @ts-expect-error

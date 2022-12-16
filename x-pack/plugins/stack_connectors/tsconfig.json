@@ -1,0 +1,20 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+  },
+  "include": [
+    "server/**/*",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "server/**/*.json",
+    "common/**/*",
+    "public/**/*"
+  ],
+  "kbn_references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../actions/tsconfig.json" },
+    { "path": "../triggers_actions_ui/tsconfig.json" }
+  ]
+}

@@ -7,25 +7,45 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function enterSpaceFunctonalTests({
+export default function enterSpaceFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
+  const spacesService = getService('spaces');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/99879
-  describe.skip('Enter Space', function () {
-    // FLAKY: https://github.com/elastic/kibana/issues/100570
-    // These tests fail very intermittently in Firefox. Skip Firefox testing until resolved.
-    // this.tags('includeFirefox');
+  describe('Enter Space', function () {
+    this.tags('includeFirefox');
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/spaces/enter_space');
+      await spacesService.create({
+        id: 'another-space',
+        name: 'Another Space',
+        disabledFeatures: [],
+      });
+      await kibanaServer.uiSettings.replace(
+        {
+          defaultRoute: '/app/canvas',
+          buildNum: 8467,
+          'dateFormat:tz': 'UTC',
+        },
+        { space: 'another-space' }
+      );
+      const config = await kibanaServer.savedObjects.get({
+        id: await kibanaServer.version.get(),
+        type: 'config',
+      });
+      await kibanaServer.savedObjects.update({
+        id: config.id,
+        type: config.type,
+        attributes: { defaultRoute: 'http://example.com/evil' },
+      });
       await PageObjects.security.forceLogout();
     });
-    after(
-      async () => await esArchiver.unload('x-pack/test/functional/es_archives/spaces/enter_space')
-    );
+    after(async () => {
+      await spacesService.delete('another-space');
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
     afterEach(async () => {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior

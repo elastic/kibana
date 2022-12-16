@@ -15,7 +15,7 @@ import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } f
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
 import { ProxySettings, ResponseSettings, SSLSettings } from './types';
-import { getSSLSettingsFromConfig } from './builtin_action_types/lib/get_node_ssl_options';
+import { getSSLSettingsFromConfig } from './lib/get_node_ssl_options';
 import {
   ValidateEmailAddressesOptions,
   validateEmailAddresses,
@@ -76,7 +76,7 @@ function isAllowed({ allowedHosts }: ActionsConfig, hostname: string | null): bo
 
 function isHostnameAllowedInUri(config: ActionsConfig, uri: string): boolean {
   return pipe(
-    tryCatch(() => url.parse(uri)),
+    tryCatch(() => url.parse(uri, false /* parseQueryString */, true /* slashesDenoteHost */)),
     map((parsedUrl) => parsedUrl.hostname),
     mapNullable((hostname) => isAllowed(config, hostname)),
     getOrElse<boolean>(() => false)

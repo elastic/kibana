@@ -9,6 +9,7 @@
 import { get, last } from 'lodash';
 import { overwrite, getBucketsPath, bucketTransform } from '../../helpers';
 import { getFieldsForTerms } from '../../../../../common/fields_utils';
+import { BASIC_AGGS_TYPES } from '../../../../../common/enums';
 import { basicAggs } from '../../../../../common/basic_aggs';
 
 import type { TableRequestProcessorsFunction } from './types';
@@ -34,7 +35,7 @@ export const pivot: TableRequestProcessorsFunction =
         overwrite(doc, `aggs.pivot.${termsType}.field`, pivotIds[0]);
       }
 
-      overwrite(doc, `aggs.pivot.${termsType}.size`, panel.pivot_rows);
+      overwrite(doc, `aggs.pivot.${termsType}.size`, panel.pivot_rows ?? 10);
 
       if (sort) {
         const series = panel.series.find((item) => item.id === sort.column);
@@ -43,7 +44,8 @@ export const pivot: TableRequestProcessorsFunction =
           overwrite(doc, `aggs.pivot.${termsType}.order`, { _count: sort.order });
         } else if (metric && series && basicAggs.includes(metric.type)) {
           const sortAggKey = `${metric.id}-SORT`;
-          const fn = bucketTransform[metric.type];
+          const type = metric.type as unknown as BASIC_AGGS_TYPES;
+          const fn = bucketTransform[type];
           const bucketPath = getBucketsPath(metric.id, series.metrics).replace(
             metric.id,
             sortAggKey

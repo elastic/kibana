@@ -10,7 +10,7 @@ import { services } from './services';
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
     rootTags: ['runOutsideOfCiGroups'],
@@ -31,6 +31,7 @@ export default async function ({ readConfigFile }) {
         '--elasticsearch.healthCheck.delay=3600000',
         '--server.xsrf.disableProtection=true',
         '--server.compression.referrerWhitelist=["some-host.com"]',
+        '--server.compression.brotli.enabled=true',
         `--savedObjects.maxImportExportSize=10001`,
         '--savedObjects.maxImportPayloadBytes=30000000',
         // for testing set buffer duration to 0 to immediately flush counters into saved objects.

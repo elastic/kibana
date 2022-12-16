@@ -14,7 +14,7 @@ import { firstValueFrom, Observable } from 'rxjs';
 import {
   ElasticsearchClient,
   IRouter,
-  MetricsServiceSetup,
+  type MetricsServiceSetup,
   SavedObjectsClientContract,
   ServiceStatus,
   ServiceStatusLevels,

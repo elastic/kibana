@@ -26,7 +26,7 @@ export const useWorkplaceSearchNav = () => {
     {
       id: 'root',
       name: NAV.OVERVIEW,
-      ...generateNavLink({ to: '/', isRoot: true }),
+      ...generateNavLink({ to: '' }),
     },
     {
       id: 'sources',

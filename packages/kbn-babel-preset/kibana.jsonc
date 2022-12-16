@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/babel-preset",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

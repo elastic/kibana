@@ -17,36 +17,6 @@ export const mockPatterns = [
   'journalbeat-*',
 ];
 
-export const mockSource = {
-  data: {
-    source: {
-      id: 'default',
-      status: {
-        indicesExist: true,
-        indexFields: [
-          {
-            category: '_id',
-            description: 'Each document has an _id that uniquely identifies it',
-            example: 'Y-6TfmcB0WOhS6qyMv3s',
-            indexes: mockPatterns,
-            name: '_id',
-            searchable: true,
-            type: 'string',
-            aggregatable: false,
-            format: null,
-            esTypes: null,
-            subType: null,
-            __typename: 'IndexField',
-          },
-        ],
-      },
-    },
-  },
-  loading: false,
-  networkStatus: 7,
-  stale: false,
-};
-
 export const mockSourcererScope = {
   ...initSourcererScope,
   scopePatterns: mockPatterns,

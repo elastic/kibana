@@ -42,7 +42,7 @@ describe('getAggsFormats', () => {
     );
     expect(format.convert({ to: '2020-06-01' })).toBe('Before 2020-06-01');
     expect(format.convert({ from: '2020-06-01' })).toBe('After 2020-06-01');
-    expect(getFormat).toHaveBeenCalledTimes(3);
+    expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
   test('date_range does not crash on empty value', () => {
@@ -62,7 +62,7 @@ describe('getAggsFormats', () => {
     expect(format.convert({ type: 'range', to: '10.0.0.10' })).toBe('-Infinity to 10.0.0.10');
     expect(format.convert({ type: 'range', from: '10.0.0.10' })).toBe('10.0.0.10 to Infinity');
     format.convert({ type: 'mask', mask: '10.0.0.1/24' });
-    expect(getFormat).toHaveBeenCalledTimes(4);
+    expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
   test('ip_range does not crash on empty value', () => {
@@ -135,7 +135,7 @@ describe('getAggsFormats', () => {
     expect(format.convert('machine.os.keyword')).toBe('machine.os.keyword');
     expect(format.convert('__other__')).toBe(mapping.params.otherBucketLabel);
     expect(format.convert('__missing__')).toBe(mapping.params.missingBucketLabel);
-    expect(getFormat).toHaveBeenCalledTimes(3);
+    expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
   test('uses a default separator for multi terms', () => {

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
+import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 
 export const DETAILS_HEADER = i18n.translate('xpack.securitySolution.blocklist.details.header', {
   defaultMessage: 'Details',

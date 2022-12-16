@@ -37,6 +37,7 @@ export const RareDetector: FC<Props> = ({ onChange }) => {
     } else {
       setRareDetectorType(RARE_DETECTOR_TYPE.RARE);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -48,6 +49,7 @@ export const RareDetector: FC<Props> = ({ onChange }) => {
       jobCreator.frequentlyRare = rareDetectorType === RARE_DETECTOR_TYPE.FREQ_RARE_POPULATION;
       jobCreatorUpdate();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rareDetectorType]);
 
   function onRareSelection() {

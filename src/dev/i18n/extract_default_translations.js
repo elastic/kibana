@@ -7,11 +7,12 @@
  */
 
 import path from 'path';
+import globby from 'globby';
 
 import { extractCodeMessages } from './extractors';
-import { globAsync, readFileAsync, normalizePath } from './utils';
+import { readFileAsync, normalizePath } from './utils';
 
-import { createFailError, isFailError } from '@kbn/dev-utils';
+import { createFailError, isFailError } from '@kbn/dev-cli-errors';
 
 function addMessageToMap(targetMap, key, value, reporter) {
   const existingValue = targetMap.get(key);
@@ -58,55 +59,49 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
     '**/build/**',
     '**/*.test.{js,jsx,ts,tsx}',
     '**/*.d.ts',
-  ].concat(additionalIgnore);
+  ]
+    .concat(additionalIgnore)
+    .map((i) => `!${i}`);
 
-  const entries = await globAsync('*.{js,jsx,ts,tsx}', {
+  const entries = await globby(['*.{js,jsx,ts,tsx}', ...ignore], {
     cwd: inputPath,
-    matchBase: true,
-    ignore,
-    mark,
+    baseNameMatch: true,
+    markDirectories: mark,
     absolute,
   });
 
-  const codeEntries = entries.reduce((paths, entry) => {
-    const resolvedPath = path.resolve(inputPath, entry);
-    paths.push(resolvedPath);
-
-    return paths;
-  }, []);
-
-  return [[codeEntries, extractCodeMessages]];
+  return {
+    entries: entries.map((entry) => path.resolve(inputPath, entry)),
+    extractFunction: extractCodeMessages,
+  };
 }
 
 export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
-  const categorizedEntries = await matchEntriesWithExctractors(inputPath);
-  return Promise.all(
-    categorizedEntries.map(async ([entries, extractFunction]) => {
-      const files = await Promise.all(
-        filterEntries(entries, config.exclude).map(async (entry) => {
-          return {
-            name: entry,
-            content: await readFileAsync(entry),
-          };
-        })
-      );
+  const { entries, extractFunction } = await matchEntriesWithExctractors(inputPath);
 
-      for (const { name, content } of files) {
-        const reporterWithContext = reporter.withContext({ name });
-
-        try {
-          for (const [id, value] of extractFunction(content, reporterWithContext)) {
-            validateMessageNamespace(id, name, config.paths, reporterWithContext);
-            addMessageToMap(targetMap, id, value, reporterWithContext);
-          }
-        } catch (error) {
-          if (!isFailError(error)) {
-            throw error;
-          }
-
-          reporterWithContext.report(error);
-        }
-      }
+  const files = await Promise.all(
+    filterEntries(entries, config.exclude).map(async (entry) => {
+      return {
+        name: entry,
+        content: await readFileAsync(entry),
+      };
     })
   );
+
+  for (const { name, content } of files) {
+    const reporterWithContext = reporter.withContext({ name });
+
+    try {
+      for (const [id, value] of extractFunction(content, reporterWithContext)) {
+        validateMessageNamespace(id, name, config.paths, reporterWithContext);
+        addMessageToMap(targetMap, id, value, reporterWithContext);
+      }
+    } catch (error) {
+      if (!isFailError(error)) {
+        throw error;
+      }
+
+      reporterWithContext.report(error);
+    }
+  }
 }

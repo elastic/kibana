@@ -18,16 +18,16 @@ import {
   EuiDraggable,
   EuiIcon,
   DropResult,
-  EuiComboBox,
-  EuiComboBoxProps,
-  EuiFormRow,
 } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DiscoveryRule } from './discovery_rule';
 import { DefaultDiscoveryRule } from './default_discovery_rule';
 import { EditDiscoveryRule } from './edit_discovery_rule';
-import { IDiscoveryRuleList, Operation } from '.';
+import { IDiscoveryRuleList, Operation, RuntimeAttachmentSettings } from '.';
+import { JavaAgentVersionInput } from './java_agent_version_input';
+
+const DEFAULT_AGENT_VERSION = 'latest';
 
 interface Props {
   isEnabled: boolean;
@@ -51,10 +51,8 @@ interface Props {
   discoveryRulesDescription: ReactNode;
   showUnsavedWarning?: boolean;
   onDragEnd: (dropResult: DropResult) => void;
-  selectedVersion: string;
-  versions: string[];
-  onChangeVersion: EuiComboBoxProps<string>['onChange'];
-  onCreateNewVersion: EuiComboBoxProps<string>['onCreateOption'];
+  version: RuntimeAttachmentSettings['version'];
+  onChangeVersion: (nextVersion: RuntimeAttachmentSettings['version']) => void;
   isValidVersion: boolean;
 }
 
@@ -80,10 +78,8 @@ export function RuntimeAttachment({
   discoveryRulesDescription,
   showUnsavedWarning,
   onDragEnd,
-  selectedVersion,
-  versions,
+  version,
   onChangeVersion,
-  onCreateNewVersion,
   isValidVersion,
 }: Props) {
   return (
@@ -120,33 +116,12 @@ export function RuntimeAttachment({
             <p>{toggleDescription}</p>
           </EuiText>
         </EuiFlexItem>
-        {isEnabled && versions && (
-          <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version',
-                { defaultMessage: 'Version' }
-              )}
-              isInvalid={!isValidVersion}
-              error={i18n.translate(
-                'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.invalid',
-                { defaultMessage: 'Invalid version' }
-              )}
-            >
-              <EuiComboBox
-                selectedOptions={[{ label: selectedVersion }]}
-                placeholder={i18n.translate(
-                  'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.placeHolder',
-                  { defaultMessage: 'Select or add a version' }
-                )}
-                options={versions.map((_version) => ({ label: _version }))}
-                onChange={onChangeVersion}
-                onCreateOption={onCreateNewVersion}
-                singleSelection
-                isClearable={false}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
+        {isEnabled && (
+          <JavaAgentVersionInput
+            version={version || DEFAULT_AGENT_VERSION}
+            onChange={onChangeVersion}
+            isValid={isValidVersion}
+          />
         )}
       </EuiFlexGroup>
       {isEnabled && (

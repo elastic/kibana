@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Config, ObjectToConfigAdapter } from '.';
+import { Config, ObjectToConfigAdapter } from '..';
 
 /**
  * Overrides some config values with ones from argv.

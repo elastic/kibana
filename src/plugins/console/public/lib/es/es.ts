@@ -7,7 +7,7 @@
  */
 
 import type { HttpResponse, HttpSetup } from '@kbn/core/public';
-import { trimStart } from 'lodash';
+import { trimStart, trimEnd } from 'lodash';
 import { API_BASE_PATH, KIBANA_API_PREFIX } from '../../../common/constants';
 
 const esVersion: string[] = [];
@@ -79,11 +79,23 @@ function getKibanaRequestUrl(path: string) {
 
 export function constructUrl(baseUri: string, path: string) {
   const kibanaRequestUrl = getKibanaRequestUrl(path);
+  let url = `${trimEnd(baseUri, '/')}/${trimStart(path, '/')}`;
 
   if (kibanaRequestUrl) {
-    return kibanaRequestUrl;
+    url = kibanaRequestUrl;
   }
-  baseUri = baseUri.replace(/\/+$/, '');
-  path = path.replace(/^\/+/, '');
-  return baseUri + '/' + path;
+
+  const { origin, pathname, search } = new URL(url);
+  return `${origin}${encodePathname(pathname)}${search ?? ''}`;
 }
+
+const encodePathname = (path: string) => {
+  const decodedPath = new URLSearchParams(`path=${path}`).get('path') ?? '';
+
+  // Skip if it is valid
+  if (path === decodedPath) {
+    return path;
+  }
+
+  return `/${encodeURIComponent(trimStart(decodedPath, '/'))}`;
+};

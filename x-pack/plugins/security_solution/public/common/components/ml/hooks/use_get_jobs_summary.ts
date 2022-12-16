@@ -10,4 +10,5 @@ import { getJobsSummary } from '../api/get_jobs_summary';
 
 const _getJobsSummary = withOptionalSignal(getJobsSummary);
 
+// TODO rewrite to react-query
 export const useGetJobsSummary = () => useAsync(_getJobsSummary);

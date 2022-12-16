@@ -15,10 +15,10 @@ import {
   Render,
   Style,
   Range,
-} from '@kbn/expressions-plugin';
-import { Datasource, Model, Transform, View } from '../public/expression_types';
+} from '@kbn/expressions-plugin/common';
+import type { Datasource, Model, Transform, View } from '../public/expression_types';
 import { AssetType } from './assets';
-import { CanvasWorkpad, Sidebar } from './canvas';
+import { CanvasWorkpad, Sidebar, Flyouts } from './canvas';
 
 export enum AppStateKeys {
   FULLSCREEN = '__fullscreen',
@@ -91,6 +91,7 @@ export interface TransientState {
   };
   inFlight: boolean;
   sidebar: Sidebar;
+  flyouts: Flyouts;
 }
 
 interface PersistentState {

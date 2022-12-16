@@ -10,7 +10,8 @@ import React from 'react';
 
 import { TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
-import { ThreatMatchRowProps, ThreatMatchRowView } from './threat_match_row';
+import type { ThreatMatchRowProps } from './threat_match_row';
+import { ThreatMatchRowView } from './threat_match_row';
 
 jest.mock('../../../../../../common/lib/kibana');
 

@@ -5,34 +5,48 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useReducer, Dispatch } from 'react';
+import type { Dispatch } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import { merge } from 'lodash';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
-import {
-  CasesContextStoreAction,
-  casesContextReducer,
-  getInitialCasesContextState,
-} from './cases_context_reducer';
-import { CasesFeaturesAllRequired, CasesFeatures } from '../../containers/types';
+import type { CasesContextStoreAction } from './cases_context_reducer';
+import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';
+import type {
+  CasesFeaturesAllRequired,
+  CasesFeatures,
+  CasesPermissions,
+} from '../../containers/types';
 import { CasesGlobalComponents } from './cases_global_components';
-import { ReleasePhase } from '../types';
+import type { ReleasePhase } from '../types';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 
 export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
 export interface CasesContextValue {
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   owner: string[];
   appId: string;
   appTitle: string;
-  userCanCrud: boolean;
+  permissions: CasesPermissions;
   basePath: string;
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
 }
 
-export interface CasesContextProps extends Pick<CasesContextValue, 'owner' | 'userCanCrud'> {
+export interface CasesContextProps
+  extends Pick<
+    CasesContextValue,
+    | 'owner'
+    | 'permissions'
+    | 'externalReferenceAttachmentTypeRegistry'
+    | 'persistableStateAttachmentTypeRegistry'
+  > {
   basePath?: string;
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
@@ -47,13 +61,23 @@ export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' 
 
 export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   children,
-  value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH, features = {}, releasePhase = 'ga' },
+  value: {
+    externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
+    owner,
+    permissions,
+    basePath = DEFAULT_BASE_PATH,
+    features = {},
+    releasePhase = 'ga',
+  },
 }) => {
   const { appId, appTitle } = useApplication();
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
   const [value, setValue] = useState<CasesContextStateValue>(() => ({
+    externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
     owner,
-    userCanCrud,
+    permissions,
     basePath,
     /**
      * The empty object at the beginning avoids the mutation
@@ -69,7 +93,14 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   }));
 
   /**
-   * `userCanCrud` prop may change by the parent plugin.
+   * Only update the context if the nested permissions fields changed, this avoids a rerender when the object's reference
+   * changes.
+   */
+  useDeepCompareEffect(() => {
+    setValue((prev) => ({ ...prev, permissions }));
+  }, [permissions]);
+
+  /**
    * `appId` and `appTitle` are dynamically retrieved from kibana context.
    * We need to update the state if any of these values change, the rest of props are never updated.
    */
@@ -79,10 +110,9 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
         ...prev,
         appId,
         appTitle,
-        userCanCrud,
       }));
     }
-  }, [appTitle, appId, userCanCrud]);
+  }, [appTitle, appId]);
 
   return isCasesContextValue(value) ? (
     <CasesContext.Provider value={value}>
@@ -94,7 +124,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
 CasesProvider.displayName = 'CasesProvider';
 
 function isCasesContextValue(value: CasesContextStateValue): value is CasesContextValue {
-  return value.appId != null && value.appTitle != null && value.userCanCrud != null;
+  return value.appId != null && value.appTitle != null && value.permissions != null;
 }
 
 // eslint-disable-next-line import/no-default-export

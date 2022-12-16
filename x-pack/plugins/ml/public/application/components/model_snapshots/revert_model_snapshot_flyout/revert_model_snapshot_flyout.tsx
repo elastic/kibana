@@ -78,6 +78,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
 
   useEffect(() => {
     createChartData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSnapshot]);
 
   useEffect(() => {
@@ -109,6 +110,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
       setAnomalies(anomalyData[0]);
     }
     setChartReady(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job]);
 
   function showRevertModal() {
@@ -204,7 +206,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
                         <>
                           <strong>{s.snapshot_id}</strong>
                           <EuiText size="s" color="subdued">
-                            <p className="euiTextColor--subdued">{s.description}</p>
+                            <p>{s.description}</p>
                           </EuiText>
                         </>
                       ),

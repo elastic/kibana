@@ -42,6 +42,7 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
           namespace_type: namespaceType,
           page,
           per_page: perPage,
+          search,
           sort_field: sortField,
           sort_order: sortOrder,
         } = request.query;
@@ -59,6 +60,7 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
             page,
             perPage,
             pit: undefined,
+            search,
             searchAfter: undefined,
             sortField,
             sortOrder,

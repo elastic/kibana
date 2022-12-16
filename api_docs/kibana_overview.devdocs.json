@@ -16,6 +16,7 @@
       "description": [],
       "path": "src/plugins/kibana_overview/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -29,6 +30,7 @@
       "description": [],
       "path": "src/plugins/kibana_overview/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -60,6 +62,7 @@
         ],
         "path": "src/plugins/kibana_overview/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -74,6 +77,7 @@
         ],
         "path": "src/plugins/kibana_overview/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -88,6 +92,7 @@
         ],
         "path": "src/plugins/kibana_overview/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -102,6 +107,7 @@
         ],
         "path": "src/plugins/kibana_overview/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

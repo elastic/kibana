@@ -6,21 +6,17 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
-import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
-// @ts-ignore
 import { createQuery } from '../create_query';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 export async function checkCcrEnabled(req: LegacyRequest, ccs: string) {
   const dataset = 'cluster_stats';
   const moduleType = 'elasticsearch';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType,
     dataset,
@@ -40,7 +36,7 @@ export async function checkCcrEnabled(req: LegacyRequest, ccs: string) {
     body: {
       query: createQuery({
         type: dataset,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getElasticsearchDataset(dataset),
         metricset: dataset,
         start,
         end,

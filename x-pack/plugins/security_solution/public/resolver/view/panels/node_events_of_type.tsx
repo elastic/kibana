@@ -24,14 +24,15 @@ import { StyledPanel } from '../styles';
 import { BoldCode, StyledTime } from './styles';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
-import { ResolverState } from '../../types';
+import type { ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
 import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { useFormattedDate } from './use_formatted_date';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
@@ -103,9 +104,10 @@ const NodeEventsListItem = memo(function ({
   nodeID: string;
   eventCategory: string;
 }) {
-  const timestamp = eventModel.eventTimestamp(event);
-  const eventID = eventModel.eventID(event);
-  const winlogRecordID = eventModel.winlogRecordID(event);
+  const expandedEvent = expandDottedObject(event);
+  const timestamp = eventModel.eventTimestamp(expandedEvent);
+  const eventID = eventModel.eventID(expandedEvent);
+  const winlogRecordID = eventModel.winlogRecordID(expandedEvent);
   const date =
     useFormattedDate(timestamp) ||
     i18n.translate('xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved', {
@@ -128,8 +130,8 @@ const NodeEventsListItem = memo(function ({
           <FormattedMessage
             id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.categoryAndType"
             values={{
-              category: eventModel.eventCategory(event).join(', '),
-              eventType: eventModel.eventType(event).join(', '),
+              category: eventModel.eventCategory(expandedEvent).join(', '),
+              eventType: eventModel.eventType(expandedEvent).join(', '),
             }}
             defaultMessage="{category} {eventType}"
           />
@@ -147,7 +149,7 @@ const NodeEventsListItem = memo(function ({
         data-test-subj="resolver:panel:node-events-in-category:event-link"
         {...linkProps}
       >
-        <DescriptiveName event={event} />
+        <DescriptiveName event={expandedEvent} />
       </EuiButtonEmpty>
     </>
   );

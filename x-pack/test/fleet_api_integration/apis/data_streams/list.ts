@@ -23,6 +23,7 @@ export default function (providerContext: FtrProviderContext) {
   const pkgVersion = '0.1.0';
   const logsTemplateName = `logs-${pkgName}.test_logs`;
   const metricsTemplateName = `metrics-${pkgName}.test_metrics`;
+  const notFleetTemplateName = `metrics-${pkgName}.test_metrics_not_fleet`;
 
   const uninstallPackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -69,6 +70,24 @@ export default function (providerContext: FtrProviderContext) {
       })
     );
 
+    // This stream should never be returned as it is not
+    // managed by fleet (it isnt added to a fleet managed data stream)
+    responses.push(
+      await es.transport.request({
+        method: 'POST',
+        path: `/${notFleetTemplateName}-default/_doc`,
+        body: {
+          '@timestamp': '2015-01-01',
+          logs_test_name: 'test',
+          data_stream: {
+            dataset: `${pkgName}.test_metrics_not_fleet`,
+            namespace: 'default',
+            type: 'metrics',
+          },
+        },
+      })
+    );
+
     return responses as IndexResponse[];
   };
 
@@ -104,6 +123,10 @@ export default function (providerContext: FtrProviderContext) {
           method: 'DELETE',
           path: `/_data_stream/${metricsTemplateName}-default`,
         });
+        await es.transport.request({
+          method: 'DELETE',
+          path: `/_data_stream/${notFleetTemplateName}-default`,
+        });
       } catch (e) {
         // Silently swallow errors here as not all tests seed data streams
       }
@@ -126,6 +149,7 @@ export default function (providerContext: FtrProviderContext) {
             package: 'datastreams',
             package_version: '0.1.0',
             dashboards: [],
+            serviceDetails: null,
           },
           {
             dataset: 'datastreams.test_logs',
@@ -134,6 +158,7 @@ export default function (providerContext: FtrProviderContext) {
             package: 'datastreams',
             package_version: '0.1.0',
             dashboards: [],
+            serviceDetails: null,
           },
         ],
         'dataset'

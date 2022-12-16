@@ -11,13 +11,11 @@ import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
-// @ts-ignore
 import { isPipelineMonitoringSupportedInVersion } from '../../../lib/logstash/pipelines';
-// @ts-ignore
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { LogstashTemplate } from './logstash_template';
 import { useTable } from '../../hooks/use_table';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -43,7 +41,7 @@ export const LogStashPipelinesPage: React.FC<ComponentProps> = ({ clusters }) =>
     defaultMessage: 'Logstash pipelines',
   });
 
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();

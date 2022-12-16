@@ -18,11 +18,11 @@ export const putWatcher = async (watch, id, body, client, log) => {
   expect(putWatchResponse.body._version).to.eql('1');
 };
 export const getWatcher = async (watch, id, client, log, common, tryForTime) => {
-  await common.sleep(50000);
+  await common.sleep(10000);
   await tryForTime(
     250000,
     async () => {
-      await common.sleep(25000);
+      await common.sleep(3000);
 
       await watcherHistory(id, client, log);
 
@@ -31,7 +31,7 @@ export const getWatcher = async (watch, id, client, log, common, tryForTime) => 
       expect(getWatchResponse.body._id).to.eql(id);
       expect(getWatchResponse.body._version).to.be.above(1);
       log.debug(`\n getWatchResponse.body._version: ${getWatchResponse.body._version}`);
-      expect(getWatchResponse.body.status.execution_state).to.eql('executed');
+      expect(getWatchResponse.body.status.execution_state).to.eql('throttled');
       expect(getWatchResponse.body.status.actions.email_admin.last_execution.successful).to.eql(
         true
       );

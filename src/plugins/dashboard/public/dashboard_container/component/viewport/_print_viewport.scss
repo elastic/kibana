@@ -1,0 +1,68 @@
+@import './print_media/styling/index';
+
+$visualisationsPerPage: 2;
+$visPadding: 4mm;
+
+/*
+We set the same visual padding on the browser and print versions of the UI so that
+we don't hit a race condition where padding is being updated while the print image
+is being formed. This can result in parts of the vis being cut out.
+*/
+@mixin visualizationPadding {
+  // Open space from page margin
+  padding-left: $visPadding;
+  padding-right: $visPadding;
+
+  // Last vis on the page
+  &:nth-child(#{$visualisationsPerPage}n) {
+    page-break-after: always;
+    padding-top: $visPadding;
+    padding-bottom: $visPadding;
+  }
+
+  &:last-child {
+    page-break-after: avoid;
+  }
+}
+
+@media screen, projection {
+  .printViewport {
+    &__vis {
+      @include visualizationPadding();
+
+      & .embPanel__header button {
+        display: none;
+      }
+
+      margin: $euiSizeL auto;
+      height: calc(#{$a4PageContentHeight} / #{$visualisationsPerPage});
+      width: $a4PageContentWidth;
+      padding: $visPadding;
+    }
+  }
+}
+
+@media print {
+  .printViewport {
+    &__vis {
+      @include visualizationPadding();
+
+      height: calc(#{$a4PageContentHeight} / #{$visualisationsPerPage});
+      width: $a4PageContentWidth;
+
+      & .euiPanel {
+        box-shadow: none !important;
+      }
+
+      & .embPanel__header button {
+        display: none;
+      }
+
+      page-break-inside: avoid;
+
+      & * {
+        overflow: hidden !important;
+      }
+    }
+  }
+}

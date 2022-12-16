@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       };
 
       await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
-      await esDeleteAllIndices('/.monitoring-*');
+      await esDeleteAllIndices('.monitoring-*');
     });
 
     it('Monitoring enabled', async function () {

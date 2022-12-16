@@ -28,7 +28,7 @@ export default function ({ getService }) {
       };
 
       await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
-      await esDeleteAllIndices('/.monitoring-*');
+      await esDeleteAllIndices('.monitoring-*');
     });
 
     it('should set collection.enabled to true', async () => {

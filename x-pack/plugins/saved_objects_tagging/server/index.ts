@@ -9,6 +9,13 @@ import { PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectTaggingPlugin } from './plugin';
 
 export { config } from './config';
+export type {
+  SavedObjectTaggingStart,
+  CreateTagAssignmentServiceOptions,
+  CreateTagClientOptions,
+} from './types';
+export type { IAssignmentService } from './services';
+export type { ITagsClient } from '../common';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SavedObjectTaggingPlugin();

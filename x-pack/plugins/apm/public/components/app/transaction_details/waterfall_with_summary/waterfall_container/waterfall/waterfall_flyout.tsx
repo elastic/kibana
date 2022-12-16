@@ -34,28 +34,30 @@ export function WaterfallFlyout({
 
   switch (currentItem.docType) {
     case 'span':
-      const parentTransaction =
+      const parentTransactionId =
         currentItem.parent?.docType === 'transaction'
-          ? currentItem.parent?.doc
+          ? currentItem.parentId
           : undefined;
 
       return (
         <SpanFlyout
           totalDuration={waterfall.duration}
-          span={currentItem.doc}
-          parentTransaction={parentTransaction}
+          spanId={currentItem.id}
+          parentTransactionId={parentTransactionId}
+          traceId={currentItem.doc.trace.id}
           onClose={() => toggleFlyout({ history })}
+          spanLinksCount={currentItem.spanLinksCount}
         />
       );
     case 'transaction':
       return (
         <TransactionFlyout
-          transaction={currentItem.doc}
+          transactionId={currentItem.id}
+          traceId={currentItem.doc.trace.id}
           onClose={() => toggleFlyout({ history })}
-          rootTransactionDuration={
-            waterfall.rootTransaction?.transaction.duration.us
-          }
+          rootTransactionDuration={waterfall.rootWaterfallTransaction?.duration}
           errorCount={waterfall.getErrorCount(currentItem.id)}
+          spanLinksCount={currentItem.spanLinksCount}
         />
       );
     default:

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EffectScope } from '../../types';
+import type { EffectScope } from '../../types';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../artifacts/constants';
 
 /**

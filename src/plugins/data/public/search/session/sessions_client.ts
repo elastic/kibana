@@ -7,14 +7,17 @@
  */
 
 import { PublicContract } from '@kbn/utility-types';
-import { HttpSetup, SavedObjectsFindOptions } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import type {
   SavedObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+  SavedObjectsFindOptions,
 } from '@kbn/core/server';
-import type { SearchSessionSavedObjectAttributes } from '../../../common';
+import type {
+  SearchSessionSavedObjectAttributes,
+  SearchSessionsFindResponse,
+} from '../../../common';
 export type SearchSessionSavedObject = SavedObject<SearchSessionSavedObjectAttributes>;
 export type ISessionsClient = PublicContract<SessionsClient>;
 export interface SessionsClientDeps {
@@ -62,7 +65,7 @@ export class SessionsClient {
     });
   }
 
-  public find(options: Omit<SavedObjectsFindOptions, 'type'>): Promise<SavedObjectsFindResponse> {
+  public find(options: Omit<SavedObjectsFindOptions, 'type'>): Promise<SearchSessionsFindResponse> {
     return this.http!.post(`/internal/session/_find`, {
       body: JSON.stringify(options),
     });

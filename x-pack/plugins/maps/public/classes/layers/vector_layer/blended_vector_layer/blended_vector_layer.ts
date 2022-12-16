@@ -77,7 +77,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     }),
   ];
   clusterSourceDescriptor.id = documentSource.getId();
-  return new ESGeoGridSource(clusterSourceDescriptor, documentSource.getInspectorAdapters());
+  return new ESGeoGridSource(clusterSourceDescriptor);
 }
 
 function getClusterStyleDescriptor(
@@ -224,15 +224,6 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     this._isClustered = isClustered;
   }
 
-  destroy() {
-    if (this._documentSource) {
-      this._documentSource.destroy();
-    }
-    if (this._clusterSource) {
-      this._clusterSource.destroy();
-    }
-  }
-
   async getDisplayName(source?: ISource) {
     const displayName = await super.getDisplayName(source);
     return this._isClustered
@@ -259,8 +250,12 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     return false;
   }
 
-  async cloneDescriptor(): Promise<VectorLayerDescriptor> {
-    const clonedDescriptor = await super.cloneDescriptor();
+  async cloneDescriptor(): Promise<VectorLayerDescriptor[]> {
+    const clones = await super.cloneDescriptor();
+    if (clones.length === 0) {
+      return [];
+    }
+    const clonedDescriptor = clones[0];
 
     // Use super getDisplayName instead of instance getDisplayName to avoid getting 'Clustered Clone of Clustered'
     const displayName = await super.getDisplayName();
@@ -269,7 +264,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     // sourceDescriptor must be document source descriptor
     clonedDescriptor.sourceDescriptor = this._documentSource.cloneDescriptor();
 
-    return clonedDescriptor;
+    return [clonedDescriptor];
   }
 
   getSource(): IVectorSource {
@@ -298,7 +293,8 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       syncContext.isForceRefresh,
       syncContext.dataFilters,
       this.getSource(),
-      this.getCurrentStyle()
+      this.getCurrentStyle(),
+      syncContext.isFeatureEditorOpenForLayer
     );
     const source = this.getSource();
 

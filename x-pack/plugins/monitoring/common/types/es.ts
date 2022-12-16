@@ -6,6 +6,7 @@
  */
 
 export interface ElasticsearchResponse {
+  timed_out?: boolean;
   hits?: {
     hits: ElasticsearchResponseHit[];
     total: {
@@ -16,6 +17,7 @@ export interface ElasticsearchResponse {
 }
 
 export interface ElasticsearchResponseHit {
+  _id: string;
   _index: string;
   _source: ElasticsearchSource;
   inner_hits?: {
@@ -142,6 +144,14 @@ export interface ElasticsearchIndexStats {
   };
 }
 
+export interface ElasticsearchLogstashStatePipeline {
+  representation?: {
+    graph?: {
+      vertices?: ElasticsearchSourceLogstashPipelineVertex[];
+    };
+  };
+}
+
 export interface ElasticsearchLegacySource {
   timestamp: string;
   cluster_uuid: string;
@@ -204,13 +214,7 @@ export interface ElasticsearchLegacySource {
     expiry_date_in_millis?: number;
   };
   logstash_state?: {
-    pipeline?: {
-      representation?: {
-        graph?: {
-          vertices?: ElasticsearchSourceLogstashPipelineVertex[];
-        };
-      };
-    };
+    pipeline?: ElasticsearchLogstashStatePipeline;
   };
   logstash_stats?: {
     timestamp?: string;
@@ -412,6 +416,7 @@ export interface ElasticsearchIndexRecoveryShard {
 export interface ElasticsearchMetricbeatNode {
   name?: string;
   stats?: ElasticsearchNodeStats;
+  master: boolean;
 }
 
 export interface ElasticsearchMetricbeatSource {

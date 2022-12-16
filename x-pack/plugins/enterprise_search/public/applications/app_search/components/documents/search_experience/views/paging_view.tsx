@@ -10,14 +10,14 @@ import React from 'react';
 import { EuiPagination } from '@elastic/eui';
 
 interface Props {
-  current: number;
+  current?: number;
   totalPages: number;
   onChange(pageNumber: number): void;
   'aria-label': string;
 }
 
 export const PagingView: React.FC<Props> = ({
-  current,
+  current = 1,
   onChange,
   totalPages,
   'aria-label': ariaLabel,

@@ -12,15 +12,20 @@ import semverMajor from 'semver/functions/major';
 import semverMinor from 'semver/functions/minor';
 import semverPatch from 'semver/functions/patch';
 
-import { useKibanaVersion } from '../../hooks';
+import { useKibanaVersion, useStartServices } from '../../hooks';
 
 import type { K8sMode } from './types';
 
 interface Props {
   isK8s?: K8sMode;
+  isManaged?: boolean;
 }
 
-export const InstallationMessage: React.FunctionComponent<Props> = ({ isK8s }) => {
+export const InstallationMessage: React.FunctionComponent<Props> = ({
+  isK8s,
+  isManaged = true,
+}) => {
+  const { docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion();
   const kibanaVersionURLString = useMemo(
     () =>
@@ -30,13 +35,8 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({ isK8s }) =
 
   return (
     <>
-      <EuiText>
-        {isK8s === 'IS_KUBERNETES' ? (
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.stepRunAgentDescriptionk8s"
-            defaultMessage="From the directory where the Kubernetes manifest is downloaded, run the apply command."
-          />
-        ) : (
+      {isK8s !== 'IS_KUBERNETES_MULTIPAGE' && (
+        <EuiText>
           <FormattedMessage
             id="xpack.fleet.enrollmentInstructions.installationMessage"
             defaultMessage="Select the appropriate platform and run commands to install, enroll, and start Elastic Agent. Reuse commands to set up agents on more than one host. For aarch64, see our {downloadLink}. For additional guidance, see our {installationLink}."
@@ -57,7 +57,11 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({ isK8s }) =
                 <EuiLink
                   target="_blank"
                   external
-                  href="https://www.elastic.co/guide/en/fleet/current/elastic-agent-installation.html"
+                  href={
+                    isManaged
+                      ? docLinks.links.fleet.installElasticAgent
+                      : docLinks.links.fleet.installElasticAgentStandalone
+                  }
                 >
                   <FormattedMessage
                     id="xpack.fleet.enrollmentInstructions.installationMessage.link"
@@ -67,8 +71,16 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({ isK8s }) =
               ),
             }}
           />
-        )}
-      </EuiText>
+        </EuiText>
+      )}
+      {isK8s === 'IS_KUBERNETES_MULTIPAGE' && (
+        <EuiText>
+          <FormattedMessage
+            id="xpack.fleet.enrollmentInstructions.k8sInstallationMessage"
+            defaultMessage="The below manifest has been automatically generated and includes credentials for this instance of Elastic Agent to be centrally managed using Fleet once it gets running in your Kubernetes cluster."
+          />
+        </EuiText>
+      )}
       <EuiSpacer size="l" />
     </>
   );

@@ -6,17 +6,16 @@
  */
 
 import React, { useMemo } from 'react';
-import { Span } from '../../../../../typings/es_schemas/ui/span';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getSectionsFromFields } from '../helper';
 import { MetadataTable } from '..';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 
 interface Props {
-  span: Span;
+  spanId: string;
 }
 
-export function SpanMetadata({ span }: Props) {
+export function SpanMetadata({ spanId }: Props) {
   const { data: spanEvent, status } = useFetcher(
     (callApmApi) => {
       return callApmApi(
@@ -25,13 +24,13 @@ export function SpanMetadata({ span }: Props) {
           params: {
             path: {
               processorEvent: ProcessorEvent.span,
-              id: span.span.id,
+              id: spanId,
             },
           },
         }
       );
     },
-    [span.span.id]
+    [spanId]
   );
 
   const sections = useMemo(

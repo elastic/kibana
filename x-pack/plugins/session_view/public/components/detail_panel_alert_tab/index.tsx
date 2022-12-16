@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
-import { EuiEmptyPrompt, EuiButtonGroup, EuiHorizontalRule } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButtonGroup, EuiHorizontalRule, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { groupBy } from 'lodash';
@@ -20,6 +20,9 @@ export const VIEW_MODE_TOGGLE = 'sessionView:detailPanelAlertsViewMode';
 
 interface DetailPanelAlertTabDeps {
   alerts: ProcessEvent[];
+  isFetchingAlerts: boolean;
+  hasNextPageAlerts?: boolean;
+  fetchNextPageAlerts: () => void;
   onJumpToEvent: (event: ProcessEvent) => void;
   onShowAlertDetails: (alertId: string) => void;
   investigatedAlertId?: string;
@@ -33,6 +36,9 @@ const VIEW_MODE_GROUP = 'groupView';
  */
 export const DetailPanelAlertTab = ({
   alerts,
+  isFetchingAlerts,
+  hasNextPageAlerts,
+  fetchNextPageAlerts,
   onJumpToEvent,
   onShowAlertDetails,
   investigatedAlertId,
@@ -147,6 +153,21 @@ export const DetailPanelAlertTab = ({
               );
             }
           })}
+
+      {hasNextPageAlerts && (
+        <EuiButton
+          color="primary"
+          isLoading={isFetchingAlerts}
+          onClick={fetchNextPageAlerts}
+          css={styles.loadMoreBtn}
+          data-test-subj="alerts-details-load-more"
+        >
+          <FormattedMessage
+            id="xpack.sessionView.alertsLoadMoreButton"
+            defaultMessage="Load more alerts"
+          />
+        </EuiButton>
+      )}
     </div>
   );
 };

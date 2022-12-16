@@ -13,10 +13,10 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 
-import type { ESSearchResponse as SearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse as SearchResponse } from '@kbn/es-types';
 
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
-import { IngestManagerError } from '../../errors';
+import { FleetError } from '../../errors';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
@@ -193,7 +193,7 @@ export async function generateEnrollmentAPIKey(
         k.name?.replace(providedKeyName, '').trim().match(uuidRegex)
       )
     ) {
-      throw new IngestManagerError(
+      throw new FleetError(
         i18n.translate('xpack.fleet.serverError.enrollmentKeyDuplicate', {
           defaultMessage:
             'An enrollment key named {providedKeyName} already exists for agent policy {agentPolicyId}',
@@ -268,6 +268,24 @@ export async function generateEnrollmentAPIKey(
     id: res._id,
     ...body,
   };
+}
+
+export async function ensureDefaultEnrollmentAPIKeyForAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentPolicyId: string
+) {
+  const hasKey = await hasEnrollementAPIKeysForPolicy(esClient, agentPolicyId);
+
+  if (hasKey) {
+    return;
+  }
+
+  return generateEnrollmentAPIKey(soClient, esClient, {
+    name: `Default`,
+    agentPolicyId,
+    forceRecreate: true, // Always generate a new enrollment key when Fleet is being set up
+  });
 }
 
 function getQueryForExistingKeyNameOnPolicy(agentPolicyId: string, providedKeyName: string) {

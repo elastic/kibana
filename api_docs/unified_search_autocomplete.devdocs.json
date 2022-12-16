@@ -1,0 +1,280 @@
+{
+  "id": "unifiedSearch.autocomplete",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.QuerySuggestionGetFnArgs",
+        "type": "Interface",
+        "tags": [],
+        "label": "QuerySuggestionGetFnArgs",
+        "description": [],
+        "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QuerySuggestionGetFnArgs.language",
+            "type": "string",
+            "tags": [],
+            "label": "language",
+            "description": [],
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QuerySuggestionGetFnArgs.indexPatterns",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QuerySuggestionGetFnArgs.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QuerySuggestionGetFnArgs.selectionStart",
+            "type": "number",
+            "tags": [],
+            "label": "selectionStart",
+            "description": [],
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QuerySuggestionGetFnArgs.selectionEnd",
+            "type": "number",
+            "tags": [],
+            "label": "selectionEnd",
+            "description": [],
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QuerySuggestionGetFnArgs.signal",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QuerySuggestionGetFnArgs.useTimeRange",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useTimeRange",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QuerySuggestionGetFnArgs.boolFilter",
+            "type": "Any",
+            "tags": [],
+            "label": "boolFilter",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QuerySuggestionGetFnArgs.method",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "method",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ValueSuggestionsMethod",
+                "text": "ValueSuggestionsMethod"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.QuerySuggestionTypes",
+        "type": "Enum",
+        "tags": [],
+        "label": "QuerySuggestionTypes",
+        "description": [],
+        "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.AutocompleteStart",
+        "type": "Type",
+        "tags": [],
+        "label": "AutocompleteStart",
+        "description": [],
+        "signature": [
+          "{ getQuerySuggestions: ",
+          {
+            "pluginId": "unifiedSearch",
+            "scope": "public",
+            "docId": "kibUnifiedSearchAutocompletePluginApi",
+            "section": "def-public.QuerySuggestionGetFn",
+            "text": "QuerySuggestionGetFn"
+          },
+          "; hasQuerySuggestions: (language: string) => boolean; getValueSuggestions: ",
+          "ValueSuggestionsGetFn",
+          "; }"
+        ],
+        "path": "src/plugins/unified_search/public/autocomplete/autocomplete_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.QuerySuggestion",
+        "type": "Type",
+        "tags": [],
+        "label": "QuerySuggestion",
+        "description": [],
+        "signature": [
+          "QuerySuggestionBasic",
+          " | ",
+          "QuerySuggestionField"
+        ],
+        "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.QuerySuggestionGetFn",
+        "type": "Type",
+        "tags": [],
+        "label": "QuerySuggestionGetFn",
+        "description": [],
+        "signature": [
+          "(args: ",
+          {
+            "pluginId": "unifiedSearch",
+            "scope": "public",
+            "docId": "kibUnifiedSearchAutocompletePluginApi",
+            "section": "def-public.QuerySuggestionGetFnArgs",
+            "text": "QuerySuggestionGetFnArgs"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "unifiedSearch",
+            "scope": "public",
+            "docId": "kibUnifiedSearchAutocompletePluginApi",
+            "section": "def-public.QuerySuggestion",
+            "text": "QuerySuggestion"
+          },
+          "[]> | undefined"
+        ],
+        "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QuerySuggestionGetFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchAutocompletePluginApi",
+                "section": "def-public.QuerySuggestionGetFnArgs",
+                "text": "QuerySuggestionGetFnArgs"
+              }
+            ],
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

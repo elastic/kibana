@@ -6,6 +6,7 @@
  */
 
 import {
+  TIMESTAMP,
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -48,5 +49,6 @@ export const parseAlert =
       fields: parsedFields,
       active: parsedFields[ALERT_STATUS] === ALERT_STATUS_ACTIVE,
       start: new Date(parsedFields[ALERT_START] ?? 0).getTime(),
+      lastUpdated: new Date(parsedFields[TIMESTAMP] ?? 0).getTime(),
     };
   };

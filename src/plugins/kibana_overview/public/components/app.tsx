@@ -49,7 +49,7 @@ export const KibanaOverviewApp = ({
       <I18nProvider>
         <Switch>
           <Route exact path="/">
-            <Overview newsFetchResult={newsFetchResult} solutions={solutions} features={features} />
+            <Overview {...{ newsFetchResult, solutions, features }} />
           </Route>
         </Switch>
       </I18nProvider>

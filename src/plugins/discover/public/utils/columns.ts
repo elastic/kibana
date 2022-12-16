@@ -18,11 +18,11 @@ const SOURCE_ONLY = ['_source'];
  * 1) no columns are given
  * 2) Just one column is given, which is the configured timefields
  */
-export function getDisplayedColumns(stateColumns: string[] = [], indexPattern: DataView) {
+export function getDisplayedColumns(stateColumns: string[] = [], dataView: DataView) {
   return stateColumns &&
     stateColumns.length > 0 &&
     // check if all columns where removed except the configured timeField (this can't be removed)
-    !(stateColumns.length === 1 && stateColumns[0] === indexPattern.timeFieldName)
+    !(stateColumns.length === 1 && stateColumns[0] === dataView.timeFieldName)
     ? stateColumns
     : SOURCE_ONLY;
 }

@@ -9,13 +9,13 @@ import { of } from 'rxjs';
 import { LocationDescriptorObject } from 'history';
 
 import {
-  docLinksServiceMock,
   uiSettingsServiceMock,
   notificationServiceMock,
   httpServiceMock,
   scopedHistoryMock,
-  executionContextServiceMock,
 } from '@kbn/core/public/mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { AppDeps } from '../../../public/application/app';
 import { LicenseStatus } from '../../../common/types/license_status';
 

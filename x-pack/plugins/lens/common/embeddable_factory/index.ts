@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { SerializableRecord, Serializable } from '@kbn/utility-types';
-import { SavedObjectReference } from '@kbn/core/types';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
+import type { SerializableRecord, Serializable } from '@kbn/utility-types';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type {
+  EmbeddableStateWithType,
+  EmbeddableRegistryDefinition,
+} from '@kbn/embeddable-plugin/common';
 
 export type LensEmbeddablePersistableState = EmbeddableStateWithType & {
   attributes: SerializableRecord;

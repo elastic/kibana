@@ -12,40 +12,30 @@
  * 2.0.
  */
 import uuid from 'uuid';
-import { journey, step, expect, after, before, Page } from '@elastic/synthetics';
+import { journey, step, expect, after, Page } from '@elastic/synthetics';
 import { monitorManagementPageProvider } from '../page_objects/monitor_management';
 
 journey('MonitorDetails', async ({ page, params }: { page: Page; params: any }) => {
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const name = `Test monitor ${uuid.v4()}`;
 
-  before(async () => {
-    await uptime.waitForLoadingToFinish();
-  });
-
   after(async () => {
     await uptime.enableMonitorManagement(false);
   });
 
   step('Go to monitor-management', async () => {
-    await uptime.navigateToMonitorManagement();
-  });
-
-  step('login to Kibana', async () => {
-    await uptime.loginToKibana();
-    const invalid = await page.locator(`text=Username or password is incorrect. Please try again.`);
-    expect(await invalid.isVisible()).toBeFalsy();
+    await uptime.navigateToMonitorManagement(true);
   });
 
   step('create basic monitor', async () => {
     await uptime.enableMonitorManagement();
     await uptime.clickAddMonitor();
-    await uptime.createBasicMonitorDetails({
+    await uptime.createBasicHTTPMonitorDetails({
       name,
       locations: ['US Central'],
       apmServiceName: 'synthetics',
+      url: 'https://www.google.com',
     });
-    await uptime.fillByTestSubj('syntheticsUrlField', 'https://www.google.com');
     await uptime.confirmAndSave();
   });
 

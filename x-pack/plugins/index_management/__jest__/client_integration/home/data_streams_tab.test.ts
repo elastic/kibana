@@ -238,7 +238,7 @@ describe('Data Streams tab', () => {
       const { table, actions } = testBed;
       await actions.clickIndicesAt(0);
       expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
-        ['', '', '', '', '', '', '', 'dataStream1'],
+        ['', 'data-stream-index', '', '', '', '', '', '', 'dataStream1'],
       ]);
     });
 
@@ -374,7 +374,7 @@ describe('Data Streams tab', () => {
         const { table, actions } = testBed;
         await actions.clickIndicesAt(0);
         expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
-          ['', '', '', '', '', '', '', '%dataStream'],
+          ['', 'data-stream-index', '', '', '', '', '', '', '%dataStream'],
         ]);
       });
     });

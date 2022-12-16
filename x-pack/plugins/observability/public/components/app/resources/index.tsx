@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiTitle } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiListGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -42,7 +42,7 @@ const resources = [
 
 export function Resources() {
   return (
-    <EuiFlexGroup direction="column" alignItems="flexStart">
+    <EuiFlexGrid direction="row">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h4>
@@ -53,6 +53,6 @@ export function Resources() {
         </EuiTitle>
       </EuiFlexItem>
       <EuiListGroup flush listItems={resources} data-test-subj="listGroup" size="s" />
-    </EuiFlexGroup>
+    </EuiFlexGrid>
   );
 }

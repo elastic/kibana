@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-avatar-solution",
+  "owner": "@elastic/kibana-global-experience",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

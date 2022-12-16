@@ -1,0 +1,6 @@
+{
+  "password": "changeme",
+  "roles": ["admin"],
+  "full_name": "Admin",
+  "email": "osquery@example.com"
+}

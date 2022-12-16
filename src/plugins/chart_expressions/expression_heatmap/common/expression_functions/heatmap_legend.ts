@@ -7,16 +7,11 @@
  */
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { EXPRESSION_HEATMAP_LEGEND_NAME } from '../constants';
-import { HeatmapLegendConfig, HeatmapLegendConfigResult } from '../types';
+import { HeatmapLegendExpressionFunctionDefinition } from '../types';
 
-export const heatmapLegendConfig: ExpressionFunctionDefinition<
-  typeof EXPRESSION_HEATMAP_LEGEND_NAME,
-  null,
-  HeatmapLegendConfig,
-  HeatmapLegendConfigResult
-> = {
+export const heatmapLegendConfig: HeatmapLegendExpressionFunctionDefinition = {
   name: EXPRESSION_HEATMAP_LEGEND_NAME,
   aliases: [],
   type: EXPRESSION_HEATMAP_LEGEND_NAME,
@@ -52,10 +47,19 @@ export const heatmapLegendConfig: ExpressionFunctionDefinition<
       }),
     },
     legendSize: {
-      types: ['number'],
+      types: ['string'],
+      default: DEFAULT_LEGEND_SIZE,
       help: i18n.translate('expressionHeatmap.function.args.legendSize.help', {
-        defaultMessage: 'Specifies the legend size in pixels.',
+        defaultMessage: 'Specifies the legend size.',
       }),
+      options: [
+        LegendSize.AUTO,
+        LegendSize.SMALL,
+        LegendSize.MEDIUM,
+        LegendSize.LARGE,
+        LegendSize.EXTRA_LARGE,
+      ],
+      strict: true,
     },
   },
   fn(input, args) {

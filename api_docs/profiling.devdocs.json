@@ -1,0 +1,261 @@
+{
+  "id": "profiling",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "profiling",
+        "id": "def-server.ProfilingConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ProfilingConfig",
+        "description": [],
+        "signature": [
+          "{ readonly elasticsearch?: Readonly<{} & { username: string; password: string; hosts: string; }> | undefined; readonly enabled: boolean; }"
+        ],
+        "path": "x-pack/plugins/profiling/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "profiling",
+      "id": "def-server.ProfilingPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ProfilingPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/profiling/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "profiling",
+      "id": "def-server.ProfilingPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ProfilingPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/profiling/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "profiling",
+        "id": "def-common.fromMapToRecord",
+        "type": "Function",
+        "tags": [],
+        "label": "fromMapToRecord",
+        "description": [],
+        "signature": [
+          "(m: Map<K, V>) => Record<string, V>"
+        ],
+        "path": "x-pack/plugins/profiling/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "profiling",
+            "id": "def-common.fromMapToRecord.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "m",
+            "description": [],
+            "signature": [
+              "Map<K, V>"
+            ],
+            "path": "x-pack/plugins/profiling/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profiling",
+        "id": "def-common.getRoutePaths",
+        "type": "Function",
+        "tags": [],
+        "label": "getRoutePaths",
+        "description": [],
+        "signature": [
+          "() => { TopN: string; TopNContainers: string; TopNDeployments: string; TopNFunctions: string; TopNHosts: string; TopNThreads: string; TopNTraces: string; Flamechart: string; CacheExecutables: string; CacheStackFrames: string; }"
+        ],
+        "path": "x-pack/plugins/profiling/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profiling",
+        "id": "def-common.timeRangeFromRequest",
+        "type": "Function",
+        "tags": [],
+        "label": "timeRangeFromRequest",
+        "description": [],
+        "signature": [
+          "(request: any) => [number, number]"
+        ],
+        "path": "x-pack/plugins/profiling/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "profiling",
+            "id": "def-common.timeRangeFromRequest.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/profiling/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "profiling",
+        "id": "def-common.INDEX_EVENTS",
+        "type": "string",
+        "tags": [],
+        "label": "INDEX_EVENTS",
+        "description": [],
+        "signature": [
+          "\"profiling-events-all\""
+        ],
+        "path": "x-pack/plugins/profiling/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profiling",
+        "id": "def-common.INDEX_EXECUTABLES",
+        "type": "string",
+        "tags": [],
+        "label": "INDEX_EXECUTABLES",
+        "description": [],
+        "signature": [
+          "\"profiling-executables\""
+        ],
+        "path": "x-pack/plugins/profiling/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profiling",
+        "id": "def-common.INDEX_FRAMES",
+        "type": "string",
+        "tags": [],
+        "label": "INDEX_FRAMES",
+        "description": [],
+        "signature": [
+          "\"profiling-stackframes\""
+        ],
+        "path": "x-pack/plugins/profiling/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profiling",
+        "id": "def-common.INDEX_TRACES",
+        "type": "string",
+        "tags": [],
+        "label": "INDEX_TRACES",
+        "description": [],
+        "signature": [
+          "\"profiling-stacktraces\""
+        ],
+        "path": "x-pack/plugins/profiling/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profiling",
+        "id": "def-common.NOT_AVAILABLE_LABEL",
+        "type": "Any",
+        "tags": [],
+        "label": "NOT_AVAILABLE_LABEL",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/plugins/profiling/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profiling",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"profiling\""
+        ],
+        "path": "x-pack/plugins/profiling/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "profiling",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"profiling\""
+        ],
+        "path": "x-pack/plugins/profiling/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -2,7 +2,7 @@
 id: kibDevAnatomyOfAPlugin
 slug: /kibana-dev-docs/key-concepts/anatomy-of-a-plugin
 title: Anatomy of a plugin
-summary: Anatomy of a Kibana plugin.
+description: Anatomy of a Kibana plugin.
 date: 2021-08-03
 tags: ['kibana', 'onboarding', 'dev']
 ---
@@ -122,7 +122,7 @@ If you are developing in TypeScript (which we recommend), you will need to add a
 core capabilities as an argument. It should return an instance of its plugin class for Kibana to load.
 
 ```ts
-import type { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { DemoPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -156,7 +156,7 @@ Using the non-`type` variation will increase the bundle size unnecessarily and m
 point, but all plugins at Elastic should be consistent in this way.
 
 ```ts
-import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
+import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from '@kbn/core/server';
 
 export class DemoPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
@@ -184,7 +184,7 @@ export class DemoPlugin implements Plugin {
 `server/plugin.ts` is the server-side plugin definition. The shape of this plugin is the same as it’s client-side counter-part:
 
 ```ts
-import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
+import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from '@kbn/core/server';
 
 export class DemoPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
@@ -240,7 +240,7 @@ For example, the core http service exposes a function createRouter to all plugin
 a plugin just accesses it off of the first argument:
 
 ```ts
-import type { CoreSetup } from 'kibana/server';
+import type { CoreSetup } from '@kbn/core/server';
 
 export class DemoPlugin {
   public setup(core: CoreSetup) {
@@ -260,7 +260,7 @@ dependency in it’s kibana.json manifest file.
 ** foobar plugin.ts: **
 
 ```ts
-import type { Plugin } from 'kibana/server';
+import type { Plugin } from '@kbn/core/server';
 // [1]
 export interface FoobarPluginSetup {
   getFoo(): string;
@@ -306,7 +306,7 @@ export class MyPlugin implements Plugin<FoobarPluginSetup, FoobarPluginStart> {
 With that specified in the plugin manifest, the appropriate interfaces are then available via the second argument of setup and/or start:
 
 ```ts
-import type { CoreSetup, CoreStart } from 'kibana/server';
+import type { CoreSetup, CoreStart } from '@kbn/core/server';
 import type { FoobarPluginSetup, FoobarPluginStart } from '../../foobar/server';
 
 // [1]

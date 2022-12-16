@@ -11,7 +11,7 @@ export default async function ({ readConfigFile }) {
     require.resolve('../../../test/api_integration/config.js')
   );
   const xPackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.js')
+    require.resolve('../functional/config.base.js')
   );
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')

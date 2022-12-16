@@ -7,13 +7,14 @@
 
 import { getApmsForClusters } from '../../../../lib/apm/get_apms_for_clusters';
 import { LegacyRequest } from '../../../../types';
+import { ClusterUuid } from '../../../../../common/http_api/shared';
 
 export const getApmClusterStatus = (
   req: LegacyRequest,
   {
     clusterUuid,
   }: {
-    clusterUuid: string;
+    clusterUuid: ClusterUuid;
   }
 ) => {
   const clusters = [{ cluster_uuid: clusterUuid }];

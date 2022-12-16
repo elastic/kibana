@@ -1,0 +1,646 @@
+{
+  "id": "@kbn/home-sample-data-card",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/home-sample-data-card",
+        "id": "def-common.getMockDataSet",
+        "type": "Function",
+        "tags": [],
+        "label": "getMockDataSet",
+        "description": [
+          "\nCustomize the Sample Data Set mock."
+        ],
+        "signature": [
+          "(params?: Partial<",
+          "SampleDataSet",
+          ">) => { appLinks: ",
+          "AppLink",
+          "[]; defaultIndex: string; description: string; id: string; name: string; overviewDashboard: string; previewImagePath: string; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; status?: ",
+          "InstalledStatus",
+          " | undefined; statusMsg?: string | undefined; }"
+        ],
+        "path": "packages/home/sample_data_card/src/mocks/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.getMockDataSet.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "SampleDataSet",
+              ">"
+            ],
+            "path": "packages/home/sample_data_card/src/mocks/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-card",
+        "id": "def-common.getStoryArgTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "getStoryArgTypes",
+        "description": [
+          "\nReturns the Storybook arguments for `SampleDataCard`, for its stories and for\nconsuming component stories."
+        ],
+        "signature": [
+          "() => { name: { control: { type: string; }; defaultValue: string; }; description: { control: { type: string; }; defaultValue: string; }; status: { options: (string | undefined)[]; control: { type: string; }; defaultValue: ",
+          "InstalledStatus",
+          " | undefined; }; includeAppLinks: { control: string; defaultValue: boolean; }; simulateErrors: { control: string; defaultValue: boolean; }; }"
+        ],
+        "path": "packages/home/sample_data_card/src/mocks/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-card",
+        "id": "def-common.getStoryServices",
+        "type": "Function",
+        "tags": [],
+        "label": "getStoryServices",
+        "description": [
+          "\nReturns Storybook-compatible service abstractions for the `SampleDataCard` Provider."
+        ],
+        "signature": [
+          "(params: ",
+          {
+            "pluginId": "@kbn/home-sample-data-card",
+            "scope": "common",
+            "docId": "kibKbnHomeSampleDataCardPluginApi",
+            "section": "def-common.Params",
+            "text": "Params"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/home-sample-data-card",
+            "scope": "common",
+            "docId": "kibKbnHomeSampleDataCardPluginApi",
+            "section": "def-common.Services",
+            "text": "Services"
+          }
+        ],
+        "path": "packages/home/sample_data_card/src/mocks/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.getStoryServices.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/home-sample-data-card",
+                "scope": "common",
+                "docId": "kibKbnHomeSampleDataCardPluginApi",
+                "section": "def-common.Params",
+                "text": "Params"
+              }
+            ],
+            "path": "packages/home/sample_data_card/src/mocks/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-card",
+        "id": "def-common.SampleDataCard",
+        "type": "Function",
+        "tags": [],
+        "label": "SampleDataCard",
+        "description": [
+          "\nA card representing a Sample Data Set that can be installed.  Uses Kibana services to\ndisplay and install the data set.  Requires a `SampleDataCardProvider` to render and\nfunction."
+        ],
+        "signature": [
+          "({ sampleDataSet, onStatusChange }: ",
+          {
+            "pluginId": "@kbn/home-sample-data-card",
+            "scope": "common",
+            "docId": "kibKbnHomeSampleDataCardPluginApi",
+            "section": "def-common.Props",
+            "text": "Props"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.SampleDataCard.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ sampleDataSet, onStatusChange }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/home-sample-data-card",
+                "scope": "common",
+                "docId": "kibKbnHomeSampleDataCardPluginApi",
+                "section": "def-common.Props",
+                "text": "Props"
+              }
+            ],
+            "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-card",
+        "id": "def-common.SampleDataCardKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "SampleDataCardKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps dependencies to services."
+        ],
+        "signature": [
+          "({ children, ...dependencies }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/home-sample-data-card",
+            "scope": "common",
+            "docId": "kibKbnHomeSampleDataCardPluginApi",
+            "section": "def-common.KibanaDependencies",
+            "text": "KibanaDependencies"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/home/sample_data_card/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.SampleDataCardKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...dependencies\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/home-sample-data-card",
+                "scope": "common",
+                "docId": "kibKbnHomeSampleDataCardPluginApi",
+                "section": "def-common.KibanaDependencies",
+                "text": "KibanaDependencies"
+              },
+              ">"
+            ],
+            "path": "packages/home/sample_data_card/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-card",
+        "id": "def-common.SampleDataCardProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "SampleDataCardProvider",
+        "description": [
+          "\nA Context Provider that provides services to the component and its dependencies."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/home-sample-data-card",
+            "scope": "common",
+            "docId": "kibKbnHomeSampleDataCardPluginApi",
+            "section": "def-common.Services",
+            "text": "Services"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/home/sample_data_card/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.SampleDataCardProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ children, ...services }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/home-sample-data-card",
+                "scope": "common",
+                "docId": "kibKbnHomeSampleDataCardPluginApi",
+                "section": "def-common.Services",
+                "text": "Services"
+              },
+              ">"
+            ],
+            "path": "packages/home/sample_data_card/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/home-sample-data-card",
+        "id": "def-common.KibanaDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaDependencies",
+        "description": [],
+        "path": "packages/home/sample_data_card/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.KibanaDependencies.coreStart",
+            "type": "Object",
+            "tags": [],
+            "label": "coreStart",
+            "description": [],
+            "signature": [
+              "{ application: { navigateToUrl: NavigateToUrl; }; http: { basePath: { prepend: (path: string) => string; }; delete: (path: string) => Promise<unknown>; post: (path: string) => Promise<unknown>; }; notifications: { toasts: { addDanger: NotifyFn; addSuccess: NotifyFn; }; }; uiSettings: { get: (key: string, defaultOverride?: any) => any; isDefault: (key: string) => boolean; set: (key: string, value: any) => Promise<boolean>; }; }"
+            ],
+            "path": "packages/home/sample_data_card/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.KibanaDependencies.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              "{ clearCache: () => void; }"
+            ],
+            "path": "packages/home/sample_data_card/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-card",
+        "id": "def-common.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [
+          "\nProps for the `SampleDataCard` component."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/home-sample-data-card",
+            "scope": "common",
+            "docId": "kibKbnHomeSampleDataCardPluginApi",
+            "section": "def-common.Props",
+            "text": "Props"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "@kbn/home-sample-data-card",
+            "scope": "common",
+            "docId": "kibKbnHomeSampleDataCardPluginApi",
+            "section": "def-common.Props",
+            "text": "Props"
+          },
+          ", \"onStatusChange\">"
+        ],
+        "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.Props.sampleDataSet",
+            "type": "Object",
+            "tags": [],
+            "label": "sampleDataSet",
+            "description": [
+              "A Sample Data Set to display."
+            ],
+            "signature": [
+              "SampleDataSet"
+            ],
+            "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-card",
+        "id": "def-common.Services",
+        "type": "Interface",
+        "tags": [],
+        "label": "Services",
+        "description": [
+          "\nA list of services that are consumed by this component."
+        ],
+        "path": "packages/home/sample_data_card/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.Services.addBasePath",
+            "type": "Function",
+            "tags": [],
+            "label": "addBasePath",
+            "description": [],
+            "signature": [
+              "(path: string) => string"
+            ],
+            "path": "packages/home/sample_data_card/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/home-sample-data-card",
+                "id": "def-common.Services.addBasePath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/home/sample_data_card/src/services.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.Services.getAppNavigationHandler",
+            "type": "Function",
+            "tags": [],
+            "label": "getAppNavigationHandler",
+            "description": [],
+            "signature": [
+              "(path: string) => React.MouseEventHandler<Element>"
+            ],
+            "path": "packages/home/sample_data_card/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/home-sample-data-card",
+                "id": "def-common.Services.getAppNavigationHandler.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/home/sample_data_card/src/services.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.Services.installSampleDataSet",
+            "type": "Function",
+            "tags": [],
+            "label": "installSampleDataSet",
+            "description": [],
+            "signature": [
+              "(id: string, defaultIndex: string) => Promise<void>"
+            ],
+            "path": "packages/home/sample_data_card/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/home-sample-data-card",
+                "id": "def-common.Services.installSampleDataSet.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/home/sample_data_card/src/services.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/home-sample-data-card",
+                "id": "def-common.Services.installSampleDataSet.$2",
+                "type": "string",
+                "tags": [],
+                "label": "defaultIndex",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/home/sample_data_card/src/services.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.Services.notifyError",
+            "type": "Function",
+            "tags": [],
+            "label": "notifyError",
+            "description": [],
+            "signature": [
+              "(notification: NotifyInput) => void"
+            ],
+            "path": "packages/home/sample_data_card/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/home-sample-data-card",
+                "id": "def-common.Services.notifyError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "notification",
+                "description": [],
+                "signature": [
+                  "string | NotifyInputFields"
+                ],
+                "path": "packages/home/sample_data_card/src/services.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.Services.notifySuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "notifySuccess",
+            "description": [],
+            "signature": [
+              "(notification: NotifyInput) => void"
+            ],
+            "path": "packages/home/sample_data_card/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/home-sample-data-card",
+                "id": "def-common.Services.notifySuccess.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "notification",
+                "description": [],
+                "signature": [
+                  "string | NotifyInputFields"
+                ],
+                "path": "packages/home/sample_data_card/src/services.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.Services.removeSampleDataSet",
+            "type": "Function",
+            "tags": [],
+            "label": "removeSampleDataSet",
+            "description": [],
+            "signature": [
+              "(id: string, defaultIndex: string) => Promise<void>"
+            ],
+            "path": "packages/home/sample_data_card/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/home-sample-data-card",
+                "id": "def-common.Services.removeSampleDataSet.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/home/sample_data_card/src/services.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/home-sample-data-card",
+                "id": "def-common.Services.removeSampleDataSet.$2",
+                "type": "string",
+                "tags": [],
+                "label": "defaultIndex",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/home/sample_data_card/src/services.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/home-sample-data-card",
+        "id": "def-common.Params",
+        "type": "Type",
+        "tags": [],
+        "label": "Params",
+        "description": [
+          "\nParameters drawn from the Storybook arguments collection that customize a component story."
+        ],
+        "signature": [
+          "{ name: any; description: any; status: any; includeAppLinks: any; simulateErrors: any; }"
+        ],
+        "path": "packages/home/sample_data_card/src/mocks/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -11,7 +11,7 @@ import { Project } from 'ts-morph';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { PluginApi, PluginOrPackage } from '../types';
-import { getKibanaPlatformPlugin } from '../tests/kibana_platform_plugin_mock';
+import { getKibanaPlatformPlugin } from '../integration_tests/kibana_platform_plugin_mock';
 import { getPluginApi } from '../get_plugin_api';
 import { splitApisByFolder } from './write_plugin_split_by_folder';
 
@@ -23,7 +23,10 @@ const log = new ToolingLog({
 let doc: PluginApi;
 
 beforeAll(() => {
-  const tsConfigFilePath = Path.resolve(__dirname, '../tests/__fixtures__/src/tsconfig.json');
+  const tsConfigFilePath = Path.resolve(
+    __dirname,
+    '../integration_tests/__fixtures__/src/tsconfig.json'
+  );
   const project = new Project({
     tsConfigFilePath,
   });
@@ -38,7 +41,7 @@ beforeAll(() => {
 });
 
 test('foo service has all exports', () => {
-  expect(doc?.client.length).toBe(37);
+  expect(doc?.client.length).toBe(38);
   const split = splitApisByFolder(doc);
   expect(split.length).toBe(2);
 
@@ -47,5 +50,5 @@ test('foo service has all exports', () => {
 
   expect(fooDoc?.common.length).toBe(1);
   expect(fooDoc?.client.length).toBe(2);
-  expect(mainDoc?.client.length).toBe(35);
+  expect(mainDoc?.client.length).toBe(36);
 });

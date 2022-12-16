@@ -8,18 +8,28 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function spaceSelectorFunctonalTests({
+export default function spaceSelectorFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kbnServer = getService('kibanaServer');
   const spaces = getService('spaces');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['security', 'settings', 'copySavedObjectsToSpace']);
+  const log = getService('log');
 
   describe('Copy Saved Objects to Space', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/spaces/copy_saved_objects');
+      log.debug('Loading test data for the following spaces: default, sales');
+      await Promise.all([
+        kbnServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/spaces/copy_saved_objects_default_space.json'
+        ),
+        kbnServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/spaces/copy_saved_objects_sales_space.json',
+          { space: 'sales' }
+        ),
+      ]);
 
       await spaces.create({
         id: 'marketing',
@@ -43,9 +53,15 @@ export default function spaceSelectorFunctonalTests({
     });
 
     after(async () => {
+      log.debug('Removing data from the following spaces: default, sales');
+      await Promise.all(
+        ['default', 'sales'].map((spaceId) =>
+          kbnServer.savedObjects.cleanStandardList({ space: spaceId })
+        )
+      );
+
       await spaces.delete('sales');
       await spaces.delete('marketing');
-      await esArchiver.unload('x-pack/test/functional/es_archives/spaces/copy_saved_objects');
     });
 
     it('allows a dashboard to be copied to the marketing space, with all references', async () => {

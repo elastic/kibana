@@ -6,7 +6,6 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { testRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
@@ -16,7 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...kibanaCommonTestsConfig.getAll(),
 
-    testRunner,
+    testFiles: [require.resolve('./test')],
 
     esTestCluster: {
       license: 'trial',
@@ -27,6 +26,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     kbnTestServer: {
       ...kibanaCommonTestsConfig.get('kbnTestServer'),
       serverArgs: [...kibanaCommonTestsConfig.get('kbnTestServer.serverArgs')],
+    },
+
+    junit: {
+      reportName: 'Saved Object Field Count',
     },
   };
 }

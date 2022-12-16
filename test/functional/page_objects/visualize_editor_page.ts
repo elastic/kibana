@@ -59,7 +59,7 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async inputControlSubmit() {
-    await this.testSubjects.clickWhenNotDisabled('inputControlSubmitBtn');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('inputControlSubmitBtn');
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
@@ -70,7 +70,7 @@ export class VisualizeEditorPageObject extends FtrService {
 
     const prevRenderingCount = await this.visChart.getVisualizationRenderingCount();
     this.log.debug(`Before Rendering count ${prevRenderingCount}`);
-    await this.testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('visualizeEditorRenderButton');
     await this.visChart.waitForRenderingCount(prevRenderingCount + 1);
   }
 
@@ -147,7 +147,12 @@ export class VisualizeEditorPageObject extends FtrService {
     await this.testSubjects.click('visEditorAddFilterButton');
   }
 
-  public async selectField(fieldValue: string, groupName = 'buckets', isChildAggregation = false) {
+  public async selectField(
+    fieldValue: string,
+    groupName = 'buckets',
+    isChildAggregation = false,
+    aggregationIndex = 0
+  ) {
     this.log.debug(`selectField ${fieldValue}`);
     const selector = `
         [data-test-subj="${groupName}AggGroup"]
@@ -156,8 +161,8 @@ export class VisualizeEditorPageObject extends FtrService {
         ${isChildAggregation ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="visDefaultEditorField"]
       `;
-    const fieldEl = await this.find.byCssSelector(selector);
-    await this.comboBox.setElement(fieldEl, fieldValue);
+    const fieldEls = await this.find.allByCssSelector(selector);
+    await this.comboBox.setElement(fieldEls[aggregationIndex], fieldValue);
   }
 
   public async selectOrderByMetric(aggNth: number, metric: string) {
@@ -175,16 +180,17 @@ export class VisualizeEditorPageObject extends FtrService {
   public async selectAggregation(
     aggValue: string,
     groupName = 'buckets',
-    isChildAggregation = false
+    isChildAggregation = false,
+    aggregationIndex = 0
   ) {
-    const comboBoxElement = await this.find.byCssSelector(`
+    const comboBoxElements = await this.find.allByCssSelector(`
         [data-test-subj="${groupName}AggGroup"]
         [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
         ${isChildAggregation ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="defaultEditorAggSelect"]
       `);
 
-    await this.comboBox.setElement(comboBoxElement, aggValue);
+    await this.comboBox.setElement(comboBoxElements[aggregationIndex], aggValue);
     await this.common.sleep(500);
   }
 
@@ -419,6 +425,13 @@ export class VisualizeEditorPageObject extends FtrService {
     await option.click();
   }
 
+  public async selectYAxisPosition(axisId: string, position: string) {
+    const option = await (
+      await this.testSubjects.find(`valueAxisPosition-${axisId}`)
+    ).findByCssSelector(`option[value="${position}"]`);
+    await option.click();
+  }
+
   public async selectYAxisMode(mode: string) {
     const selector = await this.find.byCssSelector(`#valueAxisMode0 > option[value="${mode}"]`);
     await selector.click();
@@ -477,7 +490,7 @@ export class VisualizeEditorPageObject extends FtrService {
 
   public async clickMetricByIndex(index: number) {
     const metrics = await this.find.allByCssSelector(
-      '[data-test-subj="visualizationLoader"] .mtrVis .mtrVis__container'
+      '[data-test-subj="visualizationLoader"] .legacyMtrVis .legacyMtrVis__container'
     );
     expect(metrics.length).greaterThan(index);
     await metrics[index].click();
@@ -514,6 +527,10 @@ export class VisualizeEditorPageObject extends FtrService {
 
   public async toggleGridCategoryLines() {
     return await this.testSubjects.click('showCategoryLines');
+  }
+
+  public async toggleShowThresholdLine() {
+    return await this.testSubjects.click('xyShowThresholdLine');
   }
 
   public async toggleValuesOnChart() {

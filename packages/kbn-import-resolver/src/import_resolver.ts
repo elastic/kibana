@@ -7,12 +7,12 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
 
 import Resolve from 'resolve';
+import { readPackageManifest } from '@kbn/bazel-packages';
 import { REPO_ROOT } from '@kbn/utils';
 import normalizePath from 'normalize-path';
-import { discoverBazelPackageLocations } from '@kbn/bazel-packages';
+import { discoverPackageManifestPaths } from '@kbn/bazel-packages';
 import { readPackageMap, PackageMap } from '@kbn/synthetic-package-map';
 
 import { safeStat, readFileSync } from './helpers/fs';
@@ -25,9 +25,10 @@ const NODE_MODULE_SEG = Path.sep + 'node_modules' + Path.sep;
 export class ImportResolver {
   static create(repoRoot: string) {
     const pkgMap = new Map();
-    for (const dir of discoverBazelPackageLocations(repoRoot)) {
-      const pkg = JSON.parse(Fs.readFileSync(Path.resolve(dir, 'package.json'), 'utf8'));
-      pkgMap.set(pkg.name, normalizePath(Path.relative(repoRoot, dir)));
+    for (const manifestPath of discoverPackageManifestPaths(REPO_ROOT)) {
+      const relativeBazelPackageDir = Path.relative(REPO_ROOT, Path.dirname(manifestPath));
+      const pkg = readPackageManifest(manifestPath);
+      pkgMap.set(pkg.id, normalizePath(relativeBazelPackageDir));
     }
 
     return new ImportResolver(repoRoot, pkgMap, readPackageMap());
@@ -124,14 +125,10 @@ export class ImportResolver {
       return true;
     }
 
-    // ignore requests to grammar/built_grammar.js files or bazel target dirs, these files are only
-    // available in the build output and will never resolve in dev. We will validate that people don't
-    // import these files from outside the package in another rule
-    if (
-      req.endsWith('grammar/built_grammar.js') ||
-      req.includes('/target_workers/') ||
-      req.includes('/target_node/')
-    ) {
+    // ignore requests to bazel target dirs, these files are only available in the build output
+    // and will never resolve in dev. We will validate that people don't import these files from
+    // outside the package in another rule
+    if (req.includes('/target_workers/') || req.includes('/target_node/')) {
       return true;
     }
 

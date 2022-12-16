@@ -9,7 +9,7 @@ import { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/s
 
 import { ApiRoutes } from './routes';
 
-export class IndexPatternPlugin implements Plugin<void, void, any, any> {
+export class IndexPatternPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly apiRoutes: ApiRoutes;
 

@@ -192,4 +192,24 @@ describe('health check', () => {
       `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alerting-setup.html#alerting-prerequisites"`
     );
   });
+
+  it('renders children and no warnings if error thrown getting alerting health', async () => {
+    useKibanaMock().services.http.get = jest
+      .fn()
+      // result from triggers_actions_ui health
+      .mockResolvedValueOnce({ isAlertsAvailable: true })
+      // result from alerting health
+      .mockRejectedValueOnce(new Error('for example, not authorized for rules / 403 response'));
+    const { queryByText } = render(
+      <HealthContextProvider>
+        <HealthCheck waitForCheck={true}>
+          <p>{'should render'}</p>
+        </HealthCheck>
+      </HealthContextProvider>
+    );
+    await act(async () => {
+      // wait for useEffect to run
+    });
+    expect(queryByText('should render')).toBeInTheDocument();
+  });
 });

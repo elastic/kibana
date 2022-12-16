@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { findLayout } from '../../../../../common/inventory_models/layouts';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
-
-import { MetricsTimeInput } from '../hooks/use_metrics_time';
-import { InfraLoadingPanel } from '../../../../components/loading';
-import { NoData } from '../../../../components/empty_states';
+import React from 'react';
 import { NodeDetailsMetricData } from '../../../../../common/http_api/node_details_api';
+import { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { NoData } from '../../../../components/empty_states';
+import { InfraLoadingPanel } from '../../../../components/loading';
+import { MetricsTimeInput } from '../hooks/use_metrics_time';
+import { Layout } from './layout';
 
 interface Props {
   loading: boolean;
@@ -62,9 +61,9 @@ export const PageBody = ({
     );
   }
 
-  const Layout = findLayout(type);
   return (
     <Layout
+      inventoryItemType={type}
       metrics={metrics}
       onChangeRangeTime={onChangeRangeTime}
       isLiveStreaming={isLiveStreaming}

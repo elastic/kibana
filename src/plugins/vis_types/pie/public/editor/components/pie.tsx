@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiPanel,
   EuiTitle,
@@ -31,7 +30,7 @@ import {
   LongLegendOptions,
   LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import {
   PartitionVisParams,
   LabelPositions,
@@ -97,6 +96,9 @@ const PieOptions = (props: PieOptionsProps) => {
   const hasSplitChart = Boolean(aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled));
   const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
 
+  const legendSize = stateParams.legendSize;
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
+
   const getLegendDisplay = useCallback(
     (isVisible: boolean) => (isVisible ? LegendDisplay.SHOW : LegendDisplay.HIDE),
     []
@@ -158,6 +160,7 @@ const PieOptions = (props: PieOptionsProps) => {
           paramName="isDonut"
           value={stateParams.isDonut}
           setValue={setValue}
+          data-test-subj="visTypePieIsDonut"
         />
         {props.showElasticChartsOptions && stateParams.isDonut && (
           <EuiFormRow label={emptySizeRatioLabel} fullWidth>
@@ -220,9 +223,6 @@ const PieOptions = (props: PieOptionsProps) => {
               value={stateParams.nestedLegend}
               disabled={stateParams.legendDisplay === LegendDisplay.HIDE}
               setValue={(paramName, value) => {
-                if (props.trackUiMetric) {
-                  props.trackUiMetric(METRIC_TYPE.CLICK, 'nested_legend_switched');
-                }
                 setValue(paramName, value);
               }}
               data-test-subj="visTypePieNestedLegendSwitch"
@@ -234,12 +234,13 @@ const PieOptions = (props: PieOptionsProps) => {
               setValue={setValue}
             />
             <LegendSizeSettings
-              legendSize={stateParams.legendSize}
+              legendSize={legendSize}
               onLegendSizeChange={handleLegendSizeChange}
               isVerticalLegend={
                 stateParams.legendPosition === Position.Left ||
                 stateParams.legendPosition === Position.Right
               }
+              showAutoOption={hadAutoLegendSize}
             />
           </>
         )}
@@ -249,9 +250,6 @@ const PieOptions = (props: PieOptionsProps) => {
             activePalette={stateParams.palette}
             paramName="palette"
             setPalette={(paramName, value) => {
-              if (props.trackUiMetric) {
-                props.trackUiMetric(METRIC_TYPE.CLICK, 'palette_selected');
-              }
               setValue(paramName, value);
             }}
           />
@@ -292,9 +290,6 @@ const PieOptions = (props: PieOptionsProps) => {
                 : stateParams.labels.position || LabelPositions.DEFAULT
             }
             setValue={(paramName, value) => {
-              if (props.trackUiMetric) {
-                props.trackUiMetric(METRIC_TYPE.CLICK, 'label_position_selected');
-              }
               setLabels(paramName, value);
             }}
             data-test-subj="visTypePieLabelPositionSelect"
@@ -334,9 +329,6 @@ const PieOptions = (props: PieOptionsProps) => {
               paramName="valuesFormat"
               value={stateParams.labels.valuesFormat || ValueFormats.PERCENT}
               setValue={(paramName, value) => {
-                if (props.trackUiMetric) {
-                  props.trackUiMetric(METRIC_TYPE.CLICK, 'values_format_selected');
-                }
                 setLabels(paramName, value);
               }}
               data-test-subj="visTypePieValueFormatsSelect"

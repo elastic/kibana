@@ -6,25 +6,26 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
+
+import { omit } from 'lodash';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { convertECSMappingToObject } from '../utils';
+import { getInstalledSavedQueriesMap } from './utils';
 
-export const findSavedQueryRoute = (router: IRouter) => {
+export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
-      path: '/internal/osquery/saved_query',
+      path: '/api/osquery/saved_queries',
       validate: {
-        query: schema.object(
-          {
-            pageIndex: schema.maybe(schema.string()),
-            pageSize: schema.maybe(schema.number()),
-            sortField: schema.maybe(schema.string()),
-            sortOrder: schema.maybe(schema.string()),
-          },
-          { unknowns: 'allow' }
-        ),
+        query: schema.object({
+          page: schema.maybe(schema.number()),
+          pageSize: schema.maybe(schema.number()),
+          sort: schema.maybe(schema.string()),
+          sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+        }),
       },
       options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
     },
@@ -34,18 +35,23 @@ export const findSavedQueryRoute = (router: IRouter) => {
 
       const savedQueries = await savedObjectsClient.find<{
         ecs_mapping: Array<{ field: string; value: string }>;
+        prebuilt: boolean;
       }>({
         type: savedQuerySavedObjectType,
-        page: parseInt(request.query.pageIndex ?? '0', 10) + 1,
+        page: request.query.page ?? 1,
         perPage: request.query.pageSize,
-        sortField: request.query.sortField,
-        // @ts-expect-error update types
-        sortOrder: request.query.sortDirection ?? 'desc',
+        sortField: request.query.sort,
+        sortOrder: request.query.sortOrder ?? 'desc',
       });
 
+      const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
+        osqueryContext.service.getPackageService()?.asInternalUser
+      );
       const savedObjects = savedQueries.saved_objects.map((savedObject) => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const ecs_mapping = savedObject.attributes.ecs_mapping;
+
+        savedObject.attributes.prebuilt = !!prebuiltSavedQueriesMap[savedObject.id];
 
         if (ecs_mapping) {
           // @ts-expect-error update types
@@ -57,8 +63,8 @@ export const findSavedQueryRoute = (router: IRouter) => {
 
       return response.ok({
         body: {
-          ...savedQueries,
-          saved_objects: savedObjects,
+          ...omit(savedQueries, 'saved_objects'),
+          data: savedObjects,
         },
       });
     }

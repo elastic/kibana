@@ -13,7 +13,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { useNavigation } from '../../../lib/kibana';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
-import { TabNavigationProps, TabNavigationItemProps } from './types';
+import type { TabNavigationProps, TabNavigationItemProps } from './types';
 import { BETA } from '../../../translations';
 
 const TabNavigationItemComponent = ({
@@ -23,6 +23,7 @@ const TabNavigationItemComponent = ({
   name,
   isSelected,
   isBeta,
+  betaOptions,
 }: TabNavigationItemProps) => {
   const { getAppUrl, navigateTo } = useNavigation();
 
@@ -47,7 +48,7 @@ const TabNavigationItemComponent = ({
       isSelected={isSelected}
       href={appHref}
       onClick={handleClick}
-      append={isBeta && <EuiBetaBadge label={BETA} size="s" />}
+      append={isBeta && <EuiBetaBadge label={betaOptions?.text ?? BETA} size="s" />}
     >
       {name}
     </EuiTab>
@@ -56,11 +57,7 @@ const TabNavigationItemComponent = ({
 
 const TabNavigationItem = React.memo(TabNavigationItemComponent);
 
-export const TabNavigationComponent: React.FC<TabNavigationProps> = ({
-  display,
-  navTabs,
-  tabName,
-}) => {
+export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs, tabName }) => {
   const mapLocationToTab = useCallback(
     (): string =>
       getOr(
@@ -96,13 +93,14 @@ export const TabNavigationComponent: React.FC<TabNavigationProps> = ({
             disabled={tab.disabled}
             isSelected={isSelected}
             isBeta={tab.isBeta}
+            betaOptions={tab.betaOptions}
           />
         );
       }),
     [navTabs, selectedTabId, search]
   );
 
-  return <EuiTabs display={display}>{renderTabs}</EuiTabs>;
+  return <EuiTabs>{renderTabs}</EuiTabs>;
 };
 
 TabNavigationComponent.displayName = 'TabNavigationComponent';

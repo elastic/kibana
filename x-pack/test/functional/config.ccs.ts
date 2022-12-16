@@ -10,12 +10,18 @@ import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archive
 import { RemoteEsProvider } from './services/remote_es/remote_es';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('./config'));
+  const functionalConfig = await readConfigFile(require.resolve('./config.base.js'));
 
   return {
     ...functionalConfig.getAll(),
 
-    testFiles: [require.resolve('./apps/lens')],
+    testFiles: [
+      require.resolve('./apps/canvas'),
+      require.resolve('./apps/lens/group1'),
+      require.resolve('./apps/remote_clusters/ccs/remote_clusters_index_management_flow'),
+      require.resolve('./apps/rollup_job'),
+      require.resolve('./apps/ml/anomaly_detection_jobs'),
+    ],
 
     junit: {
       reportName: 'X-Pack CCS Tests',
@@ -25,10 +31,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('security'),
       remoteEsRoles: {
         ccs_remote_search: {
+          cluster: ['manage', 'manage_ccr'],
           indices: [
             {
               names: ['*'],
-              privileges: ['read', 'view_index_metadata', 'read_cross_cluster'],
+              privileges: ['read', 'view_index_metadata', 'read_cross_cluster', 'monitor'],
             },
           ],
         },

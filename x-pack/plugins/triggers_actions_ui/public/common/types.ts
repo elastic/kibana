@@ -24,3 +24,13 @@ export interface GroupByType {
   value: string;
   validNormalizedTypes: string[];
 }
+
+export interface FieldOption {
+  name: string;
+  type: string;
+  normalizedType: string;
+  searchable: boolean;
+  aggregatable: boolean;
+}
+
+export type { RuleStatus } from '../types';

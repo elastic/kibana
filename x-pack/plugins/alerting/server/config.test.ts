@@ -30,6 +30,9 @@ describe('config validation', () => {
             "actions": Object {
               "max": 100000,
             },
+            "alerts": Object {
+              "max": 1000,
+            },
           },
         },
       }

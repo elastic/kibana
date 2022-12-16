@@ -9,7 +9,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { Ecs } from '../../../../../../../common/ecs';
+import type { Ecs } from '../../../../../../../common/ecs';
 import { NetflowRenderer } from '../netflow';
 
 import { EndgameSecurityEventDetailsLine } from './endgame_security_event_details_line';

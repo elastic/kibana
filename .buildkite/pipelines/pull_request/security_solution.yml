@@ -2,10 +2,13 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution.sh
     label: 'Security Solution Tests'
     agents:
-      queue: ci-group-6
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
+    parallelism: 4
     retry:
       automatic:
+        - exit_status: '-1'
+          limit: 3
         - exit_status: '*'
           limit: 1

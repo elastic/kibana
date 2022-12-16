@@ -7,14 +7,17 @@
 
 import { ENDPOINT_ACTION_LOG_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointActionLogRequestSchema } from '../../../../common/endpoint/schema/actions';
-import { actionsLogRequestHandler } from './audit_log_handler';
+import { auditLogRequestHandler } from './audit_log_handler';
 
-import { SecuritySolutionPluginRouter } from '../../../types';
-import { EndpointAppContext } from '../../types';
+import type { SecuritySolutionPluginRouter } from '../../../types';
+import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
  * Registers the endpoint activity_log route
+ * @deprecated
+ * @removeBy 9.0.0
+ *
  */
 export function registerActionAuditLogRoutes(
   router: SecuritySolutionPluginRouter,
@@ -29,7 +32,7 @@ export function registerActionAuditLogRoutes(
     withEndpointAuthz(
       { all: ['canIsolateHost'] },
       endpointContext.logFactory.get('hostIsolationLogs'),
-      actionsLogRequestHandler(endpointContext)
+      auditLogRequestHandler(endpointContext)
     )
   );
 }

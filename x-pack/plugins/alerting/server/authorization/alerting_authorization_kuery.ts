@@ -42,15 +42,20 @@ export function asFiltersByRuleTypeAndConsumer(
   const kueryNode = nodeBuilder.or(
     Array.from(ruleTypes).reduce<KueryNode[]>((filters, { id, authorizedConsumers }) => {
       ensureFieldIsSafeForQuery('ruleTypeId', id);
-      const andNodes = [
-        nodeBuilder.is(opts.fieldNames.ruleTypeId, id),
-        nodeBuilder.or(
-          Object.keys(authorizedConsumers).map((consumer) => {
-            ensureFieldIsSafeForQuery('consumer', consumer);
-            return nodeBuilder.is(opts.fieldNames.consumer, consumer);
-          })
-        ),
-      ];
+
+      const andNodes: KueryNode[] = [nodeBuilder.is(opts.fieldNames.ruleTypeId, id)];
+
+      const authorizedConsumersKeys = Object.keys(authorizedConsumers);
+      if (authorizedConsumersKeys.length) {
+        andNodes.push(
+          nodeBuilder.or(
+            authorizedConsumersKeys.map((consumer) => {
+              ensureFieldIsSafeForQuery('consumer', consumer);
+              return nodeBuilder.is(opts.fieldNames.consumer, consumer);
+            })
+          )
+        );
+      }
 
       if (opts.fieldNames.spaceIds != null && spaceId != null) {
         andNodes.push(nodeBuilder.is(opts.fieldNames.spaceIds, spaceId));

@@ -1,0 +1,182 @@
+{
+  "attributes": {
+    "closed_at": "2022-04-29T13:24:44.448Z",
+    "closed_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "connector": {
+      "fields": [],
+      "name": "none",
+      "type": ".none"
+    },
+    "created_at": "2022-04-28T13:24:24.011Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "description": "test mttr",
+    "duration": 20,
+    "external_service": null,
+    "owner": "securitySolutionFixture",
+    "settings": {
+      "syncAlerts": true
+    },
+    "status": "closed",
+    "tags": [],
+    "title": "test mttr",
+    "updated_at": "2022-04-29T13:24:44.448Z",
+    "updated_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    }
+  },
+  "coreMigrationVersion": "8.3.0",
+  "id": "af948570-c7bf-11ec-9771-d5eef9232089",
+  "migrationVersion": {
+    "cases": "8.3.0"
+  },
+  "references": [],
+  "type": "cases",
+  "updated_at": "2022-04-29T13:24:44.449Z",
+  "version": "WzE0NjgsMV0="
+}
+
+{
+  "attributes": {
+    "closed_at": "2022-04-30T13:32:00.448Z",
+    "closed_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "connector": {
+      "fields": [],
+      "name": "none",
+      "type": ".none"
+    },
+    "created_at": "2022-04-30T13:24:00.011Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "description": "test mttr",
+    "duration": 480,
+    "external_service": null,
+    "owner": "securitySolutionFixture",
+    "settings": {
+      "syncAlerts": true
+    },
+    "status": "closed",
+    "tags": [],
+    "title": "test mttr",
+    "updated_at": "2022-04-29T13:24:44.448Z",
+    "updated_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    }
+  },
+  "coreMigrationVersion": "8.3.0",
+  "id": "bf948570-c7bf-11ec-9771-d5eef9232089",
+  "migrationVersion": {
+    "cases": "8.3.0"
+  },
+  "references": [],
+  "type": "cases",
+  "updated_at": "2022-04-29T13:24:44.449Z",
+  "version": "WzE0NjgsMV0="
+}
+
+{
+  "attributes": {
+    "closed_at": "2022-04-29T13:32:00.448Z",
+    "closed_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "connector": {
+      "fields": [],
+      "name": "none",
+      "type": ".none"
+    },
+    "created_at": "2022-04-29T13:24:00.011Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "description": "test mttr",
+    "duration": 160,
+    "external_service": null,
+    "owner": "observabilityFixture",
+    "settings": {
+      "syncAlerts": true
+    },
+    "status": "closed",
+    "tags": [],
+    "title": "test mttr",
+    "updated_at": "2022-04-29T13:24:44.448Z",
+    "updated_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    }
+  },
+  "coreMigrationVersion": "8.3.0",
+  "id": "cf948570-c7bf-11ec-9771-d5eef9232089",
+  "migrationVersion": {
+    "cases": "8.3.0"
+  },
+  "references": [],
+  "type": "cases",
+  "updated_at": "2022-04-29T13:24:44.449Z",
+  "version": "WzE0NjgsMV0="
+}
+
+{
+  "attributes": {
+    "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": null,
+      "name": "none",
+      "type": ".none"
+    },
+    "created_at": "2022-03-20T10:16:56.252Z",
+    "created_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
+    "description": "test 2",
+    "external_service": null,
+    "owner": "securitySolutionFixture",
+    "settings": {
+      "syncAlerts": false
+    },
+    "status": "open",
+    "tags": [],
+    "title": "stack",
+    "updated_at": "2022-03-29T10:33:09.754Z",
+    "updated_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    }
+  },
+  "coreMigrationVersion": "8.3.0",
+  "id": "df948570-c7bf-11ec-9771-d5eef9232089",
+  "migrationVersion": {
+    "cases": "8.3.0"
+  },
+  "references": [],
+  "type": "cases",
+  "updated_at": "2022-04-29T13:24:44.449Z",
+  "version": "WzE0NjgsMV0="
+}

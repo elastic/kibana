@@ -152,11 +152,11 @@ describe('licensing update', () => {
     const fetcher = jest
       .fn()
       .mockImplementationOnce(async () => {
-        await delay(100);
+        await delay(2);
         return firstLicense;
       })
       .mockImplementationOnce(async () => {
-        await delay(100);
+        await delay(2);
         return secondLicense;
       });
 

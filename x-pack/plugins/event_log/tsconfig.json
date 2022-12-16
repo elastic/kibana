@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "server/**/*",
@@ -12,9 +11,9 @@
     "generated/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "generated/*.json",
-    "common/*"
+    "common/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" }
   ]

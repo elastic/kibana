@@ -17,13 +17,22 @@
     "observability",
     "ruleRegistry",
     "triggersActionsUi",
-    "unifiedSearch"
+    "share",
+    "unifiedSearch",
+    "dataViews",
+    "advancedSettings",
+    "unifiedFieldList",
+    "lens",
+    "maps"
   ],
   "optionalPlugins": [
     "actions",
     "alerting",
+    "cases",
+    "charts",
     "cloud",
     "fleet",
+    "fieldFormats",
     "home",
     "ml",
     "security",
@@ -33,12 +42,17 @@
   ],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "apm"],
+  "configPath": [
+    "xpack",
+    "apm"
+  ],
   "requiredBundles": [
     "fleet",
     "kibanaReact",
     "kibanaUtils",
     "ml",
-    "observability"
+    "observability",
+    "esUiShared",
+    "maps"
   ]
 }

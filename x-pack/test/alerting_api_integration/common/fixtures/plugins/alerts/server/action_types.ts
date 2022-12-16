@@ -9,6 +9,10 @@ import { CoreSetup } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ActionType } from '@kbn/actions-plugin/server';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
+import {
+  getTestSubActionConnector,
+  getTestSubActionConnectorWithoutSubActions,
+} from './sub_action_connector';
 
 export function defineActionTypes(
   core: CoreSetup<FixtureStartDeps>,
@@ -19,26 +23,32 @@ export function defineActionTypes(
     id: 'test.noop',
     name: 'Test: Noop',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     async executor() {
       return { status: 'ok', actionId: '' };
     },
   };
+
   const throwActionType: ActionType = {
     id: 'test.throw',
     name: 'Test: Throw',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     async executor() {
       throw new Error('this action is intended to fail');
     },
   };
+
   const cappedActionType: ActionType = {
     id: 'test.capped',
     name: 'Test: Capped',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     async executor() {
       return { status: 'ok', actionId: '' };
     },
   };
+
   actions.registerType(noopActionType);
   actions.registerType(throwActionType);
   actions.registerType(cappedActionType);
@@ -49,6 +59,11 @@ export function defineActionTypes(
   actions.registerType(getNoAttemptsRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
   actions.registerType(getExcludedActionType());
+
+  /** Sub action framework */
+
+  actions.registerSubActionConnectorType(getTestSubActionConnector(actions));
+  actions.registerSubActionConnectorType(getTestSubActionConnectorWithoutSubActions(actions));
 }
 
 function getIndexRecordActionType() {
@@ -70,10 +85,17 @@ function getIndexRecordActionType() {
     id: 'test.index-record',
     name: 'Test: Index Record',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     validate: {
-      params: paramsSchema,
-      config: configSchema,
-      secrets: secretsSchema,
+      params: {
+        schema: paramsSchema,
+      },
+      config: {
+        schema: configSchema,
+      },
+      secrets: {
+        schema: secretsSchema,
+      },
     },
     async executor({ config, secrets, params, services, actionId }) {
       await services.scopedClusterClient.index({
@@ -110,10 +132,17 @@ function getDelayedActionType() {
     id: 'test.delayed',
     name: 'Test: Delayed',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     validate: {
-      params: paramsSchema,
-      config: configSchema,
-      secrets: secretsSchema,
+      params: {
+        schema: paramsSchema,
+      },
+      config: {
+        schema: configSchema,
+      },
+      secrets: {
+        schema: secretsSchema,
+      },
     },
     async executor({ config, secrets, params, services, actionId }) {
       await new Promise((resolve) => {
@@ -137,8 +166,11 @@ function getFailingActionType() {
     id: 'test.failing',
     name: 'Test: Failing',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     validate: {
-      params: paramsSchema,
+      params: {
+        schema: paramsSchema,
+      },
     },
     async executor({ config, secrets, params, services }) {
       await services.scopedClusterClient.index({
@@ -169,9 +201,12 @@ function getRateLimitedActionType() {
     id: 'test.rate-limit',
     name: 'Test: Rate Limit',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     maxAttempts: 2,
     validate: {
-      params: paramsSchema,
+      params: {
+        schema: paramsSchema,
+      },
     },
     async executor({ config, params, services }) {
       await services.scopedClusterClient.index({
@@ -205,9 +240,12 @@ function getNoAttemptsRateLimitedActionType() {
     id: 'test.no-attempts-rate-limit',
     name: 'Test: Rate Limit',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     maxAttempts: 0,
     validate: {
-      params: paramsSchema,
+      params: {
+        schema: paramsSchema,
+      },
     },
     async executor({ config, params, services }) {
       await services.scopedClusterClient.index({
@@ -244,8 +282,11 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
     id: 'test.authorization',
     name: 'Test: Authorization',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     validate: {
-      params: paramsSchema,
+      params: {
+        schema: paramsSchema,
+      },
     },
     async executor({ params, services, actionId }) {
       // Call cluster
@@ -323,6 +364,7 @@ function getExcludedActionType() {
     id: 'test.excluded',
     name: 'Test: Excluded',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     async executor({ actionId }) {
       return { status: 'ok', actionId };
     },

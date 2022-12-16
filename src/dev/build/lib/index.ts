@@ -17,3 +17,4 @@ export * from './scan_delete';
 export * from './scan_copy';
 export * from './platform';
 export * from './scan';
+export * from './archive_utils';

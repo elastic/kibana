@@ -12,16 +12,29 @@ export interface AlertStatusEventEntityIdMap {
   };
 }
 
-export const enum EventKind {
+export enum ProcessEventAlertCategory {
+  all = 'all',
+  file = 'file',
+  network = 'network',
+  process = 'process',
+}
+
+export interface AlertTypeCount {
+  category: ProcessEventAlertCategory;
+  count: number;
+}
+export type DefaultAlertFilterType = 'all';
+
+export enum EventKind {
   event = 'event',
   signal = 'signal',
 }
 
-export const enum EventAction {
+export enum EventAction {
   fork = 'fork',
   exec = 'exec',
   end = 'end',
-  output = 'output',
+  text_output = 'text_output',
 }
 
 export interface User {
@@ -60,6 +73,24 @@ export interface Teletype {
     major?: number;
     minor?: number;
   };
+  rows?: number;
+  columns?: number;
+}
+
+export interface IOLine {
+  event: ProcessEvent;
+  value: string;
+}
+
+export interface ProcessStartMarker {
+  event: ProcessEvent;
+  line: number;
+  maxBytesExceeded?: boolean;
+}
+
+export interface IOFields {
+  text?: string;
+  max_bytes_per_process_exceeded?: boolean;
 }
 
 export interface ProcessFields {
@@ -91,14 +122,15 @@ export interface ProcessSelf extends ProcessFields {
   session_leader?: ProcessFields;
   entry_leader?: ProcessFields;
   group_leader?: ProcessFields;
+  io?: IOFields;
 }
 
 export interface ProcessEventHost {
   architecture?: string;
   hostname?: string;
   id?: string;
-  ip?: string;
-  mac?: string;
+  ip?: string[];
+  mac?: string[];
   name?: string;
   os?: {
     family?: string;
@@ -107,6 +139,9 @@ export interface ProcessEventHost {
     name?: string;
     platform?: string;
     version?: string;
+  };
+  boot?: {
+    id?: string;
   };
 }
 
@@ -134,14 +169,34 @@ export interface ProcessEventAlert {
   rule?: ProcessEventAlertRule;
 }
 
+export interface ProcessEventIPAddress {
+  address?: string;
+  ip?: string;
+  port?: number;
+}
+
+export interface ProcessEventNetwork {
+  type?: string;
+  transport?: string;
+  protocol?: string;
+}
+
 export interface ProcessEvent {
   '@timestamp'?: string;
   event?: {
     kind?: EventKind;
-    category?: string;
+    category?: string[];
     action?: EventAction;
     id?: string;
   };
+  file?: {
+    extension?: string;
+    path?: string;
+    name?: string;
+  };
+  network?: ProcessEventNetwork;
+  destination?: ProcessEventIPAddress;
+  source?: ProcessEventIPAddress;
   user?: User;
   group?: Group;
   host?: ProcessEventHost;
@@ -149,6 +204,9 @@ export interface ProcessEvent {
   kibana?: {
     alert?: ProcessEventAlert;
   };
+  container?: ProcessEventContainer;
+  orchestrator?: ProcessEventOrchestrator;
+  cloud?: ProcessEventCloud;
 }
 
 export interface ProcessEventsPage {
@@ -165,9 +223,10 @@ export interface Process {
   orphans: Process[]; // currently, orphans are rendered inline with the entry session leaders children
   parent: Process | undefined;
   autoExpand: boolean;
-  searchMatched: string | null; // either false, or set to searchQuery
+  searchMatched: number[] | null; // either false, or set to searchQuery
   addEvent(event: ProcessEvent): void;
   addAlert(alert: ProcessEvent): void;
+  addChild(child: Process): void;
   clearSearch(): void;
   hasOutput(): boolean;
   hasAlerts(): boolean;
@@ -187,3 +246,45 @@ export interface Process {
 export type ProcessMap = {
   [key: string]: Process;
 };
+
+export interface ProcessEventContainer {
+  id?: string;
+  name?: string;
+  image?: {
+    name?: string;
+    tag?: string;
+    hash?: {
+      all?: string;
+    };
+  };
+}
+
+export interface ProcessEventOrchestrator {
+  resource?: {
+    name?: string;
+    type?: string;
+    ip?: string;
+    parent?: {
+      type?: string;
+    };
+  };
+  namespace?: string;
+  cluster?: {
+    name?: string;
+    id?: string;
+  };
+}
+
+export interface ProcessEventCloud {
+  instance?: {
+    name?: string;
+  };
+  account?: {
+    id?: string;
+  };
+  project?: {
+    id?: string;
+  };
+  provider?: string;
+  region?: string;
+}

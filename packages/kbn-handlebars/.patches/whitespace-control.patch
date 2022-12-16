@@ -1,0 +1,186 @@
+1,19c1,6
+< describe('whitespace control', function() {
+<   it('should strip whitespace around mustache calls', function() {
+<     var hash = { foo: 'bar<' };
+< 
+<     expectTemplate(' {{~foo~}} ')
+<       .withInput(hash)
+<       .toCompileTo('bar&lt;');
+< 
+<     expectTemplate(' {{~foo}} ')
+<       .withInput(hash)
+<       .toCompileTo('bar&lt; ');
+< 
+<     expectTemplate(' {{foo~}} ')
+<       .withInput(hash)
+<       .toCompileTo(' bar&lt;');
+< 
+<     expectTemplate(' {{~&foo~}} ')
+<       .withInput(hash)
+<       .toCompileTo('bar<');
+---
+> /*
+>  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+>  * and may include modifications made by Elasticsearch B.V.
+>  * Elasticsearch B.V. licenses this file to you under the MIT License.
+>  * See `packages/kbn-handlebars/LICENSE` for more information.
+>  */
+21,23c8
+<     expectTemplate(' {{~{foo}~}} ')
+<       .withInput(hash)
+<       .toCompileTo('bar<');
+---
+> import { expectTemplate } from '../__jest__/test_bench';
+24a10,17
+> describe('whitespace control', () => {
+>   it('should strip whitespace around mustache calls', () => {
+>     const hash = { foo: 'bar<' };
+>     expectTemplate(' {{~foo~}} ').withInput(hash).toCompileTo('bar&lt;');
+>     expectTemplate(' {{~foo}} ').withInput(hash).toCompileTo('bar&lt; ');
+>     expectTemplate(' {{foo~}} ').withInput(hash).toCompileTo(' bar&lt;');
+>     expectTemplate(' {{~&foo~}} ').withInput(hash).toCompileTo('bar<');
+>     expectTemplate(' {{~{foo}~}} ').withInput(hash).toCompileTo('bar<');
+28,42c21,23
+<   describe('blocks', function() {
+<     it('should strip whitespace around simple block calls', function() {
+<       var hash = { foo: 'bar<' };
+< 
+<       expectTemplate(' {{~#if foo~}} bar {{~/if~}} ')
+<         .withInput(hash)
+<         .toCompileTo('bar');
+< 
+<       expectTemplate(' {{#if foo~}} bar {{/if~}} ')
+<         .withInput(hash)
+<         .toCompileTo(' bar ');
+< 
+<       expectTemplate(' {{~#if foo}} bar {{~/if}} ')
+<         .withInput(hash)
+<         .toCompileTo(' bar ');
+---
+>   describe('blocks', () => {
+>     it('should strip whitespace around simple block calls', () => {
+>       const hash = { foo: 'bar<' };
+44,46c25,28
+<       expectTemplate(' {{#if foo}} bar {{/if}} ')
+<         .withInput(hash)
+<         .toCompileTo('  bar  ');
+---
+>       expectTemplate(' {{~#if foo~}} bar {{~/if~}} ').withInput(hash).toCompileTo('bar');
+>       expectTemplate(' {{#if foo~}} bar {{/if~}} ').withInput(hash).toCompileTo(' bar ');
+>       expectTemplate(' {{~#if foo}} bar {{~/if}} ').withInput(hash).toCompileTo(' bar ');
+>       expectTemplate(' {{#if foo}} bar {{/if}} ').withInput(hash).toCompileTo('  bar  ');
+57c39
+<     it('should strip whitespace around inverse block calls', function() {
+---
+>     it('should strip whitespace around inverse block calls', () => {
+59d40
+< 
+61d41
+< 
+63d42
+< 
+65,68c44
+< 
+<       expectTemplate(
+<         ' \n\n{{~^if foo~}} \n\nbar \n\n{{~/if~}}\n\n '
+<       ).toCompileTo('bar');
+---
+>       expectTemplate(' \n\n{{~^if foo~}} \n\nbar \n\n{{~/if~}}\n\n ').toCompileTo('bar');
+71,88c47,48
+<     it('should strip whitespace around complex block calls', function() {
+<       var hash = { foo: 'bar<' };
+< 
+<       expectTemplate('{{#if foo~}} bar {{~^~}} baz {{~/if}}')
+<         .withInput(hash)
+<         .toCompileTo('bar');
+< 
+<       expectTemplate('{{#if foo~}} bar {{^~}} baz {{/if}}')
+<         .withInput(hash)
+<         .toCompileTo('bar ');
+< 
+<       expectTemplate('{{#if foo}} bar {{~^~}} baz {{~/if}}')
+<         .withInput(hash)
+<         .toCompileTo(' bar');
+< 
+<       expectTemplate('{{#if foo}} bar {{^~}} baz {{/if}}')
+<         .withInput(hash)
+<         .toCompileTo(' bar ');
+---
+>     it('should strip whitespace around complex block calls', () => {
+>       const hash = { foo: 'bar<' };
+90,92c50,54
+<       expectTemplate('{{#if foo~}} bar {{~else~}} baz {{~/if}}')
+<         .withInput(hash)
+<         .toCompileTo('bar');
+---
+>       expectTemplate('{{#if foo~}} bar {{~^~}} baz {{~/if}}').withInput(hash).toCompileTo('bar');
+>       expectTemplate('{{#if foo~}} bar {{^~}} baz {{/if}}').withInput(hash).toCompileTo('bar ');
+>       expectTemplate('{{#if foo}} bar {{~^~}} baz {{~/if}}').withInput(hash).toCompileTo(' bar');
+>       expectTemplate('{{#if foo}} bar {{^~}} baz {{/if}}').withInput(hash).toCompileTo(' bar ');
+>       expectTemplate('{{#if foo~}} bar {{~else~}} baz {{~/if}}').withInput(hash).toCompileTo('bar');
+94,96c56
+<       expectTemplate(
+<         '\n\n{{~#if foo~}} \n\nbar \n\n{{~^~}} \n\nbaz \n\n{{~/if~}}\n\n'
+<       )
+---
+>       expectTemplate('\n\n{{~#if foo~}} \n\nbar \n\n{{~^~}} \n\nbaz \n\n{{~/if~}}\n\n')
+100,102c60
+<       expectTemplate(
+<         '\n\n{{~#if foo~}} \n\n{{{foo}}} \n\n{{~^~}} \n\nbaz \n\n{{~/if~}}\n\n'
+<       )
+---
+>       expectTemplate('\n\n{{~#if foo~}} \n\n{{{foo}}} \n\n{{~^~}} \n\nbaz \n\n{{~/if~}}\n\n')
+106,109c64
+<       expectTemplate('{{#if foo~}} bar {{~^~}} baz {{~/if}}').toCompileTo(
+<         'baz'
+<       );
+< 
+---
+>       expectTemplate('{{#if foo~}} bar {{~^~}} baz {{~/if}}').toCompileTo('baz');
+111,120c66,69
+< 
+<       expectTemplate('{{#if foo~}} bar {{~^}} baz {{~/if}}').toCompileTo(
+<         ' baz'
+<       );
+< 
+<       expectTemplate('{{#if foo~}} bar {{~^}} baz {{/if}}').toCompileTo(
+<         ' baz '
+<       );
+< 
+<       expectTemplate('{{#if foo~}} bar {{~else~}} baz {{~/if}}').toCompileTo(
+---
+>       expectTemplate('{{#if foo~}} bar {{~^}} baz {{~/if}}').toCompileTo(' baz');
+>       expectTemplate('{{#if foo~}} bar {{~^}} baz {{/if}}').toCompileTo(' baz ');
+>       expectTemplate('{{#if foo~}} bar {{~else~}} baz {{~/if}}').toCompileTo('baz');
+>       expectTemplate('\n\n{{~#if foo~}} \n\nbar \n\n{{~^~}} \n\nbaz \n\n{{~/if~}}\n\n').toCompileTo(
+123,126d71
+< 
+<       expectTemplate(
+<         '\n\n{{~#if foo~}} \n\nbar \n\n{{~^~}} \n\nbaz \n\n{{~/if~}}\n\n'
+<       ).toCompileTo('baz');
+130,152c75
+<   it('should strip whitespace around partials', function() {
+<     expectTemplate('foo {{~> dude~}} ')
+<       .withPartials({ dude: 'bar' })
+<       .toCompileTo('foobar');
+< 
+<     expectTemplate('foo {{> dude~}} ')
+<       .withPartials({ dude: 'bar' })
+<       .toCompileTo('foo bar');
+< 
+<     expectTemplate('foo {{> dude}} ')
+<       .withPartials({ dude: 'bar' })
+<       .toCompileTo('foo bar ');
+< 
+<     expectTemplate('foo\n {{~> dude}} ')
+<       .withPartials({ dude: 'bar' })
+<       .toCompileTo('foobar');
+< 
+<     expectTemplate('foo\n {{> dude}} ')
+<       .withPartials({ dude: 'bar' })
+<       .toCompileTo('foo\n bar');
+<   });
+< 
+<   it('should only strip whitespace once', function() {
+---
+>   it('should only strip whitespace once', () => {

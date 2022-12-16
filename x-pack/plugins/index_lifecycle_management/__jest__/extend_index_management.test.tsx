@@ -7,7 +7,7 @@
 
 import moment from 'moment-timezone';
 
-import { init } from './client_integration/helpers/http_requests';
+import { init } from '../integration_tests/helpers/http_requests';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { Index } from '../common/types';
@@ -252,14 +252,14 @@ describe('extend index management', () => {
       const extension = ilmSummaryExtension(indexWithLifecyclePolicy, getUrlForApp);
       expect(extension).toBeDefined();
       const rendered = mountWithIntl(extension);
-      expect(rendered).toMatchSnapshot();
+      expect(rendered.render()).toMatchSnapshot();
     });
 
     test('should return extension when index has lifecycle error', () => {
       const extension = ilmSummaryExtension(indexWithLifecycleError, getUrlForApp);
       expect(extension).toBeDefined();
       const rendered = mountWithIntl(extension);
-      expect(rendered).toMatchSnapshot();
+      expect(rendered.render()).toMatchSnapshot();
     });
   });
 

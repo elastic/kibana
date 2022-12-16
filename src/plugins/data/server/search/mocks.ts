@@ -16,7 +16,6 @@ export function createSearchSetupMock(): jest.Mocked<ISearchSetup> {
   return {
     aggs: searchAggsSetupMock(),
     registerSearchStrategy: jest.fn(),
-    __enhance: jest.fn(),
     searchSource: searchSourceMock.createSetupContract(),
   };
 }
@@ -43,5 +42,6 @@ export function createSearchRequestHandlerContext() {
     extendSession: jest.fn(),
     cancelSession: jest.fn(),
     deleteSession: jest.fn(),
+    getSessionStatus: jest.fn(),
   };
 }

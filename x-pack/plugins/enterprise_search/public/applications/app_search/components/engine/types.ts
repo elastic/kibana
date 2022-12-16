@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { Schema, SchemaConflicts, IIndexingStatus } from '../../../shared/schema/types';
+import {
+  Schema,
+  SchemaConflicts,
+  IIndexingStatus,
+  AdvancedSchema,
+} from '../../../shared/schema/types';
 import { ApiToken } from '../credentials/types';
 
 export enum EngineTypes {
@@ -47,6 +52,7 @@ export interface EngineDetails extends Engine {
   apiKey: string;
   elasticsearchIndexName?: string;
   schema: Schema;
+  advancedSchema: AdvancedSchema;
   schemaConflicts?: SchemaConflicts;
   unconfirmedFields?: string[];
   activeReindexJob?: IIndexingStatus;
@@ -57,6 +63,7 @@ export interface EngineDetails extends Engine {
   includedEngines?: EngineDetails[];
   adaptive_relevance_suggestions?: SearchRelevanceSuggestionDetails;
   adaptive_relevance_suggestions_active: boolean;
+  analytics_enabled?: boolean;
 }
 
 interface ResultField {

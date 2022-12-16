@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -21,11 +22,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import semverLt from 'semver/functions/lt';
 import { PackagePolicy } from '@kbn/fleet-plugin/common/types';
-import { ElasticDocsLink } from '../../../shared/links/elastic_docs_link';
 import rocketLaunchGraphic from './blog_rocket_720x420.png';
 import { MigrationInProgressPanel } from './migration_in_progress_panel';
 import { UpgradeAvailableCard } from './migrated/upgrade_available_card';
 import { SuccessfulMigrationCard } from './migrated/successful_migration_card';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   onSwitch: () => void;
@@ -184,6 +185,7 @@ export function SchemaOverview({
 }
 
 export function SchemaOverviewHeading() {
+  const { docLinks } = useApmPluginContext().core;
   return (
     <>
       <EuiText color="subdued">
@@ -208,16 +210,12 @@ export function SchemaOverviewHeading() {
               </strong>
             ),
             elasticAgentDocLink: (
-              <ElasticDocsLink
-                section="/apm/server"
-                path="/apm-integration-data-streams.html"
-                target="_blank"
-              >
+              <EuiLink target="_blank" href={docLinks.links.apm.elasticAgent}>
                 {i18n.translate(
                   'xpack.apm.settings.schema.descriptionText.elasticAgentDocLinkText',
                   { defaultMessage: 'Elastic Agent' }
                 )}
-              </ElasticDocsLink>
+              </EuiLink>
             ),
           }}
         />

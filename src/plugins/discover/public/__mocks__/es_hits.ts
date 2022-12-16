@@ -40,6 +40,12 @@ export const esHits = [
     _id: '5',
     _score: 1,
     _type: '_doc',
-    _source: { date: '2020-20-01T12:12:12.128', name: 'test5', extension: 'doc', bytes: 50 },
+    _source: {
+      date: '2020-20-01T12:12:12.128',
+      name: 'test5',
+      extension: 'doc',
+      bytes: 50,
+      message: '',
+    },
   },
 ];

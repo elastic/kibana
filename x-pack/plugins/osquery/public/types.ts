@@ -5,24 +5,37 @@
  * 2.0.
  */
 
-import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FleetStart } from '@kbn/fleet-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import {
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { getLazyOsqueryAction } from './shared_components';
+import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
+import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type {
+  getLazyOsqueryResults,
+  getLazyLiveQueryField,
+  getLazyOsqueryAction,
+  getLazyOsqueryResponseActionTypeForm,
+} from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
+
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
+  OsqueryResults: ReturnType<typeof getLazyOsqueryResults>;
+  LiveQueryField?: ReturnType<typeof getLazyLiveQueryField>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
+  fetchInstallationStatus: () => { loading: boolean; disabled: boolean; permissionDenied: boolean };
+  OsqueryResponseActionTypeForm: ReturnType<typeof getLazyOsqueryResponseActionTypeForm>;
 }
 
 export interface AppPluginStartDependencies {
@@ -35,11 +48,16 @@ export interface StartPlugins {
   fleet: FleetStart;
   lens?: LensPublicStart;
   security: SecurityPluginStart;
+  spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  cases: CasesUiStart;
+  timelines: TimelinesUIStart;
+  appName?: string;
 }
 
 export interface SetupPlugins {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  cases?: CasesUiSetup;
 }
 
 export type StartServices = CoreStart & StartPlugins;

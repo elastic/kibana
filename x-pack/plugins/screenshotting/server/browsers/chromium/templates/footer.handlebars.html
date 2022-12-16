@@ -1,0 +1,47 @@
+<style>
+  div.container {
+    position: relative;
+    font-size: 10px;
+    font-family: system-ui;
+    text-align: center;
+    color: #aaa;
+    width: 100%;
+  }
+  div.pages {
+    position: absolute;
+
+    left: 50%;
+    transform: translateX(-50%);
+
+    bottom: 3mm;
+
+    text-align: center;
+  }
+  img.logo {
+    position: absolute;
+
+    left: 2mm;
+    bottom: 3mm;
+
+    overflow: hidden;
+  }
+
+  div.poweredByElastic {
+    position: absolute;
+    color: #aaa;
+    font-size: 2mm;
+
+    left: 2mm;
+    bottom: 0;
+  }
+</style>
+<div class="container">
+  <!-- DPI is 72/96 so scaling of all values here must * 0.75 to get values on page  -->
+  <img class="logo" height="30mm" width="80mm" src="{{base64FooterLogo}}" />
+  {{#if hasCustomLogo}}
+  <div class="poweredByElastic">{{poweredByElasticCopy}}</div>
+  {{/if}}
+  <div class="pages">
+    <span class="pageNumber"></span>&nbsp;of&nbsp;<span class="totalPages"></span>
+  </div>
+</div>

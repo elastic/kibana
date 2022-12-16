@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { memo, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { MalwareProtections } from './policy_forms/protections/malware';
 import { MemoryProtection } from './policy_forms/protections/memory';
 import { BehaviorProtection } from './policy_forms/protections/behavior';
 import { LinuxEvents, MacEvents, WindowsEvents } from './policy_forms/events';
 import { AdvancedPolicyForms } from './policy_advanced';
 import { AntivirusRegistrationForm } from './components/antivirus_registration_form';
+import { AttackSurfaceReductionForm } from './components/attack_surface_reduction_form';
 import { Ransomware } from './policy_forms/protections/ransomware';
 import { LockedPolicyCard } from './policy_forms/locked_card';
 import { useLicense } from '../../../../common/hooks/use_license';
@@ -40,12 +42,24 @@ const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
   }
 );
 
+const LOCKED_CARD_ATTACK_SURFACE_REDUCTION = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.attack_surface_reduction',
+  {
+    defaultMessage: 'Attack Surface Reduction',
+  }
+);
+
 export const PolicyDetailsForm = memo(() => {
   const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
   const handleAdvancedPolicyClick = useCallback(() => {
     setShowAdvancedPolicy(!showAdvancedPolicy);
   }, [showAdvancedPolicy]);
   const isPlatinumPlus = useLicense().isPlatinumPlus();
+  const { loading: authzLoading } = useUserPrivileges().endpointPrivileges;
+
+  if (authzLoading) {
+    return <EuiLoadingContent lines={5} />;
+  }
 
   return (
     <>
@@ -73,6 +87,12 @@ export const PolicyDetailsForm = memo(() => {
         <BehaviorProtection />
       ) : (
         <LockedPolicyCard title={LOCKED_CARD_BEHAVIOR_TITLE} />
+      )}
+      <EuiSpacer size="l" />
+      {isPlatinumPlus ? (
+        <AttackSurfaceReductionForm />
+      ) : (
+        <LockedPolicyCard title={LOCKED_CARD_ATTACK_SURFACE_REDUCTION} />
       )}
       <EuiSpacer size="l" />
 
@@ -104,7 +124,7 @@ export const PolicyDetailsForm = memo(() => {
       </EuiButtonEmpty>
 
       <EuiSpacer size="l" />
-      {showAdvancedPolicy && <AdvancedPolicyForms />}
+      {showAdvancedPolicy && <AdvancedPolicyForms isPlatinumPlus={isPlatinumPlus} />}
     </>
   );
 });

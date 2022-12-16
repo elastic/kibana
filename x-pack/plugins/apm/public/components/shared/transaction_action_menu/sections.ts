@@ -168,7 +168,7 @@ export const getSections = ({
         path: `/link-to/logs`,
         query: {
           time,
-          filter: `trace.id:"${transaction.trace.id}" OR "${transaction.trace.id}"`,
+          filter: `trace.id:"${transaction.trace.id}" OR (not trace.id:* AND "${transaction.trace.id}")`,
         },
       }),
       condition: true,

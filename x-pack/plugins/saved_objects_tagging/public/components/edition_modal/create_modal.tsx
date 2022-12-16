@@ -65,7 +65,7 @@ export const CreateTagModal: FC<CreateTagModalProps> = ({
       const createdTag = await tagClient.create(tagAttributes);
       onSave(createdTag);
     } catch (e) {
-      // if e is HttpFetchError, actual server error payload is in e.body
+      // if e is IHttpFetchError, actual server error payload is in e.body
       if (isServerValidationError(e.body)) {
         setValidation(e.body.attributes);
       }

@@ -1,0 +1,20 @@
+.entSearch__createEngineLayout {
+  max-width: 60rem;
+  margin: auto;
+}
+
+.entSearch__indexListItem {
+  pointer-events: none;
+  .euiBadge {
+    pointer-events: all;
+  }
+}
+
+.entSearch__indexSelectable {
+  .euiSelectableListItem-isFocused,
+  .euiSelectableListItem__append {
+    position: absolute;
+    top: $euiSizeXS;
+    right: calc(1rem - 2px);
+  }
+}

@@ -7,7 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 import { cloneDeep } from 'lodash/fp';
-import { EuiMarkdownFormat, EuiLinkAnchorProps } from '@elastic/eui';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiMarkdownFormat } from '@elastic/eui';
 
 import { parsingPlugins, processingPlugins } from './plugins';
 import { MarkdownLink } from './markdown_link';
@@ -23,7 +24,6 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) 
     () => (props) => <MarkdownLink {...props} disableLinks={disableLinks} />,
     [disableLinks]
   );
-
   // Deep clone of the processing plugins to prevent affecting the markdown editor.
   const processingPluginList = cloneDeep(processingPlugins);
   // This line of code is TS-compatible and it will break if [1][1] change in the future.

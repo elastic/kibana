@@ -19,7 +19,6 @@ import { CSV_REPORTING_ACTION } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDendencies } from '../plugin';
-
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
 ): embeddable is ISearchEmbeddable {
@@ -98,7 +97,20 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     }
 
     const { embeddable } = context;
-    return embeddable.getInput().viewMode !== ViewMode.EDIT && embeddable.type === 'search';
+
+    if (embeddable.type !== 'search') {
+      return false;
+    }
+
+    const savedSearch = embeddable.getSavedSearch();
+    const query = savedSearch.searchSource.getField('query');
+
+    // using isOfAggregateQueryType(query) added increased the bundle size over the configured limit of 55.7KB
+    if (query && Boolean(query && 'sql' in query)) {
+      // hide exporting CSV for SQL
+      return false;
+    }
+    return embeddable.getInput().viewMode !== ViewMode.EDIT;
   };
 
   public execute = async (context: ActionContext) => {

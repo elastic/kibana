@@ -225,15 +225,6 @@ export const search = (specService: SpecDefinitionsService) => {
     },
   });
 
-  specService.addEndpointDescription('search_template', {
-    data_autocomplete_rules: {
-      template: {
-        __one_of: [{ __scope_link: 'search' }, { __scope_link: 'GLOBAL.script' }],
-      },
-      params: {},
-    },
-  });
-
   specService.addEndpointDescription('render_search_template', {
     data_autocomplete_rules: {
       __one_of: [{ source: { __scope_link: 'search' } }, { __scope_link: 'GLOBAL.script' }],

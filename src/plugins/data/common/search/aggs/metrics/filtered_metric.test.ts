@@ -52,7 +52,8 @@ describe('filtered metric agg type', () => {
       ],
       {
         typesRegistry,
-      }
+      },
+      jest.fn()
     );
   });
 

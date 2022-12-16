@@ -12,7 +12,7 @@ import { CountUntil } from '../../../../components/count_until';
 import { Page } from '../../../../components/page';
 import { useDeps } from '../../../../hooks/use_deps';
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props {}
 
 export const PageCountUntil: React.FC<Props> = () => {

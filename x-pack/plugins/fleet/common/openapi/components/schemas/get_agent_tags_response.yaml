@@ -1,0 +1,7 @@
+title: Get Agent Tags response
+type: object
+properties:
+  items:
+    type: array
+    items:
+      type: string

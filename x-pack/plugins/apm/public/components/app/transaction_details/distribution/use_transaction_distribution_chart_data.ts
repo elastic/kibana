@@ -8,8 +8,9 @@
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
-import { EVENT_OUTCOME } from '../../../../../common/elasticsearch_fieldnames';
+import { EVENT_OUTCOME } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
+import { LatencyDistributionChartType } from '../../../../../common/latency_distribution_chart_types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
@@ -37,14 +38,18 @@ export const useTransactionDistributionChartData = () => {
         params.start &&
         params.end
       ) {
-        return callApmApi('POST /internal/apm/latency/overall_distribution', {
-          params: {
-            body: {
-              ...params,
-              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+        return callApmApi(
+          'POST /internal/apm/latency/overall_distribution/transactions',
+          {
+            params: {
+              body: {
+                ...params,
+                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+                chartType: LatencyDistributionChartType.transactionLatency,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [params]
@@ -81,25 +86,33 @@ export const useTransactionDistributionChartData = () => {
           params.serviceName &&
           params.environment &&
           params.start &&
-          params.end
+          params.end &&
+          overallLatencyData.durationMin &&
+          overallLatencyData.durationMax
         ) {
-          return callApmApi('POST /internal/apm/latency/overall_distribution', {
-            params: {
-              body: {
-                ...params,
-                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-                termFilters: [
-                  {
-                    fieldName: EVENT_OUTCOME,
-                    fieldValue: EventOutcome.failure,
-                  },
-                ],
+          return callApmApi(
+            'POST /internal/apm/latency/overall_distribution/transactions',
+            {
+              params: {
+                body: {
+                  ...params,
+                  durationMin: overallLatencyData.durationMin,
+                  durationMax: overallLatencyData.durationMax,
+                  percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+                  termFilters: [
+                    {
+                      fieldName: EVENT_OUTCOME,
+                      fieldValue: EventOutcome.failure,
+                    },
+                  ],
+                  chartType: LatencyDistributionChartType.transactionLatency,
+                },
               },
-            },
-          });
+            }
+          );
         }
       },
-      [params]
+      [params, overallLatencyData.durationMin, overallLatencyData.durationMax]
     );
 
   useEffect(() => {
@@ -124,6 +137,7 @@ export const useTransactionDistributionChartData = () => {
   });
 
   return {
+    totalDocCount: overallLatencyData.totalDocCount,
     chartData: transactionDistributionChartData,
     hasData,
     percentileThresholdValue: overallLatencyData.percentileThresholdValue,

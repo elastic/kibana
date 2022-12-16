@@ -5,11 +5,11 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { Filter } from '@kbn/es-query';
 
-import { ThreatListDoc, ThreatListItem } from './types';
+import type { ThreatListDoc, ThreatListItem } from './types';
 
 export const getThreatMappingMock = (): ThreatMapping => {
   return [

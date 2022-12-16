@@ -6,3 +6,6 @@
  */
 
 export const syntheticsMonitorType = 'synthetics-monitor';
+export const monitorAttributes = `${syntheticsMonitorType}.attributes`;
+
+export const syntheticsParamType = 'synthetics-param';

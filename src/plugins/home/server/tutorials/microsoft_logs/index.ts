@@ -55,7 +55,7 @@ export function microsoftLogsSpecProvider(context: TutorialContext): TutorialSch
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/microsoft_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/microsoft_logs/screenshot.webp',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

@@ -164,7 +164,7 @@ export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => 
 
   // Setup testbed
   await act(async () => {
-    testBed = await registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent, deps), {
+    testBed = registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent, deps), {
       memoryRouter: {
         wrapComponent: false,
       },

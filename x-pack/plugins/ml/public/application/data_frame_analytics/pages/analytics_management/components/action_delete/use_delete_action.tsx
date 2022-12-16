@@ -117,6 +117,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
     checkIndexPatternExists();
     // Check if an user has permission to delete the index & data view
     checkUserIndexPermission();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isModalVisible]);
 
   const closeModal = () => setModalVisible(false);
@@ -168,6 +169,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
       onClick: (i: DataFrameAnalyticsListRow) => openDeleteJobCheckModal(i),
       'data-test-subj': 'mlAnalyticsJobDeleteButton',
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

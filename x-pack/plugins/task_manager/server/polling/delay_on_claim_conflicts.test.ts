@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { Subject, of, firstValueFrom } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { sleep } from '../test_utils';
@@ -17,7 +16,7 @@ import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { FillPoolResult } from '../lib/fill_pool';
 
 describe('delayOnClaimConflicts', () => {
-  beforeEach(() => jest.useFakeTimers());
+  beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
 
   test(
     'initializes with a delay of 0',

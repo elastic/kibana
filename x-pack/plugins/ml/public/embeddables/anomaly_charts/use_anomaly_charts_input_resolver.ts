@@ -81,9 +81,11 @@ export function useAnomalyChartsInputResolver(
 
           anomalyExplorerService.setTimeRange(timeRangeInput);
 
-          let influencersFilterQuery: InfluencersFilterQuery;
+          let influencersFilterQuery: InfluencersFilterQuery | undefined;
           try {
-            influencersFilterQuery = processFilters(filters, query);
+            if (filters || query) {
+              influencersFilterQuery = processFilters(filters, query);
+            }
           } catch (e) {
             // handle query syntax errors
             setError(e);
@@ -134,20 +136,24 @@ export function useAnomalyChartsInputResolver(
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     chartWidth$.next(chartWidth);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartWidth]);
 
   useEffect(() => {
     severity$.next(severity);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [severity]);
 
   useEffect(() => {
     if (error) {
       renderCallbacks.onError(error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
   return { chartsData, isLoading, error };

@@ -5,9 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-// @ts-expect-error
 import { bombIcon } from '../../components/svg/bomb_icon';
-// @ts-expect-error
 import { fireIcon } from '../../components/svg/fire_icon';
 
 export const ICON_NAMES = {
@@ -17,7 +15,6 @@ export const ICON_NAMES = {
   BOMB: 'fa-bomb',
   BUG: 'fa-bug',
   COMMENT: 'fa-comment',
-  EXCLAMATION_CIRCLE: 'fa-exclamation-circle',
   EXCLAMATION_TRIANGLE: 'fa-exclamation-triangle',
   FIRE: 'fa-fire',
   FLAG: 'fa-flag',
@@ -35,7 +32,6 @@ export const ICON_TYPES_MAP = {
   [ICON_NAMES.BOMB]: bombIcon,
   [ICON_NAMES.BUG]: 'bug',
   [ICON_NAMES.COMMENT]: 'editorComment',
-  [ICON_NAMES.EXCLAMATION_CIRCLE]: 'alert', // TODO: Change as an exclamation mark is added
   [ICON_NAMES.EXCLAMATION_TRIANGLE]: 'alert',
   [ICON_NAMES.FIRE]: fireIcon,
   [ICON_NAMES.FLAG]: 'flag',

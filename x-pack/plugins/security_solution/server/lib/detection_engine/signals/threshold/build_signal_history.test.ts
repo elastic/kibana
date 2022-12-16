@@ -13,7 +13,7 @@ describe('buildSignalHistory', () => {
   it('builds a signal history from an alert', () => {
     const signalHistory = buildThresholdSignalHistory({ alerts: [sampleThresholdAlert] });
     expect(signalHistory).toEqual({
-      '7a75c5c2db61f57ec166c669cb8244b91f812f0b2f1d4f8afd528d4f8b4e199b': {
+      '3db471f26608656e5fe8441088d3015235b441c48e46715e5da2b0cc04cc9675': {
         lastSignalTimestamp: Date.parse(
           sampleThresholdAlert._source[ALERT_ORIGINAL_TIME] as string
         ),

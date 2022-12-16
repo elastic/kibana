@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import { PartitionFieldsType } from '../../../common/types/anomalies';
 import { CriteriaField } from './results_service';
@@ -17,6 +18,11 @@ type SearchTerm =
       [key in PartitionFieldsType]?: string;
     }
   | undefined;
+
+export interface PartitionFieldData {
+  name: string;
+  values: Array<{ value: string; maxRecordScore?: number }>;
+}
 
 /**
  * Gets an object for aggregation query to retrieve field name and values.
@@ -110,22 +116,37 @@ function getFieldAgg(
  * @param fieldType - Field type
  * @param aggs - Aggregation response
  */
-function getFieldObject(fieldType: PartitionFieldsType, aggs: any) {
-  const fieldNameKey = `${fieldType}_name`;
-  const fieldValueKey = `${fieldType}_value`;
+function getFieldObject(
+  fieldType: PartitionFieldsType,
+  aggs: Record<estypes.AggregateName, estypes.AggregationsAggregate>
+): Record<PartitionFieldsType, PartitionFieldData> | {} {
+  const fieldNameKey = `${fieldType}_name` as const;
+  const fieldValueKey = `${fieldType}_value` as const;
 
-  return aggs[fieldNameKey].buckets.length > 0
+  const fieldNameAgg = aggs[fieldNameKey] as estypes.AggregationsMultiTermsAggregate;
+  const fieldValueAgg = aggs[fieldValueKey] as unknown as {
+    values: estypes.AggregationsMultiBucketAggregateBase<{
+      key: string;
+      maxRecordScore?: { value: number };
+    }>;
+  };
+
+  return Array.isArray(fieldNameAgg.buckets) && fieldNameAgg.buckets.length > 0
     ? {
         [fieldType]: {
-          name: aggs[fieldNameKey].buckets[0].key,
-          values: aggs[fieldValueKey].values.buckets.map(({ key, maxRecordScore }: any) => ({
-            value: key,
-            ...(maxRecordScore ? { maxRecordScore: maxRecordScore.value } : {}),
-          })),
+          name: fieldNameAgg.buckets[0].key,
+          values: Array.isArray(fieldValueAgg.values.buckets)
+            ? fieldValueAgg.values.buckets.map(({ key, maxRecordScore }) => ({
+                value: key,
+                ...(maxRecordScore ? { maxRecordScore: maxRecordScore.value } : {}),
+              }))
+            : [],
         },
       }
     : {};
 }
+
+export type PartitionFieldValueResponse = Record<PartitionFieldsType, PartitionFieldData>;
 
 export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
   /**
@@ -144,7 +165,7 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
     earliestMs: number,
     latestMs: number,
     fieldsConfig: FieldsConfig = {}
-  ) {
+  ): Promise<PartitionFieldValueResponse | {}> {
     const jobsResponse = await mlClient.getJobs({ job_id: jobId });
     if (jobsResponse.count === 0 || jobsResponse.jobs === undefined) {
       throw Boom.notFound(`Job with the id "${jobId}" not found`);
@@ -152,7 +173,7 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
 
     const job = jobsResponse.jobs[0];
 
-    const isModelPlotEnabled = job?.model_plot_config?.enabled;
+    const isModelPlotEnabled = !!job?.model_plot_config?.enabled;
     const isAnomalousOnly = (Object.entries(fieldsConfig) as Array<[string, FieldConfig]>).some(
       ([k, v]) => {
         return !!v?.anomalousOnly;
@@ -165,14 +186,14 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
       }
     );
 
-    const isModelPlotSearch = !!isModelPlotEnabled && !isAnomalousOnly;
+    const isModelPlotSearch = isModelPlotEnabled && !isAnomalousOnly;
 
     // Remove the time filter in case model plot is not enabled
     // and time range is not applied, so
     // it includes the records that occurred as anomalies historically
     const searchAllTime = !isModelPlotEnabled && !applyTimeRange;
 
-    const requestBody = {
+    const requestBody: estypes.SearchRequest['body'] = {
       query: {
         bool: {
           filter: [
@@ -221,8 +242,10 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
 
     const body = await mlClient.anomalySearch(
       {
-        size: 0,
-        body: requestBody,
+        body: {
+          ...requestBody,
+          size: 0,
+        },
       },
       [jobId]
     );
@@ -230,7 +253,7 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
     return PARTITION_FIELDS.reduce((acc, key) => {
       return {
         ...acc,
-        ...getFieldObject(key, body.aggregations),
+        ...getFieldObject(key, body.aggregations!),
       };
     }, {});
   };

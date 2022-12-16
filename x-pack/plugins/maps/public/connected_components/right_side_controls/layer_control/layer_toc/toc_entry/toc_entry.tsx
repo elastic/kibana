@@ -31,7 +31,7 @@ export interface ReduxStateProps {
   hasDirtyStateSelector: boolean;
   isLegendDetailsOpen: boolean;
   isEditButtonDisabled: boolean;
-  editModeActiveForLayer: boolean;
+  isFeatureEditorOpenForLayer: boolean;
 }
 
 export interface ReduxDispatchProps {
@@ -44,10 +44,12 @@ export interface ReduxDispatchProps {
 }
 
 export interface OwnProps {
+  depth: number;
   layer: ILayer;
   dragHandleProps?: DraggableProvidedDragHandleProps;
   isDragging?: boolean;
   isDraggingOver?: boolean;
+  isCombineLayer?: boolean;
 }
 
 type Props = ReduxStateProps & ReduxDispatchProps & OwnProps;
@@ -226,7 +228,7 @@ export class TOCEntry extends Component<Props, State> {
   }
 
   _renderDetailsToggle() {
-    if (!this.state.hasLegendDetails) {
+    if (this.props.isDragging || !this.state.hasLegendDetails) {
       return null;
     }
 
@@ -282,7 +284,6 @@ export class TOCEntry extends Component<Props, State> {
           openLayerSettings={this._openLayerPanelWithCheck}
           isEditButtonDisabled={this.props.isEditButtonDisabled}
           supportsFitToBounds={this.state.supportsFitToBounds}
-          editModeActiveForLayer={this.props.editModeActiveForLayer}
         />
 
         {this._renderQuickActions()}
@@ -310,18 +311,35 @@ export class TOCEntry extends Component<Props, State> {
     );
   };
 
+  _hightlightAsSelectedLayer() {
+    if (this.props.isCombineLayer) {
+      return false;
+    }
+
+    if (this.props.layer.isPreviewLayer()) {
+      return true;
+    }
+
+    return (
+      this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId()
+    );
+  }
+
   render() {
     const classes = classNames('mapTocEntry', {
       'mapTocEntry-isDragging': this.props.isDragging,
       'mapTocEntry-isDraggingOver': this.props.isDraggingOver,
-      'mapTocEntry-isSelected':
-        this.props.layer.isPreviewLayer() ||
-        (this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId()),
-      'mapTocEntry-isInEditingMode': this.props.editModeActiveForLayer,
+      'mapTocEntry-isCombineLayer': this.props.isCombineLayer,
+      'mapTocEntry-isSelected': this._hightlightAsSelectedLayer(),
+      'mapTocEntry-isInEditingMode': this.props.isFeatureEditorOpenForLayer,
     });
+
+    const depthStyle =
+      this.props.depth > 0 ? { paddingLeft: `${8 + this.props.depth * 24}px` } : {};
 
     return (
       <div
+        style={depthStyle}
         className={classes}
         id={this.props.layer.getId()}
         data-layerid={this.props.layer.getId()}
@@ -334,7 +352,7 @@ export class TOCEntry extends Component<Props, State> {
 
         {this._renderCancelModal()}
 
-        {this.props.editModeActiveForLayer && (
+        {this.props.isFeatureEditorOpenForLayer && (
           <div className="mapTocEntry-isInEditingMode__row">
             <EuiIcon type="vector" size="s" />
             <span className="mapTocEntry-isInEditingMode__editFeatureText">

@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { RequestHandlerContext } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { RequestHandlerContext } from '@kbn/core/server';
+import { prefixIndexPatternWithCcs } from '../../../../../../common/ccs_utils';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_LOGSTASH,
 } from '../../../../../../common/constants';
-import { prefixIndexPatternWithCcs } from '../../../../../../common/ccs_utils';
+import {
+  postElasticsearchSettingsInternalMonitoringRequestPayloadRT,
+  postElasticsearchSettingsInternalMonitoringResponsePayloadRT,
+} from '../../../../../../common/http_api/elasticsearch_settings';
+import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
 import { handleError } from '../../../../../lib/errors';
-import { RouteDependencies, LegacyServer } from '../../../../../types';
+import { MonitoringCore, RouteDependencies } from '../../../../../types';
 
 const queryBody = {
   size: 0,
@@ -68,14 +72,16 @@ const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, ind
   return counts;
 };
 
-export function internalMonitoringCheckRoute(server: LegacyServer, npRoute: RouteDependencies) {
+export function internalMonitoringCheckRoute(server: MonitoringCore, npRoute: RouteDependencies) {
+  const validateBody = createValidationFunction(
+    postElasticsearchSettingsInternalMonitoringRequestPayloadRT
+  );
+
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/elasticsearch_settings/check/internal_monitoring',
       validate: {
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-        }),
+        body: validateBody,
       },
     },
     async (context, request, response) => {
@@ -101,9 +107,11 @@ export function internalMonitoringCheckRoute(server: LegacyServer, npRoute: Rout
           typeCount.mb_indices += counts.mbIndicesCount;
         });
 
-        return response.ok({
-          body: typeCount,
-        });
+        return response.ok(
+          postElasticsearchSettingsInternalMonitoringResponsePayloadRT.encode({
+            body: typeCount,
+          })
+        );
       } catch (err) {
         throw handleError(err);
       }

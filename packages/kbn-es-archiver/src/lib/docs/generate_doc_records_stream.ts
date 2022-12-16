@@ -47,6 +47,10 @@ export function createGenerateDocRecordsStream({
           }
         );
 
+        const hasDatastreams =
+          (await client.indices.getDataStream({ name: index })).data_streams.length > 0;
+        const indexToDatastream = new Map();
+
         let remainingHits: number | null = null;
 
         for await (const resp of interator) {
@@ -57,7 +61,17 @@ export function createGenerateDocRecordsStream({
 
           for (const hit of resp.body.hits.hits) {
             remainingHits -= 1;
-            stats.archivedDoc(hit._index);
+
+            if (hasDatastreams && !indexToDatastream.has(hit._index)) {
+              const {
+                [hit._index]: { data_stream: dataStream },
+              } = await client.indices.get({ index: hit._index, filter_path: ['*.data_stream'] });
+              indexToDatastream.set(hit._index, dataStream);
+            }
+
+            const dataStream = indexToDatastream.get(hit._index);
+            stats.archivedDoc(dataStream || hit._index);
+
             this.push({
               type: 'doc',
               value: {
@@ -65,6 +79,7 @@ export function createGenerateDocRecordsStream({
                 // when it is loaded it can skip migration, if possible
                 index:
                   hit._index.startsWith('.kibana') && !keepIndexNames ? '.kibana_1' : hit._index,
+                data_stream: dataStream,
                 id: hit._id,
                 source: hit._source,
               },

@@ -10,10 +10,16 @@ import path from 'path';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({
+  getService,
+  getPageObjects,
+  updateBaselines,
+}: FtrProviderContext & { updateBaselines: boolean }) {
   const PageObjects = getPageObjects(['common', 'reporting']);
-  const compareImages = getService('compareImages');
   const testSubjects = getService('testSubjects');
+  const png = getService('png');
+  const config = getService('config');
+  const screenshotDir = config.get('screenshots.directory');
 
   const appId = 'reportingExample';
 
@@ -24,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Captures', () => {
-    it('PNG that matches the baseline', async () => {
+    it('PNG file matches the baseline image', async () => {
       await PageObjects.common.navigateToApp(appId);
 
       await (await testSubjects.find('shareButton')).click();
@@ -35,13 +41,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const url = await PageObjects.reporting.getReportURL(60000);
       const captureData = await PageObjects.reporting.getRawPdfReportData(url);
 
-      const pngSessionFilePath = await compareImages.writeToSessionFile(
+      const pngSessionFilePath = await PageObjects.reporting.writeSessionReport(
         'capture_test_baseline_a',
-        captureData
+        'png',
+        captureData,
+        screenshotDir
       );
 
       expect(
-        await compareImages.checkIfPngsMatch(pngSessionFilePath, fixtures.baselineAPng)
+        await png.compareAgainstBaseline(
+          pngSessionFilePath,
+          fixtures.baselineAPng,
+          screenshotDir,
+          updateBaselines
+        )
       ).to.be.lessThan(0.09);
     });
   });

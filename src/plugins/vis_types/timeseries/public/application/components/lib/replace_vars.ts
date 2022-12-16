@@ -6,26 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { encode, RisonValue } from 'rison-node';
-import {
-  create as createHandlebars,
-  compile as compileHandlebars,
-  HelperDelegate,
-  HelperOptions,
-} from 'handlebars';
+import { encode } from '@kbn/rison';
+import Handlebars, { ExtendedCompileOptions, compileFnName } from '@kbn/handlebars';
 import { i18n } from '@kbn/i18n';
 import { emptyLabel } from '../../../../common/empty_label';
 
-type CompileOptions = Parameters<typeof compileHandlebars>[1];
-
-const handlebars = createHandlebars();
+const handlebars = Handlebars.create();
 
 function createSerializationHelper(
   fnName: string,
   serializeFn: (value: unknown) => string
-): HelperDelegate {
+): Handlebars.HelperDelegate {
   return (...args) => {
-    const { hash } = args.slice(-1)[0] as HelperOptions;
+    const { hash } = args.slice(-1)[0] as Handlebars.HelperOptions;
     const hasHash = Object.keys(hash).length > 0;
     const hasValues = args.length > 1;
     if (hasHash && hasValues) {
@@ -48,7 +41,7 @@ function createSerializationHelper(
 
 handlebars.registerHelper(
   'rison',
-  createSerializationHelper('rison', (v) => encode(v as RisonValue))
+  createSerializationHelper('rison', (v) => encode(v))
 );
 
 handlebars.registerHelper('encodeURIComponent', (component: unknown) => {
@@ -60,12 +53,12 @@ export function replaceVars(
   str: string,
   args: Record<string, unknown> = {},
   vars: Record<string, unknown> = {},
-  compileOptions: Partial<CompileOptions> = {}
+  compileOptions: Partial<ExtendedCompileOptions> = {}
 ) {
   try {
     /** we need add '[]' for emptyLabel because this value contains special characters.
      * @see (https://handlebarsjs.com/guide/expressions.html#literal-segments) **/
-    const template = handlebars.compile(str.split(emptyLabel).join(`[${emptyLabel}]`), {
+    const template = handlebars[compileFnName](str.split(emptyLabel).join(`[${emptyLabel}]`), {
       strict: true,
       knownHelpersOnly: true,
       knownHelpers: {

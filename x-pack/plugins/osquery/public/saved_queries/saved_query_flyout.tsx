@@ -17,18 +17,20 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import React, { useCallback, useRef } from 'react';
+import { FormProvider } from 'react-hook-form';
+
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Form } from '../shared_imports';
+import type { SavedQuerySOFormData, SavedQueryFormData } from './form/use_saved_query_form';
 import { useSavedQueryForm } from './form/use_saved_query_form';
-import { SavedQueryForm, SavedQueryFormRefObject } from './form';
+import { SavedQueryForm } from './form';
 import { useCreateSavedQuery } from './use_create_saved_query';
 
 interface AddQueryFlyoutProps {
-  defaultValue: unknown;
+  defaultValue: SavedQuerySOFormData;
   onClose: () => void;
-  isExternal?: true;
+  isExternal?: boolean;
 }
 
 const additionalZIndexStyle = { style: 'z-index: 6000' };
@@ -38,20 +40,24 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
   onClose,
   isExternal,
 }) => {
-  const savedQueryFormRef = useRef<SavedQueryFormRefObject>(null);
   const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: false });
 
-  const handleSubmit = useCallback(
-    (payload) => createSavedQueryMutation.mutateAsync(payload).then(() => onClose()),
-    [createSavedQueryMutation, onClose]
-  );
-
-  const { form } = useSavedQueryForm({
+  const hooksForm = useSavedQueryForm({
     defaultValue,
-    savedQueryFormRef,
-    handleSubmit,
   });
-  const { submit, isSubmitting } = form;
+  const {
+    serializer,
+    idSet,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = hooksForm;
+  const onSubmit = useCallback(
+    async (payload: SavedQueryFormData) => {
+      const serializedData = serializer(payload);
+      await createSavedQueryMutation.mutateAsync(serializedData).then(() => onClose());
+    },
+    [createSavedQueryMutation, onClose, serializer]
+  );
 
   return (
     <EuiPortal>
@@ -60,7 +66,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
         ownFocus
         onClose={onClose}
         aria-labelledby="flyoutTitle"
-        maskProps={isExternal && additionalZIndexStyle} // For an edge case to display above the alerts flyout
+        maskProps={isExternal ? additionalZIndexStyle : undefined} // For an edge case to display above the alerts flyout
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
@@ -73,9 +79,9 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <Form form={form}>
-            <SavedQueryForm ref={savedQueryFormRef} />
-          </Form>
+          <FormProvider {...hooksForm}>
+            <SavedQueryForm idSet={idSet} />
+          </FormProvider>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -88,7 +94,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton isLoading={isSubmitting} onClick={submit} fill>
+              <EuiButton isLoading={isSubmitting} onClick={handleSubmit(onSubmit)} fill>
                 <FormattedMessage
                   id="xpack.osquery.pack.queryFlyoutForm.saveButtonLabel"
                   defaultMessage="Save"

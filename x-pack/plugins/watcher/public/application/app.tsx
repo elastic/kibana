@@ -18,7 +18,7 @@ import {
 
 import { Router, Switch, Route, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageContent, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { EuiPageContent_Deprecated as EuiPageContent, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -26,9 +26,7 @@ import { RegisterManagementAppArgs, ManagementAppMountParams } from '@kbn/manage
 
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { LicenseStatus } from '../../common/types/license_status';
-import { WatchStatus } from './sections/watch_status/components/watch_status';
-import { WatchEdit } from './sections/watch_edit/components/watch_edit';
-import { WatchList } from './sections/watch_list/components/watch_list';
+import { WatchListPage, WatchEditPage, WatchStatusPage } from './sections';
 import { registerRouter } from './lib/navigation';
 import { AppContextProvider } from './app_context';
 import { useExecutionContext } from './shared_imports';
@@ -107,10 +105,10 @@ export const App = (deps: AppDeps) => {
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
   <Switch>
-    <Route exact path="/watches" component={WatchList} />
-    <Route exact path="/watches/watch/:id/status" component={WatchStatus} />
-    <Route exact path="/watches/watch/:id/edit" component={WatchEdit} />
-    <Route exact path="/watches/new-watch/:type(json|threshold)" component={WatchEdit} />
+    <Route exact path="/watches" component={WatchListPage} />
+    <Route exact path="/watches/watch/:id/status" component={WatchStatusPage} />
+    <Route exact path="/watches/watch/:id/edit" component={WatchEditPage} />
+    <Route exact path="/watches/new-watch/:type(json|threshold)" component={WatchEditPage} />
     <Redirect exact from="/" to="/watches" />
     <Redirect exact from="" to="/watches" />
   </Switch>

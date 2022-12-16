@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { fieldValidators, ValidationFunc } from '../shared_imports';
-import { INDEX_PATTERN_TYPE } from '../types';
 
 export const singleAstriskValidator = (
   ...args: Parameters<ValidationFunc>
@@ -25,7 +25,7 @@ export const singleAstriskValidator = (
 export const schema = {
   title: {
     label: i18n.translate('indexPatternEditor.editor.form.titleLabel', {
-      defaultMessage: 'Name',
+      defaultMessage: 'Index pattern',
     }),
     defaultValue: '',
     helpText: i18n.translate('indexPatternEditor.validations.titleHelpText', {
@@ -36,7 +36,7 @@ export const schema = {
       {
         validator: fieldValidators.emptyField(
           i18n.translate('indexPatternEditor.validations.titleIsRequiredErrorMessage', {
-            defaultMessage: 'A name is required.',
+            defaultMessage: 'An index pattern is required.',
           })
         ),
       },
@@ -44,6 +44,13 @@ export const schema = {
         validator: singleAstriskValidator,
       },
     ],
+  },
+  name: {
+    label: i18n.translate('indexPatternEditor.editor.form.nameLabel', {
+      defaultMessage: 'Name',
+    }),
+    defaultValue: '',
+    validations: [],
   },
   timestampField: {
     label: i18n.translate('indexPatternEditor.editor.form.timeFieldLabel', {
@@ -74,5 +81,12 @@ export const schema = {
       defaultMessage: 'Data view type',
     }),
     defaultValue: INDEX_PATTERN_TYPE.DEFAULT,
+  },
+  isAdHoc: {
+    label: i18n.translate('indexPatternEditor.editor.form.IsAdHocLabel', {
+      defaultMessage: 'Creeate AdHoc DataView',
+    }),
+    defaultValue: false,
+    type: 'hidden',
   },
 };

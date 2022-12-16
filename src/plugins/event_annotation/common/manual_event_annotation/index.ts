@@ -8,21 +8,36 @@
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { EventAnnotationArgs, EventAnnotationOutput } from './types';
-export const manualEventAnnotation: ExpressionFunctionDefinition<
-  'manual_event_annotation',
+import { AvailableAnnotationIcons } from '../constants';
+
+import type {
+  ManualRangeEventAnnotationArgs,
+  ManualRangeEventAnnotationOutput,
+  ManualPointEventAnnotationArgs,
+  ManualPointEventAnnotationOutput,
+} from './types';
+
+export const manualPointEventAnnotation: ExpressionFunctionDefinition<
+  'manual_point_event_annotation',
   null,
-  EventAnnotationArgs,
-  EventAnnotationOutput
+  ManualPointEventAnnotationArgs,
+  ManualPointEventAnnotationOutput
 > = {
-  name: 'manual_event_annotation',
+  name: 'manual_point_event_annotation',
   aliases: [],
-  type: 'manual_event_annotation',
+  type: 'manual_point_event_annotation',
   help: i18n.translate('eventAnnotation.manualAnnotation.description', {
     defaultMessage: `Configure manual annotation`,
   }),
   inputTypes: ['null'],
   args: {
+    id: {
+      required: true,
+      types: ['string'],
+      help: i18n.translate('eventAnnotation.manualAnnotation.args.id', {
+        defaultMessage: `Id for annotation`,
+      }),
+    },
     time: {
       types: ['string'],
       help: i18n.translate('eventAnnotation.manualAnnotation.args.time', {
@@ -59,6 +74,8 @@ export const manualEventAnnotation: ExpressionFunctionDefinition<
       help: i18n.translate('eventAnnotation.manualAnnotation.args.icon', {
         defaultMessage: 'An optional icon used for annotation lines',
       }),
+      options: [...Object.values(AvailableAnnotationIcons)],
+      strict: true,
     },
     textVisibility: {
       types: ['boolean'],
@@ -73,9 +90,75 @@ export const manualEventAnnotation: ExpressionFunctionDefinition<
       }),
     },
   },
-  fn: function fn(input: unknown, args: EventAnnotationArgs) {
+  fn: function fn(input: unknown, args: ManualPointEventAnnotationArgs) {
     return {
-      type: 'manual_event_annotation',
+      type: 'manual_point_event_annotation',
+      ...args,
+    };
+  },
+};
+
+export const manualRangeEventAnnotation: ExpressionFunctionDefinition<
+  'manual_range_event_annotation',
+  null,
+  ManualRangeEventAnnotationArgs,
+  ManualRangeEventAnnotationOutput
+> = {
+  name: 'manual_range_event_annotation',
+  aliases: [],
+  type: 'manual_range_event_annotation',
+  help: i18n.translate('eventAnnotation.rangeAnnotation.description', {
+    defaultMessage: `Configure manual annotation`,
+  }),
+  inputTypes: ['null'],
+  args: {
+    id: {
+      required: true,
+      types: ['string'],
+      help: i18n.translate('eventAnnotation.rangeAnnotation.args.id', {
+        defaultMessage: `Id for annotation`,
+      }),
+    },
+    time: {
+      types: ['string'],
+      help: i18n.translate('eventAnnotation.rangeAnnotation.args.time', {
+        defaultMessage: `Timestamp for annotation`,
+      }),
+    },
+    endTime: {
+      types: ['string'],
+      help: i18n.translate('eventAnnotation.rangeAnnotation.args.endTime', {
+        defaultMessage: `Timestamp for range annotation`,
+      }),
+      required: false,
+    },
+    outside: {
+      types: ['boolean'],
+      help: '',
+      required: false,
+    },
+    label: {
+      types: ['string'],
+      help: i18n.translate('eventAnnotation.rangeAnnotation.args.label', {
+        defaultMessage: `The name of the annotation`,
+      }),
+    },
+    color: {
+      types: ['string'],
+      help: i18n.translate('eventAnnotation.rangeAnnotation.args.color', {
+        defaultMessage: 'The color of the line',
+      }),
+    },
+    isHidden: {
+      types: ['boolean'],
+      help: i18n.translate('eventAnnotation.rangeAnnotation.args.isHidden', {
+        defaultMessage: `Switch to hide annotation`,
+      }),
+    },
+  },
+  fn: function fn(input: unknown, args: ManualRangeEventAnnotationArgs) {
+    return {
+      type: 'manual_range_event_annotation',
       ...args,
     };
   },

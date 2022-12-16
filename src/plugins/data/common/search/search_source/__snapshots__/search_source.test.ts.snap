@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SearchSource #setField() / #flatten computed fields handling includes queries in the "filter" clause by default 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "match_phrase": Object {
+                "agent.keyword": "Mozilla",
+              },
+            },
+          ],
+        },
+      },
+    ],
+    "must": Array [],
+    "must_not": Array [],
+    "should": Array [],
+  },
+}
+`;
+
+exports[`SearchSource #setField() / #flatten computed fields handling includes queries in the "must" clause if sorting by _score 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [],
+    "must": Array [
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "match_phrase": Object {
+                "agent.keyword": "Mozilla",
+              },
+            },
+          ],
+        },
+      },
+    ],
+    "must_not": Array [],
+    "should": Array [],
+  },
+}
+`;
+
+exports[`SearchSource getSerializedFields should return serialized fields 1`] = `
+Object {
+  "filter": Array [
+    Object {
+      "meta": Object {
+        "alias": "alias",
+        "disabled": false,
+        "index": "456",
+        "negate": false,
+      },
+      "query": Object {
+        "query_string": Object {
+          "query": "query",
+        },
+      },
+    },
+  ],
+  "index": "123",
+}
+`;

@@ -9,7 +9,7 @@
 import { useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
 import { EventEmitter } from 'events';
-
+import { Query } from '@kbn/es-query';
 import {
   VisualizeServices,
   VisualizeAppState,
@@ -51,15 +51,16 @@ export const useEditorUpdates = (
             uiState: vis.uiState,
             timeRange: timefilter.getTime(),
             filters: filterManager.getFilters(),
-            query: queryString.getQuery(),
+            query: queryString.getQuery() as Query,
             linked: !!vis.data.savedSearchId,
             savedSearch,
+            unifiedSearch: services.unifiedSearch,
           });
         } else {
           embeddableHandler.updateInput({
             timeRange: timefilter.getTime(),
             filters: filterManager.getFilters(),
-            query: queryString.getQuery(),
+            query: queryString.getQuery() as Query,
             searchSessionId: services.data.search.session.getSessionId(),
           });
         }
