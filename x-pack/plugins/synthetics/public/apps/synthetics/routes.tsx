@@ -16,7 +16,6 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { getSettingsRouteConfig } from './components/settings/route_config';
 import { TestRunDetails } from './components/test_run_details/test_run_details';
 import { ErrorDetailsPage } from './components/error_details/error_details_page';
