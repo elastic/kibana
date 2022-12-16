@@ -162,7 +162,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     });
     recoveredAlert.setContext(recoveryContext);
   }
-  return { latestTimestamp };
+  return { state: { latestTimestamp } };
 }
 
 function getInvalidWindowSizeError(windowValue: string) {

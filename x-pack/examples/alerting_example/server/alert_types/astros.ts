@@ -75,7 +75,9 @@ export const alertType: RuleType<
     }
 
     return {
-      peopleInSpace,
+      state: {
+        peopleInSpace,
+      },
     };
   },
   producer: ALERTING_EXAMPLE_APP_ID,

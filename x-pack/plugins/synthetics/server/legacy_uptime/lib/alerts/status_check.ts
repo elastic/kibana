@@ -416,7 +416,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
       setRecoveredAlertsContext({ alertFactory, basePath, getAlertUuid, spaceId });
 
-      return updateState(state, downMonitorsByLocation.length > 0);
+      return { state: updateState(state, downMonitorsByLocation.length > 0) };
     }
 
     let availabilityResults: GetMonitorAvailabilityResult[] = [];
@@ -496,6 +496,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
     setRecoveredAlertsContext({ alertFactory, basePath, getAlertUuid, spaceId });
 
-    return updateState(state, downMonitorsByLocation.length > 0);
+    return { state: updateState(state, downMonitorsByLocation.length > 0) };
   },
 });

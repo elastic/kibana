@@ -92,7 +92,7 @@ export type LifecycleRuleExecutor<
     ActionGroupIds,
     LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds>
   >
-) => Promise<State | void>;
+) => Promise<{ state: State } | void>;
 
 const trackedAlertStateRt = rt.type({
   alertId: rt.string,
@@ -156,7 +156,7 @@ export const createLifecycleExecutor =
       InstanceContext,
       ActionGroupIds
     >
-  ): Promise<WrappedLifecycleRuleState<State>> => {
+  ): Promise<{ state: WrappedLifecycleRuleState<State> }> => {
     const {
       services: { alertFactory, shouldWriteAlerts },
       state: previousState,
@@ -207,7 +207,7 @@ export const createLifecycleExecutor =
       },
     };
 
-    const nextWrappedState = await wrappedExecutor({
+    const wrappedExecutorResult = await wrappedExecutor({
       ...options,
       state: state.wrapped != null ? state.wrapped : ({} as State),
       services: {
@@ -381,8 +381,10 @@ export const createLifecycleExecutor =
     );
 
     return {
-      wrapped: nextWrappedState ?? ({} as State),
-      trackedAlerts: writeAlerts ? nextTrackedAlerts : {},
-      trackedAlertsRecovered: writeAlerts ? nextTrackedAlertsRecovered : {},
+      state: {
+        wrapped: wrappedExecutorResult?.state ?? ({} as State),
+        trackedAlerts: writeAlerts ? nextTrackedAlerts : {},
+        trackedAlertsRecovered: writeAlerts ? nextTrackedAlertsRecovered : {},
+      },
     };
   };

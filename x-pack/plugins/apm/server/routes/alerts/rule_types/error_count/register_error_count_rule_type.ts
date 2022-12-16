@@ -223,7 +223,7 @@ export function registerErrorCountRuleType({
               });
           });
 
-        return {};
+        return { state: {} };
       },
     })
   );

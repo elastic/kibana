@@ -130,7 +130,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           }),
         });
 
-        return {};
+        return { state: {} };
       }
     }
     const source = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);

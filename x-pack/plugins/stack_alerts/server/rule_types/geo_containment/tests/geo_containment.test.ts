@@ -574,7 +574,7 @@ describe('geo_containment', () => {
         // @ts-ignore
         state: {},
       });
-      if (executionResult && executionResult.shapesFilters) {
+      if (executionResult && executionResult.state.shapesFilters) {
         expect(boundaryCall.mock.calls.length).toBe(1);
         expect(esAggCall.mock.calls.length).toBe(1);
       }
@@ -596,7 +596,7 @@ describe('geo_containment', () => {
         },
         state: geoContainmentState,
       });
-      if (executionResult && executionResult.shapesFilters) {
+      if (executionResult && executionResult.state.shapesFilters) {
         expect(boundaryCall.mock.calls.length).toBe(0);
         expect(esAggCall.mock.calls.length).toBe(1);
       }
@@ -618,8 +618,8 @@ describe('geo_containment', () => {
         },
         state: geoContainmentState,
       });
-      if (executionResult && executionResult.shapesFilters) {
-        expect(executionResult.shapesFilters).toEqual(geoContainmentState.shapesFilters);
+      if (executionResult && executionResult.state.shapesFilters) {
+        expect(executionResult.state.shapesFilters).toEqual(geoContainmentState.shapesFilters);
       }
       expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
@@ -657,8 +657,8 @@ describe('geo_containment', () => {
         },
         state: geoContainmentState,
       });
-      if (executionResult && executionResult.prevLocationMap) {
-        expect(executionResult.prevLocationMap).toEqual(expectedPrevLocationMap);
+      if (executionResult && executionResult.state.prevLocationMap) {
+        expect(executionResult.state.prevLocationMap).toEqual(expectedPrevLocationMap);
       }
       expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });

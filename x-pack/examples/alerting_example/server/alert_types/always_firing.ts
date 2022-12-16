@@ -72,7 +72,9 @@ export const alertType: RuleType<
       });
 
     return {
-      count,
+      state: {
+        count,
+      },
     };
   },
   producer: ALERTING_EXAMPLE_APP_ID,

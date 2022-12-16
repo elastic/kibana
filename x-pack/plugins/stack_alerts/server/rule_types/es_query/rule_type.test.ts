@@ -358,7 +358,7 @@ describe('ruleType', () => {
         dateEnd: expect.any(String),
       });
 
-      expect(result).toMatchObject({
+      expect(result?.state).toMatchObject({
         latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
       });
 
@@ -379,7 +379,7 @@ describe('ruleType', () => {
       const secondResult = await invokeExecutor({
         params,
         ruleServices,
-        state: result as EsQueryRuleState,
+        state: result?.state as EsQueryRuleState,
       });
 
       const existingInstance: AlertInstanceMock =

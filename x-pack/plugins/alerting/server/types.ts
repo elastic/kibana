@@ -118,7 +118,7 @@ export type ExecutorType<
   ActionGroupIds extends string = never
 > = (
   options: RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
-) => Promise<State | void>;
+) => Promise<{ state: State } | void>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;

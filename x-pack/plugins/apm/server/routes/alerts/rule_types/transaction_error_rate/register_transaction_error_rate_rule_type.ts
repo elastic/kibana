@@ -193,7 +193,7 @@ export function registerTransactionErrorRateRuleType({
         });
 
         if (!response.aggregations) {
-          return {};
+          return { state: {} };
         }
 
         const results = [];
@@ -295,7 +295,7 @@ export function registerTransactionErrorRateRuleType({
             });
         });
 
-        return {};
+        return { state: {} };
       },
     })
   );

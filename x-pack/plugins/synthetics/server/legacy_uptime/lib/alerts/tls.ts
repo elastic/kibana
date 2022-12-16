@@ -217,6 +217,6 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
     setRecoveredAlertsContext({ alertFactory, basePath, getAlertUuid, spaceId });
 
-    return updateState(state, foundCerts);
+    return { state: updateState(state, foundCerts) };
   },
 });
