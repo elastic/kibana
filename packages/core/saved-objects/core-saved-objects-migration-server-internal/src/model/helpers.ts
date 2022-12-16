@@ -189,3 +189,20 @@ export function getAliases(
 
   return Either.right(aliases);
 }
+
+/**
+ * Kibana stores Saved Objects in indices named according to the following
+ * convention:
+ *
+ *  .kibana_a.b.c_xyz
+ *
+ * We name version aliases according to the following convention:
+ *
+ * .kibana_a.b.c
+ *
+ * We can therefore derive the version alias name from the index name by stripping
+ * the trailing "_xyz".
+ */
+export function indexNameToAliasName(indexName: string): string {
+  return indexName.trim().replace(/_\d\d\d$/, '');
+}
