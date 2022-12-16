@@ -4150,7 +4150,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _processes.pid_ - Process (or thread) ID
 * _running_apps.pid_ - The pid of the application
 * _seccomp_events.pid_ - Process ID
-* _services.pid_ - the Process ID of the service
+* _services.pid_ - The Process ID of the service
 * _shared_memory.pid_ - Process ID to last use the segment
 * _socket_events.pid_ - Process (or thread) ID
 * _unified_log.pid_ - The pid of the process that made the entry
