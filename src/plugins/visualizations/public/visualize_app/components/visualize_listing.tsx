@@ -20,7 +20,7 @@ import { useLocation } from 'react-router-dom';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { TableListView } from '@kbn/content-management-table-list';
-import type { OpenInspectorParams } from '@kbn/content-management-inspector';
+import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { findListItems } from '../../utils/saved_visualize_utils';
 import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
@@ -188,7 +188,7 @@ export const VisualizeListing = () => {
     [listingLimit, uiSettings, savedObjects.client]
   );
 
-  const onInspectorSave = useCallback(
+  const onContentEditorSave = useCallback(
     async (args: { id: string; title: string; description?: string; tags: string[] }) => {
       const content = visualizedUserContent.current?.find(({ id }) => id === args.id);
 
@@ -208,7 +208,7 @@ export const VisualizeListing = () => {
     [overlays, savedObjects.client, savedObjectsTagging]
   );
 
-  const inspectorValidators: OpenInspectorParams['customValidators'] = useMemo(
+  const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
     () => ({
       title: [
         {
@@ -303,10 +303,10 @@ export const VisualizeListing = () => {
       listingLimit={listingLimit}
       initialPageSize={initialPageSize}
       initialFilter={''}
-      inspector={{
+      contentEditor={{
         isReadonly: !visualizeCapabilities.save,
-        onSave: onInspectorSave,
-        customValidators: inspectorValidators,
+        onSave: onContentEditorSave,
+        customValidators: contentEditorValidators,
       }}
       emptyPrompt={noItemsFragment}
       entityName={i18n.translate('visualizations.listing.table.entityName', {
