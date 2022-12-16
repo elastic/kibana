@@ -8,24 +8,20 @@
 
 import React from 'react';
 import { FieldIcon as KbnFieldIcon, FieldIconProps as KbnFieldIconProps } from '@kbn/react-field';
-import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { type FieldListItem } from '../../types';
-import { getFieldIconType, getFieldTypeName } from '../../utils/field_types';
+import { getFieldTypeName } from '../../utils/field_types';
 
 export type FieldIconProps = KbnFieldIconProps;
 
-export const FieldIcon: React.FC<FieldIconProps> = ({ type, ...rest }) => {
+const InnerFieldIcon: React.FC<FieldIconProps> = ({ type, ...rest }) => {
   return <KbnFieldIcon type={normalizeFieldType(type)} label={getFieldTypeName(type)} {...rest} />;
 };
 
-export function getFieldIconProps<T extends FieldListItem = DataViewField>(
-  field: T
-): FieldIconProps {
-  return {
-    type: getFieldIconType(field),
-    scripted: field.scripted,
-  };
-}
+export type GenericFieldIcon = typeof InnerFieldIcon;
+const FieldIcon = React.memo(InnerFieldIcon) as GenericFieldIcon;
+
+// Necessary for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default FieldIcon;
 
 function normalizeFieldType(type: string) {
   if (type === 'histogram') {

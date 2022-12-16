@@ -10,6 +10,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, type EuiFieldSearchProps } from '@elastic/eui';
 
+/**
+ * Props for FieldNameSearch component
+ */
 export interface FieldNameSearchProps {
   'data-test-subj': string;
   append?: EuiFieldSearchProps['append'];
@@ -18,6 +21,15 @@ export interface FieldNameSearchProps {
   onChange: (nameFilter: string) => unknown;
 }
 
+/**
+ * Search input for fields list
+ * @param dataTestSubject
+ * @param append
+ * @param nameFilter
+ * @param screenReaderDescriptionId
+ * @param onChange
+ * @constructor
+ */
 export const FieldNameSearch: React.FC<FieldNameSearchProps> = ({
   'data-test-subj': dataTestSubject,
   append,

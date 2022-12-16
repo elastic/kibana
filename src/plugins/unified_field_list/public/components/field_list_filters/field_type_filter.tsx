@@ -53,6 +53,9 @@ const filterButtonStyle = css`
   }
 `;
 
+/**
+ * Props for FieldTypeFilter component
+ */
 export interface FieldTypeFilterProps<T extends FieldListItem> {
   'data-test-subj': string;
   docLinks: CoreStart['docLinks'];
@@ -63,6 +66,17 @@ export interface FieldTypeFilterProps<T extends FieldListItem> {
   onChange: (fieldTypes: FieldTypeKnown[]) => unknown;
 }
 
+/**
+ * A popover with field type filters
+ * @param dataTestSubject
+ * @param docLinks
+ * @param allFields
+ * @param getCustomFieldType
+ * @param selectedFieldTypes
+ * @param onSupportedFieldFilter
+ * @param onChange
+ * @constructor
+ */
 export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   'data-test-subj': dataTestSubject,
   docLinks,

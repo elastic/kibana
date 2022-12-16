@@ -93,6 +93,8 @@ const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields({
 
 ## Utils
 
+* `getFieldIconProps(field)` - gets icon's props to use with `<FieldIcon {...getFieldIconProps(field)} />` component
+
 * `getFieldIconType(field)` - gets icon's type for the field
 
 * `getFieldTypeName(field)` - gets a field type label to show to the user

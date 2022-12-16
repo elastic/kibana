@@ -4,6 +4,7 @@ exports[`UnifiedFieldList <FieldIcon /> accepts additional props 1`] = `
 <FieldIcon
   fill="none"
   label="Date"
+  scripted={false}
   type="date"
 />
 `;
@@ -25,6 +26,15 @@ exports[`UnifiedFieldList <FieldIcon /> renders Histogram type properly 1`] = `
 exports[`UnifiedFieldList <FieldIcon /> renders properly 1`] = `
 <FieldIcon
   label="Date"
+  scripted={false}
+  type="date"
+/>
+`;
+
+exports[`UnifiedFieldList <FieldIcon /> renders properly scripted fields 1`] = `
+<FieldIcon
+  label="Date"
+  scripted={true}
   type="date"
 />
 `;

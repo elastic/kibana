@@ -16,6 +16,10 @@ const containerStyle = css`
   height: 100%;
 `;
 
+/**
+ * A top level wrapper props
+ * @public
+ */
 export interface FieldListProps {
   'data-test-subj'?: string;
   isProcessing: boolean;
@@ -24,6 +28,17 @@ export interface FieldListProps {
   className?: string;
 }
 
+/**
+ * A top level wrapper for field list components (filters and field list groups)
+ * @param dataTestSubject
+ * @param isProcessing
+ * @param prepend
+ * @param append
+ * @param className
+ * @param children
+ * @public
+ * @constructor
+ */
 export const FieldList: React.FC<FieldListProps> = ({
   'data-test-subj': dataTestSubject = 'fieldList',
   isProcessing,

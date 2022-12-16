@@ -16,6 +16,9 @@ import { getFieldIconType } from '../utils/field_types';
 
 const htmlId = htmlIdGenerator('fieldList');
 
+/**
+ * Input params for useFieldFilters hook
+ */
 export interface FieldFiltersParams<T extends FieldListItem> {
   allFields: T[] | null;
   getCustomFieldType?: GetCustomFieldType<T>;
@@ -25,12 +28,23 @@ export interface FieldFiltersParams<T extends FieldListItem> {
   };
 }
 
+/**
+ * Output of useFieldFilters hook
+ */
 export interface FieldFiltersResult<T extends FieldListItem> {
   fieldSearchHighlight: string;
   fieldListFiltersProps: FieldListFiltersProps<T>;
   onFilterField?: (field: T) => boolean;
 }
 
+/**
+ * A hook for managing field search and filters state
+ * @param allFields
+ * @param getCustomFieldType
+ * @param onSupportedFieldFilter
+ * @param services
+ * @public
+ */
 export function useFieldFilters<T extends FieldListItem = DataViewField>({
   allFields,
   getCustomFieldType,

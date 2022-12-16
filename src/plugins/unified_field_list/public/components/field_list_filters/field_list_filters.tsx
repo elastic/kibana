@@ -12,6 +12,9 @@ import { FieldNameSearch, type FieldNameSearchProps } from './field_name_search'
 import { FieldTypeFilter, type FieldTypeFilterProps } from './field_type_filter';
 import { type FieldListItem } from '../../types';
 
+/**
+ * Props for FieldListFilters component
+ */
 export interface FieldListFiltersProps<T extends FieldListItem> {
   'data-test-subj'?: string;
   docLinks: FieldTypeFilterProps<T>['docLinks'];
@@ -25,7 +28,23 @@ export interface FieldListFiltersProps<T extends FieldListItem> {
   onChangeNameFilter: FieldNameSearchProps['onChange'];
 }
 
-export function FieldListFilters<T extends FieldListItem = DataViewField>({
+/**
+ * Field list filters which include search by field name and filtering by field type.
+ * Use in combination with `useGroupedFields` hook. Or for more control - `useFieldFilters()` hook.
+ * @param dataTestSubject
+ * @param docLinks
+ * @param selectedFieldTypes
+ * @param allFields
+ * @param getCustomFieldType
+ * @param onSupportedFieldFilter
+ * @param onChangeFieldTypes
+ * @param nameFilter
+ * @param screenReaderDescriptionId
+ * @param onChangeNameFilter
+ * @public
+ * @constructor
+ */
+function InnerFieldListFilters<T extends FieldListItem = DataViewField>({
   'data-test-subj': dataTestSubject = 'fieldListFilters',
   docLinks,
   selectedFieldTypes,
@@ -59,3 +78,10 @@ export function FieldListFilters<T extends FieldListItem = DataViewField>({
     />
   );
 }
+
+export type GenericFieldListFilters = typeof InnerFieldListFilters;
+const FieldListFilters = React.memo(InnerFieldListFilters) as GenericFieldListFilters;
+
+// Necessary for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default FieldListFilters;
