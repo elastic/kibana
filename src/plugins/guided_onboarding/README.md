@@ -12,9 +12,11 @@ The client-side code registers a button in the Kibana header that controls the g
 
 1. Guided onboarding is only enabled on cloud. Update your `kibana.dev.yml` file with `xpack.cloud.id: 'testID'` to imitate the Cloud environment.
 
-2. Start Kibana with the example plugins enabled: `yarn start --run-examples`. 
+2. Also set the config for guided onboarding UI with `guidedOnboarding.ui: true` in your `kibana.dev.yml` file.
 
-3. Navigate to `/app/home#/getting_started` to view the onboarding landing page and start a guide. Alternatively, you can also start a guide within the guided onboarding example plugin at `/app/guidedOnboardingExample`. The example plugin includes a sample guide that showcases the framework's capabilities. It also provides a form to dynamically start a guide at a specific step.
+3. Start Kibana with the example plugins enabled: `yarn start --run-examples`. 
+
+4. Navigate to `/app/home#/getting_started` to view the onboarding landing page and start a guide. Alternatively, you can also start a guide within the guided onboarding example plugin at `/app/guidedOnboardingExample`. The example plugin includes a sample guide that showcases the framework's capabilities. It also provides a form to dynamically start a guide at a specific step.
 
 ## API service
 *Also see `KIBANA_FOLDER/examples/guided_onboarding_example` for code examples.*
