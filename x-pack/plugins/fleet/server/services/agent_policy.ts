@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, isEqual, keyBy } from 'lodash';
+import { omit, isEqual, keyBy, groupBy } from 'lodash';
 import uuidv5 from 'uuid/v5';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
@@ -1031,7 +1031,7 @@ class AgentPolicyService {
   public async getInactivityTimeouts(
     soClient: SavedObjectsClientContract
   ): Promise<Array<{ policyIds: string[]; inactivityTimeout: number }>> {
-    const res = await soClient.find<AgentPolicySOAttributes>({
+    const findRes = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
@@ -1039,19 +1039,11 @@ class AgentPolicyService {
       fields: [`inactivity_timeout`],
     });
 
-    const results = res.saved_objects.reduce((acc, policy) => {
-      const inactivityTimeout = policy.attributes.inactivity_timeout;
-      if (inactivityTimeout) {
-        const existing = acc[inactivityTimeout] || [];
+    const groupedResults = groupBy(findRes.saved_objects, (so) => so.attributes.inactivity_timeout);
 
-        acc[inactivityTimeout] = [...existing, policy.id];
-      }
-      return acc;
-    }, {} as Record<number, string[]>);
-
-    return Object.entries(results).map(([inactivityTimeout, policyIds]) => ({
-      inactivityTimeout: inactivityTimeout as unknown as number,
-      policyIds,
+    return Object.entries(groupedResults).map(([inactivityTimeout, policies]) => ({
+      inactivityTimeout: parseInt(inactivityTimeout, 10),
+      policyIds: policies.map((policy) => policy.id),
     }));
   }
 }

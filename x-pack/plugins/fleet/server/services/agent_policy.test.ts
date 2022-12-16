@@ -569,4 +569,59 @@ describe('agent policy', () => {
       });
     });
   });
+
+  describe('getInactivityTimeouts', () => {
+    const createPolicySO = (id: string, inactivityTimeout: number) => ({
+      id,
+      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      attributes: { inactivity_timeout: inactivityTimeout },
+      references: [],
+      score: 1,
+    });
+
+    const createMockSoClientThatReturns = (policies: Array<ReturnType<typeof createPolicySO>>) => {
+      const mockSoClient = savedObjectsClientMock.create();
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: policies,
+        page: 1,
+        per_page: 10,
+        total: policies.length,
+      });
+      return mockSoClient;
+    };
+
+    it('should return empty array if no policies with inactivity timeouts', async () => {
+      const mockSoClient = createMockSoClientThatReturns([]);
+      expect(await agentPolicyService.getInactivityTimeouts(mockSoClient)).toEqual([]);
+    });
+    it('should return single inactivity timeout', async () => {
+      const mockSoClient = createMockSoClientThatReturns([createPolicySO('policy1', 1000)]);
+
+      expect(await agentPolicyService.getInactivityTimeouts(mockSoClient)).toEqual([
+        { inactivityTimeout: 1000, policyIds: ['policy1'] },
+      ]);
+    });
+    it('should return group policies with same inactivity timeout', async () => {
+      const mockSoClient = createMockSoClientThatReturns([
+        createPolicySO('policy1', 1000),
+        createPolicySO('policy2', 1000),
+      ]);
+
+      expect(await agentPolicyService.getInactivityTimeouts(mockSoClient)).toEqual([
+        { inactivityTimeout: 1000, policyIds: ['policy1', 'policy2'] },
+      ]);
+    });
+    it('should return handle single and grouped policies', async () => {
+      const mockSoClient = createMockSoClientThatReturns([
+        createPolicySO('policy1', 1000),
+        createPolicySO('policy2', 1000),
+        createPolicySO('policy3', 2000),
+      ]);
+
+      expect(await agentPolicyService.getInactivityTimeouts(mockSoClient)).toEqual([
+        { inactivityTimeout: 1000, policyIds: ['policy1', 'policy2'] },
+        { inactivityTimeout: 2000, policyIds: ['policy3'] },
+      ]);
+    });
+  });
 });
