@@ -99,7 +99,7 @@ export class RulesFailureRule extends BaseRule {
     const stat = item.meta as AlertRuleFailuresStats;
     return {
       text: i18n.translate('xpack.monitoring.alerts.rulesFailures.ui.firingMessage', {
-        defaultMessage: `Cluster #start_link{nodeName}#end_link is reporting rules failures of {rulesFailures}% at #absolute`,
+        defaultMessage: `Cluster {clusterUuid} is reporting rules failures of {rulesFailures}% at #absolute`,
         values: {
           clusterUuid: stat.clusterUuid,
           rulesFailures: numeral(stat.failures).format(ROUNDED_FLOAT),
