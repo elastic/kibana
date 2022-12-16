@@ -50,6 +50,12 @@ import { KpiPanel, StackByComboBox } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { GROUP_BY_TOP_LABEL } from '../common/translations';
+import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -67,6 +73,8 @@ const OptionsFlexItem = styled(EuiFlexItem)`
 `;
 
 export const LEGEND_WITH_COUNTS_WIDTH = 300; // px
+
+const ChartHeight = '150px';
 
 interface AlertsHistogramPanelProps {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
@@ -175,6 +183,14 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       },
       [setQuerySkip, setToggleStatus]
     );
+
+    const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+    const timerange = useMemo(() => ({ from, to }), [from, to]);
+    const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+      inputId: InputsModelId.global,
+      queryId: uniqueQueryId,
+    });
+
     const {
       loading: isLoadingAlerts,
       data: alertsData,
@@ -191,7 +207,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         runtimeMappings
       ),
       indexName: signalIndexName,
-      skip: querySkip,
+      skip: querySkip || isChartEmbeddablesEnabled,
       queryName: ALERTS_QUERY_NAMES.HISTOGRAM,
     });
 
@@ -261,10 +277,11 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       setQuery,
       response,
       request,
-      refetch,
+      refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
       uniqueQueryId,
       deleteQuery,
       loading: isLoadingAlerts,
+      searchSessionId,
     });
 
     useEffect(() => {
@@ -401,7 +418,18 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           </HeaderSection>
 
           {toggleStatus ? (
-            isInitialLoading ? (
+            isChartEmbeddablesEnabled && (getLensAttributes || lensAttributes) && timerange ? (
+              <LensEmbeddable
+                data-test-subj="embeddable-matrix-histogram"
+                getLensAttributes={getLensAttributes}
+                height={ChartHeight}
+                id={uniqueQueryId}
+                inspectTitle={title as string}
+                stackByField={selectedStackByOption}
+                timerange={timerange}
+                scopeId={SourcererScopeName.detections}
+              />
+            ) : isInitialLoading ? (
               <MatrixLoader />
             ) : (
               <AlertsHistogram

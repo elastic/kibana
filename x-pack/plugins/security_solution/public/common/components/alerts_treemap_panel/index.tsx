@@ -24,6 +24,8 @@ import { HeaderSection } from '../header_section';
 import { InspectButtonContainer } from '../inspect';
 import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from '../alerts_treemap/query';
 import type { AlertsTreeMapAggregation } from '../alerts_treemap/types';
+import { InputsModelId } from '../../store/inputs/constants';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 134; // px
 
@@ -149,9 +151,10 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
     loading: isLoadingAlerts,
     response,
     setQuery,
-    refetch,
+    refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
     request,
     uniqueQueryId,
+    searchSessionId,
   });
 
   return (

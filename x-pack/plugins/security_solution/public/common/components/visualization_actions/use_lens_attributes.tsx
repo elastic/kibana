@@ -12,6 +12,7 @@ import { NetworkRouteType } from '../../../network/pages/navigation/types';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import type { LensAttributes, GetLensAttributes } from './types';
 import {
@@ -26,13 +27,15 @@ export const useLensAttributes = ({
   getLensAttributes,
   stackByField,
   title,
+  scopeId = SourcererScopeName.default,
 }: {
   lensAttributes?: LensAttributes | null;
   getLensAttributes?: GetLensAttributes;
   stackByField?: string;
   title?: string;
+  scopeId?: SourcererScopeName;
 }): LensAttributes | null => {
-  const { selectedPatterns, dataViewId } = useSourcererDataView();
+  const { selectedPatterns, dataViewId } = useSourcererDataView(scopeId);
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),

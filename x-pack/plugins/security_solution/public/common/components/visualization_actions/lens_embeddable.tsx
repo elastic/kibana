@@ -20,6 +20,7 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
 import { getRequestsAndResponses } from './utils';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const LensComponentWrapper = styled.div<{ height?: string }>`
   height: ${({ height }) => height ?? 'auto'};
@@ -52,6 +53,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   id,
   inputsModelId = InputsModelId.global,
   lensAttributes,
+  scopeId = SourcererScopeName.default,
   stackByField,
   timerange,
   inspectTitle,
@@ -67,6 +69,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     getLensAttributes,
     stackByField,
     title: '',
+    scopeId,
   });
 
   const LensComponent = lens.EmbeddableComponent;
@@ -126,6 +129,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
       isLoading,
     });
   }, []);
+
+  console.log(id, searchSessionId);
 
   return (
     <>
