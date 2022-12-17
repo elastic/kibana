@@ -6,24 +6,16 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 import type { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
 
-import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
-import { composeHttpHandlerMocks } from '../../../../../../common/mock/endpoint/http_handler_mock_factory';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
-import {
-  fleetGetAgentStatusHttpMock,
-  fleetGetEndpointPackagePolicyHttpMock,
-} from '../../../../../mocks';
 import { EndpointPolicyEditExtension } from './endpoint_policy_edit_extension';
 import { createFleetContextRendererMock } from '../mocks';
+import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
 
-jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 jest.mock('../../../../../../common/components/user_privileges');
-const useEndpointPrivilegesMock = useEndpointPrivileges as jest.Mock;
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 describe('When displaying the EndpointPolicyEditExtension fleet UI extension', () => {
@@ -36,12 +28,7 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
   ]);
 
   beforeEach(() => {
-    useEndpointPrivilegesMock.mockReturnValue(getEndpointPrivilegesInitialStateMock());
-    useUserPrivilegesMock.mockReturnValue({
-      endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
-    });
     const mockedTestContext = createFleetContextRendererMock();
-    composeHttpHandlerMocks([fleetGetEndpointPackagePolicyHttpMock, fleetGetAgentStatusHttpMock]);
 
     render = () =>
       mockedTestContext.render(
@@ -53,33 +40,32 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
       );
   });
 
-  it('should show artifact cards', async () => {
-    const renderResult = render();
-
-    await waitFor(() => {
-      artifactCards.forEach((artifactCard) => {
-        expect(renderResult.getByTestId(artifactCard)).toBeTruthy();
-      });
-    });
+  afterEach(() => {
+    useUserPrivilegesMock.mockReturnValue(getUserPrivilegesMockDefaultValue());
   });
 
-  it('should NOT show artifact cards if no endpoint management authz', async () => {
-    useEndpointPrivilegesMock.mockReturnValue({
-      ...getEndpointPrivilegesInitialStateMock({
-        canReadTrustedApplications: false,
-        canReadEventFilters: false,
-        canReadBlocklist: false,
-        canReadHostIsolationExceptions: false,
-      }),
-    });
+  it.each([...artifactCards])('should show artifact card `%s`', (artifactCardTestId) => {
     const renderResult = render();
 
-    await waitFor(() => {
-      artifactCards.forEach((artifactCard) => {
-        expect(renderResult.queryByTestId(artifactCard)).toBeNull();
-      });
-    });
+    expect(renderResult.getByTestId(artifactCardTestId)).toBeTruthy();
   });
+
+  it.each([...artifactCards])(
+    'should NOT show artifact cards if no endpoint management authz: %s',
+    (artifactCardTestId) => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canReadTrustedApplications: false,
+          canReadEventFilters: false,
+          canReadBlocklist: false,
+          canReadHostIsolationExceptions: false,
+        }),
+      });
+      const renderResult = render();
+
+      expect(renderResult.queryByTestId(artifactCardTestId)).toBeNull();
+    }
+  );
 
   it.each([
     ['trustedApps', 'trusted_apps'],
@@ -88,20 +74,18 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
     ['blocklists', 'blocklist'],
   ])(
     'should link to the %s list page if no Authz for policy management',
-    async (artifactTestIdPrefix, pageUrlName) => {
-      useEndpointPrivilegesMock.mockReturnValue({
-        ...getEndpointPrivilegesInitialStateMock({
+    (artifactTestIdPrefix, pageUrlName) => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
           canReadPolicyManagement: false,
         }),
       });
 
       const { getByTestId } = render();
 
-      await waitFor(() => {
-        expect(
-          getByTestId(`${artifactTestIdPrefix}-link-to-exceptions`).getAttribute('href')
-        ).toEqual(`/app/security/administration/${pageUrlName}?includedPolicies=someid%2Cglobal`);
-      });
+      expect(
+        getByTestId(`${artifactTestIdPrefix}-link-to-exceptions`).getAttribute('href')
+      ).toEqual(`/app/security/administration/${pageUrlName}?includedPolicies=someid%2Cglobal`);
     }
   );
 });

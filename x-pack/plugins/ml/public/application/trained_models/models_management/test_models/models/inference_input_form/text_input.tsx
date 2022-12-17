@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo, useCallback } from 'react';
+import React, { FC, useState, useMemo, useCallback, FormEventHandler } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiSpacer, EuiButton, EuiTabs, EuiTab, EuiForm } from '@elastic/eui';
 
 import { ErrorMessage } from '../../inference_error';
 import { extractErrorMessage } from '../../../../../../../common';
@@ -37,25 +37,30 @@ export const TextInputForm: FC<Props> = ({ inferrer }) => {
   const outputComponent = useMemo(() => inferrer.getOutputComponent(), [inferrer]);
   const infoComponent = useMemo(() => inferrer.getInfoComponent(), [inferrer]);
 
-  const run = useCallback(async () => {
-    setErrorText(null);
-    try {
-      await inferrer.infer();
-    } catch (e) {
-      setErrorText(extractErrorMessage(e));
-    }
-  }, [inferrer]);
+  const run: FormEventHandler<HTMLFormElement> = useCallback(
+    async (event) => {
+      event.preventDefault();
+      setErrorText(null);
+      try {
+        await inferrer.infer();
+      } catch (e) {
+        setErrorText(extractErrorMessage(e));
+      }
+    },
+    [inferrer]
+  );
 
   return (
-    <>
+    <EuiForm component={'form'} onSubmit={run}>
       <>{infoComponent}</>
       <>{inputComponent}</>
       <EuiSpacer size="m" />
       <div>
         <EuiButton
-          onClick={run}
           disabled={runningState === RUNNING_STATE.RUNNING || isValid === false}
           fullWidth={false}
+          data-test-subj={'mlTestModelTestButton'}
+          type="submit"
         >
           <FormattedMessage
             id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.runButton"
@@ -100,13 +105,15 @@ export const TextInputForm: FC<Props> = ({ inferrer }) => {
                 </>
               ) : null}
 
-              {runningState === RUNNING_STATE.FINISHED ? <>{outputComponent}</> : null}
+              {runningState === RUNNING_STATE.FINISHED ? (
+                <div data-test-subj={'mlTestModelOutput'}>{outputComponent}</div>
+              ) : null}
             </>
           ) : (
             <RawOutput inferrer={inferrer} />
           )}
         </>
       ) : null}
-    </>
+    </EuiForm>
   );
 };

@@ -4,6 +4,19 @@ exports[`guide card footer snapshots should render the footer when the guide has
 <Fragment>
   <EuiProgress
     label="Completed"
+    labelProps={
+      Object {
+        "css": Object {
+          "map": undefined,
+          "name": "x46p4t",
+          "next": undefined,
+          "styles": "
+  text-align: 'left';
+",
+          "toString": [Function],
+        },
+      }
+    }
     max={2}
     size="s"
     value={1}
@@ -22,6 +35,7 @@ exports[`guide card footer snapshots should render the footer when the guide has
         color="primary"
         data-test-subj="onboarding--guideCard--view--search"
         fill={true}
+        isLoading={false}
         onClick={[Function]}
         size="m"
       >
@@ -43,6 +57,7 @@ exports[`guide card footer snapshots should render the footer when the guide has
       color="primary"
       data-test-subj="onboarding--guideCard--view--search"
       fill={true}
+      isLoading={false}
       onClick={[Function]}
       size="m"
     >
@@ -87,6 +102,7 @@ exports[`guide card footer snapshots should render the footer when the guide is 
         color="primary"
         data-test-subj="onboarding--guideCard--continue--search"
         fill={true}
+        isLoading={false}
         onClick={[Function]}
         size="m"
       >
@@ -132,6 +148,7 @@ exports[`guide card footer snapshots should render the footer when the guide is 
         color="primary"
         data-test-subj="onboarding--guideCard--continue--search"
         fill={true}
+        isLoading={false}
         onClick={[Function]}
         size="m"
       >
@@ -153,6 +170,7 @@ exports[`guide card footer snapshots should render the footer when the guided on
       color="primary"
       data-test-subj="onboarding--guideCard--view--search"
       fill={true}
+      isLoading={false}
       onClick={[Function]}
       size="m"
     >

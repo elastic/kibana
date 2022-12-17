@@ -1,0 +1,63 @@
+{
+  "id": "@kbn/shared-ux-prompt-not-found",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-not-found",
+        "id": "def-common.NotFoundPrompt",
+        "type": "Function",
+        "tags": [],
+        "label": "NotFoundPrompt",
+        "description": [
+          "\nPredefined `EuiEmptyPrompt` for 404 pages."
+        ],
+        "signature": [
+          "({ actions }: NotFoundProps) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/prompt/not_found/src/not_found_prompt.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-not-found",
+            "id": "def-common.NotFoundPrompt.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ actions }",
+            "description": [],
+            "signature": [
+              "NotFoundProps"
+            ],
+            "path": "packages/shared-ux/prompt/not_found/src/not_found_prompt.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

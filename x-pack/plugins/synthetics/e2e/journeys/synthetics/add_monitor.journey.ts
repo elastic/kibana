@@ -144,24 +144,15 @@ const createMonitorJourney = ({
   monitorEditDetails: Array<[string, string]>;
 }) => {
   journey(
-    `Synthetics - add monitor - ${monitorName}`,
+    `SyntheticsAddMonitor - ${monitorName}`,
     async ({ page, params }: { page: Page; params: any }) => {
       const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
       step('Go to monitor management', async () => {
-        await syntheticsApp.navigateToMonitorManagement();
+        await syntheticsApp.navigateToMonitorManagement(true);
       });
 
-      step('login to Kibana', async () => {
-        await syntheticsApp.loginToKibana();
-        const invalid = await page.locator(
-          `text=Username or password is incorrect. Please try again.`
-        );
-        expect(await invalid.isVisible()).toBeFalsy();
-      });
-
-      step('Ensure all montiors are deleted', async () => {
-        await syntheticsApp.navigateToMonitorManagement();
+      step('Ensure all monitors are deleted', async () => {
         await syntheticsApp.waitForLoadingToFinish();
         const isSuccessful = await syntheticsApp.deleteMonitors();
         expect(isSuccessful).toBeTruthy();

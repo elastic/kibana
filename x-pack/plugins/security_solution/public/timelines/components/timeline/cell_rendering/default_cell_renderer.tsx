@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import styled from 'styled-components';
 
 import { useGetMappedNonEcsValue } from '../body/data_driven_columns';
 import { columnRenderers } from '../body/renderers';
@@ -13,14 +14,15 @@ import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 import type { CellValueElementProps } from '.';
 import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/helpers';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../../common/lib/cell_actions/constants';
-import {
-  ExpandedCellValueActions,
-  StyledContent,
-} from '../../../../common/lib/cell_actions/expanded_cell_value_actions';
+import { ExpandedCellValueActions } from '../../../../common/lib/cell_actions/expanded_cell_value_actions';
 
 const hasCellActions = (columnId?: string) => {
   return columnId && !FIELDS_WITHOUT_CELL_ACTIONS.includes(columnId);
 };
+
+const StyledContent = styled.div<{ $isDetails: boolean }>`
+  padding: ${({ $isDetails }) => ($isDetails ? '0 8px' : undefined)};
+`;
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   data,
@@ -33,10 +35,9 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   isTimeline,
   linkValues,
   rowRenderers,
-  setCellProps,
   scopeId,
   truncate,
-  closeCellPopover,
+  enableActions = true,
 }) => {
   const asPlainText = useMemo(() => {
     return getLinkColumnDefinition(header.id, header.type, undefined) !== undefined && !isTimeline;
@@ -67,13 +68,12 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           values,
         })}
       </StyledContent>
-      {isDetails && hasCellActions(header.id) && (
+      {enableActions && isDetails && hasCellActions(header.id) && (
         <ExpandedCellValueActions
           field={header}
           globalFilters={globalFilters}
           scopeId={scopeId}
           value={values}
-          closeCellPopover={closeCellPopover}
         />
       )}
     </>

@@ -6,13 +6,13 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ErrorRaw } from '../../../../../../../typings/es_schemas/raw/error_raw';
 import { IWaterfallError } from '../waterfall/waterfall_helpers/waterfall_helpers';
 import { Mark } from '.';
+import { WaterfallError } from '../../../../../../../common/waterfall/typings';
 
 export interface ErrorMark extends Mark {
   type: 'errorMark';
-  error: ErrorRaw;
+  error: WaterfallError;
   serviceColor: string;
 }
 
