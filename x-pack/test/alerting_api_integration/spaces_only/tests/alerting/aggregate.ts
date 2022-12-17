@@ -149,7 +149,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
                 rule_type_id: 'test.noop',
                 schedule: { interval: '1s' },
                 tags: [...Array(numOfTagsPerAlert)].map(
-                  (_, i) => `tag-${i + numOfTagsPerAlert * alertIndex}`
+                  (__, i) => `tag-${i + numOfTagsPerAlert * alertIndex}`
                 ),
               },
               'ok'
