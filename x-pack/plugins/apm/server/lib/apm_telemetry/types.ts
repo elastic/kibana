@@ -101,7 +101,6 @@ export interface APMUsage {
     span: TimeframeMap;
     error: TimeframeMap;
     metric: TimeframeMap;
-    sourcemap: TimeframeMap;
     onboarding: TimeframeMap;
     agent_configuration: TimeframeMapAll;
     max_transaction_groups_per_service: TimeframeMap;
@@ -125,7 +124,7 @@ export interface APMUsage {
     };
   };
   retainment: Record<
-    'span' | 'transaction' | 'error' | 'metric' | 'sourcemap' | 'onboarding',
+    'span' | 'transaction' | 'error' | 'metric' | 'onboarding',
     { ms: number }
   >;
   integrations: {

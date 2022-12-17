@@ -12,6 +12,9 @@ import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/h
 import type { Content } from './schema';
 import { schema } from './schema';
 import { MarkdownRenderer, MarkdownEditorForm } from '../markdown_editor';
+import { removeItemFromSessionStorage } from '../utils';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import { UserActionMarkdownFooter } from './markdown_form_footer';
 
 export const ContentWrapper = styled.div`
@@ -21,6 +24,7 @@ export const ContentWrapper = styled.div`
 interface UserActionMarkdownProps {
   content: string;
   id: string;
+  caseId: string;
   isEditable: boolean;
   onChangeEditable: (id: string) => void;
   onSaveContent: (content: string) => void;
@@ -33,7 +37,7 @@ export interface UserActionMarkdownRefObject {
 const UserActionMarkdownComponent = forwardRef<
   UserActionMarkdownRefObject,
   UserActionMarkdownProps
->(({ id, content, isEditable, onChangeEditable, onSaveContent }, ref) => {
+>(({ id, content, caseId, isEditable, onChangeEditable, onSaveContent }, ref) => {
   const editorRef = useRef();
   const initialState = { content };
   const { form } = useForm<Content>({
@@ -43,11 +47,14 @@ const UserActionMarkdownComponent = forwardRef<
   });
 
   const fieldName = 'content';
+  const { appId } = useCasesContext();
+  const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
   const { setFieldValue, submit } = form;
 
   const handleCancelAction = useCallback(() => {
     onChangeEditable(id);
-  }, [id, onChangeEditable]);
+    removeItemFromSessionStorage(draftStorageKey);
+  }, [id, onChangeEditable, draftStorageKey]);
 
   const handleSaveAction = useCallback(async () => {
     const { isValid, data } = await submit();
@@ -56,7 +63,8 @@ const UserActionMarkdownComponent = forwardRef<
       onSaveContent(data.content);
     }
     onChangeEditable(id);
-  }, [content, id, onChangeEditable, onSaveContent, submit]);
+    removeItemFromSessionStorage(draftStorageKey);
+  }, [content, id, onChangeEditable, onSaveContent, submit, draftStorageKey]);
 
   const setComment = useCallback(
     (newComment) => {
@@ -80,12 +88,14 @@ const UserActionMarkdownComponent = forwardRef<
           'aria-label': 'Cases markdown editor',
           value: content,
           id,
+          draftStorageKey,
           bottomRightContent: (
             <UserActionMarkdownFooter
               handleSaveAction={handleSaveAction}
               handleCancelAction={handleCancelAction}
             />
           ),
+          initialValue: content,
         }}
       />
     </Form>
