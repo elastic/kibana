@@ -33,6 +33,7 @@ export const StreamPage = () => {
       data: {
         query: { queryString: queryStringService },
       },
+      notifications: { toasts: toastsService },
     },
   } = useKibanaContextForPlugin();
   const kibanaQuerySettings = useKibanaQuerySettings();
@@ -44,6 +45,7 @@ export const StreamPage = () => {
         kibanaQuerySettings={kibanaQuerySettings}
         logViewStateNotifications={logViewStateNotifications}
         queryStringService={queryStringService}
+        toastsService={toastsService}
         urlStateStorage={urlStateStorage}
       >
         <ConnectedStreamPageContentMemo />

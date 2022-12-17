@@ -63,12 +63,10 @@ const ViewLogInContext: React.FC = ({ children }) => {
 const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { logViewId } = useLogViewContext();
   const { startTimestamp, endTimestamp, targetPosition } = useLogPositionStateContext();
+  // TODO: consider changing the access here or in the main component composition site
   const validatedQuery = useParsedQuery(
     useLogStreamQueryChildService(useLogStreamPageStateContext())
   );
-  // const validatedQuery = useSelector(
-  //   (state) => (state.matches('hasQuery') ? state.context.parsedQuery : undefined)
-  // );
 
   // Don't render anything if the date range is incorrect.
   if (!startTimestamp || !endTimestamp) {

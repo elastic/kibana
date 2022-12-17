@@ -36,7 +36,7 @@ const formatError = (error: ValidationError) =>
     error.value
   )} does not match expected type ${getErrorType(error)}`;
 
-const formatErrors = (errors: ValidationError[]) =>
+export const formatErrors = (errors: ValidationError[]) =>
   `Failed to validate: \n${errors.map((error) => `  ${formatError(error)}`).join('\n')}`;
 
 export const createPlainError = (message: string) => new Error(message);

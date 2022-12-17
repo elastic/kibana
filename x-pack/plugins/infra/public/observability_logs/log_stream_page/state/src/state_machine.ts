@@ -23,7 +23,7 @@ import type {
 } from './types';
 
 export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPageContext = {}) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKAXATmAhgLYAK+M2+WYAdAK4B2Alk1o-sowF6QDEAMgHkAggBEAkgDkA4gH1BsgGpiAogHUZGACpCASpuUiA2gAYAuolAAHVLEatU9CyAAeiALQAmAJzUPHgGwArIEALAAcHmHhXsEhADQgAJ6IAQDM1IHGYQDs2ZnZxl5e-l6pAL5lCWiYuAQkZGAUVHRMLGwc3BD8wuLScgKKKuoAYkJifAYm5kgg1rb2jjOuCJ4hAIzUqZklHgX+xqlrkQnJCKlB1P4loYH+qV7hHoEVVejYeESk5FiUNAzMdnaXF4glEklk8hkSjUGgAqgBheHKAyTMxOOaAhxOZbZNbZajGXLBVIkrJrYInRBHYzUEIeVIhVJhNZZLws7IhF4garvOpfRo-Zr-NrsYFdUG9CEDKFDOGI5EiSZraZWGyYxagHEhEIEwkeI7Zc7GO6UhCZHzZML7MKBDwhQp0zmVblvWqfBpNGhofAQZhQPjoBSMMAAd26YL6kOhIzGEyMaJmGIW2JS4VpJTCWXp5K82Q8pvN1Et1tt9oedq5PLd9W+v2o3t99H9geDYYl4P6gxhGARSJR8ZVszVyaWiEZPnt-m8Ry8xjta38pqN1FK+uy+w8xhCgS8lddHxrArrDb9AagQdD4clnZl3d7CqVg6TjCxo4QISumy2MWNMWiAVNO58WMFkImMOc50CMI9xqA9+U9etUB9U8W1DYZ8EYZAQR6Dso1lLRdH0Ad0WHF8NRcdxvF8AJYgiKIwhiUIC1SDwMgNcC8g5O1nmdKs4I9QUaAAC3wWAzwvEMxHoX0AGM4BaAFWFFToeB0ZQkTEBQDBkSQxE0MQhD4GRiF0IQAFllH0HQMCmEj5jIlMEBnfxqAiYojjWVJCjnJcwnSIIrSuNZZ2CGJyl4-c+QEusRLE1DJOkxg5NgBSRQ6XgFEMsQRBkABFWFlB0ABNGR4QACSEaRUSfUjX01Kl-DyWk1gie4clzHNTQCVjIhCAoOXuQlZ38GDeXdWtmli8TWyk2T5MUoEVMyvhsrygritKiqquIxNavI5YFya9YIltKd7RJAs5xXdcnm3TJAkONYKmdehUAgOAnD4qKJrAOz1UczwGM2bYvF2Y0Dk8003AXFcwitOHdkCBcmQrCLYO+o8hVaQFlMgP6R3q998ySKk6WoclwKyG02SCLdRureDBMQ5Cm2m0N8Yct9dgyUIrnhwJch-eISbOOHNncgI8y2PweNedHxsxr0kMbZtz1bdDMLx3b7LqiizVco4QlBu5GrZanAJ3ItUg5ECWTpLxoLRsbDwQqb4tmpKPu1-632pGkHt2fYrm8G1AlNNY8TYzyI7zcJzha+n+J+6g3bV0MPeS1KcfSiAOd1g67TCDIWPXY0pwdikRaeVjbce2O-KnROMdd0S2YSuaUoW3Hc+9gm9c8qIiyRqCdwF84pwLJ4iznS1zjzG0WKbhWEMIRhYFsVn3cS5K8-2qlDhczdQe8YIslubILYta3rdxW+DnCiogA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKAXATmAhgLYAK+M2+WYAdAK4B2Alk1o-sowF6QDEAMgHkAggBEAkgDkA4gH1BsgGpiAogHUZGACpCASpuUiA2gAYAuolAAHVLEatU9CyAAeiALQAmAJzUPHgGwArIEALAAcHmHhXsEhADQgAJ6IAQDM1IHGYQDs2ZnZxl5e-l6pAL5lCWiYuAQkZGAUVHRMLGwc3BD8wuLScgKKKuoAYkJifAYm5kgg1rb2jjOuCJ4hAIzUqZklHgX+xqlrkQnJCKlB1P4loYH+qV7hHoEVVejYeESk5FiUNAzMdnaXF4glEklk8hkSjUGgAqgBheHKAyTMxOOaAhxOZbZNbZajGXLBVIkrJrYInRBHYzUEIeVIhVJhNZZLws7IhF4garvOpfRo-Zr-NrsYFdUG9CEDKFDOGI5EiSZraZWGyYxagHEhEIEwkeI7Zc7GO6UhCZHzZML7MKBDwhQp0zmVblvWqfBpNGhofAQZhQPjoBSMMAAd26YL6kOhIzGEyMaJmGIW2JS4VpJTCWXp5K82Q8pvN1Et1tt9oedq5PLd9W+v2o3t99H9geDYYl4P6gxhGARSJR8ZVszVyaWiEZPnt-m8Ry8xjta38pqN1FK+uy+w8xhCgS8lddHxrArrDb9AagQdD4clnZl3d7CqVg6TjCxo4QISumy2MWNMWiAVNO58WMFkImMOc50CMI9xqA9+U9etUB9U8W1DYZ8EYZAQR6Dso1lLRdH0Ad0WHF8NRcdxvF8AJYgiKIwhiUIC1SDwMgNcC8g5O1nmdKs4I9QUaAAC3wWAzwvEMxHoX0AGM4BaAFWFFToeB0ZQkTEBQDBkSQxE0MQhD4GRiF0IQAFllH0HQMCmEj5jIlMEBnfxqAiYojjWVJCjnJcwnSIIrSuNZZ2CGJyl4-c+QEusRLE1DJOkxg5NgBSRQ6XgFEMsQRBkABFWFlB0ABNGR4QACSEaRUSfUjX01Kl-DyWk1giW0p3tElTTxfFwhCPYQIXXE1idV5YKi2tmli8TWyk2T5MUoEVMyvhsrygritKiqquIxNavI5ZBsCZrWoCO0DlSAs5xXdcnm3TJAkONYYN5d0JuE0TptDWakvk4VAWU3hJGW1b8sKkrysqqRqrs9VHIXRrXJAkCHpY24wiXbUVxYvFUkNTN-Ba-wKmdehUAgOAnD48ajyoGGR3qlZIh8LZf12Y0Dk8003DZNjbWKWcDk47JnureDBNS-70ogOmHLfOkurpahyXArIbTZIItxF-i3sQ5Cm0+kMZbqiiEF2DJQiuK0bVyH94iSRAmTCTZ3ICPMtj8HjRpew8EJPfX4vQzDICN-bECO5k7S8NJGrZNXAJ3ItcftNYWTpLxoIisbXpp964vPGbEuSkO4c3GkHt2fYrm8G1AlNRX076rdgluPr-Azr3ReiyaPvi77kolpSpeLt8jjTcv12NKd04pe3TdtAkU8evNwnODwtephCpt7wv5rSsVh4ZzyoiLQJyTVwJDSrgsniLOdLXOPMbRY9fs4QwhGFgWx-fzr6d-gXb7LGwOocFym4o7eGCFkW42R44WlxrjXEiDzrEzKEAA */
   createMachine<LogStreamPageContext, LogStreamPageEvent, LogStreamPageTypestate>(
     {
       context: initialContext,
@@ -103,6 +103,12 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
                   internal: true,
                   actions: 'forwardToInitialParameters',
                 },
+
+                INVALID_QUERY_CHANGED: {
+                  target: 'uninitialized',
+                  internal: true,
+                  actions: 'forwardToInitialParameters',
+                },
               },
             },
             initialized: {
@@ -168,6 +174,7 @@ export const createLogStreamPageStateMachine = ({
   kibanaQuerySettings,
   logViewStateNotifications,
   queryStringService,
+  toastsService,
   urlStateStorage,
 }: LogStreamPageStateMachineDependencies) =>
   createPureLogStreamPageStateMachine().withConfig({
@@ -185,6 +192,7 @@ export const createLogStreamPageStateMachine = ({
           {
             kibanaQuerySettings,
             queryStringService,
+            toastsService,
             urlStateStorage,
           }
         );

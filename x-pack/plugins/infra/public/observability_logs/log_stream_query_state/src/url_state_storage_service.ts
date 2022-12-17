@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { Query } from '@kbn/es-query';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { IToasts } from '@kbn/core-notifications-browser';
+import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import * as Either from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/function';
 import * as rt from 'io-ts';
 import { actions, InvokeCreator } from 'xstate';
-import { decodeOrThrow } from '../../../../common/runtime_types';
+import { createPlainError, formatErrors } from '../../../../common/runtime_types';
 import type {
   LogStreamQueryContext,
   LogStreamQueryContextWithParsedQuery,
   LogStreamQueryContextWithQuery,
   LogStreamQueryEvent,
+  ParsedQuery,
 } from './types';
 
 interface LogStreamQueryUrlStateDependencies {
@@ -23,9 +26,19 @@ interface LogStreamQueryUrlStateDependencies {
 }
 
 const defaultFilterStateKey = 'logFilter'; // TODO: change to a different key for BWC
-const defaultFilterStateValue: Query = {
-  language: 'kuery',
-  query: '',
+const defaultFilterStateValue: FilterStateInUrl = {
+  query: {
+    language: 'kuery',
+    query: '',
+  },
+};
+export const safeDefaultParsedQuery: ParsedQuery = {
+  bool: {
+    must: [],
+    must_not: [],
+    should: [],
+    filter: [{ match_none: {} }],
+  },
 };
 
 export const subscribeToUrlStateStorageChanges =
@@ -51,24 +64,69 @@ export const updateQueryInUrl =
       throw new Error();
     }
 
-    // TODO: update url state
+    urlStateStorage.set(
+      filterStateKey,
+      filterStateInUrlRT.encode({
+        query: context.query,
+      })
+    );
   };
 
 export const initializeFromUrl = ({
-  urlStateStorage,
   filterStateKey = defaultFilterStateKey,
-}: LogStreamQueryUrlStateDependencies) =>
-  actions.assign((context: LogStreamQueryContext, event: LogStreamQueryEvent) => {
+  toastsService,
+  urlStateStorage,
+}: LogStreamQueryUrlStateDependencies & {
+  toastsService: IToasts;
+}) =>
+  actions.pure<LogStreamQueryContext, LogStreamQueryEvent>(() => {
     const queryValueFromUrl = urlStateStorage.get(filterStateKey) ?? defaultFilterStateValue;
-    const query = decodeOrThrow(filterStateInUrlRT)(queryValueFromUrl);
-
-    return {
-      query,
-      parsedQuery: { bool: { filter: [{ match_none: {} }] } }, // safe default
-    } as LogStreamQueryContextWithQuery & LogStreamQueryContextWithParsedQuery;
+    return pipe(
+      legacyFilterStateInUrlRT.decode(queryValueFromUrl),
+      Either.map((legacyQuery) => ({ query: legacyQuery })),
+      Either.alt(() => filterStateInUrlRT.decode(queryValueFromUrl)),
+      Either.fold(
+        (errors) => [
+          {
+            type: '__notifyOnError',
+            exec: () => {
+              withNotifyOnErrors(toastsService).onGetError(createPlainError(formatErrors(errors)));
+            },
+          },
+          actions.assign<LogStreamQueryContext, LogStreamQueryEvent>({
+            query: defaultFilterStateValue.query,
+            parsedQuery: safeDefaultParsedQuery,
+          } as LogStreamQueryContextWithQuery & LogStreamQueryContextWithParsedQuery),
+        ],
+        ({ query }) => [
+          actions.assign<LogStreamQueryContext, LogStreamQueryEvent>({
+            query,
+            parsedQuery: safeDefaultParsedQuery,
+          } as LogStreamQueryContextWithQuery & LogStreamQueryContextWithParsedQuery),
+        ]
+      )
+    );
   });
 
-const filterStateInUrlRT = rt.union([
+const filterStateInUrlRT = rt.strict({
+  query: rt.union([
+    rt.strict({
+      language: rt.string,
+      query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
+    }),
+    rt.strict({
+      sql: rt.string,
+    }),
+    rt.strict({
+      esql: rt.string,
+    }),
+  ]),
+  // "filters" could go here
+});
+
+type FilterStateInUrl = rt.TypeOf<typeof filterStateInUrlRT>;
+
+const legacyFilterStateInUrlRT = rt.union([
   rt.strict({
     language: rt.string,
     query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),

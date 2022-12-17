@@ -9,6 +9,7 @@ import { EsQueryConfig } from '@kbn/es-query';
 import { actions, ActorRefFrom, createMachine, SpecialTargets } from 'xstate';
 import { QueryStringContract } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { IToasts } from '@kbn/core-notifications-browser';
 import { OmitDeprecatedState, sendIfDefined } from '../../xstate_helpers';
 import { logStreamQueryNotificationEventSelectors } from './notifications';
 import { validateQuery } from './validate_query_service';
@@ -22,7 +23,7 @@ import type {
   LogStreamQueryTypestate,
 } from './types';
 import { subscribeToSearchBarChanges, updateQueryInSearchBar } from './search_bar_state_service';
-import { initializeFromUrl } from './url_state_storage_service';
+import { initializeFromUrl, updateQueryInUrl } from './url_state_storage_service';
 
 export const createPureLogStreamQueryStateMachine = (
   initialContext: LogStreamQueryContextWithDataViews
@@ -138,6 +139,7 @@ export interface LogStreamQueryStateMachineDependencies {
   kibanaQuerySettings: EsQueryConfig;
   queryStringService: QueryStringContract;
   urlStateStorage: IKbnUrlStateStorage;
+  toastsService: IToasts;
 }
 
 export const createLogStreamQueryStateMachine = (
@@ -145,19 +147,20 @@ export const createLogStreamQueryStateMachine = (
   {
     kibanaQuerySettings,
     queryStringService,
+    toastsService,
     urlStateStorage,
   }: LogStreamQueryStateMachineDependencies
 ) =>
   createPureLogStreamQueryStateMachine(initialContext).withConfig({
     actions: {
-      initializeFromUrl: initializeFromUrl({ urlStateStorage }),
+      initializeFromUrl: initializeFromUrl({ toastsService, urlStateStorage }),
       notifyInvalidQueryChanged: sendIfDefined(SpecialTargets.Parent)(
         logStreamQueryNotificationEventSelectors.invalidQueryChanged
       ),
       notifyValidQueryChanged: sendIfDefined(SpecialTargets.Parent)(
         logStreamQueryNotificationEventSelectors.validQueryChanged
       ),
-      updateQueryInUrl: () => {},
+      updateQueryInUrl: updateQueryInUrl({ urlStateStorage }),
       updateQueryInSearchBar: updateQueryInSearchBar({ queryStringService }),
     },
     services: {
