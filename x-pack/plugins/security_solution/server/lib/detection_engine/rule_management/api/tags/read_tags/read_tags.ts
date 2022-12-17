@@ -6,6 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { enrichFilterWithRuleTypeMapping } from '../../../logic/search/enrich_filter_with_rule_type_mappings';
 
 // This is a contrived max limit on the number of tags. In fact it can exceed this number and will be truncated to the hardcoded number.
 const EXPECTED_MAX_TAGS = 65536;
@@ -19,7 +20,7 @@ export const readTags = async ({
   const res = await rulesClient.aggregate({
     options: {
       fields: ['tags'],
-      filter: undefined,
+      filter: enrichFilterWithRuleTypeMapping(undefined),
       maxTags: EXPECTED_MAX_TAGS,
     },
   });
