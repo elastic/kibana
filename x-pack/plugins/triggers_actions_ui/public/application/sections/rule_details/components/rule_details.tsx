@@ -68,7 +68,10 @@ export type RuleDetailsProps = {
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
   refreshToken?: number;
-} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
+} & Pick<
+  BulkOperationsComponentOpts,
+  'bulkDisableRules' | 'bulkEnableRules' | 'snoozeRule' | 'unsnoozeRule'
+>;
 
 const ruleDetailStyle = {
   minWidth: 0,
@@ -78,8 +81,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
   ruleType,
   actionTypes,
-  disableRule,
-  enableRule,
+  bulkDisableRules,
+  bulkEnableRules,
   snoozeRule,
   unsnoozeRule,
   requestRefresh,
@@ -362,9 +365,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             }}
             onEnableDisable={async (enable) => {
               if (enable) {
-                await enableRule(rule);
+                await bulkEnableRules({ ids: [rule.id] });
               } else {
-                await disableRule(rule);
+                await bulkDisableRules({ ids: [rule.id] });
               }
               requestRefresh();
             }}

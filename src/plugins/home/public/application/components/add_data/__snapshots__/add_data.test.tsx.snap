@@ -103,11 +103,61 @@ exports[`AddData render 1`] = `
       </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiImage
-        alt="Illustration of Elastic data integrations"
-        className="homDataAdd__illustration"
-        src="/plugins/kibanaReact/assets/illustration_integrations_lightmode.svg"
-      />
+      <EuiPanel
+        paddingSize="l"
+      >
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="xl"
+        >
+          <EuiFlexItem>
+            <EuiImage
+              alt="Illustration for cloud data migration"
+              src="/plugins/kibanaReact/assets/illustration_cloud_migration.png"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle
+              size="xs"
+            >
+              <h4>
+                <FormattedMessage
+                  defaultMessage="Considering Elastic Cloud?"
+                  id="home.addData.moveYourDataTitle"
+                  values={Object {}}
+                />
+              </h4>
+            </EuiTitle>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText
+              size="s"
+            >
+              <FormattedMessage
+                defaultMessage="Moving your data to Elastic Cloud is easy and can save you time and money."
+                id="home.addData.moveYourDataToElasticCloud"
+                values={Object {}}
+              />
+            </EuiText>
+            <EuiSpacer
+              size="m"
+            />
+            <EuiButton
+              color="primary"
+              href="/app/management/data/migrate_data"
+              onClick={[Function]}
+              size="m"
+            >
+              <FormattedMessage
+                defaultMessage="Explore the benefits"
+                id="home.addData.moveYourDataButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     </EuiFlexItem>
   </EuiFlexGroup>
 </_EuiPageSection>
