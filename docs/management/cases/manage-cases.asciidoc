@@ -54,6 +54,34 @@ go back to your case.
 After a visualization has been added to a case, you can modify or interact with
 it by clicking the *Open Visualization* option in the comment menu.
 
+[[add-case-notifications]]
+=== Add email notifications
+
+You can configure email notifications that occur when users are assigned to
+cases.
+
+For hosted {kib} on {ess}:
+
+. Add the email addresses to the monitoring email allowlist. Follow the steps in
+{cloud}/ec-watcher.html#ec-watcher-allowlist[Send alerts by email].
++
+--
+You do not need to take any more steps to configure an email connector or update
+{kib} user settings, since the preconfigured Elastic-Cloud-SMTP connector is
+used by default.
+--
+
+For self-managed {kib}:
+
+. Create an <<email-action-type,email connector>>. For examples, refer to
+<<configuring-email>>.
+. Set the `notifications.connectors.default.email` {kib} setting to the name of
+your email connector.
+. If you want the email notifications to contain links back to the case, you
+must configure the <<server-publicBaseUrl,`server.publicBaseUrl`>> setting.
+
+When you subsequently add assignees to cases, they receive an email.
+
 [[manage-case]]
 === Manage cases
 
