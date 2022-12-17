@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:monitoring_alert_logstash_version_mismatch',
         'alerting:monitoring_alert_missing_monitoring_data',
         'alerting:monitoring_alert_nodes_changed',
-        "alerting:monitoring_alert_rules_failure"
+        "alerting:monitoring_alert_rules_failure",
         'alerting:monitoring_alert_thread_pool_search_rejections',
         'alerting:monitoring_alert_thread_pool_write_rejections',
         'alerting:monitoring_ccr_read_exceptions',
