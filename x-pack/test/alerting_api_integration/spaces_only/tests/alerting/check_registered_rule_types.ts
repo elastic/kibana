@@ -55,7 +55,7 @@ export default function createRegisteredRuleTypeTests({ getService }: FtrProvide
         'monitoring_alert_thread_pool_write_rejections',
         'monitoring_alert_jvm_memory_usage',
         'monitoring_alert_nodes_changed',
-        "monitoring_alert_rules_failure",
+        'monitoring_alert_rules_failure',
         'monitoring_alert_logstash_version_mismatch',
         'monitoring_alert_kibana_version_mismatch',
         'monitoring_alert_elasticsearch_version_mismatch',
