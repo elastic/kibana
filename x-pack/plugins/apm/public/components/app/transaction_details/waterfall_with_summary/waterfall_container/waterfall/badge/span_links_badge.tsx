@@ -61,7 +61,12 @@ export function SpanLinksBadge({
           e.stopPropagation();
           onClick(spanLinksFlyoutTab);
         }}
-        onClickAriaLabel="Open span links details"
+        onClickAriaLabel={i18n.translate(
+          'xpack.apm.waterfall.spanLinks.badgeAriaLabel',
+          {
+            defaultMessage: 'Open span links details',
+          }
+        )}
       >
         {i18n.translate('xpack.apm.waterfall.spanLinks.badge', {
           defaultMessage:

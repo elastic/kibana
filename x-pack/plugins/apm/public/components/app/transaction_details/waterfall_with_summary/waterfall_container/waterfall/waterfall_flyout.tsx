@@ -55,7 +55,7 @@ export function WaterfallFlyout({
           spanId={currentItem.id}
           parentTransactionId={parentTransactionId}
           traceId={currentItem.doc.trace.id}
-          onClose={() => toggleFlyout({ history, flyoutDetailTab: undefined })}
+          onClose={() => toggleFlyout({ history })}
           spanLinksCount={currentItem.spanLinksCount}
           flyoutDetailTab={flyoutDetailTab}
         />
@@ -65,7 +65,7 @@ export function WaterfallFlyout({
         <TransactionFlyout
           transactionId={currentItem.id}
           traceId={currentItem.doc.trace.id}
-          onClose={() => toggleFlyout({ history, flyoutDetailTab: undefined })}
+          onClose={() => toggleFlyout({ history })}
           rootTransactionDuration={waterfall.rootWaterfallTransaction?.duration}
           errorCount={waterfall.getErrorCount(currentItem.id)}
           spanLinksCount={currentItem.spanLinksCount}
