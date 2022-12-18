@@ -27,7 +27,7 @@ export class CachedContentItem<T = unknown> implements CmCachedItem<T> {
 
   public contentType(): ContentType {
     const type = this.cache.registry.get(this.getType());
-    if (!type) throw new Error(`Unknown content type: ${this.type}`);
+    if (!type) throw new Error(`Unknown content type: ${this.getType()}`);
     return type;
   }
 

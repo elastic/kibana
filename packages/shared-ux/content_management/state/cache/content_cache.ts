@@ -1,8 +1,9 @@
 import {CachedContentItem} from "./cached_content_item";
 import {CachedContentType} from "./cached_content_type";
 import type {ContentRegistry} from "../registry/content_registry";
+import type {CmCache} from "./types";
 
-export class ContentCache {
+export class ContentCache implements CmCache {
   protected readonly typeCache: Map<string, CachedContentType> = new Map();
   protected readonly itemCache: Map<string, CachedContentItem> = new Map();
 
