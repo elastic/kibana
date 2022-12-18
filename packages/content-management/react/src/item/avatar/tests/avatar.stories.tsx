@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import { CmAvatar } from '../avatar';
-import { StateProviderWithFixtures } from '../../../mocks/react';
+import { StateProviderWithFixtures } from '../../../context/mocks';
 
 export default {
   title: 'Content Management/Item/Avatar/Avatar',
