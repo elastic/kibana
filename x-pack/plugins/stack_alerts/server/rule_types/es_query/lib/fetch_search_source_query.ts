@@ -26,14 +26,7 @@ import { Logger } from '@kbn/core/server';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
 
-export async function fetchSearchSourceQuery({
-  ruleId,
-  alertLimit,
-  params,
-  latestTimestamp,
-  spacePrefix,
-  services,
-}: {
+export interface FetchSearchSourceQueryOpts {
   ruleId: string;
   alertLimit: number | undefined;
   params: OnlySearchSourceRuleParams;
@@ -44,7 +37,16 @@ export async function fetchSearchSourceQuery({
     searchSourceClient: ISearchStartSearchSource;
     share: SharePluginStart;
   };
-}) {
+}
+
+export async function fetchSearchSourceQuery({
+  ruleId,
+  alertLimit,
+  params,
+  latestTimestamp,
+  spacePrefix,
+  services,
+}: FetchSearchSourceQueryOpts) {
   const { logger, searchSourceClient } = services;
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);

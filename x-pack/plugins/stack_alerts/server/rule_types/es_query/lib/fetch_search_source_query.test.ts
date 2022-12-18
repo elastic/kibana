@@ -223,6 +223,7 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         '2020-02-09T23:12:41.941Z'
       );
