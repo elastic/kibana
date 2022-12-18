@@ -26,13 +26,15 @@ export interface CmAvatarProps extends Omit<CmAvatarUiProps, 'title'> {
  */
 export const CmAvatar: React.FC<CmAvatarProps> = (props) => {
   const { id, ...rest } = props;
-  const { data } = useContentItem(id);
+  const { data, item } = useContentItem(id);
+  const kind = item.contentType().kind();
 
   if (!data) {
     return (
       <CmAvatarEmpty
         size={props.size}
         disabled={props.disabled}
+        kind={kind}
       />
     )
   }
@@ -42,6 +44,7 @@ export const CmAvatar: React.FC<CmAvatarProps> = (props) => {
       {...rest}
       title={data.getTitle()}
       color={data.fields.color}
+      kind={kind}
     />
   );
 };

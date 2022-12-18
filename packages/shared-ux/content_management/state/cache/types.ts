@@ -7,7 +7,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { ContentItem } from '../registry';
+import type { ContentItem, ContentType } from '../registry';
 
 /**
  * Represents a cache of content items.
@@ -29,4 +29,10 @@ export interface CmCachedItem<T = unknown> {
    * various asynchronous operations that may update the data.
    */
   data$: Observable<ContentItem<T>>;
+
+
+  /**
+   * Retrieves the content type of this content item.
+   */
+  contentType(): ContentType;
 }

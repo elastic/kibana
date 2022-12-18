@@ -7,13 +7,17 @@
  */
 
 import { ContentItem } from "./content_item";
-import type { ContentTypeDetails } from "./types";
+import type { ContentTypeDetails, ContentTypeKind } from "./types";
 
 export class ContentType<T = unknown> {
   constructor(public readonly details: ContentTypeDetails<T>) {}
 
   public getId(): string {
     return this.details.id;
+  }
+
+  public kind(): ContentTypeKind {
+    return this.details.kind || 'other';
   }
 
   public async read(id: string): Promise<ContentItem<T>> {

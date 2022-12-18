@@ -36,6 +36,12 @@ export const SingleUser = () => (
   </Provider>
 );
 
+export const SingleDashboard = () => (
+  <Provider>
+    <CmAvatar id={'dashboard:xyz'} />
+  </Provider>
+);
+
 export const SmallUserAndBigDashboard = () => (
   <Provider>
     <CmAvatar id={'user:456'} size={'s'} />

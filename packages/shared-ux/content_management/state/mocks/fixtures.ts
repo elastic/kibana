@@ -38,6 +38,7 @@ const user: ContentTypeFixture = createTypeFixture(
     name: 'User',
     description: 'A Kibana user',
     icon: 'user',
+    kind: 'user',
   },
   [
     {

@@ -35,11 +35,22 @@ export interface ContentTypeDetails<T = unknown> {
   icon?: string;
 
   /**
+   * Specifies item type. Defaults to 'other'.
+   */
+  kind?: ContentTypeKind;
+
+  /**
    * CRUD + Search operations that can be performed on content items of this
    * type.
    */
   operations: ContentTypeOperations<T>;
 }
+
+/**
+ * Specifies whether this type represents user-like items (like user profiles)
+ * or something else (like dashboards). Defaults to 'other'.
+ */
+export type ContentTypeKind = 'user' | 'other';
 
 /**
  * CRUD + Search operations that can be performed on content items of this
