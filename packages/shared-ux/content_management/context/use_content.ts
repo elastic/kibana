@@ -13,7 +13,7 @@ export const useContent = (): ContentContextValue => {
   const contextValue = React.useContext(context);
 
   if (!contextValue) {
-    throw new Error('Content context is not available');
+    throw new Error('Content management context is not available.');
   }
 
   return contextValue;

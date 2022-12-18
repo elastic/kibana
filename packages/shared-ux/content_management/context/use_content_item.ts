@@ -8,13 +8,13 @@
 
 import * as React from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import {CmCachedItem, ContentItem} from '../state';
 import {useContent} from './use_content';
-import type {CmCachedItem, CmItem} from '../types';
 
 export const useContentItem = (id: string): UseContentItemResult => {
   const { cache } = useContent();
   const item = React.useMemo(() => cache.item(id), [cache, id]);
-  const data = useObservable(item.data$) as CmItem | undefined;
+  const data = useObservable(item.data$) as ContentItem | undefined;
 
   return {
     item,
@@ -24,5 +24,5 @@ export const useContentItem = (id: string): UseContentItemResult => {
 
 export interface UseContentItemResult {
   item: CmCachedItem;
-  data: CmItem | undefined;
+  data: ContentItem | undefined;
 }
