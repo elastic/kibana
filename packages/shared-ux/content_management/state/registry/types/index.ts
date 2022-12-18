@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './registry';
-export * from './cache';
+export * from './content_items';
+export * from './content_types';
