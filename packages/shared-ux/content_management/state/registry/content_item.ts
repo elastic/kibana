@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { CmItem, ContentItemDetails } from "./types";
+import type { CmItem, ContentItemDetails, ContentItemFields } from "./types";
 
 export class ContentItem<T = unknown> implements CmItem {
-  constructor(public readonly details: ContentItemDetails<T>) {}
+  public readonly fields: Readonly<ContentItemFields>;
+
+  constructor(public readonly details: ContentItemDetails<T>) {
+    this.fields = details.fields;
+  }
 
   public getId(): string {
     return this.details.id;

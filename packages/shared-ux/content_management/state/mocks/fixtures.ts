@@ -57,7 +57,8 @@ const user: ContentTypeFixture = createTypeFixture(
     {
       id: '789',
       fields: {
-        title: '',
+        title: 'Captain America',
+        color: '#aa3300',
       },
       content: {},
     },
@@ -85,6 +86,7 @@ const dashboard: ContentTypeFixture = createTypeFixture(
       fields: {
         title: 'Threat detection dashboard',
         description: 'We use this dashboard to detect threats across our network.',
+        color: '#0077ff',
       },
       content: {},
     },

@@ -41,6 +41,7 @@ export const CmAvatar: React.FC<CmAvatarProps> = (props) => {
     <CmAvatarUi
       {...rest}
       title={data.getTitle()}
+      color={data.fields.color}
     />
   );
 };

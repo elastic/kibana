@@ -27,8 +27,6 @@ export interface CmAvatarUiProps {
 export const CmAvatarUi: React.FC<CmAvatarUiProps> = (props) => {
   const { title, size, round, disabled, color } = props;
 
-  // TODO: Compute color here.
-
   return (
     <EuiAvatar
       name={title}

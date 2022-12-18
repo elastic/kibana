@@ -43,3 +43,11 @@ export const SmallUserAndBigDashboard = () => (
     <CmAvatar id={'dashboard:xyz'} size={'l'} />
   </Provider>
 );
+
+export const CustomRedAndBlueColors = () => (
+  <Provider>
+    <CmAvatar id={'user:789'} />
+    <br />
+    <CmAvatar id={'dashboard:abc'} />
+  </Provider>
+);
