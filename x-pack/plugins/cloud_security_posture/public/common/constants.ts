@@ -13,9 +13,12 @@ import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
-  CLOUDBEAT_INTEGRATION,
-  POLICY_TEMPLATE,
+  type PostureInput,
+  type PosturePolicyTemplate,
 } from '../../common/constants';
+
+import eksLogo from '../assets/icons/cis_eks_logo.svg';
+import k8sLogo from '../assets/icons/k8s_logo.svg';
 
 export const statusColors = {
   passed: euiThemeVars.euiColorVis0,
@@ -30,15 +33,18 @@ export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY = 'cloudPosture:findings:pageS
 export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
 
-export type CloudPostureIntegrations = Record<POLICY_TEMPLATE, CloudPostureIntegrationProps>;
+export type CloudPostureIntegrations = Record<PosturePolicyTemplate, CloudPostureIntegrationProps>;
 export interface CloudPostureIntegrationProps {
-  policyTemplate: POLICY_TEMPLATE;
+  policyTemplate: PosturePolicyTemplate;
   name: string;
   shortName: string;
   options: Array<{
-    type: CLOUDBEAT_INTEGRATION;
+    type: PostureInput;
     name: string;
     benchmark: string;
+    disabled?: boolean;
+    icon?: string;
+    tooltip?: string;
   }>;
 }
 
@@ -60,6 +66,10 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.awsOption.benchmarkTitle', {
           defaultMessage: 'CIS AWS',
         }),
+        icon: 'logoAWS',
+        tooltip: i18n.translate('xpack.csp.cspmIntegration.awsOption.tooltipContent', {
+          defaultMessage: 'Only AWS available for now',
+        }),
       },
       {
         type: CLOUDBEAT_GCP,
@@ -69,6 +79,11 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.gcpOption.benchmarkTitle', {
           defaultMessage: 'CIS GCP',
         }),
+        disabled: true,
+        icon: 'logoGCP',
+        tooltip: i18n.translate('xpack.csp.cspmIntegration.gcpOption.tooltipContent', {
+          defaultMessage: 'Coming soon',
+        }),
       },
       {
         type: CLOUDBEAT_AZURE,
@@ -77,6 +92,11 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         }),
         benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
           defaultMessage: 'CIS Azure',
+        }),
+        disabled: true,
+        icon: 'logoAzure',
+        tooltip: i18n.translate('xpack.csp.cspmIntegration.azureOption.tooltipContent', {
+          defaultMessage: 'Coming soon',
         }),
       },
     ],
@@ -98,6 +118,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.benchmarkTitle', {
           defaultMessage: 'CIS Kubernetes',
         }),
+        icon: k8sLogo,
       },
       {
         type: CLOUDBEAT_EKS,
@@ -107,6 +128,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.kspmIntegration.eksOption.benchmarkTitle', {
           defaultMessage: 'CIS EKS',
         }),
+        icon: eksLogo,
       },
     ],
   },

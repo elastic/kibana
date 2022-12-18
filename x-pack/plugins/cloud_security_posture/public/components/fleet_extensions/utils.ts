@@ -5,63 +5,76 @@
  * 2.0.
  */
 import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { assert } from '../../../common/utils/helpers';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_EKS,
-  CLOUDBEAT_VANILLA,
-  CLOUDBEAT_INTEGRATION,
+  PostureInput,
+  SUPPORTED_CLOUDBEAT_INPUTS,
   SUPPORTED_POLICY_TEMPLATES,
-  POLICY_TEMPLATE,
+  PosturePolicyTemplate,
 } from '../../../common/constants';
+import { cloudPostureIntegrations } from '../../common/constants';
 
-export const isEksInput = (input: NewPackagePolicyInput) => input.type === CLOUDBEAT_EKS;
+export type NewPackagePolicyPostureInput = NewPackagePolicyInput & {
+  type: PostureInput;
+  policy_template: PosturePolicyTemplate;
+};
+
+export const isPostureInput = (
+  input: NewPackagePolicyInput
+): input is NewPackagePolicyPostureInput =>
+  SUPPORTED_POLICY_TEMPLATES.includes(input.policy_template as PosturePolicyTemplate) &&
+  SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as PostureInput);
+
 export const inputsWithVars = [CLOUDBEAT_EKS, CLOUDBEAT_AWS];
-const defaultInputType: Record<POLICY_TEMPLATE, CLOUDBEAT_INTEGRATION> = {
-  kspm: CLOUDBEAT_VANILLA,
-  cspm: CLOUDBEAT_AWS,
-};
-export const getEnabledInputType = (inputs: NewPackagePolicy['inputs']): CLOUDBEAT_INTEGRATION => {
-  const enabledInput = getEnabledInput(inputs);
 
-  if (enabledInput) return enabledInput.type as CLOUDBEAT_INTEGRATION;
-
-  const policyTemplate = inputs[0].policy_template as POLICY_TEMPLATE | undefined;
-
-  if (policyTemplate && SUPPORTED_POLICY_TEMPLATES.includes(policyTemplate))
-    return defaultInputType[policyTemplate];
-
-  throw new Error('unsupported policy template');
-};
-
-export const getEnabledInput = (
-  inputs: NewPackagePolicy['inputs']
-): NewPackagePolicyInput | undefined => inputs.find((input) => input.enabled);
-
-export const getUpdatedDeploymentType = (
+export const getPolicyWithUpdatedInputs = (
   newPolicy: NewPackagePolicy,
-  inputType: CLOUDBEAT_INTEGRATION
-) => ({
-  isValid: true, // TODO: add validations
-  updatedPolicy: {
-    ...newPolicy,
-    inputs: newPolicy.inputs.map((item) => ({
-      ...item,
+  inputType: PostureInput
+): NewPackagePolicy => ({
+  ...newPolicy,
+  inputs: newPolicy.inputs.map((item) => ({
+    ...item,
+    enabled: item.type === inputType,
+    streams: item.streams.map((stream) => ({
+      ...stream,
       enabled: item.type === inputType,
-      streams: item.streams.map((stream) => ({
-        ...stream,
-        enabled: item.type === inputType,
-      })),
     })),
-  },
+  })),
 });
 
-export const getUpdatedEksVar = (newPolicy: NewPackagePolicy, key: string, value: string) => ({
-  isValid: true, // TODO: add validations
-  updatedPolicy: {
-    ...newPolicy,
-    inputs: newPolicy.inputs.map((item) =>
-      inputsWithVars.includes(item.type) ? getUpdatedStreamVars(item, key, value) : item
-    ),
+export const getPolicyTemplateInputOptions = (policyTemplate: PosturePolicyTemplate) =>
+  cloudPostureIntegrations[policyTemplate].options.map((o) => ({
+    tooltip: o.tooltip,
+    value: o.type,
+    id: o.type,
+    label: o.name,
+    icon: o.icon,
+    disabled: o.disabled,
+  }));
+
+export const getPolicyWithInputVars = (
+  newPolicy: NewPackagePolicy,
+  key: string,
+  value: string
+): NewPackagePolicy => ({
+  ...newPolicy,
+  inputs: newPolicy.inputs.map((item) =>
+    inputsWithVars.includes(item.type) ? getUpdatedStreamVars(item, key, value) : item
+  ),
+});
+
+export const getPolicyWithHiddenVars = (
+  newPolicy: NewPackagePolicy,
+  deployment: PostureInput,
+  posture: PosturePolicyTemplate
+): NewPackagePolicy => ({
+  ...newPolicy,
+  vars: {
+    ...newPolicy.vars,
+    deployment: { ...newPolicy.vars?.deployment, value: deployment },
+    posture: { ...newPolicy.vars?.posture, value: posture },
   },
 });
 
@@ -84,4 +97,14 @@ const getUpdatedStreamVars = (item: NewPackagePolicyInput, key: string, value: s
       },
     ],
   };
+};
+
+export const getPostureInput = (policy: NewPackagePolicy) => {
+  // Take first enabled input
+  const input = policy.inputs.find((i) => i.enabled);
+
+  assert(input, 'Missing enabled input'); // We can't provide a default input without knowing the policy template
+  assert(isPostureInput(input), 'Invalid enabled input');
+
+  return input;
 };
