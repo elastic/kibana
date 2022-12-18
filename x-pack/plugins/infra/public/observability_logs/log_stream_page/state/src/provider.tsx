@@ -17,6 +17,7 @@ export const useLogStreamPageState = ({
   kibanaQuerySettings,
   logViewStateNotifications,
   queryStringService,
+  toastsService,
   urlStateStorage,
   useDevTools = isDevMode(),
 }: {
@@ -28,6 +29,7 @@ export const useLogStreamPageState = ({
         kibanaQuerySettings,
         logViewStateNotifications,
         queryStringService,
+        toastsService,
         urlStateStorage,
       }),
     { devTools: useDevTools }
