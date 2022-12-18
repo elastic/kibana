@@ -52,6 +52,8 @@ export const subscribeToUrlStateStorageChanges =
   (context) =>
   (send) => {
     const urlFilterState$ = urlStateStorage.change$(filterStateKey);
+
+    // TODO: send() the proper change events
   };
 
 export const updateQueryInUrl =
