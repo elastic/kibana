@@ -27,10 +27,10 @@ export const SizeScale = () => {
 
       <br />
 
-      <CmAvatarEmpty size={'s'} round />
-      <CmAvatarEmpty size={'m'} round />
-      <CmAvatarEmpty size={'l'} round />
-      <CmAvatarEmpty size={'xl'} round />
+      <CmAvatarEmpty size={'s'} kind={'user'} />
+      <CmAvatarEmpty size={'m'} kind={'user'} />
+      <CmAvatarEmpty size={'l'} kind={'user'} />
+      <CmAvatarEmpty size={'xl'} kind={'user'} />
     </>
   );
 };

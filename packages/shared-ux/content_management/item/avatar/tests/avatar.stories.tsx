@@ -57,3 +57,21 @@ export const CustomRedAndBlueColors = () => (
     <CmAvatar id={'dashboard:abc'} />
   </Provider>
 );
+
+export const SizeScale = () => {
+  return (
+    <Provider>
+      <CmAvatar id={'dashboard:xyz'} size={'s'} />
+      <CmAvatar id={'dashboard:xyz'} size={'m'} />
+      <CmAvatar id={'dashboard:xyz'} size={'l'} />
+      <CmAvatar id={'dashboard:xyz'} size={'xl'} />
+
+      <br />
+
+      <CmAvatar id={'user:456'} size={'s'} />
+      <CmAvatar id={'user:456'} size={'m'} />
+      <CmAvatar id={'user:456'} size={'l'} />
+      <CmAvatar id={'user:456'} size={'xl'} />
+    </Provider>
+  );
+};
