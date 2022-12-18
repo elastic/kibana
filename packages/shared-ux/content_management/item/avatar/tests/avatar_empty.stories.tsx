@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import * as React from 'react';
 import { CmAvatarEmpty } from '../avatar_empty';
 
 export default {

@@ -37,12 +37,10 @@ export const CmAvatar: React.FC<CmAvatarProps> = (props) => {
     )
   }
 
-  const title = data.fields.title || '';
-
   return (
     <CmAvatarUi
       {...rest}
-      title={title}
+      title={data.getTitle()}
     />
   );
 };
