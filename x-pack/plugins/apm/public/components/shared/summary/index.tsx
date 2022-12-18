@@ -5,39 +5,32 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Maybe } from '../../../../typings/common';
 
 interface Props {
   items: Array<Maybe<React.ReactElement>>;
 }
 
-const Item = euiStyled(EuiFlexItem)`
-  flex-wrap: nowrap;
-  border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  padding-right: ${({ theme }) => theme.eui.euiSizeS};
-  flex-flow: row nowrap;
-  line-height: 1.5;
-  align-items: center !important;
-  &:last-child {
-    border-right: none;
-    padding-right: 0;
-  }
-`;
-
 function Summary({ items }: Props) {
   const filteredItems = items.filter(Boolean) as React.ReactElement[];
 
   return (
-    <EuiFlexGrid gutterSize="s">
+    <EuiFlexGroup gutterSize="s" direction="row">
       {filteredItems.map((item, index) => (
-        <Item key={index} grow={false}>
-          {item}
-        </Item>
+        <>
+          {index > 0 && (
+            <EuiFlexItem key={index} grow={false}>
+              |
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem key={index} grow={false}>
+            {item}
+          </EuiFlexItem>
+        </>
       ))}
-    </EuiFlexGrid>
+    </EuiFlexGroup>
   );
 }
 

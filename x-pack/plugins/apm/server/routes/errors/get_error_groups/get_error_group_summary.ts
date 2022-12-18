@@ -9,11 +9,8 @@ import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
-  ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
-  ERROR_EXC_MESSAGE,
   ERROR_GROUP_ID,
-  ERROR_LOG_MESSAGE,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
 } from '../../../../common/es_fields/apm';
@@ -58,12 +55,7 @@ export async function getErrorGroupSummary({
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
         },
       },
-      _source: [
-        ERROR_EXC_MESSAGE,
-        ERROR_EXC_HANDLED,
-        ERROR_LOG_MESSAGE,
-        ERROR_CULPRIT,
-      ],
+      _source: [ERROR_EXC_HANDLED],
       sort: asMutableArray([
         { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
         { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error

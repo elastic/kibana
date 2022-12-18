@@ -13,6 +13,8 @@ import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
 import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
 import { getErrorGroupSummary } from './get_error_groups/get_error_group_summary';
+import { getErrorGroupSamples } from './get_error_groups/get_error_group_samples';
+import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getTopErroneousTransactionsPeriods } from './erroneous_transactions/get_top_erroneous_transactions';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -189,7 +191,7 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
   },
 });
 
-const errorGroupsRoute = createApmServerRoute({
+const errorGroupsSummaryRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}',
   params: t.type({
     path: t.type({
@@ -223,6 +225,75 @@ const errorGroupsRoute = createApmServerRoute({
     return getErrorGroupSummary({
       environment,
       groupId,
+      kuery,
+      serviceName,
+      apmEventClient,
+      start,
+      end,
+    });
+  },
+});
+
+const errorGroupsSamplesRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+      groupId: t.string,
+    }),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    errorSamples: string[];
+  }> => {
+    const { params } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const { serviceName, groupId } = params.path;
+    const { environment, kuery, start, end } = params.query;
+
+    return getErrorGroupSamples({
+      environment,
+      groupId,
+      kuery,
+      serviceName,
+      apmEventClient,
+      start,
+      end,
+    });
+  },
+});
+
+const errorGroupSampleRoute = createApmServerRoute({
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+      groupId: t.string,
+      errorId: t.string,
+    }),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    transaction:
+      | import('./../../../typings/es_schemas/ui/transaction').Transaction
+      | undefined;
+    error: import('./../../../typings/es_schemas/ui/apm_error').APMError;
+  }> => {
+    const { params } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const { serviceName, errorId } = params.path;
+    const { environment, kuery, start, end } = params.query;
+
+    return getErrorGroupSample({
+      environment,
+      errorId,
       kuery,
       serviceName,
       apmEventClient,
@@ -332,7 +403,9 @@ export const errorsRouteRepository = {
   ...errorsMainStatisticsRoute,
   ...errorsMainStatisticsByTransactionNameRoute,
   ...errorsDetailedStatisticsRoute,
-  ...errorGroupsRoute,
+  ...errorGroupsSummaryRoute,
+  ...errorGroupsSamplesRoute,
+  ...errorGroupSampleRoute,
   ...errorDistributionRoute,
   ...topErroneousTransactionsRoute,
 };

@@ -10,37 +10,42 @@ import { isEmpty } from 'lodash';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 
 export interface ErrorTab {
-  key: 'log_stacktrace' | 'exception_stacktrace' | 'metadata';
+  key: 'log_stacktrace' | 'exception_stacktrace' | 'metadata' | 'summary';
   label: string;
 }
 
 export const logStacktraceTab: ErrorTab = {
   key: 'log_stacktrace',
-  label: i18n.translate('xpack.apm.propertiesTable.tabs.logStacktraceLabel', {
+  label: i18n.translate('xpack.apm.errorGroup.tabs.logStacktraceLabel', {
     defaultMessage: 'Log stack trace',
   }),
 };
 
 export const exceptionStacktraceTab: ErrorTab = {
   key: 'exception_stacktrace',
-  label: i18n.translate(
-    'xpack.apm.propertiesTable.tabs.exceptionStacktraceLabel',
-    {
-      defaultMessage: 'Exception stack trace',
-    }
-  ),
+  label: i18n.translate('xpack.apm.errorGroup.tabs.exceptionStacktraceLabel', {
+    defaultMessage: 'Exception stack trace',
+  }),
 };
 
 export const metadataTab: ErrorTab = {
   key: 'metadata',
-  label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
+  label: i18n.translate('xpack.apm.errorGroup.tabs.metadataLabel', {
     defaultMessage: 'Metadata',
   }),
 };
 
-export function getTabs(error: APMError) {
-  const hasLogStacktrace = !isEmpty(error.error.log?.stacktrace);
+export const summaryTab: ErrorTab = {
+  key: 'summary',
+  label: i18n.translate('xpack.apm.errorGroup.tabs.summaryLabel', {
+    defaultMessage: 'Summary',
+  }),
+};
+
+export function getTabs(error?: APMError) {
+  const hasLogStacktrace = !isEmpty(error?.error.log?.stacktrace);
   return [
+    summaryTab,
     ...(hasLogStacktrace ? [logStacktraceTab] : []),
     exceptionStacktraceTab,
     metadataTab,

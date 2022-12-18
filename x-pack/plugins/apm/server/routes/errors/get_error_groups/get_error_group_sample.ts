@@ -17,7 +17,7 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTransaction } from '../../transactions/get_transaction';
 
-export async function getErrorGroupSummary({
+export async function getErrorGroupSample({
   environment,
   kuery,
   serviceName,
@@ -39,7 +39,7 @@ export async function getErrorGroupSummary({
       events: [ProcessorEvent.error as const],
     },
     body: {
-      track_total_hits: true,
+      track_total_hits: false,
       size: 1,
       query: {
         bool: {
@@ -79,6 +79,5 @@ export async function getErrorGroupSummary({
   return {
     transaction,
     error,
-    occurrencesCount: resp.hits.total.value,
   };
 }

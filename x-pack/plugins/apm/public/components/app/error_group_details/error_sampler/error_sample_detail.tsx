@@ -16,15 +16,15 @@ import {
   EuiTabs,
   EuiTitle,
   EuiToolTip,
+  EuiEmptyPrompt,
+  EuiPagination,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import type { ApmUrlParams } from '../../../../context/url_params_context/types';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { DiscoverErrorLink } from '../../../shared/links/discover_links/discover_error_link';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
@@ -39,6 +39,7 @@ import {
   exceptionStacktraceTab,
   getTabs,
   logStacktraceTab,
+  metadataTab,
 } from './error_tabs';
 import { ExceptionStacktrace } from './exception_stacktrace';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -47,6 +48,11 @@ import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
 import { TraceSearchType } from '../../../../../common/trace_explorer';
 import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
 import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
+import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
+import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { SampleSummary } from './sample_summary';
 
 const TransactionLinkName = euiStyled.div`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
@@ -55,12 +61,14 @@ const TransactionLinkName = euiStyled.div`
 `;
 
 interface Props {
-  errorGroup: APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}'>;
-  urlParams: ApmUrlParams;
-  kuery: string;
+  onSampleClick: (sample: string) => void;
+  errorSamples: string[];
+  errorSamplesFetchStatus: FETCH_STATUS;
+  errorData: APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}'>;
+  errorFetchStatus: FETCH_STATUS;
+  occurrencesCount: number;
 }
 
-// TODO: Move query-string-based tabs into a re-usable component?
 function getCurrentTab(
   tabs: ErrorTab[] = [],
   currentTabKey: string | undefined
@@ -69,10 +77,17 @@ function getCurrentTab(
   return selectedTab ? selectedTab : first(tabs) || {};
 }
 
-export function DetailView({ errorGroup, urlParams, kuery }: Props) {
+export function ErrorSampleDetails({
+  onSampleClick,
+  errorSamples,
+  errorSamplesFetchStatus,
+  errorData,
+  errorFetchStatus,
+  occurrencesCount,
+}: Props) {
+  const [sampleActivePage, setSampleActivePage] = useState(0);
   const history = useHistory();
-  const { transaction, error, occurrencesCount } = errorGroup;
-
+  const { urlParams } = useLegacyUrlParams();
   const { detailTab, offset, comparisonEnabled } = urlParams;
 
   const router = useApmRouter();
@@ -84,8 +99,41 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
     query,
   } = useApmParams('/services/{serviceName}/errors/{groupId}');
 
-  if (!error) {
-    return null;
+  const { kuery } = query;
+
+  const loadingErrorSamplesData = isPending(errorSamplesFetchStatus);
+  const loadingErrorData = isPending(errorFetchStatus);
+  const isLoading = loadingErrorSamplesData || loadingErrorData;
+
+  const isSucceded =
+    errorSamplesFetchStatus === FETCH_STATUS.SUCCESS &&
+    errorFetchStatus === FETCH_STATUS.SUCCESS;
+
+  useEffect(() => {
+    setSampleActivePage(0);
+  }, [errorSamples]);
+
+  const goToSample = (index: number) => {
+    const sample = errorSamples[index];
+    setSampleActivePage(index);
+    onSampleClick(sample);
+  };
+
+  const { error, transaction } = errorData;
+
+  if (!error && errorSamples?.length === 0 && isSucceded) {
+    return (
+      <EuiEmptyPrompt
+        title={
+          <div>
+            {i18n.translate('xpack.apm.errorSampleDetails.sampleNotFound', {
+              defaultMessage: 'The selected error cannot be found',
+            })}
+          </div>
+        }
+        titleSize="s"
+      />
+    );
   }
 
   const tabs = getTabs(error);
@@ -112,17 +160,27 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
   return (
     <EuiPanel hasBorder={true}>
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow>
+        <EuiFlexItem grow={false}>
           <EuiTitle size="s">
             <h3>
               {i18n.translate(
                 'xpack.apm.errorGroupDetails.errorOccurrenceTitle',
                 {
-                  defaultMessage: 'Error occurrence',
+                  defaultMessage: 'Error sample',
                 }
               )}
             </h3>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          {!!errorSamples?.length && (
+            <EuiPagination
+              pageCount={errorSamples.length}
+              activePage={sampleActivePage}
+              onPageClick={goToSample}
+              compressed
+            />
+          )}
         </EuiFlexItem>
         {isTraceExplorerEnabled && (
           <EuiFlexItem grow={false}>
@@ -163,47 +221,56 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
           </DiscoverErrorLink>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <Summary
-        items={[
-          <TimestampTooltip time={error.timestamp.us / 1000} />,
-          errorUrl && method ? (
-            <HttpInfoSummaryItem
-              url={errorUrl}
-              method={method}
-              status={status}
-            />
-          ) : null,
-          transaction && transaction.user_agent ? (
-            <UserAgentSummaryItem {...transaction.user_agent} />
-          ) : null,
-          transaction && (
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.apm.errorGroupDetails.relatedTransactionSample',
-                {
-                  defaultMessage: 'Related transaction sample',
-                }
-              )}
-            >
-              <TransactionDetailLink
-                traceId={transaction.trace.id}
-                transactionId={transaction.transaction.id}
-                transactionName={transaction.transaction.name}
-                transactionType={transaction.transaction.type}
-                serviceName={transaction.service.name}
-                offset={offset}
-                comparisonEnabled={comparisonEnabled}
+      <EuiSpacer />
+      {isLoading ? (
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="s" />
+          <EuiLoadingContent lines={2} data-test-sub="loading-content" />
+        </EuiFlexItem>
+      ) : (
+        <Summary
+          items={[
+            <TimestampTooltip
+              time={errorData ? error.timestamp.us / 1000 : 0}
+            />,
+            errorUrl && method ? (
+              <HttpInfoSummaryItem
+                url={errorUrl}
+                method={method}
+                status={status}
+              />
+            ) : null,
+            transaction && transaction.user_agent ? (
+              <UserAgentSummaryItem {...transaction.user_agent} />
+            ) : null,
+            transaction && (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.errorGroupDetails.relatedTransactionSample',
+                  {
+                    defaultMessage: 'Related transaction sample',
+                  }
+                )}
               >
-                <EuiIcon type="merge" />
-                <TransactionLinkName>
-                  {transaction.transaction.name}
-                </TransactionLinkName>
-              </TransactionDetailLink>
-            </EuiToolTip>
-          ),
-        ]}
-      />
+                <TransactionDetailLink
+                  traceId={transaction.trace.id}
+                  transactionId={transaction.transaction.id}
+                  transactionName={transaction.transaction.name}
+                  transactionType={transaction.transaction.type}
+                  serviceName={transaction.service.name}
+                  offset={offset}
+                  comparisonEnabled={comparisonEnabled}
+                >
+                  <EuiIcon type="merge" />
+                  <TransactionLinkName>
+                    {transaction.transaction.name}
+                  </TransactionLinkName>
+                </TransactionDetailLink>
+              </EuiToolTip>
+            ),
+          ]}
+        />
+      )}
 
       <EuiSpacer />
 
@@ -229,7 +296,11 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
         })}
       </EuiTabs>
       <EuiSpacer />
-      <TabContent error={error} currentTab={currentTab} />
+      {isLoading || !error ? (
+        <EuiLoadingContent lines={3} data-test-sub="loading-content" />
+      ) : (
+        <TabContent error={error} currentTab={currentTab} />
+      )}
     </EuiPanel>
   );
 }
@@ -241,9 +312,9 @@ function TabContent({
   error: APMError;
   currentTab: ErrorTab;
 }) {
-  const codeLanguage = error.service.language?.name;
-  const exceptions = error.error.exception || [];
-  const logStackframes = error.error.log?.stacktrace;
+  const codeLanguage = error?.service.language?.name;
+  const exceptions = error?.error.exception || [];
+  const logStackframes = error?.error.log?.stacktrace;
 
   switch (currentTab.key) {
     case logStacktraceTab.key:
@@ -257,7 +328,9 @@ function TabContent({
           exceptions={exceptions}
         />
       );
-    default:
+    case metadataTab.key:
       return <ErrorMetadata error={error} />;
+    default:
+      return <SampleSummary error={error} />;
   }
 }
