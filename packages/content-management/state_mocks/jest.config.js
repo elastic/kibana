@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/packages/content-management/state-mocks'],
+  roots: ['<rootDir>/packages/content-management/state_mocks'],
 };

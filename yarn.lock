@@ -2821,6 +2821,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-react@link:bazel-bin/packages/content-management/react":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-state-mocks@link:bazel-bin/packages/content-management/state_mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-state@link:bazel-bin/packages/content-management/state":
   version "0.0.0"
   uid ""
@@ -2830,6 +2838,10 @@
   uid ""
 
 "@kbn/content-management-util@link:bazel-bin/packages/content-management/util":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-utils@link:bazel-bin/packages/content-management/utils":
   version "0.0.0"
   uid ""
 

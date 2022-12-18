@@ -3,5 +3,5 @@
   "id": "@kbn/content-management-state-mocks",
   "owner": "@elastic/kibana-global-experience",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
 }

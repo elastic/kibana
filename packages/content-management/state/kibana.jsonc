@@ -3,5 +3,5 @@
   "id": "@kbn/content-management-state",
   "owner": "@elastic/kibana-global-experience",
   "runtimeDeps": [],
-  "typeDeps": []
+  "typeDeps": [],
 }
