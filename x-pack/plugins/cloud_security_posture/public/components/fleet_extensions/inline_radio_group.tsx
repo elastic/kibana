@@ -27,6 +27,7 @@ export const InlineRadioGroup = ({ idSelected, size, options, onChange }: Props)
         disabled: o.disabled,
         ['data-enabled']: idSelected === o.id,
         ['data-disabled']: o.disabled,
+        className: '__extendedRadio',
       }))}
       onChange={onChange}
       css={css`
@@ -36,7 +37,7 @@ export const InlineRadioGroup = ({ idSelected, size, options, onChange }: Props)
         column-gap: ${euiTheme.size.s};
         align-items: center;
 
-        > .euiRadio {
+        > .__extendedRadio {
           margin-top: 0;
           height: 100%;
           padding-left: ${euiTheme.size.s};
@@ -61,7 +62,7 @@ export const InlineRadioGroup = ({ idSelected, size, options, onChange }: Props)
             background: ${euiTheme.colors.emptyShade};
           }
 
-          &.euiRadio {
+          &.__extendedRadio {
             & > *:not(label):not(input) {
               position: inherit;
               top: 0;
