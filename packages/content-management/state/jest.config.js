@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './src/lru_map';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/packages/content-management/state'],
+};
