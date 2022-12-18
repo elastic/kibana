@@ -8,6 +8,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/packages/shared-ux/content_management'],
+  rootDir: '../../..',
+  roots: ['<rootDir>/packages/content-management/react'],
 };

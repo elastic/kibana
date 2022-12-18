@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/content-management",
+  "name": "@kbn/content-management-react",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",

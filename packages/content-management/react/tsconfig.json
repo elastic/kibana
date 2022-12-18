@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.bazel.json",
+  "extends": "../../../tsconfig.bazel.json",
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
@@ -8,13 +8,13 @@
       "jest",
       "node",
       "react",
-      "@kbn/ambient-ui-types"
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-storybook-types",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
-    "*ts*",
-    "*.md*",
     "**/*.ts",
-    "**/*.md*",
+    "**/*.tsx",
   ]
 }
