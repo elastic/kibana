@@ -39,6 +39,14 @@ export const canProvideExamplesForField = (field: DataViewField): boolean => {
   ].includes(field.type);
 };
 
+export const showExamplesForField = (field: DataViewField): boolean => {
+  return (
+    (!field.aggregatable && canProvideExamplesForField(field)) ||
+    field.type === 'geo_point' ||
+    field.type === 'geo_shape'
+  );
+};
+
 export function getFieldExampleBuckets(params: FieldValueCountsParams, formatter?: FieldFormat) {
   params = defaults(params, {
     count: 5,
