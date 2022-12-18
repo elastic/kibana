@@ -254,7 +254,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const checkInitialRuleParamsState = async (dataView: string, isViewInApp = false) => {
-    expect(await toasts.getToastCount()).to.be(isViewInApp ? 1 : 0);
+    if (isViewInApp) {
+      expect(await toasts.getToastCount()).to.be(0);
+    } else {
+      expect(await toasts.getToastCount()).to.be(1);
+      expect(await toasts.getToastContent(1)).to.equal(
+        `Displayed documents may vary\nThe displayed documents might differ from the documents that triggered the alert. Some documents might have been added or deleted.`
+      );
+    }
     expect(await filterBar.getFilterCount()).to.be(0);
     expect(await queryBar.getQueryString()).to.equal('');
     const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
