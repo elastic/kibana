@@ -397,7 +397,6 @@ filegroup(
     "//packages/analytics/shippers/gainsight:build_types",
     "//packages/content-management/inspector:build_types",
     "//packages/content-management/react:build_types",
-    "//packages/content-management/react2:build_types",
     "//packages/content-management/state:build_types",
     "//packages/content-management/state_mocks:build_types",
     "//packages/content-management/table_list:build_types",
