@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import {CmCachedItem, ContentItem} from '../state';
+import {CmCachedItem, ContentItem} from '@kbn/content-management-state';
 import {useContent} from './use_content';
 
 export const useContentItem = (id: string): UseContentItemResult => {

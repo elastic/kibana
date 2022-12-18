@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import type { TSize } from '../types';
-import type {ContentTypeKind} from '../../state';
+import type {ContentTypeKind} from '@kbn/content-management-state';
 
 /**
  * Props of {@link CmAvatarUi} component.

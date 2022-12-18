@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import type {CmCache} from '../state';
+import type {CmCache} from '@kbn/content-management-state';
 
 export interface ContentContextValue {
   cache: CmCache;
