@@ -8,8 +8,7 @@
 
 import * as React from 'react';
 import { CmAvatar } from '../avatar';
-import { context } from '../../../context';
-import { createCmStateWithFixtures } from '../../../state/mocks/factory';
+import { StateProviderWithFixtures } from '../../../mocks/react';
 
 export default {
   title: 'Content Management/Item/Avatar/Avatar',
@@ -18,49 +17,37 @@ export default {
   parameters: {},
 };
 
-const Provider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state] = React.useState(() => createCmStateWithFixtures());
-
-  console.log(state);
-
-  return (
-    <context.Provider value={{ cache: state.cache }}>
-      {children}
-    </context.Provider>
-  );
-};
-
 export const SingleUser = () => (
-  <Provider>
+  <StateProviderWithFixtures>
     <CmAvatar id={'user:123'} />
-  </Provider>
+  </StateProviderWithFixtures>
 );
 
 export const SingleDashboard = () => (
-  <Provider>
+  <StateProviderWithFixtures>
     <CmAvatar id={'dashboard:xyz'} />
-  </Provider>
+  </StateProviderWithFixtures>
 );
 
 export const SmallUserAndBigDashboard = () => (
-  <Provider>
+  <StateProviderWithFixtures>
     <CmAvatar id={'user:456'} size={'s'} />
     <br />
     <CmAvatar id={'dashboard:xyz'} size={'l'} />
-  </Provider>
+  </StateProviderWithFixtures>
 );
 
 export const CustomRedAndBlueColors = () => (
-  <Provider>
+  <StateProviderWithFixtures>
     <CmAvatar id={'user:789'} />
     <br />
     <CmAvatar id={'dashboard:abc'} />
-  </Provider>
+  </StateProviderWithFixtures>
 );
 
 export const SizeScale = () => {
   return (
-    <Provider>
+    <StateProviderWithFixtures>
       <CmAvatar id={'dashboard:xyz'} size={'s'} />
       <CmAvatar id={'dashboard:xyz'} size={'m'} />
       <CmAvatar id={'dashboard:xyz'} size={'l'} />
@@ -72,6 +59,6 @@ export const SizeScale = () => {
       <CmAvatar id={'user:456'} size={'m'} />
       <CmAvatar id={'user:456'} size={'l'} />
       <CmAvatar id={'user:456'} size={'xl'} />
-    </Provider>
+    </StateProviderWithFixtures>
   );
 };
