@@ -1053,7 +1053,7 @@
                     "section": "def-public.EmbeddableContainerSettings",
                     "text": "EmbeddableContainerSettings"
                   },
-                  " | undefined"
+                  "<TContainerInput> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
@@ -6313,6 +6313,66 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.CellValueContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "CellValueContext",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.CellValueContext",
+            "text": "CellValueContext"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.CellValueContext.embeddable",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.CellValueContext.data",
+            "type": "Array",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "{ value?: any; eventId?: string | undefined; columnMeta?: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumnMeta",
+                "text": "DatatableColumnMeta"
+              },
+              " | undefined; }[]"
+            ],
+            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.ContainerInput",
         "type": "Interface",
         "tags": [],
@@ -6685,6 +6745,16 @@
         "tags": [],
         "label": "EmbeddableContainerSettings",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableContainerSettings",
+            "text": "EmbeddableContainerSettings"
+          },
+          "<TContainerInput>"
+        ],
         "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6716,6 +6786,23 @@
             ],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableContainerSettings.readyToInitializeChildren$",
+            "type": "Object",
+            "tags": [],
+            "label": "readyToInitializeChildren$",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "Observable",
+              "<TContainerInput> | undefined"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
@@ -9847,6 +9934,21 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.CELL_VALUE_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "CELL_VALUE_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"CELL_VALUE_TRIGGER\""
+        ],
+        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.ChartActionContext",
         "type": "Type",
         "tags": [],
@@ -10139,6 +10241,59 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.cellValueTrigger",
+        "type": "Object",
+        "tags": [],
+        "label": "cellValueTrigger",
+        "description": [],
+        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.cellValueTrigger.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.cellValueTrigger.title",
+            "type": "Any",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.cellValueTrigger.description",
+            "type": "Any",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "embeddable",
         "id": "def-public.contextMenuTrigger",
