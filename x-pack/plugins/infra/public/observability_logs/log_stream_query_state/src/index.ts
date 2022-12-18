@@ -6,7 +6,6 @@
  */
 
 export * from './errors';
-export * from './selectors';
 export * from './state_machine';
 export * from './types';
 export * from './url_state_storage_service';
