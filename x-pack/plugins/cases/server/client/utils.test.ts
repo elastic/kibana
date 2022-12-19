@@ -408,7 +408,7 @@ describe('utils', () => {
     });
 
     it('creates a filter for the severity', () => {
-      Object.values(CaseSeverity).map((severity) => {
+      Object.values(CaseSeverity).forEach((severity) => {
         expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [

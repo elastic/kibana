@@ -23,8 +23,8 @@ import {
   SEVERITY_ESMODEL_TO_EXTERNAL,
   SEVERITY_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
-import { CaseAttributes, CaseFullExternalService, CaseSeverity } from '../../../common/api';
-import { NONE_CONNECTOR_ID } from '../../../common/api';
+import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
+import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
 import {
   findConnectorIdReference,
   transformFieldsToESModel,

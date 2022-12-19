@@ -8,11 +8,7 @@
 import type { SavedObject, SavedObjectReference, SavedObjectsFindResult } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { ESConnectorFields } from '.';
-import {
-  CONNECTOR_ID_REFERENCE_NAME,
-  PUSH_CONNECTOR_ID_REFERENCE_NAME,
-  SEVERITY_EXTERNAL_TO_ESMODEL,
-} from '../common/constants';
+import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
 import type {
   CaseAttributes,
   CaseConnector,
@@ -22,6 +18,7 @@ import type {
 import { CaseSeverity, CaseStatuses, ConnectorTypes, NONE_CONNECTOR_ID } from '../../common/api';
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases/types';
+import { ESCaseSeverity } from './cases/types';
 import { getNoneCaseConnector } from '../common/utils';
 
 /**
@@ -100,6 +97,36 @@ export const createExternalService = (
   ...overrides,
 });
 
+export const basicESCaseFields: ESCaseAttributes = {
+  closed_at: null,
+  closed_by: null,
+  created_at: '2019-11-25T21:54:48.952Z',
+  created_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  severity: ESCaseSeverity.LOW,
+  duration: null,
+  description: 'This is a brand new case of a bad meanie defacing data',
+  title: 'Super Bad Security Issue',
+  status: CaseStatuses.open,
+  tags: ['defacement'],
+  updated_at: '2019-11-25T21:54:48.952Z',
+  updated_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  connector: getNoneCaseConnector(),
+  external_service: null,
+  settings: {
+    syncAlerts: true,
+  },
+  owner: SECURITY_SOLUTION_OWNER,
+  assignees: [],
+};
+
 export const basicCaseFields: CaseAttributes = {
   closed_at: null,
   closed_by: null,
@@ -137,7 +164,7 @@ export const createCaseSavedObjectResponse = ({
 }: {
   connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
-  overrides?: Partial<CaseAttributes>;
+  overrides?: Partial<ESCaseAttributes>;
 } = {}): SavedObject<ESCaseAttributes> => {
   const references: SavedObjectReference[] = createSavedObjectReferences({
     connector,
@@ -167,15 +194,12 @@ export const createCaseSavedObjectResponse = ({
     restExternalService = rest;
   }
 
-  const severity = SEVERITY_EXTERNAL_TO_ESMODEL[basicCaseFields.severity];
-
   return {
     type: CASE_SAVED_OBJECT,
     id: '1',
     attributes: {
-      ...basicCaseFields,
+      ...basicESCaseFields,
       ...overrides,
-      severity,
       // if connector is null we'll default this to an incomplete jira value because the service
       // should switch it to a none connector when the id can't be found in the references array
       connector: formattedConnector,
