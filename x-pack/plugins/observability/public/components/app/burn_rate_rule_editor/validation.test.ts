@@ -57,18 +57,11 @@ describe('ValidateBurnRateRule', () => {
     ).toHaveLength(0);
   });
 
-  it('validates longWindow is between 30min and 24hours', () => {
+  it('validates longWindow is between 1 and 24hours', () => {
     expect(
       validateBurnRateRule({
         ...VALID_PARAMS,
-        longWindow: { value: 29, unit: 'm' },
-      }).errors.longWindow.length
-    ).toBe(1);
-
-    expect(
-      validateBurnRateRule({
-        ...VALID_PARAMS,
-        longWindow: { value: 1441, unit: 'm' },
+        longWindow: { value: 0, unit: 'h' },
       }).errors.longWindow.length
     ).toBe(1);
 
@@ -89,7 +82,7 @@ describe('ValidateBurnRateRule', () => {
     expect(
       validateBurnRateRule({
         ...VALID_PARAMS,
-        longWindow: { value: 30, unit: 'm' },
+        longWindow: { value: 1, unit: 'h' },
       }).errors.longWindow.length
     ).toBe(0);
   });

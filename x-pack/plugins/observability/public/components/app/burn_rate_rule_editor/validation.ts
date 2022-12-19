@@ -7,14 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
-import { BurnRateRuleParams, DurationUnit } from '../../../typings';
+import { BurnRateRuleParams, Duration, DurationUnit } from '../../../typings';
 
 export type ValidationBurnRateRuleResult = ValidationResult & {
   errors: { sloId: string[]; longWindow: string[]; burnRateThreshold: string[] };
 };
 
-const MIN_DURATION_IN_MINUTES = 30;
-const MAX_DURATION_IN_MINUTES = 1440;
+const MIN_DURATION_IN_HOURS = 1;
 const MAX_DURATION_IN_HOURS = 24;
 
 type Optional<T> = { [P in keyof T]?: T[P] };
@@ -45,18 +44,16 @@ export function validateBurnRateRule(
 
   if (longWindow === undefined) {
     validationResult.errors.longWindow.push(LONG_WINDOW_DURATION_REQUIRED);
-  } else if (!isValidLongWindowDuration(longWindow.value, longWindow.unit)) {
+  } else if (!isValidLongWindowDuration(longWindow)) {
     validationResult.errors.longWindow.push(LONG_WINDOW_DURATION_INVALID);
   }
 
   return validationResult;
 }
 
-const isValidLongWindowDuration = (value: number, unit: DurationUnit): boolean => {
-  return (
-    (unit === 'm' && value >= MIN_DURATION_IN_MINUTES && value <= MAX_DURATION_IN_MINUTES) ||
-    (unit === 'h' && value <= MAX_DURATION_IN_HOURS)
-  );
+const isValidLongWindowDuration = (duration: Duration): boolean => {
+  const { unit, value } = duration;
+  return unit === 'h' && value >= MIN_DURATION_IN_HOURS && value <= MAX_DURATION_IN_HOURS;
 };
 
 const SLO_REQUIRED = i18n.translate('xpack.observability.slo.rules.burnRate.errors.sloRequired', {
@@ -65,13 +62,13 @@ const SLO_REQUIRED = i18n.translate('xpack.observability.slo.rules.burnRate.erro
 
 const LONG_WINDOW_DURATION_REQUIRED = i18n.translate(
   'xpack.observability.slo.rules.burnRate.errors.windowDurationRequired',
-  { defaultMessage: 'Long window duration is required.' }
+  { defaultMessage: 'The lookback period is required.' }
 );
 
 const LONG_WINDOW_DURATION_INVALID = i18n.translate(
   'xpack.observability.slo.rules.longWindow.errorText',
   {
-    defaultMessage: 'The long window must be between 30 minutes and 24 hours or 1440 minutes.',
+    defaultMessage: 'The lookback period must be between 1 and 24 hours.',
   }
 );
 

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import numeral from '@elastic/numeral';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { toMinutes } from '../../../utils/slo/duration';
 import { useFetchSloDetails } from '../../../pages/slo_details/hooks/use_fetch_slo_details';
 import { BurnRateRuleParams, Duration, DurationUnit, SLO } from '../../../typings';
@@ -107,7 +109,32 @@ export function BurnRateRuleEditor(props: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      <EuiFlexGroup direction="row">
+        {selectedSlo && longWindowDuration?.value > 0 && burnRate >= 1 && (
+          <EuiFlexItem>
+            <EuiText size="s" color="subdued">
+              {getErrorBudgetExhaustionText(
+                numeral(
+                  longWindowDuration.value /
+                    ((burnRate * toMinutes(longWindowDuration)) /
+                      toMinutes(selectedSlo.timeWindow.duration))
+                ).format('0a')
+              )}
+            </EuiText>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+
       <EuiSpacer size="m" />
     </EuiFlexGroup>
   );
 }
+
+const getErrorBudgetExhaustionText = (formatedHours: string) =>
+  i18n.translate('xpack.observability.slo.rules.errorBudgetExhaustion.text', {
+    defaultMessage:
+      "At this rate, the SLO's error budget will be exhausted after {formatedHours} hours.",
+    values: {
+      formatedHours,
+    },
+  });

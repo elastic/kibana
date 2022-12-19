@@ -21,8 +21,7 @@ export const registerObservabilityRuleTypes = (
     observabilityRuleTypeRegistry.register({
       id: SLO_BURN_RATE_RULE_ID,
       description: i18n.translate('xpack.observability.slo.rules.burnRate.description', {
-        defaultMessage:
-          'Get an alert when your SLO burn rate is too high over a defined period of time.',
+        defaultMessage: 'Alert when your SLO burn rate is too high over a defined period of time.',
       }),
       format: ({ fields }) => {
         return {
