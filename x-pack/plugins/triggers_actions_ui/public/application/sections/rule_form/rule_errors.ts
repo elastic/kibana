@@ -6,6 +6,7 @@
  */
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { formatDuration, parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import {
   RuleTypeModel,
@@ -56,6 +57,24 @@ export function validateBaseProperties(
         })
       );
     }
+  }
+
+  const invalidThrottleActions = ruleObject.actions.filter(
+    (a) =>
+      a.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
+      parseDuration(a.frequency.throttle ?? '0m') <
+        parseDuration(ruleObject.schedule.interval ?? '0m')
+  );
+  if (invalidThrottleActions.length) {
+    errors['schedule.interval'].push(
+      i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleForm.error.actionThrottleBelowSchedule',
+        {
+          defaultMessage:
+            "Custom action intervals cannot be shorter than the rule's check interval",
+        }
+      )
+    );
   }
 
   if (!ruleObject.ruleTypeId) {
