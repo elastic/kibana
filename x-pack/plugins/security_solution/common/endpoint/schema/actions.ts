@@ -40,10 +40,12 @@ export const KillOrSuspendProcessRequestSchema = {
   }),
 };
 
-export const KubeRequestSchema = {
+export const ResponseActionKubeRequestSchema = {
   body: schema.object({
     ...BaseActionRequestSchema,
-    parameters: schema.oneOf([schema.object({ resource: schema.string() })]),
+    parameters: schema.object({
+      resource: schema.string({ minLength: 1 }),
+    }),
   }),
 };
 

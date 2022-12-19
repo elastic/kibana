@@ -12,6 +12,7 @@ import type {
   NoParametersRequestSchema,
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
+  ResponseActionKubeRequestSchema,
 } from '../schema/actions';
 import type {
   ResponseActionStatus,
@@ -35,6 +36,47 @@ export interface ProcessesEntry {
 
 export interface GetProcessesActionOutputContent {
   entries: ProcessesEntry[];
+}
+
+export interface KubeResourceDeployment {
+  resource: 'deployment';
+  items: Array<{
+    metadata: {
+      name: string;
+      creationTimestamp: string;
+    };
+    status: {
+      readyReplicas: number;
+      replicas: number;
+      updatedReplicas: number;
+      availableReplicas: number;
+    };
+  }>;
+}
+
+export interface KubeResourcePod {
+  resource: 'pod';
+  items: Array<{
+    metadata: {
+      name: string;
+      creationTimestamp: string;
+    };
+    status: {
+      containerStatuses: Array<{
+        ready: boolean;
+        restartCount: number;
+      }>;
+      podIP: string;
+      phase: string;
+    };
+    spec: {
+      nodeName: string;
+    };
+  }>;
+}
+
+export interface KubeListActionOutputContent {
+  entries: KubeResourceDeployment | KubeResourcePod;
 }
 
 export interface SuspendProcessActionOutputContent {
@@ -149,10 +191,15 @@ export interface ResponseActionGetFileParameters {
   path: string;
 }
 
+export interface ResponseActionKubeParameters {
+  resource: string;
+}
+
 export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId
-  | ResponseActionGetFileParameters;
+  | ResponseActionGetFileParameters
+  | ResponseActionKubeParameters;
 
 export interface EndpointActionData<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
@@ -264,6 +311,9 @@ export interface HostIsolationResponse {
 }
 
 export type ProcessesRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
+
+export type KubeRequestBody = TypeOf<typeof ResponseActionKubeRequestSchema.body>;
+
 export interface ResponseActionApiResponse<TOutput extends object = object> {
   action?: string;
   data: ActionDetails<TOutput>;
