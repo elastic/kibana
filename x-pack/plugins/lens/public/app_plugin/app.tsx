@@ -98,6 +98,7 @@ export function App({
     datasourceStates,
     isLoading,
     isSaveable,
+    visualization,
   } = useLensSelector((state) => state.lens);
 
   const selectorDependencies = useMemo(
@@ -450,24 +451,30 @@ export function App({
     selectFrameDatasourceAPI(state, datasourceMap)
   );
 
-  // TODO - store messages in ref -- may have to eventually store messages in redux so they can be pushed to from other places
+  // TODO - store messages in ref -- may eventually consider store messages in redux so they can be pushed to from other places
   const getUserMessages: UserMessagesGetter = (locationId, severity) =>
-    (activeDatasourceId
-      ? datasourceMap[activeDatasourceId].getUserMessages?.(
-          datasourceStates[activeDatasourceId].state,
-          {
+    [
+      ...(activeDatasourceId
+        ? datasourceMap[activeDatasourceId].getUserMessages(
+            datasourceStates[activeDatasourceId].state,
+            {
+              frame: frameDatasourceAPI,
+              setState: (newStateOrUpdater) =>
+                dispatch(
+                  updateDatasourceState({
+                    updater: newStateOrUpdater,
+                    datasourceId: activeDatasourceId,
+                  })
+                ),
+            }
+          )
+        : []),
+      ...(visualization.activeId && visualization.state
+        ? visualizationMap[visualization.activeId]?.getUserMessages?.(visualization.state, {
             frame: frameDatasourceAPI,
-            setState: (newStateOrUpdater) =>
-              dispatch(
-                updateDatasourceState({
-                  updater: newStateOrUpdater,
-                  datasourceId: activeDatasourceId,
-                })
-              ),
-          }
-        )
-      : []
-    ).filter(
+          }) ?? []
+        : []),
+    ].filter(
       (message) =>
         Boolean(message.displayLocations.find((location) => location.id === locationId)) &&
         (severity ? message.severity === severity : true)
