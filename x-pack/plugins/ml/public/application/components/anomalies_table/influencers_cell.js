@@ -67,7 +67,7 @@ export class InfluencersCell extends Component {
                     '+'
                   );
                 })}
-                iconType="plusInCircle"
+                iconType="filterInclude"
                 aria-label={i18n.translate(
                   'xpack.ml.anomaliesTable.influencersCell.addFilterAriaLabel',
                   {
@@ -94,7 +94,7 @@ export class InfluencersCell extends Component {
                     '-'
                   );
                 })}
-                iconType="minusInCircle"
+                iconType="filterExclude"
                 aria-label={i18n.translate(
                   'xpack.ml.anomaliesTable.influencersCell.removeFilterAriaLabel',
                   {

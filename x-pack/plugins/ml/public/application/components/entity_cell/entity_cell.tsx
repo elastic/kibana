@@ -46,7 +46,7 @@ function getAddFilter({ entityName, entityValue, filter }: EntityCellProps) {
           onClick={blurButtonOnClick(() => {
             filter(entityName, entityValue, ENTITY_FIELD_OPERATIONS.ADD);
           })}
-          iconType="plusInCircle"
+          iconType="filterInclude"
           aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.addFilterAriaLabel', {
             defaultMessage: 'Add filter',
           })}
@@ -74,7 +74,7 @@ function getRemoveFilter({ entityName, entityValue, filter }: EntityCellProps) {
           onClick={blurButtonOnClick(() => {
             filter(entityName, entityValue, ENTITY_FIELD_OPERATIONS.REMOVE);
           })}
-          iconType="minusInCircle"
+          iconType="filterExclude"
           aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.removeFilterAriaLabel', {
             defaultMessage: 'Remove filter',
           })}
