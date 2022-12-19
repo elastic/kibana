@@ -29,22 +29,12 @@ import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { optionsListStrings } from './dataview_list_strings';
 import {
-  OptionsListSortBy,
-  OptionsListOrder,
-  sortDirections,
   DEFAULT_SORT,
   hadnleAlphabeticalSorting,
   getCompatibleSortingTypes,
+  getCompatibleSortingTypesByOrder,
 } from './suggestions_sorting';
 import { IUnifiedSearchPluginServices } from '../types';
-
-export type SortDirection = typeof sortDirections[number];
-export interface SortingType {
-  by: OptionsListSortBy;
-  direction: SortDirection;
-}
-
-export const getCompatibleSortingTypesByOrder = (): OptionsListOrder[] => ['asc', 'desc'];
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;

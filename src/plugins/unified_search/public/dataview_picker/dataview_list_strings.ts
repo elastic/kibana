@@ -29,7 +29,7 @@ export const optionsListStrings = {
         defaultMessage: 'Sort directions',
       }),
     sortBy: {
-      _key: {
+      alphabetically: {
         getSortByLabel: () =>
           i18n.translate('unifiedSearch.optionsList.popover.sortBy.alphabetical', {
             defaultMessage: 'Alphabetically',
