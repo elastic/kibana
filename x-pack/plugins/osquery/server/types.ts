@@ -24,7 +24,7 @@ import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/
 import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
 
 export interface OsqueryPluginSetup {
-  osqueryCreateAction: (payload: CreateLiveQueryRequestBodySchema) => void;
+  osqueryCreateAction: (payload: CreateLiveQueryRequestBodySchema, ecsData?: object) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

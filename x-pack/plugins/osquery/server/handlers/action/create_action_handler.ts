@@ -10,6 +10,9 @@ import moment from 'moment';
 import { filter, flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import type { Ecs } from '../../../common/ecs';
+import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { getInternalSavedObjectsClient } from '../../routes/utils';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
@@ -25,17 +28,23 @@ interface Metadata {
   currentUser: string | undefined;
 }
 
+interface CreateActionHandlerOptions {
+  soClient?: SavedObjectsClientContract;
+  metadata?: Metadata;
+  ecsData?: Ecs;
+}
+
 export const createActionHandler = async (
   osqueryContext: OsqueryAppContext,
   params: CreateLiveQueryRequestBodySchema,
-  soClient?: SavedObjectsClientContract,
-  metadata?: Metadata
+  options: CreateActionHandlerOptions
 ) => {
   const [coreStartServices] = await osqueryContext.getStartServices();
   const esClientInternal = coreStartServices.elasticsearch.client.asInternalUser;
   const internalSavedObjectsClient = await getInternalSavedObjectsClient(
     osqueryContext.getStartServices
   );
+  const { soClient, metadata, ecsData } = options;
   const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -46,6 +55,7 @@ export const createActionHandler = async (
     platformsSelected: agent_platforms,
     policiesSelected: agent_policy_ids,
   });
+
   if (!selectedAgents.length) {
     throw new Error('No agents found for selection');
   }
@@ -96,22 +106,27 @@ export const createActionHandler = async (
           )
         )
       : params.queries?.length
-      ? map(params.queries, (query) =>
-          pickBy(
+      ? map(params.queries, (query) => {
+          const replacedQuery = replacedQueries(query.query, ecsData);
+
+          return pickBy(
             {
               ...query,
+              ...replacedQuery,
               action_id: uuid.v4(),
               agents: selectedAgents,
             },
             (value) => !isEmpty(value) || value === true
-          )
-        )
+          );
+        })
       : [
           pickBy(
             {
               action_id: uuid.v4(),
               id: uuid.v4(),
-              query: params.query,
+              ...replacedQueries(params.query, ecsData),
+              // just for single queries - we need to overwrite the error property
+              error: undefined,
               saved_query_id: params.saved_query_id,
               saved_query_prebuilt: params.saved_query_id
                 ? await isSavedQueryPrebuilt(
@@ -127,19 +142,20 @@ export const createActionHandler = async (
         ],
   };
 
-  // we filter out the queries that were skipped
-  osqueryAction.queries = filter(osqueryAction.queries, (query) => !query.skipped);
-
-  const fleetActions = map(osqueryAction.queries, (query) => ({
-    action_id: query.action_id,
-    '@timestamp': moment().toISOString(),
-    expiration: moment().add(5, 'minutes').toISOString(),
-    type: 'INPUT_ACTION',
-    input_type: 'osquery',
-    agents: query.agents,
-    user_id: metadata?.currentUser,
-    data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
-  }));
+  const fleetActions = map(
+    // we filter out the queries that were skipped (contain erorr)
+    filter(osqueryAction.queries, (query) => !query.error),
+    (query) => ({
+      action_id: query.action_id,
+      '@timestamp': moment().toISOString(),
+      expiration: moment().add(5, 'minutes').toISOString(),
+      type: 'INPUT_ACTION',
+      input_type: 'osquery',
+      agents: query.agents,
+      user_id: metadata?.currentUser,
+      data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
+    })
+  );
 
   await esClientInternal.bulk({
     refresh: 'wait_for',
@@ -167,4 +183,24 @@ export const createActionHandler = async (
   return {
     response: osqueryAction,
   };
+};
+
+const replacedQueries = (query: string | undefined, ecsData?: object) => {
+  if (ecsData && query) {
+    const { result, skipped } = replaceParamsQuery(query, ecsData);
+
+    return {
+      query: result,
+      ...(skipped
+        ? {
+            error: i18n.translate('xpack.osquery.liveQueryActions.error.notFoundParameters', {
+              defaultMessage:
+                "This query hasn't been called due to parameter used and its value not found in the alert.",
+            }),
+          }
+        : {}),
+    };
+  }
+
+  return { query };
 };

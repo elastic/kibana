@@ -61,6 +61,7 @@ export interface ResultsTableComponentProps {
   endDate?: string;
   startDate?: string;
   liveQueryActionId?: string;
+  error?: string;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -70,6 +71,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   startDate,
   endDate,
   liveQueryActionId,
+  error,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -367,7 +369,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   useEffect(
     () =>
       setIsLive(() => {
-        if (!agentIds?.length || expired) return false;
+        if (!agentIds?.length || expired || error) return false;
 
         return !!(
           aggregations.totalResponded !== agentIds?.length ||
@@ -381,6 +383,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       aggregations?.totalRowCount,
       allResultsData?.edges.length,
       allResultsData?.total,
+      error,
       expired,
     ]
   );

@@ -25,6 +25,7 @@ export const replaceParamsQuery = (query: string, data: object) => {
   }
 
   const skipped = regex.test(resultQuery);
+
   return {
     result: resultQuery,
     skipped,

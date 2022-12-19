@@ -6,7 +6,6 @@
  */
 
 import { find, map, uniq } from 'lodash';
-import { replaceParamsQuery } from '../../../../common/utils/replace_params_query';
 import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type { SetupPlugins } from '../../../plugin_contract';
@@ -34,35 +33,29 @@ export const scheduleNotificationResponseActions = (
 
   responseActions.forEach((responseAction) => {
     if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {
-      const { savedQueryId, packId, queries, ecsMapping, query, ...rest } = responseAction.params;
+      const { savedQueryId, packId, queries, ecsMapping, ...rest } = responseAction.params;
 
       if (packId) {
-        const replacedQueries = map(queries, (item) => {
-          const { result, skipped } = replaceParamsQuery(item.query, foundAlert as object);
-          return {
-            ...item,
-            query: result,
-            skipped,
-          };
-        });
-
-        return osqueryCreateAction({
+        return osqueryCreateAction(
+          {
+            ...rest,
+            queries,
+            agent_ids: agentIds,
+            alert_ids: alertIds,
+          },
+          foundAlert
+        );
+      }
+      return osqueryCreateAction(
+        {
           ...rest,
-          queries: replacedQueries,
-          agent_ids: agentIds,
-          alert_ids: alertIds,
-        });
-      } else if (query) {
-        const { result, skipped } = replaceParamsQuery(query, foundAlert as object);
-        return osqueryCreateAction({
-          ...rest,
-          ...(query ? { query: result } : {}),
           ecs_mapping: ecsMapping,
           saved_query_id: savedQueryId,
-          agent_ids: skipped ? [] : agentIds,
+          agent_ids: agentIds,
           alert_ids: alertIds,
-        });
-      }
+        },
+        foundAlert
+      );
     }
   });
 };

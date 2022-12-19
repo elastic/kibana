@@ -16,11 +16,7 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { useKibana } from '../../lib/kibana';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
-import { OsquerySkippedResults } from './osquery_result_skipped';
-import type {
-  RESPONSE_ACTION_TYPES,
-  ResponseAction,
-} from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
+import type { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -143,11 +139,6 @@ export const useOsqueryTab = ({
                 ruleName={ruleName}
                 actionItems={actionItems}
                 ecsData={ecsData}
-              />
-              <EuiSpacer size="s" />
-              <OsquerySkippedResults
-                responseActions={responseActions as ResponseAction[]}
-                rawEventData={rawEventData}
               />
               <EuiSpacer size="s" />
             </>

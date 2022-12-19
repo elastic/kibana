@@ -86,7 +86,7 @@ const DocsColumnResults: React.FC<DocsColumnResultsProps> = ({ count, isLive }) 
     <EuiFlexItem grow={false}>
       {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
     </EuiFlexItem>
-    {isLive ? (
+    {!isLive ? (
       <EuiFlexItem grow={false} data-test-subj={'live-query-loading'}>
         <EuiLoadingSpinner />
       </EuiFlexItem>
@@ -130,6 +130,7 @@ type PackQueryStatusItem = Partial<{
   status?: string;
   pending?: number;
   docs?: number;
+  error?: string;
 }>;
 
 interface PackQueriesStatusTableProps {
@@ -196,7 +197,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     (item: PackQueryStatusItem) => (
       <DocsColumnResults
         count={item?.docs ?? 0}
-        isLive={item?.status === 'running' && item?.pending !== 0}
+        isLive={!!item.error || (item?.status !== 'running' && item?.pending === 0)}
       />
     ),
     []
@@ -239,6 +240,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   endDate={expirationDate}
                   agentIds={agentIds}
                   failedAgentsCount={item?.failed ?? 0}
+                  error={item.error}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

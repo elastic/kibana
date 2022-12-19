@@ -24,8 +24,8 @@ import styled from 'styled-components';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { replaceParamsQuery } from '../../../../../../common/utils/replace_params_query';
 import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
+import type { Ecs } from '../../../../../../common/ecs';
 import { useKibana } from '../../../../lib/kibana';
 import { LabelField } from './label_field';
 import OsqueryLogo from './osquery_icon/osquery.svg';
@@ -270,7 +270,7 @@ const RunOsqueryButtonRenderer = ({
 
   const handleClose = useCallback(() => setShowFlyout(false), [setShowFlyout]);
 
-  const replacedParamsQuery = useMemo(() => {
+  const ecsData = useMemo(() => {
     const fieldsMap: Record<string, string> = reduce(
       data,
       (acc, eventDetailItem) => ({
@@ -279,11 +279,8 @@ const RunOsqueryButtonRenderer = ({
       }),
       {}
     );
-    const expandedEventObject = expandDottedObject(fieldsMap);
-
-    const { result } = replaceParamsQuery(configuration.query, expandedEventObject);
-    return result;
-  }, [configuration.query, data]);
+    return expandDottedObject(fieldsMap) as Ecs;
+  }, [data]);
 
   return (
     <>
@@ -297,12 +294,13 @@ const RunOsqueryButtonRenderer = ({
         <OsqueryFlyout
           defaultValues={{
             ...(alertId ? { alertIds: [alertId] } : {}),
-            query: replacedParamsQuery,
+            query: configuration.query,
             ecs_mapping: configuration.ecs_mapping,
             queryField: false,
           }}
           agentId={agentId}
           onClose={handleClose}
+          ecsData={ecsData}
         />
       )}
     </>

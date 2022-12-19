@@ -92,9 +92,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
     return {
-      osqueryCreateAction: (params: CreateLiveQueryRequestBodySchema) =>
-        // eslint-disable-next-line no-console
-        createActionHandler(osqueryContext, params).catch((error) => console.log(error)),
+      osqueryCreateAction: (params: CreateLiveQueryRequestBodySchema, ecsData?: object) =>
+        createActionHandler(osqueryContext, params, { ecsData }).catch((error) =>
+          // eslint-disable-next-line no-console
+          console.log(error)
+        ),
     };
   }
 
