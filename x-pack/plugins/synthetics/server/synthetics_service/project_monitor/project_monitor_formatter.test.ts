@@ -29,6 +29,7 @@ import { formatSecrets } from '../utils';
 import * as telemetryHooks from '../../routes/telemetry/monitor_upgrade_sender';
 import { formatLocation } from '../../../common/utils/location_formatter';
 import * as locationsUtil from '../get_all_locations';
+import { mockEncryptedSO } from '../utils/mocks';
 
 const testMonitors = [
   {
@@ -121,6 +122,7 @@ describe('ProjectMonitorFormatter', () => {
         getSpaceId: jest.fn().mockReturnValue('test-space'),
       },
     },
+    encryptedSavedObjects: mockEncryptedSO,
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);

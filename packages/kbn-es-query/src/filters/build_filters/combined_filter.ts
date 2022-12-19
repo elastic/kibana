@@ -40,6 +40,12 @@ export function isCombinedFilter(filter: Filter): filter is CombinedFilter {
   return filter?.meta?.type === FILTERS.COMBINED;
 }
 
+const cleanUpFilter = (filter: Filter) => {
+  const { $state, meta, ...cleanedUpFilter } = filter;
+  const { alias, disabled, ...cleanedUpMeta } = meta;
+  return { ...cleanedUpFilter, meta: cleanedUpMeta };
+};
+
 /**
  * Builds an COMBINED filter. An COMBINED filter is a filter with multiple sub-filters. Each sub-filter (FilterItem)
  * represents a condition.
@@ -61,7 +67,7 @@ export function buildCombinedFilter(
     meta: {
       type: FILTERS.COMBINED,
       relation,
-      params: filters,
+      params: filters.map(cleanUpFilter),
       index: indexPattern.id,
       disabled,
       negate,

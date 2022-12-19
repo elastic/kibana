@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 import { HostsTableColumns } from './hosts_table_columns';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
@@ -17,6 +18,7 @@ import type { SnapshotMetricType } from '../../../../../common/inventory_models/
 import type { InfraTimerangeInput } from '../../../../../common/http_api';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { useSourceContext } from '../../../../containers/metrics_source';
+import { useTableProperties } from '../hooks/use_table_properties_url_state';
 
 const HOST_METRICS: Array<{ type: SnapshotMetricType }> = [
   { type: 'rx' },
@@ -30,6 +32,7 @@ const HOST_METRICS: Array<{ type: SnapshotMetricType }> = [
 export const HostsTable = () => {
   const { sourceId } = useSourceContext();
   const { buildQuery, dateRangeTimestamp, panelFilters } = useUnifiedSearchContext();
+  const [properties, setProperties] = useTableProperties();
 
   const timeRange: InfraTimerangeInput = {
     from: dateRangeTimestamp.from,
@@ -43,21 +46,39 @@ export const HostsTable = () => {
   // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
   // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
   // if we introduce data view selection, we'll have to change this hook and the endpoint to accept a new parameter for the indices
-  const { loading, nodes, reload } = useSnapshot(
-    esQuery && JSON.stringify(esQuery),
-    HOST_METRICS,
-    [],
-    'host',
+  const { loading, nodes, reload } = useSnapshot({
+    filterQuery: esQuery ? JSON.stringify(esQuery) : null,
+    metrics: HOST_METRICS,
+    groupBy: [],
+    nodeType: 'host',
     sourceId,
-    dateRangeTimestamp.to,
-    '',
-    '',
-    true,
-    timeRange
-  );
+    currentTime: dateRangeTimestamp.to,
+    accountId: '',
+    region: '',
+    timerange: timeRange,
+    includeTimeseries: false,
+  });
 
   const items = useHostTable(nodes);
   const noData = items.length === 0;
+
+  const onTableChange = useCallback(
+    ({ page = {}, sort = {} }) => {
+      const { index: pageIndex, size: pageSize } = page;
+      const { field, direction } = sort;
+
+      const sorting = field && direction ? { field, direction } : true;
+      const pagination = pageIndex >= 0 && pageSize !== 0 ? { pageIndex, pageSize } : true;
+
+      if (!isEqual(properties.sorting, sorting)) {
+        setProperties({ sorting });
+      }
+      if (!isEqual(properties.pagination, pagination)) {
+        setProperties({ pagination });
+      }
+    },
+    [setProperties, properties.pagination, properties.sorting]
+  );
 
   return (
     <>
@@ -88,7 +109,17 @@ export const HostsTable = () => {
           />
         </div>
       ) : (
-        <EuiInMemoryTable pagination sorting items={items} columns={HostsTableColumns} />
+        <EuiInMemoryTable
+          pagination={properties.pagination}
+          sorting={
+            typeof properties.sorting === 'boolean'
+              ? properties.sorting
+              : { sort: properties.sorting }
+          }
+          items={items}
+          columns={HostsTableColumns}
+          onTableChange={onTableChange}
+        />
       )}
     </>
   );

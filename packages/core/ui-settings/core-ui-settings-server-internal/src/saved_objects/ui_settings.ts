@@ -43,3 +43,29 @@ export const uiSettingsType: SavedObjectsType = {
   },
   migrations,
 };
+
+export const uiSettingsGlobalType: SavedObjectsType = {
+  name: 'config-global',
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: {
+    dynamic: false,
+    properties: {
+      buildNum: {
+        type: 'keyword',
+      },
+    },
+  },
+  management: {
+    importableAndExportable: true,
+    getInAppUrl() {
+      return {
+        path: `/app/management/kibana/settings`,
+        uiCapabilitiesPath: 'advancedSettings.show',
+      };
+    },
+    getTitle(obj) {
+      return `Global Settings [${obj.id}]`;
+    },
+  },
+};

@@ -7,10 +7,9 @@
  */
 
 import React from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from '@kbn/data-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import { EuiTextColor, useEuiPaddingCSS } from '@elastic/eui';
+import type { Filter, DataViewBase } from '@kbn/es-query';
+import { EuiTextColor } from '@elastic/eui';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { FilterContent } from './filter_content';
 import { getBooleanRelationType } from '../utils';
@@ -20,13 +19,13 @@ import { bracketColorCss } from './filter_badge.styles';
 export interface FilterBadgeExpressionProps {
   filter: Filter;
   shouldShowBrackets?: boolean;
-  dataViews: DataView[];
+  dataViews: DataViewBase[];
   filterLabelStatus?: string;
 }
 
 interface FilterBadgeContentProps {
   filter: Filter;
-  dataViews: DataView[];
+  dataViews: DataViewBase[];
   filterLabelStatus?: string;
 }
 
@@ -39,7 +38,14 @@ const FilterBadgeContent = ({ filter, dataViews, filterLabelStatus }: FilterBadg
     return <FilterBadgeInvalidPlaceholder />;
   }
 
-  return <FilterContent filter={filter} valueLabel={valueLabel} fieldLabel={fieldLabel} />;
+  return (
+    <FilterContent
+      filter={filter}
+      valueLabel={valueLabel}
+      fieldLabel={fieldLabel}
+      hideAlias={true}
+    />
+  );
 };
 
 export function FilterExpressionBadge({
@@ -48,15 +54,12 @@ export function FilterExpressionBadge({
   dataViews,
   filterLabelStatus,
 }: FilterBadgeExpressionProps) {
-  const paddingLeftCss = useEuiPaddingCSS('left').xs;
-  const paddingRightCss = useEuiPaddingCSS('right').xs;
-
   const conditionalOperationType = getBooleanRelationType(filter);
 
   return conditionalOperationType ? (
     <>
       {shouldShowBrackets && (
-        <span css={paddingLeftCss}>
+        <span>
           <EuiTextColor className={bracketColorCss}>(</EuiTextColor>
         </span>
       )}
@@ -67,13 +70,13 @@ export function FilterExpressionBadge({
         booleanRelation={getBooleanRelationType(filter)}
       />
       {shouldShowBrackets && (
-        <span css={paddingRightCss}>
+        <span>
           <EuiTextColor className={bracketColorCss}>)</EuiTextColor>
         </span>
       )}
     </>
   ) : (
-    <span css={[paddingLeftCss, paddingRightCss]}>
+    <span>
       <FilterBadgeContent
         filter={filter}
         dataViews={dataViews}

@@ -54,6 +54,7 @@ export {
   decorateQuery,
   luceneStringToDsl,
   migrateFilter,
+  fromCombinedFilter,
   isOfQueryType,
   isOfAggregateQueryType,
   getAggregateQueryMode,

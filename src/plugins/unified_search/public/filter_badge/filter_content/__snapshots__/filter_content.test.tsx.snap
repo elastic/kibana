@@ -2,12 +2,10 @@
 
 exports[`alias 1`] = `
 <div>
-  machine.os
-  :
   <span
     class="globalFilterLabel__value emotion-euiTextColor-success"
   >
-     ios
+     geo.coordinates in US
   </span>
 </div>
 `;

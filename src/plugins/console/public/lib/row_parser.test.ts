@@ -82,10 +82,25 @@ describe('RowParser', () => {
       expect(parser?.getRowParseMode()).toBe(MODE.REQUEST_START | MODE.REQUEST_END);
     });
 
-    it('should return MODE.REQUEST_END | MODE.MULTI_DOC_CUR_DOC_END for a request that ends with a curly closing brace', () => {
+    it('should return MODE.REQUEST_START | MODE.REQUEST_END if a single request line ends with a closing curly brace', () => {
       editor?.getCoreEditor().setValue('DELETE <foo>/_bar/_baz%{test}', forceRetokenize);
       // eslint-disable-next-line no-bitwise
-      expect(parser?.getRowParseMode()).toBe(MODE.REQUEST_END | MODE.MULTI_DOC_CUR_DOC_END);
+      expect(parser?.getRowParseMode()).toBe(MODE.REQUEST_START | MODE.REQUEST_END);
+    });
+
+    it('should return correct modes for multiple bulk requests', () => {
+      editor
+        ?.getCoreEditor()
+        .setValue('POST _bulk\n{"index": {"_index": "test"}}\n{"foo": "bar"}\n', forceRetokenize);
+      expect(parser?.getRowParseMode(0)).toBe(MODE.BETWEEN_REQUESTS);
+      editor
+        ?.getCoreEditor()
+        .setValue('POST _bulk\n{"index": {"_index": "test"}}\n{"foo": "bar"}\n', forceRetokenize);
+      const lineNumber = editor?.getCoreEditor().getLineCount()! - 1;
+      expect(parser?.getRowParseMode(lineNumber)).toBe(
+        // eslint-disable-next-line no-bitwise
+        MODE.REQUEST_END | MODE.MULTI_DOC_CUR_DOC_END
+      );
     });
   });
 });

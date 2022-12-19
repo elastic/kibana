@@ -20,12 +20,16 @@ export const cursorOrCss = css`
   cursor: url(${or}), auto;
 `;
 
-export const fieldAndParamCss = css`
-  min-width: 162px;
+export const fieldAndParamCss = (euiTheme: EuiThemeComputed) => css`
+  min-width: calc(${euiTheme.size.xl} * 5);
 `;
 
-export const operationCss = css`
-  max-width: 162px;
+export const operationCss = (euiTheme: EuiThemeComputed) => css`
+  max-width: calc(${euiTheme.size.xl} * 4.5);
+  // temporary fix to be removed after https://github.com/elastic/eui/issues/2082 is fixed
+  .euiComboBox__inputWrap {
+    padding-right: calc(${euiTheme.size.base}) !important;
+  }
 `;
 
 export const getGrabIconCss = (euiTheme: EuiThemeComputed) => css`
@@ -34,13 +38,7 @@ export const getGrabIconCss = (euiTheme: EuiThemeComputed) => css`
 
 export const actionButtonCss = css`
   &.euiButtonEmpty .euiButtonEmpty__content {
-    padding: 0 0px;
-    padding-left: 2px;
-
-    &.euiButtonContent > * + * {
-      -webkit-margin-start: 2px;
-      margin-inline-start: 2px;
-    }
+    padding: 0 4px;
   }
 `;
 

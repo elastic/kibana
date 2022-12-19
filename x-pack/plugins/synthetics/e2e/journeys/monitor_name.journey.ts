@@ -5,7 +5,7 @@
  * 2.0.
  */
 import uuid from 'uuid';
-import { journey, step, expect, before, Page } from '@elastic/synthetics';
+import { journey, step, expect, Page } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { monitorManagementPageProvider } from '../page_objects/monitor_management';
 
@@ -22,18 +22,8 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
     });
   };
 
-  before(async () => {
-    await uptime.waitForLoadingToFinish();
-  });
-
   step('Go to monitor-management', async () => {
-    await uptime.navigateToMonitorManagement();
-  });
-
-  step('login to Kibana', async () => {
-    await uptime.loginToKibana();
-    const invalid = await page.locator(`text=Username or password is incorrect. Please try again.`);
-    expect(await invalid.isVisible()).toBeFalsy();
+    await uptime.navigateToMonitorManagement(true);
   });
 
   step('create basic monitor', async () => {
