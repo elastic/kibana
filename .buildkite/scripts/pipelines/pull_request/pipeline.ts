@@ -131,11 +131,21 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/observability_plugin.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/synthetics/])) {
+    if (
+      await doAnyChangesMatch([
+        /^x-pack\/plugins\/synthetics/,
+        /^x-pack\/plugins\/observability\/public\/components\/shared\/exploratory_view/,
+      ])
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/ux/])) {
+    if (
+      await doAnyChangesMatch([
+        /^x-pack\/plugins\/ux/,
+        /^x-pack\/plugins\/observability\/public\/components\/shared\/exploratory_view/,
+      ])
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 
