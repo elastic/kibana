@@ -123,7 +123,7 @@ export const parseCustomFieldName = (
 
       return {
         ...(currField ?? {}),
-        fieldName: selectedMetricField,
+        fieldName: currField?.field ?? selectedMetricField,
         columnLabel: currField?.label,
         columnField: currField?.field,
       };
