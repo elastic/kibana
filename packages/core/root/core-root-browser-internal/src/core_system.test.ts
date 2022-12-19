@@ -289,6 +289,11 @@ describe('#setup()', () => {
     expect(MockPluginsService.setup).toHaveBeenCalledTimes(1);
   });
 
+  it('calls customBranding#setup()', async () => {
+    await setupCore();
+    expect(MockSettingsService.setup).toHaveBeenCalledTimes(1);
+  });
+
   it('calls integrations#setup()', async () => {
     await setupCore();
     expect(MockIntegrationsService.setup).toHaveBeenCalledTimes(1);

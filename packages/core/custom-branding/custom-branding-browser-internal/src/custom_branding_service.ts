@@ -31,7 +31,7 @@ export class CustomBrandingService {
 
   private get() {
     if (!this.registeredPlugin || this.registeredPlugin !== CUSTOM_BRANDING_PLUGIN) {
-      throw new Error('Plugin needs to register before retrieveing custom branding.');
+      throw new Error('Plugin needs to register before retrieving custom branding.');
     }
     return this.customBranding;
   }
