@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "owner": {
-    "name": "awp-viz",
-    "githubTeam": "awp-viz"
+    "name": "Cloud Native Integrations",
+    "githubTeam": "sec-cloudnative-integrations"
   },
-  "description": "Drift prevention for containers.",
+  "description": "Defend for Containers",
   "server": false,
   "ui": true,
   "requiredPlugins": ["fleet", "kibanaReact"],
