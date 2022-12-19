@@ -62,7 +62,11 @@ export function useDiscoverState({
       savedSearch,
       services,
     });
-    container.actions.setDataView(savedSearch.searchSource.getField('index')!);
+    const nextDataView = savedSearch.searchSource.getField('index')!;
+    container.actions.setDataView(nextDataView);
+    if (!nextDataView.isPersisted()) {
+      container.actions.appendAdHocDataViews(nextDataView);
+    }
     return container;
   }, [history, savedSearch, services]);
 
