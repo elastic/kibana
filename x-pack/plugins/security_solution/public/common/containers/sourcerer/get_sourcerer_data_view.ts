@@ -13,9 +13,9 @@ export const getSourcererDataView = async (
   dataViewsService: DataViewsContract
 ) => {
   const dataViewData = await dataViewsService.get(dataViewId);
-  const defaultPatternsList = ensurePatternFormat(dataViewData.title.split(','));
+  const defaultPatternsList = ensurePatternFormat(dataViewData.getIndexPattern().split(','));
   const patternList = defaultPatternsList.reduce((res: string[], pattern) => {
-    if (dataViewData.matchedIndices.find((q) => q.includes(pattern.replace('*', '')))) {
+    if (dataViewData.matchedIndices.find((q) => q.includes(pattern.replaceAll('*', '')))) {
       res.push(pattern);
     }
     return res;
