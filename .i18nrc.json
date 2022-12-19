@@ -53,6 +53,7 @@
     "inspectorViews": "src/legacy/core_plugins/inspector_views",
     "interactiveSetup": "src/plugins/interactive_setup",
     "interpreter": "src/legacy/core_plugins/interpreter",
+    "imageEmbeddable": "src/plugins/image_embeddable",
     "kbn": "src/legacy/core_plugins/kibana",
     "kbnConfig": "packages/kbn-config/src",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
