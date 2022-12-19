@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
@@ -17,35 +18,35 @@ export interface AlertSummaryTimeRange {
   title: JSX.Element | string;
 }
 
-interface UseLoadRuleAlertsAggs {
+interface UseLoadAlertSummaryProps {
   features: string;
-  ruleId: string;
   timeRange: AlertSummaryTimeRange;
+  filter?: estypes.QueryDslQueryContainer;
 }
-interface RuleAlertsAggs {
+interface AlertSummary {
   active: number;
   recovered: number;
   error?: string;
 }
 
-interface LoadRuleAlertsAggs {
-  isLoadingRuleAlertsAggs: boolean;
-  ruleAlertsAggs: {
+interface LoadAlertSummary {
+  isLoading: boolean;
+  alertSummary: {
     active: number;
     recovered: number;
   };
-  errorRuleAlertsAggs?: string;
+  error?: string;
 }
 
 interface IndexName {
   index: string;
 }
 
-export function useLoadRuleAlertsAggs({ features, ruleId, timeRange }: UseLoadRuleAlertsAggs) {
+export function useLoadAlertSummary({ features, timeRange, filter }: UseLoadAlertSummaryProps) {
   const { http } = useKibana().services;
-  const [ruleAlertsAggs, setRuleAlertsAggs] = useState<LoadRuleAlertsAggs>({
-    isLoadingRuleAlertsAggs: true,
-    ruleAlertsAggs: { active: 0, recovered: 0 },
+  const [alertSummary, setAlertSummary] = useState<LoadAlertSummary>({
+    isLoading: true,
+    alertSummary: { active: 0, recovered: 0 },
   });
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
@@ -62,38 +63,38 @@ export function useLoadRuleAlertsAggs({ features, ruleId, timeRange }: UseLoadRu
       const { active, recovered, error } = await fetchRuleAlertsAggByTimeRange({
         http,
         index,
-        ruleId,
         signal: abortCtrlRef.current.signal,
         timeRange,
+        filter,
       });
       if (error) throw error;
       if (!isCancelledRef.current) {
-        setRuleAlertsAggs((oldState: LoadRuleAlertsAggs) => ({
+        setAlertSummary((oldState: LoadAlertSummary) => ({
           ...oldState,
-          ruleAlertsAggs: {
+          alertSummary: {
             active,
             recovered,
           },
-          isLoadingRuleAlertsAggs: false,
+          isLoading: false,
         }));
       }
     } catch (error) {
       if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
-          setRuleAlertsAggs((oldState: LoadRuleAlertsAggs) => ({
+          setAlertSummary((oldState: LoadAlertSummary) => ({
             ...oldState,
-            isLoadingRuleAlertsAggs: false,
-            errorRuleAlertsAggs: error,
+            isLoading: false,
+            error,
           }));
         }
       }
     }
-  }, [features, http, ruleId, timeRange]);
+  }, [features, filter, http, timeRange]);
   useEffect(() => {
     loadRuleAlertsAgg();
   }, [loadRuleAlertsAgg]);
 
-  return ruleAlertsAggs;
+  return alertSummary;
 }
 
 async function fetchIndexNameAPI({
@@ -114,16 +115,16 @@ async function fetchIndexNameAPI({
 async function fetchRuleAlertsAggByTimeRange({
   http,
   index,
-  ruleId,
   signal,
   timeRange: { utcFrom, utcTo },
+  filter,
 }: {
   http: HttpSetup;
   index: string;
-  ruleId: string;
   signal: AbortSignal;
   timeRange: AlertSummaryTimeRange;
-}): Promise<RuleAlertsAggs> {
+  filter?: estypes.QueryDslQueryContainer;
+}): Promise<AlertSummary> {
   try {
     const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
       signal,
@@ -132,12 +133,7 @@ async function fetchRuleAlertsAggByTimeRange({
         size: 0,
         query: {
           bool: {
-            must: [
-              {
-                term: {
-                  'kibana.alert.rule.uuid': ruleId,
-                },
-              },
+            filter: [
               {
                 range: {
                   '@timestamp': {
@@ -162,6 +158,7 @@ async function fetchRuleAlertsAggByTimeRange({
                   ],
                 },
               },
+              ...(filter ? [filter] : []),
             ],
           },
         },
@@ -198,6 +195,6 @@ async function fetchRuleAlertsAggByTimeRange({
       error,
       active: 0,
       recovered: 0,
-    } as RuleAlertsAggs;
+    };
   }
 }
