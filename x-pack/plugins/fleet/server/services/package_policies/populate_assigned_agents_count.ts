@@ -20,21 +20,32 @@ import { getAgentsByKuery } from '../agents';
  * @param esClient
  * @param packagePolicies
  */
-export const populateAssignedAgentsCount = async (
+export const populatePackagePolicyAssignedAgentsCount = async (
   esClient: ElasticsearchClient,
   packagePolicies: PackagePolicy[]
 ) => {
+  const agentPolicyRequestsByIdCache: Record<string, ReturnType<typeof getAgentsByKuery>> = {};
+
   await pMap(
     packagePolicies,
     async (packagePolicy) => {
-      const { total: agentTotal } = await getAgentsByKuery(esClient, {
-        showInactive: false,
-        perPage: 0,
-        page: 1,
-        kuery: `${AGENTS_PREFIX}.policy_id:${packagePolicy.policy_id}`,
-      });
+      const agentPolicyId = packagePolicy.policy_id;
+      let agentsByQueryPromise: ReturnType<typeof getAgentsByKuery>;
 
-      packagePolicy.agents = agentTotal ?? 0;
+      if (Boolean(agentPolicyRequestsByIdCache[agentPolicyId])) {
+        agentsByQueryPromise = agentPolicyRequestsByIdCache[agentPolicyId];
+      } else {
+        agentsByQueryPromise = getAgentsByKuery(esClient, {
+          showInactive: false,
+          perPage: 0,
+          page: 1,
+          kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicyId}`,
+        });
+
+        agentPolicyRequestsByIdCache[agentPolicyId] = agentsByQueryPromise;
+      }
+
+      packagePolicy.agents = (await agentsByQueryPromise).total;
     },
     { concurrency: 10 }
   );

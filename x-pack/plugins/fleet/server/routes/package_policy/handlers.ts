@@ -13,7 +13,7 @@ import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
 
-import { populateAssignedAgentsCount } from '../../services/package_policies/populate_assigned_agents_count';
+import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_assigned_agents_count';
 
 import { agentPolicyService, appContextService, packagePolicyService } from '../../services';
 import type {
@@ -112,7 +112,7 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
     }
 
     if (request.query.withAgentCount) {
-      await populateAssignedAgentsCount(esClient, items);
+      await populatePackagePolicyAssignedAgentsCount(esClient, items);
     }
 
     // agnostic to package-level RBAC
