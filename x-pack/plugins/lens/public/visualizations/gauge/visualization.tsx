@@ -25,7 +25,13 @@ import {
 import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-import type { DatasourceLayers, OperationMetadata, Suggestion, Visualization } from '../../types';
+import type {
+  DatasourceLayers,
+  OperationMetadata,
+  Suggestion,
+  UserMessage,
+  Visualization,
+} from '../../types';
 import { getSuggestions } from './suggestions';
 import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
@@ -466,17 +472,17 @@ export const getGaugeVisualization = ({
   toPreviewExpression: (state, datasourceLayers, datasourceExpressionsByLayers = {}) =>
     toExpression(paletteService, state, datasourceLayers, undefined, datasourceExpressionsByLayers),
 
-  getWarningMessages(state, frame) {
+  getUserMessages(state, { frame }) {
     const { maxAccessor, minAccessor, goalAccessor, metricAccessor } = state;
     if (!maxAccessor && !minAccessor && !goalAccessor && !metricAccessor) {
       // nothing configured yet
-      return;
+      return [];
     }
     if (!metricAccessor) {
       return [];
     }
 
-    const row = frame?.activeData?.[state.layerId]?.rows?.[0];
+    const row = frame.activeData?.[state.layerId]?.rows?.[0];
     if (!row || checkInvalidConfiguration(row, state)) {
       return [];
     }
@@ -485,43 +491,67 @@ export const getGaugeVisualization = ({
     const minValue = minAccessor && row[minAccessor];
     const goalValue = goalAccessor && row[goalAccessor];
 
-    const warnings = [];
+    const warnings: UserMessage[] = [];
     if (typeof minValue === 'number') {
       if (minValue > metricValue) {
-        warnings.push([
-          <FormattedMessage
-            id="xpack.lens.gaugeVisualization.minValueGreaterMetricShortMessage"
-            defaultMessage="Minimum value is greater than metric value."
-          />,
-        ]);
+        warnings.push({
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }],
+          shortMessage: '',
+          longMessage: (
+            <FormattedMessage
+              id="xpack.lens.gaugeVisualization.minValueGreaterMetricShortMessage"
+              defaultMessage="Minimum value is greater than metric value."
+            />
+          ),
+        });
       }
       if (minValue > goalValue) {
-        warnings.push([
-          <FormattedMessage
-            id="xpack.lens.gaugeVisualization.minimumValueGreaterGoalShortMessage"
-            defaultMessage="Minimum value is greater than goal value."
-          />,
-        ]);
+        warnings.push({
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }],
+          shortMessage: '',
+          longMessage: (
+            <FormattedMessage
+              id="xpack.lens.gaugeVisualization.minimumValueGreaterGoalShortMessage"
+              defaultMessage="Minimum value is greater than goal value."
+            />
+          ),
+        });
       }
     }
 
     if (typeof maxValue === 'number') {
       if (metricValue > maxValue) {
-        warnings.push([
-          <FormattedMessage
-            id="xpack.lens.gaugeVisualization.metricValueGreaterMaximumShortMessage"
-            defaultMessage="Metric value is greater than maximum value."
-          />,
-        ]);
+        warnings.push({
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }],
+          shortMessage: '',
+          longMessage: (
+            <FormattedMessage
+              id="xpack.lens.gaugeVisualization.metricValueGreaterMaximumShortMessage"
+              defaultMessage="Metric value is greater than maximum value."
+            />
+          ),
+        });
       }
 
       if (typeof goalValue === 'number' && goalValue > maxValue) {
-        warnings.push([
-          <FormattedMessage
-            id="xpack.lens.gaugeVisualization.goalValueGreaterMaximumShortMessage"
-            defaultMessage="Goal value is greater than maximum value."
-          />,
-        ]);
+        warnings.push({
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }],
+          shortMessage: '',
+          longMessage: (
+            <FormattedMessage
+              id="xpack.lens.gaugeVisualization.goalValueGreaterMaximumShortMessage"
+              defaultMessage="Goal value is greater than maximum value."
+            />
+          ),
+        });
       }
     }
 

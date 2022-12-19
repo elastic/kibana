@@ -21,7 +21,12 @@ import {
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Position } from '@elastic/charts';
 import type { HeatmapVisualizationState } from './types';
-import type { DatasourceLayers, FramePublicAPI, OperationDescriptor } from '../../types';
+import type {
+  DatasourceLayers,
+  FramePublicAPI,
+  OperationDescriptor,
+  UserMessage,
+} from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
@@ -627,80 +632,89 @@ describe('heatmap', () => {
         ]
       `);
     });
-  });
 
-  describe('#getWarningMessages', () => {
-    beforeEach(() => {
-      const mockDatasource = createMockDatasource('testDatasource');
+    describe('warnings', () => {
+      beforeEach(() => {
+        const mockDatasource = createMockDatasource('testDatasource');
 
-      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
-        dataType: 'string',
-        label: 'MyOperation',
-      } as OperationDescriptor);
+        mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+          dataType: 'string',
+          label: 'MyOperation',
+        } as OperationDescriptor);
 
-      frame.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-    });
+        frame.datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+        };
+      });
 
-    test('should not return warning messages when the layer it not configured', () => {
-      const mockState = {
-        shape: CHART_SHAPES.HEATMAP,
-        valueAccessor: 'v-accessor',
-      } as HeatmapVisualizationState;
-      expect(
-        getHeatmapVisualization({
-          paletteService,
-          theme,
-        }).getWarningMessages!(mockState, frame)
-      ).toEqual(undefined);
-    });
+      const onlyWarnings = (messages: UserMessage[]) =>
+        messages.filter(({ severity }) => severity === 'warning');
 
-    test('should not return warning messages when the data table is empty', () => {
-      frame.activeData = {
-        first: {
-          type: 'datatable',
-          rows: [],
-          columns: [],
-        },
-      };
-      const mockState = {
-        shape: CHART_SHAPES.HEATMAP,
-        valueAccessor: 'v-accessor',
-        layerId: 'first',
-      } as HeatmapVisualizationState;
-      expect(
-        getHeatmapVisualization({
-          paletteService,
-          theme,
-        }).getWarningMessages!(mockState, frame)
-      ).toEqual(undefined);
-    });
+      test('should not return warning messages when the layer it not configured', () => {
+        const mockState = {
+          shape: CHART_SHAPES.HEATMAP,
+          valueAccessor: 'v-accessor',
+        } as HeatmapVisualizationState;
+        expect(
+          onlyWarnings(
+            getHeatmapVisualization({
+              paletteService,
+              theme,
+            }).getUserMessages!(mockState, { frame })
+          )
+        ).toHaveLength(0);
+      });
 
-    test('should return a warning message when cell value data contains arrays', () => {
-      frame.activeData = {
-        first: {
-          type: 'datatable',
-          rows: [
-            {
-              'v-accessor': [1, 2, 3],
-            },
-          ],
-          columns: [],
-        },
-      };
+      test('should not return warning messages when the data table is empty', () => {
+        frame.activeData = {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [],
+          },
+        };
+        const mockState = {
+          shape: CHART_SHAPES.HEATMAP,
+          valueAccessor: 'v-accessor',
+          layerId: 'first',
+        } as HeatmapVisualizationState;
+        expect(
+          onlyWarnings(
+            getHeatmapVisualization({
+              paletteService,
+              theme,
+            }).getUserMessages!(mockState, { frame })
+          )
+        ).toHaveLength(0);
+      });
 
-      const mockState = {
-        shape: CHART_SHAPES.HEATMAP,
-        valueAccessor: 'v-accessor',
-        layerId: 'first',
-      } as HeatmapVisualizationState;
-      expect(
-        getHeatmapVisualization({
-          paletteService,
-          theme,
-        }).getWarningMessages!(mockState, frame)
-      ).toHaveLength(1);
+      test('should return a warning message when cell value data contains arrays', () => {
+        frame.activeData = {
+          first: {
+            type: 'datatable',
+            rows: [
+              {
+                'v-accessor': [1, 2, 3],
+              },
+            ],
+            columns: [],
+          },
+        };
+
+        const mockState = {
+          shape: CHART_SHAPES.HEATMAP,
+          valueAccessor: 'v-accessor',
+          layerId: 'first',
+        } as HeatmapVisualizationState;
+        expect(
+          onlyWarnings(
+            getHeatmapVisualization({
+              paletteService,
+              theme,
+            }).getUserMessages!(mockState, { frame })
+          )
+        ).toHaveLength(1);
+      });
     });
   });
 });

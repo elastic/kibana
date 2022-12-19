@@ -607,7 +607,7 @@ describe('gauge', () => {
     });
   });
 
-  describe('#getWarningMessages', () => {
+  describe('#getUserMessages', () => {
     beforeEach(() => {
       const mockDatasource = createMockDatasource('testDatasource');
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
@@ -646,7 +646,7 @@ describe('gauge', () => {
         getGaugeVisualization({
           paletteService,
           theme,
-        }).getWarningMessages!(state, frame)
+        }).getUserMessages!(state, { frame })
       ).toHaveLength(0);
     });
     it('should warn when minimum value is greater than metric value', () => {
@@ -669,7 +669,7 @@ describe('gauge', () => {
         getGaugeVisualization({
           paletteService,
           theme,
-        }).getWarningMessages!(state, frame)
+        }).getUserMessages!(state, { frame })
       ).toHaveLength(1);
     });
 
@@ -692,7 +692,7 @@ describe('gauge', () => {
         getGaugeVisualization({
           paletteService,
           theme,
-        }).getWarningMessages!(state, frame)
+        }).getUserMessages!(state, { frame })
       ).toHaveLength(1);
     });
     it('should warn when goal value is greater than maximum value', () => {
@@ -715,7 +715,7 @@ describe('gauge', () => {
         getGaugeVisualization({
           paletteService,
           theme,
-        }).getWarningMessages!(state, frame)
+        }).getUserMessages!(state, { frame })
       ).toHaveLength(1);
     });
     it('should warn when minimum value is greater than goal value', () => {
@@ -738,7 +738,7 @@ describe('gauge', () => {
         getGaugeVisualization({
           paletteService,
           theme,
-        }).getWarningMessages!(state, frame)
+        }).getUserMessages!(state, { frame })
       ).toHaveLength(1);
     });
   });

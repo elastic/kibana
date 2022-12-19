@@ -706,7 +706,7 @@ export const getXyVisualization = ({
     return { invalid, invalidMessage: invalidMessages![0] };
   },
 
-  getUserMessages(state, { frame: { datasourceLayers, dataViews } }) {
+  getUserMessages(state, { frame: { datasourceLayers, dataViews, activeData } }) {
     const annotationLayers = getAnnotationsLayers(state.layers);
     const errors: UserMessage[] = [];
 
@@ -817,47 +817,54 @@ export const getXyVisualization = ({
       }
     }
 
-    return errors;
-  },
+    const warnings: UserMessage[] = [];
 
-  getWarningMessages(state, frame) {
-    if (state?.layers.length === 0 || !frame.activeData) {
-      return;
-    }
+    if (state?.layers.length > 0 && activeData) {
+      const filteredLayers = [
+        ...getDataLayers(state.layers),
+        ...getReferenceLayers(state.layers),
+      ].filter(({ accessors }) => accessors.length > 0);
 
-    const filteredLayers = [
-      ...getDataLayers(state.layers),
-      ...getReferenceLayers(state.layers),
-    ].filter(({ accessors }) => accessors.length > 0);
+      const accessorsWithArrayValues = [];
 
-    const accessorsWithArrayValues = [];
-
-    for (const layer of filteredLayers) {
-      const { layerId, accessors } = layer;
-      const rows = frame.activeData?.[layerId] && frame.activeData[layerId].rows;
-      if (!rows) {
-        break;
-      }
-      const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layerId]);
-      for (const accessor of accessors) {
-        const hasArrayValues = rows.some((row) => Array.isArray(row[accessor]));
-        if (hasArrayValues) {
-          accessorsWithArrayValues.push(columnToLabel[accessor]);
+      for (const layer of filteredLayers) {
+        const { layerId, accessors } = layer;
+        const rows = activeData?.[layerId] && activeData[layerId].rows;
+        if (!rows) {
+          break;
+        }
+        const columnToLabel = getColumnToLabelMap(layer, datasourceLayers[layerId]);
+        for (const accessor of accessors) {
+          const hasArrayValues = rows.some((row) => Array.isArray(row[accessor]));
+          if (hasArrayValues) {
+            accessorsWithArrayValues.push(columnToLabel[accessor]);
+          }
         }
       }
+
+      accessorsWithArrayValues.forEach((label) =>
+        warnings.push({
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }],
+          shortMessage: '',
+          longMessage: (
+            <FormattedMessage
+              key={label}
+              id="xpack.lens.xyVisualization.arrayValues"
+              defaultMessage="{label} contains array values. Your visualization may not render as expected."
+              values={{
+                label: <strong>{label}</strong>,
+              }}
+            />
+          ),
+        })
+      );
     }
 
-    return accessorsWithArrayValues.map((label) => (
-      <FormattedMessage
-        key={label}
-        id="xpack.lens.xyVisualization.arrayValues"
-        defaultMessage="{label} contains array values. Your visualization may not render as expected."
-        values={{
-          label: <strong>{label}</strong>,
-        }}
-      />
-    ));
+    return [...errors, ...warnings];
   },
+
   getUniqueLabels(state) {
     return getUniqueLabels(state.layers);
   },

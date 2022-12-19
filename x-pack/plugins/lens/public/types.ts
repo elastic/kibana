@@ -1257,10 +1257,7 @@ export interface Visualization<T = unknown, P = unknown> {
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
    */
-  getUserMessages?: (
-    state: T,
-    deps: { frame: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'> }
-  ) => UserMessage[];
+  getUserMessages?: (state: T, deps: { frame: FramePublicAPI }) => UserMessage[];
 
   validateColumn?: (
     state: T,
@@ -1269,11 +1266,6 @@ export interface Visualization<T = unknown, P = unknown> {
     columnId: string,
     group?: VisualizationDimensionGroupConfig
   ) => { invalid: boolean; invalidMessage?: string };
-
-  /**
-   * The frame calls this function to display warnings about visualization
-   */
-  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
 
   /**
    * On Edit events the frame will call this to know what's going to be the next visualization state
