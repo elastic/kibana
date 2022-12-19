@@ -33,6 +33,7 @@ describe('skip reindexing', () => {
   });
 
   it('when migrating to a new version, but mappings remain the same', async () => {
+    let logs: string;
     const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
@@ -52,7 +53,7 @@ describe('skip reindexing', () => {
     // stop Kibana and remove logs
     await root.shutdown();
     await delay(10);
-    await fs.unlink(logFilePath).catch(() => void 0);
+    await fs.unlink(logFilePath).catch(() => {});
 
     const nextPatch = new SemVer(currentVersion).inc('patch').format();
     root = createRoot(nextPatch);
@@ -60,7 +61,7 @@ describe('skip reindexing', () => {
     await root.setup();
     await root.start();
 
-    const logs = await fs.readFile(logFilePath, 'utf-8');
+    logs = await fs.readFile(logFilePath, 'utf-8');
 
     expect(logs).toMatch('INIT -> PREPARE_COMPATIBLE_MIGRATION');
     expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
@@ -69,6 +70,23 @@ describe('skip reindexing', () => {
 
     expect(logs).not.toMatch('CREATE_NEW_TARGET');
     expect(logs).not.toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS');
+
+    // We restart Kibana again after doing a "compatible migration" to ensure that
+    // the next time state is loaded everything still works as expected.
+    // For instance, we might see something like:
+    // Unable to complete saved object migrations for the [.kibana] index. Please check the health of your Elasticsearch cluster and try again. Unexpected Elasticsearch ResponseError: statusCode: 404, method: POST, url: /.kibana_8.7.1_001/_pit?keep_alive=10m error: [index_not_found_exception]: no such index [.kibana_8.7.1_001]
+    await root.shutdown();
+    await delay(10);
+    await fs.unlink(logFilePath).catch(() => {});
+
+    root = createRoot(nextPatch);
+    await root.preboot();
+    await root.setup();
+    await root.start();
+
+    logs = await fs.readFile(logFilePath, 'utf-8');
+    expect(logs).toMatch('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+    expect(logs).not.toMatch('INIT -> PREPARE_COMPATIBLE_MIGRATION');
   });
 });
 
