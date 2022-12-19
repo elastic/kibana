@@ -61,9 +61,7 @@ export const getMetricRenderer =
           </KibanaThemeProvider>
         </EuiErrorBoundary>,
         domNode,
-        () => {
-          handlers.done();
-        }
+        () => handlers.done()
       );
     },
   });
