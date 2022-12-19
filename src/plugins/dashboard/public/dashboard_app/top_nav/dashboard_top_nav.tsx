@@ -9,10 +9,14 @@
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import {
+  withSuspense,
+  LazyLabsFlyout,
+  getContextProvider as getPresentationUtilContextProvider,
+} from '@kbn/presentation-util-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import { withSuspense, LazyLabsFlyout } from '@kbn/presentation-util-plugin/public';
 
 import {
   getDashboardTitle,
@@ -74,6 +78,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
     embeddableInstance: dashboardContainer,
   } = useDashboardContainerContext();
   const dispatch = useEmbeddableDispatch();
+  const PresentationUtilContextProvider = getPresentationUtilContextProvider();
 
   const hasUnsavedChanges = select((state) => state.componentState.hasUnsavedChanges);
   const fullScreenMode = select((state) => state.componentState.fullScreenMode);
@@ -251,7 +256,9 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       <TopNavMenu {...getNavBarProps()} />
       {viewMode !== ViewMode.PRINT && isLabsEnabled && isLabsShown ? (
-        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
+        <PresentationUtilContextProvider>
+          <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
+        </PresentationUtilContextProvider>
       ) : null}
       {viewMode === ViewMode.EDIT ? <DashboardEditingToolbar /> : null}
     </>
