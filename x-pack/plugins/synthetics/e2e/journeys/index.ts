@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './uptime';
 export * from './synthetics';
+export * from './uptime';
