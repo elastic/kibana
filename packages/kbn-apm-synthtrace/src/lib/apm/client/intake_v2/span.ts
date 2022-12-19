@@ -415,6 +415,10 @@ export interface Span {
         [k: string]: unknown;
       }
   >;
+
+  event?: null | {
+    name: string;
+  };
   /**
    * Start is the offset relative to the transaction's timestamp identifying the start of the span, in milliseconds.
    */
