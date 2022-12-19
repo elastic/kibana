@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
-import { BurnRateRuleParams, Duration, DurationUnit } from '../../../typings';
+import { BurnRateRuleParams, Duration } from '../../../typings';
 
 export type ValidationBurnRateRuleResult = ValidationResult & {
   errors: { sloId: string[]; longWindow: string[]; burnRateThreshold: string[] };
