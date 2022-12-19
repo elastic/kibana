@@ -112,11 +112,8 @@ export async function getAgentStatusForAgentPolicy(
     throw error;
   }
 
-  const buckets = response?.aggregations?.status?.buckets || [];
-
-  if (!Array.isArray(buckets)) {
-    throw new Error('buckets is not an array');
-  }
+  const buckets = (response?.aggregations?.status?.buckets ||
+    []) as AggregationsStatusTermsBucketKeys[];
 
   buckets.forEach((bucket) => {
     if (statuses[bucket.key] !== undefined) {
