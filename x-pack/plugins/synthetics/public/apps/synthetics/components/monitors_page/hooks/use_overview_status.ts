@@ -15,10 +15,6 @@ import {
   selectOverviewStatus,
 } from '../../../state';
 
-export interface StatusByLocationAndMonitor {
-  [locationId: string]: { [configId: string]: 'up' | 'down' };
-}
-
 export function useOverviewStatus({ pageState }: { pageState: MonitorOverviewPageState }) {
   const { status, statusError } = useSelector(selectOverviewStatus);
 
