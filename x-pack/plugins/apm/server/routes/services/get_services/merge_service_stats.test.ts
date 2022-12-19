@@ -53,6 +53,12 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java',
           },
         ],
+        alertCounts: [
+          {
+            alertsCount: 1,
+            serviceName: 'opbeans-java',
+          },
+        ],
       })
     ).toEqual([
       {
@@ -73,6 +79,7 @@ describe('mergeServiceStats', () => {
         throughput: 2,
         transactionErrorRate: 3,
         transactionType: 'request',
+        alertsCount: 1,
       },
     ]);
   });
@@ -99,6 +106,12 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java',
           },
         ],
+        alertCounts: [
+          {
+            alertsCount: 2,
+            serviceName: 'opbeans-java',
+          },
+        ],
       })
     ).toEqual([
       {
@@ -115,6 +128,7 @@ describe('mergeServiceStats', () => {
         environments: ['production'],
         healthStatus: ServiceHealthStatus.healthy,
         serviceName: 'opbeans-java',
+        alertsCount: 2,
       },
     ]);
   });
@@ -135,6 +149,12 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java',
           },
         ],
+        alertCounts: [
+          {
+            alertsCount: 3,
+            serviceName: 'opbeans-java-2',
+          },
+        ],
       })
     ).toEqual([
       {
@@ -145,6 +165,7 @@ describe('mergeServiceStats', () => {
         throughput: 2,
         transactionErrorRate: 3,
         transactionType: 'request',
+        alertsCount: 3,
       },
     ]);
   });
@@ -166,6 +187,7 @@ describe('mergeServiceStats', () => {
           },
         ],
         healthStatuses: [],
+        alertCounts: [],
       })
     ).toEqual([
       {
