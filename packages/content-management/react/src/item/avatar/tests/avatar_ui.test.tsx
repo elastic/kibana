@@ -7,13 +7,19 @@
  */
 
 import * as React from 'react';
-import { createCmStateWithFixtures } from '@kbn/content-management-state-mocks';
-import { context } from '.';
+import { shallow } from 'enzyme';
 
-export const StateProviderWithFixtures: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const [state] = React.useState(() => createCmStateWithFixtures());
+import { CmAvatarUi } from '../avatar_ui';
 
-  return <context.Provider value={{ cache: state.cache }}>{children}</context.Provider>;
-};
+describe('CmAvatarUi', () => {
+  it('should render EuiAvatar component under the hood', () => {
+    const wrapper = shallow(<CmAvatarUi title="Test" />);
+
+    expect(wrapper).toMatchInlineSnapshot(`
+      <EuiAvatar
+        name="Test"
+        type="space"
+      />
+    `);
+  });
+});
