@@ -14,7 +14,8 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common']);
+  const listingTable = getService('listingTable');
+  const PageObjects = getPageObjects(['common', 'header']);
 
   return {
     async enterFullscreen() {
@@ -34,12 +35,18 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.findAll('canvasWorkpadPage > canvasWorkpadPageElementContent');
     },
 
+    async searchForWorkpadsWithName(workpadName: string) {
+      await listingTable.searchForItemWithName(workpadName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
     /*
      * Finds the first workpad in the loader (uses find, not findAll) and
      * ensures the expected name is the actual name. Then it clicks the element
      * to load the workpad. Resolves once the workpad is in the DOM
      */
     async loadFirstWorkpad(workpadName: string) {
+      await this.searchForWorkpadsWithName(workpadName);
       const elem = await testSubjects.find('canvasWorkpadTableWorkpad');
       const text = await elem.getVisibleText();
       expect(text).to.be(workpadName);
