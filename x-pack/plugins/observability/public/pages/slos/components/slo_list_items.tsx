@@ -45,8 +45,8 @@ export function SloListItems({
               </EuiFlexItem>
             ))
         : null}
-      {!loading && !error ? <SloListEmpty /> : null}
-      {!loading && error ? <SloListError /> : null}
+      {!loading && slos.length === 0 && !error ? <SloListEmpty /> : null}
+      {!loading && slos.length === 0 && error ? <SloListError /> : null}
     </EuiFlexGroup>
   );
 }
