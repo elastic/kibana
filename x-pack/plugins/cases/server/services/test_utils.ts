@@ -161,10 +161,12 @@ export const createCaseSavedObjectResponse = ({
   connector,
   externalService,
   overrides,
+  caseId,
 }: {
   connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
   overrides?: Partial<ESCaseAttributes>;
+  caseId?: string;
 } = {}): SavedObject<ESCaseAttributes> => {
   const references: SavedObjectReference[] = createSavedObjectReferences({
     connector,
@@ -196,7 +198,7 @@ export const createCaseSavedObjectResponse = ({
 
   return {
     type: CASE_SAVED_OBJECT,
-    id: '1',
+    id: caseId ?? '1',
     attributes: {
       ...basicESCaseFields,
       ...overrides,

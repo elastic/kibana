@@ -339,20 +339,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('unhappy path - 400s when bad query supplied', async () => {
-        await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
-      });
-
-      for (const field of ['owner', 'tags', 'severity', 'status']) {
-        it(`should return a 400 when attempting to query a keyword field [${field}] when using a wildcard query`, async () => {
-          await findCases({
-            supertest,
-            query: { searchFields: [field], search: 'some search string*' },
-            expectedHttpCode: 400,
-          });
-        });
-      }
-
       describe('search and searchField', () => {
         beforeEach(async () => {
           await createCase(supertest, postCaseReq);
