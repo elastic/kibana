@@ -138,7 +138,6 @@ export const explainLogRateSpikesTestData: TestData[] = [
           group: [
             { fieldName: 'response_code', fieldValue: '500', duplicate: false },
             { fieldName: 'url', fieldValue: 'home.php', duplicate: false },
-            { fieldName: 'url', fieldValue: 'home.php', duplicate: false },
             { fieldName: 'url', fieldValue: 'login.php', duplicate: false },
           ],
           docCount: 792,

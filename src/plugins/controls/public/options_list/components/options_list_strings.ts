@@ -41,27 +41,6 @@ export const OptionsListStrings = {
         defaultMessage:
           'Wait to display results until the list is complete. This setting is useful for large data sets, but the results might take longer to populate.',
       }),
-    getHideExcludeTitle: () =>
-      i18n.translate('controls.optionsList.editor.hideExclude', {
-        defaultMessage: 'Allow selections to be excluded',
-      }),
-    getHideExistsQueryTitle: () =>
-      i18n.translate('controls.optionsList.editor.hideExistsQuery', {
-        defaultMessage: 'Allow exists query',
-      }),
-    getHideExistsQueryTooltip: () =>
-      i18n.translate('controls.optionsList.editor.hideExistsQueryTooltip', {
-        defaultMessage:
-          'Allows you to create an exists query, which returns all documents that contain an indexed value for the field.',
-      }),
-    getHideSortingTitle: () =>
-      i18n.translate('controls.optionsList.editor.hideSort', {
-        defaultMessage: 'Allow dynamic sorting of suggestions',
-      }),
-    getSuggestionsSortingTitle: () =>
-      i18n.translate('controls.optionsList.editor.suggestionsSorting', {
-        defaultMessage: 'Default sort order',
-      }),
   },
   popover: {
     getAriaLabel: (fieldName: string) =>
