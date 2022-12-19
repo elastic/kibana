@@ -13,9 +13,9 @@ import type { MutableRefObject } from 'react';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
-  ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
+  ExpressionRendererEvent,
 } from '@kbn/expressions-plugin/public';
 import type { Configuration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/public';
@@ -35,6 +35,7 @@ import type { EuiButtonIconProps } from '@elastic/eui';
 import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
+import { CellValueContext } from '@kbn/embeddable-plugin/public';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -1335,7 +1336,7 @@ export function isLensEditEvent<T extends LensEditSupportedActions>(
 
 export function isLensTableRowContextMenuClickEvent(
   event: ExpressionRendererEvent
-): event is BrushTriggerEvent {
+): event is LensTableRowContextMenuEvent {
   return event.name === 'tableRowContextMenuClick';
 }
 
@@ -1376,3 +1377,14 @@ export type LensTopNavMenuEntryGenerator = (props: {
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: Document | undefined;
 }) => undefined | TopNavMenuData;
+
+export interface LensCellValueAction {
+  id: string;
+  iconType: string;
+  displayName: string;
+  execute: (data: CellValueContext['data']) => void;
+}
+
+export type GetCompatibleCellValueActions = (
+  data: CellValueContext['data']
+) => Promise<LensCellValueAction[]>;

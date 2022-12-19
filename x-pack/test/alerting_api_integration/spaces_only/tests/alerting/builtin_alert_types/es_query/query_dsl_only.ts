@@ -332,6 +332,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
             searchType: params.searchType,
+            aggType: params.aggType || 'count',
+            groupBy: params.groupBy || 'all',
             ...ruleParams,
           },
         })
