@@ -27,10 +27,9 @@ import { DataViewListItem } from '@kbn/data-views-plugin/public';
 
 import { css } from '@emotion/react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { optionsListStrings } from './dataview_list_strings';
-import { IUnifiedSearchPluginServices } from '../types';
-import { Sorting } from './sorting_service';
+
+import { ALPHABETICALLY, Sorting } from './sorting_service';
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
@@ -55,6 +54,10 @@ function toSelectableOption(key: string, isChecked: boolean, label: string): Eui
   };
 }
 
+function getColums(): Array<Sorting['by']> {
+  return [ALPHABETICALLY];
+}
+
 export function DataViewsList({
   dataViewsList,
   onChangeDataView,
@@ -67,13 +70,11 @@ export function DataViewsList({
 }: DataViewsListProps) {
   const { euiTheme } = useEuiTheme();
   const popoverStyle = euiTheme.base * 13;
-  const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { sortingService } = kibana.services;
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
 
   const [sortByOptions, setSortByOptions] = useState<EuiSelectableOption[]>(() => {
-    return sortingService.getColums().map((key) => {
+    return getColums().map((key) => {
       return toSelectableOption(
         key,
         key === dataViewSortSettings?.by,

@@ -10,7 +10,7 @@ import { Direction, SortDirection } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 const storageKey = 'unified_search_sorting';
-const ALPHABETICALLY = 'alphabetically';
+export const ALPHABETICALLY = 'alphabetically';
 
 export interface Sorting {
   by: typeof ALPHABETICALLY;
@@ -34,9 +34,5 @@ export class SortingService {
 
   setSorting(data: Sorting) {
     this.storage.set(storageKey, data);
-  }
-
-  getColums(): Array<Sorting['by']> {
-    return [ALPHABETICALLY];
   }
 }
