@@ -516,18 +516,18 @@ export const RULE_DETAILS = {
       defaultMessage: 'Rules failures',
     }),
     description: i18n.translate('xpack.monitoring.alerts.ruleFailures.description', {
-      defaultMessage: 'Alert when the rules failures for a node is consistently high.',
+      defaultMessage: 'Alert when the rules failures are happening.',
     }),
     paramDetails: {
       threshold: {
         label: i18n.translate('xpack.monitoring.alerts.ruleFailures.paramDetails.threshold.label', {
           defaultMessage: `Notify when rules failures is over`,
         }),
-        type: AlertParamType.Percentage,
+        type: AlertParamType.Number,
       } as CommonAlertParamDetail,
       duration: {
         label: i18n.translate('xpack.monitoring.alerts.ruleFailures.paramDetails.duration.label', {
-          defaultMessage: `Look at the average over`,
+          defaultMessage: `Look back duration`,
         }),
         type: AlertParamType.Duration,
       } as CommonAlertParamDetail,
