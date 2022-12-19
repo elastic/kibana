@@ -16,4 +16,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new ContentPlugin(initializerContext);
 }
 
-export { ContentPluginSetup, ContentPluginStart } from './types';
+export type { ContentPluginSetup, ContentPluginStart } from './types';
