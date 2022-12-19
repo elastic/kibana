@@ -187,14 +187,16 @@ export class DashboardPlugin
         // Do not save SEARCH_SESSION_ID into nav link, because of possible edge cases
         // that could lead to session restoration failure.
         // see: https://github.com/elastic/kibana/issues/87149
-        if (newNavLink.includes(SEARCH_SESSION_ID)) {
-          newNavLink = replaceUrlHashQuery(newNavLink, (query) => {
-            delete query[SEARCH_SESSION_ID];
-            return query;
-          });
-        }
 
-        return newNavLink;
+        // We also don't want to store the table list view state.
+        // The question is: what _do_ we want to save here? :)
+        const tableListUrlState = ['s', 'title', 'sort', 'sortdir'];
+        return replaceUrlHashQuery(newNavLink, (query) => {
+          [SEARCH_SESSION_ID, ...tableListUrlState].forEach((param) => {
+            delete query[param];
+          });
+          return query;
+        });
       },
     });
 

@@ -5,17 +5,18 @@ A custom version of the handlebars package which, to improve security, does not 
 ## Limitations
 
 - Only the following compile options are supported:
+  - `data`
   - `knownHelpers`
   - `knownHelpersOnly`
+  - `noEscape`
   - `strict`
   - `assumeObjects`
-  - `noEscape`
-  - `data`
 
 - Only the following runtime options are supported:
-  - `helpers`
-  - `blockParams`
   - `data`
+  - `helpers`
+  - `decorators` (not documented in the official Handlebars [runtime options documentation](https://handlebarsjs.com/api-reference/runtime-options.html))
+  - `blockParams` (not documented in the official Handlebars [runtime options documentation](https://handlebarsjs.com/api-reference/runtime-options.html))
 
 The [Inline partials](https://handlebarsjs.com/guide/partials.html#inline-partials) handlebars template feature is currently not supported by `@kbn/handlebars`.
 
