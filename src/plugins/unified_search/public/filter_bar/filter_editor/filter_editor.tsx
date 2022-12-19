@@ -29,6 +29,7 @@ import {
   buildCustomFilter,
   cleanFilter,
   getFilterParams,
+  FILTERS,
 } from '@kbn/es-query';
 import { get } from 'lodash';
 import React, { Component } from 'react';
@@ -36,6 +37,7 @@ import { XJsonLang } from '@kbn/monaco';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { MbMap } from './map/map_selector';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -44,11 +46,12 @@ import {
   getOperatorOptions,
   isFilterValid,
 } from './lib/filter_editor_utils';
-import { Operator } from './lib/filter_operators';
+import { geoOperatorToOperation, Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { getFieldValidityAndErrorMessage } from './lib/helpers';
+import { KBN_FIELD_TYPES, KBN_GEO_FEILDS } from '@kbn/field-types';
 
 export interface FilterEditorProps {
   filter: Filter;
@@ -299,7 +302,14 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
   private renderOperatorInput() {
     const { selectedField, selectedOperator } = this.state;
-    const operators = selectedField ? getOperatorOptions(selectedField) : [];
+    let operators = selectedField ? getOperatorOptions(selectedField) : [];
+    const isGeoType = KBN_GEO_FEILDS.includes((selectedField?.type || '') as KBN_FIELD_TYPES);
+    if (isGeoType) {
+      operators = operators.filter((o) => o.type === FILTERS.SPATIAL_FILTER);
+    } else {
+      operators = operators.filter((o) => o.type !== FILTERS.SPATIAL_FILTER);
+    }
+
     return (
       <EuiFormRow
         fullWidth
@@ -421,6 +431,25 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
             onChange={this.onParamsChange}
             fullWidth
           />
+        );
+      case FILTERS.SPATIAL_FILTER:
+        // Want to use x-pack/plugins/maps but get error when using as a required bundle
+        // Error: X-Pack plugin or bundle with id "maps" is required by OSS plugin "unifiedSearch", which is prohibited. Consider making this an optional dependency instead.
+        // As an optional dependancy we get circular dependancy errors
+        // Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies
+        // So just for now a temp solution
+        return (
+          <div>
+            <MbMap
+              onMapDestroyed={() => {}}
+              onGeojsonCreated={(geo_shape) => {
+                if (this.state.selectedOperator) {
+                  const operation = geoOperatorToOperation(this.state.selectedOperator);
+                  this.onParamsChange({ geo_shape, operation });
+                }
+              }}
+            />
+          </div>
         );
     }
   }
