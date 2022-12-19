@@ -7,7 +7,6 @@
 
 import React, { FC, RefCallback, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
-import { EuiErrorBoundary } from '@elastic/eui';
 import {
   ShapeDrawerComponent,
   getDefaultShapeData,
@@ -42,17 +41,15 @@ export const ShapePreview: FC<Props> = ({ shape }) => {
   if (!shape) return <div className="canvasShapePreview" />;
   return (
     <div className="canvasShapePreview">
-      <EuiErrorBoundary>
-        <ShapeDrawerComponent
-          ref={shapeRef}
-          shapeType={shape}
-          shapeAttributes={{
-            fill: 'none',
-            stroke: 'black',
-            viewBox: getViewBox(5, shapeData.viewBox),
-          }}
-        />
-      </EuiErrorBoundary>
+      <ShapeDrawerComponent
+        ref={shapeRef}
+        shapeType={shape}
+        shapeAttributes={{
+          fill: 'none',
+          stroke: 'black',
+          viewBox: getViewBox(5, shapeData.viewBox),
+        }}
+      />
     </div>
   );
 };

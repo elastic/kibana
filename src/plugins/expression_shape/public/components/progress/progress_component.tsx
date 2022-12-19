@@ -7,7 +7,7 @@
  */
 
 import React, { CSSProperties, RefCallback, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiErrorBoundary, useResizeObserver } from '@elastic/eui';
+import { useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { NodeDimensions, ProgressRendererConfig } from '../../../common/types';
 import { ShapeRef, SvgConfig, SvgTextAttributes } from '../reusable/types';
@@ -110,17 +110,15 @@ export function ProgressComponent({
 
   return (
     <div className="shapeAligner">
-      <EuiErrorBoundary>
-        <ProgressDrawerComponent
-          shapeType={shapeType}
-          shapeContentAttributes={{ ...shapeContentAttributes, ref: progressRef }}
-          shapeAttributes={shapeAttributes}
-          textAttributes={{ ...textAttributes, ref: textRef }}
-          ref={shapeRef}
-        >
-          {BarProgress && <BarProgress {...barProgressAttributes} />}
-        </ProgressDrawerComponent>
-      </EuiErrorBoundary>
+      <ProgressDrawerComponent
+        shapeType={shapeType}
+        shapeContentAttributes={{ ...shapeContentAttributes, ref: progressRef }}
+        shapeAttributes={shapeAttributes}
+        textAttributes={{ ...textAttributes, ref: textRef }}
+        ref={shapeRef}
+      >
+        {BarProgress && <BarProgress {...barProgressAttributes} />}
+      </ProgressDrawerComponent>
     </div>
   );
 }

@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect, useCallback, RefCallback } from 'react';
-import { EuiErrorBoundary, useResizeObserver } from '@elastic/eui';
+import { useResizeObserver } from '@elastic/eui';
 import {
   ShapeRef,
   ShapeAttributes,
@@ -75,14 +75,12 @@ export function ShapeComponent({
 
   return (
     <div className="shapeAligner">
-      <EuiErrorBoundary>
-        <ShapeDrawerComponent
-          shapeType={shapeType}
-          shapeContentAttributes={shapeContentAttributes}
-          shapeAttributes={shapeAttributes}
-          ref={shapeRef}
-        />
-      </EuiErrorBoundary>
+      <ShapeDrawerComponent
+        shapeType={shapeType}
+        shapeContentAttributes={shapeContentAttributes}
+        shapeAttributes={shapeAttributes}
+        ref={shapeRef}
+      />
     </div>
   );
 }
