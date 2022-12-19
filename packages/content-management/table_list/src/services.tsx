@@ -47,11 +47,11 @@ export interface Services {
   notifyError: NotifyFn;
   currentAppId$: Observable<string | undefined>;
   navigateToUrl: (url: string) => Promise<void> | void;
-  searchQueryParser?: (searchQuery: string) => {
+  searchQueryParser?: (searchQuery: string) => Promise<{
     searchQuery: string;
     references?: SavedObjectsFindOptionsReference[];
     referencesToExclude?: SavedObjectsFindOptionsReference[];
-  };
+  }>;
   DateFormatterComp?: DateFormatter;
   /** Handler to retrieve the list of available tags */
   getTagList: () => Tag[];
@@ -142,12 +142,12 @@ export interface TableListViewKibanaDependencies {
           useName?: boolean;
           tagField?: string;
         }
-      ) => {
+      ) => Promise<{
         searchTerm: string;
         tagReferences: SavedObjectsFindOptionsReference[];
         tagReferencesToExclude: SavedObjectsFindOptionsReference[];
         valid: boolean;
-      };
+      }>;
       getTagList: () => Tag[];
       getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
     };
@@ -167,8 +167,8 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
 
   const searchQueryParser = useMemo(() => {
     if (savedObjectsTagging) {
-      return (searchQuery: string) => {
-        const res = savedObjectsTagging.ui.parseSearchQuery(searchQuery, { useName: true });
+      return async (searchQuery: string) => {
+        const res = await savedObjectsTagging.ui.parseSearchQuery(searchQuery, { useName: true });
         return {
           searchQuery: res.searchTerm,
           references: res.tagReferences,
