@@ -113,7 +113,7 @@ export interface FilterEditorComponentProps {
   indexPatterns: DataView[];
   onSubmit: (filter: Filter) => void;
   onCancel: () => void;
-  onLocalFilterUpdated?: (filter: Filter) => void;
+  onLocalFilterUpdate?: (filter: Filter) => void;
   timeRangeForSuggestionsOverride?: boolean;
   mode?: 'edit' | 'add';
 }
@@ -460,7 +460,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     }
 
     this.setState({ localFilter: newFilter });
-    this.props.onLocalFilterUpdated?.(newFilter);
+    this.props.onLocalFilterUpdate?.(newFilter);
   };
 
   private onSubmit = () => {

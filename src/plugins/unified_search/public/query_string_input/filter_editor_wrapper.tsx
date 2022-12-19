@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Filter, buildEmptyFilter } from '@kbn/es-query';
+import { Filter, buildEmptyFilter, FILTERS } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -72,8 +72,12 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
     onFiltersUpdated?.(updatedFilters);
   }
 
-  const onLocalFilterUpdated = (localFilter: Filter) => {
-    if (localFilter && localFilter.meta.type === 'combined' && localFilter.meta.params.length > 1) {
+  const onLocalFilterUpdate = (localFilter: Filter) => {
+    if (
+      localFilter &&
+      localFilter.meta.type === FILTERS.COMBINED &&
+      localFilter.meta.params.length > 1
+    ) {
       setShouldShowConfirmModalOnClosePopover?.(true);
     } else {
       setShouldShowConfirmModalOnClosePopover?.(false);
@@ -84,14 +88,14 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
     <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
       {newFilter && (
         <FilterEditor
+          mode="add"
           filter={newFilter}
           indexPatterns={dataViews}
-          onSubmit={onAdd}
-          onLocalFilterUpdated={onLocalFilterUpdated}
-          onCancel={() => closePopover?.()}
           key={JSON.stringify(newFilter)}
+          onSubmit={onAdd}
+          onCancel={() => closePopover?.()}
+          onLocalFilterUpdate={onLocalFilterUpdate}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-          mode="add"
         />
       )}
     </div>
