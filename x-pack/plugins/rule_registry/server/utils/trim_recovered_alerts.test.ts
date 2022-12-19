@@ -50,6 +50,10 @@ describe('trimRecoveredAlerts', () => {
     const trimmedAlerts = trimRecoveredAlerts(recoveredEvents, trackedEvents, alertFactory);
     expect(trimmedAlerts.trackedEventsToIndex).toEqual([alert4]);
     expect(trimmedAlerts.trackedRecoveredEventsToIndex).toEqual([alert1, alert3]);
+    expect(trimmedAlerts.earlyRecoveredEvents).toEqual([
+      { ...alert2, flapping: false },
+      { ...alert2, flapping: false },
+    ]);
   });
 
   test('should not remove alerts if the num of recovered alerts is not at the limit', () => {
@@ -59,5 +63,6 @@ describe('trimRecoveredAlerts', () => {
     const trimmedAlerts = trimRecoveredAlerts(recoveredEvents, trackedEvents, alertFactory);
     expect(trimmedAlerts.trackedEventsToIndex).toEqual(trackedEvents);
     expect(trimmedAlerts.trackedRecoveredEventsToIndex).toEqual(recoveredEvents);
+    expect(trimmedAlerts.earlyRecoveredEvents).toEqual([]);
   });
 });

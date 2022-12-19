@@ -42,3 +42,4 @@ export { setFlapping } from './set_flapping';
 export { determineAlertsToReturn } from './determine_alerts_to_return';
 export { updateFlappingHistory, isFlapping } from './flapping_utils';
 export { trimRecoveredAlerts } from './trim_recovered_alerts';
+export { getAlertsForNotification } from './get_alerts_for_notification';

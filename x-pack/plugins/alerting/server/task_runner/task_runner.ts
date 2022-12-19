@@ -6,7 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { cloneDeep, omit } from 'lodash';
+import { cloneDeep, merge, omit } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import uuid from 'uuid';
 import { Logger } from '@kbn/core/server';
@@ -28,6 +28,7 @@ import {
   getNextRun,
   determineAlertsToReturn,
   trimRecoveredAlerts,
+  getAlertsForNotification,
 } from '../lib';
 import {
   RuleExecutionStatus,
@@ -429,19 +430,33 @@ export class TaskRunner<
           processedAlertsRecovered
         );
 
-        const { trimmedAlertsRecovered, trimmedAlertsRecoveredCurrent } = trimRecoveredAlerts<
+        const { trimmedAlertsRecovered, trimmedAlertsRecoveredCurrent, earlyRecoveredAlerts } =
+          trimRecoveredAlerts<State, Context, RecoveryActionGroupId, ActionGroupIds>(
+            processedAlertsRecovered,
+            processedAlertsRecoveredCurrent,
+            alertFactory
+          );
+
+        const alerts = getAlertsForNotification<
           State,
           Context,
-          RecoveryActionGroupId,
-          ActionGroupIds
-        >(processedAlertsRecovered, processedAlertsRecoveredCurrent, alertFactory);
+          ActionGroupIds,
+          RecoveryActionGroupId
+        >(
+          this.ruleType.defaultActionGroupId,
+          processedAlertsNew,
+          processedAlertsActive,
+          trimmedAlertsRecovered,
+          trimmedAlertsRecoveredCurrent
+        );
+        alerts.currentRecoveredAlerts = merge(alerts.currentRecoveredAlerts, earlyRecoveredAlerts);
 
         logAlerts({
           logger: this.logger,
           alertingEventLogger: this.alertingEventLogger,
-          newAlerts: processedAlertsNew,
-          activeAlerts: processedAlertsActive,
-          recoveredAlerts: trimmedAlertsRecoveredCurrent,
+          newAlerts: alerts.newAlerts,
+          activeAlerts: alerts.activeAlerts,
+          recoveredAlerts: alerts.currentRecoveredAlerts,
           ruleLogPrefix: ruleLabel,
           ruleRunMetricsStore,
           canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
@@ -449,10 +464,10 @@ export class TaskRunner<
         });
 
         return {
-          newAlerts: processedAlertsNew,
-          activeAlerts: processedAlertsActive,
-          recoveredAlerts: trimmedAlertsRecovered,
-          currentRecoveredAlerts: trimmedAlertsRecoveredCurrent,
+          newAlerts: alerts.newAlerts,
+          activeAlerts: alerts.activeAlerts,
+          recoveredAlerts: alerts.recoveredAlerts,
+          currentRecoveredAlerts: alerts.currentRecoveredAlerts,
         };
       }
     );

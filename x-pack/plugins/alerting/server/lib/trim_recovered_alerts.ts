@@ -17,6 +17,7 @@ interface TrimmedRecoveredAlertsResult<
 > {
   trimmedAlertsRecovered: Record<string, Alert<State, Context, RecoveryActionGroupIds>>;
   trimmedAlertsRecoveredCurrent: Record<string, Alert<State, Context, RecoveryActionGroupIds>>;
+  earlyRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>>;
 }
 
 export function trimRecoveredAlerts<
@@ -39,15 +40,19 @@ export function trimRecoveredAlerts<
       flappingHistory: value.getFlappingHistory() || [],
     };
   });
-  const earlyRecoveredAlerts = alertFactory.alertLimit.trimRecovered(alerts);
-  // Dropping the "early recovered" alerts for now.
-  // In #143445 we will want to recover these alerts and set flapping to false
-  earlyRecoveredAlerts.forEach((alert) => {
-    delete recoveredAlerts[alert.index];
-    delete currentRecoveredAlerts[alert.index];
+  const earlyRecoveredAlertOpts = alertFactory.alertLimit.trimRecovered(alerts);
+  const earlyRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {};
+  earlyRecoveredAlertOpts.forEach((opt) => {
+    const alert = recoveredAlerts[opt.index];
+    alert.setFlapping(false);
+    earlyRecoveredAlerts[opt.index] = recoveredAlerts[opt.index];
+
+    delete recoveredAlerts[opt.index];
+    delete currentRecoveredAlerts[opt.index];
   });
   return {
     trimmedAlertsRecovered: recoveredAlerts,
     trimmedAlertsRecoveredCurrent: currentRecoveredAlerts,
+    earlyRecoveredAlerts,
   };
 }

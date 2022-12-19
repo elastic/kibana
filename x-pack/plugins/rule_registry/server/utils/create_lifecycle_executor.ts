@@ -48,6 +48,7 @@ import { getCommonAlertFields } from './get_common_alert_fields';
 import { getUpdatedFlappingHistory } from './get_updated_flapping_history';
 import { fetchAlertByAlertUUID } from './fetch_alert_by_uuid';
 import { trimRecoveredAlerts } from './trim_recovered_alerts';
+import { getAlertsForNotification } from './get_alerts_for_notification';
 
 type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
 
@@ -105,6 +106,7 @@ const trackedAlertStateRt = rt.type({
   flappingHistory: rt.array(rt.boolean),
   // flapping flag that indicates whether the alert is flapping
   flapping: rt.boolean,
+  pendingRecoveredCount: rt.number,
 });
 
 export type TrackedLifecycleAlertState = rt.TypeOf<typeof trackedAlertStateRt>;
@@ -277,6 +279,7 @@ export const createLifecycleExecutor =
           alertUuid,
           started,
           flapping: isCurrentlyFlapping,
+          pendingRecoveredCount,
         } = !isNew
           ? state.trackedAlerts[alertId]
           : {
@@ -285,6 +288,7 @@ export const createLifecycleExecutor =
               flapping: state.trackedAlertsRecovered[alertId]
                 ? state.trackedAlertsRecovered[alertId].flapping
                 : false,
+              pendingRecoveredCount: 0,
             };
 
         const flapping = isFlapping(flappingHistory, isCurrentlyFlapping);
@@ -318,20 +322,23 @@ export const createLifecycleExecutor =
           event,
           flappingHistory,
           flapping,
+          pendingRecoveredCount,
         };
       });
 
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
-    const { trackedEventsToIndex, trackedRecoveredEventsToIndex } = trimRecoveredAlerts<
-      InstanceState,
-      InstanceContext,
-      ActionGroupIds
-    >(
-      makeEventsDataMapFor(trackedAlertRecoveredIds),
-      makeEventsDataMapFor(trackedAlertIds),
-      alertFactory
-    );
-    const allEventsToIndex = [...trackedEventsToIndex, ...newEventsToIndex];
+    const { trackedEventsToIndex, trackedRecoveredEventsToIndex, earlyRecoveredEvents } =
+      trimRecoveredAlerts<InstanceState, InstanceContext, ActionGroupIds>(
+        makeEventsDataMapFor(trackedAlertRecoveredIds),
+        makeEventsDataMapFor(trackedAlertIds),
+        alertFactory
+      );
+
+    const allEventsToIndex = [
+      ...getAlertsForNotification(trackedEventsToIndex),
+      ...newEventsToIndex,
+      ...earlyRecoveredEvents,
+    ];
 
     // Only write alerts if:
     // - writing is enabled
@@ -362,11 +369,14 @@ export const createLifecycleExecutor =
     const nextTrackedAlerts = Object.fromEntries(
       allEventsToIndex
         .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
-        .map(({ event, flappingHistory, flapping }) => {
+        .map(({ event, flappingHistory, flapping, pendingRecoveredCount }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
           const alertUuid = event[ALERT_UUID]!;
           const started = new Date(event[ALERT_START]!).toISOString();
-          return [alertId, { alertId, alertUuid, started, flappingHistory, flapping }];
+          return [
+            alertId,
+            { alertId, alertUuid, started, flappingHistory, flapping, pendingRecoveredCount },
+          ];
         })
     );
 
@@ -380,11 +390,14 @@ export const createLifecycleExecutor =
             event[ALERT_STATUS] === ALERT_STATUS_RECOVERED &&
             (flapping || flappingHistory.filter((f: boolean) => f).length > 0)
         )
-        .map(({ event, flappingHistory, flapping }) => {
+        .map(({ event, flappingHistory, flapping, pendingRecoveredCount }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
           const alertUuid = event[ALERT_UUID]!;
           const started = new Date(event[ALERT_START]!).toISOString();
-          return [alertId, { alertId, alertUuid, started, flappingHistory, flapping }];
+          return [
+            alertId,
+            { alertId, alertUuid, started, flappingHistory, flapping, pendingRecoveredCount },
+          ];
         })
     );
 

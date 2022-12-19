@@ -29,19 +29,23 @@ export function trimRecoveredAlerts<
       .map((e, index) => ({ index, flappingHistory: e.flappingHistory, trackedEvents: true })),
   ];
 
-  const earlyRecoveredAlerts = alertFactory.alertLimit.trimRecovered(recoveredAlerts);
-  // Dropping the "early recovered" alerts for now.
-  // In #143445 we will want to recover these alerts and set flapping to false
-  earlyRecoveredAlerts.forEach((alert) => {
-    if (alert.trackedEvents) {
-      trackedEvents.splice(alert.index as number, 1);
+  const earlyRecoveredAlertOpts = alertFactory.alertLimit.trimRecovered(recoveredAlerts);
+  let earlyRecoveredEvents: any[] = [];
+  earlyRecoveredAlertOpts.forEach((opts) => {
+    let alert;
+    if (opts.trackedEvents) {
+      alert = trackedEvents.splice(opts.index as number, 1);
     } else {
-      trackedRecoveredEvents.splice(alert.index as number, 1);
+      alert = trackedRecoveredEvents.splice(opts.index as number, 1);
     }
+
+    alert[0].flapping = false;
+    earlyRecoveredEvents = earlyRecoveredEvents.concat(alert);
   });
 
   return {
     trackedEventsToIndex: trackedEvents,
     trackedRecoveredEventsToIndex: trackedRecoveredEvents,
+    earlyRecoveredEvents,
   };
 }

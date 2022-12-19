@@ -344,6 +344,7 @@ export const generateAlertInstance = (
       },
       flappingHistory,
       flapping: false,
+      pendingRecoveredCount: 0,
     },
     state: {
       bar: false,
