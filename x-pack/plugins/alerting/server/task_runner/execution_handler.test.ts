@@ -1168,6 +1168,109 @@ describe('Execution Handler', () => {
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.COMPLETE);
   });
 
+  test('schedules alerts with multiple recovered actions', async () => {
+    const actions = [
+      {
+        id: '1',
+        group: 'recovered',
+        actionTypeId: 'test',
+        params: {
+          foo: true,
+          contextVal: 'My {{context.value}} goes here',
+          stateVal: 'My {{state.value}} goes here',
+          alertVal:
+            'My {{alertId}} {{alertName}} {{spaceId}} {{tags}} {{alertInstanceId}} goes here',
+        },
+      },
+      {
+        id: '2',
+        group: 'recovered',
+        actionTypeId: 'test',
+        params: {
+          foo: true,
+          contextVal: 'My {{context.value}} goes here',
+          stateVal: 'My {{state.value}} goes here',
+          alertVal:
+            'My {{alertId}} {{alertName}} {{spaceId}} {{tags}} {{alertInstanceId}} goes here',
+        },
+      },
+    ];
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        ...defaultExecutionParams,
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions,
+        },
+      })
+    );
+    await executionHandler.run(generateRecoveredAlert({ id: 1 }));
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "apiKey": "MTIzOmFiYw==",
+                "consumer": "rule-consumer",
+                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                "id": "1",
+                "params": Object {
+                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+                  "contextVal": "My  goes here",
+                  "foo": true,
+                  "stateVal": "My  goes here",
+                },
+                "relatedSavedObjects": Array [
+                  Object {
+                    "id": "1",
+                    "namespace": "test1",
+                    "type": "alert",
+                    "typeId": "test",
+                  },
+                ],
+                "source": Object {
+                  "source": Object {
+                    "id": "1",
+                    "type": "alert",
+                  },
+                  "type": "SAVED_OBJECT",
+                },
+                "spaceId": "test1",
+              },
+              Object {
+                "apiKey": "MTIzOmFiYw==",
+                "consumer": "rule-consumer",
+                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                "id": "2",
+                "params": Object {
+                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+                  "contextVal": "My  goes here",
+                  "foo": true,
+                  "stateVal": "My  goes here",
+                },
+                "relatedSavedObjects": Array [
+                  Object {
+                    "id": "1",
+                    "namespace": "test1",
+                    "type": "alert",
+                    "typeId": "test",
+                  },
+                ],
+                "source": Object {
+                  "source": Object {
+                    "id": "1",
+                    "type": "alert",
+                  },
+                  "type": "SAVED_OBJECT",
+                },
+                "spaceId": "test1",
+              },
+            ],
+          ]
+      `);
+  });
+
   describe('rule url', () => {
     const ruleWithUrl = {
       ...rule,

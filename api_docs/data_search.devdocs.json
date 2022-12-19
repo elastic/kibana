@@ -12066,6 +12066,23 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.aggRate",
+        "type": "Function",
+        "tags": [],
+        "label": "aggRate",
+        "description": [],
+        "signature": [
+          "() => FunctionDefinition"
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/rate_fn.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.aggregateQueryToAst",
         "type": "Function",
         "tags": [],
@@ -14856,6 +14873,39 @@
           ">"
         ],
         "path": "src/plugins/data/common/search/aggs/buckets/rare_terms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.getRateMetricAgg",
+        "type": "Function",
+        "tags": [],
+        "label": "getRateMetricAgg",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IMetricAggConfig",
+            "text": "IMetricAggConfig"
+          },
+          ">"
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/rate.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -22739,6 +22789,26 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.RATE",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.RATE]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsRate",
+                "text": "AggParamsRate"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.AggParamsMapping.METRIC_TYPES.SERIAL_DIFF",
             "type": "Object",
             "tags": [],
@@ -23347,6 +23417,62 @@
               "number | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/rare_terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsRate",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsRate",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsRate",
+            "text": "AggParamsRate"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/rate.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsRate.unit",
+            "type": "string",
+            "tags": [],
+            "label": "unit",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/metrics/rate.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsRate.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/rate.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -31795,6 +31921,21 @@
           "\"aggRareTerms\""
         ],
         "path": "src/plugins/data/common/search/aggs/buckets/rare_terms_fn.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.aggRateFnName",
+        "type": "string",
+        "tags": [],
+        "label": "aggRateFnName",
+        "description": [],
+        "signature": [
+          "\"aggRate\""
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/rate_fn.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
