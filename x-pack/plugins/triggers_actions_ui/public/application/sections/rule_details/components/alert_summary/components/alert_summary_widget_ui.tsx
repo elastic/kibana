@@ -39,7 +39,7 @@ export const AlertsSummaryWidgetUI = ({
   return (
     <EuiPanel
       element="div"
-      data-test-subj="ruleAlertsSummary"
+      data-test-subj="alertSummaryWidget"
       hasShadow={false}
       hasBorder
       onClick={handleClick}

@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { RuleAlertsSummary } from '../application/sections';
-import { RuleAlertsSummaryProps } from '../application/sections/rule_details/components/alert_summary';
+import { AlertSummaryWidget } from '../application/sections';
+import { AlertSummaryWidgetProps } from '../application/sections/rule_details/components/alert_summary';
 
-export const getRuleAlertsSummaryLazy = (props: RuleAlertsSummaryProps) => {
-  return <RuleAlertsSummary {...props} />;
+export const getAlertSummaryWidgetLazy = (props: AlertSummaryWidgetProps) => {
+  return <AlertSummaryWidget {...props} />;
 };
