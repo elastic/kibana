@@ -11,5 +11,4 @@ export * from './painless_error';
 export * from './timeout_error';
 export * from './utils';
 export * from './types';
-export * from './http_error';
 export * from './search_session_incomplete_warning';

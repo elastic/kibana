@@ -96,10 +96,10 @@ export const WithGuidedOnboardingTour: FunctionComponent<{
       anchorPosition={tourPosition ? tourPosition : 'rightUp'}
       footerAction={
         <EuiButtonEmpty
+          onClick={() => setIsGuidedOnboardingTourOpen(false)}
           size="xs"
           color="text"
           flush="right"
-          onClick={() => setIsGuidedOnboardingTourOpen(false)}
         >
           {i18n.translate('xpack.fleet.guidedOnboardingTour.nextButtonLabel', {
             defaultMessage: 'Continue',
