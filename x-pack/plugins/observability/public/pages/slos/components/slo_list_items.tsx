@@ -35,20 +35,18 @@ export function SloListItems({
 }: SloListItemsProps) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      {slos.length ? (
-        slos
-          .filter(filterSlos(filters))
-          .sort(sortSlos(sort))
-          .map((slo) => (
-            <EuiFlexItem key={slo.id}>
-              <SloListItem slo={slo} onDeleted={onDeleted} onDeleting={onDeleting} />
-            </EuiFlexItem>
-          ))
-      ) : !loading && !error ? (
-        <SloListEmpty />
-      ) : error ? (
-        <SloListError />
-      ) : null}
+      {slos.length
+        ? slos
+            .filter(filterSlos(filters))
+            .sort(sortSlos(sort))
+            .map((slo) => (
+              <EuiFlexItem key={slo.id}>
+                <SloListItem slo={slo} onDeleted={onDeleted} onDeleting={onDeleting} />
+              </EuiFlexItem>
+            ))
+        : null}
+      {!loading && !error ? <SloListEmpty /> : null}
+      {!loading && error ? <SloListError /> : null}
     </EuiFlexGroup>
   );
 }
