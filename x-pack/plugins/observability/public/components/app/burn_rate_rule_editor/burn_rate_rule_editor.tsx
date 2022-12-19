@@ -12,7 +12,7 @@ import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { toMinutes } from '../../../utils/slo/duration';
-import { useFetchSloDetails } from '../../../pages/slo_details/hooks/use_fetch_slo_details';
+import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
 import { BurnRateRuleParams, Duration, DurationUnit, SLO } from '../../../typings';
 import { SloSelector } from './slo_selector';
 import { BurnRate } from './burn_rate';
@@ -82,6 +82,17 @@ export function BurnRateRuleEditor(props: Props) {
     setRuleParams('maxBurnRateThreshold', maxBurnRate);
   }, [burnRate, maxBurnRate, setRuleParams]);
 
+  const computeErrorBudgetExhaustionInHours = () => {
+    if (selectedSlo && longWindowDuration?.value > 0 && burnRate >= 1) {
+      return numeral(
+        longWindowDuration.value /
+          ((burnRate * toMinutes(longWindowDuration)) / toMinutes(selectedSlo.timeWindow.duration))
+      ).format('0a');
+    }
+
+    return 'N/A';
+  };
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexGroup direction="row">
@@ -110,21 +121,12 @@ export function BurnRateRuleEditor(props: Props) {
       </EuiFlexGroup>
 
       <EuiFlexGroup direction="row">
-        {selectedSlo && longWindowDuration?.value > 0 && burnRate >= 1 && (
-          <EuiFlexItem>
-            <EuiText size="s" color="subdued">
-              {getErrorBudgetExhaustionText(
-                numeral(
-                  longWindowDuration.value /
-                    ((burnRate * toMinutes(longWindowDuration)) /
-                      toMinutes(selectedSlo.timeWindow.duration))
-                ).format('0a')
-              )}
-            </EuiText>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem>
+          <EuiText size="s" color="subdued">
+            {getErrorBudgetExhaustionText(computeErrorBudgetExhaustionInHours())}
+          </EuiText>
+        </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="m" />
     </EuiFlexGroup>
   );

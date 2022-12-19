@@ -7,9 +7,9 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useMemo } from 'react';
-import { toSLO } from '../../../utils/slo/slo';
-import { useDataFetcher } from '../../../hooks/use_data_fetcher';
-import { SLO } from '../../../typings';
+import { toSLO } from '../../utils/slo/slo';
+import { useDataFetcher } from '../use_data_fetcher';
+import { SLO } from '../../typings';
 
 interface UseFetchSloDetailsResponse {
   loading: boolean;
