@@ -210,6 +210,37 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
   {
     requireAllSpaces: true,
     privilegesTooltip: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.kubernetesCommands.privilegesTooltip',
+      {
+        defaultMessage:
+          'Grant access to Execute Kubernetes Commands from the Response Console. All Spaces is required for Kubernetes Commands access.',
+      }
+    ),
+    name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.kubernetesCommands', {
+      defaultMessage: 'Kubernetes Commands',
+    }),
+    privilegeGroups: [
+      {
+        groupType: 'mutually_exclusive',
+        privileges: [
+          {
+            api: [`${APP_ID}-executeKubernetesCommands`],
+            id: 'kubernetes_commands_all',
+            includeIn: 'none',
+            name: 'All',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['executeKubernetesCommands'],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    requireAllSpaces: true,
+    privilegesTooltip: i18n.translate(
       'xpack.securitySolution.featureRegistry.subFeatures.fileOperations.privilegesTooltip',
       {
         defaultMessage: 'All Spaces is required for File Operations access.',

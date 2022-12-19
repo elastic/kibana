@@ -248,6 +248,7 @@ describe('Endpoint Authz service', () => {
         canReadBlocklist: false,
         canWriteEventFilters: false,
         canReadEventFilters: false,
+        canExecuteKubernetesCommands: false,
       });
     });
   });

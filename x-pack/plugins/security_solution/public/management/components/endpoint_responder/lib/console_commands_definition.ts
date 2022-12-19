@@ -90,7 +90,7 @@ const getRbacControl = ({
     ['suspend-process', privileges.canSuspendProcess],
     ['processes', privileges.canGetRunningProcesses],
     ['get-file', privileges.canWriteFileOperations],
-    ['kube-list', true], // TODO: RBAC Kubernetes
+    ['kube-list', privileges.canExecuteKubernetesCommands],
   ]);
   return commandToPrivilegeMap.get(commandName as ConsoleResponseActionCommands) ?? false;
 };
