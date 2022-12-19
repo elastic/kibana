@@ -18,11 +18,12 @@ export const validateQuery =
   }): InvokeCreator<LogStreamQueryContext, LogStreamQueryEvent> =>
   (context) =>
   (send) => {
+    console.log(context);
     if (!('query' in context)) {
       throw new Error('Failed to validate query: no query in context');
     }
 
-    const { dataViews, query } = context;
+    const { dataViews, query, filters } = context;
 
     if (!isOfQueryType(query)) {
       send({
@@ -34,7 +35,7 @@ export const validateQuery =
     }
 
     try {
-      const parsedQuery = buildEsQuery(dataViews, query, [], kibanaQuerySettings);
+      const parsedQuery = buildEsQuery(dataViews, query, filters, kibanaQuerySettings);
 
       send({
         type: 'VALIDATION_SUCCEEDED',

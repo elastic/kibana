@@ -21,6 +21,7 @@ export const useLogSummary = (
   endTimestamp: number | null,
   filterQuery: string | null
 ) => {
+  console.log('filterQuery', filterQuery);
   const { services } = useKibanaContextForPlugin();
   const [logSummaryBuckets, setLogSummaryBuckets] = useState<LogSummaryBuckets>([]);
   const bucketSize = useBucketSize(startTimestamp, endTimestamp);

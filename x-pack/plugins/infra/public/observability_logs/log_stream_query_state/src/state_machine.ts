@@ -7,7 +7,7 @@
 
 import { EsQueryConfig } from '@kbn/es-query';
 import { actions, ActorRefFrom, createMachine, SpecialTargets } from 'xstate';
-import { QueryStringContract } from '@kbn/data-plugin/public';
+import { FilterManager, QueryStringContract } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { OmitDeprecatedState, sendIfDefined } from '../../xstate_helpers';
@@ -21,9 +21,19 @@ import type {
   LogStreamQueryContextWithValidationError,
   LogStreamQueryEvent,
   LogStreamQueryTypestate,
+  LogStreamQueryContextWithFilters,
 } from './types';
-import { subscribeToSearchBarChanges, updateQueryInSearchBar } from './search_bar_state_service';
-import { initializeFromUrl, updateQueryInUrl } from './url_state_storage_service';
+import {
+  initializeFromUrl,
+  updateQueryInUrl,
+  updateFiltersInUrl,
+} from './url_state_storage_service';
+import {
+  subscribeToQuerySearchBarChanges,
+  subscribeToFilterSearchBarChanges,
+  updateQueryInSearchBar,
+  updateFiltersInSearchBar,
+} from './search_bar_state_service';
 
 export const createPureLogStreamQueryStateMachine = (
   initialContext: LogStreamQueryContextWithDataViews
@@ -40,7 +50,12 @@ export const createPureLogStreamQueryStateMachine = (
         uninitialized: {
           always: {
             target: 'hasQuery',
-            actions: ['initializeFromUrl', 'updateQueryInUrl', 'updateQueryInSearchBar'],
+            actions: [
+              'initializeFromUrl',
+              'updateQueryInUrl',
+              'updateQueryInSearchBar',
+              'updateFiltersInSearchBar',
+            ],
           },
         },
         hasQuery: {
@@ -49,7 +64,10 @@ export const createPureLogStreamQueryStateMachine = (
               src: 'subscribeToUrlStateStorageChanges',
             },
             {
-              src: 'subscribeToSearchBarChanges',
+              src: 'subscribeToQuerySearchBarChanges',
+            },
+            {
+              src: 'subscribeToFilterSearchBarChanges',
             },
           ],
           initial: 'validating',
@@ -81,6 +99,14 @@ export const createPureLogStreamQueryStateMachine = (
               target: '.validating',
               actions: ['storeQuery', 'updateQueryInSearchBar'],
             },
+            FILTERS_FROM_SEARCH_BAR_CHANGED: {
+              target: '.validating',
+              actions: ['storeFilters', 'updateFiltersInUrl'],
+            },
+            FILTERS_FROM_URL_CHANGED: {
+              target: '.validating',
+              actions: ['updateFiltersInUi', 'storeFilters'],
+            },
             DATA_VIEWS_CHANGED: {
               target: '.validating',
               actions: 'storeDataViews',
@@ -99,6 +125,9 @@ export const createPureLogStreamQueryStateMachine = (
         notifyValidQueryChanged: actions.pure(() => undefined),
         storeQuery: actions.assign((_context, event) =>
           'query' in event ? ({ query: event.query } as LogStreamQueryContextWithQuery) : {}
+        ),
+        storeFilters: actions.assign((_context, event) =>
+          'filters' in event ? ({ filters: event.filters } as LogStreamQueryContextWithFilters) : {}
         ),
         storeDataViews: actions.assign((_context, event) =>
           'dataViews' in event
@@ -138,6 +167,7 @@ export const createPureLogStreamQueryStateMachine = (
 export interface LogStreamQueryStateMachineDependencies {
   kibanaQuerySettings: EsQueryConfig;
   queryStringService: QueryStringContract;
+  filterManagerService: FilterManager;
   urlStateStorage: IKbnUrlStateStorage;
   toastsService: IToasts;
 }
@@ -148,6 +178,7 @@ export const createLogStreamQueryStateMachine = (
     kibanaQuerySettings,
     queryStringService,
     toastsService,
+    filterManagerService,
     urlStateStorage,
   }: LogStreamQueryStateMachineDependencies
 ) =>
@@ -162,10 +193,17 @@ export const createLogStreamQueryStateMachine = (
       ),
       updateQueryInUrl: updateQueryInUrl({ urlStateStorage }),
       updateQueryInSearchBar: updateQueryInSearchBar({ queryStringService }),
+      updateFiltersInUrl: updateFiltersInUrl({ urlStateStorage }),
+      updateFiltersInSearchBar: updateFiltersInSearchBar({ filterManagerService }),
     },
     services: {
       validateQuery: validateQuery({ kibanaQuerySettings }),
-      subscribeToSearchBarChanges: subscribeToSearchBarChanges({ queryStringService }),
+      subscribeToQuerySearchBarChanges: subscribeToQuerySearchBarChanges({
+        queryStringService,
+      }),
+      subscribeToFilterSearchBarChanges: subscribeToFilterSearchBarChanges({
+        filterManagerService,
+      }),
     },
   });
 

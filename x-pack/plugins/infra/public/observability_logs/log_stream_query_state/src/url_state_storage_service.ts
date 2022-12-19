@@ -31,6 +31,7 @@ const defaultFilterStateValue: FilterStateInUrl = {
     language: 'kuery',
     query: '',
   },
+  filters: [],
 };
 export const safeDefaultParsedQuery: ParsedQuery = {
   bool: {
@@ -70,6 +71,34 @@ export const updateQueryInUrl =
       filterStateKey,
       filterStateInUrlRT.encode({
         query: context.query,
+        filters: context.filters,
+      })
+    );
+  };
+
+export const updateFiltersInUrl =
+  ({
+    urlStateStorage,
+    filterStateKey = defaultFilterStateKey,
+  }: LogStreamQueryUrlStateDependencies) =>
+  (context: LogStreamQueryContext, event: LogStreamQueryEvent) => {
+    console.log(context);
+    if (!('filters' in context)) {
+      throw new Error();
+    }
+
+    console.log(
+      filterStateInUrlRT.encode({
+        query: context.query,
+        filters: context.filters,
+      })
+    );
+
+    urlStateStorage.set(
+      filterStateKey,
+      filterStateInUrlRT.encode({
+        query: context.query,
+        filters: context.filters,
       })
     );
   };
@@ -83,6 +112,8 @@ export const initializeFromUrl = ({
 }) =>
   actions.pure<LogStreamQueryContext, LogStreamQueryEvent>(() => {
     const queryValueFromUrl = urlStateStorage.get(filterStateKey) ?? defaultFilterStateValue;
+    console.log(queryValueFromUrl);
+    console.log(filterStateInUrlRT.decode(queryValueFromUrl));
     return pipe(
       legacyFilterStateInUrlRT.decode(queryValueFromUrl),
       Either.map((legacyQuery) => ({ query: legacyQuery })),
@@ -97,12 +128,14 @@ export const initializeFromUrl = ({
           },
           actions.assign<LogStreamQueryContext, LogStreamQueryEvent>({
             query: defaultFilterStateValue.query,
+            filters: defaultFilterStateValue.filters,
             parsedQuery: safeDefaultParsedQuery,
           } as LogStreamQueryContextWithQuery & LogStreamQueryContextWithParsedQuery),
         ],
-        ({ query }) => [
+        ({ query, filters }) => [
           actions.assign<LogStreamQueryContext, LogStreamQueryEvent>({
             query,
+            filters,
             parsedQuery: safeDefaultParsedQuery,
           } as LogStreamQueryContextWithQuery & LogStreamQueryContextWithParsedQuery),
         ]
@@ -110,21 +143,48 @@ export const initializeFromUrl = ({
     );
   });
 
-const filterStateInUrlRT = rt.strict({
-  query: rt.union([
-    rt.strict({
-      language: rt.string,
-      query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
-    }),
-    rt.strict({
-      sql: rt.string,
-    }),
-    rt.strict({
-      esql: rt.string,
-    }),
-  ]),
-  // "filters" could go here
+const filterMeta = rt.partial({
+  alias: rt.union([rt.string, rt.null]),
+  disabled: rt.boolean,
+  negate: rt.boolean,
+  controlledBy: rt.string,
+  group: rt.string,
+  index: rt.string,
+  isMultiIndex: rt.boolean,
+  type: rt.string,
+  key: rt.string,
+  params: rt.unknown,
+  value: rt.string,
 });
+
+const filter = rt.intersection([
+  rt.type({
+    meta: filterMeta,
+  }),
+  rt.partial({
+    query: rt.UnknownRecord,
+  }),
+]);
+
+const filterStateInUrlRT = rt.intersection([
+  rt.strict({
+    query: rt.union([
+      rt.strict({
+        language: rt.string,
+        query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
+      }),
+      rt.strict({
+        sql: rt.string,
+      }),
+      rt.strict({
+        esql: rt.string,
+      }),
+    ]),
+  }),
+  rt.partial({
+    filters: rt.array(filter),
+  }),
+]);
 
 type FilterStateInUrl = rt.TypeOf<typeof filterStateInUrlRT>;
 

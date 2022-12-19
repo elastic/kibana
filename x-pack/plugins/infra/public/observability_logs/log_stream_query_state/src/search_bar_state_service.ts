@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { QueryStringContract } from '@kbn/data-plugin/public';
+import { FilterManager, QueryStringContract } from '@kbn/data-plugin/public';
 import { map } from 'rxjs/operators';
 import type { InvokeCreator } from 'xstate';
 import type { LogStreamQueryContext, LogStreamQueryEvent } from './types';
 
-export const subscribeToSearchBarChanges =
+export const subscribeToQuerySearchBarChanges =
   ({
     queryStringService,
   }: {
@@ -35,4 +35,32 @@ export const updateQueryInSearchBar =
     }
 
     queryStringService.setQuery(context.query);
+  };
+
+export const subscribeToFilterSearchBarChanges =
+  ({
+    filterManagerService,
+  }: {
+    filterManagerService: FilterManager;
+  }): InvokeCreator<LogStreamQueryContext, LogStreamQueryEvent> =>
+  (context) =>
+    filterManagerService.getUpdates$().pipe(
+      map(() => filterManagerService.getFilters()),
+      map((filters): LogStreamQueryEvent => {
+        console.log(filters);
+        return {
+          type: 'FILTERS_FROM_SEARCH_BAR_CHANGED',
+          filters,
+        };
+      })
+    );
+
+export const updateFiltersInSearchBar =
+  ({ filterManagerService }: { filterManagerService: FilterManager }) =>
+  (context: LogStreamQueryContext, event: LogStreamQueryEvent) => {
+    if (!('filters' in context)) {
+      return;
+    }
+
+    filterManagerService.setFilters(context.filters);
   };

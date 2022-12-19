@@ -18,6 +18,7 @@ export const useLogStreamPageState = ({
   logViewStateNotifications,
   queryStringService,
   toastsService,
+  filterManagerService,
   urlStateStorage,
   useDevTools = isDevMode(),
 }: {
@@ -30,6 +31,7 @@ export const useLogStreamPageState = ({
         logViewStateNotifications,
         queryStringService,
         toastsService,
+        filterManagerService,
         urlStateStorage,
       }),
     { devTools: useDevTools }

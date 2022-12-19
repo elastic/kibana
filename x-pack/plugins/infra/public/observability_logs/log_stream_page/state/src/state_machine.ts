@@ -175,6 +175,7 @@ export const createLogStreamPageStateMachine = ({
   logViewStateNotifications,
   queryStringService,
   toastsService,
+  filterManagerService,
   urlStateStorage,
 }: LogStreamPageStateMachineDependencies) =>
   createPureLogStreamPageStateMachine().withConfig({
@@ -193,6 +194,7 @@ export const createLogStreamPageStateMachine = ({
             kibanaQuerySettings,
             queryStringService,
             toastsService,
+            filterManagerService,
             urlStateStorage,
           }
         );

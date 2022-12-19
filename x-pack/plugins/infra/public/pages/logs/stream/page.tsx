@@ -31,7 +31,7 @@ export const StreamPage = () => {
   const {
     services: {
       data: {
-        query: { queryString: queryStringService },
+        query: { queryString: queryStringService, filterManager: filterManagerService },
       },
       notifications: { toasts: toastsService },
     },
@@ -46,6 +46,7 @@ export const StreamPage = () => {
         logViewStateNotifications={logViewStateNotifications}
         queryStringService={queryStringService}
         toastsService={toastsService}
+        filterManagerService={filterManagerService}
         urlStateStorage={urlStateStorage}
       >
         <ConnectedStreamPageContentMemo />

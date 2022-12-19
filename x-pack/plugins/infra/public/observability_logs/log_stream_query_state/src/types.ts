@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregateQuery, BoolQuery, DataViewBase, Query } from '@kbn/es-query';
+import { AggregateQuery, BoolQuery, DataViewBase, Query, Filter } from '@kbn/es-query';
 
 export type AnyQuery = Query | AggregateQuery;
 
@@ -25,6 +25,10 @@ export interface LogStreamQueryContextWithParsedQuery {
   parsedQuery: ParsedQuery;
 }
 
+export interface LogStreamQueryContextWithFilters {
+  filters: Filter[];
+}
+
 export interface LogStreamQueryContextWithValidationError {
   validationError: Error;
 }
@@ -38,18 +42,21 @@ export type LogStreamQueryTypestate =
       value: 'hasQuery' | { hasQuery: 'validating' };
       context: LogStreamQueryContextWithDataViews &
         LogStreamQueryContextWithQuery &
-        LogStreamQueryContextWithParsedQuery;
+        LogStreamQueryContextWithParsedQuery &
+        LogStreamQueryContextWithFilters;
     }
   | {
       value: { hasQuery: 'valid' };
       context: LogStreamQueryContextWithDataViews &
         LogStreamQueryContextWithQuery &
-        LogStreamQueryContextWithParsedQuery;
+        LogStreamQueryContextWithParsedQuery &
+        LogStreamQueryContextWithFilters;
     }
   | {
       value: { hasQuery: 'invalid' };
       context: LogStreamQueryContextWithDataViews &
         LogStreamQueryContextWithQuery &
+        LogStreamQueryContextWithFilters &
         LogStreamQueryContextWithValidationError;
     };
 
@@ -65,6 +72,14 @@ export type LogStreamQueryEvent =
   | {
       type: 'QUERY_FROM_SEARCH_BAR_CHANGED';
       query: AnyQuery;
+    }
+  | {
+      type: 'FILTERS_FROM_SEARCH_BAR_CHANGED';
+      filters: Filter[];
+    }
+  | {
+      type: 'FILTERS_FROM_URL_CHANGED';
+      filters: Filter[];
     }
   | {
       type: 'DATA_VIEWS_CHANGED';
