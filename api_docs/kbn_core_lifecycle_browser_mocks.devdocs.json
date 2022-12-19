@@ -172,7 +172,23 @@
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
-              ">; savedObjects: jest.Mocked<",
+              ">; settings: { client: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">; globalClient: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">; }; savedObjects: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-browser",
                 "scope": "common",
@@ -236,7 +252,23 @@
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
-              ">; deprecations: undefined; injectedMetadata: { getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]> & ((name: string, defaultValue?: any) => unknown); }; theme: jest.Mocked<",
+              ">; settings: { client: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">; globalClient: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">; }; deprecations: undefined; injectedMetadata: { getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]> & ((name: string, defaultValue?: any) => unknown); }; theme: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-theme-browser",
                 "scope": "common",
@@ -373,7 +405,23 @@
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
-              ">; savedObjects: jest.Mocked<",
+              ">; settings: { client: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">; globalClient: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">; }; savedObjects: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-browser",
                 "scope": "common",

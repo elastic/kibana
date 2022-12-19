@@ -53,7 +53,6 @@ const Status = {
 
 function getStatusComponent(status: Agent['status']): React.ReactElement {
   switch (status) {
-    case 'warning':
     case 'error':
     case 'degraded':
       return Status.Unhealthy;

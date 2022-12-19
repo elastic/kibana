@@ -18,6 +18,7 @@ import {
   DynamicSettingsType,
 } from '../../../../../common/runtime_types';
 import { API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 const apiPath = API_URLS.DYNAMIC_SETTINGS;
 
@@ -79,4 +80,8 @@ export const fetchActionTypes = async (): Promise<ActionType[]> => {
       supportedFeatureIds,
     })
   );
+};
+
+export const syncGlobalParamsAPI = async (): Promise<boolean> => {
+  return await apiService.get(SYNTHETICS_API_URLS.SYNC_GLOBAL_PARAMS);
 };

@@ -16,3 +16,5 @@ export const setDynamicSettingsAction = createAsyncAction<DynamicSettings, Dynam
   'SET_DYNAMIC_SETTINGS'
 );
 export const getConnectorsAction = createAsyncAction<void, ActionConnector[]>('GET CONNECTORS');
+
+export const syncGlobalParamsAction = createAsyncAction<void, boolean>('SYNC GLOBAL PARAMS');
