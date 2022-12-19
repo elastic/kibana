@@ -178,6 +178,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           sourceIndex: Option.none,
           targetIndex,
           sourceIndexMappings: sourceMappings,
+          targetIndexCurrentMappings: sourceMappings,
+          targetIndexMappings: mergeMigrationMappingPropertyHashes(
+            stateP.targetIndexMappings,
+            sourceMappings
+          ),
           preTransformDocsActions: [
             // Point the version alias to the source index. This let's other Kibana
             // instances know that a migration for the current version has is "done"
@@ -188,11 +193,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
               stateP.versionAlias,
             ]),
           ],
-          targetIndexCurrentMappings: sourceMappings,
-          targetIndexMappings: mergeMigrationMappingPropertyHashes(
-            stateP.targetIndexMappings,
-            sourceMappings
-          ),
           versionIndexReadyActions: Option.none,
         };
       } else if (
