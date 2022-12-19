@@ -13,6 +13,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiLoadingContent,
   EuiPortal,
   EuiSpacer,
   EuiTabbedContent,
@@ -26,6 +27,7 @@ import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
 import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
@@ -85,39 +87,41 @@ const ContainerWithMarginRight = euiStyled.div`
 `;
 
 interface Props {
-  span?: Span;
-  parentTransaction?: Transaction;
+  spanId: string;
+  parentTransactionId?: string;
+  traceId: string;
   totalDuration?: number;
-  onClose: () => void;
   spanLinksCount: SpanLinksCount;
+  flyoutDetailTab?: string;
+  onClose: () => void;
 }
 
+const INITIAL_DATA = {
+  span: undefined,
+  parentTransaction: undefined,
+};
+
 export function SpanFlyout({
-  span,
-  parentTransaction,
+  spanId,
+  parentTransactionId,
+  traceId,
   totalDuration,
   onClose,
   spanLinksCount,
+  flyoutDetailTab,
 }: Props) {
-  if (!span) {
-    return null;
-  }
+  const { data = INITIAL_DATA, status } = useFetcher(
+    (callApmApi) => {
+      return callApmApi('GET /internal/apm/traces/{traceId}/spans/{spanId}', {
+        params: { path: { traceId, spanId }, query: { parentTransactionId } },
+      });
+    },
+    [traceId, spanId, parentTransactionId]
+  );
 
-  const stackframes = span.span.stacktrace;
-  const codeLanguage = parentTransaction?.service.language?.name;
-  const spanDb = span.span.db;
-  const spanTypes = getSpanTypes(span);
-  const spanHttpStatusCode =
-    span.http?.response?.status_code || span.span?.http?.response?.status_code;
-  const spanHttpUrl = span.url?.original || span.span?.http?.url?.original;
-  const spanHttpMethod = span.http?.request?.method || span.span?.http?.method;
+  const { span, parentTransaction } = data;
 
-  const spanLinksTabContent = getSpanLinksTabContent({
-    spanLinksCount,
-    traceId: span.trace.id,
-    spanId: span.span.id,
-    processorEvent: ProcessorEvent.span,
-  });
+  const isLoading = isPending(status);
 
   return (
     <EuiPortal>
@@ -129,25 +133,23 @@ export function SpanFlyout({
                 <h2>
                   {i18n.translate(
                     'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
-                    {
-                      defaultMessage: 'Span details',
-                    }
+                    { defaultMessage: 'Span details' }
                   )}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <DiscoverSpanLink span={span}>
-                {i18n.translate(
-                  'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                  {
-                    defaultMessage: 'View span in Discover',
-                  }
-                )}
-              </DiscoverSpanLink>
-            </EuiFlexItem>
+            {span && (
+              <EuiFlexItem grow={false}>
+                <DiscoverSpanLink spanId={span.span.id}>
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
+                    { defaultMessage: 'View span in Discover' }
+                  )}
+                </DiscoverSpanLink>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
-          {span.span.composite && (
+          {span?.span.composite && (
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiCallOut color="warning" iconType="gear" size="s">
@@ -164,113 +166,156 @@ export function SpanFlyout({
           )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <StickySpanProperties span={span} transaction={parentTransaction} />
-          <EuiSpacer size="m" />
-          <Summary
-            items={[
-              <TimestampTooltip time={span.timestamp.us / 1000} />,
-              <>
-                <DurationSummaryItem
-                  duration={span.span.duration.us}
-                  totalDuration={totalDuration}
-                  parentType="transaction"
-                />
-                {span.span.composite && (
-                  <CompositeSpanDurationSummaryItem
-                    count={span.span.composite.count}
-                    durationSum={span.span.composite.sum.us}
-                  />
-                )}
-              </>,
-              <ContainerWithMarginRight>
-                {spanHttpUrl && (
-                  <HttpInfoSummaryItem
-                    method={spanHttpMethod}
-                    url={spanHttpUrl}
-                    status={spanHttpStatusCode}
-                  />
-                )}
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.spanType',
-                    { defaultMessage: 'Type' }
-                  )}
-                >
-                  <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
-                </EuiToolTip>
-                {spanTypes.spanSubtype && (
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.apm.transactionDetails.spanFlyout.spanSubtype',
-                      { defaultMessage: 'Subtype' }
-                    )}
-                  >
-                    <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
-                  </EuiToolTip>
-                )}
-                {spanTypes.spanAction && (
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.apm.transactionDetails.spanFlyout.spanAction',
-                      { defaultMessage: 'Action' }
-                    )}
-                  >
-                    <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
-                  </EuiToolTip>
-                )}
-
-                <FailureBadge outcome={span.event?.outcome} />
-
-                <SyncBadge sync={span.span.sync} agentName={span.agent.name} />
-              </ContainerWithMarginRight>,
-            ]}
-          />
-          <EuiHorizontalRule />
-          <SpanDatabase spanDb={spanDb} />
-          <EuiTabbedContent
-            tabs={[
-              {
-                id: 'metadata',
-                name: i18n.translate(
-                  'xpack.apm.propertiesTable.tabs.metadataLabel',
-                  {
-                    defaultMessage: 'Metadata',
-                  }
-                ),
-                content: (
-                  <Fragment>
-                    <EuiSpacer size="m" />
-                    <SpanMetadata span={span} />
-                  </Fragment>
-                ),
-              },
-              ...(!isEmpty(stackframes)
-                ? [
-                    {
-                      id: 'stack-trace',
-                      name: i18n.translate(
-                        'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
-                        {
-                          defaultMessage: 'Stack Trace',
-                        }
-                      ),
-                      content: (
-                        <Fragment>
-                          <EuiSpacer size="l" />
-                          <Stacktrace
-                            stackframes={stackframes}
-                            codeLanguage={codeLanguage}
-                          />
-                        </Fragment>
-                      ),
-                    },
-                  ]
-                : []),
-              ...(spanLinksTabContent ? [spanLinksTabContent] : []),
-            ]}
-          />
+          {isLoading && <EuiLoadingContent />}
+          {span && (
+            <SpanFlyoutBody
+              span={span}
+              parentTransaction={parentTransaction}
+              totalDuration={totalDuration}
+              spanLinksCount={spanLinksCount}
+              flyoutDetailTab={flyoutDetailTab}
+            />
+          )}
         </EuiFlyoutBody>
       </ResponsiveFlyout>
     </EuiPortal>
+  );
+}
+
+function SpanFlyoutBody({
+  span,
+  parentTransaction,
+  totalDuration,
+  spanLinksCount,
+  flyoutDetailTab,
+}: {
+  span: Span;
+  parentTransaction?: Transaction;
+  totalDuration?: number;
+  spanLinksCount: SpanLinksCount;
+  flyoutDetailTab?: string;
+}) {
+  const stackframes = span.span.stacktrace;
+  const codeLanguage = parentTransaction?.service.language?.name;
+  const spanDb = span.span.db;
+  const spanTypes = getSpanTypes(span);
+  const spanHttpStatusCode =
+    span.http?.response?.status_code || span.span?.http?.response?.status_code;
+  const spanHttpUrl = span.url?.original || span.span?.http?.url?.original;
+  const spanHttpMethod = span.http?.request?.method || span.span?.http?.method;
+
+  const spanLinksTabContent = getSpanLinksTabContent({
+    spanLinksCount,
+    traceId: span.trace.id,
+    spanId: span.span.id,
+    processorEvent: ProcessorEvent.span,
+  });
+
+  const tabs = [
+    {
+      id: 'metadata',
+      name: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
+        defaultMessage: 'Metadata',
+      }),
+      content: (
+        <Fragment>
+          <EuiSpacer size="m" />
+          <SpanMetadata spanId={span.span.id} />
+        </Fragment>
+      ),
+    },
+    ...(!isEmpty(stackframes)
+      ? [
+          {
+            id: 'stack-trace',
+            name: i18n.translate(
+              'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
+              {
+                defaultMessage: 'Stack Trace',
+              }
+            ),
+            content: (
+              <Fragment>
+                <EuiSpacer size="l" />
+                <Stacktrace
+                  stackframes={stackframes}
+                  codeLanguage={codeLanguage}
+                />
+              </Fragment>
+            ),
+          },
+        ]
+      : []),
+    ...(spanLinksTabContent ? [spanLinksTabContent] : []),
+  ];
+
+  const initialTab = tabs.find(({ id }) => id === flyoutDetailTab) ?? tabs[0];
+  return (
+    <>
+      <StickySpanProperties span={span} transaction={parentTransaction} />
+      <EuiSpacer size="m" />
+      <Summary
+        items={[
+          <TimestampTooltip time={span.timestamp.us / 1000} />,
+          <>
+            <DurationSummaryItem
+              duration={span.span.duration.us}
+              totalDuration={totalDuration}
+              parentType="transaction"
+            />
+            {span.span.composite && (
+              <CompositeSpanDurationSummaryItem
+                count={span.span.composite.count}
+                durationSum={span.span.composite.sum.us}
+              />
+            )}
+          </>,
+          <ContainerWithMarginRight>
+            {spanHttpUrl && (
+              <HttpInfoSummaryItem
+                method={spanHttpMethod}
+                url={spanHttpUrl}
+                status={spanHttpStatusCode}
+              />
+            )}
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.apm.transactionDetails.spanFlyout.spanType',
+                { defaultMessage: 'Type' }
+              )}
+            >
+              <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
+            </EuiToolTip>
+            {spanTypes.spanSubtype && (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.transactionDetails.spanFlyout.spanSubtype',
+                  { defaultMessage: 'Subtype' }
+                )}
+              >
+                <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
+              </EuiToolTip>
+            )}
+            {spanTypes.spanAction && (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.transactionDetails.spanFlyout.spanAction',
+                  { defaultMessage: 'Action' }
+                )}
+              >
+                <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
+              </EuiToolTip>
+            )}
+
+            <FailureBadge outcome={span.event?.outcome} />
+
+            <SyncBadge sync={span.span.sync} agentName={span.agent.name} />
+          </ContainerWithMarginRight>,
+        ]}
+      />
+      <EuiHorizontalRule />
+      <SpanDatabase spanDb={spanDb} />
+      <EuiTabbedContent tabs={tabs} initialSelectedTab={initialTab} />
+    </>
   );
 }

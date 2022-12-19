@@ -5,7 +5,7 @@
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
-    "types": ["node"],
+    "types": ["node", "@kbn/ambient-ftr-types"],
     // there is still a decent amount of JS in this plugin and we are taking
     // advantage of the fact that TS doesn't know the types of that code and
     // gives us `any`. Once that code is converted to .ts we can remove this

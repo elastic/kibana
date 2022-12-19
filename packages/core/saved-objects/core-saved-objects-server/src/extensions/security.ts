@@ -7,7 +7,7 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type { EcsEventOutcome } from '@kbn/logging';
+import type { EcsEventOutcome } from '@kbn/ecs';
 
 /**
  * The PerformAuthorizationParams interface contains settings for checking
