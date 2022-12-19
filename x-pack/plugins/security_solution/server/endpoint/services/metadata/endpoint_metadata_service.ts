@@ -16,7 +16,6 @@ import type { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
-import { getAgentStatus } from '@kbn/fleet-plugin/common/services/agent_status';
 import type {
   HostInfo,
   HostMetadata,
@@ -443,18 +442,9 @@ export class EndpointMetadataService {
     const hosts: HostInfo[] = [];
 
     for (const doc of docs) {
-      const { endpoint: metadata, agent: _agent } = doc?._source?.united ?? {};
+      const { endpoint: metadata, agent } = doc?._source?.united ?? {};
 
-      if (metadata && _agent) {
-        // `_agent: Agent` here is the record stored in the unified index, whose `status` **IS NOT** the
-        // calculated status returned by the normal fleet API/Service. So lets calculated it before
-        // passing this on to other methods that expect an `Agent` type
-        const agent: typeof _agent = {
-          ..._agent,
-          // Casting below necessary to remove `Immutable<>` from the type
-          status: getAgentStatus(_agent as Agent),
-        };
-
+      if (metadata && agent) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const agentPolicy = agentPoliciesMap[agent.policy_id!];
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

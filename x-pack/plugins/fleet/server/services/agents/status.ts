@@ -18,7 +18,6 @@ import type {
 
 import { AGENTS_INDEX } from '../../constants';
 import type { AgentStatus } from '../../types';
-import { AgentStatusKueryHelper } from '../../../common/services';
 import { FleetUnauthorizedError } from '../../errors';
 
 import { appContextService } from '../app_context';
@@ -39,8 +38,6 @@ export async function getAgentStatusById(
 ): Promise<AgentStatus> {
   return (await getAgentById(esClient, soClient, agentId)).status!;
 }
-
-export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
 
 export async function getAgentStatusForAgentPolicy(
   esClient: ElasticsearchClient,
