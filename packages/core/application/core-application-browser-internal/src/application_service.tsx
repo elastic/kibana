@@ -354,7 +354,7 @@ export class ApplicationService {
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
-            showPlainSpinner={!this.hasCustomBrandingSet}
+            showPlainSpinner={this.hasCustomBrandingSet}
           />
         );
       },
