@@ -7,7 +7,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
-import { ScalabilitySetup } from './runner';
+import { ScalabilitySetup } from '@kbn/journeys';
 
 interface CapacityMetrics {
   rpsAtResponseTimeWarmupAvg: number;
@@ -18,10 +18,19 @@ interface CapacityMetrics {
   thresholdSLA: number;
 }
 
+const responseTimeMetrics = ['min', '25%', '50%', '75%', '80%', '85%', '90%', '95%', '99%', 'max'];
+const rpsMetrics = ['activeUsers', 'requests', 'ground'];
+const responseTimeThresholds = 3000;
+const collectedPct = '85%';
+
+interface DataPoint {
+  timestamp: number;
+  values: number[];
+}
+
 const REQUESTS_REGEXP = /(?<=var requests = unpack\(\[)(.*)(?=\]\);)/g;
 const RESPONSES_PERCENTILES_REGEXP =
   /(?<=var responsetimepercentilesovertimeokPercentiles = unpack\(\[)(.*)(?=\]\);)/g;
-const ACTIVE_USERS_REGEXP = /(?<=data: \[  )(\[.*\])(?=\]\,tooltip)/g;
 
 const findDataSet = (str: string, regex: RegExp) => {
   const found = str.match(regex);
@@ -43,122 +52,99 @@ const findDataSet = (str: string, regex: RegExp) => {
     });
 };
 
-const getActiveUsers = (str: string, regex: RegExp) => {
-  const found = str.match(regex);
-  if (found == null) {
-    throw Error('Failed to parse Html string');
-  }
-  const usersStr = found[0].split('],tooltip')[0];
-  return usersStr
-    .replaceAll('],[', '].[')
-    .split('.')
-    .map((i) => {
-      const pair = i.replaceAll(/^\[/g, '').replaceAll(/\]$/g, '').split(',');
-      return { key: pair[0].slice(0, -3), value: parseInt(pair[1], 10) };
-    })
-    .reduce((obj, item) => ({ ...obj, [item.key]: item.value }), {});
-};
-
-const getTimeThresholdFirstPassed = (
-  dataSet: Array<{
+const getThresholdTimePoint = (
+  data: Array<{
     timestamp: number;
-    value: number;
+    metrics: {
+      [k: string]: number;
+    };
   }>,
+  metricName: string,
   thresholdInMs: number
 ) => {
-  const resultsAboveThreshold = dataSet.filter((i) => i.value >= thresholdInMs);
+  const resultsAboveThreshold = data.filter((i) => i.metrics[metricName] >= thresholdInMs);
   if (resultsAboveThreshold.length > 0) {
     return resultsAboveThreshold[0].timestamp;
   } else return -1;
 };
 
-// const getTimeActiveUsersToReqCountThreshold = (
-//   responses: Array<{
-//     timestamp: number;
-//     values: any;
-//   }>,
-//   threshold: number
-// ) => {
-//   const resultsAboveThreshold = responses.filter(
-//     (i) => i.values.length > 0 && i.values[0] > i.values[1] * threshold
-//   );
-//   if (resultsAboveThreshold.length > 0) {
-//     return resultsAboveThreshold[0].timestamp;
-//   } else return -1;
-// };
-
 const getRPS = (
   time: number,
-  dataSet: Array<{
+  data: Array<{
     timestamp: number;
-    values: any;
+    metrics: {
+      [k: string]: number;
+    };
   }>,
   rpsMax: number
-) => (time === -1 ? rpsMax : dataSet.find((i) => i.timestamp === time)?.values[1]);
+) => (time === -1 ? rpsMax : data.find((i) => i.timestamp === time)?.metrics.requests || 0);
+
+const mapValuesWithMetrics = (data: DataPoint[], metrics: string[]) => {
+  return data
+    .filter((i) => i.values.length === metrics.length)
+    .map((i) => {
+      return {
+        timestamp: i.timestamp,
+        metrics: Object.fromEntries(metrics.map((_, index) => [metrics[index], i.values[index]])),
+      };
+    });
+};
 
 export function getCapacityMetrics(
   htmlReportPath: string,
   scalabilitySetup: ScalabilitySetup,
   log: ToolingLog
 ): CapacityMetrics {
-  const htmlContent = fs.readFileSync(htmlReportPath, 'utf-8').replace(/(\r\n|\n|\r)/gm, '');
+  const htmlContent = fs.readFileSync(htmlReportPath, 'utf-8');
   // [timestamp, [activeUsers,requests,0]], e.g. [1669026394,[6,6,0]]
   const requests = findDataSet(htmlContent, REQUESTS_REGEXP);
   // [timestamp, [min, 25%, 50%, 75%, 80%, 85%, 90%, 95%, 99%, max]], e.g. 1669026394,[9,11,11,12,13,13,14,15,15,16]
   const responsePercentiles = findDataSet(htmlContent, RESPONSES_PERCENTILES_REGEXP);
 
-  const activeUsers: { [key: string]: number } = getActiveUsers(htmlContent, ACTIVE_USERS_REGEXP);
-  log.info(JSON.stringify(activeUsers));
-  const rpsMax = Math.max(...requests.filter((i) => i.values.length > 1).map((i) => i.values[1]));
+  // warmup phase duration in seconds
+  const warmupDuration = scalabilitySetup.warmup
+    .map((action) => {
+      const parsedValue = parseInt(action.duration.replace(/s|m/, ''), 10);
+      return action.duration.endsWith('m') ? parsedValue * 60 : parsedValue;
+    })
+    .reduce((a, b) => a + b, 0);
+
+  const warmupData = mapValuesWithMetrics(
+    responsePercentiles.slice(0, warmupDuration),
+    responseTimeMetrics
+  );
+  const testData = mapValuesWithMetrics(
+    responsePercentiles.slice(warmupDuration, responsePercentiles.length - 1),
+    responseTimeMetrics
+  );
+  const rpsData = mapValuesWithMetrics(requests, rpsMetrics);
+
+  const rpsMax = Math.max(...rpsData.map((i) => i.metrics.requests));
   log.info(`rpsMax=${rpsMax}`);
 
-  const warmupPhase = responsePercentiles.slice(0, 10);
-  const rpsAtResponseTimeWarmupAvg = Math.round(
-    warmupPhase
-      .filter((i) => i.values.length > 0)
-      .map((i) => i.values[3])
-      .filter((i) => i > 0)
-      .reduce((a, b) => a + b, 0) / warmupPhase.length
+  const avgWarmupResponseTime = Math.round(
+    warmupData
+      .map((i) => i.metrics[collectedPct])
+      .reduce((avg, value, _, { length }) => {
+        return avg + value / length;
+      }, 0)
   );
+  log.info(`Warmup: Avg ${collectedPct} percentile response time - ${avgWarmupResponseTime} ms`);
 
-  log.info(`Warmup: Avg 75 percentile response time - ${rpsAtResponseTimeWarmupAvg} ms`);
+  const responseThresholdSLA = scalabilitySetup.thresholds || responseTimeThresholds;
+  const avgWarmupResponseTimeX10 = avgWarmupResponseTime * 10;
+  const avgWarmupResponseTimeX100 = avgWarmupResponseTime * 100;
 
-  // 1.SLA - constant value per api
-  const responseThresholdSLA = scalabilitySetup.thresholdSLA || 3000;
-  // 2. x10 increase
-  const responseThresholdX10 = rpsAtResponseTimeWarmupAvg * 10;
-  // 3. x100 increase
-  const responseThresholdX100 = rpsAtResponseTimeWarmupAvg * 100;
-  // 4. #users/#requests > 1.5-2
-  const usersToReqThreshold = 1.5;
-  // 5. abs(response/requests - 1) > 0.1
-  // 6. time of first error
-  // 7. t0 (average during startup)
-
-  const maxResponses = responsePercentiles.map((i) => {
-    return { timestamp: i.timestamp, value: i.values.length > 0 ? i.values[9] : 0 };
-  });
-
-  const timeSLA = getTimeThresholdFirstPassed(maxResponses, responseThresholdSLA);
-  const timeX10 = getTimeThresholdFirstPassed(maxResponses, responseThresholdX10);
-  const timeX100 = getTimeThresholdFirstPassed(maxResponses, responseThresholdX100);
-  // const timeActiveUsersToReq = getTimeActiveUsersToReqCountThreshold(requests, usersToReqThreshold);
-
-  const requestsAfterThreshold = requests.filter((i) => {
-    const time = String(i.timestamp);
-    const activeUsersInTime = activeUsers[time];
-    return activeUsersInTime / i.values[0] > usersToReqThreshold;
-  });
-
-  const rpsAtRequestsToActiveUsers =
-    requestsAfterThreshold.length > 0 ? requestsAfterThreshold[0].values[0] : rpsMax;
+  const timeSLA = getThresholdTimePoint(testData, collectedPct, responseThresholdSLA);
+  const timeX10 = getThresholdTimePoint(testData, collectedPct, avgWarmupResponseTimeX10);
+  const timeX100 = getThresholdTimePoint(testData, collectedPct, avgWarmupResponseTimeX100);
 
   return {
-    rpsAtResponseTimeWarmupAvg,
-    rpsAtSLA: getRPS(timeSLA, requests, rpsMax),
-    rpsAtResponseTime10XAvg: getRPS(timeX10, requests, rpsMax),
-    rpsAtResponseTime100XAvg: getRPS(timeX100, requests, rpsMax),
-    rpsAtRequestsToActiveUsers,
+    rpsAtResponseTimeWarmupAvg: avgWarmupResponseTime,
+    rpsAtSLA: getRPS(timeSLA, rpsData, rpsMax),
+    rpsAtResponseTime10XAvg: getRPS(timeX10, rpsData, rpsMax),
+    rpsAtResponseTime100XAvg: getRPS(timeX100, rpsData, rpsMax),
+    rpsAtRequestsToActiveUsers: 0,
     thresholdSLA: responseThresholdSLA,
   };
 }

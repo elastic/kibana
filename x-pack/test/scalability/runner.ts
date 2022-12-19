@@ -12,24 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from './ftr_provider_context';
 import { EventsShipper } from './events_shipper';
 import { getCapacityMetrics } from './report_parser';
-
-interface ScalabilityAction {
-  action: string;
-  userCount: number;
-  times?: number;
-  duration: string;
-}
-export interface ScalabilitySetup {
-  maxDuration: string;
-  thresholdSLA?: number;
-  warmup: ScalabilityAction[];
-  test: ScalabilityAction[];
-}
-interface Journey {
-  journeyName: string;
-  kibanaVersion: string;
-  scalabilitySetup: ScalabilitySetup;
-}
+import { ScalabilityJourney } from './types';
 
 const telemetryChannel = 'scalability-metrics';
 
@@ -45,7 +28,7 @@ async function sendReportMetricsToTelemetry(
   if (lastReportPath) {
     const journeyHtmlReportPath = path.resolve(reportRootPath, lastReportPath, 'index.html');
 
-    const journey: Journey = JSON.parse(fs.readFileSync(scalabilityJsonPath, 'utf8'));
+    const journey: ScalabilityJourney = JSON.parse(fs.readFileSync(scalabilityJsonPath, 'utf8'));
     const metrics = getCapacityMetrics(journeyHtmlReportPath, journey.scalabilitySetup, log);
     const events = [
       {

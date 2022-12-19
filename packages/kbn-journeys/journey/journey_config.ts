@@ -47,6 +47,7 @@ export interface ScalabilitySetup {
    * eg: "1m" or "30s"
    */
   maxDuration: string;
+  thresholds?: number;
   warmup: ScalabilityAction[];
   test: ScalabilityAction[];
 }
