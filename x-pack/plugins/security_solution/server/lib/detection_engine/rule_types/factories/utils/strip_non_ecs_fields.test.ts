@@ -276,4 +276,115 @@ describe('stripNonEcsFields', () => {
       ]);
     });
   });
+
+  describe('nested field', () => {
+    it('should strip invalid nested', () => {
+      const { result, removed } = stripNonEcsFields({
+        threat: {
+          enrichments: ['non-valid-threat-1', 'non-valid-threat-2'],
+          'indicator.port': 443,
+        },
+      });
+
+      expect(result).toEqual({
+        threat: {
+          'indicator.port': 443,
+        },
+      });
+      expect(removed).toEqual([
+        {
+          key: 'threat.enrichments',
+          value: 'non-valid-threat-1',
+        },
+        {
+          key: 'threat.enrichments',
+          value: 'non-valid-threat-2',
+        },
+      ]);
+    });
+
+    it('should not strip valid values', () => {
+      const { result, removed } = stripNonEcsFields({
+        threat: {
+          enrichments: [
+            {
+              'indicator.as.number': 5,
+            },
+          ],
+        },
+      });
+
+      expect(result).toEqual({
+        threat: {
+          enrichments: [
+            {
+              'indicator.as.number': 5,
+            },
+          ],
+        },
+      });
+      expect(removed).toEqual([]);
+    });
+  });
+
+  describe('date field', () => {
+    it('should strip invalid format date', () => {
+      const { result, removed } = stripNonEcsFields({
+        event: {
+          created: '21/21/21',
+          category: 'start',
+        },
+      });
+
+      expect(result).toEqual({
+        event: {
+          category: 'start',
+        },
+      });
+      expect(removed).toEqual([
+        {
+          key: 'event.created',
+          value: '21/21/21',
+        },
+      ]);
+    });
+
+    it('should strip invalid date', () => {
+      const { result, removed } = stripNonEcsFields({
+        event: {
+          created: 'non date',
+          category: 'start',
+        },
+      });
+
+      expect(result).toEqual({
+        event: {
+          category: 'start',
+        },
+      });
+      expect(removed).toEqual([
+        {
+          key: 'event.created',
+          value: 'non date',
+        },
+      ]);
+    });
+
+    it('should not strip valid date', () => {
+      const { result, removed } = stripNonEcsFields({
+        event: {
+          created: '2020/12/12',
+          end: [2345562, '2022/10/12'],
+        },
+      });
+
+      expect(result).toEqual({
+        event: {
+          created: '2020/12/12',
+          end: [2345562, '2022/10/12'],
+        },
+      });
+      expect(removed).toEqual([]);
+    });
+  });
 });

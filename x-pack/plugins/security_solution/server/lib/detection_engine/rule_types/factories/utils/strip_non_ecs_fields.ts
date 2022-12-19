@@ -11,6 +11,7 @@ import { isPlainObject, cloneDeep, isArray } from 'lodash';
 
 import type { SearchTypes } from '../../../../../../common/detection_engine/types';
 import { isValidIpType } from './ecs_types_validators/is_valid_ip_type';
+import { isValidDateType } from './ecs_types_validators/is_valid_date_type';
 
 type SourceFieldRecord = Record<string, SearchTypes>;
 type SourceField = SearchTypes | SourceFieldRecord;
@@ -121,6 +122,11 @@ const computeIsEcsCompliant = (value: SourceField, path: string) => {
   // validate if value is a valid ip type
   if (ecsField?.type === 'ip') {
     return isValidIpType(value);
+  }
+
+  // validate if value is a valid date
+  if (ecsField?.type === 'date') {
+    return isValidDateType(value);
   }
 
   // checked value is not object and if ECS mapping is not as well, it compliant

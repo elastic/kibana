@@ -18,6 +18,16 @@ import {
 import { indexDocumentsFactory } from '../../utils/data_generator';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
+const getQueryRule = (docIdToQuery: string) => ({
+  ...getRuleForSignalTesting(['ecs_non_compliant']),
+  query: `id: "${docIdToQuery}"`,
+});
+
+const getDocument = (id: string, doc: Record<string, unknown>) => ({
+  id,
+  ...doc,
+});
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -29,6 +39,19 @@ export default ({ getService }: FtrProviderContext) => {
     es,
     index: 'ecs_non_compliant',
   });
+
+  const previewRuleAndGetAlertSource = async (documentId: string) => {
+    const { previewId, logs } = await previewRule({
+      supertest,
+      rule: getQueryRule(documentId),
+    });
+    const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+    return {
+      alertSource: previewAlerts[0]._source,
+      errors: logs[0].errors,
+    };
+  };
 
   describe('Non ECS fields in alert document source', () => {
     before(async () => {
@@ -116,6 +139,53 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts[0]._source).not.toHaveProperty('client.ip');
 
       expect(previewAlerts[0]._source).toHaveProperty('client.name', 'test name');
+    });
+
+    // source event.created is text, ECS mapping for client.created is date
+    it('should remove source non date field from alert if ECS field mapping is date', async () => {
+      const documentId = 'event.created is keyword';
+      await indexDocuments([
+        getDocument(documentId, {
+          event: {
+            created: 'non-valid-date',
+            end: '2022-12-19',
+          },
+        }),
+      ]);
+
+      const { previewId, logs } = await previewRule({ supertest, rule: getQueryRule(documentId) });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+      expect(logs[0].errors).toEqual([]);
+
+      // invalid ECS field is getting removed
+      // event properties getting flattened, so we make sure event.created was removed
+      expect(previewAlerts[0]._source).not.toHaveProperty(['event.created']);
+      expect(previewAlerts[0]._source).not.toHaveProperty('event.created');
+
+      expect(previewAlerts[0]._source).toHaveProperty(['event.end'], '2022-12-19');
+    });
+
+    // source threat.enrichments is keyword, ECS mapping for threat.enrichments is nested
+    it('should remove source array of keywords field from alert if ECS field mapping is nested', async () => {
+      const documentId = 'threat.enrichments is keyword array';
+      await indexDocuments([
+        getDocument(documentId, {
+          threat: {
+            enrichments: ['non-valid-threat-1', 'non-valid-threat-2'],
+            'indicator.port': 443,
+          },
+        }),
+      ]);
+
+      const { errors, alertSource } = await previewRuleAndGetAlertSource(documentId);
+
+      expect(errors).toEqual([]);
+
+      // invalid ECS field is getting removed
+      expect(alertSource).not.toHaveProperty('threat.enrichments');
+
+      expect(alertSource).toHaveProperty('threat.indicator.port', 443);
     });
   });
 };

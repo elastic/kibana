@@ -8,7 +8,7 @@
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
-import type { BaseHit } from '../../../../../../common/detection_engine/types';
+import type { BaseHit, SearchTypes } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
 import type { BuildReasonMessage } from '../../../signals/reason_formatters';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
@@ -28,7 +28,7 @@ const isSourceDoc = (
   return hit._source != null;
 };
 
-const buildEventTypeAlert = (doc: BaseSignalHit): object => {
+const buildEventTypeAlert = (doc: BaseSignalHit): Record<string, SearchTypes> => {
   if (doc._source?.event != null && doc._source?.event instanceof Object) {
     return flattenWithPrefix('event', doc._source?.event ?? {});
   }
@@ -56,7 +56,7 @@ export const buildBulkBody = (
   alertTimestampOverride: Date | undefined
 ): BaseFieldsLatest => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
-  const eventFields = buildEventTypeAlert(mergedDoc);
+  const eventFields = stripNonEcsFields(buildEventTypeAlert(mergedDoc)).result;
   const filteredSource = filterSource(mergedDoc);
   const { result: validatedSource } = stripNonEcsFields(filteredSource);
 
