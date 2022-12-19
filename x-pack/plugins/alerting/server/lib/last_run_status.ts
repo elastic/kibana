@@ -26,14 +26,14 @@ export interface ILastRun {
 
 export const lastRunFromState = (
   stateWithMetrics: RuleTaskStateAndMetrics,
-  lastRunService: RuleResultService
+  ruleResultService: RuleResultService
 ): ILastRun => {
   let outcome: RuleLastRunOutcomes = RuleLastRunOutcomeValues[0];
   // Check for warning states
   let warning: RuleLastRun['warning'] = null;
   const outcomeMsg: string[] = [];
 
-  const { errors, warnings, outcomeMessage } = lastRunService.getLastRunResults();
+  const { errors, warnings, outcomeMessage } = ruleResultService.getLastRunResults();
   const { metrics } = stateWithMetrics;
 
   if (warnings.length > 0) {

@@ -114,7 +114,7 @@ export class TaskRunner<
   private cancelled: boolean;
   private stackTraceLog: StackTraceLog | null;
   private ruleMonitoring: RuleMonitoringService;
-  private ruleExecution: RuleResultService;
+  private ruleResult: RuleResultService;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -148,7 +148,7 @@ export class TaskRunner<
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
     this.ruleMonitoring = new RuleMonitoringService();
-    this.ruleExecution = new RuleResultService();
+    this.ruleResult = new RuleResultService();
   }
 
   private async updateRuleSavedObject(
@@ -583,7 +583,7 @@ export class TaskRunner<
       ILastRun
     >(
       stateWithMetrics,
-      (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics, this.ruleExecution),
+      (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics, this.ruleResult),
       (err: ElasticsearchError) => lastRunFromError(err)
     );
 

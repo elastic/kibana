@@ -8,7 +8,7 @@
 import { lastRunFromState } from './last_run_status';
 import { ActionsCompletion } from '../../common';
 import { RuleRunMetrics } from './rule_run_metrics_store';
-import { RuleExecutionResults, RuleResultService } from '../monitoring/rule_result_service';
+import { RuleResultServiceResults, RuleResultService } from '../monitoring/rule_result_service';
 
 const getMetrics = ({
   hasReachedAlertLimit = false,
@@ -28,25 +28,25 @@ const getMetrics = ({
   };
 };
 
-const getExecutionService = ({
+const getRuleResultService = ({
   errors = [],
   warnings = [],
   outcomeMessage = '',
-}: Partial<RuleExecutionResults>) => {
-  const lastRunService = new RuleResultService();
+}: Partial<RuleResultServiceResults>) => {
+  const ruleResultService = new RuleResultService();
   const { addLastRunError, addLastRunWarning, setLastRunOutcomeMessage } =
-    lastRunService.getLastRunSetters();
+    ruleResultService.getLastRunSetters();
   errors.forEach((error) => addLastRunError(error));
   warnings.forEach((warning) => addLastRunWarning(warning));
   setLastRunOutcomeMessage(outcomeMessage);
-  return lastRunService;
+  return ruleResultService;
 };
 
 describe('lastRunFromState', () => {
   it('returns successful outcome if no errors or warnings reported', () => {
     const result = lastRunFromState(
       { metrics: getMetrics({}) },
-      getExecutionService({ outcomeMessage: 'Rule executed succesfully' })
+      getRuleResultService({ outcomeMessage: 'Rule executed succesfully' })
     );
 
     expect(result.lastRun.outcome).toEqual('succeeded');
@@ -64,7 +64,7 @@ describe('lastRunFromState', () => {
   it('returns a warning outcome if rules last execution reported one', () => {
     const result = lastRunFromState(
       { metrics: getMetrics({}) },
-      getExecutionService({
+      getRuleResultService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
       })
@@ -87,7 +87,7 @@ describe('lastRunFromState', () => {
       {
         metrics: getMetrics({ hasReachedAlertLimit: true }),
       },
-      getExecutionService({})
+      getRuleResultService({})
     );
 
     expect(result.lastRun.outcome).toEqual('warning');
@@ -109,7 +109,7 @@ describe('lastRunFromState', () => {
       {
         metrics: getMetrics({ triggeredActionsStatus: ActionsCompletion.PARTIAL }),
       },
-      getExecutionService({})
+      getRuleResultService({})
     );
 
     expect(result.lastRun.outcome).toEqual('warning');
@@ -134,7 +134,7 @@ describe('lastRunFromState', () => {
       {
         metrics: getMetrics({ hasReachedAlertLimit: true }),
       },
-      getExecutionService({
+      getRuleResultService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
       })
@@ -163,7 +163,7 @@ describe('lastRunFromState', () => {
       {
         metrics: getMetrics({ triggeredActionsStatus: ActionsCompletion.PARTIAL }),
       },
-      getExecutionService({
+      getRuleResultService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
       })
@@ -189,7 +189,7 @@ describe('lastRunFromState', () => {
       {
         metrics: getMetrics({ hasReachedAlertLimit: true }),
       },
-      getExecutionService({
+      getRuleResultService({
         errors: ['MOCK_ERROR'],
         outcomeMessage: 'Rule execution reported an error',
       })
