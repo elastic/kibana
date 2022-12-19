@@ -126,6 +126,7 @@ const getDataset = (moduleType: INDEX_PATTERN_TYPES) => (dataset: string) =>
 export const getElasticsearchDataset = getDataset('elasticsearch');
 export const getKibanaDataset = getDataset('kibana');
 export const getLogstashDataset = getDataset('logstash');
+export const getBeatDataset = getDataset('beats');
 
 function buildDatasetPattern(
   moduleType?: INDEX_PATTERN_TYPES,

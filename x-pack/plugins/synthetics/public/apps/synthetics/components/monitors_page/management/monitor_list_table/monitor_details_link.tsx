@@ -6,14 +6,16 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiIcon } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { selectSelectedLocationId } from '../../../../state';
 import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
+  SourceType,
 } from '../../../../../../../common/runtime_types';
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
+import * as labels from './labels';
 
 export const MonitorDetailsLink = ({
   basePath,
@@ -36,9 +38,23 @@ export const MonitorDetailsLink = ({
     locationId,
   });
 
+  const isProjectMonitor = monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+  const projectLabel = isProjectMonitor
+    ? `${labels.PROJECT}: ${monitor[ConfigKey.PROJECT_ID]}`
+    : '';
+
   return (
     <>
       <EuiLink href={monitorDetailLinkUrl}>{monitor.name}</EuiLink>
+      {isProjectMonitor ? (
+        <EuiIcon
+          title={projectLabel}
+          aria-label={projectLabel}
+          type="symlink"
+          size="s"
+          css={{ margin: 4 }}
+        />
+      ) : null}
     </>
   );
 };
