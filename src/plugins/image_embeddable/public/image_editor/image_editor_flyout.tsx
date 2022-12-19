@@ -208,7 +208,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                     >
                       <FormattedMessage
                         id="imageEmbeddable.imageEditor.selectImagePromptText"
-                        defaultMessage="Or use a previously uploaded image"
+                        defaultMessage="Use a previously uploaded image"
                       />
                     </EuiLink>
                   </p>
@@ -245,7 +245,11 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                 css={CONTAINER_SIZING_CSS}
                 imageConfig={draftImageConfig}
                 onError={() => {
-                  setSrcUrlError(failedToLoadImageFromURL(srcUrl));
+                  setSrcUrlError(
+                    i18n.translate('imageEmbeddable.imageEditor.urlFailedToLoadImageErrorMessage', {
+                      defaultMessage: 'Unable to load image.',
+                    })
+                  );
                 }}
                 containerCSS={css`
                   border: ${euiTheme.border.thin};
@@ -265,7 +269,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
               helpText={
                 <FormattedMessage
                   id="imageEmbeddable.imageEditor.imageURLHelpText"
-                  defaultMessage="Supported file types: png, jpeg, webp and avif."
+                  defaultMessage="Supported file types: png, jpeg, webp, and avif."
                 />
               }
               fullWidth={true}
@@ -439,11 +443,3 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
     </>
   );
 }
-
-const failedToLoadImageFromURL = (url: string) =>
-  i18n.translate('imageEmbeddable.imageEditor.urlFailedToLoadImageErrorMessage', {
-    defaultMessage: 'Unable to load image from URL "{url}".',
-    values: {
-      url,
-    },
-  });

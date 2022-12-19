@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should create an image embeddable', async () => {
       // create an image embeddable
-      await testSubjects.click(`dashboardQuickButtonIMAGE_EMBEDDABLE`);
+      await testSubjects.click(`dashboardQuickButtonimage`);
       await testSubjects.exists(`createImageEmbeddableFlyout`);
       await PageObjects.common.setFileInputPath(require.resolve('./elastic_logo.png'));
       await testSubjects.clickWhenNotDisabled(`imageEmbeddableEditorSave`);

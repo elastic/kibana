@@ -46,7 +46,7 @@ export function DashboardEditingToolbar() {
     { type: 'vis'; visType: string } | { type: 'embeddable'; embeddableType: string }
   > = [
     { type: 'vis', visType: 'markdown' },
-    { type: 'embeddable', embeddableType: 'IMAGE_EMBEDDABLE' },
+    { type: 'embeddable', embeddableType: 'image' },
     { type: 'vis', visType: 'maps' },
   ];
 

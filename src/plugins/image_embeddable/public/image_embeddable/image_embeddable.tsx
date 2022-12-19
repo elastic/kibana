@@ -13,7 +13,7 @@ import { ImageEmbeddableInput } from './image_embeddable_factory';
 import { ImageViewer, ImageViewerContext } from '../image_viewer';
 import { createValidateUrl } from '../utils/validate_url';
 
-export const IMAGE_EMBEDDABLE_TYPE = 'IMAGE_EMBEDDABLE';
+export const IMAGE_EMBEDDABLE_TYPE = 'image';
 
 export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
   public readonly type = IMAGE_EMBEDDABLE_TYPE;
