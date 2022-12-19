@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiSelectable,
   EuiSelectableProps,
@@ -29,13 +29,8 @@ import { css } from '@emotion/react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { optionsListStrings } from './dataview_list_strings';
-import {
-  DEFAULT_SORT,
-  handleSortingByDirection,
-  getCompatibleSortingTypes,
-  getOrderDirection,
-} from './suggestions_sorting';
 import { IUnifiedSearchPluginServices } from '../types';
+import { Sorting } from './sorting_service';
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
@@ -48,6 +43,16 @@ export interface DataViewsListProps {
   currentDataViewId?: string;
   selectableProps?: EuiSelectableProps;
   searchListInputId?: string;
+  onChangeSortDataViewList: (selectedOption: EuiSelectableOption) => void;
+  dataViewSortSettings: Sorting;
+}
+
+function toSelectableOption(key: string, isChecked: boolean, label: string): EuiSelectableOption {
+  return {
+    data: { key },
+    checked: isChecked ? 'on' : undefined,
+    label,
+  };
 }
 
 export function DataViewsList({
@@ -57,37 +62,21 @@ export function DataViewsList({
   currentDataViewId,
   selectableProps,
   searchListInputId,
+  onChangeSortDataViewList,
+  dataViewSortSettings,
 }: DataViewsListProps) {
   const { euiTheme } = useEuiTheme();
   const popoverStyle = euiTheme.base * 13;
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { storage } = kibana.services;
-
-  const orderDirection = useMemo(() => {
-    return storage.get('orderDirection');
-  }, [storage]);
+  const { sortingService } = kibana.services;
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
 
-  const [sortedDataViewsList, setSortedDataViewsList] = useState(dataViewsList);
-
-  function toSelectableOptions(
-    data: { [key: string]: any },
-    checked: 'on' | undefined,
-    label: string
-  ) {
-    return {
-      data,
-      checked,
-      label,
-    };
-  }
-
   const [sortByOptions, setSortByOptions] = useState<EuiSelectableOption[]>(() => {
-    return getCompatibleSortingTypes().map((key) => {
-      return toSelectableOptions(
-        { sortBy: key },
-        key === DEFAULT_SORT.by ? 'on' : undefined,
+    return sortingService.getColums().map((key) => {
+      return toSelectableOption(
+        key,
+        key === dataViewSortSettings?.by,
         optionsListStrings.editorAndPopover.sortBy[key].getSortByLabel()
       );
     });
@@ -95,9 +84,9 @@ export function DataViewsList({
 
   const [sortOrderOptions, setSortOrderOptions] = useState<EuiSelectableOption[]>(() => {
     return [SortDirection.ASC, SortDirection.DESC].map((key) => {
-      return toSelectableOptions(
-        { order: key },
-        key === getOrderDirection(orderDirection) ? 'on' : undefined,
+      return toSelectableOption(
+        key,
+        key === dataViewSortSettings?.direction,
         optionsListStrings.editorAndPopover.sortOrder[key].getSortOrderLabel()
       );
     });
@@ -110,22 +99,22 @@ export function DataViewsList({
     []
   );
 
-  const handleOrderChangesDataViewList = (selectedOption: EuiSelectableOption) => {
-    setSortedDataViewsList((currentDataViewsList) =>
-      handleSortingByDirection(currentDataViewsList, selectedOption.data?.order)
-    );
-  };
+  const handleChangesDataViewListOrder = useCallback(
+    (selectedOption: EuiSelectableOption) => {
+      onChangeSortDataViewList(selectedOption);
+    },
+    [onChangeSortDataViewList]
+  );
 
   const onSortByOrder = useCallback(
     (updatedOptions: EuiSelectableOption[]) => {
       setSortOrderOptions(updatedOptions);
       const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
       if (selectedOption) {
-        storage.set('orderDirection', selectedOption.data?.order);
-        handleOrderChangesDataViewList(selectedOption);
+        handleChangesDataViewListOrder(selectedOption);
       }
     },
-    [storage]
+    [handleChangesDataViewListOrder]
   );
 
   return (
@@ -139,7 +128,7 @@ export function DataViewsList({
       data-test-subj="indexPattern-switcher"
       searchable
       singleSelection="always"
-      options={sortedDataViewsList?.map(({ title, id, name, isAdhoc }) => ({
+      options={dataViewsList?.map(({ title, id, name, isAdhoc }) => ({
         key: id,
         label: name ? name : title,
         value: id,

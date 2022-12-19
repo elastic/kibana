@@ -8,25 +8,8 @@
 
 import type { Direction } from '@elastic/eui';
 import { SortDirection } from '@elastic/eui';
+
 import { DataViewListItemEnhanced } from './dataview_list';
-
-const ALPHABETICALLY = 'alphabetically';
-export type OptionsListSortBy = typeof ALPHABETICALLY;
-
-export const DEFAULT_SORT: SortingType = { by: ALPHABETICALLY, direction: SortDirection.ASC };
-
-export interface SortingType {
-  by: OptionsListSortBy;
-  direction: Direction;
-}
-
-export const getCompatibleSortingTypes = (): OptionsListSortBy[] => {
-  return [ALPHABETICALLY];
-};
-
-export const getOrderDirection = (orderDirection?: Direction) => {
-  return orderDirection ?? DEFAULT_SORT.direction;
-};
 
 export const handleSortingByDirection = (
   dataViews: DataViewListItemEnhanced[],
@@ -38,7 +21,7 @@ export const handleSortingByDirection = (
     const firstComparableField = a.name ?? a.title;
     const secondComparableField = b.name ?? b.title;
 
-    if (direction === DEFAULT_SORT.direction) {
+    if (direction === SortDirection.ASC) {
       return compare(firstComparableField, secondComparableField);
     } else {
       return compare(secondComparableField, firstComparableField);

@@ -24,6 +24,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiToolTip,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
@@ -34,7 +35,7 @@ import type { TextBasedLanguagesTransitionModalProps } from './text_languages_tr
 import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
 import { DataViewSelector } from './data_view_selector';
-import { getOrderDirection, handleSortingByDirection } from './suggestions_sorting';
+import { handleSortingByDirection } from './suggestions_sorting';
 
 // local storage key for the text based languages transition modal
 const TEXT_LANG_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
@@ -88,7 +89,9 @@ export function ChangeDataView({
   const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { application, data, storage, dataViews, dataViewEditor } = kibana.services;
+  const { application, data, storage, dataViews, dataViewEditor, sortingService } = kibana.services;
+  const [dataViewSortSettings, setDataViewSortSettings] = useState(sortingService.getSorting());
+
   const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
@@ -98,8 +101,6 @@ export function ChangeDataView({
   const searchListInputId = useGeneratedHtmlId({ prefix: 'dataviewPickerListSearchInput' });
 
   useEffect(() => {
-    const orderDirection = storage.get('orderDirection');
-
     const fetchDataViews = async () => {
       const dataViewsRefs: DataViewListItemEnhanced[] = savedDataViews
         ? savedDataViews
@@ -116,10 +117,10 @@ export function ChangeDataView({
           }
         });
       }
-      setDataViewsList(handleSortingByDirection(dataViewsRefs, getOrderDirection(orderDirection)));
+      setDataViewsList(handleSortingByDirection(dataViewsRefs, dataViewSortSettings.direction));
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, savedDataViews, storage]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews, dataViewSortSettings]);
 
   useEffect(() => {
     if (trigger.label) {
@@ -136,6 +137,13 @@ export function ChangeDataView({
       setIsTextBasedLangSelected(Boolean(textBasedLanguage));
     }
   }, [isTextBasedLangSelected, textBasedLanguage]);
+
+  const onChangeSortDataViewList = (selectedOption: EuiSelectableOption) => {
+    sortingService.setSorting({ ...dataViewSortSettings, direction: selectedOption.data?.key });
+    setDataViewSortSettings((settings) => {
+      return { ...settings, direction: selectedOption.data?.key };
+    });
+  };
 
   const isAdHocSelected = useMemo(() => {
     return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
@@ -305,6 +313,8 @@ export function ChangeDataView({
           selectableProps={selectableProps}
           isTextBasedLangSelected={isTextBasedLangSelected}
           setPopoverIsOpen={setPopoverIsOpen}
+          onChangeSortDataViewList={onChangeSortDataViewList}
+          dataViewSortSettings={dataViewSortSettings}
           onChangeDataView={async (newId) => {
             const dataView = await data.dataViews.get(newId);
             await data.dataViews.refreshFields(dataView);

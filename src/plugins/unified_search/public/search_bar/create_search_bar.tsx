@@ -22,11 +22,13 @@ import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import { UnifiedSearchPublicPluginStart } from '../types';
+import { SortingService } from '../dataview_picker/sorting_service';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
   storage: IStorageWrapper;
+  sortingService: SortingService;
   usageCollection?: UsageCollectionSetup;
   isScreenshotMode?: boolean;
   unifiedSearch: Omit<UnifiedSearchPublicPluginStart, 'ui'>;
@@ -138,6 +140,7 @@ export function createSearchBar({
   usageCollection,
   isScreenshotMode = false,
   unifiedSearch,
+  sortingService,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -191,6 +194,7 @@ export function createSearchBar({
           storage,
           usageCollection,
           unifiedSearch,
+          sortingService,
           ...core,
         }}
       >

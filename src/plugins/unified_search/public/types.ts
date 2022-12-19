@@ -18,6 +18,7 @@ import { CoreStart, DocLinksStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
+import { SortingService } from './dataview_picker/sorting_service';
 
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;
@@ -85,6 +86,7 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   application: CoreStart['application'];
   http: CoreStart['http'];
   storage: IStorageWrapper;
+  sortingService: SortingService;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;

@@ -29,6 +29,7 @@ export type { DataViewPickerProps } from './dataview_picker';
 export type { ApplyGlobalFilterActionContext } from './actions';
 export { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
 export { UPDATE_FILTER_REFERENCES_TRIGGER } from './triggers';
+export type { Sorting } from './dataview_picker/sorting_service';
 
 /*
  * Autocomplete query suggestions:
