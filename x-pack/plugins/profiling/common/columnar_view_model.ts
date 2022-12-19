@@ -22,6 +22,7 @@ import { ElasticFlameGraph } from './flamegraph';
  *   6 = Ruby
  *   7 = Perl
  *   8 = JavaScript
+ *   9 = PHP JIT
  *
  * This is most easily achieved by mapping frame types to different color variations, using
  * the x-position we can use different colors for adjacent blocks while keeping a similar hue
@@ -38,6 +39,7 @@ const frameTypeToColors = [
   [0xd79ffc, 0xdfb2fd, 0xe7c5fd, 0xefd9fe],
   [0xf98bb9, 0xfaa2c7, 0xfbb9d5, 0xfdd1e3],
   [0xcbc3e3, 0xd5cfe8, 0xdfdbee, 0xeae7f3],
+  [0xccfc82, 0xd1fc8e, 0xd6fc9b, 0xdbfca7],
 ];
 
 function frameTypeToRGB(frameType: number, x: number): number {
