@@ -8,20 +8,23 @@
 import React, { useState, useMemo } from 'react';
 import { EuiBadge, EuiBadgeGroup, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { useTheme } from '@kbn/observability-plugin/public';
-import { ServiceLocations, ServiceLocation } from '../../../../../../../common/runtime_types';
+import {
+  ServiceLocations,
+  ServiceLocation,
+  OverviewStatusState,
+} from '../../../../../../../common/runtime_types';
 import { useLocations } from '../../../../hooks';
-import type { StatusByLocationAndMonitor } from '../../hooks/use_overview_status';
 import { EXPAND_LOCATIONS_LABEL } from './labels';
 
 interface Props {
   locations: ServiceLocations;
   monitorId: string;
-  statusByLocationAndMonitor: StatusByLocationAndMonitor;
+  status: OverviewStatusState | null;
 }
 
 const INITIAL_LIMIT = 3;
 
-export const MonitorLocations = ({ locations, monitorId, statusByLocationAndMonitor }: Props) => {
+export const MonitorLocations = ({ locations, monitorId, status }: Props) => {
   const { euiTheme } = useEuiTheme();
   const theme = useTheme();
   const { locations: allLocations } = useLocations();
@@ -45,12 +48,12 @@ export const MonitorLocations = ({ locations, monitorId, statusByLocationAndMoni
         >
           <EuiIcon
             type="dot"
-            size="s"
+            size="m"
             color={getLocationStatusColor(
               theme,
               locationLabelsById[location.id],
               monitorId,
-              statusByLocationAndMonitor
+              status
             )}
             css={{ marginRight: 2 }}
           />
@@ -76,20 +79,19 @@ function getLocationStatusColor(
   euiTheme: ReturnType<typeof useTheme>,
   locationLabel: string | undefined,
   monitorId: string,
-  statusByLocationAndMonitor: StatusByLocationAndMonitor
+  overviewStatus: OverviewStatusState | null
 ) {
   const {
     eui: { euiColorVis9, euiColorVis0, euiSideNavDisabledTextcolor },
   } = euiTheme;
 
-  const status =
-    locationLabel && statusByLocationAndMonitor
-      ? statusByLocationAndMonitor[locationLabel]?.[monitorId]
-      : undefined;
+  const locById = `${monitorId}-${locationLabel}`;
 
-  return status === 'up'
-    ? euiColorVis0
-    : status === 'down'
-    ? euiColorVis9
-    : euiSideNavDisabledTextcolor;
+  if (overviewStatus?.downConfigs[locById]) {
+    return euiColorVis9;
+  } else if (overviewStatus?.upConfigs[locById]) {
+    return euiColorVis0;
+  }
+
+  return euiSideNavDisabledTextcolor;
 }

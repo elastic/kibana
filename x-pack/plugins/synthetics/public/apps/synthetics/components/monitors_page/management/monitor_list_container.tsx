@@ -45,7 +45,7 @@ export const MonitorListContainer = ({
     };
   }, [pageState]);
 
-  const { statusByLocationAndMonitor } = useOverviewStatus(overviewStatusArgs);
+  const { status } = useOverviewStatus(overviewStatusArgs);
 
   if (!isEnabled && absoluteTotal === 0) {
     return null;
@@ -62,7 +62,7 @@ export const MonitorListContainer = ({
         pageState={pageState}
         error={error}
         loading={monitorsLoading || errorsLoading}
-        statusByLocationAndMonitor={statusByLocationAndMonitor}
+        status={status}
         errorSummaries={errorSummaries}
         loadPage={loadPage}
         reloadPage={reloadPage}

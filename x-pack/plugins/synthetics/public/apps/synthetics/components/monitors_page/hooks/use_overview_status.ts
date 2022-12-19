@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
@@ -21,19 +21,6 @@ export interface StatusByLocationAndMonitor {
 
 export function useOverviewStatus({ pageState }: { pageState: MonitorOverviewPageState }) {
   const { status, statusError } = useSelector(selectOverviewStatus);
-  const statusByLocationAndMonitor = useMemo(() => {
-    return [...(status?.upConfigs ?? []), ...(status?.downConfigs ?? [])].reduce(
-      (acc, cur, index) => {
-        if (!acc[cur.location]) {
-          acc[cur.location] = {};
-        }
-        acc[cur.location][cur.configId] = index < (status?.upConfigs ?? []).length ? 'up' : 'down';
-
-        return acc;
-      },
-      {} as StatusByLocationAndMonitor
-    );
-  }, [status]);
 
   const { lastRefresh } = useSyntheticsRefreshContext();
   const lastRefreshRef = useRef(lastRefresh);
@@ -52,6 +39,5 @@ export function useOverviewStatus({ pageState }: { pageState: MonitorOverviewPag
   return {
     status,
     statusError,
-    statusByLocationAndMonitor,
   };
 }

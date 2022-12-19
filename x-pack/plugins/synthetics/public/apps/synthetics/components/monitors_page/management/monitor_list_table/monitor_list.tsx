@@ -23,10 +23,10 @@ import {
   ConfigKey,
   Ping,
   EncryptedSyntheticsSavedMonitor,
+  OverviewStatusState,
 } from '../../../../../../../common/runtime_types';
 import { SyntheticsSettingsContext } from '../../../../contexts/synthetics_settings_context';
-import type { StatusByLocationAndMonitor } from '../../hooks/use_overview_status';
-import { getMonitorListColumns } from './columns';
+import { useMonitorListColumns } from './columns';
 import * as labels from './labels';
 
 interface Props {
@@ -35,10 +35,10 @@ interface Props {
   total: number;
   error: IHttpSerializedFetchError | null;
   loading: boolean;
-  statusByLocationAndMonitor: StatusByLocationAndMonitor;
   loadPage: (state: MonitorListPageState) => void;
   reloadPage: () => void;
   errorSummaries?: Ping[];
+  status: OverviewStatusState | null;
 }
 
 export const MonitorList = ({
@@ -47,7 +47,7 @@ export const MonitorList = ({
   total,
   error,
   loading,
-  statusByLocationAndMonitor,
+  status,
   loadPage,
   reloadPage,
   errorSummaries,
@@ -106,7 +106,7 @@ export const MonitorList = ({
     total,
   });
 
-  const columns = getMonitorListColumns({
+  const columns = useMonitorListColumns({
     basePath,
     euiTheme,
     errorSummaries,
@@ -115,7 +115,7 @@ export const MonitorList = ({
     syntheticsMonitors,
     loading,
     reloadPage,
-    statusByLocationAndMonitor,
+    status,
   });
 
   return (

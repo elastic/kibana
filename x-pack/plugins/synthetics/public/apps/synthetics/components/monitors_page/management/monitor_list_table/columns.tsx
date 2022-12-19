@@ -8,31 +8,33 @@
 import { EuiBadge, EuiBasicTableColumn, EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { TagsBadges } from '../../../common/components/tag_badges';
 import { MonitorDetailsLink } from './monitor_details_link';
 
 import {
   ConfigKey,
   DataStream,
   EncryptedSyntheticsSavedMonitor,
+  OverviewStatusState,
   Ping,
   ServiceLocations,
   SourceType,
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
 
-import type { StatusByLocationAndMonitor } from '../../hooks/use_overview_status';
 import { getFrequencyLabel } from './labels';
 import { Actions } from './actions';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
 
-export function getMonitorListColumns({
+export function useMonitorListColumns({
   basePath,
   euiTheme,
   canEditSynthetics,
   reloadPage,
   loading,
-  statusByLocationAndMonitor,
+  status,
 }: {
   basePath: string;
   euiTheme: EuiThemeComputed;
@@ -41,9 +43,11 @@ export function getMonitorListColumns({
   canEditSynthetics: boolean;
   syntheticsMonitors: EncryptedSyntheticsSavedMonitor[];
   loading: boolean;
-  statusByLocationAndMonitor: StatusByLocationAndMonitor;
+  status: OverviewStatusState | null;
   reloadPage: () => void;
 }) {
+  const history = useHistory();
+
   return [
     {
       align: 'left' as const,
@@ -87,9 +91,24 @@ export function getMonitorListColumns({
           <MonitorLocations
             monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
             locations={locations}
-            statusByLocationAndMonitor={statusByLocationAndMonitor}
+            status={status}
           />
         ) : null,
+    },
+    {
+      align: 'left' as const,
+      field: ConfigKey.TAGS,
+      name: i18n.translate('xpack.synthetics.management.monitorList.tags', {
+        defaultMessage: 'Tags',
+      }),
+      render: (tags: string[]) => (
+        <TagsBadges
+          tags={tags}
+          onClick={(tag) => {
+            history.push({ search: `tags=${JSON.stringify([tag])}` });
+          }}
+        />
+      ),
     },
     {
       align: 'left' as const,
