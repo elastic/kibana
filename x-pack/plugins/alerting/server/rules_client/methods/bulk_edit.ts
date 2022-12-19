@@ -329,6 +329,7 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
       { concurrency: API_KEY_GENERATE_CONCURRENCY }
     );
   }
+  await rulesFinder.close();
 
   const { result, apiKeysToInvalidate } =
     rules.length > 0
