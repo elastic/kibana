@@ -158,7 +158,7 @@ const COMMENT_ARG_ABOUT = i18n.translate(
 
 const ENTER_RESOURCE_NAME = i18n.translate(
   'xpack.securitySolution.endpointResponseActionsConsoleCommands.enterResourceName',
-  { defaultMessage: 'Enter a resource name to execute' }
+  { defaultMessage: 'Enter a resource name to execute (pod or deployment)' }
 );
 
 export const getEndpointConsoleCommands = ({
@@ -461,10 +461,9 @@ export const getEndpointConsoleCommands = ({
     name: 'kube-list',
     about: getCommandAboutInfo({
       aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.kubeList.about', {
-        defaultMessage: 'List Kubernetes Resources (pods or deployments)',
+        defaultMessage: 'List Kubernetes Resources (pod or deployment)',
       }),
-      // isSupported: doesEndpointSupportCommand('processes'),
-      isSupported: true,
+      isSupported: doesEndpointSupportCommand('kube-list'),
     }),
     RenderComponent: KubeListActionResult,
     meta: {
