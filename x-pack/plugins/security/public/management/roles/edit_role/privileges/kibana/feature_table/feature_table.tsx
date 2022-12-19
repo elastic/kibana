@@ -221,7 +221,7 @@ export class FeatureTable extends Component<Props, State> {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>{infoIcon}</EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem className="eui-fullWidth">
             <EuiAccordion
               id={`featurePrivilegeControls_${feature.id}`}
               data-test-subj="featurePrivilegeControls"

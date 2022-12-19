@@ -68,23 +68,22 @@ export const SubFeatureForm = (props: Props) => {
   return (
     <>
       <EuiFlexGroup>
-        <EuiFlexItem className="eui-textTruncate eui-fullWidth">
+        <EuiFlexItem className="eui-textTruncate">
           <EuiFlexGroup gutterSize="s" direction="column">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem>
               <EuiText size="s">
                 {props.subFeature.name} {getTooltip()}
               </EuiText>
             </EuiFlexItem>
             {props.subFeature.description && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiToolTip
                   content={props.subFeature.description}
-                  anchorClassName="eui-textTruncate"
                 >
                   <EuiText
                     color={'subdued'}
                     size={'xs'}
-                    className="eui-textTruncate eui-fullWidth"
+                    className="eui-textTruncate"
                     data-test-subj="subFeatureDescription"
                   >
                     {props.subFeature.description}
@@ -94,7 +93,7 @@ export const SubFeatureForm = (props: Props) => {
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
+        <EuiFlexItem>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
