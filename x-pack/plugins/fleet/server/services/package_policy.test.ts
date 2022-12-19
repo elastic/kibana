@@ -57,6 +57,11 @@ import {
 import { appContextService } from './app_context';
 
 import { getPackageInfo } from './epm/packages';
+import { sendTelemetryEvents } from './upgrade_sender';
+
+const mockedSendTelemetryEvents = sendTelemetryEvents as jest.MockedFunction<
+  typeof sendTelemetryEvents
+>;
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {
@@ -1297,6 +1302,7 @@ describe('Package policy service', () => {
   describe('bulkUpdate', () => {
     beforeEach(() => {
       appContextService.start(createAppContextStartContractMock());
+      mockedSendTelemetryEvents.mockReset();
     });
     afterEach(() => {
       appContextService.stop();
@@ -1825,6 +1831,207 @@ describe('Package policy service', () => {
       );
 
       expect(result![0].name).toEqual('test');
+    });
+
+    it('should send telemetry event when upgrading a package policy', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+                period: {
+                  value: '6mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
+          });
+          return {
+            saved_objects: newObjs,
+          };
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+        [
+          {
+            ...mockPackagePolicy,
+            package: { ...mockPackagePolicy!.package, version: '0.9.1' },
+          } as any,
+        ],
+        { force: true }
+      );
+
+      expect(mockedSendTelemetryEvents).toBeCalled();
+    });
+
+    it('should not send telemetry event when updating a package policy without upgrade', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+                period: {
+                  value: '6mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
+          });
+          return {
+            saved_objects: newObjs,
+          };
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+        [
+          {
+            ...mockPackagePolicy,
+          } as any,
+        ],
+        { force: true }
+      );
+
+      expect(mockedSendTelemetryEvents).not.toBeCalled();
     });
   });
 

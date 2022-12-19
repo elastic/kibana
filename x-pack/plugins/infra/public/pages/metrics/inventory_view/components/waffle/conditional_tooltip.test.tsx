@@ -16,7 +16,7 @@ jest.mock('../../../../../containers/metrics_source', () => ({
 }));
 
 jest.mock('../../hooks/use_snaphot');
-import { useSnapshot } from '../../hooks/use_snaphot';
+import { useSnapshot, UseSnapshotRequest } from '../../hooks/use_snaphot';
 jest.mock('../../hooks/use_waffle_options');
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 const mockedUseSnapshot = useSnapshot as jest.Mock<ReturnType<typeof useSnapshot>>;
@@ -103,16 +103,16 @@ describe('ConditionalToolTip', () => {
     const tooltip = wrapper.find('[data-test-subj~="conditionalTooltipContent-host-01"]');
     expect(tooltip.render()).toMatchSnapshot();
 
-    expect(mockedUseSnapshot).toBeCalledWith(
-      expectedQuery,
-      expectedMetrics,
-      [],
-      'host',
-      'default',
+    expect(mockedUseSnapshot).toBeCalledWith({
+      filterQuery: expectedQuery,
+      metrics: expectedMetrics,
+      groupBy: [],
+      nodeType: 'host',
+      sourceId: 'default',
       currentTime,
-      '',
-      ''
-    );
+      accountId: '',
+      region: '',
+    } as UseSnapshotRequest);
   });
 });
 

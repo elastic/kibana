@@ -2508,6 +2508,41 @@ describe('successful migrations', () => {
     });
   });
 
+  describe('8.7.0', () => {
+    test('migrates es_query rule params and adds group by fields', () => {
+      const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0'];
+      const rule = getMockData(
+        {
+          params: { esQuery: '{ "query": "test-query" }', searchType: 'esQuery' },
+          alertTypeId: '.es-query',
+        },
+        true
+      );
+      const migratedAlert870 = migration870(rule, migrationContext);
+
+      expect(migratedAlert870.attributes.params).toEqual({
+        esQuery: '{ "query": "test-query" }',
+        searchType: 'esQuery',
+        aggType: 'count',
+        groupBy: 'all',
+      });
+    });
+
+    test('does not migrate rule params if rule is not es query', () => {
+      const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0'];
+      const rule = getMockData(
+        {
+          params: { foo: true },
+          alertTypeId: '.not-es-query',
+        },
+        true
+      );
+      const migratedAlert870 = migration870(rule, migrationContext);
+
+      expect(migratedAlert870.attributes.params).toEqual({ foo: true });
+    });
+  });
+
   describe('Metrics Inventory Threshold rule', () => {
     test('Migrates incorrect action group spelling', () => {
       const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0'];

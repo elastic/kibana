@@ -11,4 +11,6 @@ export enum SYNTHETICS_API_URLS {
   PING_STATUSES = '/internal/synthetics/ping_statuses',
   OVERVIEW_STATUS = `/internal/synthetics/overview/status`,
   INDEX_SIZE = `/internal/synthetics/index_size`,
+  PARAMS = `/synthetics/params`,
+  SYNC_GLOBAL_PARAMS = `/synthetics/sync_global_params`,
 }
