@@ -735,7 +735,7 @@ describe('SecureSpacesClientWrapper', () => {
       securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>,
       aliases: Array<{ targetSpace: string; targetType: string }>
     ) {
-      expect(securityExtension!.performAuthorization).toHaveBeenCalledTimes(1);
+      expect(securityExtension.performAuthorization).toHaveBeenCalledTimes(1);
 
       const targetTypes = aliases.map((alias) => alias.targetType);
       const targetSpaces = aliases.map((alias) => alias.targetSpace);
@@ -754,7 +754,7 @@ describe('SecureSpacesClientWrapper', () => {
         types: actualTypes,
         enforceMap: actualEnforceMap,
         options: actualOptions,
-      } = securityExtension!.performAuthorization.mock.calls[0][0];
+      } = securityExtension.performAuthorization.mock.calls[0][0];
 
       expect(setsAreEqual(expectedActions, actualActions)).toBeTruthy();
       expect(setsAreEqual(expectedSpaces, actualSpaces)).toBeTruthy();

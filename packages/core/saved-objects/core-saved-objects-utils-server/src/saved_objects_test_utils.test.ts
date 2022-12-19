@@ -16,14 +16,14 @@ describe('savedObjects/testUtils', () => {
     const setD = new Set(['2', '3', '1']);
 
     describe('inequal', () => {
-      it('should return false is the sets are not the same size', () => {
+      it('should return false if the sets are not the same size', () => {
         expect(setsAreEqual(setA, setB)).toBeFalsy();
         expect(setsAreEqual(setB, setA)).toBeFalsy();
         expect(setsAreEqual(setA, new Set())).toBeFalsy();
         expect(setsAreEqual(new Set(), setA)).toBeFalsy();
       });
 
-      it('should return false is the sets do not have the same values', () => {
+      it('should return false if the sets do not have the same values', () => {
         expect(setsAreEqual(setA, setC)).toBeFalsy();
         expect(setsAreEqual(setC, setA)).toBeFalsy();
       });
@@ -58,22 +58,42 @@ describe('savedObjects/testUtils', () => {
     mapE.set('b', ['2', '1']);
     mapE.set('a', ['3', '1', '2']);
 
+    const mapF = new Map<string, string[] | undefined>();
+    mapF.set('a', ['1', '2', '3']);
+    mapF.set('b', undefined);
+
+    const mapG = new Map<string, string[] | undefined>();
+    mapG.set('b', undefined);
+    mapG.set('a', ['3', '1', '2']);
+
+    const mapH = new Map<string, string[] | undefined>();
+    mapF.set('a', ['1', '2', '3']);
+    mapF.set('b', []);
+
+    const mapI = new Map<string, string[] | undefined>();
+    mapG.set('b', []);
+    mapG.set('a', ['3', '1', '2']);
+
     describe('inequal', () => {
-      it('should return false is the maps are not the same size', () => {
+      it('should return false if the maps are not the same size', () => {
         expect(arrayMapsAreEqual(mapA, mapB)).toBeFalsy();
         expect(arrayMapsAreEqual(mapB, mapA)).toBeFalsy();
         expect(arrayMapsAreEqual(mapA, new Map())).toBeFalsy();
         expect(arrayMapsAreEqual(new Map(), mapA)).toBeFalsy();
       });
 
-      it('should return false is the maps do not have the same keys', () => {
+      it('should return false if the maps do not have the same keys', () => {
         expect(arrayMapsAreEqual(mapA, mapC)).toBeFalsy();
         expect(arrayMapsAreEqual(mapC, mapA)).toBeFalsy();
       });
 
-      it('should return false is the maps do not have the same values', () => {
+      it('should return false if the maps do not have the same values', () => {
         expect(arrayMapsAreEqual(mapA, mapD)).toBeFalsy();
         expect(arrayMapsAreEqual(mapD, mapA)).toBeFalsy();
+        expect(arrayMapsAreEqual(mapA, mapF)).toBeFalsy();
+        expect(arrayMapsAreEqual(mapF, mapA)).toBeFalsy();
+        expect(arrayMapsAreEqual(mapA, mapH)).toBeFalsy();
+        expect(arrayMapsAreEqual(mapH, mapA)).toBeFalsy();
       });
     });
 
@@ -82,6 +102,10 @@ describe('savedObjects/testUtils', () => {
         expect(arrayMapsAreEqual(mapA, mapE)).toBeTruthy();
         expect(arrayMapsAreEqual(mapE, mapA)).toBeTruthy();
         expect(arrayMapsAreEqual(new Map(), new Map())).toBeTruthy();
+        expect(arrayMapsAreEqual(mapF, mapG)).toBeTruthy();
+        expect(arrayMapsAreEqual(mapG, mapF)).toBeTruthy();
+        expect(arrayMapsAreEqual(mapH, mapI)).toBeTruthy();
+        expect(arrayMapsAreEqual(mapI, mapH)).toBeTruthy();
       });
     });
   });
@@ -107,19 +131,19 @@ describe('savedObjects/testUtils', () => {
     mapE.set('a', new Set(['3', '1', '2']));
 
     describe('inequal', () => {
-      it('should return false is the maps are not the same size', () => {
+      it('should return false if the maps are not the same size', () => {
         expect(setMapsAreEqual(mapA, mapB)).toBeFalsy();
         expect(setMapsAreEqual(mapB, mapA)).toBeFalsy();
         expect(setMapsAreEqual(mapA, new Map())).toBeFalsy();
         expect(setMapsAreEqual(new Map(), mapA)).toBeFalsy();
       });
 
-      it('should return false is the maps do not have the same keys', () => {
+      it('should return false if the maps do not have the same keys', () => {
         expect(setMapsAreEqual(mapA, mapC)).toBeFalsy();
         expect(setMapsAreEqual(mapC, mapA)).toBeFalsy();
       });
 
-      it('should return false is the maps do not have the same values', () => {
+      it('should return false if the maps do not have the same values', () => {
         expect(setMapsAreEqual(mapA, mapD)).toBeFalsy();
         expect(setMapsAreEqual(mapD, mapA)).toBeFalsy();
       });

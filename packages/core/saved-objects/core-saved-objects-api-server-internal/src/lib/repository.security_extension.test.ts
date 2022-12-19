@@ -965,7 +965,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         namespace
       );
 
-      expect(mockGetSearchDsl.mock.calls[0].length).toBe(3); // Find success verifies this is called once, this shouyld always pass
+      expect(mockGetSearchDsl.mock.calls[0].length).toBe(3); // Find success verifies this is called once, this should always pass
       const {
         typeToNamespacesMap: actualMap,
       }: { typeToNamespacesMap: Map<string, string[] | undefined> } =

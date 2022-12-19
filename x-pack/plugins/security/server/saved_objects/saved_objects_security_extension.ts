@@ -169,10 +169,11 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       options: { allowGlobalResource: params.options?.allowGlobalResource === true },
     });
 
-    if (params.enforceMap !== undefined && checkResult) {
+    const typesAndSpaces = params.enforceMap;
+    if (typesAndSpaces !== undefined && checkResult) {
       params.actions.forEach((action) => {
         this.enforceAuthorization({
-          typesAndSpaces: params.enforceMap!,
+          typesAndSpaces,
           action,
           typeMap: checkResult.typeMap,
           auditCallback: params.auditCallback,

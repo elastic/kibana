@@ -15,7 +15,7 @@ import type { EcsEventOutcome } from '@kbn/logging';
  */
 export interface PerformAuthorizationParams<A extends string> {
   /**
-   * An set of actions to check.
+   * A set of actions to check.
    */
   actions: Set<A>;
   /**
