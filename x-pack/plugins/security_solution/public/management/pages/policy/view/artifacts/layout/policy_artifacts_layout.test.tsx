@@ -28,6 +28,10 @@ import { useUserPrivileges } from '../../../../../../common/components/user_priv
 
 jest.mock('../../../../../../common/components/user_privileges');
 
+interface MockedAPIArgs {
+  query: { filter: string };
+}
+
 let render: (canWriteArtifact?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
 let mockedContext: AppContextTestRender;
 let renderResult: ReturnType<AppContextTestRender['render']>;
@@ -49,6 +53,9 @@ const getEventFiltersLabels = () => ({
 });
 
 describe('Policy artifacts layout', () => {
+  const isFilteredByPolicyQuery = (args?: { query: { filter: string } }) =>
+    args && args.query.filter === parsePoliciesAndFilterToKql({ policies: [policyItem.id, 'all'] });
+
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
@@ -109,18 +116,13 @@ describe('Policy artifacts layout', () => {
   });
 
   it('should render layout with no assigned artifacts data when there are artifacts', async () => {
-    mockedApi.responseProvider.eventFiltersList.mockImplementation(
-      (args?: { query: { filter: string } }) => {
-        if (
-          !args ||
-          args.query.filter !== parsePoliciesAndFilterToKql({ policies: [policyItem.id, 'all'] })
-        ) {
-          return getFoundExceptionListItemSchemaMock(1);
-        } else {
-          return getFoundExceptionListItemSchemaMock(0);
-        }
+    mockedApi.responseProvider.eventFiltersList.mockImplementation((args?: MockedAPIArgs) => {
+      if (!isFilteredByPolicyQuery(args)) {
+        return getFoundExceptionListItemSchemaMock(1);
+      } else {
+        return getFoundExceptionListItemSchemaMock(0);
       }
-    );
+    });
 
     await render();
 
@@ -197,18 +199,13 @@ describe('Policy artifacts layout', () => {
       expect(renderResult.queryByTestId('artifacts-assign-button')).toBeNull();
     });
     it('should not display assign and manage artifacts buttons on empty state when there are artifacts', async () => {
-      mockedApi.responseProvider.eventFiltersList.mockImplementation(
-        (args?: { query: { filter: string } }) => {
-          if (
-            !args ||
-            args.query.filter !== parsePoliciesAndFilterToKql({ policies: [policyItem.id, 'all'] })
-          ) {
-            return getFoundExceptionListItemSchemaMock(1);
-          } else {
-            return getFoundExceptionListItemSchemaMock(0);
-          }
+      mockedApi.responseProvider.eventFiltersList.mockImplementation((args?: MockedAPIArgs) => {
+        if (!isFilteredByPolicyQuery(args)) {
+          return getFoundExceptionListItemSchemaMock(1);
+        } else {
+          return getFoundExceptionListItemSchemaMock(0);
         }
-      );
+      });
       await render(false);
       expect(await renderResult.findByTestId('policy-artifacts-empty-unassigned')).not.toBeNull();
       expect(renderResult.queryByTestId('unassigned-assign-artifacts-button')).toBeNull();
