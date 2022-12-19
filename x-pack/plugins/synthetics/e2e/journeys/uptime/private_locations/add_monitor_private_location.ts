@@ -6,7 +6,7 @@
  */
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { assertText, byTestId, TIMEOUT_60_SEC } from '@kbn/observability-plugin/e2e/utils';
-import { monitorManagementPageProvider } from '../../page_objects/monitor_management';
+import { monitorManagementPageProvider } from '../../../page_objects/uptime/monitor_management';
 
 journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => {
   const uptime = monitorManagementPageProvider({ page, kibanaUrl });

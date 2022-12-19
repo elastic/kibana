@@ -6,7 +6,7 @@
  */
 
 import { before, expect, journey, step } from '@elastic/synthetics';
-import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey('Test Monitor Detail Flyout', async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });

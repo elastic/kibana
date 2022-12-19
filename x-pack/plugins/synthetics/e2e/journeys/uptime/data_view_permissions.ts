@@ -12,7 +12,7 @@ import {
   waitForLoadingToFinish,
 } from '@kbn/observability-plugin/e2e/utils';
 import { callKibana } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/helpers/call_kibana';
-import { loginPageProvider } from '../page_objects/login';
+import { loginPageProvider } from '../../page_objects/login';
 
 journey('DataViewPermissions', async ({ page, params }) => {
   const login = loginPageProvider({ page });
@@ -28,7 +28,7 @@ journey('DataViewPermissions', async ({ page, params }) => {
         },
       });
       // eslint-disable-next-line no-empty
-    } catch (e) {}
+    } catch (e) { }
   });
 
   const queryParams = new URLSearchParams({

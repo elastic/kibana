@@ -6,9 +6,9 @@
  */
 import { expect, Page } from '@elastic/synthetics';
 import { getQuerystring, TIMEOUT_60_SEC } from '@kbn/observability-plugin/e2e/utils';
-import { DataStream } from '../../common/runtime_types/monitor_management';
-import { loginPageProvider } from './login';
-import { utilsPageProvider } from './utils';
+import { DataStream } from '../../../common/runtime_types/monitor_management';
+import { loginPageProvider } from '../login';
+import { utilsPageProvider } from '../utils';
 
 export function monitorManagementPageProvider({
   page,

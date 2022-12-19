@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { expect, Page } from '@elastic/synthetics';
-import { FormMonitorType } from '../../common/runtime_types/monitor_management';
-import { loginPageProvider } from './login';
-import { utilsPageProvider } from './utils';
+import { FormMonitorType } from '../../../common/runtime_types/monitor_management';
+import { loginPageProvider } from '../login';
+import { utilsPageProvider } from '../utils';
 
 const SIXTY_SEC_TIMEOUT = {
   timeout: 60 * 1000,

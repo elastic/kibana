@@ -7,7 +7,7 @@
 
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { assertText, byTestId, waitForLoadingToFinish } from '@kbn/observability-plugin/e2e/utils';
-import { loginPageProvider } from '../../page_objects/login';
+import { loginPageProvider } from '../../../page_objects/login';
 
 journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
   const login = loginPageProvider({ page });

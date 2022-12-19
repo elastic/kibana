@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { journey, step, expect, after, Page } from '@elastic/synthetics';
-import { monitorManagementPageProvider } from '../page_objects/monitor_management';
+import { monitorManagementPageProvider } from '../../page_objects/uptime/monitor_management';
 
 journey(
   'Monitor Management-enablement-superuser',

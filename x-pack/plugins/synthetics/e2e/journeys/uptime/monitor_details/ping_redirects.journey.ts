@@ -7,8 +7,8 @@
 
 import { journey, step, expect, before, Page } from '@elastic/synthetics';
 import { byTestId, delay } from '@kbn/observability-plugin/e2e/utils';
-import { makeChecksWithStatus } from '../../helpers/make_checks';
-import { monitorDetailsPageProvider } from '../../page_objects/monitor_details';
+import { makeChecksWithStatus } from '../../../helpers/make_checks';
+import { monitorDetailsPageProvider } from '../../../page_objects/uptime/monitor_details';
 
 journey('MonitorPingRedirects', async ({ page, params }: { page: Page; params: any }) => {
   const monitorDetails = monitorDetailsPageProvider({ page, kibanaUrl: params.kibanaUrl });
