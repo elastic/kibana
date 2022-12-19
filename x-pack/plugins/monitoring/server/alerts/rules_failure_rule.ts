@@ -39,8 +39,8 @@ export class RulesFailureRule extends BaseRule {
       name: RULE_DETAILS[RULE_RULES_FAILURE].label,
       accessorKey: 'rulesFailure',
       defaultParams: {
-        threshold: 85,
-        duration: '5m',
+        threshold: 1,
+        duration: '1m',
       },
       actionVariables: [
         {
