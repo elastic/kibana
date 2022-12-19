@@ -4,13 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import yaml from 'js-yaml';
-import { INPUT_CONTROL } from '../../../common/constants';
-import { useStyles } from './styles';
-import { getInputFromPolicy } from '../../common/utils';
 import * as i18n from './translations';
 import { ControlGeneralView } from '../control_general_view';
 import { ControlYamlView } from '../control_yaml_view';
@@ -29,23 +25,13 @@ interface ControlSettingsDeps {
 }
 
 export const ControlSettings = ({ policy, onChange }: ControlSettingsDeps) => {
-  const styles = useStyles();
   const [viewMode, setViewMode] = useState(VIEW_MODE_GENERAL);
-  const input = getInputFromPolicy(policy, INPUT_CONTROL);
-  const configuration = input?.vars?.configuration?.value || '';
-  const json = useMemo(() => {
-    try {
-      return yaml.load(configuration);
-    } catch {
-      return { selectors: [] };
-    }
-  }, [configuration]);
 
-  const onViewModeGeneral = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+  const onViewModeGeneral = useCallback(() => {
     setViewMode(VIEW_MODE_GENERAL);
   }, []);
 
-  const onViewModeYaml = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+  const onViewModeYaml = useCallback(() => {
     setViewMode(VIEW_MODE_YAML);
   }, []);
 

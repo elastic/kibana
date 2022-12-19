@@ -121,9 +121,14 @@ export const ControlGeneralViewResponse = ({
       delete response.actions[response.actions.indexOf(ControlResponseAction.block)];
     } else {
       response.actions.push(ControlResponseAction.block);
+
+      // alert is required if block enabled
+      if (!alertSelected) {
+        onToggleAlert();
+      }
     }
     onChange(response);
-  }, [blockSelected, onChange, response]);
+  }, [alertSelected, blockSelected, onChange, onToggleAlert, response]);
 
   return (
     <EuiFlexGroup>
@@ -166,6 +171,7 @@ export const ControlGeneralViewResponse = ({
                 <EuiSpacer size="s" />
                 <EuiCheckbox
                   id={'alert' + index}
+                  disabled={blockSelected}
                   label={i18n.actionAlert}
                   checked={alertSelected}
                   onChange={onToggleAlert}

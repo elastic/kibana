@@ -15,8 +15,9 @@ export const useStyles = () => {
     };
 
     const draggable: CSSObject = {
-      paddingLeft: 0,
-      paddingRight: 0,
+      // setting manually as the spacing of selectors doesn't match with built in sizes
+      padding: 0,
+      paddingBottom: '12px',
     };
 
     return { panel, draggable };

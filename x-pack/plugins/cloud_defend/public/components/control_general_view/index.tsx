@@ -17,12 +17,19 @@ import {
   EuiDraggable,
   EuiDroppable,
   euiDragDropReorder,
+  EuiSpacer,
 } from '@elastic/eui';
 import yaml from 'js-yaml';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import { getInputFromPolicy } from '../../common/utils';
-import { ControlSelector, ControlResponse, SettingsDeps, DefaultSelector, DefaultResponse } from '../../types';
+import {
+  ControlSelector,
+  ControlResponse,
+  SettingsDeps,
+  DefaultSelector,
+  DefaultResponse,
+} from '../../types';
 import * as i18n from './translations';
 import { ControlGeneralViewSelector } from '../control_general_view_selector';
 import { ControlGeneralViewResponse } from '../control_general_view_response';
@@ -157,12 +164,14 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
   );
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup gutterSize="m" direction="column">
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h4>{i18n.selectors}</h4>
         </EuiTitle>
-        <EuiText color="subdued">{i18n.selectorsHelp}</EuiText>
+        <EuiText color="subdued" size="s">
+          {i18n.selectorsHelp}
+        </EuiText>
       </EuiFlexItem>
 
       {selectors.map((selector, i) => {
@@ -183,11 +192,15 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
         {i18n.addSelector}
       </EuiButton>
 
+      <EuiSpacer size="m" />
+
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h4>{i18n.responses}</h4>
         </EuiTitle>
-        <EuiText color="subdued">{i18n.responsesHelp}</EuiText>
+        <EuiText size="s" color="subdued">
+          {i18n.responsesHelp}
+        </EuiText>
       </EuiFlexItem>
 
       <EuiFlexItem>
@@ -198,7 +211,6 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
                 <EuiDraggable
                   key={i}
                   css={styles.draggable}
-                  spacing="l"
                   index={i}
                   draggableId={i + ''}
                   customDragHandle={true}
@@ -240,6 +252,7 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
         <EuiButton fullWidth color="primary" iconType="plusInCircle" onClick={onAddResponse}>
           {i18n.addResponse}
         </EuiButton>
+        <EuiSpacer size="m" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

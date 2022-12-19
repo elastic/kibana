@@ -21,8 +21,8 @@ export interface CloudDefendPluginStartDeps {
 }
 
 export enum ControlResponseAction {
-  'alert',
-  'block',
+  alert = 'alert',
+  block = 'block',
 }
 
 export enum ControlSelectorCondition {
