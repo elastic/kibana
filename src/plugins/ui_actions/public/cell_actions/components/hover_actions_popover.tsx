@@ -37,13 +37,13 @@ const HOVER_INTENT_DELAY = 100; // ms
 
 interface Props {
   children: React.ReactNode;
-  showMoreActionsFrom: number;
+  visibleCellActions: number;
   actionContext: CellActionExecutionContext;
-  showTooltip: boolean;
+  showActionTooltips: boolean;
 }
 
 export const HoverActionsPopover = React.memo<Props>(
-  ({ children, showMoreActionsFrom, actionContext, showTooltip }) => {
+  ({ children, visibleCellActions, actionContext, showActionTooltips }) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
     const [showHoverContent, setShowHoverContent] = useState(false);
@@ -52,8 +52,8 @@ export const HoverActionsPopover = React.memo<Props>(
     const [{ value: actions }, loadActions] = useLoadActionsFn();
 
     const { visibleActions, extraActions } = useMemo(
-      () => partitionActions(actions ?? [], showMoreActionsFrom),
-      [actions, showMoreActionsFrom]
+      () => partitionActions(actions ?? [], visibleCellActions),
+      [actions, visibleCellActions]
     );
 
     const closePopover = useCallback(() => {
@@ -139,11 +139,14 @@ export const HoverActionsPopover = React.memo<Props>(
                     key={action.id}
                     action={action}
                     actionContext={actionContext}
-                    showTooltip={showTooltip}
+                    showTooltip={showActionTooltips}
                   />
                 ))}
                 {extraActions.length > 0 ? (
-                  <ExtraActionsButton onClick={onShowExtraActionsClick} showTooltip={showTooltip} />
+                  <ExtraActionsButton
+                    onClick={onShowExtraActionsClick}
+                    showTooltip={showActionTooltips}
+                  />
                 ) : null}
               </div>
             ) : null}

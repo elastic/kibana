@@ -27,9 +27,9 @@ describe('HoverActionsPopover', () => {
       <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
           children={null}
-          showMoreActionsFrom={4}
+          visibleCellActions={4}
           actionContext={actionContext}
-          showTooltip={false}
+          showActionTooltips={false}
         />
       </CellActionsContextProvider>
     );
@@ -44,9 +44,9 @@ describe('HoverActionsPopover', () => {
     const { queryByLabelText, getByTestId } = render(
       <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
-          showMoreActionsFrom={4}
+          visibleCellActions={4}
           actionContext={actionContext}
-          showTooltip={false}
+          showActionTooltips={false}
         >
           <TestComponent />
         </HoverActionsPopover>
@@ -69,9 +69,9 @@ describe('HoverActionsPopover', () => {
     const { queryByLabelText, getByTestId } = render(
       <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
-          showMoreActionsFrom={4}
+          visibleCellActions={4}
           actionContext={actionContext}
-          showTooltip={false}
+          showActionTooltips={false}
         >
           <TestComponent />
         </HoverActionsPopover>
@@ -99,9 +99,9 @@ describe('HoverActionsPopover', () => {
     const { getByTestId } = render(
       <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
-          showMoreActionsFrom={1}
+          visibleCellActions={1}
           actionContext={actionContext}
-          showTooltip={false}
+          showActionTooltips={false}
         >
           <TestComponent />
         </HoverActionsPopover>
@@ -124,9 +124,9 @@ describe('HoverActionsPopover', () => {
     const { getByTestId, getByLabelText } = render(
       <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
-          showMoreActionsFrom={1}
+          visibleCellActions={1}
           actionContext={actionContext}
-          showTooltip={false}
+          showActionTooltips={false}
         >
           <TestComponent />
         </HoverActionsPopover>
@@ -158,9 +158,9 @@ describe('HoverActionsPopover', () => {
     const { getByTestId, queryByLabelText } = render(
       <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
-          showMoreActionsFrom={2}
+          visibleCellActions={2}
           actionContext={actionContext}
-          showTooltip={false}
+          showActionTooltips={false}
         >
           <TestComponent />
         </HoverActionsPopover>

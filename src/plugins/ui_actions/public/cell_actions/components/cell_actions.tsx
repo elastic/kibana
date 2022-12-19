@@ -70,11 +70,15 @@ export interface CellActionsProps {
    * `ALWAYS_VISIBLE` always shows the actions.
    */
   mode: CellActionsMode;
-  showTooltip?: boolean;
+
+  /**
+   * It displays a tooltip for every action button when `true`.
+   */
+  showActionTooltips?: boolean;
   /**
    * It shows 'more actions' button when the number of actions is bigger than this parameter.
    */
-  showMoreActionsFrom?: number;
+  visibleCellActions?: number;
   /**
    * Custom set of properties used by some actions.
    * An action might require a specific set of metadata properties to render.
@@ -88,8 +92,8 @@ export const CellActions: React.FC<CellActionsProps> = ({
   triggerId,
   children,
   mode,
-  showTooltip = true,
-  showMoreActionsFrom = 3,
+  showActionTooltips = true,
+  visibleCellActions = 3,
   metadata,
 }) => {
   const extraContentNodeRef = useRef<HTMLDivElement | null>(null);
@@ -111,8 +115,8 @@ export const CellActions: React.FC<CellActionsProps> = ({
       <div ref={nodeRef} data-test-subj={'cellActions'}>
         <HoverActionsPopover
           actionContext={actionContext}
-          showTooltip={showTooltip}
-          showMoreActionsFrom={showMoreActionsFrom}
+          showActionTooltips={showActionTooltips}
+          visibleCellActions={visibleCellActions}
         >
           {children}
         </HoverActionsPopover>
@@ -127,8 +131,8 @@ export const CellActions: React.FC<CellActionsProps> = ({
       {children}
       <InlineActions
         actionContext={actionContext}
-        showTooltip={showTooltip}
-        showMoreActionsFrom={showMoreActionsFrom}
+        showActionTooltips={showActionTooltips}
+        visibleCellActions={visibleCellActions}
       />
       <div ref={extraContentNodeRef} />
     </div>

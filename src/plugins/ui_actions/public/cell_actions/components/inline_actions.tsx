@@ -16,26 +16,26 @@ import { useLoadActions } from './cell_actions_context';
 
 interface InlineActionsProps {
   actionContext: CellActionExecutionContext;
-  showTooltip: boolean;
-  showMoreActionsFrom: number;
+  showActionTooltips: boolean;
+  visibleCellActions: number;
 }
 
 export const InlineActions: React.FC<InlineActionsProps> = ({
   actionContext,
-  showTooltip,
-  showMoreActionsFrom,
+  showActionTooltips,
+  visibleCellActions,
 }) => {
   const { value: allActions } = useLoadActions(actionContext);
   const { extraActions, visibleActions } = usePartitionActions(
     allActions ?? [],
-    showMoreActionsFrom
+    visibleCellActions
   );
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopOver = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
   const closePopOver = useCallback(() => setIsPopoverOpen(false), []);
   const button = useMemo(
-    () => <ExtraActionsButton onClick={togglePopOver} showTooltip={showTooltip} />,
-    [togglePopOver, showTooltip]
+    () => <ExtraActionsButton onClick={togglePopOver} showTooltip={showActionTooltips} />,
+    [togglePopOver, showActionTooltips]
   );
 
   return (
@@ -45,7 +45,7 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
           key={`action-item-${index}`}
           action={action}
           actionContext={actionContext}
-          showTooltip={showTooltip}
+          showTooltip={showActionTooltips}
         />
       ))}
       {extraActions.length > 0 ? (

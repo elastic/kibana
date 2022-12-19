@@ -9,13 +9,13 @@
 import { useMemo } from 'react';
 import { Action } from '../../actions';
 
-export const partitionActions = (actions: Action[], showMoreActionsFrom: number) => {
-  if (showMoreActionsFrom <= 1) return { extraActions: actions, visibleActions: [] };
-  if (actions.length <= showMoreActionsFrom) return { extraActions: [], visibleActions: actions };
+export const partitionActions = (actions: Action[], visibleCellActions: number) => {
+  if (visibleCellActions <= 1) return { extraActions: actions, visibleActions: [] };
+  if (actions.length <= visibleCellActions) return { extraActions: [], visibleActions: actions };
 
   return {
-    visibleActions: actions.slice(0, showMoreActionsFrom - 1),
-    extraActions: actions.slice(showMoreActionsFrom - 1, actions.length),
+    visibleActions: actions.slice(0, visibleCellActions - 1),
+    extraActions: actions.slice(visibleCellActions - 1, actions.length),
   };
 };
 
@@ -26,9 +26,9 @@ export interface PartitionedActions {
 
 export const usePartitionActions = (
   allActions: Action[],
-  showMoreActionsFrom: number
+  visibleCellActions: number
 ): PartitionedActions => {
   return useMemo(() => {
-    return partitionActions(allActions ?? [], showMoreActionsFrom);
-  }, [allActions, showMoreActionsFrom]);
+    return partitionActions(allActions ?? [], visibleCellActions);
+  }, [allActions, visibleCellActions]);
 };

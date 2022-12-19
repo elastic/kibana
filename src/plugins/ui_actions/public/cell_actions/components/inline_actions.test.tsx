@@ -20,7 +20,11 @@ describe('InlineActions', () => {
     const getActions = () => getActionsPromise;
     const { queryByTestId } = render(
       <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
-        <InlineActions showMoreActionsFrom={5} actionContext={actionContext} showTooltip={false} />
+        <InlineActions
+          visibleCellActions={5}
+          actionContext={actionContext}
+          showActionTooltips={false}
+        />
       </CellActionsContextProvider>
     );
 
@@ -42,7 +46,11 @@ describe('InlineActions', () => {
     const getActions = () => getActionsPromise;
     const { queryAllByRole } = render(
       <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
-        <InlineActions showMoreActionsFrom={5} actionContext={actionContext} showTooltip={false} />
+        <InlineActions
+          visibleCellActions={5}
+          actionContext={actionContext}
+          showActionTooltips={false}
+        />
       </CellActionsContextProvider>
     );
 

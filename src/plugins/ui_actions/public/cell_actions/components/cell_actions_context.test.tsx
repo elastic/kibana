@@ -75,7 +75,7 @@ describe('CellActionsContextProvider', () => {
     expect(result.current.value).toEqual([action]);
   });
 
-  it('sorts actions', async () => {
+  it('sorts actions by order', async () => {
     const firstAction = makeAction('action-1', 'icon', 1);
     const secondAction = makeAction('action-2', 'icon', 2);
     const getActionsPromise = Promise.resolve([secondAction, firstAction]);
@@ -124,5 +124,32 @@ describe('CellActionsContextProvider', () => {
     });
 
     expect(result.current.value).toEqual([firstAction, secondAction]);
+  });
+
+  it('sorts actions by id and order', async () => {
+    const actionWithoutOrder = makeAction('action-1-no-order');
+    const secondAction = makeAction('action-2', 'icon', 2);
+    const thirdAction = makeAction('action-3', 'icon', 3);
+
+    const getActionsPromise = Promise.resolve([secondAction, actionWithoutOrder, thirdAction]);
+    const getActions = () => getActionsPromise;
+
+    const { result } = renderHook(
+      () => useLoadActions(actionContext),
+
+      {
+        wrapper: ({ children }) => (
+          <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
+            {children}
+          </CellActionsContextProvider>
+        ),
+      }
+    );
+
+    await act(async () => {
+      await getActionsPromise;
+    });
+
+    expect(result.current.value).toEqual([secondAction, thirdAction, actionWithoutOrder]);
   });
 });

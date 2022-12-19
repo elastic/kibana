@@ -57,11 +57,11 @@ DefaultWithControls.argTypes = {
 };
 
 DefaultWithControls.args = {
-  showTooltip: true,
+  showActionTooltips: true,
   mode: CellActionsMode.ALWAYS_VISIBLE,
   triggerId: TRIGGER_ID,
   field: FIELD,
-  showMoreActionsFrom: 3,
+  visibleCellActions: 3,
 };
 
 export const CellActionInline = ({}: {}) => (

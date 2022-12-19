@@ -17,7 +17,7 @@ describe('InlineActions', () => {
     expect(extraActions).toEqual([]);
   });
 
-  it('returns only visible actions when showMoreActionsFrom > actions.length', async () => {
+  it('returns only visible actions when visibleCellActions > actions.length', async () => {
     const actions = [makeAction('action-1'), makeAction('action-2'), makeAction('action-3')];
     const { extraActions, visibleActions } = partitionActions(actions, 4);
 
@@ -25,7 +25,7 @@ describe('InlineActions', () => {
     expect(extraActions).toEqual([]);
   });
 
-  it('returns only extra actions when showMoreActionsFrom is 1', async () => {
+  it('returns only extra actions when visibleCellActions is 1', async () => {
     const actions = [makeAction('action-1'), makeAction('action-2'), makeAction('action-3')];
     const { extraActions, visibleActions } = partitionActions(actions, 1);
 
@@ -33,7 +33,7 @@ describe('InlineActions', () => {
     expect(extraActions.length).toEqual(actions.length);
   });
 
-  it('returns only extra actions when showMoreActionsFrom is 0', async () => {
+  it('returns only extra actions when visibleCellActions is 0', async () => {
     const actions = [makeAction('action-1'), makeAction('action-2'), makeAction('action-3')];
     const { extraActions, visibleActions } = partitionActions(actions, 0);
 
@@ -41,7 +41,7 @@ describe('InlineActions', () => {
     expect(extraActions.length).toEqual(actions.length);
   });
 
-  it('returns only extra actions when showMoreActionsFrom is negative', async () => {
+  it('returns only extra actions when visibleCellActions is negative', async () => {
     const actions = [makeAction('action-1'), makeAction('action-2'), makeAction('action-3')];
     const { extraActions, visibleActions } = partitionActions(actions, -6);
 
@@ -49,7 +49,7 @@ describe('InlineActions', () => {
     expect(extraActions.length).toEqual(actions.length);
   });
 
-  it('returns only one visible action when showMoreActionsFrom is 2 and action.length is 3', async () => {
+  it('returns only one visible action when visibleCellActionss 2 and action.length is 3', async () => {
     const { extraActions, visibleActions } = partitionActions(
       [makeAction('action-1'), makeAction('action-2'), makeAction('action-3')],
       2
@@ -59,7 +59,7 @@ describe('InlineActions', () => {
     expect(extraActions.length).toEqual(2);
   });
 
-  it('returns two visible actions when showMoreActionsFrom is 3 and action.length is 5', async () => {
+  it('returns two visible actions when visibleCellActions is 3 and action.length is 5', async () => {
     const { extraActions, visibleActions } = partitionActions(
       [
         makeAction('action-1'),
@@ -74,7 +74,7 @@ describe('InlineActions', () => {
     expect(extraActions.length).toEqual(3);
   });
 
-  it('returns three visible actions when showMoreActionsFrom is 3 and action.length is 3', async () => {
+  it('returns three visible actions when visibleCellActions is 3 and action.length is 3', async () => {
     const { extraActions, visibleActions } = partitionActions(
       [makeAction('action-1'), makeAction('action-2'), makeAction('action-3')],
       3
