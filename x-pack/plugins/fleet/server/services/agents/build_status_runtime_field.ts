@@ -79,8 +79,7 @@ function _buildSource(inactivityTimeouts: InactivityTimeouts, pathPrefix?: strin
       emit('degraded');
     } else { 
       emit('online'); 
-    }
-    `.replace(/(\n|\s{4})/g, ''); // condense source to single line
+    }`;
 }
 
 // exported for testing
