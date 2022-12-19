@@ -219,7 +219,7 @@ export class FeatureTable extends Component<Props, State> {
       const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
 
       return (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="s" alignItems="center" className="eui-fullWidth">
           <EuiFlexItem grow={false}>{infoIcon}</EuiFlexItem>
           <EuiFlexItem className="eui-fullWidth">
             <EuiAccordion

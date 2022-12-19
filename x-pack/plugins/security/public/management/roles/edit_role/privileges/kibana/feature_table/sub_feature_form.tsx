@@ -77,9 +77,7 @@ export const SubFeatureForm = (props: Props) => {
             </EuiFlexItem>
             {props.subFeature.description && (
               <EuiFlexItem>
-                <EuiToolTip
-                  content={props.subFeature.description}
-                >
+                <EuiToolTip content={props.subFeature.description}>
                   <EuiText
                     color={'subdued'}
                     size={'xs'}
