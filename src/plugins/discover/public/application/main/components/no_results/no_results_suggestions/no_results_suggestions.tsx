@@ -10,7 +10,7 @@ import React from 'react';
 import dateMath from '@kbn/datemath';
 import { EuiEmptyPrompt, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { isOfQueryType } from '@kbn/es-query';
+import { isOfQueryType, isOfAggregateQueryType } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
 import { NoResultsSuggestionDefault } from './no_results_suggestion_default';
@@ -36,7 +36,8 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = React.me
     const services = useDiscoverServices();
     const { data, uiSettings, timefilter } = services;
     const { query, filters } = useQuerySubscriber({ data });
-    const hasQuery = isOfQueryType(query) && !!query?.query;
+    const hasQuery =
+      (isOfQueryType(query) && !!query?.query) || (!!query && isOfAggregateQueryType(query));
     const hasFilters = hasActiveFilter(filters);
 
     const {
@@ -80,7 +81,9 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = React.me
           )}
           {hasQuery && (
             <li>
-              <NoResultsSuggestionWhenQuery />
+              <NoResultsSuggestionWhenQuery
+                querySyntax={isOfQueryType(query) ? query.language : undefined}
+              />
             </li>
           )}
           {hasFilters && (
