@@ -109,6 +109,7 @@ export function QueryBarMenu({
         onClick={onButtonClick}
         isDisabled={isDisabled}
         {...buttonProps}
+        style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
         iconType="filter"
         aria-label={buttonLabel}
         data-test-subj="showQueryBarMenu"
