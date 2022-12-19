@@ -668,7 +668,10 @@
 ---
 > 
 >     afterEach(function () {
-578,580c481,484
+575a479,480
+> 
+>       global.kbnHandlebarsEnv = null;
+578,580c483,486
 <     it('should call logger at default level', function() {
 <       var levelArg, logArg;
 <       handlebarsEnv.log = function(level, arg) {
@@ -677,7 +680,7 @@
 >       let levelArg;
 >       let logArg;
 >       kbnHandlebarsEnv!.log = function (level, arg) {
-585,590c489,491
+585,590c491,493
 <       expectTemplate('{{log blah}}')
 <         .withInput({ blah: 'whee' })
 <         .withMessage('log should not display')
@@ -688,7 +691,7 @@
 >       expectTemplate('{{log blah}}').withInput({ blah: 'whee' }).toCompileTo('');
 >       expect(1).toEqual(levelArg);
 >       expect('whee').toEqual(logArg);
-593,595c494,497
+593,595c496,499
 <     it('should call logger at data level', function() {
 <       var levelArg, logArg;
 <       handlebarsEnv.log = function(level, arg) {
@@ -697,20 +700,20 @@
 >       let levelArg;
 >       let logArg;
 >       kbnHandlebarsEnv!.log = function (level, arg) {
-605,606c507,508
+605,606c509,510
 <       equals('03', levelArg);
 <       equals('whee', logArg);
 ---
 >       expect('03').toEqual(levelArg);
 >       expect('whee').toEqual(logArg);
-609,610c511,513
+609,610c513,515
 <     it('should output to info', function() {
 <       var called;
 ---
 >     it('should output to info', function () {
 >       let calls = 0;
 >       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
-612,616c515,521
+612,616c517,523
 <       console.info = function(info) {
 <         equals('whee', info);
 <         called = true;
@@ -724,7 +727,7 @@
 >           console.info = $info;
 >           console.log = $log;
 >         }
-618,622c523,529
+618,622c525,531
 <       console.log = function(log) {
 <         equals('whee', log);
 <         called = true;
@@ -738,7 +741,7 @@
 >           console.info = $info;
 >           console.log = $log;
 >         }
-625,628c532,533
+625,628c534,535
 <       expectTemplate('{{log blah}}')
 <         .withInput({ blah: 'whee' })
 <         .toCompileTo('');
@@ -746,14 +749,14 @@
 ---
 >       expectTemplate('{{log blah}}').withInput({ blah: 'whee' }).toCompileTo('');
 >       expect(calls).toEqual(callsExpected);
-631,632c536,538
+631,632c538,540
 <     it('should log at data level', function() {
 <       var called;
 ---
 >     it('should log at data level', function () {
 >       let calls = 0;
 >       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
-634,637c540,543
+634,637c542,545
 <       console.error = function(log) {
 <         equals('whee', log);
 <         called = true;
@@ -763,20 +766,20 @@
 >         expect('whee').toEqual(log);
 >         calls++;
 >         if (calls === callsExpected) console.error = $error;
-645c551
+645c553
 <       equals(true, called);
 ---
 >       expect(calls).toEqual(callsExpected);
-648,649c554,556
+648,649c556,558
 <     it('should handle missing logger', function() {
 <       var called = false;
 ---
 >     it('should handle missing logger', function () {
 >       let calls = 0;
 >       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
-650a558
+650a560
 >       // @ts-expect-error
-652,655c560,563
+652,655c562,565
 <       console.log = function(log) {
 <         equals('whee', log);
 <         called = true;
@@ -786,18 +789,18 @@
 >         expect('whee').toEqual(log);
 >         calls++;
 >         if (calls === callsExpected) console.log = $log;
-663c571
+663c573
 <       equals(true, called);
 ---
 >       expect(calls).toEqual(callsExpected);
-666,667c574,576
+666,667c576,578
 <     it('should handle string log levels', function() {
 <       var called;
 ---
 >     it('should handle string log levels', function () {
 >       let calls = 0;
 >       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
-669,671c578,580
+669,671c580,582
 <       console.error = function(log) {
 <         equals('whee', log);
 <         called = true;
@@ -805,26 +808,26 @@
 >       console.error = function (log) {
 >         expect('whee').toEqual(log);
 >         calls++;
-679c588
+679c590
 <       equals(true, called);
 ---
 >       expect(calls).toEqual(callsExpected);
-681c590
+681c592
 <       called = false;
 ---
 >       calls = 0;
-688c597
+688c599
 <       equals(true, called);
 ---
 >       expect(calls).toEqual(callsExpected);
-691,692c600,602
+691,692c602,604
 <     it('should handle hash log levels', function() {
 <       var called;
 ---
 >     it('should handle hash log levels [1]', function () {
 >       let calls = 0;
 >       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
-694,696c604,606
+694,696c606,608
 <       console.error = function(log) {
 <         equals('whee', log);
 <         called = true;
@@ -832,7 +835,7 @@
 >       console.error = function (log) {
 >         expect('whee').toEqual(log);
 >         calls++;
-699,702c609,610
+699,702c611,612
 <       expectTemplate('{{log blah level="error"}}')
 <         .withInput({ blah: 'whee' })
 <         .toCompileTo('');
@@ -840,13 +843,13 @@
 ---
 >       expectTemplate('{{log blah level="error"}}').withInput({ blah: 'whee' }).toCompileTo('');
 >       expect(calls).toEqual(callsExpected);
-705,706c613,614
+705,706c615,616
 <     it('should handle hash log levels', function() {
 <       var called = false;
 ---
 >     it('should handle hash log levels [2]', function () {
 >       let called = false;
-708,711c616,623
+708,711c618,625
 <       console.info = console.log = console.error = console.debug = function() {
 <         called = true;
 <         console.info = console.log = console.error = console.debug = $log;
@@ -860,7 +863,7 @@
 >             called = true;
 >             console.info = console.log = console.error = console.debug = $log;
 >           };
-713,716c625,626
+713,716c627,628
 <       expectTemplate('{{log blah level="debug"}}')
 <         .withInput({ blah: 'whee' })
 <         .toCompileTo('');
@@ -868,14 +871,14 @@
 ---
 >       expectTemplate('{{log blah level="debug"}}').withInput({ blah: 'whee' }).toCompileTo('');
 >       expect(false).toEqual(called);
-719,720c629,631
+719,720c631,633
 <     it('should pass multiple log arguments', function() {
 <       var called;
 ---
 >     it('should pass multiple log arguments', function () {
 >       let calls = 0;
 >       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
-722,727c633,638
+722,727c635,640
 <       console.info = console.log = function(log1, log2, log3) {
 <         equals('whee', log1);
 <         equals('foo', log2);
@@ -889,7 +892,7 @@
 >         expect(1).toEqual(log3);
 >         calls++;
 >         if (calls === callsExpected) console.log = $log;
-730,733c641,642
+730,733c643,644
 <       expectTemplate('{{log blah "foo" 1}}')
 <         .withInput({ blah: 'whee' })
 <         .toCompileTo('');
@@ -897,14 +900,14 @@
 ---
 >       expectTemplate('{{log blah "foo" 1}}').withInput({ blah: 'whee' }).toCompileTo('');
 >       expect(calls).toEqual(callsExpected);
-736,737c645,647
+736,737c647,649
 <     it('should pass zero log arguments', function() {
 <       var called;
 ---
 >     it('should pass zero log arguments', function () {
 >       let calls = 0;
 >       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
-739,742c649,652
+739,742c651,654
 <       console.info = console.log = function() {
 <         expect(arguments.length).to.equal(0);
 <         called = true;
@@ -914,7 +917,7 @@
 >         expect(arguments.length).toEqual(0);
 >         calls++;
 >         if (calls === callsExpected) console.log = $log;
-745,748c655,656
+745,748c657,658
 <       expectTemplate('{{log}}')
 <         .withInput({ blah: 'whee' })
 <         .toCompileTo('');
@@ -922,13 +925,13 @@
 ---
 >       expectTemplate('{{log}}').withInput({ blah: 'whee' }).toCompileTo('');
 >       expect(calls).toEqual(callsExpected);
-753,754c661,662
+753,754c663,664
 <   describe('#lookup', function() {
 <     it('should lookup arbitrary content', function() {
 ---
 >   describe('#lookup', () => {
 >     it('should lookup arbitrary content', () => {
-760c668
+760c670
 <     it('should not fail on undefined value', function() {
 ---
 >     it('should not fail on undefined value', () => {
