@@ -442,7 +442,7 @@ describe('case transforms', () => {
       [ESCaseSeverity.HIGH],
       [ESCaseSeverity.CRITICAL],
     ])(
-      'properly converts "%s" severity to corresponding external Value',
+      'properly converts "%s" severity to corresponding external value',
       (internalSeverityValue) => {
         const caseSO = createCaseSavedObjectResponse({
           overrides: { severity: internalSeverityValue },

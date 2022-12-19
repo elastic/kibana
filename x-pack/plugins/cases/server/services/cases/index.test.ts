@@ -14,6 +14,7 @@
  */
 
 import type { CaseAttributes, CaseConnector, CaseFullExternalService } from '../../../common/api';
+import { CaseSeverity } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
@@ -27,7 +28,11 @@ import type {
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import {
+  CONNECTOR_ID_REFERENCE_NAME,
+  SEVERITY_ESMODEL_TO_EXTERNAL,
+  SEVERITY_EXTERNAL_TO_ESMODEL,
+} from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { CasesService } from '.';
 import type { ESCaseConnectorWithId } from '../test_utils';
@@ -41,6 +46,7 @@ import {
   createSOFindResponse,
 } from '../test_utils';
 import type { ESCaseAttributes } from './types';
+import { ESCaseSeverity } from './types';
 import { AttachmentService } from '../attachments';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { CaseSavedObject } from '../../common/types';
@@ -48,9 +54,11 @@ import type { CaseSavedObject } from '../../common/types';
 const createUpdateSOResponse = ({
   connector,
   externalService,
+  severity,
 }: {
   connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
+  severity?: ESCaseSeverity;
 } = {}): SavedObjectsUpdateResponse<ESCaseAttributes> => {
   const references: SavedObjectReference[] = createSavedObjectReferences({
     connector,
@@ -71,6 +79,10 @@ const createUpdateSOResponse = ({
     attributes = { ...attributes, external_service: null };
   }
 
+  if (severity || severity === 0) {
+    attributes = { ...attributes, severity };
+  }
+
   return {
     type: CASE_SAVED_OBJECT,
     id: '1',
@@ -83,6 +95,7 @@ const createFindSO = (
   params: {
     connector?: ESCaseConnectorWithId;
     externalService?: CaseFullExternalService;
+    overrides?: Partial<ESCaseAttributes>;
   } = {}
 ): SavedObjectsFindResult<ESCaseAttributes> => ({
   ...createCaseSavedObjectResponse(params),
@@ -91,18 +104,22 @@ const createFindSO = (
 
 const createCaseUpdateParams = (
   connector?: CaseConnector,
-  externalService?: CaseFullExternalService
+  externalService?: CaseFullExternalService,
+  severity?: CaseSeverity
 ): Partial<CaseAttributes> => ({
   ...(connector && { connector }),
   ...(externalService && { external_service: externalService }),
+  ...(severity && { severity }),
 });
 
 const createCasePostParams = (
   connector: CaseConnector,
-  externalService?: CaseFullExternalService
+  externalService?: CaseFullExternalService,
+  severity?: CaseSeverity
 ): CaseAttributes => ({
   ...basicCaseFields,
   connector,
+  ...(severity ? { severity } : { severity: basicCaseFields.severity }),
   ...(externalService ? { external_service: externalService } : { external_service: null }),
 });
 
@@ -147,7 +164,11 @@ describe('CasesService', () => {
 
         await service.patchCase({
           caseId: '1',
-          updatedAttributes: createCasePostParams(createJiraConnector(), createExternalService()),
+          updatedAttributes: createCasePostParams(
+            createJiraConnector(),
+            createExternalService(),
+            CaseSeverity.CRITICAL
+          ),
           originalCase: {} as CaseSavedObject,
         });
 
@@ -173,7 +194,7 @@ describe('CasesService', () => {
             "settings": Object {
               "syncAlerts": true,
             },
-            "severity": 0,
+            "severity": 30,
             "status": "open",
             "tags": Array [
               "defacement",
@@ -449,6 +470,33 @@ describe('CasesService', () => {
           }
         `);
       });
+
+      it.each([
+        [CaseSeverity.LOW],
+        [CaseSeverity.MEDIUM],
+        [CaseSeverity.HIGH],
+        [CaseSeverity.CRITICAL],
+      ])(
+        'properly converts "%s" severity to corresponding ES value on updating SO',
+        async (patchParamsSeverity) => {
+          unsecuredSavedObjectsClient.update.mockReturnValue(
+            Promise.resolve({} as SavedObjectsUpdateResponse<ESCaseAttributes>)
+          );
+
+          await service.patchCase({
+            caseId: '1',
+            updatedAttributes: createCaseUpdateParams(undefined, undefined, patchParamsSeverity),
+            originalCase: {} as CaseSavedObject,
+          });
+
+          const patchAttributes = unsecuredSavedObjectsClient.update.mock
+            .calls[0][2] as ESCaseAttributes;
+
+          expect(patchAttributes.severity).toEqual(
+            SEVERITY_EXTERNAL_TO_ESMODEL[patchParamsSeverity]
+          );
+        }
+      );
     });
 
     describe('post', () => {
@@ -637,6 +685,29 @@ describe('CasesService', () => {
           .calls[0][2] as SavedObjectsCreateOptions;
         expect(creationOptions.references).toEqual([]);
       });
+
+      it.each([
+        [CaseSeverity.LOW],
+        [CaseSeverity.MEDIUM],
+        [CaseSeverity.HIGH],
+        [CaseSeverity.CRITICAL],
+      ])(
+        'properly converts "%s" severity to corresponding ES value on creating SO',
+        async (postParamsSeverity) => {
+          unsecuredSavedObjectsClient.create.mockReturnValue(
+            Promise.resolve({} as SavedObject<ESCaseAttributes>)
+          );
+
+          await service.postNewCase({
+            attributes: createCasePostParams(getNoneCaseConnector(), undefined, postParamsSeverity),
+            id: '1',
+          });
+
+          const postAttributes = unsecuredSavedObjectsClient.create.mock
+            .calls[0][1] as ESCaseAttributes;
+          expect(postAttributes.severity).toEqual(SEVERITY_EXTERNAL_TO_ESMODEL[postParamsSeverity]);
+        }
+      );
     });
   });
 
@@ -702,6 +773,41 @@ describe('CasesService', () => {
         expect(
           res.saved_objects[0].attributes.external_service?.connector_id
         ).toMatchInlineSnapshot(`"100"`);
+      });
+
+      it('properly converts the severity field to the corresponding external value the bulkPatch response', async () => {
+        unsecuredSavedObjectsClient.bulkUpdate.mockReturnValue(
+          Promise.resolve({
+            saved_objects: [
+              createCaseSavedObjectResponse({ overrides: { severity: ESCaseSeverity.LOW } }),
+              createCaseSavedObjectResponse({ overrides: { severity: ESCaseSeverity.MEDIUM } }),
+              createCaseSavedObjectResponse({ overrides: { severity: ESCaseSeverity.HIGH } }),
+              createCaseSavedObjectResponse({ overrides: { severity: ESCaseSeverity.CRITICAL } }),
+            ],
+          })
+        );
+
+        const res = await service.patchCases({
+          cases: [
+            {
+              caseId: '1',
+              updatedAttributes: createCasePostParams(getNoneCaseConnector()),
+              originalCase: {} as CaseSavedObject,
+            },
+          ],
+        });
+        expect(res.saved_objects[0].attributes.severity).toEqual(
+          SEVERITY_ESMODEL_TO_EXTERNAL[ESCaseSeverity.LOW]
+        );
+        expect(res.saved_objects[1].attributes.severity).toEqual(
+          SEVERITY_ESMODEL_TO_EXTERNAL[ESCaseSeverity.MEDIUM]
+        );
+        expect(res.saved_objects[2].attributes.severity).toEqual(
+          SEVERITY_ESMODEL_TO_EXTERNAL[ESCaseSeverity.HIGH]
+        );
+        expect(res.saved_objects[3].attributes.severity).toEqual(
+          SEVERITY_ESMODEL_TO_EXTERNAL[ESCaseSeverity.CRITICAL]
+        );
       });
     });
 
@@ -938,6 +1044,30 @@ describe('CasesService', () => {
           `);
         expect(res.attributes.external_service?.connector_id).toMatchInlineSnapshot(`"100"`);
       });
+
+      it.each([
+        [ESCaseSeverity.LOW],
+        [ESCaseSeverity.MEDIUM],
+        [ESCaseSeverity.HIGH],
+        [ESCaseSeverity.CRITICAL],
+      ])(
+        'properly converts "%s" severity to corresponding external value in the patch response',
+        async (internalSeverityValue) => {
+          unsecuredSavedObjectsClient.update.mockReturnValue(
+            Promise.resolve(createUpdateSOResponse({ severity: internalSeverityValue }))
+          );
+
+          const res = await service.patchCase({
+            caseId: '1',
+            updatedAttributes: createCaseUpdateParams(),
+            originalCase: {} as CaseSavedObject,
+          });
+
+          expect(res.attributes.severity).toEqual(
+            SEVERITY_ESMODEL_TO_EXTERNAL[internalSeverityValue]
+          );
+        }
+      );
     });
 
     describe('post', () => {
@@ -959,6 +1089,31 @@ describe('CasesService', () => {
         expect(res.attributes.connector.id).toMatchInlineSnapshot(`"1"`);
         expect(res.attributes.external_service?.connector_id).toMatchInlineSnapshot(`"100"`);
       });
+
+      it.each([
+        [ESCaseSeverity.LOW],
+        [ESCaseSeverity.MEDIUM],
+        [ESCaseSeverity.HIGH],
+        [ESCaseSeverity.CRITICAL],
+      ])(
+        'properly converts "%s" severity to corresponding external value in the post response',
+        async (internalSeverityValue) => {
+          unsecuredSavedObjectsClient.create.mockReturnValue(
+            Promise.resolve(
+              createCaseSavedObjectResponse({ overrides: { severity: internalSeverityValue } })
+            )
+          );
+
+          const res = await service.postNewCase({
+            attributes: createCasePostParams(getNoneCaseConnector()),
+            id: '1',
+          });
+
+          expect(res.attributes.severity).toEqual(
+            SEVERITY_ESMODEL_TO_EXTERNAL[internalSeverityValue]
+          );
+        }
+      );
     });
 
     describe('find', () => {
@@ -999,6 +1154,24 @@ describe('CasesService', () => {
           }
         `);
       });
+
+      it.each([
+        [ESCaseSeverity.LOW],
+        [ESCaseSeverity.MEDIUM],
+        [ESCaseSeverity.HIGH],
+        [ESCaseSeverity.CRITICAL],
+      ])('includes the properly converted "%s" severity field in the result', async (severity) => {
+        const findMockReturn = createSOFindResponse([
+          createFindSO({ overrides: { severity } }),
+          createFindSO(),
+        ]);
+        unsecuredSavedObjectsClient.find.mockReturnValue(Promise.resolve(findMockReturn));
+
+        const res = await service.findCases();
+        expect(res.saved_objects[0].attributes.severity).toEqual(
+          SEVERITY_ESMODEL_TO_EXTERNAL[severity]
+        );
+      });
     });
 
     describe('bulkGet', () => {
@@ -1029,6 +1202,41 @@ describe('CasesService', () => {
         expect(
           res.saved_objects[1].attributes.external_service?.connector_id
         ).toMatchInlineSnapshot(`"200"`);
+      });
+
+      it('includes all severity values properly converted in the response', async () => {
+        unsecuredSavedObjectsClient.bulkGet.mockReturnValue(
+          Promise.resolve({
+            saved_objects: [
+              createCaseSavedObjectResponse({
+                overrides: { severity: ESCaseSeverity.LOW },
+              }),
+              createCaseSavedObjectResponse({
+                overrides: { severity: ESCaseSeverity.MEDIUM },
+              }),
+              createCaseSavedObjectResponse({
+                overrides: { severity: ESCaseSeverity.HIGH },
+              }),
+              createCaseSavedObjectResponse({
+                overrides: { severity: ESCaseSeverity.CRITICAL },
+              }),
+            ],
+          })
+        );
+
+        const res = await service.getCases({ caseIds: ['a'] });
+        expect(res.saved_objects[0].attributes.severity).toEqual(
+          SEVERITY_ESMODEL_TO_EXTERNAL[ESCaseSeverity.LOW]
+        );
+        expect(res.saved_objects[1].attributes.severity).toEqual(
+          SEVERITY_ESMODEL_TO_EXTERNAL[ESCaseSeverity.MEDIUM]
+        );
+        expect(res.saved_objects[2].attributes.severity).toEqual(
+          SEVERITY_ESMODEL_TO_EXTERNAL[ESCaseSeverity.HIGH]
+        );
+        expect(res.saved_objects[3].attributes.severity).toEqual(
+          SEVERITY_ESMODEL_TO_EXTERNAL[ESCaseSeverity.CRITICAL]
+        );
       });
     });
 
@@ -1144,6 +1352,28 @@ describe('CasesService', () => {
 
         expect(res.attributes.external_service).toMatchInlineSnapshot(`null`);
       });
+
+      it.each([
+        [ESCaseSeverity.LOW],
+        [ESCaseSeverity.MEDIUM],
+        [ESCaseSeverity.HIGH],
+        [ESCaseSeverity.CRITICAL],
+      ])(
+        'includes the properly converted "%s" severity field in the result',
+        async (internalSeverityValue) => {
+          unsecuredSavedObjectsClient.get.mockReturnValue(
+            Promise.resolve({
+              attributes: { severity: internalSeverityValue },
+            } as SavedObject<ESCaseAttributes>)
+          );
+
+          const res = await service.getCase({ id: 'a' });
+
+          expect(res.attributes.severity).toEqual(
+            SEVERITY_ESMODEL_TO_EXTERNAL[internalSeverityValue]
+          );
+        }
+      );
     });
   });
 
