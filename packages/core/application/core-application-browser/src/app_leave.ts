@@ -17,6 +17,9 @@ import type { EuiButtonColor } from '@elastic/eui';
  *
  * See {@link AppMountParameters} for detailed usage examples.
  *
+ * @remarks prefer {@link ScopedHistory.block} instead
+ *
+ * @public
  */
 export type AppLeaveHandler = (
   factory: AppLeaveActionFactory,

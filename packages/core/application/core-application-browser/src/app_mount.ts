@@ -87,6 +87,9 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * The route path for configuring navigation to the application.
    * This string should not include the base path from HTTP.
    *
+   * @deprecated Use {@link AppMountParameters.history} instead.
+   * @removeBy 8.8.0
+   *
    * @example
    *
    * How to configure react-router with a base path:
