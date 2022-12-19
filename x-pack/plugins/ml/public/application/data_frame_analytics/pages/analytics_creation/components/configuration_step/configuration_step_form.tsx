@@ -285,9 +285,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
       const formStateUpdated = {
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
-        ...(depVarIsRuntimeField || jobTypeChanged || depVarNotIncluded
-          ? { includes: formToUse.includes }
-          : {}),
+        ...(depVarIsRuntimeField || depVarNotIncluded ? { includes: formToUse.includes } : {}),
         requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
       };
 

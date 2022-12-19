@@ -47,6 +47,7 @@ export enum AlertProvidedActionVariables {
   alertActionGroup = 'alert.actionGroup',
   alertActionGroupName = 'alert.actionGroupName',
   alertActionSubgroup = 'alert.actionSubgroup',
+  alertFlapping = 'alert.flapping',
 }
 
 export enum LegacyAlertProvidedActionVariables {
@@ -154,6 +155,14 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
           'The human readable name of the action group of the alert that scheduled actions for the rule.',
       }
     ),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertFlapping,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertFlappingLabel', {
+      defaultMessage:
+        'A flag on the alert that indicates whether the alert status is changing repeatedly.',
+    }),
   });
 
   result.push({

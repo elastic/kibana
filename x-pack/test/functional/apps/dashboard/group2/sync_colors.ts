@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'geo.src',
       });
 
-      await filterBar.addFilter('geo.src', 'is not', 'CN');
+      await filterBar.addFilter({ field: 'geo.src', operation: 'is not', value: 'CN' });
 
       await PageObjects.lens.save('vis2', false, true);
       await PageObjects.dashboard.useColorSync(true);

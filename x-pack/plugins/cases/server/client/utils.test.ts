@@ -10,36 +10,41 @@ import {
   buildNestedFilter,
   buildRangeFilter,
   constructQueryOptions,
-  sortToSnake,
+  convertSortField,
 } from './utils';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { CaseStatuses } from '../../common';
 import { CaseSeverity } from '../../common/api';
+import { SEVERITY_EXTERNAL_TO_ESMODEL } from '../common/constants';
 
 describe('utils', () => {
-  describe('sortToSnake', () => {
+  describe('convertSortField', () => {
     it('transforms status correctly', () => {
-      expect(sortToSnake('status')).toBe('status');
+      expect(convertSortField('status')).toBe('status');
     });
 
     it('transforms createdAt correctly', () => {
-      expect(sortToSnake('createdAt')).toBe('created_at');
+      expect(convertSortField('createdAt')).toBe('created_at');
     });
 
     it('transforms created_at correctly', () => {
-      expect(sortToSnake('created_at')).toBe('created_at');
+      expect(convertSortField('created_at')).toBe('created_at');
     });
 
     it('transforms closedAt correctly', () => {
-      expect(sortToSnake('closedAt')).toBe('closed_at');
+      expect(convertSortField('closedAt')).toBe('closed_at');
     });
 
     it('transforms closed_at correctly', () => {
-      expect(sortToSnake('closed_at')).toBe('closed_at');
+      expect(convertSortField('closed_at')).toBe('closed_at');
+    });
+
+    it('transforms title correctly', () => {
+      expect(convertSortField('title')).toBe('title.keyword');
     });
 
     it('transforms default correctly', () => {
-      expect(sortToSnake('not-exist')).toBe('created_at');
+      expect(convertSortField('not-exist')).toBe('created_at');
     });
   });
 
@@ -403,8 +408,8 @@ describe('utils', () => {
     });
 
     it('creates a filter for the severity', () => {
-      expect(constructQueryOptions({ severity: CaseSeverity.CRITICAL }).filter)
-        .toMatchInlineSnapshot(`
+      Object.values(CaseSeverity).forEach((severity) => {
+        expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -415,13 +420,14 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "critical",
+              "value": "${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}",
             },
           ],
           "function": "is",
           "type": "function",
         }
-      `);
+        `);
+      });
     });
 
     it('creates a filter for the time range', () => {

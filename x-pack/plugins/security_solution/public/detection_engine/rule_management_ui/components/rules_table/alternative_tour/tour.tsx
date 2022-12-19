@@ -6,7 +6,10 @@
  */
 
 import { EuiText, EuiTourStep } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 import React, { useCallback, useEffect, useState } from 'react';
+import { siemGuideId } from '../../../../../../common/guided_onboarding/siem_guide_config';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -22,7 +25,15 @@ export const RulesPageTourComponent: React.FC<Props> = ({ children }) => {
     tourPopoverWidth: 300,
   };
 
-  const { storage } = useKibana().services;
+  const {
+    storage,
+    guidedOnboarding: { guidedOnboardingApi },
+  } = useKibana().services;
+
+  const isGuidedOnboardingActive = useObservable(
+    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, 'rules') ?? of(false),
+    true
+  );
 
   const [tourState, setTourState] = useState(() => {
     const restoredTourState = storage.get(NEW_FEATURES_TOUR_STORAGE_KEYS.RULE_MANAGEMENT_PAGE);
@@ -54,7 +65,9 @@ export const RulesPageTourComponent: React.FC<Props> = ({ children }) => {
   return (
     <EuiTourStep
       content={demoTourSteps[0].content}
-      isStepOpen={tourState.currentTourStep === 1 && tourState.isTourActive}
+      isStepOpen={
+        tourState.currentTourStep === 1 && tourState.isTourActive && !isGuidedOnboardingActive
+      }
       minWidth={tourState.tourPopoverWidth}
       onFinish={finishTour}
       step={1}

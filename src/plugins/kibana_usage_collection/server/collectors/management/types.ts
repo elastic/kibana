@@ -27,7 +27,6 @@ export interface UsageStats {
   'autocomplete:useTimeRange': boolean;
   'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
-  'visualization:visualize:legacyPieChartsLibrary': boolean;
   'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
@@ -154,6 +153,5 @@ export interface UsageStats {
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
-  'enterpriseSearch:enableBehavioralAnalyticsSection': boolean;
   'enterpriseSearch:enableEnginesSection': boolean;
 }
