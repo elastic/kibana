@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import {
-  EuiBadge,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -18,14 +17,13 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars } from '@kbn/ui-theme';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { SloSummaryStats } from './slo_summary_stats';
 import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
+import { SloBadges } from './slo_badges';
 import { paths } from '../../../config';
 import { SLO } from '../../../typings';
-import { isSloHealthy } from '../helpers/is_slo_healthy';
 
 export interface SloListItemProps {
   slo: SLO;
@@ -86,19 +84,7 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
 
                 <EuiFlexItem grow={false}>
                   <div>
-                    {isSloHealthy(slo) ? (
-                      <EuiBadge color={euiLightVars.euiColorSuccess}>
-                        {i18n.translate('xpack.observability.slos.slo.state.healthy', {
-                          defaultMessage: 'Healthy',
-                        })}
-                      </EuiBadge>
-                    ) : (
-                      <EuiBadge color={euiLightVars.euiColorDanger}>
-                        {i18n.translate('xpack.observability.slos.slo.state.violated', {
-                          defaultMessage: 'Violated',
-                        })}
-                      </EuiBadge>
-                    )}
+                    <SloBadges slo={slo} />
                   </div>
                 </EuiFlexItem>
               </EuiFlexGroup>
