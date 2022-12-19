@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {ContentService} from "./service/content_service";
+import type { ContentService } from './service/content_service';
 
 export interface ContentPluginSetup {
   content: ReturnType<ContentService['setup']>;

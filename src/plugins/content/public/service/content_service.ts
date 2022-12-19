@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ContentRegistry, ContentCache } from "@kbn/content-management-state";
+import { ContentRegistry, ContentCache } from '@kbn/content-management-state';
 
 export class ContentService {
   public readonly registry: ContentRegistry;
