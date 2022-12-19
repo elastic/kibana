@@ -34,9 +34,10 @@ const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-
 const MAX_AGENT_DATA_PREVIEW_SIZE = 20;
 export async function getAgentStatusById(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentId: string
 ): Promise<AgentStatus> {
-  return (await getAgentById(esClient, agentId)).status!;
+  return (await getAgentById(esClient, soClient, agentId)).status!;
 }
 
 export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
@@ -141,7 +142,10 @@ export async function getAgentStatusForAgentPolicy(
     other: 0,
     /* @deprecated Agent events do not exists anymore */
     events: 0,
-    total: Object.values(statuses).reduce((acc, val) => acc + val, 0) - combinedStatuses.unenrolled,
+    total:
+      Object.values(statuses).reduce((acc, val) => acc + val, 0) -
+      combinedStatuses.unenrolled -
+      combinedStatuses.inactive,
   };
 }
 export async function getIncomingDataByAgentsId(

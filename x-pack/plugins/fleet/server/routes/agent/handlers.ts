@@ -52,10 +52,11 @@ export const getAgentHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
 
   try {
     const body: GetOneAgentResponse = {
-      item: await AgentService.getAgentById(esClient, request.params.agentId),
+      item: await AgentService.getAgentById(esClient, soClient, request.params.agentId),
     };
 
     return response.ok({ body });
@@ -103,6 +104,7 @@ export const updateAgentHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
 
   const partialAgent: any = {};
   if (request.body.user_provided_metadata) {
@@ -115,7 +117,7 @@ export const updateAgentHandler: RequestHandler<
   try {
     await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
-      item: await AgentService.getAgentById(esClient, request.params.agentId),
+      item: await AgentService.getAgentById(esClient, soClient, request.params.agentId),
     };
 
     return response.ok({ body });
@@ -166,24 +168,22 @@ export const getAgentsHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
 
   try {
-    const { agents, total, page, perPage } = await AgentService.getAgentsByKuery(
-      esClient,
-      soClient,
-      {
-        page: request.query.page,
-        perPage: request.query.perPage,
-        showInactive: request.query.showInactive,
-        showUpgradeable: request.query.showUpgradeable,
-        kuery: request.query.kuery,
-        sortField: request.query.sortField,
-        sortOrder: request.query.sortOrder,
-      }
-    );
-    const totalInactive = request.query.showInactive
-      ? await AgentService.countInactiveAgents(esClient, {
-          kuery: request.query.kuery,
-        })
-      : 0;
+    const {
+      agents,
+      total,
+      page,
+      perPage,
+      totalInactive = 0,
+    } = await AgentService.getAgentsByKuery(esClient, soClient, {
+      page: request.query.page,
+      perPage: request.query.perPage,
+      showInactive: request.query.showInactive,
+      showUpgradeable: request.query.showUpgradeable,
+      kuery: request.query.kuery,
+      sortField: request.query.sortField,
+      sortOrder: request.query.sortOrder,
+      getTotalInactive: true,
+    });
 
     const body: GetAgentsResponse = {
       list: agents, // deprecated

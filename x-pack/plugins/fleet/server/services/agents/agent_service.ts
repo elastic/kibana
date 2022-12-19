@@ -101,12 +101,12 @@ class AgentClientImpl implements AgentClient {
 
   public async getAgent(agentId: string) {
     await this.#runPreflight();
-    return getAgentById(this.internalEsClient, agentId);
+    return getAgentById(this.internalEsClient, this.soClient, agentId);
   }
 
   public async getAgentStatusById(agentId: string) {
     await this.#runPreflight();
-    return getAgentStatusById(this.internalEsClient, agentId);
+    return getAgentStatusById(this.internalEsClient, this.soClient, agentId);
   }
 
   public async getAgentStatusForAgentPolicy(agentPolicyId?: string, filterKuery?: string) {

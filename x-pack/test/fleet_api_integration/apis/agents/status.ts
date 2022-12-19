@@ -193,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
         results: {
           events: 0,
           other: 0,
-          total: 9,
+          total: 7,
           online: 2,
           error: 2,
           offline: 1,
