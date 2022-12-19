@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiSelectable,
   EuiSelectableProps,
@@ -21,6 +21,7 @@ import {
   EuiPanel,
   EuiHorizontalRule,
   useEuiTheme,
+  SortDirection,
 } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
 
@@ -30,9 +31,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { optionsListStrings } from './dataview_list_strings';
 import {
   DEFAULT_SORT,
-  hadnleAlphabeticalSorting,
+  handleSortingByDirection,
   getCompatibleSortingTypes,
-  getCompatibleSortingTypesByOrder,
+  getOrderDirection,
 } from './suggestions_sorting';
 import { IUnifiedSearchPluginServices } from '../types';
 
@@ -62,37 +63,56 @@ export function DataViewsList({
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { storage } = kibana.services;
 
+  const orderDirection = useMemo(() => {
+    return storage.get('orderDirection');
+  }, [storage]);
+
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
 
   const [sortedDataViewsList, setSortedDataViewsList] = useState(dataViewsList);
 
+  function toSelectableOptions(
+    data: { [key: string]: any },
+    checked: 'on' | undefined,
+    label: string
+  ) {
+    return {
+      data,
+      checked,
+      label,
+    };
+  }
+
   const [sortByOptions, setSortByOptions] = useState<EuiSelectableOption[]>(() => {
     return getCompatibleSortingTypes().map((key) => {
-      return {
-        data: { sortBy: key },
-        checked: key === DEFAULT_SORT.by ? 'on' : undefined,
-        label: optionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(),
-      };
+      return toSelectableOptions(
+        { sortBy: key },
+        key === DEFAULT_SORT.by ? 'on' : undefined,
+        optionsListStrings.editorAndPopover.sortBy[key].getSortByLabel()
+      );
     });
   });
 
   const [sortOrderOptions, setSortOrderOptions] = useState<EuiSelectableOption[]>(() => {
-    return getCompatibleSortingTypesByOrder().map((key) => {
-      return {
-        data: { order: key },
-        checked: key === DEFAULT_SORT.direction ? 'on' : undefined,
-        label: optionsListStrings.editorAndPopover.sortOrder[key].getSortOrderLabel(),
-      };
+    return [SortDirection.ASC, SortDirection.DESC].map((key) => {
+      return toSelectableOptions(
+        { order: key },
+        key === getOrderDirection(orderDirection) ? 'on' : undefined,
+        optionsListStrings.editorAndPopover.sortOrder[key].getSortOrderLabel()
+      );
     });
   });
 
-  const onSortByChange = (updatedOptions: EuiSelectableOption[]) => {
-    setSortByOptions(updatedOptions);
-  };
+  const onSortByChange = useCallback(
+    () => (updatedOptions: EuiSelectableOption[]) => {
+      setSortByOptions(updatedOptions);
+    },
+    []
+  );
 
   const handleOrderChangesDataViewList = (selectedOption: EuiSelectableOption) => {
     setSortedDataViewsList((currentDataViewsList) =>
-      hadnleAlphabeticalSorting(currentDataViewsList, selectedOption.data?.order)
+      handleSortingByDirection(currentDataViewsList, selectedOption.data?.order)
     );
   };
 

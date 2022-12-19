@@ -6,28 +6,31 @@
  * Side Public License, v 1.
  */
 
+import type { Direction } from '@elastic/eui';
+import { SortDirection } from '@elastic/eui';
 import { DataViewListItemEnhanced } from './dataview_list';
 
-export type OptionsListSortBy = 'alphabetically';
+const ALPHABETICALLY = 'alphabetically';
+export type OptionsListSortBy = typeof ALPHABETICALLY;
 
-export const DEFAULT_SORT: SortingType = { by: 'alphabetically', direction: 'asc' };
-
-export type OptionsListOrder = 'asc' | 'desc';
+export const DEFAULT_SORT: SortingType = { by: ALPHABETICALLY, direction: SortDirection.ASC };
 
 export interface SortingType {
   by: OptionsListSortBy;
-  direction: OptionsListOrder;
+  direction: Direction;
 }
 
 export const getCompatibleSortingTypes = (): OptionsListSortBy[] => {
-  return ['alphabetically'];
+  return [ALPHABETICALLY];
 };
 
-export const getCompatibleSortingTypesByOrder = (): OptionsListOrder[] => ['asc', 'desc'];
+export const getOrderDirection = (orderDirection?: Direction) => {
+  return orderDirection ?? DEFAULT_SORT.direction;
+};
 
-export const hadnleAlphabeticalSorting = (
+export const handleSortingByDirection = (
   dataViews: DataViewListItemEnhanced[],
-  direction?: OptionsListOrder
+  direction: Direction
 ) => {
   const compare = (a: string, b: string) => a.localeCompare(b);
 
