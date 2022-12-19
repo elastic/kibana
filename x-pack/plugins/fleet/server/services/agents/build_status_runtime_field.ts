@@ -10,7 +10,6 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { AGENT_POLLING_THRESHOLD_MS } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
-const DEFAULT_MS_BEFORE_INACTIVE = 10 * 60 * 1000; // 10 minutes
 const MISSED_INTERVALS_BEFORE_OFFLINE = 10;
 const MS_BEFORE_OFFLINE = MISSED_INTERVALS_BEFORE_OFFLINE * AGENT_POLLING_THRESHOLD_MS;
 
@@ -34,10 +33,9 @@ const _buildInactiveClause = (
     })
     .join(' || ');
 
-  const policyHasNoInactivityTimeout = `lastCheckinMillis < ${now - DEFAULT_MS_BEFORE_INACTIVE}L`;
-  const agentIsInactive =
-    (policyClauses.length ? `(${policyClauses}) || ` : '') + policyHasNoInactivityTimeout;
-  return `lastCheckinMillis > 0 && ${field('policy_id')}.size() > 0 && (${agentIsInactive})`;
+  const agentIsInactive = policyClauses.length ? `${policyClauses}` : 'false'; // if no policies have inactivity timeouts, then no agents are inactive
+
+  return `lastCheckinMillis > 0 && ${field('policy_id')}.size() > 0 && ${agentIsInactive}`;
 };
 
 function _buildSource(inactivityTimeouts: InactivityTimeouts, pathPrefix?: string) {
@@ -48,7 +46,7 @@ function _buildSource(inactivityTimeouts: InactivityTimeouts, pathPrefix?: strin
     long lastCheckinMillis = ${field('last_checkin')}.size() > 0 
       ? ${field('last_checkin')}.value.toInstant().toEpochMilli() 
       : -1;
-    if (${field('unenrolled_at')}.size() > 0) {
+    if (${field('active')}.size() > 0 && ${field('active')}.value == false) {
       emit('unenrolled'); 
     } else if (${_buildInactiveClause(now, inactivityTimeouts, field)}) {
       emit('inactive');
