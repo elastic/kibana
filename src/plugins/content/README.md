@@ -1,9 +1,4 @@
-# content
+# Content Management
 
-A Kibana plugin
-
----
-
-## Development
-
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions setting up your development environment.
+This plugin exposes the Content Management Service. Content Management service
+provides a unified way to do CRUD+ operations on content.
