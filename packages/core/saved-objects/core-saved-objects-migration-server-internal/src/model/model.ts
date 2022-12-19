@@ -170,20 +170,19 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         )
       ) {
         const targetIndex = source!;
+        const sourceMappings = indices[source!].mappings;
 
         return {
           ...stateP,
           controlState: 'PREPARE_COMPATIBLE_MIGRATION',
           sourceIndex: Option.none,
           targetIndex,
-          sourceIndexMappings: indices[source!].mappings,
+          sourceIndexMappings: sourceMappings,
           preTransformDocsActions: buildRemoveAliasActions(source!, Object.keys(aliases), [
             stateP.currentAlias,
             stateP.versionAlias,
           ]),
-          // Setting this to "undefined" will trigger UPDATE_TARGET_MAPPINGS
-          // which we always want to do for new versions
-          targetIndexCurrentMappings: undefined,
+          targetIndexCurrentMappings: sourceMappings,
           targetIndexMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetIndexMappings,
             indices[source!].mappings
