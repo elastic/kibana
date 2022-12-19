@@ -7,21 +7,18 @@
 
 import React, { FC, RefCallback, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
+import { EuiErrorBoundary } from '@elastic/eui';
 import {
-  LazyShapeDrawer,
-  ShapeDrawerComponentProps,
+  ShapeDrawerComponent,
   getDefaultShapeData,
   SvgConfig,
   ShapeRef,
   ViewBoxParams,
 } from '@kbn/expression-shape-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
 
 interface Props {
   shape?: string;
 }
-
-const ShapeDrawer = withSuspense<ShapeDrawerComponentProps, ShapeRef>(LazyShapeDrawer);
 
 function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBoxParams {
   const { minX, minY, width, height } = defaultViewBox;
@@ -45,15 +42,17 @@ export const ShapePreview: FC<Props> = ({ shape }) => {
   if (!shape) return <div className="canvasShapePreview" />;
   return (
     <div className="canvasShapePreview">
-      <ShapeDrawer
-        ref={shapeRef}
-        shapeType={shape}
-        shapeAttributes={{
-          fill: 'none',
-          stroke: 'black',
-          viewBox: getViewBox(5, shapeData.viewBox),
-        }}
-      />
+      <EuiErrorBoundary>
+        <ShapeDrawerComponent
+          ref={shapeRef}
+          shapeType={shape}
+          shapeAttributes={{
+            fill: 'none',
+            stroke: 'black',
+            viewBox: getViewBox(5, shapeData.viewBox),
+          }}
+        />
+      </EuiErrorBoundary>
     </div>
   );
 };

@@ -21,8 +21,8 @@ export {
   progressRendererFactory,
 } from './expression_renderers';
 
-export { LazyShapeDrawer } from './components/shape';
-export { LazyProgressDrawer } from './components/progress';
+export { ShapeDrawerComponent } from './components/shape';
+export { ProgressDrawerComponent } from './components/progress';
 export { getDefaultShapeData } from './components/reusable';
 
 export type {

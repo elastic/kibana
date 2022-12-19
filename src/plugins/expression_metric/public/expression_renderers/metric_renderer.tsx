@@ -9,6 +9,7 @@ import React, { CSSProperties } from 'react';
 import { Observable } from 'rxjs';
 import { CoreTheme } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { EuiErrorBoundary } from '@elastic/eui';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -16,10 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { MetricRendererConfig } from '../../common/types';
-import { LazyMetricComponent } from '../components';
 
 const strings = {
   getDisplayName: () =>
@@ -31,8 +30,6 @@ const strings = {
       defaultMessage: 'Render a number over a label',
     }),
 };
-
-const MetricComponent = withSuspense(LazyMetricComponent);
 
 export const getMetricRenderer =
   (theme$: Observable<CoreTheme> = defaultTheme$) =>
@@ -46,22 +43,27 @@ export const getMetricRenderer =
       config: MetricRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
+      const { MetricComponent } = await import('../components/metric_component');
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });
 
       render(
-        <KibanaThemeProvider theme$={theme$}>
-          <MetricComponent
-            label={config.label}
-            labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
-            metric={config.metric}
-            metricFont={config.metricFont ? (config.metricFont.spec as CSSProperties) : {}}
-            metricFormat={config.metricFormat}
-          />
-        </KibanaThemeProvider>,
+        <EuiErrorBoundary>
+          <KibanaThemeProvider theme$={theme$}>
+            <MetricComponent
+              label={config.label}
+              labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
+              metric={config.metric}
+              metricFont={config.metricFont ? (config.metricFont.spec as CSSProperties) : {}}
+              metricFormat={config.metricFormat}
+            />
+          </KibanaThemeProvider>
+        </EuiErrorBoundary>,
         domNode,
-        () => handlers.done()
+        () => {
+          handlers.done();
+        }
       );
     },
   });

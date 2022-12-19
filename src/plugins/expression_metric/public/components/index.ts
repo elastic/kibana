@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { lazy } from 'react';
-
-export const LazyMetricComponent = lazy(() => import('./metric_component'));
+export { MetricComponent } from './metric_component';
