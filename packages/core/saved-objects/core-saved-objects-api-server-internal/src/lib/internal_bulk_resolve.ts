@@ -324,15 +324,11 @@ async function authorizeAuditAndRedact<T>(
     return resolvedObjects;
   }
 
-  const authorizationResult = await securityExtension.checkAuthorization({
+  const authorizationResult = await securityExtension?.performAuthorization({
+    actions: new Set(['bulk_get']),
     types: new Set(typesAndSpaces.keys()),
     spaces: spacesToAuthorize,
-    actions: new Set(['bulk_get']),
-  });
-  securityExtension.enforceAuthorization({
-    typesAndSpaces,
-    action: 'bulk_get',
-    typeMap: authorizationResult.typeMap,
+    enforceMap: typesAndSpaces,
     auditCallback: (error) => {
       for (const { type, id } of auditableObjects) {
         securityExtension.addAuditEvent({

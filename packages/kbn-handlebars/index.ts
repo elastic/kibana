@@ -50,7 +50,7 @@ export const compileFnName: 'compile' | 'compileAST' = allowUnsafeEval() ? 'comp
  */
 export type ExtendedCompileOptions = Pick<
   CompileOptions,
-  'knownHelpers' | 'knownHelpersOnly' | 'strict' | 'assumeObjects' | 'noEscape' | 'data'
+  'data' | 'knownHelpers' | 'knownHelpersOnly' | 'noEscape' | 'strict' | 'assumeObjects'
 >;
 
 /**
@@ -61,7 +61,7 @@ export type ExtendedCompileOptions = Pick<
  */
 export type ExtendedRuntimeOptions = Pick<
   RuntimeOptions,
-  'helpers' | 'blockParams' | 'data' | 'decorators'
+  'data' | 'helpers' | 'decorators' | 'blockParams'
 >;
 
 /**
@@ -77,12 +77,12 @@ export type DecoratorFunction = (
   options: any
 ) => any;
 
-export interface DecoratorsHash {
-  [name: string]: DecoratorFunction;
-}
-
 export interface HelpersHash {
   [name: string]: Handlebars.HelperDelegate;
+}
+
+export interface DecoratorsHash {
+  [name: string]: DecoratorFunction;
 }
 
 /**
@@ -298,6 +298,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   Program(program: hbs.AST.Program) {
     this.blockParamNames.unshift(program.blockParams);
 
+    // Run any decorators that might exist on the root
     this.processDecorators(program, this.generateProgramFunction(program));
     this.processedRootDecorators = true;
 
@@ -314,13 +315,13 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   // This space intentionally left blank: We want to override the Visitor class implementation
-  // of `DecoratorBlock`, but since we handle decorators separately before traversing the
-  // nodes, we just want to make this a no-op.
+  // of this method, but since we handle decorators separately before traversing the nodes, we
+  // just want to make this a no-op.
   DecoratorBlock(decorator: hbs.AST.DecoratorBlock) {}
 
   // This space intentionally left blank: We want to override the Visitor class implementation
-  // of `DecoratorBlock`, but since we handle decorators separately before traversing the
-  // nodes, we just want to make this a no-op.
+  // of this method, but since we handle decorators separately before traversing the nodes, we
+  // just want to make this a no-op.
   Decorator(decorator: hbs.AST.Decorator) {}
 
   SubExpression(sexpr: hbs.AST.SubExpression) {
@@ -391,22 +392,21 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     decorator: hbs.AST.DecoratorBlock | hbs.AST.Decorator,
     prog: Handlebars.TemplateDelegate
   ) {
-    // TypeScript: The types indicate that `decorator.path` technically can be an `hbs.AST.Literal`. However, the upstream codebase always treats it as an `hbs.AST.PathExpression`, so we do too.
-    const name = (decorator.path as hbs.AST.PathExpression).original;
-    const decoratorFn = this.container.lookupProperty<DecoratorFunction>(
-      this.container.decorators,
-      name
-    );
     const props = {};
-    // TypeScript: Because `decorator` can be of type `hbs.AST.Decorator`, TS indicates that `decorator.path` technically can be an `hbs.AST.Literal`. However, the upstream codebase always treats it as an `hbs.AST.PathExpression`, so we do too.
-    const options = this.setupParams(decorator as hbs.AST.DecoratorBlock, name);
-    // @ts-expect-error: Property 'lookupProperty' does not exist on type 'HelperOptions'
-    delete options.lookupProperty; // There's really no tests/documentation on this, but to match the upstream codebase we'll remove `lookupProperty` from the decorator context
+    const options = this.setupDecoratorOptions(decorator);
 
-    Object.assign(decoratorFn(prog, props, this.container, options) || prog, props);
+    const result = this.container.lookupProperty<DecoratorFunction>(
+      this.container.decorators,
+      // @ts-expect-error: Property 'name' does not exist on type 'HelperOptions' - The types are wrong
+      options.name
+    )(prog, props, this.container, options);
+
+    Object.assign(result || prog, props);
   }
 
   private processStatementOrExpression(node: ProcessableNode) {
+    // Calling `transformLiteralToPath` has side-effects!
+    // It converts a node from type `ProcessableNode` to `ProcessableNodeWithPathParts`
     transformLiteralToPath(node);
 
     switch (this.classifyNode(node as ProcessableNodeWithPathParts)) {
@@ -533,6 +533,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private invokeKnownHelper(node: ProcessableNodeWithPathParts) {
     const name = node.path.parts[0];
     const helper = this.setupHelper(node, name);
+    // TypeScript: `helper.fn` might be `undefined` at this point, but to match the upstream behavior we call it without any guards
     const result = helper.fn.apply(helper.context, helper.params);
     this.output.push(result);
   }
@@ -558,6 +559,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       }
     }
 
+    // TypeScript: `helper.fn` might be `undefined` at this point, but to match the upstream behavior we call it without any guards
     const result = helper.fn.apply(helper.context, helper.params);
 
     this.output.push(result);
@@ -573,8 +575,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       }
     } else {
       if (
-        // @ts-expect-error: The `escaped` property is only on MustacheStatement nodes
-        node.escaped === false ||
+        (node as hbs.AST.MustacheStatement).escaped === false ||
         this.compileOptions.noEscape === true ||
         typeof invokeResult !== 'string'
       ) {
@@ -637,6 +638,32 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     };
   }
 
+  private setupDecoratorOptions(
+    decorator: hbs.AST.Decorator | hbs.AST.DecoratorBlock
+  ): Handlebars.HelperOptions {
+    // TypeScript: The types indicate that `decorator.path` technically can be an `hbs.AST.Literal`. However, the upstream codebase always treats it as an `hbs.AST.PathExpression`, so we do too.
+    const name = (decorator.path as hbs.AST.PathExpression).original;
+    const options = this.setupParams(decorator as hbs.AST.DecoratorBlock, name);
+
+    if (decorator.params.length > 0) {
+      if (!this.processedRootDecorators) {
+        // When processing the root decorators, temporarily remove the root context so it's not accessible to the decorator
+        const context = this.scopes.shift();
+        // @ts-expect-error: Property 'args' does not exist on type 'HelperOptions'. The 'args' property is expected in decorators
+        options.args = this.resolveNodes(decorator.params);
+        this.scopes.unshift(context);
+      } else {
+        // @ts-expect-error: Property 'args' does not exist on type 'HelperOptions'. The 'args' property is expected in decorators
+        options.args = this.resolveNodes(decorator.params);
+      }
+    }
+
+    // @ts-expect-error: Property 'lookupProperty' does not exist on type 'HelperOptions'
+    delete options.lookupProperty; // There's really no tests/documentation on this, but to match the upstream codebase we'll remove `lookupProperty` from the decorator context
+
+    return options;
+  }
+
   private setupParams(
     node: ProcessableNodeWithPathParts,
     helperName: string
@@ -648,19 +675,6 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       data: this.runtimeOptions!.data,
       loc: { start: node.loc.start, end: node.loc.end },
     };
-
-    if (node.params.length > 0) {
-      if (!this.processedRootDecorators) {
-        // When processing the root decorators, temporarily remove the root context so it's not accessible to the decorator
-        const context = this.scopes.shift();
-        // @ts-expect-error: Property 'args' does not exist on type 'HelperOptions'. The 'args' property is expected in decorators
-        options.args = this.resolveNodes(node.params);
-        this.scopes.unshift(context);
-      } else {
-        // @ts-expect-error: Property 'args' does not exist on type 'HelperOptions'. The 'args' property is expected in decorators
-        options.args = this.resolveNodes(node.params);
-      }
-    }
 
     if (isBlock(node)) {
       options.fn = this.generateProgramFunction(node.program);
@@ -679,8 +693,9 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       nextContext: any,
       runtimeOptions: ExtendedRuntimeOptions = {}
     ) => {
-      // inherit data in blockParams from parent program
       runtimeOptions = Object.assign({}, runtimeOptions);
+
+      // inherit data in blockParams from parent program
       runtimeOptions.data = runtimeOptions.data || this.runtimeOptions!.data;
       if (runtimeOptions.blockParams) {
         runtimeOptions.blockParams = runtimeOptions.blockParams.concat(
