@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+  },
+  "extraPublicDirs": ["common"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "public/**/*.json",
+    "server/**/*",
+    "storybook/**/*",
+    "../../../typings/**/*",
+    "./jest_setup.ts"
+  ],
+  "kbn_references": [
+    { "path": "../../core/tsconfig.json" }
+  ]
+}
