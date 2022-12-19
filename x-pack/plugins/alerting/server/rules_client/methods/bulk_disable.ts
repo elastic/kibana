@@ -125,10 +125,12 @@ const bulkDisableRulesWithOCC = async (
   context: RulesClientContext,
   { filter }: { filter: KueryNode | null }
 ) => {
+  const additionalFilter = nodeBuilder.is('alert.attributes.enabled', 'true');
+
   const rulesFinder =
     await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
       {
-        filter,
+        filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
         type: 'alert',
         perPage: 100,
         ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
