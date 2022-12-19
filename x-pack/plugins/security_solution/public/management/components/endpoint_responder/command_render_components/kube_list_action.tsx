@@ -227,10 +227,9 @@ export const KubeListActionResult = memo<
           columns: COLUMNS_TO_RESOURCE_MAPPING.pod,
           items: entries.items.map(({ metadata, status: kubeStatus, spec }) => ({
             name: metadata.name,
-            ready:
-              kubeStatus.containerStatuses.filter(({ ready }) => ready).length +
-              '/' +
-              kubeStatus.containerStatuses.length,
+            ready: `${kubeStatus.containerStatuses.filter(({ ready }) => ready).length}/${
+              kubeStatus.containerStatuses.length
+            }`,
             status: kubeStatus.phase,
             restarts: _.sumBy(kubeStatus.containerStatuses, 'restartCount'),
             age: startTimeToAge(metadata.creationTimestamp),
