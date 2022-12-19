@@ -69,7 +69,7 @@ const yesterdayToString = new Date(yesterday.getTime()).toDateString();
 const runTests = () => {
   describe('TableListView', () => {
     beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+      jest.useFakeTimers({ legacyFakeTimers: true });
     });
 
     afterAll(() => {
@@ -548,7 +548,7 @@ const runTests = () => {
       });
     });
 
-  describe('content editor', () => {
+    describe('content editor', () => {
       const setupInspector = registerTestBed<string, TableListViewProps>(
         WithServices<TableListViewProps>(TableListView),
         {
@@ -580,13 +580,13 @@ const runTests = () => {
         },
       ];
 
-    test('should have an "inpect" button if the content editor is enabled', async () => {
+      test('should have an "inpect" button if the content editor is enabled', async () => {
         let testBed: TestBed;
 
         await act(async () => {
           testBed = await setupInspector({
             findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
-          contentEditor: { enabled: true },
+            contentEditor: { enabled: true },
           });
         });
 
@@ -594,8 +594,8 @@ const runTests = () => {
         component.update();
 
         const { tableCellsValues } = table.getMetaData('itemsInMemTable');
-      expect(tableCellsValues[0][2]).toBe('View Item 1 details');
-      expect(tableCellsValues[1][2]).toBe('View Item 2 details');
+        expect(tableCellsValues[0][2]).toBe('View Item 1 details');
+        expect(tableCellsValues[1][2]).toBe('View Item 2 details');
       });
     });
 
