@@ -75,6 +75,7 @@ async function mountAndFindSubjects(
     adjustFilters: findTestSubject(component!, 'discoverNoResultsAdjustFilters').exists(),
     checkIndices: findTestSubject(component!, 'discoverNoResultsCheckIndices').exists(),
     disableFiltersButton: findTestSubject(component!, 'discoverNoResultsDisableFilters').exists(),
+    recentMatchesButton: findTestSubject(component!, 'discoverNoResultsViewRecentMatches').exists(),
   };
 }
 
@@ -99,6 +100,7 @@ describe('DiscoverNoResults', () => {
             "disableFiltersButton": false,
             "errorMsg": false,
             "mainMsg": true,
+            "recentMatchesButton": false,
           }
         `);
       });
@@ -117,6 +119,7 @@ describe('DiscoverNoResults', () => {
             "disableFiltersButton": false,
             "errorMsg": false,
             "mainMsg": true,
+            "recentMatchesButton": true,
           }
         `);
         expect(QueryApi.useQuerySubscriber).toHaveBeenCalled();
@@ -167,6 +170,7 @@ describe('DiscoverNoResults', () => {
             "disableFiltersButton": false,
             "errorMsg": true,
             "mainMsg": false,
+            "recentMatchesButton": false,
           }
         `);
       });

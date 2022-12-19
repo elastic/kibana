@@ -112,7 +112,13 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = React.me
           typeof occurrencesRange === 'undefined' ? (
             <EuiLoadingSpinner />
           ) : canExtendTimeRange ? (
-            <EuiButton color="primary" fill onClick={expandTimeRange} isLoading={isLoading}>
+            <EuiButton
+              color="primary"
+              fill
+              onClick={expandTimeRange}
+              isLoading={isLoading}
+              data-test-subj="discoverNoResultsViewRecentMatches"
+            >
               <FormattedMessage
                 id="discover.noResults.suggestion.viewRecentMatchesButtonText"
                 defaultMessage="View recent matches"
