@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const OptionsListStrings = {
+export const optionsListStrings = {
   popover: {
     getSortPopoverTitle: () =>
       i18n.translate('unifiedSearch.optionsList.popover.sortTitle', {

@@ -31,13 +31,16 @@ export const hadnleAlphabeticalSorting = (
   dataViews: DataViewListItemEnhanced[],
   direction?: SortDirection
 ) => {
-  const sortedDataViews = dataViews.sort((a, b) =>
-    (a.name ?? a.title).localeCompare(b.name ?? b.title)
-  );
+  const compare = (a: string, b: string) => a.localeCompare(b);
 
-  if (direction) {
-    return direction === DEFAULT_SORT.direction ? sortedDataViews : sortedDataViews.reverse();
-  }
+  return dataViews.sort((a, b) => {
+    const firstСomparableField = a.name ?? a.title;
+    const secondСomparableField = b.name ?? b.title;
 
-  return sortedDataViews;
+    if (direction === DEFAULT_SORT.direction) {
+      return compare(firstСomparableField, secondСomparableField);
+    } else {
+      return compare(secondСomparableField, firstСomparableField);
+    }
+  });
 };

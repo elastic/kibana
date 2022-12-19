@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiSelectable,
   EuiSelectableProps,
@@ -27,7 +27,7 @@ import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { OptionsListStrings } from './dataview_list_strings';
+import { optionsListStrings } from './dataview_list_strings';
 import {
   OptionsListSortBy,
   OptionsListOrder,
@@ -81,7 +81,7 @@ export function DataViewsList({
       return {
         data: { sortBy: key },
         checked: key === DEFAULT_SORT.by ? 'on' : undefined,
-        label: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(),
+        label: optionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(),
       };
     });
   });
@@ -91,7 +91,7 @@ export function DataViewsList({
       return {
         data: { order: key },
         checked: key === DEFAULT_SORT.direction ? 'on' : undefined,
-        label: OptionsListStrings.editorAndPopover.sortOrder[key].getSortOrderLabel(),
+        label: optionsListStrings.editorAndPopover.sortOrder[key].getSortOrderLabel(),
       };
     });
   });
@@ -106,14 +106,17 @@ export function DataViewsList({
     );
   };
 
-  const onSortByOrder = (updatedOptions: EuiSelectableOption[]) => {
-    setSortOrderOptions(updatedOptions);
-    const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
-    if (selectedOption) {
-      storage.set('orderDirection', selectedOption.data?.order);
-      handleOrderChangesDataViewList(selectedOption);
-    }
-  };
+  const onSortByOrder = useCallback(
+    (updatedOptions: EuiSelectableOption[]) => {
+      setSortOrderOptions(updatedOptions);
+      const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
+      if (selectedOption) {
+        storage.set('orderDirection', selectedOption.data?.order);
+        handleOrderChangesDataViewList(selectedOption);
+      }
+    },
+    [storage]
+  );
 
   return (
     <EuiSelectable<{
@@ -133,7 +136,7 @@ export function DataViewsList({
         checked: id === currentDataViewId && !Boolean(isTextBasedLangSelected) ? 'on' : undefined,
         append: isAdhoc ? (
           <EuiBadge color="hollow" data-test-subj={`dataViewItemTempBadge-${name}`}>
-            {OptionsListStrings.editorAndPopover.adhoc.getTemporaryDataviewLabel()}
+            {optionsListStrings.editorAndPopover.adhoc.getTemporaryDataviewLabel()}
           </EuiBadge>
         ) : null,
       }))}
@@ -146,7 +149,7 @@ export function DataViewsList({
       searchProps={{
         id: searchListInputId,
         compressed: true,
-        placeholder: OptionsListStrings.editorAndPopover.search.getSearchPlaceholder(),
+        placeholder: optionsListStrings.editorAndPopover.search.getSearchPlaceholder(),
         'data-test-subj': 'indexPattern-switcher--input',
         ...(selectableProps ? selectableProps.searchProps : undefined),
       }}
@@ -176,7 +179,7 @@ export function DataViewsList({
                       <EuiButtonIcon
                         iconType="sortable"
                         onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
-                        aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+                        aria-label={optionsListStrings.popover.getSortPopoverDescription()}
                       />
                     }
                     panelPaddingSize="none"
@@ -185,7 +188,7 @@ export function DataViewsList({
                     closePopover={() => setIsSortingPopoverOpen(false)}
                   >
                     <EuiPopoverTitle paddingSize="s">
-                      {OptionsListStrings.popover.getSortPopoverTitle()}
+                      {optionsListStrings.popover.getSortPopoverTitle()}
                     </EuiPopoverTitle>
 
                     <EuiSelectable
@@ -193,7 +196,7 @@ export function DataViewsList({
                       singleSelection="always"
                       onChange={onSortByChange}
                       listProps={{ bordered: false }}
-                      aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+                      aria-label={optionsListStrings.popover.getSortPopoverDescription()}
                       style={{ width: popoverStyle }}
                     >
                       {(sortByOptionList) => sortByOptionList}
@@ -202,14 +205,14 @@ export function DataViewsList({
                     <EuiHorizontalRule margin="none" />
 
                     <EuiPopoverTitle paddingSize="s">
-                      {OptionsListStrings.popover.getOrderPopoverTitle()}
+                      {optionsListStrings.popover.getOrderPopoverTitle()}
                     </EuiPopoverTitle>
                     <EuiSelectable
                       options={sortOrderOptions}
                       singleSelection="always"
                       onChange={onSortByOrder}
                       listProps={{ bordered: false }}
-                      aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+                      aria-label={optionsListStrings.popover.getSortPopoverDescription()}
                       style={{ width: popoverStyle }}
                     >
                       {(sortOrderOptionList) => sortOrderOptionList}
