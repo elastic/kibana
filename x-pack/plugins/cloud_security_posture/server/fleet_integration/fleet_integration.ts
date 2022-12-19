@@ -5,25 +5,29 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import { NewPackagePolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { PackageService } from '@kbn/fleet-plugin/server';
+import {
+  NewPackagePolicy,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PackagePolicy,
+} from '@kbn/fleet-plugin/common';
+import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { BenchmarkId } from '../../common/types';
 import { isEnabledBenchmarkInputType } from '../../common/utils/helpers';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME, CLOUDBEAT_VANILLA } from '../../common/constants';
 
 export const isCspPackageInstalled = async (
-  packageService: PackageService,
+  packagePolicyClient: PackagePolicyClient,
+  soClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<boolean> => {
-  // TODO: check if CSP package installed via the Fleet API
   try {
-    const installation = await packageService.asInternalUser.getInstallation(
-      CLOUD_SECURITY_POSTURE_PACKAGE_NAME
-    );
+    const { total, _ } = await packagePolicyClient.list(soClient, {
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}`,
+      page: 1,
+    });
 
-    if (installation) return true;
-
-    return false;
+    return total > 0;
   } catch (e) {
     logger.error(e);
     return false;

@@ -7,7 +7,11 @@
 
 import { Truthy } from 'lodash';
 import { NewPackagePolicyInput, PackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../constants';
+import {
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+} from '../constants';
+import { BenchmarkId } from '../types';
 
 /**
  * @example
