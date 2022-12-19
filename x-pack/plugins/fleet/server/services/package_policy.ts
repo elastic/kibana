@@ -565,7 +565,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
     await Promise.all([bumpPromise, assetRemovePromise]);
 
-    sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], currentVersion);
+    sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], [oldPackagePolicy]);
 
     return newPolicy;
   }
@@ -674,7 +674,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     await Promise.all([bumpPromise, removeAssetPromise]);
 
-    sendUpdatePackagePolicyTelemetryEvent(soClient, packagePolicyUpdates, currentVersion);
+    sendUpdatePackagePolicyTelemetryEvent(soClient, packagePolicyUpdates, oldPackagePolicies);
 
     return newPolicies.map(
       (soPolicy) =>
@@ -1933,15 +1933,19 @@ async function validateIsNotHostedPolicy(
 export function sendUpdatePackagePolicyTelemetryEvent(
   soClient: SavedObjectsClientContract,
   updatedPkgPolicies: UpdatePackagePolicy[],
-  currentVersion?: string
+  oldPackagePolicies: UpdatePackagePolicy[]
 ) {
   updatedPkgPolicies.forEach((updatedPkgPolicy) => {
     if (updatedPkgPolicy.package) {
       const { name, version } = updatedPkgPolicy.package;
-      if (version !== currentVersion) {
+      const oldPkgPolicy = oldPackagePolicies.find(
+        (packagePolicy) => packagePolicy.id === updatedPkgPolicy.id
+      );
+      const oldVersion = oldPkgPolicy?.package?.version;
+      if (oldVersion && oldVersion !== version) {
         const upgradeTelemetry: PackageUpdateEvent = {
           packageName: name,
-          currentVersion: currentVersion || 'unknown',
+          currentVersion: oldVersion,
           newVersion: version,
           status: 'success',
           eventType: 'package-policy-upgrade' as UpdateEventType,
