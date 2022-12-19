@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { MetricsUIAggregationRT } from '../inventory_models/types';
 import { afterKeyObjectRT } from './metrics_explorer';
@@ -27,22 +28,25 @@ export const MetricsAPIRequestRT = rt.intersection([
     timerange: MetricsAPITimerangeRT,
     indexPattern: rt.string,
     metrics: rt.array(MetricsAPIMetricRT),
+    includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(true)]),
   }),
   rt.partial({
     groupBy: rt.array(groupByRT),
     modules: rt.array(rt.string),
     afterKey: rt.union([rt.null, afterKeyObjectRT]),
-    limit: rt.union([rt.number, rt.null, rt.undefined]),
-    filters: rt.array(rt.object),
+    limit: rt.union([rt.number, rt.null]),
+    filters: rt.array(rt.UnknownRecord),
     dropPartialBuckets: rt.boolean,
     alignDataToEnd: rt.boolean,
   }),
 ]);
 
-export const MetricsAPIPageInfoRT = rt.type({
-  afterKey: rt.union([rt.null, afterKeyObjectRT, rt.undefined]),
-  interval: rt.number,
-});
+export const MetricsAPIPageInfoRT = rt.intersection([
+  rt.type({
+    afterKey: rt.union([rt.null, afterKeyObjectRT, rt.undefined]),
+  }),
+  rt.partial({ interval: rt.number }),
+]);
 
 export const MetricsAPIColumnTypeRT = rt.keyof({
   date: null,
@@ -76,10 +80,13 @@ export const MetricsAPISeriesRT = rt.intersection([
   }),
 ]);
 
+export const MetricsAPIResponseSeriesRT = rt.intersection([
+  MetricsAPISeriesRT,
+  rt.partial({ metricsets: rt.array(rt.string) }),
+]);
+
 export const MetricsAPIResponseRT = rt.type({
-  series: rt.array(
-    rt.intersection([MetricsAPISeriesRT, rt.partial({ metricsets: rt.array(rt.string) })])
-  ),
+  series: rt.array(MetricsAPIResponseSeriesRT),
   info: MetricsAPIPageInfoRT,
 });
 

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { uniqBy } from 'lodash';
+import { isEqual, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { Filter } from '@kbn/es-query';
+import { Filter, fromCombinedFilter } from '@kbn/es-query';
 import { Query, uniqFilters } from '@kbn/es-query';
 import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
@@ -124,10 +124,9 @@ export const getKibanaContextFn = (
 
       const timeRange = args.timeRange || input?.timeRange;
       let queries = mergeQueries(input?.query, args?.q?.filter(Boolean) || []);
-      let filters = [
-        ...(input?.filters || []),
-        ...((args?.filters?.map(unboxExpressionValue) || []) as Filter[]),
-      ];
+      const filterFromArgs = (args?.filters?.map(unboxExpressionValue) || []) as Filter[];
+
+      let filters = [...(input?.filters || [])];
 
       if (args.savedSearchId) {
         const obj = await savedObjectsClient.get('search', args.savedSearchId);
@@ -141,6 +140,14 @@ export const getKibanaContextFn = (
           filters = [...filters, ...(Array.isArray(filter) ? filter : [filter])];
         }
       }
+      const uniqueArgFilters = filterFromArgs.filter(
+        (argF) =>
+          !filters.some((f) => {
+            return isEqual(fromCombinedFilter(f).query, argF.query);
+          })
+      );
+
+      filters = [...filters, ...uniqueArgFilters];
 
       return {
         type: 'kibana_context',

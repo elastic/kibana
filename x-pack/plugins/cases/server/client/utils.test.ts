@@ -15,6 +15,7 @@ import {
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { CaseStatuses } from '../../common';
 import { CaseSeverity } from '../../common/api';
+import { SEVERITY_EXTERNAL_TO_ESMODEL } from '../common/constants';
 
 describe('utils', () => {
   describe('convertSortField', () => {
@@ -407,8 +408,8 @@ describe('utils', () => {
     });
 
     it('creates a filter for the severity', () => {
-      expect(constructQueryOptions({ severity: CaseSeverity.CRITICAL }).filter)
-        .toMatchInlineSnapshot(`
+      Object.values(CaseSeverity).forEach((severity) => {
+        expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -419,13 +420,14 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "critical",
+              "value": "${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}",
             },
           ],
           "function": "is",
           "type": "function",
         }
-      `);
+        `);
+      });
     });
 
     it('creates a filter for the time range', () => {
