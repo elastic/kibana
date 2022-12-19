@@ -29,7 +29,6 @@ import { populateContext } from './engine';
 import type { AutoCompleteContext, DataAutoCompleteRulesOneOf, ResultTerm } from './types';
 // @ts-ignore
 import { URL_PATH_END_MARKER } from './components';
-import { type SetAsyncResults } from './types';
 
 let lastEvaluatedToken: Token | null = null;
 
@@ -558,11 +557,7 @@ export default function ({
     editor.on('changeSelection', editorChangeListener);
   }
 
-  function getAutoCompleteContext(
-    ctxEditor: CoreEditor,
-    pos: Position,
-    setAsyncResultsCallback: SetAsyncResults
-  ) {
+  function getAutoCompleteContext(ctxEditor: CoreEditor, pos: Position) {
     // deduces all the parameters need to position and insert the auto complete
     const context: AutoCompleteContext = {
       autoCompleteSet: null, // instructions for what can be here
@@ -592,7 +587,7 @@ export default function ({
         addMethodAutoCompleteSetToContext(context);
         break;
       case 'body':
-        addBodyAutoCompleteSetToContext(context, pos, setAsyncResultsCallback);
+        addBodyAutoCompleteSetToContext(context, pos);
         break;
       default:
         return null;
@@ -1020,11 +1015,7 @@ export default function ({
     return context;
   }
 
-  function addBodyAutoCompleteSetToContext(
-    context: AutoCompleteContext,
-    pos: Position,
-    setAsyncResultsCallback: SetAsyncResults
-  ) {
+  function addBodyAutoCompleteSetToContext(context: AutoCompleteContext, pos: Position) {
     const ret = getCurrentMethodAndTokenPaths(editor, pos, parser);
     context.method = ret.method;
     context.otherTokenValues = ret.otherTokenValues;
@@ -1213,7 +1204,7 @@ export default function ({
     callback: (e: Error | null, result: ResultTerm[] | null) => void
   ) {
     try {
-      const context = getAutoCompleteContext(editor, position, callback);
+      const context = getAutoCompleteContext(editor, position);
 
       if (!context) {
         callback(null, []);

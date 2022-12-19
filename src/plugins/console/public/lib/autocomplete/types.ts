@@ -25,8 +25,6 @@ export interface DataAutoCompleteRulesOneOf {
   [key: string]: unknown;
 }
 
-export type SetAsyncResults = (e: Error | null, result: ResultTerm[] | null) => void;
-
 export interface AutoCompleteContext {
   autoCompleteSet?: null | ResultTerm[];
   /**
