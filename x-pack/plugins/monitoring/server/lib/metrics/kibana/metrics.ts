@@ -385,12 +385,9 @@ export const metrics = {
     technicalPreview: true,
   }),
   kibana_node_rule_failures: new KibanaClusterRuleMetric({
-    title: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleFailuresLabel', {
-      defaultMessage: 'Rules Failures',
-    }),
     field: 'kibana.node_rules.failures',
-    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP50Label', {
-      defaultMessage: 'Average Rule Queue Duration',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleFailuresCountLabel', {
+      defaultMessage: 'Rules Failures Count',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP50Description',
@@ -400,8 +397,7 @@ export const metrics = {
     ),
     format: SMALL_FLOAT,
     metricAgg: 'max',
-    units: msTimeUnitLabel,
-    isNotSupportedInInternalCollection: true,
+    units: '',
     technicalPreview: true,
   }),
   kibana_cluster_rule_overdue_p99: new KibanaClusterRuleMetric({
