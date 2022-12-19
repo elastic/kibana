@@ -10,7 +10,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import type { EuiTableActionsColumnType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataViewField, KBN_FIELD_TYPES, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { DataViewField, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import seedrandom from 'seedrandom';
 import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
 import type { RandomSamplerOption } from '../constants/random_sampler';
@@ -208,7 +209,7 @@ export const useDataVisualizerGridData = (
           if (
             field.aggregatable === true &&
             !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) &&
-            !field.esTypes?.some((d) => d === 'aggregate_metric_double')
+            !field.esTypes?.some((d) => d === ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE)
           ) {
             aggregatableFields.push(field.name);
           } else {

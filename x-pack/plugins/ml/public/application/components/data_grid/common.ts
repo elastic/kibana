@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from '@kbn/core/public';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
@@ -241,7 +241,8 @@ export const getDataGridSchemaFromKibanaFieldType = (
 
   if (
     (schema === undefined && field?.aggregatable === false) ||
-    (schema === 'numeric' && field?.esTypes?.some((d) => d === 'aggregate_metric_double'))
+    (schema === 'numeric' &&
+      field?.esTypes?.some((d) => d === ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE))
   ) {
     return NON_AGGREGATABLE;
   }
