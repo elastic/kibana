@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     query,
   }: {
     traceId: string;
-    query: { start: string; end: string; _inspect?: boolean };
+    query: { start: string; end: string; entryTransactionId: string };
   }) {
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/traces/{traceId}`,
@@ -40,20 +40,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
+          entryTransactionId: 'foo',
         },
       });
 
       expect(response.status).to.be(200);
       expect(response.body).to.eql({
-        exceedsMax: false,
-        traceDocs: [],
-        errorDocs: [],
-        linkedChildrenOfSpanCountBySpanId: {},
+        traceItems: {
+          exceedsMax: false,
+          traceDocs: [],
+          errorDocs: [],
+          spanLinksCountById: {},
+          traceItemCount: 0,
+          maxTraceItems: 1000,
+        },
       });
     });
   });
 
   registry.when('Trace exists', { config: 'basic', archives: [] }, () => {
+    let entryTransactionId: string;
     let serviceATraceId: string;
     before(async () => {
       const instanceJava = apm
@@ -89,9 +95,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       const unserialized = Array.from(events);
 
-      serviceATraceId = unserialized.flatMap((event) => event.serialize()).slice(0, 1)[0][
-        'trace.id'
-      ]!;
+      const serialized = unserialized.flatMap((event) => event.serialize());
+
+      entryTransactionId = serialized[0]['transaction.id']!;
+      serviceATraceId = serialized[0]['trace.id']!;
 
       await synthtraceEsClient.index(Readable.from(unserialized));
     });
@@ -103,22 +110,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         const response = await fetchTraces({
           traceId: serviceATraceId,
-          query: { start: new Date(start).toISOString(), end: new Date(end).toISOString() },
+          query: {
+            start: new Date(start).toISOString(),
+            end: new Date(end).toISOString(),
+            entryTransactionId,
+          },
         });
         expect(response.status).to.eql(200);
         traces = response.body;
       });
       it('returns some errors', () => {
-        expect(traces.errorDocs.length).to.be.greaterThan(0);
-        expect(traces.errorDocs[0].error.exception?.[0].message).to.eql(
+        expect(traces.traceItems.errorDocs.length).to.be.greaterThan(0);
+        expect(traces.traceItems.errorDocs[0].error.exception?.[0].message).to.eql(
           '[ResponseError] index_not_found_exception'
         );
       });
 
       it('returns some trace docs', () => {
-        expect(traces.traceDocs.length).to.be.greaterThan(0);
+        expect(traces.traceItems.traceDocs.length).to.be.greaterThan(0);
         expect(
-          traces.traceDocs.map((item) => {
+          traces.traceItems.traceDocs.map((item) => {
             if (item.span && 'name' in item.span) {
               return item.span.name;
             }
@@ -127,6 +138,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             }
           })
         ).to.eql(['GET /apple 🍏', 'get_green_apple_🍏']);
+      });
+
+      it('returns entry transaction details', () => {
+        expect(traces.entryTransaction).to.not.be(undefined);
+        expect(traces.entryTransaction?.transaction.id).to.equal(entryTransactionId);
+        expect(traces.entryTransaction?.transaction.name).to.equal('GET /apple 🍏');
       });
     });
   });

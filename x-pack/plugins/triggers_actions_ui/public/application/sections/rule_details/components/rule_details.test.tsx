@@ -48,7 +48,7 @@ jest.mock('../../../lib/rule_api', () => ({
   bulkUpdateAPIKey: jest.fn(),
   deleteRules: jest.fn(),
 }));
-const { bulkUpdateAPIKey, deleteRules } = jest.requireMock('../../../lib/rule_api');
+const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api');
 
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
@@ -62,12 +62,13 @@ const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const mockRuleApis = {
   muteRule: jest.fn(),
   unmuteRule: jest.fn(),
-  enableRule: jest.fn(),
-  disableRule: jest.fn(),
   requestRefresh: jest.fn(),
   refreshToken: Date.now(),
   snoozeRule: jest.fn(),
   unsnoozeRule: jest.fn(),
+  bulkEnableRules: jest.fn(),
+  bulkDisableRules: jest.fn(),
+  bulkDeleteRules: jest.fn(),
 };
 
 const authorizedConsumers = {
@@ -691,7 +692,11 @@ describe('rule_details', () => {
 
   describe('delete rule button', () => {
     it('should delete the rule when clicked', async () => {
-      deleteRules.mockResolvedValueOnce({ successes: ['1'], errors: [] });
+      mockRuleApis.bulkDeleteRules.mockResolvedValueOnce({
+        rules: [{ id: 1 }],
+        errors: [],
+        total: 1,
+      });
       const rule = mockRule();
       const requestRefresh = jest.fn();
       const wrapper = mountWithIntl(
@@ -716,7 +721,7 @@ describe('rule_details', () => {
 
       updateButton.simulate('click');
 
-      const confirm = wrapper.find('[data-test-subj="deleteIdsConfirmation"]').first();
+      const confirm = wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').first();
       expect(confirm.exists()).toBeTruthy();
 
       const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').last();
@@ -724,8 +729,8 @@ describe('rule_details', () => {
 
       confirmButton.simulate('click');
 
-      expect(deleteRules).toHaveBeenCalledTimes(1);
-      expect(deleteRules).toHaveBeenCalledWith(expect.objectContaining({ ids: [rule.id] }));
+      expect(mockRuleApis.bulkDeleteRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkDeleteRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
   });
 
@@ -755,8 +760,8 @@ describe('rule_details', () => {
 
       disableButton.simulate('click');
 
-      expect(mockRuleApis.disableRule).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.disableRule).toHaveBeenCalledWith(rule);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
 
     it('should enable the rule when clicked', async () => {
@@ -784,8 +789,8 @@ describe('rule_details', () => {
 
       enableButton.simulate('click');
 
-      expect(mockRuleApis.enableRule).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.enableRule).toHaveBeenCalledWith(rule);
+      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
   });
 

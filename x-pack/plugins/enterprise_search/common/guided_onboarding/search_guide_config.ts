@@ -18,6 +18,7 @@ export const searchGuideConfig: GuideConfig = {
       'Build custom search experiences with your data using Elastic’s out-of-the-box web crawler, connectors, and robust APIs. Gain deep insights from the built-in search analytics to curate results and optimize relevance.',
   }),
   guideName: 'Enterprise Search',
+  telemetryId: 'search',
   steps: [
     {
       id: 'add_data',

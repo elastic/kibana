@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { each, eachSeries } from 'async';
+import { eachSeries } from 'async';
 import MultiStream from 'multistream';
-import { Duplex, PassThrough, Readable, Transform } from 'stream';
-import { finished } from 'stream';
+import { Duplex, Readable, Transform } from 'stream';
 
 export function sequential(...streams: Readable[]) {
   return new MultiStream(streams, { objectMode: true });

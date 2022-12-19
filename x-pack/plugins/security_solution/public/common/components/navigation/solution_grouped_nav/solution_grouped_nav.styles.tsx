@@ -9,7 +9,7 @@ import styled from 'styled-components';
 
 export const EuiListGroupItemStyled = styled(EuiListGroupItem)`
   font-weight: ${({ theme }) => theme.eui.euiFontWeightRegular};
-  &.solutionGroupedNavItem--isPrimary {
+  &.solutionGroupedNavItem--isPrimary * {
     font-weight: ${({ theme }) => theme.eui.euiFontWeightBold};
   }
   &:focus,
@@ -21,6 +21,7 @@ export const EuiListGroupItemStyled = styled(EuiListGroupItem)`
   .solutionGroupedNavItemButton:focus,
   .solutionGroupedNavItemButton:focus-within,
   .solutionGroupedNavItemButton:hover {
-    background-color: ${({ theme }) => transparentize(theme.eui.euiColorPrimary, 0.1)};
+    transform: none; /* prevent translationY transform that causes misalignment within the list item */
+    background-color: ${({ theme }) => transparentize(theme.eui.euiColorPrimary, 0.2)};
   }
 `;

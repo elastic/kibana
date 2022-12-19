@@ -19,6 +19,8 @@ import {
   isCommentRequestTypePersistableState,
 } from '../../common/utils/attachments';
 import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+
+import { SEVERITY_EXTERNAL_TO_ESMODEL } from '../common/constants';
 import type {
   CaseStatuses,
   CommentRequest,
@@ -164,7 +166,10 @@ export const addSeverityFilter = ({
   type?: string;
 }): KueryNode => {
   const filters: KueryNode[] = [];
-  filters.push(nodeBuilder.is(`${type}.attributes.severity`, severity));
+
+  filters.push(
+    nodeBuilder.is(`${type}.attributes.severity`, `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`)
+  );
 
   if (appendFilter) {
     filters.push(appendFilter);
@@ -373,7 +378,7 @@ export const constructQueryOptions = ({
 }: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
-  const sortField = sortToSnake(sortByField);
+  const sortField = convertSortField(sortByField);
   const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
 
   const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
@@ -494,9 +499,11 @@ enum SortFieldCase {
   closedAt = 'closed_at',
   createdAt = 'created_at',
   status = 'status',
+  title = 'title.keyword',
+  severity = 'severity',
 }
 
-export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
+export const convertSortField = (sortField: string | undefined): SortFieldCase => {
   switch (sortField) {
     case 'status':
       return SortFieldCase.status;
@@ -506,6 +513,10 @@ export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
     case 'closedAt':
     case 'closed_at':
       return SortFieldCase.closedAt;
+    case 'title':
+      return SortFieldCase.title;
+    case 'severity':
+      return SortFieldCase.severity;
     default:
       return SortFieldCase.createdAt;
   }

@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { castArray, map } from 'lodash';
+import { castArray } from 'lodash';
 import moment, { unitOfTime } from 'moment';
-import { Readable, Writable } from 'stream';
 import { SynthtraceGenerator } from '../types';
 import { Fields } from './entity';
 import { Serializable } from './serializable';
