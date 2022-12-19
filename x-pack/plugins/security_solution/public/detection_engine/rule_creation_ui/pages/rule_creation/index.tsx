@@ -169,7 +169,6 @@ const CreateRulePageComponent: React.FC = () => {
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
   const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
-  const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(false);
 
   const [defineRuleData, setDefineRuleData] = useState<DefineStepRule>({
     ...stepDefineDefaultValue,

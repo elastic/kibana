@@ -144,8 +144,6 @@ export const RISK_OVERRIDE =
 
 export const RULES_CREATION_FORM = '[data-test-subj="stepDefineRule"]';
 
-export const RULES_CREATION_PREVIEW_BUTTON = '[data-test-subj="preview-flyout"]';
-
 export const RULES_CREATION_PREVIEW_REFRESH_BUTTON = '[data-test-subj="previewSubmitButton"]';
 
 export const RULE_DESCRIPTION_INPUT =
