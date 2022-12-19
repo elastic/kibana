@@ -16,6 +16,7 @@ export interface ApiKey {
   expiration: number;
   invalidated: boolean;
   metadata: Record<string, any>;
+  role_descriptors?: Record<string, any>;
 }
 
 export interface ApiKeyToInvalidate {

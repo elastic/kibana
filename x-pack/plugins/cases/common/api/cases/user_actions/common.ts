@@ -34,9 +34,6 @@ export const Actions = {
   push_to_service: 'push_to_service',
 } as const;
 
-export type ActionOperationKeys = keyof typeof Actions;
-export type ActionOperationValues = typeof Actions[ActionOperationKeys];
-
 /* To the next developer, if you add/removed fields here
  * make sure to check this file (x-pack/plugins/cases/server/services/user_actions/helpers.ts) too
  */

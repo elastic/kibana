@@ -3302,6 +3302,14 @@
             "section": "def-common.IUiSettingsClient",
             "text": "IUiSettingsClient"
           },
+          " | undefined; settings?: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-common.SettingsStart",
+            "text": "SettingsStart"
+          },
           " | undefined; fatalErrors?: ",
           {
             "pluginId": "@kbn/core-fatal-errors-browser",

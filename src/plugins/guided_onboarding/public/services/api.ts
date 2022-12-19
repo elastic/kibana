@@ -37,7 +37,7 @@ export class ApiService implements GuidedOnboardingApi {
   private isCloudEnabled: boolean | undefined;
   private client: HttpSetup | undefined;
   private pluginState$!: BehaviorSubject<PluginState | undefined>;
-  private isPluginStateLoading: boolean | undefined;
+  public isLoading$ = new BehaviorSubject<boolean>(false);
   public isGuidePanelOpen$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private configService = new ConfigService();
 
@@ -46,6 +46,7 @@ export class ApiService implements GuidedOnboardingApi {
     this.client = httpClient;
     this.pluginState$ = new BehaviorSubject<PluginState | undefined>(undefined);
     this.isGuidePanelOpen$ = new BehaviorSubject<boolean>(false);
+    this.isLoading$ = new BehaviorSubject<boolean>(false);
     this.configService.setup(httpClient);
   }
 
@@ -53,18 +54,18 @@ export class ApiService implements GuidedOnboardingApi {
     return new Observable<PluginState | undefined>((observer) => {
       const controller = new AbortController();
       const signal = controller.signal;
-      this.isPluginStateLoading = true;
+      this.isLoading$.next(true);
       this.client!.get<{ pluginState: PluginState }>(`${API_BASE_PATH}/state`, {
         signal,
       })
         .then(({ pluginState }) => {
-          this.isPluginStateLoading = false;
+          this.isLoading$.next(false);
           observer.next(pluginState);
           this.pluginState$.next(pluginState);
           observer.complete();
         })
         .catch((error) => {
-          this.isPluginStateLoading = false;
+          this.isLoading$.next(false);
           // if the request fails, we initialize the state with error
           observer.next({ status: 'error', isActivePeriod: false });
           this.pluginState$.next({
@@ -74,7 +75,7 @@ export class ApiService implements GuidedOnboardingApi {
           observer.complete();
         });
       return () => {
-        this.isPluginStateLoading = false;
+        this.isLoading$.next(false);
         controller.abort();
       };
     });
@@ -97,8 +98,8 @@ export class ApiService implements GuidedOnboardingApi {
     // if currentState is undefined, it was not fetched from the backend yet
     // or the request was cancelled or failed
     // also check if we don't have a request in flight already
-    if (!currentState && !this.isPluginStateLoading) {
-      this.isPluginStateLoading = true;
+    if (!currentState && !this.isLoading$.value) {
+      this.isLoading$.next(true);
       return concat(this.createGetPluginStateObservable(), this.pluginState$);
     }
     return this.pluginState$;
@@ -118,8 +119,12 @@ export class ApiService implements GuidedOnboardingApi {
     }
 
     try {
-      return await this.client.get<{ state: GuideState[] }>(`${API_BASE_PATH}/guides`);
+      this.isLoading$.next(true);
+      const response = await this.client.get<{ state: GuideState[] }>(`${API_BASE_PATH}/guides`);
+      this.isLoading$.next(false);
+      return response;
     } catch (error) {
+      this.isLoading$.next(false);
       throw error;
     }
   }
@@ -143,17 +148,20 @@ export class ApiService implements GuidedOnboardingApi {
     }
 
     try {
+      this.isLoading$.next(true);
       const response = await this.client.put<{ pluginState: PluginState }>(
         `${API_BASE_PATH}/state`,
         {
           body: JSON.stringify(state),
         }
       );
+      this.isLoading$.next(false);
       // update the guide state in the plugin state observable
       this.pluginState$.next(response.pluginState);
       this.isGuidePanelOpen$.next(panelState);
       return response;
     } catch (error) {
+      this.isLoading$.next(false);
       throw error;
     }
   }
@@ -278,6 +286,23 @@ export class ApiService implements GuidedOnboardingApi {
       map((pluginState) => {
         if (!isGuideActive(pluginState, guideId)) return false;
         return isStepInProgress(pluginState!.activeGuide, guideId, stepId);
+      })
+    );
+  }
+
+  /**
+   * An observable with the boolean value if the step is ready_to_complete (i.e., user needs to click the "Mark done" button).
+   * Returns true, if the passed params identify the guide step that is currently ready_to_complete.
+   * Returns false otherwise.
+   * @param {GuideId} guideId the id of the guide (one of search, observability, security)
+   * @param {GuideStepIds} stepId the id of the step in the guide
+   * @return {Observable} an observable with the boolean value
+   */
+  public isGuideStepReadyToComplete$(guideId: GuideId, stepId: GuideStepIds): Observable<boolean> {
+    return this.fetchPluginState$().pipe(
+      map((pluginState) => {
+        if (!isGuideActive(pluginState, guideId)) return false;
+        return isStepReadyToComplete(pluginState!.activeGuide, guideId, stepId);
       })
     );
   }
@@ -443,7 +468,10 @@ export class ApiService implements GuidedOnboardingApi {
     if (!this.client) {
       throw new Error('ApiService has not be initialized.');
     }
-    return await this.configService.getGuideConfig(guideId);
+    this.isLoading$.next(true);
+    const config = await this.configService.getGuideConfig(guideId);
+    this.isLoading$.next(false);
+    return config;
   }
 }
 
