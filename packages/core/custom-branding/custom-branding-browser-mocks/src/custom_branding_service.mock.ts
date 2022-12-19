@@ -18,6 +18,7 @@ const createStartContractMock = () => {
   return {
     get: jest.fn(),
     set: jest.fn(),
+    hasCustomBrandingSet: jest.fn(),
   };
 };
 

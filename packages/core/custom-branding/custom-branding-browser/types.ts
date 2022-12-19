@@ -28,6 +28,7 @@ export interface CustomBranding {
 export interface CustomBrandingStart {
   get: () => CustomBranding;
   set: (customBranding: CustomBranding) => void;
+  hasCustomBrandingSet(): boolean;
 }
 
 export interface CustomBrandingSetup {

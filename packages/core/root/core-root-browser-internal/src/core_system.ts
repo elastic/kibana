@@ -309,7 +309,8 @@ export class CoreSystem {
         theme,
         targetDomElement: notificationsTargetDomElement,
       });
-      const application = await this.application.start({ http, theme, overlays });
+      const customBranding = this.customBranding.start();
+      const application = await this.application.start({ http, theme, overlays, customBranding });
 
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
@@ -323,8 +324,6 @@ export class CoreSystem {
         notifications,
       });
       const deprecations = this.deprecations.start({ http });
-
-      const customBranding = this.customBranding.start();
 
       this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
 

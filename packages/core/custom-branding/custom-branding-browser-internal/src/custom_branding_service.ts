@@ -26,14 +26,22 @@ export class CustomBrandingService {
     if (!this.registeredPlugin || this.registeredPlugin !== CUSTOM_BRANDING_PLUGIN) {
       throw new Error('Plugin needs to register before setting custom branding');
     }
-    this.customBranding = customBranding;
+    if (!this.customBranding) {
+      this.customBranding = customBranding;
+    } else {
+      Object.keys(customBranding).forEach((key) => {
+        this.customBranding[key as keyof CustomBranding] =
+          customBranding[key as keyof CustomBranding];
+      });
+    }
   }
 
   private get() {
-    if (!this.registeredPlugin || this.registeredPlugin !== CUSTOM_BRANDING_PLUGIN) {
-      throw new Error('Plugin needs to register before retrieving custom branding.');
-    }
     return this.customBranding;
+  }
+
+  private hasCustomBrandingSet() {
+    return Object.keys(this.customBranding).length > 0;
   }
 
   private register(pluginName: string) {
@@ -50,6 +58,7 @@ export class CustomBrandingService {
     return {
       get: this.get,
       set: this.set,
+      hasCustomBrandingSet: this.hasCustomBrandingSet,
     };
   }
 

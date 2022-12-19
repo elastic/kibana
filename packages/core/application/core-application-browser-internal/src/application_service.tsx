@@ -29,6 +29,7 @@ import type {
 } from '@kbn/core-application-browser';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus, AppNavLinkStatus } from '@kbn/core-application-browser';
+import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
@@ -47,6 +48,7 @@ interface StartDeps {
   http: HttpStart;
   theme: ThemeServiceStart;
   overlays: OverlayStart;
+  customBranding: CustomBrandingStart;
 }
 
 function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
@@ -105,6 +107,7 @@ export class ApplicationService {
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
+  private hasCustomBrandingSet: boolean | undefined;
 
   public setup({
     http: { basePath },
@@ -204,7 +207,12 @@ export class ApplicationService {
     };
   }
 
-  public async start({ http, overlays, theme }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({
+    http,
+    overlays,
+    theme,
+    customBranding,
+  }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
@@ -215,6 +223,7 @@ export class ApplicationService {
     http.addLoadingCountSource(httpLoadingCount$);
 
     this.registrationClosed = true;
+    this.hasCustomBrandingSet = customBranding.hasCustomBrandingSet();
     window.addEventListener('beforeunload', this.onBeforeUnload);
 
     const { capabilities } = await this.capabilities.start({
@@ -345,6 +354,7 @@ export class ApplicationService {
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
+            showPlainSpinner={!this.hasCustomBrandingSet}
           />
         );
       },
