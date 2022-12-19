@@ -11,7 +11,7 @@ import { useKibana } from '../../utils/kibana_react';
 interface UseDeleteSlo {
   loading: boolean;
   success: boolean;
-  error: string;
+  error: string | undefined;
   deleteSlo: (id: string) => void;
 }
 
@@ -19,7 +19,7 @@ export function useDeleteSlo(): UseDeleteSlo {
   const { http } = useKibana().services;
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | undefined>(undefined);
 
   const deleteSlo = useCallback(
     async (id: string) => {
