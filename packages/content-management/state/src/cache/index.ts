@@ -8,5 +8,4 @@
 
 export * from './types';
 export * from './cached_content_item';
-export * from './cached_content_type';
 export * from './content_cache';
