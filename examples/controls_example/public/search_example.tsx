@@ -40,7 +40,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [hits, setHits] = useState(0);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [query, setQuery] = useState<Query>({
+  const [query, setQuery] = useState<Query | undefined>({
     language: 'kuery',
     query: '',
   });
