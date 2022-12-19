@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { DashboardState } from '../../types';
+import type { DashboardContainerByValueInput } from '../../../common';
 
 export interface DashboardSessionStorageServiceType {
   clearState: (id?: string) => void;
-  getState: (id: string | undefined) => Partial<DashboardState> | undefined;
-  setState: (id: string | undefined, newState: Partial<DashboardState>) => void;
+  getState: (id: string | undefined) => Partial<DashboardContainerByValueInput> | undefined;
+  setState: (id: string | undefined, newState: Partial<DashboardContainerByValueInput>) => void;
   getDashboardIdsWithUnsavedChanges: () => string[];
   dashboardHasUnsavedEdits: (id?: string) => boolean;
 }
