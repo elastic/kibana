@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard('Dashboard with Missing Lens Panel');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await filterBar.addFilter('bytes', 'is', '12345678');
+      await filterBar.addFilter({ field: 'bytes', operation: 'is', value: '12345678' });
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await filterBar.getFilterCount()).to.be(1);
     });

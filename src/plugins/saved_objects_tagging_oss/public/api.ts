@@ -46,7 +46,7 @@ export interface ITagsCache {
   /**
    * Return an observable that will emit everytime the cache's state mutates.
    */
-  getState$(): Observable<Tag[]>;
+  getState$(params?: { waitForInitialization?: boolean }): Observable<Tag[]>;
 }
 
 /**
@@ -160,7 +160,7 @@ export interface SavedObjectsTaggingApiUi {
    * }
    * ```
    */
-  parseSearchQuery(query: string, options?: ParseSearchQueryOptions): ParsedSearchQuery;
+  parseSearchQuery(query: string, options?: ParseSearchQueryOptions): Promise<ParsedSearchQuery>;
 
   /**
    * Returns the object ids for the tag references from given references array
