@@ -28,7 +28,7 @@ journey('DataViewPermissions', async ({ page, params }) => {
         },
       });
       // eslint-disable-next-line no-empty
-    } catch (e) { }
+    } catch (e) {}
   });
 
   const queryParams = new URLSearchParams({
