@@ -191,7 +191,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           targetIndexCurrentMappings: sourceMappings,
           targetIndexMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetIndexMappings,
-            indices[source!].mappings
+            sourceMappings
           ),
           versionIndexReadyActions: Option.none,
         };
