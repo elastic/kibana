@@ -43,8 +43,8 @@ export function useTags({
 
   const updateTagClauseGetter = useCallback(
     (queryUpdater: QueryUpdater) =>
-      (tag: Tag, q?: Query, doUpdate: boolean = true) => {
-        const updatedQuery = queryUpdater(q !== undefined ? q : query, tag);
+      (tag: Tag, q: Query = query, doUpdate: boolean = true) => {
+        const updatedQuery = queryUpdater(q, tag);
         if (doUpdate) {
           updateQuery(updatedQuery);
         }
@@ -128,7 +128,7 @@ export function useTags({
       }
 
       if (hasTagInExclude(tag, q)) {
-        // Already selected, remove the filter
+        // Already excluded, remove the filter
         removeTagFromExcludeClause(tag, q);
         return;
       }

@@ -29,6 +29,7 @@ import {
   CaseStatuses,
   CaseSeverity,
 } from '@kbn/cases-plugin/common/api';
+import { ESCaseSeverity } from '@kbn/cases-plugin/server/services/cases/types';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   deleteAllCaseItems,
@@ -206,7 +207,7 @@ const expectExportToHaveCaseSavedObject = (
   expect(createdCaseSO.attributes.connector.fields).to.eql([]);
   expect(createdCaseSO.attributes.settings).to.eql(caseRequest.settings);
   expect(createdCaseSO.attributes.status).to.eql(CaseStatuses.open);
-  expect(createdCaseSO.attributes.severity).to.eql(CaseSeverity.LOW);
+  expect(createdCaseSO.attributes.severity).to.eql(ESCaseSeverity.LOW);
   expect(createdCaseSO.attributes.duration).to.eql(null);
   expect(createdCaseSO.attributes.tags).to.eql(caseRequest.tags);
 };

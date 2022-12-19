@@ -45,47 +45,50 @@
 >       for (const prop in options.hash) {
 40d48
 <       .withMessage('Automatic data was triggered')
-44c52
+41a50,51
+> 
+>     global.kbnHandlebarsEnv = null;
+44c54
 <   it('parameter data can be looked up via @foo', function() {
 ---
 >   it('parameter data can be looked up via @foo', () => {
-47c55
+47c57
 <       .withHelper('hello', function(noun) {
 ---
 >       .withHelper('hello', function (noun) {
-50d57
+50d59
 <       .withMessage('@foo as a parameter retrieves template data')
-54c61
+54c63
 <   it('hash values can be looked up via @foo', function() {
 ---
 >   it('hash values can be looked up via @foo', () => {
-57c64
+57c66
 <       .withHelper('hello', function(options) {
 ---
 >       .withHelper('hello', function (options) {
-60d66
+60d68
 <       .withMessage('@foo as a parameter retrieves template data')
-64c70
+64c72
 <   it('nested parameter data can be looked up via @foo.bar', function() {
 ---
 >   it('nested parameter data can be looked up via @foo.bar', () => {
-67c73
+67c75
 <       .withHelper('hello', function(noun) {
 ---
 >       .withHelper('hello', function (noun) {
-70d75
+70d77
 <       .withMessage('@foo as a parameter retrieves template data')
-74c79
+74c81
 <   it('nested parameter data does not fail with @world.bar', function() {
 ---
 >   it('nested parameter data does not fail with @world.bar', () => {
-77c82
+77c84
 <       .withHelper('hello', function(noun) {
 ---
 >       .withHelper('hello', function (noun) {
-80d84
+80d86
 <       .withMessage('@foo as a parameter retrieves template data')
-84,87c88,89
+84,87c90,91
 <   it('parameter data throws when using complex scope references', function() {
 <     expectTemplate(
 <       '{{#goodbyes}}{{text}} cruel {{@foo/../name}}! {{/goodbyes}}'
@@ -93,39 +96,39 @@
 ---
 >   it('parameter data throws when using complex scope references', () => {
 >     expectTemplate('{{#goodbyes}}{{text}} cruel {{@foo/../name}}! {{/goodbyes}}').toThrow(Error);
-90c92
+90c94
 <   it('data can be functions', function() {
 ---
 >   it('data can be functions', () => {
-94c96
+94c98
 <           hello: function() {
 ---
 >           hello() {
-96,97c98,99
+96,97c100,101
 <           }
 <         }
 ---
 >           },
 >         },
-102c104
+102c106
 <   it('data can be functions with params', function() {
 ---
 >   it('data can be functions with params', () => {
-106c108
+106c110
 <           hello: function(arg) {
 ---
 >           hello(arg: any) {
-108,109c110,111
+108,109c112,113
 <           }
 <         }
 ---
 >           },
 >         },
-114c116
+114c118
 <   it('data is inherited downstream', function() {
 ---
 >   it('data is inherited downstream', () => {
-120,122c122,124
+120,122c124,126
 <       .withHelper('let', function(options) {
 <         var frame = Handlebars.createFrame(options.data);
 <         for (var prop in options.hash) {
@@ -133,9 +136,9 @@
 >       .withHelper('let', function (this: any, options) {
 >         const frame = Handlebars.createFrame(options.data);
 >         for (const prop in options.hash) {
-130d131
+130d133
 <       .withMessage('data variables are inherited downstream')
-134,147c135
+134,147c137
 <   it('passing in data to a compiled function that expects data - works with helpers in partials', function() {
 <     expectTemplate('{{>myPartial}}')
 <       .withCompileOptions({ data: true })
@@ -152,63 +155,63 @@
 <   it('passing in data to a compiled function that expects data - works with helpers and parameters', function() {
 ---
 >   it('passing in data to a compiled function that expects data - works with helpers and parameters', () => {
-150c138
+150c140
 <       .withHelper('hello', function(noun, options) {
 ---
 >       .withHelper('hello', function (this: any, noun, options) {
-155d142
+155d144
 <       .withMessage('Data output by helper')
-159c146
+159c148
 <   it('passing in data to a compiled function that expects data - works with block helpers', function() {
 ---
 >   it('passing in data to a compiled function that expects data - works with block helpers', () => {
-162c149
+162c151
 <         data: true
 ---
 >         data: true,
-164c151
+164c153
 <       .withHelper('hello', function(options) {
 ---
 >       .withHelper('hello', function (this: any, options) {
-167c154
+167c156
 <       .withHelper('world', function(options) {
 ---
 >       .withHelper('world', function (this: any, options) {
-172d158
+172d160
 <       .withMessage('Data output by helper')
-176c162
+176c164
 <   it('passing in data to a compiled function that expects data - works with block helpers that use ..', function() {
 ---
 >   it('passing in data to a compiled function that expects data - works with block helpers that use ..', () => {
-179c165
+179c167
 <       .withHelper('hello', function(options) {
 ---
 >       .withHelper('hello', function (options) {
-182c168
+182c170
 <       .withHelper('world', function(thing, options) {
 ---
 >       .withHelper('world', function (this: any, thing, options) {
-187d172
+187d174
 <       .withMessage('Data output by helper')
-191c176
+191c178
 <   it('passing in data to a compiled function that expects data - data is passed to with block helpers where children use ..', function() {
 ---
 >   it('passing in data to a compiled function that expects data - data is passed to with block helpers where children use ..', () => {
-194c179
+194c181
 <       .withHelper('hello', function(options) {
 ---
 >       .withHelper('hello', function (options) {
-197c182
+197c184
 <       .withHelper('world', function(thing, options) {
 ---
 >       .withHelper('world', function (this: any, thing, options) {
-202d186
+202d188
 <       .withMessage('Data output by helper')
-206c190
+206c192
 <   it('you can override inherited data when invoking a helper', function() {
 ---
 >   it('you can override inherited data when invoking a helper', () => {
-209,213c193,194
+209,213c195,196
 <       .withHelper('hello', function(options) {
 <         return options.fn(
 <           { exclaim: '?', zomg: 'world' },
@@ -217,55 +220,55 @@
 ---
 >       .withHelper('hello', function (options) {
 >         return options.fn({ exclaim: '?', zomg: 'world' }, { data: { adjective: 'sad' } });
-215c196
+215c198
 <       .withHelper('world', function(thing, options) {
 ---
 >       .withHelper('world', function (this: any, thing, options) {
-220d200
+220d202
 <       .withMessage('Overriden data output by helper')
-224c204
+224c206
 <   it('you can override inherited data when invoking a helper with depth', function() {
 ---
 >   it('you can override inherited data when invoking a helper with depth', () => {
-227c207
+227c209
 <       .withHelper('hello', function(options) {
 ---
 >       .withHelper('hello', function (options) {
-230c210
+230c212
 <       .withHelper('world', function(thing, options) {
 ---
 >       .withHelper('world', function (this: any, thing, options) {
-235d214
+235d216
 <       .withMessage('Overriden data output by helper')
-239,240c218,219
+239,240c220,221
 <   describe('@root', function() {
 <     it('the root context can be looked up via @root', function() {
 ---
 >   describe('@root', () => {
 >     it('the root context can be looked up via @root', () => {
-246,248c225
+246,248c227
 <       expectTemplate('{{@root.foo}}')
 <         .withInput({ foo: 'hello' })
 <         .toCompileTo('hello');
 ---
 >       expectTemplate('{{@root.foo}}').withInput({ foo: 'hello' }).toCompileTo('hello');
-251c228
+251c230
 <     it('passed root values take priority', function() {
 ---
 >     it('passed root values take priority', () => {
-259,260c236,237
+259,260c238,239
 <   describe('nesting', function() {
 <     it('the root context can be looked up via @root', function() {
 ---
 >   describe('nesting', () => {
 >     it('the root context can be looked up via @root', () => {
-265,266c242,243
+265,266c244,245
 <         .withHelper('helper', function(options) {
 <           var frame = Handlebars.createFrame(options.data);
 ---
 >         .withHelper('helper', function (this: any, options) {
 >           const frame = Handlebars.createFrame(options.data);
-272,273c249,250
+272,273c251,252
 <             depth: 0
 <           }
 ---
