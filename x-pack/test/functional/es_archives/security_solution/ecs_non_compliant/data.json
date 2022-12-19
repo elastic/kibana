@@ -46,18 +46,3 @@
     "type": "_doc"
   }
 }
-
-{
-  "type": "doc",
-  "value": {
-    "index": "ecs_non_compliant",
-    "source": {
-      "@timestamp": "2020-10-14T05:00:01.000Z",
-      "id": "client.ip is keyword",
-      "client": {
-        "ip": "non-valid-ip"
-      }
-    },
-    "type": "_doc"
-  }
-}

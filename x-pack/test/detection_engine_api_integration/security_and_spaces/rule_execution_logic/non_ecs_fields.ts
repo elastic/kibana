@@ -15,6 +15,7 @@ import {
   getRuleForSignalTesting,
   previewRule,
 } from '../../utils';
+import { indexDocumentsFactory } from '../../utils/data_generator';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -23,6 +24,11 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+
+  const indexDocuments = indexDocumentsFactory({
+    es,
+    index: 'ecs_non_compliant',
+  });
 
   describe('Non ECS fields in alert document source', () => {
     before(async () => {
@@ -85,9 +91,21 @@ export default ({ getService }: FtrProviderContext) => {
 
     // source client.ip is keyword, ECS mapping for client.ip is ip
     it('should remove source non ip field from alert if ECS field mapping is ip', async () => {
+      const documentId = 'client.ip is keyword';
+
+      await indexDocuments([
+        {
+          id: documentId,
+          client: {
+            ip: 'non-valid-ip',
+            name: 'test name',
+          },
+        },
+      ]);
+
       const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting(['ecs_non_compliant']),
-        query: `id: "client.ip is keyword"`,
+        query: `id: "${documentId}"`,
       };
       const { previewId, logs } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
@@ -96,6 +114,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       // invalid ECS field is getting removed
       expect(previewAlerts[0]._source).not.toHaveProperty('client.ip');
+
+      expect(previewAlerts[0]._source).toHaveProperty('client.name', 'test name');
     });
   });
 };

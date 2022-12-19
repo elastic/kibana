@@ -1,7 +1,7 @@
 {
     "type": "index",
     "value": {
-      "index": "new_terms",
+      "index": "ecs_non_compliant",
       "mappings": {
         "properties": {
           "id": {

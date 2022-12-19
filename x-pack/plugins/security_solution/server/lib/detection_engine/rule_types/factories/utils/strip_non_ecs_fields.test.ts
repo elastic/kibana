@@ -238,4 +238,42 @@ describe('stripNonEcsFields', () => {
       });
     });
   });
+
+  describe('ip field', () => {
+    it('should not strip valid CIDR', () => {
+      const { result, removed } = stripNonEcsFields({
+        source: {
+          ip: '192.168.0.0/16',
+          name: 'test source',
+        },
+      });
+
+      expect(result).toEqual({
+        source: {
+          ip: '192.168.0.0/16',
+          name: 'test source',
+        },
+      });
+      expect(removed).toEqual([]);
+    });
+
+    it('should strip invalid ip', () => {
+      const { result, removed } = stripNonEcsFields({
+        source: {
+          ip: 'invalid-ip',
+          name: 'test source',
+        },
+      });
+
+      expect(result).toEqual({
+        source: { name: 'test source' },
+      });
+      expect(removed).toEqual([
+        {
+          key: 'source.ip',
+          value: 'invalid-ip',
+        },
+      ]);
+    });
+  });
 });

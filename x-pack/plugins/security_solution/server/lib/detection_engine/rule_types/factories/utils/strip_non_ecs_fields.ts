@@ -10,6 +10,7 @@ import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/
 import { isPlainObject, cloneDeep, isArray } from 'lodash';
 
 import type { SearchTypes } from '../../../../../../common/detection_engine/types';
+import { isValidIpType } from './ecs_types_validators/is_valid_ip_type';
 
 type SourceFieldRecord = Record<string, SearchTypes>;
 type SourceField = SearchTypes | SourceFieldRecord;
@@ -109,11 +110,17 @@ const computeIsEcsCompliant = (value: SourceField, path: string) => {
     return true;
   }
 
+  const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
   const isEcsFieldObject = getIsEcsFieldObject(path);
 
-  // if checked value is object but ECS mapping not, it's not compliant
   if (isPlainObject(value)) {
+    // if checked value is object but ECS mapping not, it's not compliant
     return isEcsFieldObject;
+  }
+
+  // validate if value is a valid ip type
+  if (ecsField?.type === 'ip') {
+    return isValidIpType(value);
   }
 
   // checked value is not object and if ECS mapping is not as well, it compliant
