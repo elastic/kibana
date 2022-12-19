@@ -8,7 +8,6 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import { SemVer } from 'semver';
 import JSON5 from 'json5';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/utils';
