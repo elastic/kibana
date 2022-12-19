@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { act, fireEvent } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../../../mock';
 
@@ -130,6 +131,56 @@ describe('ExperimentDatastreamSettings', () => {
       expect(syntheticSourceSwitch).not.toBeChecked();
       expect(syntheticSourceSwitch).not.toBeEnabled();
       expect(mockSetNewExperimentalDataFeatures).not.toBeCalled();
+    });
+
+    it('should not mutate original experimental feature if a user change one', () => {
+      const mockSetNewExperimentalDataFeatures = jest.fn();
+      const experimentalDataFeatures = [
+        {
+          data_stream: 'logs-test',
+          features: {
+            synthetic_source: true,
+            tsdb: false,
+          },
+        },
+      ];
+      const res = createFleetTestRendererMock().render(
+        <ExperimentDatastreamSettings
+          registryDataStream={
+            {
+              type: 'logs',
+              dataset: 'test',
+            } as unknown as RegistryDataStream
+          }
+          experimentalDataFeatures={experimentalDataFeatures}
+          setNewExperimentalDataFeatures={mockSetNewExperimentalDataFeatures}
+        />
+      );
+
+      act(() => {
+        fireEvent.click(
+          res.getByTestId('packagePolicyEditor.syntheticSourceExperimentalFeature.switch')
+        );
+      });
+      expect(mockSetNewExperimentalDataFeatures).toBeCalled();
+      expect(mockSetNewExperimentalDataFeatures.mock.calls[0][0]).toEqual([
+        {
+          data_stream: 'logs-test',
+          features: {
+            synthetic_source: false,
+            tsdb: false,
+          },
+        },
+      ]);
+      expect(experimentalDataFeatures).toEqual([
+        {
+          data_stream: 'logs-test',
+          features: {
+            synthetic_source: true,
+            tsdb: false,
+          },
+        },
+      ]);
     });
   });
 });
