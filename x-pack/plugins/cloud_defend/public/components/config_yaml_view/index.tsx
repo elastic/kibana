@@ -22,7 +22,7 @@ interface OnChangeDeps {
   updatedPolicy: NewPackagePolicy;
 }
 
-interface ConfigYamlViewwDeps {
+interface ConfigYamlViewDeps {
   policy: NewPackagePolicy;
   onChange(opts: OnChangeDeps): void;
 }
@@ -32,7 +32,7 @@ interface ConfigError {
   message: string;
 }
 
-export const ConfigYamlView = ({ policy, onChange }: ConfigYamlViewwDeps) => {
+export const ConfigYamlView = ({ policy, onChange }: ConfigYamlViewDeps) => {
   const styles = useStyles();
   const [errors, setErrors] = useState<ConfigError[]>([]);
   const input = getInputFromPolicy(policy, INPUT_CONTROL);

@@ -12,7 +12,7 @@ const MOCK_YAML_CONFIGURATION = `
 selectors:
   # default selector (user can modify or remove if they want)
   - name: default
-    activity: [createExecutable, modifyExecutable]
+    operation: [createExecutable, modifyExecutable, execMemFd]
 
   # example custom selector
   - name: nginxOnly
