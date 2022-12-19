@@ -695,7 +695,6 @@ packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/analytics/shippers/gainsight @elastic/kibana-core
-packages/content-management/inspector @elastic/kibana-global-experience
 packages/content-management/react @elastic/kibana-global-experience
 packages/content-management/state @elastic/kibana-global-experience
 packages/content-management/state_mocks @elastic/kibana-global-experience

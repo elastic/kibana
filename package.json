@@ -147,7 +147,6 @@
     "@kbn/config": "link:bazel-bin/packages/kbn-config",
     "@kbn/config-mocks": "link:bazel-bin/packages/kbn-config-mocks",
     "@kbn/config-schema": "link:bazel-bin/packages/kbn-config-schema",
-    "@kbn/content-management-inspector": "link:bazel-bin/packages/content-management/inspector",
     "@kbn/content-management-react": "link:bazel-bin/packages/content-management/react",
     "@kbn/content-management-state": "link:bazel-bin/packages/content-management/state",
     "@kbn/content-management-state-mocks": "link:bazel-bin/packages/content-management/state_mocks",
