@@ -160,6 +160,7 @@ export const mobileServiceDetail = {
                 t.partial({
                   traceId: t.string,
                   transactionId: t.string,
+                  flyoutDetailTab: t.string,
                 }),
                 offsetRt,
               ]),
