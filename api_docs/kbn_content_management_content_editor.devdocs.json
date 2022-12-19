@@ -1,5 +1,5 @@
 {
-  "id": "@kbn/content-management-inspector",
+  "id": "@kbn/content-management-content-editor",
   "client": {
     "classes": [],
     "functions": [],
@@ -20,36 +20,36 @@
     "classes": [],
     "functions": [
       {
-        "parentPluginId": "@kbn/content-management-inspector",
-        "id": "def-common.InspectorKibanaProvider",
+        "parentPluginId": "@kbn/content-management-content-editor",
+        "id": "def-common.ContentEditorKibanaProvider",
         "type": "Function",
         "tags": [],
-        "label": "InspectorKibanaProvider",
+        "label": "ContentEditorKibanaProvider",
         "description": [
           "\nKibana-specific Provider that maps to known dependency types."
         ],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
-          "InspectorKibanaDependencies",
+          "ContentEditorKibanaDependencies",
           ">) => JSX.Element"
         ],
-        "path": "packages/content-management/inspector/src/services.tsx",
+        "path": "packages/content-management/content_editor/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/content-management-inspector",
-            "id": "def-common.InspectorKibanaProvider.$1",
+            "parentPluginId": "@kbn/content-management-content-editor",
+            "id": "def-common.ContentEditorKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "InspectorKibanaDependencies",
+              "ContentEditorKibanaDependencies",
               ">"
             ],
-            "path": "packages/content-management/inspector/src/services.tsx",
+            "path": "packages/content-management/content_editor/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -59,11 +59,11 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/content-management-inspector",
-        "id": "def-common.InspectorProvider",
+        "parentPluginId": "@kbn/content-management-content-editor",
+        "id": "def-common.ContentEditorProvider",
         "type": "Function",
         "tags": [],
-        "label": "InspectorProvider",
+        "label": "ContentEditorProvider",
         "description": [
           "\nAbstract external service Provider."
         ],
@@ -72,13 +72,13 @@
           "Services",
           ">) => JSX.Element"
         ],
-        "path": "packages/content-management/inspector/src/services.tsx",
+        "path": "packages/content-management/content_editor/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/content-management-inspector",
-            "id": "def-common.InspectorProvider.$1",
+            "parentPluginId": "@kbn/content-management-content-editor",
+            "id": "def-common.ContentEditorProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{ children, ...services }",
@@ -88,7 +88,7 @@
               "Services",
               ">"
             ],
-            "path": "packages/content-management/inspector/src/services.tsx",
+            "path": "packages/content-management/content_editor/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -98,24 +98,24 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/content-management-inspector",
-        "id": "def-common.useOpenInspector",
+        "parentPluginId": "@kbn/content-management-content-editor",
+        "id": "def-common.useOpenContentEditor",
         "type": "Function",
         "tags": [],
-        "label": "useOpenInspector",
+        "label": "useOpenContentEditor",
         "description": [],
         "signature": [
           "() => (args: ",
           {
-            "pluginId": "@kbn/content-management-inspector",
+            "pluginId": "@kbn/content-management-content-editor",
             "scope": "common",
-            "docId": "kibKbnContentManagementInspectorPluginApi",
-            "section": "def-common.OpenInspectorParams",
-            "text": "OpenInspectorParams"
+            "docId": "kibKbnContentManagementContentEditorPluginApi",
+            "section": "def-common.OpenContentEditorParams",
+            "text": "OpenContentEditorParams"
           },
           ") => () => void"
         ],
-        "path": "packages/content-management/inspector/src/open_inspector.tsx",
+        "path": "packages/content-management/content_editor/src/open_content_editor.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -127,11 +127,11 @@
     "enums": [],
     "misc": [
       {
-        "parentPluginId": "@kbn/content-management-inspector",
-        "id": "def-common.OpenInspectorParams",
+        "parentPluginId": "@kbn/content-management-content-editor",
+        "id": "def-common.OpenContentEditorParams",
         "type": "Type",
         "tags": [],
-        "label": "OpenInspectorParams",
+        "label": "OpenContentEditorParams",
         "description": [],
         "signature": [
           "{ onSave?: ((args: { id: string; title: string; description?: string | undefined; tags: string[]; }) => Promise<void>) | undefined; item: ",
@@ -140,7 +140,7 @@
           "CustomValidators",
           " | undefined; }"
         ],
-        "path": "packages/content-management/inspector/src/open_inspector.tsx",
+        "path": "packages/content-management/content_editor/src/open_content_editor.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
