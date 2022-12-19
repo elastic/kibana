@@ -152,4 +152,11 @@ describe('KibanaSocket', () => {
       expect(socket.authorizationError).toBe(authorizationError);
     });
   });
+
+  describe('remoteAddress', () => {
+    it('mirrors the value of net.Socket instance', () => {
+      const socket = new KibanaSocket({ remoteAddress: '1.1.1.1' } as Socket);
+      expect(socket.remoteAddress).toBe('1.1.1.1');
+    });
+  });
 });
