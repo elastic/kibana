@@ -95,7 +95,7 @@ export function validateCoreQueryBody(anyParams: unknown): string | undefined {
 
 const AggTypes = new Set(['count', 'avg', 'min', 'max', 'sum']);
 
-function validateAggType(aggType: string): string | undefined {
+export function validateAggType(aggType: string): string | undefined {
   if (AggTypes.has(aggType)) {
     return;
   }

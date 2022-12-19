@@ -13,6 +13,7 @@
     "xpack.cloudChat": "plugins/cloud_integrations/cloud_chat",
     "xpack.cloudDefend": "plugins/cloud_defend",
     "xpack.cloudLinks": "plugins/cloud_integrations/cloud_links",
+    "xpack.cloudDataMigration": "plugins/cloud_integrations/cloud_data_migration",
     "xpack.csp": "plugins/cloud_security_posture",
     "xpack.customBranding": "plugins/custom_branding",
     "xpack.dashboard": "plugins/dashboard_enhanced",

@@ -440,6 +440,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Integrates with DriftChat in order to provide live support to our Elastic Cloud users. This plugin should only run on Elastic Cloud.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]
+|Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_defend/README.md[cloudDefend]
 |This plugin currently only exists to provide custom fleet policy UX for a set of new BPF LSM features. The first feature being container "drift prevention".
 
