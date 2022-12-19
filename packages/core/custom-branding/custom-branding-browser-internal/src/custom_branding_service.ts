@@ -10,10 +10,10 @@ import type {
   CustomBranding,
   CustomBrandingStart,
   CustomBrandingSetup,
-  // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
 } from '@kbn/core-custom-branding-browser';
 
 const CUSTOM_BRANDING_PLUGIN = 'customBranding';
+
 export class CustomBrandingService {
   private customBranding: CustomBranding;
   private registeredPlugin?: string;

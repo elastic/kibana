@@ -17,7 +17,6 @@ SOURCE_FILES = glob(
     "**/*.stories.*",
     "**/__snapshots__/**",
     "**/integration_tests/**",
-    "**/mocks/**",
     "**/scripts/**",
     "**/storybook/**",
     "**/test_fixtures/**",
@@ -46,9 +45,7 @@ NPM_MODULE_EXTRA_FILES = [
 #  To reference a NPM package use:
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
-RUNTIME_DEPS = [
-  "@npm//react"
-]
+RUNTIME_DEPS = []
 
 # In this array place dependencies necessary to build the types, which will include the
 # :npm_module_types target of other packages and packages from NPM, including @types/*
@@ -62,7 +59,6 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react"
 ]
 
 jsts_transpiler(
