@@ -13,7 +13,7 @@ import { EuiPanel, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
 import { XYBrushEvent } from '@elastic/charts';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import {
   TraceSamplesFetchResult,
   useTransactionTraceSamplesFetcher,
@@ -46,7 +46,10 @@ const tabs = [
 ];
 
 export function TransactionDetailsTabs() {
-  const { query } = useApmParams('/services/{serviceName}/transactions/view');
+  const { query } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
 

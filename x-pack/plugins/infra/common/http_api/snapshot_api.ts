@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { SnapshotMetricTypeRT, ItemTypeRT } from '../inventory_models/types';
 import { MetricsAPISeriesRT } from './metrics_api';
@@ -16,9 +17,14 @@ export const SnapshotNodePathRT = rt.intersection([
   }),
   rt.partial({
     ip: rt.union([rt.string, rt.null]),
-  }),
-  rt.partial({
     os: rt.union([rt.string, rt.null]),
+    cloudProvider: rt.union([
+      rt.literal('gcp'),
+      rt.literal('aws'),
+      rt.literal('azure'),
+      rt.literal('unknownProvider'),
+      rt.null,
+    ]),
   }),
 ]);
 
@@ -43,10 +49,12 @@ export const SnapshotNodeRT = rt.type({
   name: rt.string,
 });
 
-export const SnapshotNodeResponseRT = rt.type({
-  nodes: rt.array(SnapshotNodeRT),
-  interval: rt.string,
-});
+export const SnapshotNodeResponseRT = rt.intersection([
+  rt.type({
+    nodes: rt.array(SnapshotNodeRT),
+  }),
+  rt.partial({ interval: rt.string }),
+]);
 
 export const InfraTimerangeInputRT = rt.intersection([
   rt.type({
@@ -106,12 +114,12 @@ export const SnapshotRequestRT = rt.intersection([
     groupBy: rt.union([SnapshotGroupByRT, rt.null]),
     nodeType: ItemTypeRT,
     sourceId: rt.string,
+    includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(true)]),
   }),
   rt.partial({
     accountId: rt.string,
     region: rt.string,
     filterQuery: rt.union([rt.string, rt.null]),
-    includeTimeseries: rt.boolean,
     overrideCompositeSize: rt.number,
   }),
 ]);

@@ -77,7 +77,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -86,6 +86,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -482,10 +486,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
               },
               {
                 "plugin": "ml",
@@ -8378,7 +8378,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8387,6 +8387,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8783,10 +8787,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
               },
               {
                 "plugin": "ml",
@@ -12785,7 +12785,7 @@
               "\n Get a list of field objects for an index pattern that may contain wildcards\n"
             ],
             "signature": [
-              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; filter?: ",
+              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
               " | undefined; }) => Promise<{ fields: ",
               {
@@ -12884,10 +12884,10 @@
                   },
                   {
                     "parentPluginId": "dataViews",
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.filter",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.indexFilter",
                     "type": "Object",
                     "tags": [],
-                    "label": "filter",
+                    "label": "indexFilter",
                     "description": [],
                     "signature": [
                       "QueryDslQueryContainer",
@@ -15760,7 +15760,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -15769,6 +15769,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16165,10 +16169,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
               },
               {
                 "plugin": "ml",
@@ -23422,10 +23422,10 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.GetFieldsOptions.filter",
+            "id": "def-common.GetFieldsOptions.indexFilter",
             "type": "Object",
             "tags": [],
-            "label": "filter",
+            "label": "indexFilter",
             "description": [],
             "signature": [
               "QueryDslQueryContainer",

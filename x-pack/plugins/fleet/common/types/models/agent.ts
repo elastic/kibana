@@ -22,7 +22,6 @@ export type AgentStatus =
   | 'error'
   | 'online'
   | 'inactive'
-  | 'warning'
   | 'enrolling'
   | 'unenrolling'
   | 'updating'

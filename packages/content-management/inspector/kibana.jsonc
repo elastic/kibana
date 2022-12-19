@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/content-management-inspector",
-  "owner": "@elastic/kibana-global-experience",
-  "runtimeDeps": [],
-  "typeDeps": [],
-}

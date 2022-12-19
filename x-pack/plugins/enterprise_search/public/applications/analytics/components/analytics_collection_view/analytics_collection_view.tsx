@@ -21,7 +21,7 @@ import { COLLECTION_CREATION_PATH, COLLECTION_VIEW_PATH } from '../../routes';
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 
 import { AnalyticsCollectionEvents } from './analytics_collection_events';
-import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate';
+import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate/analytics_collection_integrate';
 import { AnalyticsCollectionSettings } from './analytics_collection_settings';
 
 import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
