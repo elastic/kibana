@@ -48,7 +48,7 @@ import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_seconds';
 import { InfraBackendLibs } from '../../infra_types';
-import { getAlertDetailsUrl, UNGROUPED_FACTORY_KEY } from '../common/utils';
+import { getAlertDetailsUrl, getGroupByObject, UNGROUPED_FACTORY_KEY } from '../common/utils';
 import {
   getReasonMessageForGroupedCountAlert,
   getReasonMessageForGroupedRatioAlert,
@@ -483,6 +483,12 @@ export const processGroupByResults = (
         timeSize,
         timeUnit
       );
+
+      const groupByKeysObjectMapping = getGroupByObject(
+        params.groupBy,
+        new Set<string>(groupResults.map((groupResult) => groupResult.name))
+      );
+
       const actions = [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -490,6 +496,7 @@ export const processGroupByResults = (
             matchingDocuments: documentCount,
             conditions: createConditionsMessageForCriteria(criteria),
             group: group.name,
+            groupByKeys: groupByKeysObjectMapping[group.name],
             isRatio: false,
             reason: reasonMessage,
           },
@@ -542,6 +549,12 @@ export const processGroupByRatioResults = (
         timeSize,
         timeUnit
       );
+
+      const groupByKeysObjectMapping = getGroupByObject(
+        params.groupBy,
+        new Set<string>(numeratorGroupResults.map((groupResult) => groupResult.name))
+      );
+
       const actions = [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -550,6 +563,7 @@ export const processGroupByRatioResults = (
             numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
             denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
             group: numeratorGroup.name,
+            groupByKeys: groupByKeysObjectMapping[numeratorGroup.name],
             isRatio: true,
             reason: reasonMessage,
           },
@@ -910,6 +924,11 @@ const processRecoveredAlerts = ({
   startedAt: Date;
   validatedParams: RuleParams;
 }) => {
+  const groupByKeysObjectForRecovered = getGroupByObject(
+    validatedParams.groupBy,
+    new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.getId()))
+  );
+
   for (const alert of recoveredAlerts) {
     const recoveredAlertId = alert.getId();
     const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
@@ -921,6 +940,7 @@ const processRecoveredAlerts = ({
     const baseContext = {
       alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
       group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
+      groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
       timestamp: startedAt.toISOString(),
       viewInAppUrl,
     };

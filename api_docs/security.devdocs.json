@@ -1258,7 +1258,23 @@
             "label": "kibana",
             "description": [],
             "signature": [
-              "{ space_id?: string | undefined; session_id?: string | undefined; saved_object?: { type: string; id: string; } | undefined; authentication_provider?: string | undefined; authentication_type?: string | undefined; authentication_realm?: string | undefined; lookup_realm?: string | undefined; add_to_spaces?: readonly string[] | undefined; delete_from_spaces?: readonly string[] | undefined; } | undefined"
+              "AuditKibana",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditEvent.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "AuditHttp",
+              " | undefined"
             ],
             "path": "x-pack/plugins/security/server/audit/audit_events.ts",
             "deprecated": false,
@@ -3039,6 +3055,20 @@
             "description": [],
             "signature": [
               "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/plugins/security/common/model/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.ApiKey.role_descriptors",
+            "type": "Object",
+            "tags": [],
+            "label": "role_descriptors",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/api_key.ts",
             "deprecated": false,

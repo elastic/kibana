@@ -42,7 +42,6 @@ import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
 import type { TimelineEpicDependencies, TimelineState } from '../../timelines/store/timeline/types';
 import { dataTableSelectors } from './data_table';
-import type { DataTableReducer } from './data_table';
 import type { KibanaDataView, SourcererModel } from './sourcerer/model';
 import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
@@ -111,21 +110,18 @@ export const createStoreFactory = async (
   const dataTableInitialState = {
     dataTable: {
       tableById: {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
         ...subPlugins.alerts.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...subPlugins.rules.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...subPlugins.exceptions.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...subPlugins.hosts.storageDataTables!.tableById,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...subPlugins.network.storageDataTables!.tableById,
+        ...subPlugins.explore.exploreDataTables!.hosts.tableById,
+        ...subPlugins.explore.exploreDataTables!.network.tableById,
+        ...subPlugins.explore.exploreDataTables!.users.tableById,
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
       },
     },
   };
 
-  const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
   const timelineReducer = reduceReducers(
     timelineInitialState.timeline,
     startPlugins.timelines?.getTimelineReducer() ?? {},
@@ -134,9 +130,7 @@ export const createStoreFactory = async (
 
   const initialState = createInitialState(
     {
-      ...subPlugins.hosts.store.initialState,
-      ...subPlugins.users.store.initialState,
-      ...subPlugins.network.store.initialState,
+      ...subPlugins.explore.store.initialState,
       ...timelineInitialState,
       ...subPlugins.management.store.initialState,
     },
@@ -150,22 +144,14 @@ export const createStoreFactory = async (
   );
 
   const rootReducer = {
-    ...subPlugins.hosts.store.reducer,
-    ...subPlugins.users.store.reducer,
-    ...subPlugins.network.store.reducer,
+    ...subPlugins.explore.store.reducer,
     timeline: timelineReducer,
     ...subPlugins.management.store.reducer,
-    ...tGridReducer,
   };
 
-  return createStore(
-    initialState,
-    rootReducer,
-    { dataTable: tGridReducer },
-    libs$.pipe(pluck('kibana')),
-    storage,
-    [...(subPlugins.management.store.middleware ?? [])]
-  );
+  return createStore(initialState, rootReducer, libs$.pipe(pluck('kibana')), storage, [
+    ...(subPlugins.management.store.middleware ?? []),
+  ]);
 };
 
 /**
@@ -174,7 +160,6 @@ export const createStoreFactory = async (
 export const createStore = (
   state: State,
   pluginsReducer: SubPluginsInitReducer,
-  tgridReducer: DataTableReducer, // TODO: remove this param, when the table reducer will be moved to security_solution
   kibana: Observable<CoreStart>,
   storage: Storage,
   additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
@@ -198,7 +183,7 @@ export const createStore = (
   );
 
   store = createReduxStore(
-    createReducer(pluginsReducer, tgridReducer),
+    createReducer(pluginsReducer),
     state as PreloadedState<State>,
     composeEnhancers(
       applyMiddleware(epicMiddleware, telemetryMiddleware, ...(additionalMiddleware ?? []))

@@ -87,7 +87,7 @@ describe('current status route', () => {
                             config_id: 'id1',
                             observer: {
                               geo: {
-                                name: 'test-location',
+                                name: 'Asia/Pacific - Japan',
                               },
                             },
                           },
@@ -122,7 +122,7 @@ describe('current status route', () => {
                             config_id: 'id2',
                             observer: {
                               geo: {
-                                name: 'test-location',
+                                name: 'Asia/Pacific - Japan',
                               },
                             },
                           },
@@ -150,7 +150,7 @@ describe('current status route', () => {
                             config_id: 'id2',
                             observer: {
                               geo: {
-                                name: 'test-location',
+                                name: 'Europe - Germany',
                               },
                             },
                           },
@@ -168,25 +168,28 @@ describe('current status route', () => {
         down: 1,
         enabledIds: ['id1', 'id2'],
         up: 2,
-        upConfigs: [
-          {
+        upConfigs: {
+          'id1-Asia/Pacific - Japan': {
             configId: 'id1',
-            heartbeatId: 'id1',
-            location: 'test-location',
+            monitorQueryId: 'id1',
+            location: 'Asia/Pacific - Japan',
+            status: 'up',
           },
-          {
+          'id2-Asia/Pacific - Japan': {
             configId: 'id2',
-            heartbeatId: 'id2',
-            location: 'test-location',
+            monitorQueryId: 'id2',
+            location: 'Asia/Pacific - Japan',
+            status: 'up',
           },
-        ],
-        downConfigs: [
-          {
+        },
+        downConfigs: {
+          'id2-Europe - Germany': {
             configId: 'id2',
-            heartbeatId: 'id2',
-            location: 'test-location',
+            monitorQueryId: 'id2',
+            location: 'Europe - Germany',
+            status: 'down',
           },
-        ],
+        },
       });
     });
 
@@ -217,7 +220,7 @@ describe('current status route', () => {
                             config_id: 'id1',
                             observer: {
                               geo: {
-                                name: 'test-location',
+                                name: 'Asia/Pacific - Japan',
                               },
                             },
                           },
@@ -252,7 +255,7 @@ describe('current status route', () => {
                             config_id: 'id2',
                             observer: {
                               geo: {
-                                name: 'test-location',
+                                name: 'Asia/Pacific - Japan',
                               },
                             },
                           },
@@ -280,7 +283,7 @@ describe('current status route', () => {
                             config_id: 'id2',
                             observer: {
                               geo: {
-                                name: 'test-location',
+                                name: 'Europe - Germany',
                               },
                             },
                           },
@@ -305,25 +308,28 @@ describe('current status route', () => {
         down: 1,
         enabledIds: ['id1', 'id2'],
         up: 2,
-        upConfigs: [
-          {
+        upConfigs: {
+          'id1-Asia/Pacific - Japan': {
             configId: 'id1',
-            heartbeatId: 'id1',
-            location: 'test-location',
+            monitorQueryId: 'id1',
+            location: 'Asia/Pacific - Japan',
+            status: 'up',
           },
-          {
+          'id2-Asia/Pacific - Japan': {
             configId: 'id2',
-            heartbeatId: 'id2',
-            location: 'test-location',
+            monitorQueryId: 'id2',
+            location: 'Asia/Pacific - Japan',
+            status: 'up',
           },
-        ],
-        downConfigs: [
-          {
+        },
+        downConfigs: {
+          'id2-Europe - Germany': {
             configId: 'id2',
-            heartbeatId: 'id2',
-            location: 'test-location',
+            monitorQueryId: 'id2',
+            location: 'Europe - Germany',
+            status: 'down',
           },
-        ],
+        },
       });
       expect(esClient.search).toHaveBeenCalledTimes(2);
       // These assertions are to ensure that we are paginating through the IDs we use for filtering

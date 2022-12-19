@@ -77,7 +77,7 @@ describe('APIKeysGridPage', () => {
 
     authc.getCurrentUser.mockResolvedValue(
       mockAuthenticatedUser({
-        username: 'jdoe',
+        username: 'elastic',
         full_name: '',
         email: '',
         enabled: true,
@@ -96,7 +96,7 @@ describe('APIKeysGridPage', () => {
       },
     };
 
-    const { findByText, queryByTestId } = render(
+    const { findByText, queryByTestId, getByText } = render(
       <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <APIKeysGridPage
           apiKeysAPIClient={apiClientMock}
@@ -108,9 +108,15 @@ describe('APIKeysGridPage', () => {
     );
 
     expect(await queryByTestId('apiKeysCreateTableButton')).toBeNull();
+
     expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
+
     await findByText(/first-api-key/);
-    await findByText(/second-api-key/);
+
+    const secondKey = getByText(/second-api-key/).closest('td');
+    const secondKeyEuiLink = secondKey!.querySelector('button');
+    expect(secondKeyEuiLink).not.toBeNull();
+    expect(secondKeyEuiLink!.getAttribute('data-test-subj')).toBe('roleRowName-second-api-key');
   });
 
   afterAll(() => {
@@ -246,38 +252,6 @@ describe('APIKeysGridPage', () => {
       expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
       expect(await findByText('You do not have permission to create API keys')).toBeInTheDocument();
       expect(queryByText('Create API key')).toBeNull();
-    });
-
-    it('should not display table `Create Button` nor `Delete` icons column', async () => {
-      const history = createMemoryHistory({ initialEntries: ['/'] });
-
-      coreStart.application.capabilities = {
-        ...coreStart.application.capabilities,
-        api_keys: {
-          save: false,
-        },
-      };
-
-      const { findByText, queryByText, queryAllByText } = await render(
-        <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
-          <APIKeysGridPage
-            apiKeysAPIClient={apiClientMock}
-            notifications={coreStart.notifications}
-            history={history}
-            readOnly={true}
-          />
-        </Providers>
-      );
-
-      expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
-      expect(
-        await findByText('You only have permission to view your own API keys.')
-      ).toBeInTheDocument();
-      expect(
-        await findByText('View your API keys. An API key sends requests on your behalf.')
-      ).toBeInTheDocument();
-      expect(queryByText('Create API key')).toBeNull();
-      expect(queryAllByText('Delete').length).toBe(0);
     });
   });
 });

@@ -375,8 +375,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
         linux_deadlock: `${SECURITY_SOLUTION_DOCS}ts-management.html#linux-deadlock`,
       },
       packageActionTroubleshooting: {
-        // TODO: Pending to be updated when docs are ready
-        es_connection: '',
+        es_connection: `${SECURITY_SOLUTION_DOCS}ts-management.html`,
       },
       responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
       configureEndpointIntegrationPolicy: `${SECURITY_SOLUTION_DOCS}configure-endpoint-integration-policy.html`,
@@ -489,6 +488,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
       slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack`,
       teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
+      connectors: `${KIBANA_DOCS}action-types.html`,
     },
     maps: {
       guide: `${KIBANA_DOCS}maps.html`,
