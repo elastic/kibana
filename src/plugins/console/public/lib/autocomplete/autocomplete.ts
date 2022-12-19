@@ -29,6 +29,7 @@ import { populateContext } from './engine';
 import type { AutoCompleteContext, DataAutoCompleteRulesOneOf, ResultTerm } from './types';
 // @ts-ignore
 import { URL_PATH_END_MARKER } from './components';
+import { type SetAsyncResults } from './types';
 
 let lastEvaluatedToken: Token | null = null;
 
@@ -557,7 +558,11 @@ export default function ({
     editor.on('changeSelection', editorChangeListener);
   }
 
-  function getAutoCompleteContext(ctxEditor: CoreEditor, pos: Position) {
+  function getAutoCompleteContext(
+    ctxEditor: CoreEditor,
+    pos: Position,
+    setAsyncResultsCallback: SetAsyncResults
+  ) {
     // deduces all the parameters need to position and insert the auto complete
     const context: AutoCompleteContext = {
       autoCompleteSet: null, // instructions for what can be here
@@ -587,13 +592,16 @@ export default function ({
         addMethodAutoCompleteSetToContext(context);
         break;
       case 'body':
-        addBodyAutoCompleteSetToContext(context, pos);
+        addBodyAutoCompleteSetToContext(context, pos, setAsyncResultsCallback);
         break;
       default:
         return null;
     }
 
-    if (!context.autoCompleteSet) {
+    const isMappingsFetchingInProgress =
+      context.autoCompleteType === 'body' && !!context.asyncResultsState?.isLoading;
+
+    if (!context.autoCompleteSet && !isMappingsFetchingInProgress) {
       return null; // nothing to do..
     }
 
@@ -1012,7 +1020,11 @@ export default function ({
     return context;
   }
 
-  function addBodyAutoCompleteSetToContext(context: AutoCompleteContext, pos: Position) {
+  function addBodyAutoCompleteSetToContext(
+    context: AutoCompleteContext,
+    pos: Position,
+    setAsyncResultsCallback: SetAsyncResults
+  ) {
     const ret = getCurrentMethodAndTokenPaths(editor, pos, parser);
     context.method = ret.method;
     context.otherTokenValues = ret.otherTokenValues;
@@ -1123,80 +1135,103 @@ export default function ({
     }
   }
 
+  /**
+   * Extracts terms from the autocomplete set.
+   * @param context
+   */
+  function getTerms(context: AutoCompleteContext, autoCompleteSet: ResultTerm[]) {
+    const terms = _.map(
+      autoCompleteSet.filter((term) => Boolean(term) && term.name != null),
+      function (term) {
+        if (typeof term !== 'object') {
+          term = {
+            name: term,
+          };
+        } else {
+          term = _.clone(term);
+        }
+        const defaults: {
+          value?: string;
+          meta: string;
+          score: number;
+          context: AutoCompleteContext;
+          completer?: { insertMatch: (v: unknown) => void };
+        } = {
+          value: term.name,
+          meta: 'API',
+          score: 0,
+          context,
+        };
+        // we only need our custom insertMatch behavior for the body
+        if (context.autoCompleteType === 'body') {
+          defaults.completer = {
+            insertMatch() {
+              return applyTerm(term);
+            },
+          };
+        }
+        return _.defaults(term, defaults);
+      }
+    );
+
+    terms.sort(function (
+      t1: { score: number; name?: string },
+      t2: { score: number; name?: string }
+    ) {
+      /* score sorts from high to low */
+      if (t1.score > t2.score) {
+        return -1;
+      }
+      if (t1.score < t2.score) {
+        return 1;
+      }
+      /* names sort from low to high */
+      if (t1.name! < t2.name!) {
+        return -1;
+      }
+      if (t1.name === t2.name) {
+        return 0;
+      }
+      return 1;
+    });
+
+    return terms;
+  }
+
+  function getSuggestions(terms: ResultTerm[]) {
+    return _.map(terms, function (t, i) {
+      t.insertValue = t.insertValue || t.value;
+      t.value = '' + t.value; // normalize to strings
+      t.score = -i;
+      return t;
+    });
+  }
+
   function getCompletions(
     position: Position,
     prefix: string,
     callback: (e: Error | null, result: ResultTerm[] | null) => void
   ) {
     try {
-      const context = getAutoCompleteContext(editor, position);
+      const context = getAutoCompleteContext(editor, position, callback);
+
       if (!context) {
         callback(null, []);
       } else {
-        const terms = _.map(
-          context.autoCompleteSet!.filter((term) => Boolean(term) && term.name != null),
-          function (term) {
-            if (typeof term !== 'object') {
-              term = {
-                name: term,
-              };
-            } else {
-              term = _.clone(term);
-            }
-            const defaults: {
-              value?: string;
-              meta: string;
-              score: number;
-              context: AutoCompleteContext;
-              completer?: { insertMatch: (v: unknown) => void };
-            } = {
-              value: term.name,
-              meta: 'API',
-              score: 0,
-              context,
-            };
-            // we only need our custom insertMatch behavior for the body
-            if (context.autoCompleteType === 'body') {
-              defaults.completer = {
-                insertMatch() {
-                  return applyTerm(term);
-                },
-              };
-            }
-            return _.defaults(term, defaults);
-          }
-        );
+        const terms = getTerms(context, context.autoCompleteSet!);
 
-        terms.sort(function (
-          t1: { score: number; name?: string },
-          t2: { score: number; name?: string }
-        ) {
-          /* score sorts from high to low */
-          if (t1.score > t2.score) {
-            return -1;
-          }
-          if (t1.score < t2.score) {
-            return 1;
-          }
-          /* names sort from low to high */
-          if (t1.name! < t2.name!) {
-            return -1;
-          }
-          if (t1.name === t2.name) {
-            return 0;
-          }
-          return 1;
-        });
+        const suggestions = getSuggestions(terms);
 
-        callback(
-          null,
-          _.map(terms, function (t, i) {
-            t.insertValue = t.insertValue || t.value;
-            t.value = '' + t.value; // normalize to strings
-            t.score = -i;
-            return t;
-          })
-        );
+        callback(null, suggestions);
+
+        if (context.asyncResultsState) {
+          // TODO indicate mappings fetching is in progress
+          context.asyncResultsState.results$.subscribe((r) => {
+            const asyncSuggestions = getSuggestions(getTerms(context, r));
+
+            callback(null, asyncSuggestions);
+          });
+        }
       }
     } catch (e) {
       // eslint-disable-next-line no-console

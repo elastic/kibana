@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
 import { CoreEditor, Range, Token } from '../../types';
 
 export interface ResultTerm {
@@ -13,6 +14,7 @@ export interface ResultTerm {
   insertValue?: string;
   name?: string;
   value?: string;
+  score?: number;
 }
 
 export interface DataAutoCompleteRulesOneOf {
@@ -23,8 +25,18 @@ export interface DataAutoCompleteRulesOneOf {
   [key: string]: unknown;
 }
 
+export type SetAsyncResults = (e: Error | null, result: ResultTerm[] | null) => void;
+
 export interface AutoCompleteContext {
   autoCompleteSet?: null | ResultTerm[];
+  /**
+   * Stores a state for async results, e.g. fields suggestions based on the mappings definition.
+   */
+  asyncResultsState?: {
+    isLoading: boolean;
+    lastFetched: number | null;
+    results$: Observable<ResultTerm[]>;
+  };
   endpoint?: null | {
     paramsAutocomplete: {
       getTopLevelComponents: (method?: string | null) => unknown;

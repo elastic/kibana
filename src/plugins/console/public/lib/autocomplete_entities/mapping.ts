@@ -8,6 +8,9 @@
 
 import _ from 'lodash';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { Subject } from 'rxjs';
+import type { ResultTerm, AutoCompleteContext } from '../autocomplete/types';
 import { expandAliases } from './expand_aliases';
 import type { Field, FieldMapping } from './types';
 
@@ -70,22 +73,133 @@ function getFieldNamesFromFieldMapping(
 
 export interface BaseMapping {
   perIndexTypes: Record<string, object>;
-  getMappings(indices: string | string[], types?: string | string[]): Field[];
+  /**
+   * Fetches mappings definition
+   */
+  fetchMappings(index: string): Promise<IndicesGetMappingResponse>;
+
+  /**
+   * Retrieves mappings definition from cache, fetches if necessary.
+   */
+  getMappings(
+    autoCompleteContext: AutoCompleteContext,
+    indices: string | string[],
+    types?: string | string[]
+  ): Field[];
+
+  /**
+   * Stores mappings definition
+   * @param mappings
+   */
   loadMappings(mappings: IndicesGetMappingResponse): void;
   clearMappings(): void;
 }
 
 export class Mapping implements BaseMapping {
+  private http!: HttpSetup;
+
   public perIndexTypes: Record<string, object> = {};
 
-  getMappings = (indices: string | string[], types?: string | string[]) => {
+  public setup(http: HttpSetup) {
+    this.http = http;
+  }
+
+  /**
+   * TODO: Replace mock with the proxy endpoint
+   * @param index
+   */
+  async fetchMappings(index: string): Promise<IndicesGetMappingResponse> {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve({
+          'cloudwatch-2019.10.28': {
+            mappings: {
+              properties: {
+                '@timestamp': {
+                  type: 'date',
+                },
+                CPUUtilization: {
+                  type: 'double',
+                },
+                DiskReadBytes: {
+                  type: 'double',
+                },
+                DiskReadOps: {
+                  type: 'double',
+                },
+                DiskWriteBytes: {
+                  type: 'double',
+                },
+                DiskWriteOps: {
+                  type: 'double',
+                },
+                NetworkIn: {
+                  type: 'double',
+                },
+                NetworkOut: {
+                  type: 'double',
+                },
+                instance: {
+                  type: 'keyword',
+                },
+                region: {
+                  type: 'keyword',
+                },
+                sourcetype: {
+                  type: 'text',
+                  fields: {
+                    keyword: {
+                      type: 'keyword',
+                      ignore_above: 256,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+      }, 2000);
+    });
+  }
+
+  getMappings = (
+    autoCompleteContext: AutoCompleteContext,
+    indices: string | string[],
+    types?: string | string[]
+  ) => {
     // get fields for indices and types. Both can be a list, a string or null (meaning all).
     let ret: Field[] = [];
     indices = expandAliases(indices);
 
     if (typeof indices === 'string') {
       const typeDict = this.perIndexTypes[indices] as Record<string, unknown>;
+
       if (!typeDict) {
+        if (!autoCompleteContext.asyncResultsState) {
+          autoCompleteContext.asyncResultsState = {} as AutoCompleteContext['asyncResultsState'];
+        }
+
+        autoCompleteContext.asyncResultsState!.isLoading = true;
+
+        const subj$ = new Subject<ResultTerm[]>();
+
+        autoCompleteContext.asyncResultsState!.results$ = subj$.asObservable();
+
+        this.fetchMappings(indices)
+          .then((mapping) => {
+            autoCompleteContext.asyncResultsState!.isLoading = false;
+            autoCompleteContext.asyncResultsState!.lastFetched = Date.now();
+
+            // cache mappings
+            this.loadMappings(mapping);
+
+            subj$.next(this.getMappings(autoCompleteContext, indices, types));
+          })
+          .catch((error) => {
+            // eslint-disable-next-line no-console
+            console.error(error);
+          });
+
         return [];
       }
 
@@ -108,7 +222,7 @@ export class Mapping implements BaseMapping {
       // multi index mode.
       Object.keys(this.perIndexTypes).forEach((index) => {
         if (!indices || indices.length === 0 || indices.includes(index)) {
-          ret.push(this.getMappings(index, types) as unknown as Field);
+          ret.push(this.getMappings(autoCompleteContext, index, types) as unknown as Field);
         }
       });
 

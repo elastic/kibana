@@ -31,15 +31,6 @@ const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB
 // Limit the response size to 10MB, because the response can be very large and sending it to the client
 // can cause the browser to hang.
 
-const getMappings = async (settings: SettingsToRetrieve, config: Config) => {
-  if (settings.fields) {
-    const mappings = await getEntity('/_mapping', config);
-    return mappings;
-  }
-  // If the user doesn't want autocomplete suggestions, then clear any that exist.
-  return {};
-};
-
 const getAliases = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.indices) {
     const aliases = await getEntity('/_alias', config);
@@ -174,7 +165,6 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
 
       // Wait for all requests to complete, in case one of them fails return the successfull ones
       const results = await Promise.allSettled([
-        getMappings(settings, configWithHeaders),
         getAliases(settings, configWithHeaders),
         getDataStreams(settings, configWithHeaders),
         getLegacyTemplates(settings, configWithHeaders),
@@ -182,7 +172,7 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
         getComponentTemplates(settings, configWithHeaders),
       ]);
 
-      const [mappings, aliases, dataStreams, legacyTemplates, indexTemplates, componentTemplates] =
+      const [aliases, dataStreams, legacyTemplates, indexTemplates, componentTemplates] =
         results.map((result) => {
           // If the request was successful, return the result
           if (result.status === 'fulfilled') {
@@ -199,7 +189,6 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
 
       return response.ok({
         body: {
-          mappings,
           aliases,
           dataStreams,
           legacyTemplates,

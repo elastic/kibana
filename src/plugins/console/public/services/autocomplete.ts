@@ -53,7 +53,11 @@ export class AutocompleteInfo {
         const collaborator = this.mapping;
         return () => this.alias.getIndices(includeAliases, collaborator);
       case ENTITIES.FIELDS:
-        return this.mapping.getMappings(context.indices, context.types);
+        return this.mapping.getMappings(
+          Object.getPrototypeOf(context),
+          context.indices,
+          context.types
+        );
       case ENTITIES.INDEX_TEMPLATES:
         return () => this.indexTemplate.getTemplates();
       case ENTITIES.COMPONENT_TEMPLATES:
