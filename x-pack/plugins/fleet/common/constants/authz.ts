@@ -23,4 +23,5 @@ export const ENDPOINT_PRIVILEGES = [
   'writeHostIsolation',
   'writeProcessOperations',
   'writeFileOperations',
+  'executeKubernetesCommands',
 ] as const;

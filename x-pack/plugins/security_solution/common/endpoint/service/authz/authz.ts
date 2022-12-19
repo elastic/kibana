@@ -212,6 +212,12 @@ export const calculateEndpointAuthz = (
     hasEndpointManagementAccess,
     'writeFileOperations'
   );
+  const canExecuteKubernetesCommands = hasKibanaPrivilege(
+    fleetAuthz,
+    isEndpointRbacEnabled,
+    hasEndpointManagementAccess,
+    'executeKubernetesCommands'
+  );
 
   return {
     canWriteSecuritySolution,
@@ -234,7 +240,10 @@ export const calculateEndpointAuthz = (
     canGetRunningProcesses: canWriteProcessOperations && isEnterpriseLicense,
     canAccessResponseConsole:
       isEnterpriseLicense &&
-      (canIsolateHost || canWriteProcessOperations || canWriteFileOperations),
+      (canIsolateHost ||
+        canWriteProcessOperations ||
+        canWriteFileOperations ||
+        canExecuteKubernetesCommands),
     canWriteFileOperations: canWriteFileOperations && isEnterpriseLicense,
     // artifacts
     canWriteTrustedApplications,
@@ -246,6 +255,7 @@ export const calculateEndpointAuthz = (
     canReadBlocklist,
     canWriteEventFilters,
     canReadEventFilters,
+    canExecuteKubernetesCommands,
   };
 };
 
@@ -278,6 +288,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadBlocklist: false,
     canWriteEventFilters: false,
     canReadEventFilters: false,
+    canExecuteKubernetesCommands: false,
   };
 };
 
