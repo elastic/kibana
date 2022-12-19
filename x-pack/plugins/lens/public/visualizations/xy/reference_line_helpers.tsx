@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { IconChartBarReferenceLine } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { DatasourceLayers, FramePublicAPI, Visualization } from '../../types';
+import type { DatasourceLayers, FramePublicAPI, Visualization, AccessorConfig } from '../../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
 import type {
@@ -383,9 +383,9 @@ export const getSingleColorConfig = (
   id: string,
   color = defaultReferenceLineColor,
   icon?: string
-) => ({
+): AccessorConfig => ({
   columnId: id,
-  triggerIconType: icon && icon !== 'empty' ? ('custom' as const) : ('color' as const),
+  triggerIconType: icon && icon !== 'empty' ? 'custom' : 'color',
   color,
   customIcon: icon,
 });
