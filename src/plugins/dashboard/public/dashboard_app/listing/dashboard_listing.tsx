@@ -145,7 +145,7 @@ export const DashboardListing = ({
 
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
-  const defaultFilter = title ? `"${title}"` : '';
+  const defaultFilter = title ? `${title}` : '';
 
   const createItem = useCallback(() => {
     if (!dashboardSessionStorage.dashboardHasUnsavedEdits()) {
