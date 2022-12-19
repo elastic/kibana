@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { UserActionTimestamp } from '../user_actions/timestamp';
 import { IconWithCount } from './icon_with_count';
 import * as i18n from './translations';
 import { CaseDetailsLink } from '../links';
@@ -71,7 +71,7 @@ export const RecentCasesComp = ({
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" data-test-subj="recent-cases-creation-relative-time">
-                  <FormattedRelative value={c.createdAt} />
+                  <UserActionTimestamp createdAt={c.createdAt} />
                 </EuiText>
               </EuiFlexItem>
               <IconWithCount
