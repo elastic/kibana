@@ -232,7 +232,7 @@ export async function getAgentsByKuery(
     ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
     : [];
   const queryAgents = async (from: number, size: number) =>
-    esClient.search<FleetServerAgent, { totalInactive?: { total: { value: number } } }>({
+    esClient.search<FleetServerAgent, { totalInactive?: { doc_count: { value: number } } }>({
       from,
       size,
       track_total_hits: true,
@@ -240,7 +240,7 @@ export async function getAgentsByKuery(
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
       sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
-      query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
+      post_filter: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
       ...(pitId
         ? {
             pit: {
@@ -273,7 +273,7 @@ export async function getAgentsByKuery(
   let total = res.hits.total as number;
   let totalInactive = 0;
   if (getTotalInactive && res.aggregations) {
-    totalInactive = res.aggregations?.totalInactive?.total?.value ?? 0;
+    totalInactive = res.aggregations?.totalInactive?.doc_count ?? 0;
   }
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
