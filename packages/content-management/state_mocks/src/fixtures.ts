@@ -21,9 +21,9 @@ const createTypeFixture = (
     ...partialDetails,
     operations: {
       read: async (id: string) => {
-        const item = items.find((item) => item.id === id);
-        if (!item) throw new Error(`Unknown item: ${id}`);
-        return item;
+        const theItem = items.find((item) => item.id === id);
+        if (!theItem) throw new Error(`Unknown item: ${id}`);
+        return theItem;
       },
       list: async () => items,
     },
