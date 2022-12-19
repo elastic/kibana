@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../routes/security');
+jest.mock('../security');
 jest.mock('./crud');
 jest.mock('./status');
 
@@ -14,7 +14,7 @@ import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks
 
 import { FleetUnauthorizedError } from '../../errors';
 
-import { getAuthzFromRequest } from '../../routes/security';
+import { getAuthzFromRequest } from '../security';
 import type { FleetAuthz } from '../../../common';
 
 import type { AgentClient } from './agent_service';
