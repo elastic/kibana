@@ -115,10 +115,12 @@ const bulkEnableRulesWithOCC = async (
   context: RulesClientContext,
   { filter }: { filter: KueryNode | null }
 ) => {
+  const additionalFilter = nodeBuilder.is('alert.attributes.enabled', 'false');
+
   const rulesFinder =
     await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
       {
-        filter,
+        filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
         type: 'alert',
         perPage: 100,
         ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
@@ -129,10 +131,12 @@ const bulkEnableRulesWithOCC = async (
   const taskIdsToEnable: string[] = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
+  const username = await context.getUserName();
 
   for await (const response of rulesFinder.find()) {
     await pMap(response.saved_objects, async (rule) => {
       try {
+        if (rule.attributes.enabled === true) return;
         if (rule.attributes.actions.length) {
           try {
             await context.actionsAuthorization.ensureAuthorized('execute');
@@ -140,12 +144,9 @@ const bulkEnableRulesWithOCC = async (
             throw Error(`Rule not authorized for bulk enable - ${error.message}`);
           }
         }
-        if (rule.attributes.enabled === true) return;
         if (rule.attributes.name) {
           ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
         }
-
-        const username = await context.getUserName();
 
         const updatedAttributes = updateMeta(context, {
           ...rule.attributes,
@@ -212,6 +213,7 @@ const bulkEnableRulesWithOCC = async (
       }
     });
   }
+  await rulesFinder.close();
 
   const result = await context.unsecuredSavedObjectsClient.bulkCreate(rulesToEnable, {
     overwrite: true,

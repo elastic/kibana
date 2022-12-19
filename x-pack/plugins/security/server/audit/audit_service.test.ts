@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Socket } from 'net';
 import { lastValueFrom, Observable, of } from 'rxjs';
 
 import {
@@ -23,7 +22,6 @@ import {
   AuditService,
   createLoggingConfig,
   filterEvent,
-  getForwardedFor,
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
 
@@ -188,26 +186,14 @@ describe('#asScoped', () => {
       recordAuditLoggingUsage,
     });
     const request = httpServerMock.createKibanaRequest({
-      socket: { remoteAddress: '3.3.3.3' } as Socket,
-      headers: {
-        'x-forwarded-for': '1.1.1.1, 2.2.2.2',
-      },
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
     });
 
-    await auditSetup.asScoped(request).log({
-      message: 'MESSAGE',
-      event: { action: 'ACTION' },
-      http: { request: { method: 'GET' } },
-    });
-    expect(logger.info).toHaveBeenLastCalledWith('MESSAGE', {
+    await auditSetup.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    expect(logger.info).toHaveBeenCalledWith('MESSAGE', {
       event: { action: 'ACTION' },
       kibana: { space_id: 'default', session_id: 'SESSION_ID' },
       trace: { id: 'REQUEST_ID' },
-      client: { ip: '3.3.3.3' },
-      http: {
-        request: { method: 'GET', headers: { 'x-forwarded-for': '1.1.1.1, 2.2.2.2' } },
-      },
       user: { id: 'uid', name: 'jdoe', roles: ['admin'] },
     });
     audit.stop();
@@ -435,32 +421,6 @@ describe('#createLoggingConfig', () => {
     );
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
-  });
-});
-
-describe('#getForwardedFor', () => {
-  it('extracts x-forwarded-for header from request', () => {
-    const request = httpServerMock.createKibanaRequest({
-      headers: {
-        'x-forwarded-for': '1.1.1.1',
-      },
-    });
-    expect(getForwardedFor(request)).toBe('1.1.1.1');
-  });
-
-  it('concatenates multiple headers into single string in correct order', () => {
-    const request = httpServerMock.createKibanaRequest({
-      headers: {
-        // @ts-expect-error Headers can be arrays but HAPI mocks are incorrectly typed
-        'x-forwarded-for': ['1.1.1.1, 2.2.2.2', '3.3.3.3'],
-      },
-    });
-    expect(getForwardedFor(request)).toBe('1.1.1.1, 2.2.2.2, 3.3.3.3');
-  });
-
-  it('returns undefined when header not present', () => {
-    const request = httpServerMock.createKibanaRequest();
-    expect(getForwardedFor(request)).toBeUndefined();
   });
 });
 
