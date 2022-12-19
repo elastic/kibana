@@ -83,11 +83,6 @@ export function WorkspacePanelWrapper({
   );
 
   const warningMessages: React.ReactNode[] = [];
-  if (activeVisualization?.getWarningMessages) {
-    warningMessages.push(
-      ...(activeVisualization.getWarningMessages(visualizationState, framePublicAPI) || [])
-    );
-  }
 
   warningMessages.push(
     ...getUserMessages('toolbar', 'warning').map(({ longMessage }) => longMessage)

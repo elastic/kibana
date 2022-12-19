@@ -43,7 +43,6 @@ import {
   isLensEditEvent,
   VisualizationMap,
   DatasourceMap,
-  DatasourceFixAction,
   Suggestion,
   DatasourceLayers,
   UserMessage,
@@ -98,11 +97,7 @@ export interface WorkspacePanelProps {
 }
 
 interface WorkspaceState {
-  expressionBuildError?: Array<{
-    shortMessage: string;
-    longMessage: React.ReactNode;
-    fixAction?: DatasourceFixAction<unknown>;
-  }>;
+  expressionBuildErrors: UserMessage[];
   expandError: boolean;
   expressionToRender: string | null | undefined;
 }
@@ -168,7 +163,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
-    expressionBuildError: undefined,
+    expressionBuildErrors: [],
     expandError: false,
     expressionToRender: undefined,
   });
@@ -325,8 +320,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           return null;
         }
       } catch (e) {
-        const buildMessages = activeVisualization?.getErrorMessages(visualization.state);
-        const defaultMessage = {
+        const errors = getUserMessages('workspace', 'error');
+
+        // TODO consider pushing this user message to a global store/subscription somewhere instead of using it directly here
+        // this will allow us to show these errors outside just the workspace
+        const defaultMessage: UserMessage = {
+          severity: 'error',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'workspace' }],
           shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
             defaultMessage: 'An unexpected error occurred while preparing the chart',
           }),
@@ -335,14 +336,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         // Most likely an error in the expression provided by a datasource or visualization
         setLocalState((s) => ({
           ...s,
-          expressionBuildError: buildMessages ?? [defaultMessage],
+          expressionBuildErrors: errors.length ? errors : [defaultMessage],
         }));
       }
     }
     if (unknownVisError) {
       setLocalState((s) => ({
         ...s,
-        expressionBuildError: [getUnknownVisualizationTypeError(visualization.activeId!)],
+        expressionBuildErrors: [getUnknownVisualizationTypeError(visualization.activeId!)],
       }));
     }
   }, [
@@ -356,8 +357,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceStates,
     datasourceLayers,
     dataViews.indexPatterns,
-    searchSessionId,
     framePublicAPI.dateRange,
+    searchSessionId,
+    getUserMessages,
   ]);
 
   useEffect(() => {
@@ -447,13 +449,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   useEffect(() => {
     // reset expression error if component attempts to run it again
-    if (expressionExists && localState.expressionBuildError) {
+    if (expressionExists && localState.expressionBuildErrors.length) {
       setLocalState((s) => ({
         ...s,
-        expressionBuildError: undefined,
+        expressionBuildErrors: [],
       }));
     }
-  }, [expressionExists, localState.expressionBuildError]);
+  }, [expressionExists, localState.expressionBuildErrors]);
 
   const onDrop = useCallback(() => {
     if (suggestionForDraggedField) {
@@ -781,8 +783,8 @@ export const VisualizationWrapper = ({
     );
   }
 
-  if (localState.expressionBuildError?.length) {
-    const firstError = localState.expressionBuildError[0];
+  if (localState.expressionBuildErrors.length) {
+    const firstError = localState.expressionBuildErrors[0];
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
