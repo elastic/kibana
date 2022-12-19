@@ -19,7 +19,9 @@ export const createCmState = () => {
   };
 };
 
-export const createCmStateWithFixtures = (types: Record<string, ContentTypeFixture> = defaultMockTypes) => {
+export const createCmStateWithFixtures = (
+  types: Record<string, ContentTypeFixture> = defaultMockTypes
+) => {
   const state = createCmState();
 
   for (const [, type] of Object.entries(types)) {

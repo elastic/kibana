@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ContentItem } from "./content_item";
-import type { ContentTypeDetails, ContentTypeKind } from "./types";
+import { ContentItem } from './content_item';
+import type { ContentTypeDetails, ContentTypeKind } from './types';
 
 export class ContentType<T = unknown> {
   constructor(public readonly details: ContentTypeDetails<T>) {}
@@ -29,7 +29,7 @@ export class ContentType<T = unknown> {
     return item;
   }
 
-  public async list(): Promise<ContentItem<T>[]> {
+  public async list(): Promise<Array<ContentItem<T>>> {
     const typeDetails = this.details;
     if (!typeDetails.operations.list)
       throw new Error(`Content type ${this.getId()} does not support list operation`);

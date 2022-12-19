@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {ContentItemDetails} from "./content_items";
+import type { ContentItemDetails } from './content_items';
 
 /**
  * Content type definition as it is registered in the content registry.
@@ -29,7 +29,7 @@ export interface ContentTypeDetails<T = unknown> {
 
   /**
    * Icon to use for this type. Usually an EUI icon type.
-   * 
+   *
    * @see https://elastic.github.io/eui/#/display/icons
    */
   icon?: string;
@@ -65,5 +65,5 @@ export interface ContentTypeOperations<T = unknown> {
   /**
    * Read a list of content items.
    */
-  list?: () => Promise<ContentItemDetails<T>[]>;
+  list?: () => Promise<Array<ContentItemDetails<T>>>;
 }

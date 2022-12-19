@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {CachedContentItem} from "./cached_content_item";
-import {CachedContentType} from "./cached_content_type";
-import type {ContentRegistry} from "../registry/content_registry";
-import type {CmCache} from "./types";
+import { CachedContentItem } from './cached_content_item';
+import { CachedContentType } from './cached_content_type';
+import type { ContentRegistry } from '../registry/content_registry';
+import type { CmCache } from './types';
 
 export class ContentCache implements CmCache {
   protected readonly typeCache: Map<string, CachedContentType> = new Map();

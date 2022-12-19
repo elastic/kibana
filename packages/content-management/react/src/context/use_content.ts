@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import {type ContentContextValue, context} from './context';
+import { type ContentContextValue, context } from './context';
 
 export const useContent = (): ContentContextValue => {
   const contextValue = React.useContext(context);
@@ -17,4 +17,4 @@ export const useContent = (): ContentContextValue => {
   }
 
   return contextValue;
-}
+};

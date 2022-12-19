@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { ContentPluginSetup, ContentPluginStart } from './types';
 // import { ContentService } from './service/content_service';
-
 
 export class ContentPlugin implements Plugin<ContentPluginSetup, ContentPluginStart> {
   // private readonly content = new ContentService();

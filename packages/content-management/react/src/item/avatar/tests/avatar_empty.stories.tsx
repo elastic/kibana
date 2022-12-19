@@ -13,8 +13,7 @@ export default {
   title: 'Content Management/Item/Avatar/AvatarEmpty',
   description:
     'Renders any content item as an "avatar" - a small circle or a square with with text initials or an image.',
-  parameters: {
-  },
+  parameters: {},
 };
 
 export const SizeScale = () => {

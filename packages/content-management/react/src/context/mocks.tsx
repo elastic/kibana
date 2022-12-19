@@ -7,15 +7,13 @@
  */
 
 import * as React from 'react';
-import { context } from '../context';
 import { createCmStateWithFixtures } from '@kbn/content-management-state';
+import { context } from '.';
 
-export const StateProviderWithFixtures: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const StateProviderWithFixtures: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [state] = React.useState(() => createCmStateWithFixtures());
 
-  return (
-    <context.Provider value={{ cache: state.cache }}>
-      {children}
-    </context.Provider>
-  );
+  return <context.Provider value={{ cache: state.cache }}>{children}</context.Provider>;
 };

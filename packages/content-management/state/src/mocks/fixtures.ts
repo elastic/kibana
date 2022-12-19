@@ -6,14 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type {ContentItemDetails, ContentTypeDetails} from '../registry';
+import type { ContentItemDetails, ContentTypeDetails } from '../registry';
 
 export interface ContentTypeFixture {
   details: ContentTypeDetails;
   items: ContentItemDetails[];
 }
 
-const createTypeFixture = (partialDetails: Omit<ContentTypeDetails, 'operations'>, items: ContentItemDetails[]): ContentTypeFixture => {
+const createTypeFixture = (
+  partialDetails: Omit<ContentTypeDetails, 'operations'>,
+  items: ContentItemDetails[]
+): ContentTypeFixture => {
   const details: ContentTypeDetails = {
     ...partialDetails,
     operations: {
@@ -23,7 +26,7 @@ const createTypeFixture = (partialDetails: Omit<ContentTypeDetails, 'operations'
         return item;
       },
       list: async () => items,
-    }
+    },
   };
 
   return {
@@ -63,7 +66,7 @@ const user: ContentTypeFixture = createTypeFixture(
       },
       content: {},
     },
-  ],
+  ]
 );
 
 const dashboard: ContentTypeFixture = createTypeFixture(
@@ -91,9 +94,8 @@ const dashboard: ContentTypeFixture = createTypeFixture(
       },
       content: {},
     },
-  ],
+  ]
 );
-
 
 export const types: Record<string, ContentTypeFixture> = {
   user,

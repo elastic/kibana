@@ -9,7 +9,7 @@
 /**
  * LRU (Least Recently Used) Map a very lean and fast implementation on top
  * of the native Map class. It is used to cache the most recently used items.
- * 
+ *
  * How it works: in native `Map` when new item is added it is added to the end
  * of the list. When we add a new item to the `LruMap` we check if the size of
  * the map is greater than the limit. If it is we delete the first item in the

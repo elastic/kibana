@@ -30,7 +30,6 @@ export interface CmCachedItem<T = unknown> {
    */
   data$: Observable<ContentItem<T>>;
 
-
   /**
    * Retrieves the content type of this content item.
    */

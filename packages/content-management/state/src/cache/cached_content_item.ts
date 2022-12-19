@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {firstValueFrom, ReplaySubject} from "rxjs";
-import type {ContentType} from "../registry";
-import type {ContentItem} from "../registry/content_item";
-import type {ContentCache} from "./content_cache";
-import type {CmCachedItem} from "./types";
+import { firstValueFrom, ReplaySubject } from 'rxjs';
+import type { ContentType } from '../registry';
+import type { ContentItem } from '../registry/content_item';
+import type { ContentCache } from './content_cache';
+import type { CmCachedItem } from './types';
 
 export class CachedContentItem<T = unknown> implements CmCachedItem<T> {
   public readonly data$ = new ReplaySubject<ContentItem<T>>(1);
@@ -34,7 +34,7 @@ export class CachedContentItem<T = unknown> implements CmCachedItem<T> {
   public async load(): Promise<void> {
     const type = this.contentType();
     const itemId = this.getId();
-    const item = await type.read(itemId) as ContentItem<T>;
+    const item = (await type.read(itemId)) as ContentItem<T>;
     this.data$.next(item);
   }
 

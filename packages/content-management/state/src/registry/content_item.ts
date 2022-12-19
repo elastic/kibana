@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CmItem, ContentItemDetails, ContentItemFields } from "./types";
+import type { CmItem, ContentItemDetails, ContentItemFields } from './types';
 
 export class ContentItem<T = unknown> implements CmItem {
   public readonly fields: Readonly<ContentItemFields>;

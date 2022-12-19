@@ -16,7 +16,7 @@ test('can register and retrieve a type', () => {
     name: 'Test',
     icon: 'test',
     description: 'A test type',
-    operations: {}
+    operations: {},
   });
   const type = registry.get('test')!;
 

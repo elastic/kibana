@@ -12,8 +12,7 @@ import { StateProviderWithFixtures } from '../../../context/mocks';
 
 export default {
   title: 'Content Management/Item/Avatar/Avatar',
-  description:
-    'A connected container component of "avatar" view for a single content item.',
+  description: 'A connected container component of "avatar" view for a single content item.',
   parameters: {},
 };
 

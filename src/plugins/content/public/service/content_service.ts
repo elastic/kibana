@@ -11,26 +11,22 @@
 export class ContentService {
   // private readonly registry: ContentRegistry;
   // private readonly cache: ContentCache;
-
   // constructor() {
   //   this.registry = new ContentRegistry();
   //   this.cache = new ContentCache(this.registry);
   // }
-
   // public setup() {
   //   return {
   //     registry: this.registry,
   //     cache: this.cache,
   //   };
   // }
-
   // public start() {
   //   return {
   //     registry: this.registry,
   //     cache: this.cache,
   //   };
   // }
-
   // public stop() {
   //   // nothing to do here yet
   // }

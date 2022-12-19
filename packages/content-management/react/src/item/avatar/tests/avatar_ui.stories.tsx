@@ -11,8 +11,7 @@ import { CmAvatarUi } from '../avatar_ui';
 
 export default {
   title: 'Content Management/Item/Avatar/AvatarUi',
-  description:
-    'A presentational component of "avatar" view for a single content item.',
+  description: 'A presentational component of "avatar" view for a single content item.',
   parameters: {},
 };
 

@@ -7,9 +7,9 @@
  */
 
 import * as React from 'react';
-import {CmAvatarUi, type CmAvatarUiProps} from './avatar_ui';
-import {useContentItem} from '../../context';
-import {CmAvatarEmpty} from './avatar_empty';
+import { CmAvatarUi, type CmAvatarUiProps } from './avatar_ui';
+import { useContentItem } from '../../context';
+import { CmAvatarEmpty } from './avatar_empty';
 
 /**
  * Props of {@link CmAvatar} component.
@@ -20,7 +20,7 @@ export interface CmAvatarProps extends Omit<CmAvatarUiProps, 'title'> {
 
 /**
  * A connected "container" component of "avatar" view for a single content item.
- * 
+ *
  * Renders any content item as an "avatar" - a small circle or a square with
  * with text initials or an image.
  */
@@ -30,21 +30,8 @@ export const CmAvatar: React.FC<CmAvatarProps> = (props) => {
   const kind = item.contentType().kind();
 
   if (!data) {
-    return (
-      <CmAvatarEmpty
-        size={props.size}
-        disabled={props.disabled}
-        kind={kind}
-      />
-    )
+    return <CmAvatarEmpty size={props.size} disabled={props.disabled} kind={kind} />;
   }
 
-  return (
-    <CmAvatarUi
-      {...rest}
-      title={data.getTitle()}
-      color={data.fields.color}
-      kind={kind}
-    />
-  );
+  return <CmAvatarUi {...rest} title={data.getTitle()} color={data.fields.color} kind={kind} />;
 };

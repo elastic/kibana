@@ -21,11 +21,5 @@ export type CmAvatarEmptyProps = Pick<CmAvatarUiProps, 'size' | 'disabled' | 'ki
 export const CmAvatarEmpty: React.FC<CmAvatarEmptyProps> = (props) => {
   const { euiTheme } = useEuiTheme();
 
-  return (
-    <CmAvatarUi
-      {...props}
-      title={''}
-      color={euiTheme.colors.lightestShade}
-    />
-  );
+  return <CmAvatarUi {...props} title={''} color={euiTheme.colors.lightestShade} />;
 };
