@@ -103,8 +103,8 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/package_policies/${packagePolicyId}`)
           .set('kbn-xsrf', 'xxxx')
           .auth(
-            testUsers.any_integr_read_policy_read.username,
-            testUsers.any_integr_read_policy_read.password
+            testUsers.endpoint_integr_read_policy.username,
+            testUsers.endpoint_integr_read_policy.password
           )
           .expect(403, {
             statusCode: 403,
@@ -199,8 +199,8 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/package_policies/_bulk_get`)
           .set('kbn-xsrf', 'xxxx')
           .auth(
-            testUsers.any_integr_read_policy_read.username,
-            testUsers.any_integr_read_policy_read.password
+            testUsers.endpoint_integr_read_policy.username,
+            testUsers.endpoint_integr_read_policy.password
           )
           .send({ ids: [packagePolicyId] })
           .expect(403, {
