@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { syntheticsParamType } from '../common/types/saved_objects';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
 import { PLUGIN } from '../common/constants/plugin';
 import { UPTIME_RULE_TYPES } from '../common/constants/alerts';
@@ -35,6 +36,7 @@ export const uptimeFeature = {
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
           privateLocationsSavedObjectName,
+          syntheticsParamType,
         ],
         read: [],
       },
@@ -58,6 +60,7 @@ export const uptimeFeature = {
       savedObject: {
         all: [],
         read: [
+          syntheticsParamType,
           umDynamicSettings.name,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,

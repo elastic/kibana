@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, Action, Middleware, CombinedState } from 'redux';
+import type { Store, Dispatch, Action, Middleware, CombinedState } from 'redux';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { StartPlugins } from '../../types';
@@ -35,6 +35,11 @@ export type State = HostsPluginState &
     sourcerer: SourcererState;
     globalUrlParam: GlobalUrlParam;
   } & DataTableState;
+
+/**
+ * The Redux store type for the Security app.
+ */
+export type SecurityAppStore = Store<State, Action>;
 
 /**
  * like redux's `MiddlewareAPI` but `getState` returns an `Immutable` version of
