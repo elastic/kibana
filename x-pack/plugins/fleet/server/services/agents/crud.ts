@@ -24,7 +24,7 @@ import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './help
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
-const ACTIVE_AGENT_CONDITION = `NOT ${INACTIVE_AGENT_CONDITION}`;
+const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
 
 function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode | undefined {
   try {
@@ -80,7 +80,7 @@ export async function getAgents(
   let agents: Agent[] = [];
   if ('agentIds' in options) {
     agents = (await getAgentsById(esClient, soClient, options.agentIds)).filter(
-      (agent) => agent !== null
+      (maybeAgent) => !('notFound' in maybeAgent)
     ) as Agent[];
   } else if ('kuery' in options) {
     agents = (
@@ -395,6 +395,10 @@ export async function getAgentsById(
   soClient: SavedObjectsClientContract,
   agentIds: string[]
 ): Promise<Array<Agent | { id: string; notFound: true }>> {
+  if (!agentIds.length) {
+    return [];
+  }
+
   const idsQuery = {
     terms: {
       _id: agentIds,

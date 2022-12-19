@@ -202,7 +202,7 @@ export class EndpointMetadataService {
      * If undefined, it will be retrieved from Fleet using the ID in the endpointMetadata.
      * If passing in an `Agent` record that was retrieved from the Endpoint Unified transform index,
      * ensure that its `.status` property is properly set to the calculated value done by
-     * fleet `getAgentStatus()` method.
+     * fleet.
      */
     _fleetAgent?: MaybeImmutable<Agent>,
     /** If undefined, it will be retrieved from Fleet using data from the endpointMetadata  */

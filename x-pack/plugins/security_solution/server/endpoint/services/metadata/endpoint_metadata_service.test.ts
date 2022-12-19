@@ -144,6 +144,7 @@ describe('EndpointMetadataService', () => {
       const mockAgent = {
         policy_id: agentPolicies[0].id,
         policy_revision: agentPolicies[0].revision,
+        status: 'online',
       } as unknown as Agent;
       const mockDoc = unitedMetadataSearchResponseMock(endpointMetadataDoc, mockAgent);
       esClient.search.mockResponse(mockDoc);
@@ -188,7 +189,7 @@ describe('EndpointMetadataService', () => {
         data: [
           {
             metadata: endpointMetadataDoc,
-            host_status: 'inactive',
+            host_status: 'healthy',
             policy_info: {
               agent: {
                 applied: {

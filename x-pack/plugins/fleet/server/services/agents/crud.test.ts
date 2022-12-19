@@ -38,6 +38,9 @@ describe('Agents CRUD test', () => {
         hits: ids.map((id: string) => ({
           _id: id,
           _source: {},
+          fields: {
+            status: ['inactive'],
+          },
         })),
       },
     };
@@ -57,7 +60,7 @@ describe('Agents CRUD test', () => {
       expect(searchMock).toHaveBeenCalledWith({
         aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
         body: {
-          query: { bool: { minimum_should_match: 1, should: [{ match: { active: true } }] } },
+          query: expect.any(Object),
         },
         index: '.fleet-agents',
         size: 0,

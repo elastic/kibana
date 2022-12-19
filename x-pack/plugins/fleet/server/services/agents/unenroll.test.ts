@@ -6,7 +6,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { AGENT_ACTIONS_INDEX } from '../../../common';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { invalidateAPIKeys } from '../api_keys';
@@ -144,24 +144,33 @@ describe('unenrollAgents (plural)', () => {
   it('force unenroll updates in progress unenroll actions', async () => {
     const { soClient, esClient, agentInRegularDoc, agentInRegularDoc2 } = createClientMock();
     esClient.search.mockReset();
-    esClient.search.mockImplementation((request) =>
-      Promise.resolve(
-        request?.index === AGENT_ACTIONS_INDEX
-          ? ({
-              hits: {
-                hits: [
-                  {
-                    _source: {
-                      agents: ['agent-in-regular-policy'],
-                      action_id: 'other-action',
-                    },
-                  },
-                ],
+
+    esClient.search.mockImplementation(async (request) => {
+      if (request?.index === AGENT_ACTIONS_INDEX) {
+        return {
+          hits: {
+            hits: [
+              {
+                _source: {
+                  agents: ['agent-in-regular-policy'],
+                  action_id: 'other-action',
+                },
               },
-            } as any)
-          : { hits: { hits: [] } }
-      )
-    );
+            ],
+          },
+        } as any;
+      }
+
+      if (request?.index === AGENT_ACTIONS_RESULTS_INDEX) {
+        return {
+          hits: {
+            hits: [],
+          },
+        };
+      }
+
+      return { hits: { hits: [agentInRegularDoc, agentInRegularDoc2] } };
+    });
 
     const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];
     await unenrollAgents(soClient, esClient, {
@@ -178,30 +187,34 @@ describe('unenrollAgents (plural)', () => {
   it('force unenroll should not update completed unenroll actions', async () => {
     const { soClient, esClient, agentInRegularDoc, agentInRegularDoc2 } = createClientMock();
     esClient.search.mockReset();
-    esClient.search.mockImplementation((request) =>
-      Promise.resolve(
-        request?.index === AGENT_ACTIONS_INDEX
-          ? ({
-              hits: {
-                hits: [
-                  {
-                    _source: {
-                      agents: ['agent-in-regular-policy'],
-                      action_id: 'other-action1',
-                    },
-                  },
-                ],
+    esClient.search.mockImplementation(async (request) => {
+      if (request?.index === AGENT_ACTIONS_INDEX) {
+        return {
+          hits: {
+            hits: [
+              {
+                _source: {
+                  agents: ['agent-in-regular-policy'],
+                  action_id: 'other-action1',
+                },
               },
-            } as any)
-          : {
-              hits: {
-                hits: [
-                  { _source: { action_id: 'other-action1', agent_id: 'agent-in-regular-policy' } },
-                ],
-              },
-            }
-      )
-    );
+            ],
+          },
+        } as any;
+      }
+
+      if (request?.index === AGENT_ACTIONS_RESULTS_INDEX) {
+        return {
+          hits: {
+            hits: [
+              { _source: { action_id: 'other-action1', agent_id: 'agent-in-regular-policy' } },
+            ],
+          },
+        };
+      }
+
+      return { hits: { hits: [agentInRegularDoc, agentInRegularDoc2] } };
+    });
 
     const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];
     await unenrollAgents(soClient, esClient, {

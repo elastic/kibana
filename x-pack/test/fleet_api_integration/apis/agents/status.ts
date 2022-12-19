@@ -76,32 +76,22 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       });
-      // 1 agents inactive (default timeout)
+      // 1 agents inactive
       await es.update({
         id: 'agent4',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         body: {
           doc: {
+            policy_id: 'policy-inactivity-timeout',
             policy_revision_idx: 1,
-            last_checkin: new Date(Date.now() - 1000 * 60 * 11).toISOString(), // 10m default inactive timeout + 1 min
+            last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
           },
-        },
-      });
-      // 1 agents inactive (policy timeout)
-      await es.create({
-        id: 'agent5',
-        refresh: 'wait_for',
-        index: AGENTS_INDEX,
-        document: {
-          policy_id: 'policy-inactivity-timeout',
-          policy_revision_idx: 1,
-          last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
         },
       });
       // 1 agent upgrading
       await es.create({
-        id: 'agent6',
+        id: 'agent5',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         document: {
@@ -112,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       // 1 agent reassigned to a new policy
       await es.create({
-        id: 'agent7',
+        id: 'agent6',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         document: {
@@ -130,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // 1 agent unenrolled
       await es.create({
-        id: 'agent8',
+        id: 'agent7',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         document: {
@@ -148,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       // 1 agent error
       await es.create({
-        id: 'agent9',
+        id: 'agent8',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         document: {
@@ -166,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       // 1 agent degraded (error category)
       await es.create({
-        id: 'agent10',
+        id: 'agent9',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         document: {
@@ -198,7 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
           error: 2,
           offline: 1,
           updating: 2,
-          inactive: 2,
+          inactive: 1,
           unenrolled: 1,
         },
       });
