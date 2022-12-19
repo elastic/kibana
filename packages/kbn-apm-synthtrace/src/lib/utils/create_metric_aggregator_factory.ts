@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import { Duplex, PassThrough, Transform } from 'stream';
+import { Duplex, PassThrough } from 'stream';
 import { Fields } from '../entity';
 import { parseInterval } from '../interval';
 import { appendHash } from './hash';
