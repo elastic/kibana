@@ -84,7 +84,7 @@ export interface RuleExecutorServices<
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;
-  ruleExecutionService?: PublicRuleExecutionService;
+  ruleResultService?: PublicRuleResultService;
 }
 
 export interface RuleExecutorOptions<
@@ -330,7 +330,7 @@ export interface PublicLastRunSetters {
 
 export type PublicRuleMonitoringService = PublicMetricsSetters;
 
-export type PublicRuleExecutionService = PublicLastRunSetters;
+export type PublicRuleResultService = PublicLastRunSetters;
 
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
 export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}

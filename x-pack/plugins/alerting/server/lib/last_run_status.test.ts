@@ -8,7 +8,7 @@
 import { lastRunFromState } from './last_run_status';
 import { ActionsCompletion } from '../../common';
 import { RuleRunMetrics } from './rule_run_metrics_store';
-import { RuleExecutionResults, RuleExecutionService } from '../monitoring/rule_execution_service';
+import { RuleExecutionResults, RuleResultService } from '../monitoring/rule_result_service';
 
 const getMetrics = ({
   hasReachedAlertLimit = false,
@@ -33,7 +33,7 @@ const getExecutionService = ({
   warnings = [],
   outcomeMessage = '',
 }: Partial<RuleExecutionResults>) => {
-  const lastRunService = new RuleExecutionService();
+  const lastRunService = new RuleResultService();
   const { addLastRunError, addLastRunWarning, setLastRunOutcomeMessage } =
     lastRunService.getLastRunSetters();
   errors.forEach((error) => addLastRunError(error));

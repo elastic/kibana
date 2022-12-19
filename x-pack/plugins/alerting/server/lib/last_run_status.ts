@@ -17,7 +17,7 @@ import {
 } from '../types';
 import { translations } from '../constants/translations';
 import { RuleRunMetrics } from './rule_run_metrics_store';
-import { RuleExecutionService } from '../monitoring/rule_execution_service';
+import { RuleResultService } from '../monitoring/rule_result_service';
 
 export interface ILastRun {
   lastRun: RuleLastRun;
@@ -26,7 +26,7 @@ export interface ILastRun {
 
 export const lastRunFromState = (
   stateWithMetrics: RuleTaskStateAndMetrics,
-  lastRunService: RuleExecutionService
+  lastRunService: RuleResultService
 ): ILastRun => {
   let outcome: RuleLastRunOutcomes = RuleLastRunOutcomeValues[0];
   // Check for warning states

@@ -70,7 +70,7 @@ import { getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
-import { RuleExecutionService } from '../monitoring/rule_execution_service';
+import { RuleResultService } from '../monitoring/rule_result_service';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -114,7 +114,7 @@ export class TaskRunner<
   private cancelled: boolean;
   private stackTraceLog: StackTraceLog | null;
   private ruleMonitoring: RuleMonitoringService;
-  private ruleExecution: RuleExecutionService;
+  private ruleExecution: RuleResultService;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -148,7 +148,7 @@ export class TaskRunner<
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
     this.ruleMonitoring = new RuleMonitoringService();
-    this.ruleExecution = new RuleExecutionService();
+    this.ruleExecution = new RuleResultService();
   }
 
   private async updateRuleSavedObject(
@@ -337,7 +337,7 @@ export class TaskRunner<
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
-                ruleExecutionService: this.ruleExecution.getLastRunSetters(),
+                ruleResultService: this.ruleResult.getLastRunSetters(),
               },
               params,
               state: ruleTypeState as RuleState,
