@@ -61,10 +61,21 @@ export function getInternalStateContainer() {
         dataViewAdHocList: newAdHocDataViewList,
       }),
       appendAdHocDataViews:
-        (prevState: InternalState) => (dataViewsAdHoc: DataView | DataView[]) => ({
-          ...prevState,
-          dataViewAdHocList: prevState.dataViewAdHocList.concat(dataViewsAdHoc),
-        }),
+        (prevState: InternalState) => (dataViewsAdHoc: DataView | DataView[]) => {
+          // check for already existing data views
+          const concatList = (
+            Array.isArray(dataViewsAdHoc) ? dataViewsAdHoc : [dataViewsAdHoc]
+          ).filter((dataView) => {
+            return !prevState.dataViewAdHocList.find((el: DataView) => el.id === dataView.id);
+          });
+          if (!concatList.length) {
+            return prevState;
+          }
+          return {
+            ...prevState,
+            dataViewAdHocList: prevState.dataViewAdHocList.concat(dataViewsAdHoc),
+          };
+        },
       removeAdHocDataViewById: (prevState: InternalState) => (id: string) => ({
         ...prevState,
         dataViewAdHocList: prevState.dataViewAdHocList.filter((dataView) => dataView.id !== id),
