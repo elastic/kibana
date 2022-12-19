@@ -69,9 +69,9 @@ export const editException = (updatedField: string, itemIndex = 0, fieldIndex = 
 };
 
 export const addExceptionFlyoutItemName = (name: string) => {
-  cy.wait(500);
-  cy.get(EXCEPTION_ITEM_NAME_INPUT, { timeout: 10000 }).first().click();
-  cy.wait(500);
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('exist');
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('be.visible');
+  cy.get(EXCEPTION_ITEM_NAME_INPUT, { timeout: 10000 }).first().focus();
   cy.get(EXCEPTION_ITEM_NAME_INPUT, { timeout: 10000 })
     .type(`${name}{enter}`)
     .should('have.value', name);
@@ -88,6 +88,7 @@ export const editExceptionFlyoutItemName = (name: string) => {
 };
 
 export const selectBulkCloseAlerts = () => {
+  cy.get(CLOSE_ALERTS_CHECKBOX, { timeout: 10000 }).should('exist');
   cy.get(CLOSE_ALERTS_CHECKBOX, { timeout: 10000 }).click({ force: true });
 };
 

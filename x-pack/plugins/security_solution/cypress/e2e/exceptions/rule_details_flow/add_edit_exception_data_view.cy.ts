@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
 import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
@@ -83,7 +84,7 @@ describe('Add exception using data views from rule details', () => {
     );
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
-    goToExceptionsTab();
+    waitForAlertsToPopulate();
   });
 
   afterEach(() => {
@@ -91,7 +92,7 @@ describe('Add exception using data views from rule details', () => {
   });
 
   it('Creates an exception item from alert actions overflow menu', () => {
-    goToAlertsTab();
+    cy.get(LOADING_INDICATOR).should('not.exist');
     addExceptionFromFirstAlert();
     addExceptionFlyoutItemName(ITEM_NAME);
     addExceptionConditions({
@@ -133,6 +134,7 @@ describe('Add exception using data views from rule details', () => {
   });
 
   it('Creates an exception item', () => {
+    goToExceptionsTab();
     // when no exceptions exist, empty component shows with action to add exception
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
@@ -186,6 +188,7 @@ describe('Add exception using data views from rule details', () => {
     const ITEM_FIELD = 'unique_value.test';
     const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
 
+    goToExceptionsTab();
     // add item to edit
     addFirstExceptionFromRuleDetails(
       {
