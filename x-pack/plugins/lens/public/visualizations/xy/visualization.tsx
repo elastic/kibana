@@ -35,7 +35,13 @@ import {
   DimensionEditor,
 } from './xy_config_panel/dimension_editor';
 import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
-import type { Visualization, AccessorConfig, FramePublicAPI, Suggestion } from '../../types';
+import type {
+  Visualization,
+  AccessorConfig,
+  FramePublicAPI,
+  Suggestion,
+  UserMessage,
+} from '../../types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import {
   type State,
@@ -700,27 +706,20 @@ export const getXyVisualization = ({
     return { invalid, invalidMessage: invalidMessages![0] };
   },
 
-  getErrorMessages(state, frame) {
-    const { datasourceLayers, dataViews } = frame || {};
-    const errors: Array<{
-      shortMessage: string;
-      longMessage: React.ReactNode;
-    }> = [];
-
+  getUserMessages(state, { frame: { datasourceLayers, dataViews } }) {
     const annotationLayers = getAnnotationsLayers(state.layers);
+    const errors: UserMessage[] = [];
 
-    if (dataViews) {
-      annotationLayers.forEach((layer) => {
-        layer.annotations.forEach((annotation) => {
-          const validatedColumn = validateColumn(
-            state,
-            { dataViews },
-            layer.layerId,
-            annotation.id
-          );
-          if (validatedColumn?.invalid && validatedColumn.invalidMessages?.length) {
-            errors.push(
-              ...validatedColumn.invalidMessages.map((invalidMessage) => ({
+    annotationLayers.forEach((layer) => {
+      layer.annotations.forEach((annotation) => {
+        const validatedColumn = validateColumn(state, { dataViews }, layer.layerId, annotation.id);
+        if (validatedColumn?.invalid && validatedColumn.invalidMessages?.length) {
+          errors.push(
+            ...validatedColumn.invalidMessages.map((invalidMessage) => {
+              const message: UserMessage = {
+                severity: 'error',
+                fixableInEditor: true,
+                displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
                 shortMessage: invalidMessage,
                 longMessage: (
                   <FormattedMessage
@@ -732,12 +731,13 @@ export const getXyVisualization = ({
                     }}
                   />
                 ),
-              }))
-            );
-          }
-        });
+              };
+              return message;
+            })
+          );
+        }
       });
-    }
+    });
 
     // Data error handling below here
     const hasNoAccessors = ({ accessors }: XYDataLayerConfig) =>
@@ -763,44 +763,61 @@ export const getXyVisualization = ({
       for (const [dimension, criteria] of checks) {
         const result = validateLayersForDimension(dimension, filteredLayers, criteria);
         if (!result.valid) {
-          errors.push(result.payload);
+          errors.push({
+            severity: 'error',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
+            shortMessage: result.payload.shortMessage,
+            longMessage: result.payload.longMessage,
+          });
         }
       }
     }
+    // temporary fix for #87068
+    errors.push(
+      ...checkXAccessorCompatibility(state, datasourceLayers).map(
+        ({ shortMessage, longMessage }) =>
+          ({
+            severity: 'error',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
+            shortMessage,
+            longMessage,
+          } as UserMessage)
+      )
+    );
 
-    if (datasourceLayers && state) {
-      // temporary fix for #87068
-      errors.push(...checkXAccessorCompatibility(state, datasourceLayers));
-
-      for (const layer of getDataLayers(state.layers)) {
-        const datasourceAPI = datasourceLayers[layer.layerId];
-        if (datasourceAPI) {
-          for (const accessor of layer.accessors) {
-            const operation = datasourceAPI.getOperationForColumnId(accessor);
-            if (operation && operation.dataType !== 'number') {
-              errors.push({
-                shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYShort', {
-                  defaultMessage: `Wrong data type for {axis}.`,
-                  values: {
-                    axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
-                  },
-                }),
-                longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYLong', {
-                  defaultMessage: `The dimension {label} provided for the {axis} has the wrong data type. Expected number but have {dataType}`,
-                  values: {
-                    label: operation.label,
-                    dataType: operation.dataType,
-                    axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
-                  },
-                }),
-              });
-            }
+    for (const layer of getDataLayers(state.layers)) {
+      const datasourceAPI = datasourceLayers[layer.layerId];
+      if (datasourceAPI) {
+        for (const accessor of layer.accessors) {
+          const operation = datasourceAPI.getOperationForColumnId(accessor);
+          if (operation && operation.dataType !== 'number') {
+            errors.push({
+              severity: 'error',
+              fixableInEditor: true,
+              displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
+              shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYShort', {
+                defaultMessage: `Wrong data type for {axis}.`,
+                values: {
+                  axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
+                },
+              }),
+              longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYLong', {
+                defaultMessage: `The dimension {label} provided for the {axis} has the wrong data type. Expected number but have {dataType}`,
+                values: {
+                  label: operation.label,
+                  dataType: operation.dataType,
+                  axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
+                },
+              }),
+            });
           }
         }
       }
     }
 
-    return errors.length ? errors : undefined;
+    return errors;
   },
 
   getWarningMessages(state, frame) {

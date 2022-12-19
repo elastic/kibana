@@ -24,7 +24,7 @@ import {
   HeatmapLegendExpressionFunctionDefinition,
 } from '@kbn/expression-heatmap-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import type { OperationMetadata, Suggestion, Visualization } from '../../types';
+import type { OperationMetadata, Suggestion, UserMessage, Visualization } from '../../types';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
 import {
@@ -433,16 +433,19 @@ export const getHeatmapVisualization = ({
     };
   },
 
-  getErrorMessages(state) {
+  getUserMessages(state) {
     if (!state.yAccessor && !state.xAccessor && !state.valueAccessor) {
       // nothing configured yet
-      return;
+      return [];
     }
 
-    const errors: ReturnType<Visualization['getErrorMessages']> = [];
+    const errors: UserMessage[] = [];
 
     if (!state.xAccessor) {
       errors.push({
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
         shortMessage: i18n.translate(
           'xpack.lens.heatmapVisualization.missingXAccessorShortMessage',
           {
@@ -455,7 +458,7 @@ export const getHeatmapVisualization = ({
       });
     }
 
-    return errors.length ? errors : undefined;
+    return errors;
   },
 
   getWarningMessages(state, frame) {

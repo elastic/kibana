@@ -1252,19 +1252,15 @@ export interface Visualization<T = unknown, P = unknown> {
     datasourceLayers: DatasourceLayers,
     datasourceExpressionsByLayers?: Record<string, Ast>
   ) => ExpressionAstExpression | string | null;
+
   /**
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
    */
-  getErrorMessages: (
+  getUserMessages?: (
     state: T,
-    frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
-  ) =>
-    | Array<{
-        shortMessage: string;
-        longMessage: React.ReactNode;
-      }>
-    | undefined;
+    deps: { frame: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'> }
+  ) => UserMessage[];
 
   validateColumn?: (
     state: T,

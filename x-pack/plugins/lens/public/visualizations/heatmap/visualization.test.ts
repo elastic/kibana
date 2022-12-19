@@ -21,7 +21,7 @@ import {
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Position } from '@elastic/charts';
 import type { HeatmapVisualizationState } from './types';
-import type { DatasourceLayers, OperationDescriptor } from '../../types';
+import type { DatasourceLayers, FramePublicAPI, OperationDescriptor } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
@@ -581,7 +581,7 @@ describe('heatmap', () => {
     });
   });
 
-  describe('#getErrorMessages', () => {
+  describe('#getUserMessages', () => {
     test('should not return an error when chart has empty configuration', () => {
       const mockState = {
         shape: CHART_SHAPES.HEATMAP,
@@ -590,8 +590,10 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
-        }).getErrorMessages(mockState)
-      ).toEqual(undefined);
+        }).getUserMessages!(mockState, {
+          frame: {} as FramePublicAPI,
+        })
+      ).toHaveLength(0);
     });
 
     test('should return an error when the X accessor is missing', () => {
@@ -603,13 +605,27 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
-        }).getErrorMessages(mockState)
-      ).toEqual([
-        {
-          longMessage: 'Configuration for the horizontal axis is missing.',
-          shortMessage: 'Missing Horizontal axis.',
-        },
-      ]);
+        }).getUserMessages!(mockState, {
+          frame: {} as FramePublicAPI,
+        })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "workspace",
+              },
+              Object {
+                "id": "suggestionPanel",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": "Configuration for the horizontal axis is missing.",
+            "severity": "error",
+            "shortMessage": "Missing Horizontal axis.",
+          },
+        ]
+      `);
     });
   });
 

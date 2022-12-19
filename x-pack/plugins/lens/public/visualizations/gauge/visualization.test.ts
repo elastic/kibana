@@ -607,16 +607,6 @@ describe('gauge', () => {
     });
   });
 
-  describe('#getErrorMessages', () => {
-    it('returns undefined if no error is raised', () => {
-      const error = getGaugeVisualization({
-        paletteService,
-        theme,
-      }).getErrorMessages(exampleState());
-      expect(error).not.toBeDefined();
-    });
-  });
-
   describe('#getWarningMessages', () => {
     beforeEach(() => {
       const mockDatasource = createMockDatasource('testDatasource');

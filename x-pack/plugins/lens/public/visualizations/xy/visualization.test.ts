@@ -7,7 +7,7 @@
 
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
-import { Operation, OperationDescriptor, DatasourcePublicAPI } from '../../types';
+import { Operation, OperationDescriptor, DatasourcePublicAPI, FramePublicAPI } from '../../types';
 import type {
   State,
   XYState,
@@ -15,6 +15,7 @@ import type {
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   SeriesType,
+  XYPersistedState,
 } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar } from '@kbn/chart-icons';
@@ -31,7 +32,7 @@ import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { KEEP_GLOBAL_FILTERS_ACTION_ID } from './annotations/actions';
-import { layerTypes } from '../..';
+import { layerTypes, Visualization } from '../..';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -2165,7 +2166,7 @@ describe('xy_visualization', () => {
     });
   });
 
-  describe('#getErrorMessages', () => {
+  describe('#getUserMessages', () => {
     let mockDatasource: ReturnType<typeof createMockDatasource>;
     let frame: ReturnType<typeof createMockFramePublicAPI>;
 
@@ -2183,9 +2184,18 @@ describe('xy_visualization', () => {
       };
     });
 
+    const getErrorMessages = (
+      vis: Visualization<XYState, XYPersistedState>,
+      state: XYState,
+      frameMock = { datasourceLayers: {} } as Partial<FramePublicAPI>
+    ) =>
+      vis.getUserMessages!(state, { frame: frameMock as FramePublicAPI })
+        .filter(({ severity }) => severity === 'error')
+        .map((error) => ({ shortMessage: error.shortMessage, longMessage: error.longMessage }));
+
     it("should not return an error when there's only one dimension (X or Y)", () => {
       expect(
-        xyVisualization.getErrorMessages({
+        getErrorMessages(xyVisualization, {
           ...exampleState(),
           layers: [
             {
@@ -2197,11 +2207,11 @@ describe('xy_visualization', () => {
             },
           ],
         })
-      ).not.toBeDefined();
+      ).toHaveLength(0);
     });
     it("should not return an error when there's only one dimension on multiple layers (same axis everywhere)", () => {
       expect(
-        xyVisualization.getErrorMessages({
+        getErrorMessages(xyVisualization, {
           ...exampleState(),
           layers: [
             {
@@ -2220,11 +2230,11 @@ describe('xy_visualization', () => {
             },
           ],
         })
-      ).not.toBeDefined();
+      ).toHaveLength(0);
     });
     it('should not return an error when mixing different valid configurations in multiple layers', () => {
       expect(
-        xyVisualization.getErrorMessages({
+        getErrorMessages(xyVisualization, {
           ...exampleState(),
           layers: [
             {
@@ -2244,11 +2254,11 @@ describe('xy_visualization', () => {
             },
           ],
         })
-      ).not.toBeDefined();
+      ).toHaveLength(0);
     });
     it("should not return an error when there's only one splitAccessor dimension configured", () => {
       expect(
-        xyVisualization.getErrorMessages({
+        getErrorMessages(xyVisualization, {
           ...exampleState(),
           layers: [
             {
@@ -2261,10 +2271,10 @@ describe('xy_visualization', () => {
             },
           ],
         })
-      ).not.toBeDefined();
+      ).toHaveLength(0);
 
       expect(
-        xyVisualization.getErrorMessages({
+        getErrorMessages(xyVisualization, {
           ...exampleState(),
           layers: [
             {
@@ -2285,11 +2295,11 @@ describe('xy_visualization', () => {
             },
           ],
         })
-      ).not.toBeDefined();
+      ).toHaveLength(0);
     });
     it('should return an error when there are multiple layers, one axis configured for each layer (but different axis from each other)', () => {
       expect(
-        xyVisualization.getErrorMessages({
+        getErrorMessages(xyVisualization, {
           ...exampleState(),
           layers: [
             {
@@ -2317,7 +2327,7 @@ describe('xy_visualization', () => {
     });
     it('should return an error with batched messages for the same error with multiple layers', () => {
       expect(
-        xyVisualization.getErrorMessages({
+        getErrorMessages(xyVisualization, {
           ...exampleState(),
           layers: [
             {
@@ -2354,7 +2364,7 @@ describe('xy_visualization', () => {
     });
     it("should return an error when some layers are complete but other layers aren't", () => {
       expect(
-        xyVisualization.getErrorMessages({
+        getErrorMessages(xyVisualization, {
           ...exampleState(),
           layers: [
             {
@@ -2390,7 +2400,8 @@ describe('xy_visualization', () => {
 
     it('should return an error when accessor type is of the wrong type', () => {
       expect(
-        xyVisualization.getErrorMessages(
+        getErrorMessages(
+          xyVisualization,
           {
             ...exampleState(),
             layers: [
@@ -2438,7 +2449,8 @@ describe('xy_visualization', () => {
           : null
       );
       expect(
-        xyVisualization.getErrorMessages(
+        getErrorMessages(
+          xyVisualization,
           {
             ...exampleState(),
             layers: [
@@ -2494,7 +2506,8 @@ describe('xy_visualization', () => {
           : null
       );
       expect(
-        xyVisualization.getErrorMessages(
+        getErrorMessages(
+          xyVisualization,
           {
             ...exampleState(),
             layers: [
@@ -2561,7 +2574,7 @@ describe('xy_visualization', () => {
         const xyState = createStateWithAnnotationProps({
           timeField: 'non-existent',
         });
-        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        const errors = getErrorMessages(xyVisualization, xyState, getFrameMock());
         expect(errors).toHaveLength(1);
         expect(errors![0]).toEqual(
           expect.objectContaining({
@@ -2573,7 +2586,7 @@ describe('xy_visualization', () => {
         const xyState = createStateWithAnnotationProps({
           textField: 'non-existent',
         });
-        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        const errors = getErrorMessages(xyVisualization, xyState, getFrameMock());
         expect(errors).toHaveLength(1);
         expect(errors![0]).toEqual(
           expect.objectContaining({
@@ -2585,7 +2598,7 @@ describe('xy_visualization', () => {
         const xyState = createStateWithAnnotationProps({
           extraFields: ['bytes', 'memory', 'non-existent'],
         });
-        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        const errors = getErrorMessages(xyVisualization, xyState, getFrameMock());
         expect(errors).toHaveLength(1);
         expect(errors![0]).toEqual(
           expect.objectContaining({
@@ -2597,7 +2610,7 @@ describe('xy_visualization', () => {
         const xyState = createStateWithAnnotationProps({
           filter: { type: 'kibana_query', query: 'invalid: "', language: 'kuery' },
         });
-        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        const errors = getErrorMessages(xyVisualization, xyState, getFrameMock());
         expect(errors).toHaveLength(1);
         expect(errors![0]).toEqual(
           expect.objectContaining({
@@ -2614,14 +2627,14 @@ describe('xy_visualization', () => {
           extraFields: ['bytes', 'memory', 'non-existent'],
           filter: { type: 'kibana_query', query: 'invalid: "', language: 'kuery' },
         });
-        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        const errors = getErrorMessages(xyVisualization, xyState, getFrameMock());
         expect(errors).toHaveLength(4);
       });
       it('should contain error if current annotation contains no time field set', () => {
         const xyState = createStateWithAnnotationProps({
           timeField: undefined,
         });
-        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        const errors = getErrorMessages(xyVisualization, xyState, getFrameMock());
         expect(errors).toHaveLength(1);
         expect(errors![0]).toEqual(
           expect.objectContaining({

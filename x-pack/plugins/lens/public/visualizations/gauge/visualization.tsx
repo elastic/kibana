@@ -466,11 +466,6 @@ export const getGaugeVisualization = ({
   toPreviewExpression: (state, datasourceLayers, datasourceExpressionsByLayers = {}) =>
     toExpression(paletteService, state, datasourceLayers, undefined, datasourceExpressionsByLayers),
 
-  getErrorMessages(state) {
-    // not possible to break it?
-    return undefined;
-  },
-
   getWarningMessages(state, frame) {
     const { maxAccessor, minAccessor, goalAccessor, metricAccessor } = state;
     if (!maxAccessor && !minAccessor && !goalAccessor && !metricAccessor) {

@@ -634,11 +634,6 @@ export const getMetricVisualization = ({
     );
   },
 
-  getErrorMessages(state) {
-    // Is it possible to break it?
-    return undefined;
-  },
-
   getDisplayOptions() {
     return {
       noPanelTitle: true,

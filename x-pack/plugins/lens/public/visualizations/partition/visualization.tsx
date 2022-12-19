@@ -592,7 +592,7 @@ export const getPieVisualization = ({
     return suggestion;
   },
 
-  getErrorMessages(state) {
+  getUserMessages(state) {
     const hasTooManyBucketDimensions = state.layers
       .map((layer) => {
         const totalBucketDimensions =
@@ -608,6 +608,9 @@ export const getPieVisualization = ({
     return hasTooManyBucketDimensions
       ? [
           {
+            severity: 'error',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
             shortMessage: i18n.translate('xpack.lens.pie.tooManyDimensions', {
               defaultMessage: 'Your visualization has too many dimensions.',
             }),
