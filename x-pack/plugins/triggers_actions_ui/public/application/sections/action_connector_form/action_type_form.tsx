@@ -252,7 +252,6 @@ export const ActionTypeForm = ({
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
-      {!hideNotifyWhen && actionNotifyWhen}
       {showSelectActionGroup && (
         <>
           <EuiSpacer size="xs" />
@@ -282,6 +281,7 @@ export const ActionTypeForm = ({
           />
         </>
       )}
+      {!hideNotifyWhen && actionNotifyWhen}
       {(showSelectActionGroup || !hideNotifyWhen) && <EuiSpacer size="l" />}
       <EuiFormRow
         fullWidth
