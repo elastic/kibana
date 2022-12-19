@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { Agent, AgentPolicy, AgentStatus, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import type {
@@ -271,7 +271,6 @@ export class EndpointMetadataService {
         this.logger?.error(error);
       }
     }
-
     return {
       metadata: endpointMetadata,
       host_status: fleetAgent
@@ -442,14 +441,18 @@ export class EndpointMetadataService {
     const hosts: HostInfo[] = [];
 
     for (const doc of docs) {
-      const { endpoint: metadata, agent } = doc?._source?.united ?? {};
-
-      if (metadata && agent) {
+      const { endpoint: metadata, agent: _agent } = doc?._source?.united ?? {};
+      if (metadata && _agent) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const agentPolicy = agentPoliciesMap[agent.policy_id!];
+        const agentPolicy = agentPoliciesMap[_agent.policy_id!];
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const endpointPolicy = endpointPoliciesMap[agent.policy_id!];
-
+        const endpointPolicy = endpointPoliciesMap[_agent.policy_id!];
+        // add the agent status from the fleet runtime field to
+        // the agent object
+        const agent: typeof _agent = {
+          ..._agent,
+          status: doc?.fields?.status?.[0] as AgentStatus,
+        };
         hosts.push(
           await this.enrichHostMetadata(fleetServices, metadata, agent, agentPolicy, endpointPolicy)
         );
