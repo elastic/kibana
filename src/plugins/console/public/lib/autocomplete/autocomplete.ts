@@ -1222,7 +1222,9 @@ export default function ({
 
         const suggestions = getSuggestions(terms);
 
-        callback(null, suggestions);
+        if (!context.asyncResultsState?.isLoading) {
+          callback(null, suggestions);
+        }
 
         if (context.asyncResultsState) {
           // TODO indicate mappings fetching is in progress
