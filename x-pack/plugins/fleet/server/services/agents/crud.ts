@@ -232,7 +232,7 @@ export async function getAgentsByKuery(
     ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
     : [];
   const queryAgents = async (from: number, size: number) =>
-    esClient.search<FleetServerAgent, { totalInactive?: { doc_count: { value: number } } }>({
+    esClient.search<FleetServerAgent, { totalInactive?: { doc_count: number } }>({
       from,
       size,
       track_total_hits: true,
