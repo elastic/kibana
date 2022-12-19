@@ -7,10 +7,10 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { ContentItemDetails } from '@kbn/content-management-state';
 import { ContentPluginSetup, ContentPluginStart } from './types';
 import { ContentService } from './service/content_service';
-import { i18n } from '@kbn/i18n';
-import {ContentItemDetails} from '@kbn/content-management-state';
 
 export class ContentPlugin implements Plugin<ContentPluginSetup, ContentPluginStart> {
   private content?: ContentService;
