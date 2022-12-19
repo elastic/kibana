@@ -3876,16 +3876,6 @@
                 }
               }
             },
-            "sourcemap": {
-              "properties": {
-                "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
-                }
-              }
-            },
             "onboarding": {
               "properties": {
                 "1d": {
@@ -4036,13 +4026,6 @@
               }
             },
             "metric": {
-              "properties": {
-                "ms": {
-                  "type": "long"
-                }
-              }
-            },
-            "sourcemap": {
               "properties": {
                 "ms": {
                   "type": "long"

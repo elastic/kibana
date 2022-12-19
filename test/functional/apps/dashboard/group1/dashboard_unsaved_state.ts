@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('view mode state', () => {
       before(async () => {
         await queryBar.setQuery(testQuery);
-        await filterBar.addFilter('bytes', 'exists');
+        await filterBar.addFilter({ field: 'bytes', operation: 'exists' });
         await queryBar.submitQuery();
       });
 
