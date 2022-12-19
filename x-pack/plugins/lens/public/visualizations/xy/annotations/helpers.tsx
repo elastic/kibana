@@ -447,7 +447,8 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
 
 export const getSingleColorAnnotationConfig = (annotation: EventAnnotationConfig) => {
   const annotationIcon = !isRangeAnnotationConfig(annotation)
-    ? annotationsIconSet.find((option) => annotation?.icon === option.value)
+    ? annotationsIconSet.find((option) => option.value === annotation?.icon) ||
+      annotationsIconSet.find((option) => option.value === 'triangle')
     : undefined;
   const icon = annotationIcon?.icon ?? annotationIcon?.value;
   return {
