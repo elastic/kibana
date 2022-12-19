@@ -14,12 +14,12 @@ export class CachedContentType {
 
   public list(): Observable<string[]> {
     const type = defer(() => {
-      const type = this.cache.registry.get(this.id);
-      if (!type) throw new Error(`Unknown content type: ${this.id}`);
-      return of(type);
+      const theType = this.cache.registry.get(this.id);
+      if (!theType) throw new Error(`Unknown content type: ${this.id}`);
+      return of(theType);
     });
     const list = type.pipe(
-      switchMap((type) => type.list()),
+      switchMap((theType) => theType.list()),
       map((items) => {
         return items.map((item) => {
           const itemId = item.getId();
