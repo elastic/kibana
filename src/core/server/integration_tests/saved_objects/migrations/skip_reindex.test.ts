@@ -64,9 +64,11 @@ describe('skip reindexing', () => {
 
     expect(logs).toMatch('INIT -> PREPARE_COMPATIBLE_MIGRATION');
     expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+    expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS');
     expect(logs).toMatch('MARK_VERSION_INDEX_READY -> DONE');
 
     expect(logs).not.toMatch('CREATE_NEW_TARGET');
+    expect(logs).not.toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS');
   });
 });
 
