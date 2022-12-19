@@ -50,12 +50,10 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   private getTimezone: ControlsSettingsService['getTimezone'];
   private timefilter: ControlsDataService['timefilter'];
   private prevTimeRange: TimeRange | undefined;
-  private prevTimesliceAsPercentage:
-    | {
-        timesliceStartAsPercentageOfTimeRange?: number;
-        timesliceEndAsPercentageOfTimeRange?: number;
-      }
-    | undefined;
+  private prevTimesliceAsPercentage: {
+    timesliceStartAsPercentageOfTimeRange?: number;
+    timesliceEndAsPercentageOfTimeRange?: number;
+  };
   private readonly waitForControlOutputConsumersToLoad$;
 
   private reduxEmbeddableTools: ReduxEmbeddableTools<
