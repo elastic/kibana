@@ -160,5 +160,3 @@ export const HoverActionsPopover = React.memo<Props>(
     );
   }
 );
-
-HoverActionsPopover.displayName = 'HoverActionsPopover';

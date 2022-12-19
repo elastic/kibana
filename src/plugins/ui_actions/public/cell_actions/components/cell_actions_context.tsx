@@ -7,69 +7,63 @@
  */
 
 import { orderBy } from 'lodash/fp';
-import React, { createContext, FC, useContext, useMemo } from 'react';
+import React, { createContext, FC, useCallback, useContext } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { Action } from '../../actions';
 import { CellActionExecutionContext } from './cell_actions';
 
-type GetActionsType = (trigger: string, context: object) => Promise<Action[]>;
+// It must to match `UiActionsService.getTriggerCompatibleActions`
+type GetTriggerCompatibleActionsType = (triggerId: string, context: object) => Promise<Action[]>;
 
-const initialContext = {
-  getCompatibleActions: undefined,
-};
+type GetActionsType = (context: CellActionExecutionContext) => Promise<Action[]>;
 
-const CellActionsContext = createContext<{
-  getCompatibleActions: GetActionsType | undefined;
-}>(initialContext);
+const CellActionsContext = createContext<{ getActions: GetActionsType } | null>(null);
 
 interface CellActionsContextProviderProps {
   /**
    * Please assign `uiActions.getTriggerCompatibleActions` function.
    * This function should return a list of actions for a triggerId that are compatible with the provided context.
    */
-  getCompatibleActions: GetActionsType;
+  getTriggerCompatibleActions: GetTriggerCompatibleActionsType;
 }
 
 export const CellActionsContextProvider: FC<CellActionsContextProviderProps> = ({
   children,
-  getCompatibleActions,
+  getTriggerCompatibleActions,
 }) => {
-  const getSortedCompatibleActions = useMemo<GetActionsType>(() => {
-    return (trigger, context) =>
-      getCompatibleActions(trigger, context).then((actions) =>
+  const getSortedCompatibleActions = useCallback<GetActionsType>(
+    (context) =>
+      getTriggerCompatibleActions(context.trigger.id, context).then((actions) =>
         orderBy(['order', 'id'], ['asc', 'asc'], actions)
-      );
-  }, [getCompatibleActions]);
+      ),
+    [getTriggerCompatibleActions]
+  );
 
   return (
-    <CellActionsContext.Provider value={{ getCompatibleActions: getSortedCompatibleActions }}>
+    <CellActionsContext.Provider value={{ getActions: getSortedCompatibleActions }}>
       {children}
     </CellActionsContext.Provider>
   );
 };
 
-const useGetCompatibleActions = () => {
+const useCellActions = () => {
   const context = useContext(CellActionsContext);
-  if (context.getCompatibleActions === undefined) {
-    // eslint-disable-next-line no-console
-    console.error(
+  if (!context) {
+    throw new Error(
       'No CellActionsContext found. Please wrap the application with CellActionsContextProvider'
     );
   }
 
-  return (cellActionContext: CellActionExecutionContext) =>
-    context.getCompatibleActions
-      ? context.getCompatibleActions(cellActionContext.trigger.id, cellActionContext)
-      : Promise.resolve([]);
+  return context;
 };
 
 export const useLoadActions = (context: CellActionExecutionContext) => {
-  const getCompatibleActions = useGetCompatibleActions();
-  return useAsync(() => getCompatibleActions(context), []);
+  const { getActions } = useCellActions();
+  return useAsync(() => getActions(context), []);
 };
 
 export const useLoadActionsFn = () => {
-  const getCompatibleActions = useGetCompatibleActions();
-  return useAsyncFn(getCompatibleActions, []);
+  const { getActions } = useCellActions();
+  return useAsyncFn(getActions, []);
 };

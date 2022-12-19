@@ -33,5 +33,3 @@ export const ExtraActionsButton: React.FC<ExtraActionsButtonProps> = ({ onClick,
       onClick={onClick}
     />
   );
-
-ExtraActionsButton.displayName = 'ExtraActionsButton';

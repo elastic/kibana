@@ -29,7 +29,7 @@ describe('CellActionsContextProvider', () => {
 
       {
         wrapper: ({ children }) => (
-          <CellActionsContextProvider getCompatibleActions={getActions}>
+          <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
             {children}
           </CellActionsContextProvider>
         ),
@@ -61,7 +61,7 @@ describe('CellActionsContextProvider', () => {
 
       {
         wrapper: ({ children }) => (
-          <CellActionsContextProvider getCompatibleActions={getActions}>
+          <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
             {children}
           </CellActionsContextProvider>
         ),
@@ -86,7 +86,7 @@ describe('CellActionsContextProvider', () => {
 
       {
         wrapper: ({ children }) => (
-          <CellActionsContextProvider getCompatibleActions={getActions}>
+          <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
             {children}
           </CellActionsContextProvider>
         ),
@@ -112,7 +112,7 @@ describe('CellActionsContextProvider', () => {
 
       {
         wrapper: ({ children }) => (
-          <CellActionsContextProvider getCompatibleActions={getActions}>
+          <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
             {children}
           </CellActionsContextProvider>
         ),

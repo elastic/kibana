@@ -134,5 +134,3 @@ export const CellActions: React.FC<CellActionsProps> = ({
     </div>
   );
 };
-
-CellActions.displayName = 'CellActions';

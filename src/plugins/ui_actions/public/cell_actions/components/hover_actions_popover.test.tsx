@@ -24,7 +24,7 @@ describe('HoverActionsPopover', () => {
   it('renders', () => {
     const getActions = () => Promise.resolve([]);
     const { queryByTestId } = render(
-      <CellActionsContextProvider getCompatibleActions={getActions}>
+      <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
           children={null}
           showMoreActionsFrom={4}
@@ -42,7 +42,7 @@ describe('HoverActionsPopover', () => {
     const getActions = () => getActionsPromise;
 
     const { queryByLabelText, getByTestId } = render(
-      <CellActionsContextProvider getCompatibleActions={getActions}>
+      <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
           showMoreActionsFrom={4}
           actionContext={actionContext}
@@ -67,7 +67,7 @@ describe('HoverActionsPopover', () => {
     const getActions = () => getActionsPromise;
 
     const { queryByLabelText, getByTestId } = render(
-      <CellActionsContextProvider getCompatibleActions={getActions}>
+      <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
           showMoreActionsFrom={4}
           actionContext={actionContext}
@@ -97,7 +97,7 @@ describe('HoverActionsPopover', () => {
     const getActions = () => getActionsPromise;
 
     const { getByTestId } = render(
-      <CellActionsContextProvider getCompatibleActions={getActions}>
+      <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
           showMoreActionsFrom={1}
           actionContext={actionContext}
@@ -122,7 +122,7 @@ describe('HoverActionsPopover', () => {
     const getActions = () => getActionsPromise;
 
     const { getByTestId, getByLabelText } = render(
-      <CellActionsContextProvider getCompatibleActions={getActions}>
+      <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
           showMoreActionsFrom={1}
           actionContext={actionContext}
@@ -156,7 +156,7 @@ describe('HoverActionsPopover', () => {
     const getActions = () => getActionsPromise;
 
     const { getByTestId, queryByLabelText } = render(
-      <CellActionsContextProvider getCompatibleActions={getActions}>
+      <CellActionsContextProvider getTriggerCompatibleActions={getActions}>
         <HoverActionsPopover
           showMoreActionsFrom={2}
           actionContext={actionContext}

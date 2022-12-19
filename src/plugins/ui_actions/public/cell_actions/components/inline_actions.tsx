@@ -60,5 +60,3 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
     </span>
   );
 };
-
-InlineActions.displayName = 'InlineActions';

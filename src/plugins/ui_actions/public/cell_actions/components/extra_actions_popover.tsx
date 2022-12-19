@@ -94,8 +94,6 @@ export const ExtraActionsPopOverWithAnchor = ({
   ) : null;
 };
 
-ExtraActionsPopOverWithAnchor.displayName = 'ExtraActionsPopOverWithAnchor';
-
 type ExtraActionsPopOverContentProps = Pick<
   ActionsPopOverProps,
   'actionContext' | 'closePopOver' | 'actions'
@@ -133,5 +131,3 @@ const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
     </>
   );
 };
-
-ExtraActionsPopOverContent.displayName = 'ExtraActionsPopOverContent';

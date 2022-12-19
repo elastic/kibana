@@ -31,7 +31,7 @@ export default {
     (storyFn: Function) => (
       <CellActionsContextProvider
         // call uiActions getTriggerCompatibleActions(triggerId, data)
-        getCompatibleActions={getCompatibleActions}
+        getTriggerCompatibleActions={getCompatibleActions}
       >
         <div style={{ paddingTop: '70px' }} />
         {storyFn()}
