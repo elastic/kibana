@@ -48,6 +48,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./categorization_job'));
       loadTestFile(require.resolve('./date_nanos_job'));
       loadTestFile(require.resolve('./custom_urls'));
+      loadTestFile(require.resolve('./delete_job_and_delete_annotations'));
     }
   });
 }

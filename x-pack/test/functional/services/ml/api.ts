@@ -1119,6 +1119,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async assertAnnotationsCount(jobId: string, expectedCount: number) {
+      const annotations = await this.getAnnotations(jobId);
+      expect(annotations.length).to.eql(
+        expectedCount,
+        `expected annotation count of ${expectedCount}, got ${annotations.length}`
+      );
+    },
+
     async runDFAJob(dfaId: string) {
       log.debug(`Starting data frame analytics job '${dfaId}'...`);
       const { body: startResponse, status } = await esSupertest

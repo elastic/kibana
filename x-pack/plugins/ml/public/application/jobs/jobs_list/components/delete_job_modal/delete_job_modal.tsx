@@ -148,6 +148,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
                     )}
                     checked={deleteUserAnnotations}
                     onChange={(e) => setDeleteUserAnnotations(e.target.checked)}
+                    data-test-subj="mlDeleteJobConfirmModalDeleteAnnotationsSwitch"
                   />
                 </EuiText>
               </>
