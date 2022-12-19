@@ -114,7 +114,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // Source is a none because we didn't do any migration from a source
           // index
           sourceIndex: Option.none,
-          targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+          targetIndex: source!,
           sourceIndexMappings: indices[source!].mappings,
           // in this scenario, a .kibana_X.Y.Z_001 index exists that matches the current kibana version
           // aka we are NOT upgrading to a newer version
