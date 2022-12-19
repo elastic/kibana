@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { Observable, of } from 'rxjs';
+import { SortDirection } from '@elastic/eui';
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -133,6 +134,11 @@ export function createDiscoverServicesMock(): DiscoverServices {
       useChartsBaseTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
     },
     storage: new LocalStorageMock({}) as unknown as Storage,
+    sortingService: {
+      getSorting: () => {
+        return { by: 'alphabetically', direction: SortDirection.ASC };
+      },
+    },
     addBasePath: jest.fn(),
     toastNotifications: {
       addInfo: jest.fn(),
