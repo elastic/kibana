@@ -64,5 +64,14 @@ describe('AnalyticsOverview', () => {
       expect(wrapper.find(AnalyticsCollectionSettings)).toHaveLength(1);
       expect(mockActions.fetchAnalyticsCollection).toHaveBeenCalled();
     });
+
+    it('sends correct telemetry page name for selected tab', async () => {
+      setMockValues(mockValues);
+      setMockActions(mockActions);
+
+      const wrapper = shallow(<AnalyticsCollectionView />);
+
+      expect(wrapper.prop('pageViewTelemetry')).toBe('View Analytics Collection - settings');
+    });
   });
 });

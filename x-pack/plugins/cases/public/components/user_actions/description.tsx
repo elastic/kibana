@@ -54,6 +54,7 @@ export const getDescriptionUserAction = ({
       <UserActionMarkdown
         key={isEditable ? DESCRIPTION_ID : undefined}
         ref={(element) => (commentRefs.current[DESCRIPTION_ID] = element)}
+        caseId={caseData.id}
         id={DESCRIPTION_ID}
         content={caseData.description}
         isEditable={isEditable}
