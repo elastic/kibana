@@ -28,7 +28,6 @@ import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import type { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
 import {
-  useGetAgentCountForPolicy,
   useGetEndpointSecurityPackage,
   useGetEndpointSpecificPolicies,
 } from '../../../services/policies/hooks';
@@ -57,31 +56,10 @@ export const PolicyList = memo(() => {
     perPage: pagination.pageSize,
   });
 
-  // endpoint count per policy
-  const policyIds = useMemo(() => data?.items.map((policies) => policies.id) ?? [], [data]);
-  const agentPolicyIds = useMemo(
-    () => data?.items.map((policies) => policies.policy_id) ?? [],
-    [data]
-  );
-  const { data: endpointCount = { items: [] } } = useGetAgentCountForPolicy({
-    agentPolicyIds,
-    customQueryOptions: {
-      enabled: agentPolicyIds.length > 0,
-      onError: (err) => {
-        toasts.addDanger(
-          i18n.translate('xpack.securitySolution.policyList.endpointCountError', {
-            defaultMessage: 'Error retrieving endpoint counts',
-          })
-        );
-      },
-    },
-  });
-
   // grab endpoint version for empty page
   const { data: endpointPackageInfo, isFetching: packageIsFetching } =
     useGetEndpointSecurityPackage({
       customQueryOptions: {
-        enabled: agentPolicyIds.length === 0,
         onError: (err) => {
           toasts.addDanger(
             i18n.translate('xpack.securitySolution.policyList.packageVersionError', {
@@ -91,28 +69,6 @@ export const PolicyList = memo(() => {
         },
       },
     });
-
-  const policyIdToEndpointCount = useMemo(() => {
-    const map = new Map<string, number>();
-
-    for (const agentPolicy of endpointCount?.items) {
-      if (agentPolicy.package_policies) {
-        for (const packagePolicy of agentPolicy.package_policies) {
-          if (policyIds.includes(packagePolicy.id)) {
-            map.set(packagePolicy.id, agentPolicy.agents ?? 0);
-          }
-        }
-      }
-    }
-
-    // error with the endpointCount api call, set default count to 0
-    if (policyIds.length > 0 && map.size === 0) {
-      for (const policy of policyIds) {
-        map.set(policy, 0);
-      }
-    }
-    return map;
-  }, [endpointCount, policyIds]);
 
   const totalItemCount = useMemo(() => data?.total ?? 0, [data]);
 
@@ -262,7 +218,8 @@ export const PolicyList = memo(() => {
         }),
         width: '8%',
         render: (policy: PolicyData) => {
-          const count = policyIdToEndpointCount.get(policy.id);
+          const count = policy.agents ?? 0;
+
           return (
             <PolicyEndpointCount
               className="eui-textTruncate"
@@ -276,7 +233,7 @@ export const PolicyList = memo(() => {
         },
       },
     ];
-  }, [backLink, policyIdToEndpointCount, authLoading, canReadEndpointList]);
+  }, [backLink, authLoading, canReadEndpointList]);
 
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PolicyData>) => {
