@@ -42,7 +42,7 @@ interface PolicyArtifactsLayoutProps {
   searchableFields: readonly string[];
   getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
   getPolicyArtifactsPath: (policyId: string) => string;
-  /** A boolean to check extra privileges for restricted actions, true when it's allowed, false when not */
+  /** A boolean to check if has write artifact privilege or not */
   canWriteArtifact?: boolean;
 }
 export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
