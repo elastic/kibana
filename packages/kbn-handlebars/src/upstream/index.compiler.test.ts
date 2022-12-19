@@ -66,8 +66,8 @@ describe('compiler', () => {
       });
 
       it('should not modify the options.data property(GH-1327)', () => {
-        const options = { data: [{ a: 'foo' }, { a: 'bar' }] };
-        // @ts-expect-error: The `data` property is supposed to be a boolean, but in this test we want to ignore that
+        // The `data` property is supposed to be a boolean, but in this test we want to ignore that
+        const options = { data: [{ a: 'foo' }, { a: 'bar' }] as unknown as boolean };
         compile('{{#each data}}{{@index}}:{{a}} {{/each}}', options)({});
         expect(JSON.stringify(options, null, 2)).toEqual(
           JSON.stringify({ data: [{ a: 'foo' }, { a: 'bar' }] }, null, 2)
