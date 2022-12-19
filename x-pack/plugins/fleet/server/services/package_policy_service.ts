@@ -84,7 +84,7 @@ export interface PackagePolicyClient {
 
   list(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery
+    options: ListWithKuery & { withAgentCount?: boolean }
   ): Promise<ListResult<PackagePolicy>>;
 
   listIds(
