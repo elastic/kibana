@@ -22,11 +22,14 @@ export async function bootstrapApmSynthtrace(
     })
     .slice(0, -1);
 
-  const kibanaClient = new apm.ApmSynthtraceKibanaClient({ logger: createLogger(LogLevel.info) });
+  const kibanaClient = new apm.ApmSynthtraceKibanaClient({
+    target: kibanaServerUrlWithAuth,
+    logger: createLogger(LogLevel.debug),
+  });
 
-  const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion(kibanaServerUrl);
+  const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
 
-  await kibanaClient.installApmPackage(kibanaServerUrlWithAuth, kibanaVersion);
+  await kibanaClient.installApmPackage(kibanaVersion);
 
   const esClient = new apm.ApmSynthtraceEsClient({
     client: es,

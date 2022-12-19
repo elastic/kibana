@@ -8,7 +8,7 @@
 
 import { Client, estypes } from '@elastic/elasticsearch';
 import { castArray } from 'lodash';
-import { PassThrough, pipeline, Readable, Transform } from 'stream';
+import { PassThrough, Readable, Transform, pipeline } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import { ValuesType } from 'utility-types';
 import {
@@ -17,7 +17,7 @@ import {
   SynthtraceGenerator,
 } from '../../../../types';
 import { Logger } from '../../../utils/create_logger';
-import { fork, parallel } from '../../../utils/stream_utils';
+import { fork, sequential } from '../../../utils/stream_utils';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
 import { createSpanMetricsAggregator } from '../../aggregators/create_span_metrics_aggregator';
 import { createTransactionMetricsAggregator } from '../../aggregators/create_transaction_metrics_aggregator';
@@ -154,7 +154,7 @@ export class ApmSynthtraceEsClient {
 
     let count: number = 0;
 
-    const stream = parallel(...allStreams);
+    const stream = sequential(...allStreams);
 
     await this.client.helpers.bulk({
       concurrency: this.concurrency,
@@ -162,6 +162,7 @@ export class ApmSynthtraceEsClient {
       refreshOnCompletion: false,
       flushBytes: 250000,
       datasource: stream,
+      filter_path: 'errors,items.*.error,items.*.status',
       onDocument: (doc: ESDocumentWithOperation<ApmFields>) => {
         let action: SynthtraceESAction;
         count++;

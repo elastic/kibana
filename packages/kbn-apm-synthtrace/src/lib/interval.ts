@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { castArray } from 'lodash';
+import { castArray, map } from 'lodash';
 import moment, { unitOfTime } from 'moment';
+import { Readable, Writable } from 'stream';
 import { SynthtraceGenerator } from '../types';
 import { Fields } from './entity';
 import { Serializable } from './serializable';
@@ -44,12 +45,7 @@ export class Interval<TFields = Fields> {
     this._rate = options.rate || 1;
   }
 
-  *generator<TGeneratedFields = TFields>(
-    map: (
-      timestamp: number,
-      index: number
-    ) => Serializable<TGeneratedFields> | Array<Serializable<TGeneratedFields>>
-  ): SynthtraceGenerator<TGeneratedFields> {
+  private getTimestamps() {
     const from = this.options.from.getTime();
     const to = this.options.to.getTime();
 
@@ -65,7 +61,18 @@ export class Interval<TFields = Fields> {
       time += diff;
     }
 
-    let index: number = 0;
+    return timestamps;
+  }
+
+  *generator<TGeneratedFields = TFields>(
+    map: (
+      timestamp: number,
+      index: number
+    ) => Serializable<TGeneratedFields> | Array<Serializable<TGeneratedFields>>
+  ): SynthtraceGenerator<TGeneratedFields> {
+    const timestamps = this.getTimestamps();
+
+    let index = 0;
 
     for (const timestamp of timestamps) {
       const events = castArray(map(timestamp, index));

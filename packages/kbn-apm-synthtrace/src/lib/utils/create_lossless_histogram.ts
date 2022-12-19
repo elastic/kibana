@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { sortBy } from 'lodash';
 // @ts-expect-error
 import Histogram from 'native-hdr-histogram';
 
@@ -14,7 +15,10 @@ interface SerializedHistogram {
   counts: number[];
   values: number[];
   total: number;
+  sum: number;
 }
+
+const MAX_VALUES_TO_TRACK_LOSSLESS = 10;
 
 class LosslessHistogram {
   private backingHistogram: any;
@@ -22,8 +26,7 @@ class LosslessHistogram {
   private readonly min: number;
   private readonly max: number;
 
-  private trackedValue: number | null = null;
-  private trackedCount: number = 0;
+  private readonly trackedValues: Map<number, number> = new Map();
 
   constructor(options?: { min?: number; max?: number }) {
     const { min, max } = options ?? {};
@@ -40,21 +43,26 @@ class LosslessHistogram {
 
     this.backingHistogram = histogram;
 
-    if (this.trackedValue !== null) {
-      histogram.record(this.trackedValue, this.trackedCount);
+    if (this.trackedValues.size > 0) {
+      this.trackedValues.forEach((count, value) => {
+        histogram.record(value, count);
+      });
     }
 
     return histogram;
   }
 
   record(value: number) {
-    if ((this.trackedValue !== null && this.trackedValue !== value) || this.backingHistogram) {
+    const countForValue = this.trackedValues.get(value);
+    if (
+      this.backingHistogram ||
+      (countForValue === undefined && this.trackedValues.size >= MAX_VALUES_TO_TRACK_LOSSLESS)
+    ) {
       this.getBackingHistogram().record(value);
       return;
     }
 
-    this.trackedValue = value;
-    this.trackedCount++;
+    this.trackedValues.set(value, 1 + (countForValue ?? 0));
   }
 
   serialize(): SerializedHistogram {
@@ -68,27 +76,43 @@ class LosslessHistogram {
       const values: number[] = [];
       const counts: number[] = [];
 
+      let sum: number = 0;
+
       for (const { value, count } of distribution) {
         values.push(value);
         counts.push(count);
+        sum += value * count;
       }
 
       return {
         values,
         counts,
         total: this.backingHistogram.totalCount,
+        sum,
       };
     }
 
-    if (this.trackedValue === null) {
-      throw new Error('Tracked value was unexpectedly null');
-    }
+    const values: number[] = [];
+    const counts: number[] = [];
+    let total = 0;
+    let sum = 0;
 
-    return {
-      values: [this.trackedValue],
-      counts: [this.trackedCount],
-      total: this.trackedCount,
-    };
+    let sortedValues: Array<{ value: number; count: number }> = [];
+
+    this.trackedValues.forEach((count, value) => {
+      sortedValues.push({ count, value });
+    });
+
+    sortedValues = sortBy(sortedValues, ({ value }) => value);
+
+    sortedValues.forEach(({ value, count }) => {
+      values.push(value);
+      counts.push(count);
+      total += count;
+      sum += value * count;
+    });
+
+    return { values, counts, total, sum };
   }
 }
 

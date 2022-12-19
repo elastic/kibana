@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import { Duplex, Transform } from 'stream';
+import { Duplex, PassThrough, Transform } from 'stream';
 import { Fields } from '../entity';
 import { parseInterval } from '../interval';
 import { appendHash } from './hash';
@@ -34,13 +34,13 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
     const { intervalAmount, intervalUnit } = parseInterval(flushInterval);
 
-    const flushEveryMs = moment.duration(intervalAmount, intervalUnit).asMilliseconds();
+    let nextFlush: number = Number.MIN_VALUE;
 
-    let nextFlush: number | null = null;
+    const flushEveryMs = moment.duration(intervalAmount, intervalUnit).asMilliseconds();
 
     let toFlush: TMetric[] = [];
 
-    function flush(stream: Duplex, includeCurrentMetrics: boolean, minSize: number = 0) {
+    function flush(stream: Duplex, includeCurrentMetrics: boolean, callback?: () => void) {
       const allItems = [...toFlush];
 
       toFlush = [];
@@ -50,42 +50,36 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
         metrics.clear();
       }
 
-      let flushed = 0;
-
       while (allItems.length) {
         const next = allItems.shift()!;
-        const shouldWriteNext = stream.push(serialize(next));
-        flushed++;
-        if (!shouldWriteNext && minSize <= flushed) {
+        const serialized = serialize(next);
+        const shouldWriteNext = stream.push(serialized);
+        if (!shouldWriteNext) {
           toFlush = allItems;
+          cb = callback;
           return;
         }
       }
 
-      if (cb) {
-        const next = cb;
-        cb = undefined;
-        next();
-      }
+      const next = cb;
+      cb = undefined;
+      next?.();
+      callback?.();
     }
 
     function getNextFlush(timestamp: number) {
-      return Math.ceil((timestamp + 1) / flushEveryMs) * flushEveryMs;
+      return Math.ceil(timestamp / flushEveryMs) * flushEveryMs;
     }
 
-    return new Transform({
+    return new PassThrough({
       objectMode: true,
-      read(size) {
-        flush(this, false, size);
+      read() {
+        flush(this, false, cb);
       },
       final(callback) {
-        flush(this, true);
-        callback();
+        flush(this, true, callback);
       },
       write(event: TFields, encoding, callback) {
-        if (cb) {
-          throw new Error('Writing to a paused stream');
-        }
         if (!filter(event)) {
           callback();
           return;
@@ -93,33 +87,29 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
         const timestamp = event['@timestamp']!;
 
-        if (typeof timestamp === 'string') {
-          throw new Error('Timestamp cannot be a string');
-        }
+        function writeMetric() {
+          const truncatedTimestamp = Math.floor(timestamp / flushEveryMs) * flushEveryMs;
 
-        const truncatedTimestamp = Math.floor(timestamp / flushEveryMs) * flushEveryMs;
-        const key = appendHash(getAggregateKey(event), truncatedTimestamp.toString());
+          const key = appendHash(getAggregateKey(event), truncatedTimestamp.toString());
 
-        let set = metrics.get(key);
+          let set = metrics.get(key);
 
-        if (!set) {
-          set = init({ ...event });
-          set['@timestamp'] = truncatedTimestamp;
-          metrics.set(key, set);
-        }
+          if (!set) {
+            set = init({ ...event });
+            set['@timestamp'] = truncatedTimestamp;
+            metrics.set(key, set);
+          }
 
-        reduce(set, event);
+          reduce(set, event);
 
-        if (nextFlush === null) {
-          nextFlush = getNextFlush(timestamp);
+          callback();
         }
 
         if (timestamp > nextFlush) {
           nextFlush = getNextFlush(timestamp);
-          cb = callback;
-          flush(this, true);
+          flush(this, true, writeMetric);
         } else {
-          callback();
+          writeMetric();
         }
       },
     });

@@ -6,41 +6,33 @@
  * Side Public License, v 1.
  */
 import { each, eachSeries } from 'async';
-import { Duplex, PassThrough, Transform } from 'stream';
+import MultiStream from 'multistream';
+import { Duplex, PassThrough, Readable, Transform } from 'stream';
+import { finished } from 'stream';
 
-export function parallel(...streams: NodeJS.ReadableStream[]) {
-  const pt = new PassThrough({ objectMode: true });
-  streams.forEach((stream) => {
-    stream.pipe(pt, { end: false });
-  });
-
-  each(
-    streams,
-    (stream, cb) => {
-      stream.on('end', () => {
-        cb();
-      });
-    },
-    () => {
-      pt.end();
-    }
-  );
-  return pt;
+export function sequential(...streams: Readable[]) {
+  return new MultiStream(streams, { objectMode: true });
 }
 
 export function fork(...streams: Transform[]): Duplex {
   const proxy = new Transform({
     objectMode: true,
-    read() {
-      resumeAllStreams();
+    final(callback) {
+      eachSeries(
+        streams,
+        (stream, cb) => {
+          stream.end(cb);
+        },
+        callback
+      );
     },
-    write(chunk, encoding, callback) {
+    transform(chunk, encoding, callback) {
       eachSeries(
         streams,
         (stream, cb) => {
           const shouldWriteNext = stream.write(chunk, cb);
           if (!shouldWriteNext) {
-            stream.on('drain', cb);
+            stream.once('drain', cb);
           }
         },
         () => {
@@ -50,24 +42,11 @@ export function fork(...streams: Transform[]): Duplex {
     },
   });
 
-  function pauseAllStreams() {
-    streams.forEach((stream) => stream.pause());
-  }
-
-  function resumeAllStreams() {
-    streams.forEach((stream) => stream.resume());
-  }
-
   streams.forEach((stream) =>
     stream.on('data', (chunk) => {
-      const shouldWriteNext = proxy.push(chunk);
-      if (!shouldWriteNext) {
-        pauseAllStreams();
-      }
+      proxy.push(chunk);
     })
   );
-
-  pauseAllStreams();
 
   return proxy;
 }

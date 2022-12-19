@@ -48,7 +48,8 @@ RUNTIME_DEPS = [
   "@npm//node-fetch",
   "@npm//semver",
   "@npm//elastic-apm-http-client",
-  "@npm//async"
+  "@npm//async",
+  "@npm//pidusage"
 ]
 
 TYPES_DEPS = [
@@ -64,6 +65,7 @@ TYPES_DEPS = [
   "@npm//@types/semver",
   "@npm//@types/yargs",
   "@npm//@types/async",
+  "@npm//@types/pidusage",
   "@npm//utility-types"
 ]
 

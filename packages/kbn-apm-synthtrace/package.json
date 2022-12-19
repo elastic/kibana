@@ -7,5 +7,6 @@
     "synthtrace": "./bin/synthtrace"
   },
   "private": true,
-  "types": "./target_types/index.d.ts"
+  "types": "./target_types/index.d.ts",
+  "main": "./target_node/index.js"
 }

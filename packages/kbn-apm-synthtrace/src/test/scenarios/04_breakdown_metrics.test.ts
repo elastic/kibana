@@ -88,13 +88,15 @@ describe('breakdown metrics', () => {
         )
     );
 
-    const stream = Readable.from(
-      listSpans.concat(productPageSpans).flatMap((event) => event.serialize())
-    ).pipe(createBreakdownMetricsAggregator('30s'));
+    const serializedEvents = listSpans
+      .concat(productPageSpans)
+      .flatMap((event) => event.serialize());
 
-    events = (await awaitStream<ApmFields>(stream)).filter(
-      (event) => event['metricset.name'] === 'span_breakdown'
-    );
+    const stream = Readable.from(serializedEvents).pipe(createBreakdownMetricsAggregator('30s'));
+
+    const allEvents = await awaitStream<ApmFields>(stream);
+
+    events = allEvents.filter((event) => event['metricset.name'] === 'span_breakdown');
   });
 
   it('generates the right amount of breakdown metrics', () => {
