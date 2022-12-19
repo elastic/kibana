@@ -8,7 +8,7 @@
 import { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useApmParams } from '../../../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { SpanFlyout } from './span_flyout';
 import { TransactionFlyout } from './transaction_flyout';
 import { IWaterfall } from './waterfall_helpers/waterfall_helpers';
@@ -33,7 +33,10 @@ export function WaterfallFlyout({
   const history = useHistory();
   const {
     query: { flyoutDetailTab },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
   const currentItem = waterfall.items.find(
     (item) => item.id === waterfallItemId
   );

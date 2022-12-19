@@ -9,45 +9,52 @@ import {
   EuiFlexGroupProps,
   EuiFlexItem,
   EuiSelect,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { Environment } from '../../../../../../common/environment_rt';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
+import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
-import { useFetcher } from '../../../../../hooks/use_fetcher';
+import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { push } from '../../../../shared/links/url_helpers';
 
 type MobileFilter =
   APIReturnType<'GET /internal/apm/services/{serviceName}/mobile/filters'>['mobileFilters'][0];
 
-interface Props {
-  end: string;
-  environment: Environment;
-  transactionType?: string;
-  kuery: string;
-  start: string;
-  filters: Record<MobileFilter['key'], string | undefined>;
-}
-
 const ALL_OPTION = {
   value: 'all',
   text: 'All',
 };
 
-export function MobileFilters({
-  end,
-  environment,
-  transactionType,
-  kuery,
-  start,
-  filters,
-}: Props) {
+export function MobileFilters() {
   const history = useHistory();
   const { isSmall, isLarge } = useBreakpoints();
   const { serviceName } = useApmServiceContext();
-  const { data = { mobileFilters: [] } } = useFetcher(
+
+  const {
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      netConnectionType,
+      device,
+      osVersion,
+      appVersion,
+      transactionType,
+    },
+  } = useAnyOfApmParams(
+    '/mobile-services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/transactions',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
+  const filters = { netConnectionType, device, osVersion, appVersion };
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { data = { mobileFilters: [] }, status } = useFetcher(
     (callApmApi) => {
       return callApmApi(
         'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -86,25 +93,29 @@ export function MobileFilters({
       responsive={false}
       direction={groupDirection}
     >
-      {data.mobileFilters.map((filter) => {
-        return (
-          <EuiFlexItem
-            grow={false}
-            key={filter.key}
-            style={isLarge ? {} : { width: '225px' }}
-          >
-            <EuiSelect
-              fullWidth={isSmall}
-              prepend={filter.label}
-              options={toSelectOptions(filter.options)}
-              value={filters[filter.key]}
-              onChange={(e) => {
-                onChangeFilter(filter.key, e.target.value);
-              }}
-            />
-          </EuiFlexItem>
-        );
-      })}
+      {isPending(status) ? (
+        <EuiLoadingSpinner size="m" />
+      ) : (
+        data.mobileFilters.map((filter) => {
+          return (
+            <EuiFlexItem
+              grow={false}
+              key={filter.key}
+              style={isLarge ? {} : { width: '225px' }}
+            >
+              <EuiSelect
+                fullWidth={isSmall}
+                prepend={filter.label}
+                options={toSelectOptions(filter.options)}
+                value={filters[filter.key]}
+                onChange={(e) => {
+                  onChangeFilter(filter.key, e.target.value);
+                }}
+              />
+            </EuiFlexItem>
+          );
+        })
+      )}
     </EuiFlexGroup>
   );
 }

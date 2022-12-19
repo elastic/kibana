@@ -35,7 +35,6 @@ import {
   SERVICE_VERSION,
 } from '../../../../../common/es_fields/apm';
 import { MostUsedChart } from './most_used_chart';
-import { MobileFilters } from './filters';
 import { LatencyMap } from './latency_map';
 import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
 import { ServiceOverviewDependenciesTable } from '../../service_overview/service_overview_dependencies_table';
@@ -55,17 +54,7 @@ export function MobileServiceOverview() {
 
   const {
     query,
-    query: {
-      environment,
-      kuery,
-      rangeFrom,
-      rangeTo,
-      netConnectionType,
-      device,
-      osVersion,
-      appVersion,
-      transactionType,
-    },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/mobile-services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -99,21 +88,6 @@ export function MobileServiceOverview() {
     >
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <MobileFilters
-              start={start}
-              end={end}
-              environment={environment}
-              transactionType={transactionType}
-              kuery={kuery}
-              filters={{
-                device,
-                osVersion,
-                appVersion,
-                netConnectionType,
-              }}
-            />
-          </EuiFlexItem>
           {fallbackToTransactions && (
             <EuiFlexItem>
               <AggregatedTransactionsBadge />
