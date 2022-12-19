@@ -68,25 +68,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(agent2data.body.item.tags).to.eql(['existingTag']);
       });
 
-      it('should allow to update tags of multiple agents by kuery', async () => {
-        await supertest
-          .post(`/api/fleet/agents/bulk_update_agent_tags`)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            agents: 'active: true',
-            tagsToAdd: ['newTag'],
-            tagsToRemove: ['existingTag'],
-          })
-          .expect(200);
-
-        const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
-        expect(body.total).to.eql(4);
-        body.items.forEach((agent: any) => {
-          expect(agent.tags.includes('newTag')).to.be(true);
-          expect(agent.tags.includes('existingTag')).to.be(false);
-        });
-      });
-
       async function pollResult(
         actionId: string,
         nbAgentsAck: number,
@@ -115,7 +96,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       }
 
-      it('should bulk update tags of multiple agents by kuery in batches - add', async () => {
+      it('should bulk update tags of multiple agents by kuery - add', async () => {
         const { body: actionBody } = await supertest
           .post(`/api/fleet/agents/bulk_update_agent_tags`)
           .set('kbn-xsrf', 'xxx')
@@ -123,7 +104,6 @@ export default function (providerContext: FtrProviderContext) {
             agents: 'active: true',
             tagsToAdd: ['newTag'],
             tagsToRemove: [],
-            batchSize: 3,
           })
           .expect(200);
 
@@ -139,7 +119,7 @@ export default function (providerContext: FtrProviderContext) {
         await pollResult(actionId, 4, verifyActionResult);
       });
 
-      it('should bulk update tags of multiple agents by kuery in batches - remove', async () => {
+      it('should bulk update tags of multiple agents by kuery - remove', async () => {
         const { body: actionBody } = await supertest
           .post(`/api/fleet/agents/bulk_update_agent_tags`)
           .set('kbn-xsrf', 'xxx')
@@ -147,7 +127,6 @@ export default function (providerContext: FtrProviderContext) {
             agents: 'active: true',
             tagsToAdd: [],
             tagsToRemove: ['existingTag'],
-            batchSize: 3,
           })
           .expect(200);
 
