@@ -129,6 +129,18 @@ const HELP_GROUPS = Object.freeze({
   },
 });
 
+const HELP_KUBE_COMMANDS = Object.freeze({
+  kubernetesActions: {
+    position: 1,
+    label: i18n.translate(
+      'xpack.securitySolution.endpointConsoleCommands.groups.kubernetesActions',
+      {
+        defaultMessage: 'Kubernetes Response actions',
+      }
+    ),
+  },
+});
+
 const ENTER_PID_OR_ENTITY_ID_INSTRUCTION = i18n.translate(
   'xpack.securitySolution.endpointResponseActionsConsoleCommands.enterPidOrEntityId',
   { defaultMessage: 'Enter a pid or an entity id to execute' }
@@ -483,8 +495,8 @@ export const getEndpointConsoleCommands = ({
         validate: kubernetesResourceValidator,
       },
     },
-    helpGroupLabel: HELP_GROUPS.responseActions.label,
-    helpGroupPosition: HELP_GROUPS.responseActions.position,
+    helpGroupLabel: HELP_KUBE_COMMANDS.kubernetesActions.label,
+    helpGroupPosition: HELP_KUBE_COMMANDS.kubernetesActions.position,
     helpCommandPosition: 7,
     helpDisabled: doesEndpointSupportCommand('kube-list') === false,
     helpHidden: !getRbacControl({ commandName: 'kube-list', privileges: endpointPrivileges }),
