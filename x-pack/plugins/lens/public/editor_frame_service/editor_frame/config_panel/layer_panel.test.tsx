@@ -12,6 +12,7 @@ import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../.
 import { LayerPanel } from './layer_panel';
 import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { generateId } from '../../../id_generator';
 import {
   createMockVisualization,
@@ -113,6 +114,7 @@ describe('LayerPanel', () => {
       onEmptyDimensionAdd: jest.fn(),
       onChangeIndexPattern: jest.fn(),
       indexPatternService: createIndexPatternServiceMock(),
+      dataViewsService: dataViewPluginMocks.createStartContract(),
     };
   }
 
