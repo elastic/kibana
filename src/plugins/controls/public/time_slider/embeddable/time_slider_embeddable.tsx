@@ -118,6 +118,10 @@ export class TimeSliderControlEmbeddable extends Embeddable<
           )
         : undefined;
 
+    this.prevTimesliceAsPercentage = {
+      timesliceStartAsPercentageOfTimeRange: this.getInput().timesliceStartAsPercentageOfTimeRange,
+      timesliceEndAsPercentageOfTimeRange: this.getInput().timesliceEndAsPercentageOfTimeRange,
+    };
     this.syncWithTimeRange();
   }
 
@@ -175,6 +179,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       getState().explicitInput.timesliceStartAsPercentageOfTimeRange;
     const timesliceEndAsPercentageOfTimeRange =
       getState().explicitInput.timesliceEndAsPercentageOfTimeRange;
+
     if (
       timesliceStartAsPercentageOfTimeRange !== undefined &&
       timesliceEndAsPercentageOfTimeRange !== undefined
@@ -209,7 +214,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     dispatch(actions.publishValue({ value }));
   }, 500);
 
-  private getTimeSliceAsPercentageOfTimeRange = (value?: [number, number]) => {
+  private getTimeSliceAsPercentageOfTimeRange(value?: [number, number]) {
     const { getState } = this.reduxEmbeddableTools;
     let timesliceStartAsPercentageOfTimeRange: number | undefined;
     let timesliceEndAsPercentageOfTimeRange: number | undefined;
@@ -226,7 +231,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       timesliceEndAsPercentageOfTimeRange,
     };
     return { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange };
-  };
+  }
 
   private onTimesliceChange = (value?: [number, number]) => {
     const { actions, dispatch } = this.reduxEmbeddableTools;
