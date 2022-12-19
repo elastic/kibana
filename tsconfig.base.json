@@ -1070,6 +1070,8 @@
       "@kbn/cases-plugin/*": ["x-pack/plugins/cases/*"],
       "@kbn/cloud-chat-plugin": ["x-pack/plugins/cloud_integrations/cloud_chat"],
       "@kbn/cloud-chat-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_chat/*"],
+      "@kbn/cloud-data-migration-plugin": ["x-pack/plugins/cloud_integrations/cloud_data_migration"],
+      "@kbn/cloud-data-migration-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_data_migration/*"],
       "@kbn/cloud-experiments-plugin": ["x-pack/plugins/cloud_integrations/cloud_experiments"],
       "@kbn/cloud-experiments-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_experiments/*"],
       "@kbn/cloud-full-story-plugin": ["x-pack/plugins/cloud_integrations/cloud_full_story"],
