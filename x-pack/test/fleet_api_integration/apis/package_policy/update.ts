@@ -7,10 +7,12 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const superTestWithoutAuth = getService('supertestWithoutAuth');
   const dockerServers = getService('dockerServers');
   const kibanaServer = getService('kibanaServer');
 
@@ -206,6 +208,34 @@ export default function (providerContext: FtrProviderContext) {
             title: 'For File Tests',
             version: '0.1.0',
           },
+        });
+    });
+
+    it('should return a 403 with package names that are not allowed', async function () {
+      await superTestWithoutAuth
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .auth(
+          testUsers.endpoint_integr_write_policy.username,
+          testUsers.endpoint_integr_write_policy.password
+        )
+        .send({
+          name: 'updated_name',
+          description: '',
+          namespace: 'updated_namespace',
+          policy_id: managedAgentPolicyId,
+          enabled: true,
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(403, {
+          error: 'Forbidden',
+          message: 'Update for package name filetest is not authorized.',
+          statusCode: 403,
         });
     });
 

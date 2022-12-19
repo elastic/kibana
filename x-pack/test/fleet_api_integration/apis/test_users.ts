@@ -74,7 +74,7 @@ export const testUsers: {
     password: 'changeme',
   },
   // for package_policy get one, bulk get with ids, get list
-  any_integr_read_policy_read: {
+  endpoint_integr_read_policy: {
     permissions: {
       feature: {
         fleet: ['read'],
@@ -89,11 +89,11 @@ export const testUsers: {
       },
       spaces: ['*'],
     },
-    username: 'any_integr_read_policy_read',
+    username: 'endpoint_integr_read_policy',
     password: 'changeme',
   },
   // for package_policy update API
-  any_integr_write_policy_write: {
+  endpoint_integr_write_policy: {
     permissions: {
       feature: {
         fleet: ['all'],
@@ -101,7 +101,7 @@ export const testUsers: {
       },
       spaces: ['*'],
     },
-    username: 'any_integr_write_policy_write',
+    username: 'endpoint_integr_write_policy',
     password: 'changeme',
   },
 };
