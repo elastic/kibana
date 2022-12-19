@@ -8,8 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { ControlGroupContainer, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Filter, TimeRange, compareFilters } from '@kbn/es-query';
-import { isEqual } from 'lodash';
+import { Filter, TimeRange } from '@kbn/es-query';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
@@ -44,21 +43,26 @@ export const ControlsContent: React.FC<Props> = ({
     if (!controlGroup) {
       return;
     }
-    if (
-      !isEqual(controlGroup.getInput().timeRange, timeRange) ||
-      !compareFilters(controlGroup.getInput().filters ?? [], filters) ||
-      !isEqual(controlGroup.getInput().query, query)
-    ) {
-      controlGroup.updateInput({
-        timeRange,
-        query,
-        filters,
+    const filtersSubscription = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
+      setPanelFilters([...newFilters]);
+    });
+    const inputSubscription = controlGroup
+      .getInput$()
+      .subscribe(({ panels, filters: currentFilters }) => {
+        setControlPanels(panels);
+        if (currentFilters?.length === 0) {
+          setPanelFilters([]);
+        }
       });
-    }
-  }, [query, filters, controlGroup, timeRange]);
+    return () => {
+      filtersSubscription.unsubscribe();
+      inputSubscription.unsubscribe();
+    };
+  }, [controlGroup, setControlPanels, setPanelFilters]);
 
   return (
     <LazyControlsRenderer
+      filters={filters}
       getInitialInput={async () => ({
         id: dataViewId,
         type: CONTROL_GROUP_TYPE,
@@ -74,16 +78,9 @@ export const ControlsContent: React.FC<Props> = ({
       })}
       onLoadComplete={(newControlGroup) => {
         setControlGroup(newControlGroup);
-        newControlGroup.onFiltersPublished$.subscribe((newFilters) => {
-          setPanelFilters([...newFilters]);
-        });
-        newControlGroup.getInput$().subscribe(({ panels, filters: currentFilters }) => {
-          setControlPanels(panels);
-          if (currentFilters?.length === 0) {
-            setPanelFilters([]);
-          }
-        });
       }}
+      query={query}
+      timeRange={timeRange}
     />
   );
 };

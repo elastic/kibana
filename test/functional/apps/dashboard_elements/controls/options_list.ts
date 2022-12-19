@@ -439,6 +439,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await pieChart.getPieSliceCount()).to.be(2);
           await dashboard.clearUnsavedChanges();
         });
+
+        it('changes to selections can be discarded', async () => {
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await dashboardControls.optionsListPopoverSelectOption('bark');
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+          let selections = await dashboardControls.optionsListGetSelectionsString(controlId);
+          expect(selections).to.equal('hiss, grr, bark');
+
+          await dashboard.clickCancelOutOfEditMode();
+          selections = await dashboardControls.optionsListGetSelectionsString(controlId);
+          expect(selections).to.equal('hiss, grr');
+        });
+
+        it('dashboard does not load with unsaved changes when changes are discarded', async () => {
+          await dashboard.switchToEditMode();
+          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        });
       });
 
       describe('test data view runtime field', async () => {
