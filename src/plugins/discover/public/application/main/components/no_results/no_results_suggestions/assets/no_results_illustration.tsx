@@ -12,8 +12,8 @@ import React from 'react';
 export const NoResultsIllustration = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="226"
-    height="166"
+    width="290"
+    height="206.14"
     fill="none"
     viewBox="0 0 226 166"
   >

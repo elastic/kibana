@@ -13,14 +13,22 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import {
+  stubDataView,
+  stubDataViewWithoutTimeField,
+} from '@kbn/data-views-plugin/common/data_view.stub';
 import * as QueryApi from '@kbn/unified-field-list-plugin/public/hooks/use_query_subscriber';
 import { DiscoverNoResults, DiscoverNoResultsProps } from './no_results';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 
-const dataView = stubDataView;
+const MOCK_DEFAULT_QUERY = {
+  query: { language: 'lucene', query: '' },
+  filters: [],
+  fromDate: 'now-15m',
+  toDate: 'now',
+};
 
-jest.spyOn(QueryApi, 'useQuerySubscriber');
+jest.spyOn(QueryApi, 'useQuerySubscriber').mockImplementation(() => MOCK_DEFAULT_QUERY);
 jest.spyOn(RxApi, 'lastValueFrom').mockImplementation(async () => ({
   rawResponse: {
     aggregations: {
@@ -35,7 +43,7 @@ jest.spyOn(RxApi, 'lastValueFrom').mockImplementation(async () => ({
 }));
 
 async function mountAndFindSubjects(
-  props: Omit<DiscoverNoResultsProps, 'onDisableFilters' | 'data' | 'dataView'>
+  props: Omit<DiscoverNoResultsProps, 'onDisableFilters' | 'data' | 'isTimeBased'>
 ) {
   const services = createDiscoverServicesMock();
 
@@ -46,7 +54,7 @@ async function mountAndFindSubjects(
       <KibanaContextProvider services={services}>
         <DiscoverNoResults
           data={services.data}
-          dataView={dataView}
+          isTimeBased={props.dataView.isTimeBased()}
           onDisableFilters={() => {}}
           {...props}
         />
@@ -55,7 +63,9 @@ async function mountAndFindSubjects(
   });
 
   await new Promise((resolve) => setTimeout(resolve, 0));
-  await component!.update();
+  await act(async () => {
+    await component!.update();
+  });
 
   return {
     mainMsg: findTestSubject(component!, 'discoverNoResults').exists(),
@@ -77,7 +87,9 @@ describe('DiscoverNoResults', () => {
   describe('props', () => {
     describe('no props', () => {
       test('renders default feedback', async () => {
-        const result = await mountAndFindSubjects({});
+        const result = await mountAndFindSubjects({
+          dataView: stubDataViewWithoutTimeField,
+        });
         expect(result).toMatchInlineSnapshot(`
           Object {
             "adjustFilters": false,
@@ -93,13 +105,8 @@ describe('DiscoverNoResults', () => {
     });
     describe('timeFieldName', () => {
       test('renders time range feedback', async () => {
-        (QueryApi.useQuerySubscriber as jest.Mock).mockImplementation(() => ({
-          query: { language: 'lucene', query: '' },
-          filters: [],
-        }));
-
         const result = await mountAndFindSubjects({
-          isTimeBased: true,
+          dataView: stubDataView,
         });
         expect(result).toMatchInlineSnapshot(`
           Object {
@@ -112,29 +119,33 @@ describe('DiscoverNoResults', () => {
             "mainMsg": true,
           }
         `);
-        expect(QueryApi.useQuerySubscriber).toHaveBeenCalledTimes(1);
+        expect(QueryApi.useQuerySubscriber).toHaveBeenCalled();
         expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(1);
       });
     });
 
     describe('filter/query', () => {
       test('shows "adjust search" message when having query', async () => {
-        (QueryApi.useQuerySubscriber as jest.Mock).mockImplementation(() => ({
+        const mockNonEmptyQuery = {
+          ...MOCK_DEFAULT_QUERY,
           query: { language: 'lucene', query: '*' },
-          filters: [],
-        }));
+        };
+        (QueryApi.useQuerySubscriber as jest.Mock).mockReset();
+        (QueryApi.useQuerySubscriber as jest.Mock).mockImplementation(() => mockNonEmptyQuery);
 
-        const result = await mountAndFindSubjects({});
+        const result = await mountAndFindSubjects({ dataView: stubDataView });
         expect(result).toHaveProperty('adjustSearch', true);
       });
 
       test('shows "adjust filters" message when having filters', async () => {
-        (QueryApi.useQuerySubscriber as jest.Mock).mockImplementation(() => ({
-          query: { language: 'lucene', query: '' },
+        const mockQueryWithFilters = {
+          ...MOCK_DEFAULT_QUERY,
           filters: [{}],
-        }));
+        };
+        (QueryApi.useQuerySubscriber as jest.Mock).mockReset();
+        (QueryApi.useQuerySubscriber as jest.Mock).mockImplementation(() => mockQueryWithFilters);
 
-        const result = await mountAndFindSubjects({});
+        const result = await mountAndFindSubjects({ dataView: stubDataView });
         expect(result).toHaveProperty('adjustFilters', true);
         expect(result).toHaveProperty('disableFiltersButton', true);
       });
@@ -144,7 +155,7 @@ describe('DiscoverNoResults', () => {
       test('renders error message', async () => {
         const error = new Error('Fatal error');
         const result = await mountAndFindSubjects({
-          isTimeBased: true,
+          dataView: stubDataView,
           error,
         });
         expect(result).toMatchInlineSnapshot(`

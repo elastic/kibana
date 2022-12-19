@@ -8,17 +8,15 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescriptionList, EuiDescriptionListDescription } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 
 export function NoResultsSuggestionDefault() {
   return (
-    <EuiDescriptionList compressed>
-      <EuiDescriptionListDescription data-test-subj="discoverNoResultsCheckIndices">
-        <FormattedMessage
-          id="discover.noResults.noDocumentsOrCheckPermissionsDescription"
-          defaultMessage="Make sure you have permission to view the indices and that they contain documents."
-        />
-      </EuiDescriptionListDescription>
-    </EuiDescriptionList>
+    <EuiText data-test-subj="discoverNoResultsCheckIndices">
+      <FormattedMessage
+        id="discover.noResults.noDocumentsOrCheckPermissionsDescription"
+        defaultMessage="Make sure you have permission to view the indices and that they contain documents."
+      />
+    </EuiText>
   );
 }

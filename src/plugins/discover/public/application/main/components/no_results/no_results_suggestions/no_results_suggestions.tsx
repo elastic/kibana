@@ -7,10 +7,11 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import dateMath from '@kbn/datemath';
+import { EuiEmptyPrompt, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isOfQueryType } from '@kbn/es-query';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
 import { NoResultsSuggestionDefault } from './no_results_suggestion_default';
 import {
@@ -20,48 +21,106 @@ import {
 import { NoResultsSuggestionWhenQuery } from './no_results_suggestion_when_query';
 import { NoResultsSuggestionWhenTimeRange } from './no_results_suggestion_when_time_range';
 import { hasActiveFilter } from '../../layout/utils';
+import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
+import { useFetchOccurrencesRange } from './use_fetch_occurances_range';
+import { NoResultsIllustration } from './assets/no_results_illustration';
 
 interface NoResultsSuggestionProps {
-  data: DataPublicPluginStart;
   dataView: DataView;
   isTimeBased?: boolean;
   onDisableFilters: NoResultsSuggestionWhenFiltersProps['onDisableFilters'];
 }
 
-export function NoResultsSuggestions({
-  data,
-  dataView,
-  isTimeBased,
-  onDisableFilters,
-}: NoResultsSuggestionProps) {
-  const { query, filters } = useQuerySubscriber({ data });
-  const hasQuery = isOfQueryType(query) && !!query?.query;
-  const hasFilters = hasActiveFilter(filters);
-  const canAdjustSearchCriteria = isTimeBased || hasFilters || hasQuery;
+export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = React.memo(
+  ({ dataView, isTimeBased, onDisableFilters }) => {
+    const services = useDiscoverServices();
+    const { data, uiSettings, timefilter } = services;
+    const { query, filters } = useQuerySubscriber({ data });
+    const hasQuery = isOfQueryType(query) && !!query?.query;
+    const hasFilters = hasActiveFilter(filters);
 
-  if (canAdjustSearchCriteria) {
-    return (
+    const {
+      isLoading,
+      range: occurrencesRange,
+      refetch,
+    } = useFetchOccurrencesRange({
+      dataView,
+      query,
+      filters,
+      services: {
+        data,
+        uiSettings,
+      },
+    });
+
+    const expandTimeRange = async () => {
+      const range = await refetch();
+      if (range?.from && range?.to) {
+        timefilter.setTime({
+          from: dateMath.parse(range.to)!.subtract(24, 'hours').toISOString(),
+          to: range.to,
+        });
+      }
+    };
+
+    const canExtendTimeRange = Boolean(occurrencesRange?.from && occurrencesRange.to);
+    const canAdjustSearchCriteria = isTimeBased || hasFilters || hasQuery;
+
+    const body = canAdjustSearchCriteria ? (
       <>
-        {isTimeBased && (
-          <>
-            <NoResultsSuggestionWhenTimeRange dataView={dataView} query={query} filters={filters} />
-          </>
-        )}
-        {hasQuery && (
-          <>
-            <EuiSpacer size="s" />
-            <NoResultsSuggestionWhenQuery />
-          </>
-        )}
-        {hasFilters && (
-          <>
-            <EuiSpacer size="s" />
-            <NoResultsSuggestionWhenFilters onDisableFilters={onDisableFilters} />
-          </>
-        )}
+        <FormattedMessage
+          id="discover.noResults.suggestion.tryText"
+          defaultMessage="Here are some things to try:"
+        />
+        <ul>
+          {isTimeBased && (
+            <li>
+              <NoResultsSuggestionWhenTimeRange />
+            </li>
+          )}
+          {hasQuery && (
+            <li>
+              <NoResultsSuggestionWhenQuery />
+            </li>
+          )}
+          {hasFilters && (
+            <li>
+              <NoResultsSuggestionWhenFilters onDisableFilters={onDisableFilters} />
+            </li>
+          )}
+        </ul>
       </>
+    ) : (
+      <NoResultsSuggestionDefault />
+    );
+
+    return (
+      <EuiEmptyPrompt
+        layout="horizontal"
+        color="plain"
+        icon={<NoResultsIllustration />}
+        title={
+          <h2 data-test-subj="discoverNoResults">
+            <FormattedMessage
+              id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
+              defaultMessage="No results match your search&nbsp;criteria"
+            />
+          </h2>
+        }
+        body={body}
+        actions={
+          typeof occurrencesRange === 'undefined' ? (
+            <EuiLoadingSpinner />
+          ) : canExtendTimeRange ? (
+            <EuiButton color="primary" fill onClick={expandTimeRange} isLoading={isLoading}>
+              <FormattedMessage
+                id="discover.noResults.suggestion.viewRecentMatchesButtonText"
+                defaultMessage="View recent matches"
+              />
+            </EuiButton>
+          ) : undefined
+        }
+      />
     );
   }
-
-  return <NoResultsSuggestionDefault />;
-}
+);

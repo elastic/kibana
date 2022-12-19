@@ -8,24 +8,15 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-} from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 
 export function NoResultsSuggestionWhenQuery() {
   return (
-    <EuiDescriptionList compressed>
-      <EuiDescriptionListTitle data-test-subj="discoverNoResultsAdjustSearch">
-        <FormattedMessage id="discover.noResults.adjustSearch" defaultMessage="Adjust your query" />
-      </EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
-        <FormattedMessage
-          id="discover.noResults.tryUpdatingYourSearchQuery"
-          defaultMessage="Try changing or clearing your search query."
-        />
-      </EuiDescriptionListDescription>
-    </EuiDescriptionList>
+    <EuiText data-test-subj="discoverNoResultsAdjustSearch">
+      <FormattedMessage
+        id="discover.noResults.suggestion.adjustYourQueryQueryText"
+        defaultMessage="Adjust your query" // TODO: add "see examples"
+      />
+    </EuiText>
   );
 }

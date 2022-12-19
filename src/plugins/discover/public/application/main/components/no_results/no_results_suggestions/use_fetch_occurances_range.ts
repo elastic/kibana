@@ -31,21 +31,28 @@ export interface OccurrencesRange {
   to: string;
 }
 
-export const useFetchOccurrencesRange = (
-  params: Params
-): { range: OccurrencesRange | null; refetch: () => Promise<OccurrencesRange | null> } => {
+export interface Result {
+  isLoading: boolean;
+  range: OccurrencesRange | null | undefined;
+  refetch: () => Promise<OccurrencesRange | null | undefined>;
+}
+
+export const useFetchOccurrencesRange = (params: Params): Result => {
   const data = params.services.data;
   const uiSettings = params.services.uiSettings;
-  const [range, setRange] = useState<OccurrencesRange | null>(null);
+  const [range, setRange] = useState<OccurrencesRange | null | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const mountedRef = useRef<boolean>(true);
 
   const fetchOccurrences = useCallback(
     async (dataView?: DataView, query?: Query | AggregateQuery, filters?: Filter[]) => {
       let occurrencesRange = null;
-      if (!dataView?.timeFieldName || !query) {
+      if (!dataView?.timeFieldName || !query || !mountedRef.current) {
         return null;
       }
+
+      setIsLoading(true);
 
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
@@ -69,11 +76,12 @@ export const useFetchOccurrencesRange = (
 
       if (mountedRef.current) {
         setRange(occurrencesRange);
+        setIsLoading(false);
       }
 
       return occurrencesRange;
     },
-    [abortControllerRef, setRange, mountedRef, data, uiSettings]
+    [abortControllerRef, setRange, setIsLoading, mountedRef, data, uiSettings]
   );
 
   useEffect(() => {
@@ -88,6 +96,7 @@ export const useFetchOccurrencesRange = (
   }, [fetchOccurrences, params.query, params.filters, params.dataView]);
 
   return {
+    isLoading,
     range,
     refetch: () => fetchOccurrences(params.dataView, params.query, params.filters),
   };
