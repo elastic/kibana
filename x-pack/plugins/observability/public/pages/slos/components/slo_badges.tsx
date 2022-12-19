@@ -12,11 +12,11 @@ import { euiLightVars } from '@kbn/ui-theme';
 import { isSloHealthy } from '../helpers/is_slo_healthy';
 import { SLO } from '../../../typings';
 
-export interface SloBadgeProps {
+export interface SloBadgesProps {
   slo: SLO;
 }
 
-export function SloBadges({ slo }: SloBadgeProps) {
+export function SloBadges({ slo }: SloBadgesProps) {
   return (
     <>
       {isSloHealthy(slo) ? (

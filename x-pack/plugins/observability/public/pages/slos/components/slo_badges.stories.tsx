@@ -9,7 +9,7 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloBadges as Component, SloBadgeProps } from './slo_badges';
+import { SloBadges as Component, SloBadgesProps } from './slo_badges';
 import { anSLO } from '../../../../common/data/slo';
 
 export default {
@@ -18,7 +18,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: SloBadgeProps) => (
+const Template: ComponentStory<typeof Component> = (props: SloBadgesProps) => (
   <Component {...props} />
 );
 
