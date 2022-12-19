@@ -134,7 +134,9 @@ describe('common_transformations', () => {
             "recovered": 3,
           },
           "outcome": "failed",
-          "outcomeMsg": "this is just a test",
+          "outcomeMsg": Array [
+            "this is just a test",
+          ],
           "warning": "unknown",
         },
         "monitoring": Object {
@@ -295,7 +297,9 @@ describe('common_transformations', () => {
             "recovered": 3,
           },
           "outcome": "failed",
-          "outcomeMsg": "this is just a test",
+          "outcomeMsg": Array [
+            "this is just a test",
+          ],
           "warning": "unknown",
         },
         "monitoring": Object {
