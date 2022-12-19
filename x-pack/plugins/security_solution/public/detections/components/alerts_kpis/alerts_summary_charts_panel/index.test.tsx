@@ -18,7 +18,7 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-describe('AlertsChartsPanel', () => {
+describe('AlertsSummaryChartsPanel', () => {
   const defaultProps = {
     signalIndexName: 'signalIndexName',
   };

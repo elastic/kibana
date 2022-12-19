@@ -12,7 +12,7 @@ import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ShapeTreeNode, ElementClickListener } from '@elastic/charts';
 import * as i18n from '../translations';
-import type { ParsedSeverityData, SeverityData } from '../types';
+import type { SeverityBuckets as SeverityData } from '../../../../../overview/components/detection_response/alerts_by_status/types';
 import type { FillColor } from '../../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../../common/components/charts/donutchart';
 import { ChartLabel } from '../../../../../overview/components/detection_response/alerts_by_status/chart_label';
@@ -20,17 +20,12 @@ import { HeaderSection } from '../../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { getSeverityTableColumns } from '../columns';
 import { getSeverityColor } from '../helpers';
+import { TOTAL_COUNT_OF_ALERTS } from '../../../alerts_table/translations';
+import type { ChartsPanelProps } from '../types';
 
 const DONUT_HEIGHT = 150;
 
-interface AlertsChartsPanelProps {
-  data: ParsedSeverityData;
-  isLoading: boolean;
-  uniqueQueryId: string;
-  addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
-}
-
-export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
+export const SeverityLevelChart: React.FC<ChartsPanelProps> = ({
   data,
   isLoading,
   uniqueQueryId,
@@ -41,15 +36,14 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
   }, []);
 
   const columns = useMemo(() => getSeverityTableColumns(), []);
-  const items = data ?? [];
-
+  const items = useMemo(() => (data as SeverityData[]) ?? [], [data]);
   const count = useMemo(() => {
-    return data
-      ? data.reduce(function (prev, cur) {
+    return items
+      ? items.reduce(function (prev, cur) {
           return prev + cur.value;
         }, 0)
       : 0;
-  }, [data]);
+  }, [items]);
 
   const sorting: { sort: { field: keyof SeverityData; direction: SortOrder } } = {
     sort: {
@@ -76,7 +70,7 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
   );
 
   return (
-    <EuiFlexItem>
+    <EuiFlexItem style={{ minWidth: 350 }}>
       <InspectButtonContainer>
         <EuiPanel>
           <HeaderSection
@@ -97,13 +91,13 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
                 sorting={sorting}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem>
               <DonutChart
                 data-test-subj="severity-level-donut"
-                data={data}
+                data={items}
                 fillColor={fillColor}
                 height={DONUT_HEIGHT}
-                label={i18n.SEVERITY_TOTAL_ALERTS}
+                label={TOTAL_COUNT_OF_ALERTS}
                 title={<ChartLabel count={count} />}
                 totalCount={count}
                 onElementClick={onElementClick}

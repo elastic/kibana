@@ -18,7 +18,7 @@ jest.mock('react-router-dom', () => {
 
 describe('Severity level chart', () => {
   const defaultProps = {
-    data: [],
+    data: null,
     isLoading: false,
     uniqueQueryId: 'test-query-id',
   };

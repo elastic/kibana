@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const from = '2022-04-05T12:00:00.000Z';
-export const to = '2022-04-08T12:00:00.000Z';
+const from = '2022-04-05T12:00:00.000Z';
+const to = '2022-04-08T12:00:00.000Z';
 
 export const mockAlertsData = {
   took: 0,
-  timed_out: false,
+  timeout: false,
   _shards: {
     total: 1,
     successful: 1,
@@ -50,16 +50,9 @@ export const mockAlertsData = {
   },
 };
 
-export const parsedAlerts = [
-  { key: 'high', value: 78, label: 'High' },
-  { key: 'low', value: 46, label: 'Low' },
-  { key: 'medium', value: 32, label: 'Medium' },
-  { key: 'critical', value: 21, label: 'Critical' },
-];
-
 export const mockAlertsEmptyData = {
   took: 0,
-  timed_out: false,
+  timeout: false,
   _shards: {
     total: 1,
     successful: 1,
@@ -83,12 +76,19 @@ export const mockAlertsEmptyData = {
   },
 };
 
-export const alertsBySeverityQuery = {
+export const severityQuery = {
   size: 0,
   query: {
     bool: {
       filter: [
-        { bool: { filter: [], must: [], must_not: [], should: [] } },
+        {
+          bool: {
+            filter: [],
+            must: [],
+            must_not: [],
+            should: [],
+          },
+        },
         { range: { '@timestamp': { gte: from, lte: to } } },
       ],
     },
@@ -102,3 +102,10 @@ export const alertsBySeverityQuery = {
   },
   runtime_mappings: undefined,
 };
+
+export const parsedAlerts = [
+  { key: 'high', value: 78, label: 'High' },
+  { key: 'low', value: 46, label: 'Low' },
+  { key: 'medium', value: 32, label: 'Medium' },
+  { key: 'critical', value: 21, label: 'Critical' },
+];

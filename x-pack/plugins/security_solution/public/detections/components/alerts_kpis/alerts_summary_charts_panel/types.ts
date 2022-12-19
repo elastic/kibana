@@ -4,12 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
 import type { EntityFilter } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import type {
+  SeverityBucket,
+  SeverityBuckets as SeverityData,
+} from '../../../../overview/components/detection_response/alerts_by_status/types';
+import type { BucketItem } from '../../../../../common/search_strategy/security_solution/cti';
 
+export type AggregationType = 'Severity' | 'Detections' | 'Host';
+export type DetectionType = 'Detections' | 'Preventions';
+
+export interface ChartsPanelProps {
+  data: SummaryChartsData[] | null;
+  isLoading: boolean;
+  uniqueQueryId: string;
+  addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
+}
 export interface UseAlertsQueryProps {
+  aggregations: {};
+  aggregationType: AggregationType;
   uniqueQueryId: string;
   signalIndexName: string | null;
   skip?: boolean;
@@ -17,61 +32,6 @@ export interface UseAlertsQueryProps {
   query?: Query;
   filters?: Filter[];
   runtimeMappings?: MappingRuntimeFields;
-}
-
-export interface AlertsResponse<Hit = {}, Aggregations = {} | undefined> {
-  took: number;
-  _shards: {
-    total: number;
-    successful: number;
-    skipped: number;
-    failed: number;
-  };
-  aggregations?: Aggregations;
-  hits: {
-    total: {
-      value: number;
-      relation: string;
-    };
-    hits: Hit[];
-  };
-}
-
-export interface SeverityData {
-  key: Severity;
-  value: number;
-  label: string;
-}
-
-export interface AlertsBySeverityAgg {
-  statusBySeverity: {
-    doc_count_error_upper_bound: number;
-    sum_other_doc_count: number;
-    buckets: SeverityBucket[];
-  };
-}
-interface SeverityBucket {
-  key: Severity;
-  doc_count: number;
-}
-
-export interface AlertsByHostAgg {
-  alertsByHost: {
-    doc_count_error_upper_bound: number;
-    sum_other_doc_count: number;
-    buckets: HostBucket[];
-  };
-}
-
-export interface HostBucket {
-  key: string;
-  doc_count: number;
-}
-
-export interface HostData {
-  key: string;
-  value: number;
-  label: string;
 }
 
 export interface AlertsByRuleAgg {
@@ -82,7 +42,7 @@ export interface AlertsByRuleAgg {
   };
 }
 
-interface RuleBucket {
+export interface RuleBucket {
   key: string;
   doc_count: number;
   ruleByEventType?: RuleByEventType;
@@ -91,16 +51,34 @@ interface RuleBucket {
 interface RuleByEventType {
   doc_count_error_upper_bound: number;
   sum_other_doc_count: number;
-  buckets: EventBucket[];
-}
-
-interface EventBucket {
-  key: string;
-  doc_count: number;
+  buckets: BucketItem[];
 }
 
 export interface DetectionsData {
   rule: string;
-  preventions: number;
-  detections: number;
+  type: string;
+  value: number;
 }
+
+export interface AlertsBySeverityAgg {
+  statusBySeverity: {
+    doc_count_error_upper_bound: number;
+    sum_other_doc_count: number;
+    buckets: SeverityBucket[];
+  };
+}
+export interface AlertsByHostAgg {
+  alertsByHost: {
+    doc_count_error_upper_bound: number;
+    sum_other_doc_count: number;
+    buckets: BucketItem[];
+  };
+}
+export interface HostData {
+  key: string;
+  value: number;
+  label: string;
+}
+
+export type SummaryChartsAgg = Partial<AlertsByHostAgg | AlertsBySeverityAgg | AlertsByRuleAgg>;
+export type SummaryChartsData = Partial<HostData | DetectionsData | SeverityData>;

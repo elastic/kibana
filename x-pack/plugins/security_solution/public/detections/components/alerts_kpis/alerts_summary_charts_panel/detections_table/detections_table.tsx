@@ -7,28 +7,26 @@
 
 import { EuiFlexItem, EuiPanel, EuiInMemoryTable } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import type { DetectionsData } from '../types';
+import styled from 'styled-components';
+import type { ChartsPanelProps, DetectionsData } from '../types';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { getDetectionsTableColumns } from '../columns';
 import * as i18n from '../translations';
 
-interface DetectionsTableProps {
-  data: DetectionsData[] | null;
-  isLoading: boolean;
-  uniqueQueryId: string;
-}
+const TABLE_HEIGHT = 150;
 
-export const DetectionsTable: React.FC<DetectionsTableProps> = ({
-  data,
-  isLoading,
-  uniqueQueryId,
-}) => {
+export const DetectionsTable: React.FC<ChartsPanelProps> = ({ data, isLoading, uniqueQueryId }) => {
   const columns = useMemo(() => getDetectionsTableColumns(), []);
-  const items = data ?? [];
-
+  const items = (data as DetectionsData[]) ?? [];
+  const Wrapper = styled.div`
+    margin-top: -${({ theme }) => theme.eui.euiSizeS};
+    @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.xl}) {
+      ${() => `height: ${TABLE_HEIGHT}px;`}
+    }
+  `;
   return (
-    <EuiFlexItem>
+    <EuiFlexItem style={{ minWidth: 350 }}>
       <InspectButtonContainer>
         <EuiPanel>
           <HeaderSection
@@ -39,12 +37,9 @@ export const DetectionsTable: React.FC<DetectionsTableProps> = ({
             titleSize="xs"
             hideSubtitle
           />
-          <EuiInMemoryTable
-            data-test-subj="alert-detections-table"
-            columns={columns}
-            items={items}
-            loading={isLoading}
-          />
+          <Wrapper data-test-subj="alert-detections-table" className="eui-yScroll">
+            <EuiInMemoryTable columns={columns} items={items} loading={isLoading} />
+          </Wrapper>
         </EuiPanel>
       </InspectButtonContainer>
     </EuiFlexItem>

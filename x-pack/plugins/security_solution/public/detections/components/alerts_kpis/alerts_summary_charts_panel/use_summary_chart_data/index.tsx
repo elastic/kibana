@@ -7,29 +7,62 @@
 
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { buildEsQuery } from '@kbn/es-query';
-import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import type { AlertsBySeverityAgg, UseAlertsQueryProps, SeverityData } from '../types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { SummaryChartsAgg, SummaryChartsData, UseAlertsQueryProps } from '../types';
+import type { EntityFilter } from '../../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import type { ESBoolQuery } from '../../../../../../common/typed_json';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
 import { useInspectButton } from '../../common/hooks';
-import { parseSeverityData, getAlertsQuery } from '../helpers';
+import { parseData } from '../helpers';
 
-const aggregations = {
-  statusBySeverity: {
-    terms: {
-      field: ALERT_SEVERITY,
-    },
-  },
-};
-
-export type UseAlertsBySeverity = (props: UseAlertsQueryProps) => {
-  items: SeverityData[] | null;
+export type UseAlerts = (props: UseAlertsQueryProps) => {
+  items: SummaryChartsData[] | null;
   isLoading: boolean;
   updatedAt: number;
 };
 
-export const useSeverityChartData: UseAlertsBySeverity = ({
+export const getAlertsQuery = ({
+  additionalFilters = [],
+  from,
+  to,
+  entityFilter,
+  runtimeMappings,
+  aggregations,
+}: {
+  from: string;
+  to: string;
+  entityFilter?: EntityFilter;
+  additionalFilters?: ESBoolQuery[];
+  runtimeMappings?: MappingRuntimeFields;
+  aggregations: {};
+}) => ({
+  size: 0,
+  query: {
+    bool: {
+      filter: [
+        ...additionalFilters,
+        { range: { '@timestamp': { gte: from, lte: to } } },
+        ...(entityFilter
+          ? [
+              {
+                term: {
+                  [entityFilter.field]: entityFilter.value,
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+  },
+  aggs: aggregations,
+  runtime_mappings: runtimeMappings,
+});
+
+export const useSummaryChartData: UseAlerts = ({
+  aggregationType,
+  aggregations,
   uniqueQueryId,
   entityFilter,
   query,
@@ -40,7 +73,7 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
-  const [items, setItems] = useState<null | SeverityData[]>(null);
+  const [items, setItems] = useState<null | SummaryChartsData[]>(null);
 
   const additionalFilters = useMemo(() => {
     try {
@@ -63,7 +96,7 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
     request,
     response,
     setQuery: setAlertsQuery,
-  } = useQueryAlerts<{}, AlertsBySeverityAgg>({
+  } = useQueryAlerts<{}, SummaryChartsAgg>({
     query: getAlertsQuery({
       from,
       to,
@@ -88,16 +121,16 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
         aggregations,
       })
     );
-  }, [setAlertsQuery, from, to, entityFilter, additionalFilters, runtimeMappings]);
+  }, [setAlertsQuery, from, to, entityFilter, additionalFilters, runtimeMappings, aggregations]);
 
   useEffect(() => {
     if (data == null) {
       setItems(null);
     } else {
-      setItems(parseSeverityData(data));
+      setItems(parseData(aggregationType, data));
     }
     setUpdatedAt(Date.now());
-  }, [data]);
+  }, [data, aggregationType]);
 
   const refetch = useCallback(() => {
     if (!skip && refetchQuery) {

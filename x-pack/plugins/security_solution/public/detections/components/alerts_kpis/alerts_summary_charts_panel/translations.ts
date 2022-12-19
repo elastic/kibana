@@ -20,13 +20,6 @@ export const SEVERITY_LEVELS_TITLE = i18n.translate(
   }
 );
 
-export const SEVERITY_TOTAL_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.severity.severityDonutTotalAlerts',
-  {
-    defaultMessage: 'alerts',
-  }
-);
-
 export const UNKNOWN_SEVERITY = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.severity.unknown',
   {

@@ -21,11 +21,11 @@ import {
   PartitionLayout,
   defaultPartitionValueFormatter,
 } from '@elastic/charts';
-import type { LegendItem } from '../../../../../common/components/charts/legend_item';
-import { getColor } from './host_name_pie_chart';
+import { getPieChartColor } from '../helpers';
 import { useTheme } from '../../../../../common/components/charts/common';
-// import { DraggableLegend } from '../../../../../common/components/charts/draggable_legend';
 import { DonutChartEmpty } from '../../../../../common/components/charts/donutchart_empty';
+// import { DraggableLegend } from '../../../../../common/components/charts/draggable_legend';
+// import type { LegendItem } from '../../../../../common/components/charts/legend_item';
 
 interface PieChartData {
   key: string;
@@ -38,7 +38,7 @@ interface PieChartProps {
   data: PieChartData[] | null | undefined;
   // fillColor: FillColor;
   height?: number;
-  legendItems?: LegendItem[] | null | undefined;
+  // legendItems?: LegendItem[] | null | undefined;
   onElementClick?: ElementClickListener;
   total: number;
 }
@@ -61,12 +61,12 @@ export const PieChart = ({
   data,
   // fillColor,
   height = 90,
-  legendItems,
+  // legendItems,
   onElementClick,
   total,
 }: PieChartProps) => {
   const theme = useTheme();
-  // const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -95,11 +95,7 @@ export const PieChart = ({
                   nodeLabel: (d: Datum) => d,
                   shape: {
                     fillColor: (d: ShapeTreeNode) =>
-                      transparentize(
-                        getColor(data?.length, d.sortIndex),
-                        // euiPaletteColorBlind({ sortBy: 'natural' })[d.sortIndex % 10],
-                        0.7
-                      ),
+                      transparentize(getPieChartColor(data?.length, d.sortIndex), 0.7),
                   },
                 },
               ]}
@@ -107,11 +103,6 @@ export const PieChart = ({
           </Chart>
         )}
       </StyledEuiFlexItem>
-      {legendItems && legendItems?.length > 0 && (
-        <EuiFlexItem>
-          {/* <DraggableLegend legendItems={legendItems} height={height} /> */}
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   );
 };

@@ -5,18 +5,18 @@
  * 2.0.
  */
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+
+import { euiPaletteColorBlind } from '@elastic/eui';
 import type {
-  AlertsResponse,
   AlertsBySeverityAgg,
   AlertsByRuleAgg,
   AlertsByHostAgg,
-  SeverityData,
   DetectionsData,
   HostData,
+  AggregationType,
 } from './types';
-import type { EntityFilter } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
-import type { ESBoolQuery } from '../../../../../common/typed_json';
+import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
+import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import * as i18n from './translations';
 import { severityLabels } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
@@ -24,12 +24,22 @@ import { SEVERITY_COLOR } from '../../../../overview/components/detection_respon
 
 export const DEFAULT_QUERY_SIZE = 1000;
 
+export const DETECTION_COLORS = {
+  Detections: 'success',
+  Preventions: 'accent',
+};
+
 export const getSeverityColor = (severity: string) => {
   return SEVERITY_COLOR[severity.toLocaleLowerCase() as Severity] ?? emptyDonutColor;
 };
 
+export const getPieChartColor = (count: number, index: number) => {
+  const rotNum = Math.ceil(count / 10);
+  return euiPaletteColorBlind({ sortBy: 'natural', rotations: rotNum })[index];
+};
+
 export const parseSeverityData = (
-  response: AlertsResponse<{}, AlertsBySeverityAgg>
+  response: AlertSearchResponse<{}, AlertsBySeverityAgg>
 ): SeverityData[] | null => {
   const severityBuckets = response?.aggregations?.statusBySeverity?.buckets ?? [];
 
@@ -45,13 +55,12 @@ export const parseSeverityData = (
 };
 
 export const parseDetectionsData = (
-  response: AlertsResponse<{}, AlertsByRuleAgg>
+  response: AlertSearchResponse<{}, AlertsByRuleAgg>
 ): DetectionsData[] | null => {
   const rulesBuckets = response?.aggregations?.alertsByRule?.buckets ?? [];
-
   return rulesBuckets.length === 0
     ? null
-    : rulesBuckets.map((rule) => {
+    : rulesBuckets.flatMap((rule) => {
         const events = rule.ruleByEventType?.buckets ?? [];
         return getAggregateDetections(rule.key, events);
       });
@@ -60,63 +69,50 @@ export const parseDetectionsData = (
 const getAggregateDetections = (
   ruleName: string,
   ruleEvents: Array<{ key: string; doc_count: number }>
-): DetectionsData => {
-  const agg = { rule: ruleName, detections: 0, preventions: 0 };
-  ruleEvents.map((eventBucket) =>
-    eventBucket.key === 'denied'
-      ? (agg.preventions += eventBucket.doc_count)
-      : (agg.detections += eventBucket.doc_count)
-  );
-  return agg;
+): DetectionsData[] => {
+  let preventions = 0;
+  let detections = 0;
+
+  ruleEvents.map((eventBucket) => {
+    return eventBucket.key === 'denied'
+      ? (preventions += eventBucket.doc_count)
+      : (detections += eventBucket.doc_count);
+  });
+
+  const ret = [];
+  if (preventions > 0) {
+    ret.push({ rule: ruleName, type: 'Preventions', value: preventions });
+  }
+  if (detections > 0) {
+    ret.push({ rule: ruleName, type: 'Detections', value: detections });
+  }
+  return ret;
 };
 
-export const parseHostData = (response: AlertsResponse<{}, AlertsByHostAgg>): HostData[] | null => {
+export const parseHostData = (
+  response: AlertSearchResponse<{}, AlertsByHostAgg>
+): HostData[] | null => {
   const hostsBuckets = response?.aggregations?.alertsByHost?.buckets ?? [];
 
   return hostsBuckets.length === 0
     ? null
-    : hostsBuckets.map((host) => {
+    : hostsBuckets.map((host, i) => {
         return {
           key: host.key,
           value: host.doc_count,
           label: host.key,
+          color: getPieChartColor(hostsBuckets.length, i),
         };
       });
 };
 
-export const getAlertsQuery = ({
-  additionalFilters = [],
-  from,
-  to,
-  entityFilter,
-  runtimeMappings,
-  aggregations,
-}: {
-  from: string;
-  to: string;
-  entityFilter?: EntityFilter;
-  additionalFilters?: ESBoolQuery[];
-  runtimeMappings?: MappingRuntimeFields;
-  aggregations: {};
-}) => ({
-  size: 0,
-  query: {
-    bool: {
-      filter: [
-        ...additionalFilters,
-        { range: { '@timestamp': { gte: from, lte: to } } },
-        ...(entityFilter
-          ? [
-              {
-                term: {
-                  [entityFilter.field]: entityFilter.value,
-                },
-              },
-            ]
-          : []),
-      ],
-    },
-  },
-  aggs: aggregations,
-  runtime_mappings: runtimeMappings,
-});
+export const parseData = (aggregationType: AggregationType, data: AlertSearchResponse<{}, {}>) => {
+  switch (aggregationType) {
+    case 'Severity':
+      return parseSeverityData(data as AlertSearchResponse<{}, AlertsBySeverityAgg>);
+    case 'Detections':
+      return parseDetectionsData(data as AlertSearchResponse<{}, AlertsByRuleAgg>);
+    case 'Host':
+      return parseHostData(data as AlertSearchResponse<{}, AlertsByHostAgg>);
+  }
+};
