@@ -13,16 +13,26 @@ import type { ContentRegistry } from '../registry/content_registry';
 import type { CmCache } from './types';
 
 export class ContentCache implements CmCache {
-  protected readonly typeCache: Map<string, CachedContentType> = new Map();
+  protected readonly types: Map<string, CachedContentType> = new Map();
+
+  /**
+   * Cache of content items. Each item is cached by its id.
+   */
   protected readonly itemCache: LruMap<string, CachedContentItem> = new LruMap(5000);
+
+  /**
+   * Cache of lists, where usually a list is a list of ids of content items.
+   * The key is a hash of parameters used to fetch the list.
+   */
+  protected readonly listCache: LruMap<string, string[]> = new LruMap(5000);
 
   constructor(public readonly registry: ContentRegistry) {}
 
   public type(id: string): CachedContentType {
-    let type = this.typeCache.get(id);
+    let type = this.types.get(id);
     if (!type) {
       type = new CachedContentType(id, this);
-      this.typeCache.set(id, type);
+      this.types.set(id, type);
     }
     return type;
   }
