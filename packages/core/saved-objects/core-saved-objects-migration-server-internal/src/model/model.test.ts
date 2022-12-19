@@ -46,6 +46,7 @@ import type {
   CheckVersionIndexReadyActions,
   UpdateTargetMappingsMeta,
   CheckTargetMappingsState,
+  PrepareCompatibleMigration,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
@@ -2621,7 +2622,7 @@ describe('migrations v2 model', () => {
             settings: {},
           },
         });
-        const newState = model(unchangedMappingsState, res) as PostInitState;
+        const newState = model(unchangedMappingsState, res) as PrepareCompatibleMigration;
 
         expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
 
@@ -2629,6 +2630,21 @@ describe('migrations v2 model', () => {
         expect(newState.currentAlias).toEqual('.kibana');
         // will point to
         expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
+        expect(newState.preTransformDocsActions).toEqual([
+          {
+            add: {
+              alias: '.kibana_7.12.0',
+              index: '.kibana_7.11.0_001',
+            },
+          },
+          {
+            remove: {
+              alias: '.kibana_7.11.0',
+              index: '.kibana_7.11.0_001',
+              must_exist: true,
+            },
+          },
+        ]);
       });
     });
   });
