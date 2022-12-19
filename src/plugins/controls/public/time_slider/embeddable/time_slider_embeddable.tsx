@@ -41,6 +41,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   private getDateFormat: ControlsSettingsService['getDateFormat'];
   private getTimezone: ControlsSettingsService['getTimezone'];
   private timefilter: ControlsDataService['timefilter'];
+  private prevTimeRange: TimeRange | undefined;
   private prevTimesliceAsPercentage: {
     timesliceStartAsPercentageOfTimeRange?: number;
     timesliceEndAsPercentageOfTimeRange?: number;
@@ -146,7 +147,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       const ticks = getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], this.getTimezone());
       dispatch(
         actions.setTimeRangeBounds({
-          ticks: getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], this.getTimezone()),
+          ticks,
           timeRangeBounds: nextBounds,
         })
       );
