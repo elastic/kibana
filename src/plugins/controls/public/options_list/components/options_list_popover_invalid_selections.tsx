@@ -44,6 +44,7 @@ export const OptionsListPopoverInvalidSelections = () => {
           className="optionsList__selectionInvalid"
           key={index}
           onClick={() => dispatch(deselectOption(ignoredSelection))}
+          aria-label={OptionsListStrings.popover.getInvalidSelectionAriaLabel(ignoredSelection)}
         >
           {`${ignoredSelection}`}
         </EuiFilterSelectItem>

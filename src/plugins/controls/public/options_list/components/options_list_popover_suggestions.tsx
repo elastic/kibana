@@ -121,27 +121,33 @@ export const OptionsListPopoverSuggestions = ({
               ? 'optionsList__selectionInvalid'
               : undefined
           }
-          aria-label={OptionsListStrings.popover.getSuggestionAriaLabel(
-            key,
-            availableOptions?.[key].doc_count ?? 0
-          )}
+          aria-label={
+            availableOptions?.[key]
+              ? OptionsListStrings.popover.getSuggestionAriaLabel(
+                  key,
+                  availableOptions[key].doc_count ?? 0
+                )
+              : key
+          }
         >
           <EuiFlexGroup>
             <EuiFlexItem>{`${key}`}</EuiFlexItem>
-            <EuiFlexItem grow={false} tabIndex={-1}>
-              {availableOptions && availableOptions[key] && (
-                <EuiToolTip
-                  content={OptionsListStrings.popover.getDocumentCountTooltip(
-                    availableOptions[key].doc_count
-                  )}
-                  position={'right'}
-                >
-                  <EuiBadge title={undefined} className="eui-textNumber">
-                    {`${availableOptions[key].doc_count}`}
-                  </EuiBadge>
-                </EuiToolTip>
-              )}
-            </EuiFlexItem>
+            {!showOnlySelected && (
+              <EuiFlexItem grow={false} tabIndex={-1}>
+                {availableOptions && availableOptions[key] && (
+                  <EuiToolTip
+                    content={OptionsListStrings.popover.getDocumentCountTooltip(
+                      availableOptions[key].doc_count
+                    )}
+                    position={'right'}
+                  >
+                    <EuiBadge title={undefined} className="eui-textNumber">
+                      {`${availableOptions[key].doc_count}`}
+                    </EuiBadge>
+                  </EuiToolTip>
+                )}
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFilterSelectItem>
       ))}

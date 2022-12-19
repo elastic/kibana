@@ -322,7 +322,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           },
           this.abortController.signal
         );
-      // console.log('after', suggestions, invalidSelections, totalCardinality);
       if (
         (!selectedOptions && !existsSelected) ||
         isEmpty(invalidSelections) ||
