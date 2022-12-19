@@ -1098,16 +1098,17 @@ export const RulesList = ({
     setIsDeleteModalVisibility(false);
     setIsDeletingRules(true);
 
-    const { errors, total } =
+    const bulkDeleteRulesArguments =
       isAllSelected && rulesToDeleteFilter
-        ? await bulkDeleteRules({
+        ? {
             filter: rulesToDeleteFilter,
             http,
-          })
-        : await bulkDeleteRules({
+          }
+        : {
             ids: rulesToDelete,
             http,
-          });
+          };
+    const { errors, total } = await bulkDeleteRules(bulkDeleteRulesArguments);
 
     setIsDeletingRules(false);
     showToast({ action: 'DELETE', errors, total });
