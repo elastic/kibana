@@ -72,7 +72,6 @@ const createBenchmarks = (
           package_policy: cspPackage,
           agent_policy: agentPolicyStatus,
           number_of_rules: rulesCount,
-          benchmark_id: benchmarkId,
         };
       });
 

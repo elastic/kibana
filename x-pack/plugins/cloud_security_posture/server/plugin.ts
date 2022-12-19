@@ -142,9 +142,10 @@ export class CspPlugin
         async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
           for (const deletedPackagePolicy of deletedPackagePolicies) {
             if (isCspPackage(deletedPackagePolicy.package?.name)) {
-              const soClient = core.savedObjects.createInternalRepository();
-              const isPackageExists = await isCspPackageInstalled(soClient, this.logger);
-
+              const isPackageExists = await isCspPackageInstalled(
+                plugins.fleet.packageService,
+                this.logger
+              );
               if (!isPackageExists) {
                 await this.uninstallResources(plugins.taskManager, this.logger);
               }

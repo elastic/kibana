@@ -7,12 +7,7 @@
 
 import { Truthy } from 'lodash';
 import { NewPackagePolicyInput, PackagePolicyInput } from '@kbn/fleet-plugin/common';
-import {
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  CSP_RULE_SAVED_OBJECT_TYPE,
-  CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-} from '../constants';
-import { BenchmarkId } from '../types';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../constants';
 
 /**
  * @example
@@ -31,16 +26,6 @@ export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'
   return defaultMessage; // TODO: i18n
 };
 
-export const createCspRuleSearchFilterByPackagePolicy = ({
-  packagePolicyId,
-  policyId,
-}: {
-  packagePolicyId: string;
-  policyId?: string;
-}): string =>
-  `${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.package_policy_id: "${packagePolicyId}"${
-    policyId ? ` AND ${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.policy_id: "${policyId}"` : ''
-  }`;
 export const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
   `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
 

@@ -4,28 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ISavedObjectsRepository, Logger, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { NewPackagePolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PackageService } from '@kbn/fleet-plugin/server';
 import { BenchmarkId } from '../../common/types';
 import { isEnabledBenchmarkInputType } from '../../common/utils/helpers';
-import type { CspRule } from '../../common/schemas';
-import { CLOUDBEAT_VANILLA, CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME, CLOUDBEAT_VANILLA } from '../../common/constants';
 
 export const isCspPackageInstalled = async (
-  soClient: ISavedObjectsRepository,
+  packageService: PackageService,
   logger: Logger
 ): Promise<boolean> => {
   // TODO: check if CSP package installed via the Fleet API
   try {
-    const { saved_objects: postDeleteRules }: SavedObjectsFindResponse<CspRule> =
-      await soClient.find({
-        type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-      });
+    const installation = await packageService.asInternalUser.getInstallation(
+      CLOUD_SECURITY_POSTURE_PACKAGE_NAME
+    );
 
-    if (postDeleteRules.length > 0) {
-      return true;
-    }
-    return true;
+    if (installation) return true;
+
+    return false;
   } catch (e) {
     logger.error(e);
     return false;
