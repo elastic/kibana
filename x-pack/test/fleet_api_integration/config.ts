@@ -72,6 +72,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.packageVerification.gpgKeyPath=${getFullPath(
           './apis/fixtures/package_verification/signatures/fleet_test_key_public.asc'
         )}`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
 
