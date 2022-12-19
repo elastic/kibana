@@ -63,6 +63,8 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/react",
+  "@npm//@elastic/eui",
+  "@npm//react-use",
   "//packages/content-management/utils:npm_module_types",
   "//packages/content-management/state:npm_module_types",
   "//packages/content-management/state_mocks:npm_module_types"
