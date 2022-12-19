@@ -379,10 +379,15 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
   };
 };
 
-export const getSingleColorConfig = (id: string, color = defaultReferenceLineColor) => ({
+export const getSingleColorConfig = (
+  id: string,
+  color = defaultReferenceLineColor,
+  icon?: string
+) => ({
   columnId: id,
-  triggerIconType: 'color' as const,
+  triggerIconType: icon && icon !== 'empty' ? ('custom' as const) : ('color' as const),
   color,
+  customIcon: icon,
 });
 
 export const getReferenceLineAccessorColorConfig = (layer: XYReferenceLineLayerConfig) => {
@@ -458,7 +463,9 @@ export const getReferenceConfiguration = ({
           values: { groupLabel: getAxisName(label, { isHorizontal }) },
         }
       ),
-      accessors: config.map(({ forAccessor, color }) => getSingleColorConfig(forAccessor, color)),
+      accessors: config.map(({ forAccessor, color, icon }) =>
+        getSingleColorConfig(forAccessor, color, icon)
+      ),
       filterOperations: isNumericMetric,
       supportsMoreColumns: true,
       requiredMinDimensionCount: 0,
