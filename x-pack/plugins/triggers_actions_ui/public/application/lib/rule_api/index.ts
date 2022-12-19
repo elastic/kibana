@@ -10,7 +10,6 @@ export type { LoadRuleAggregationsProps } from './aggregate_helpers';
 export { loadRuleAggregations, loadRuleTags } from './aggregate';
 export { createRule } from './create';
 export { cloneRule } from './clone';
-export { deleteRules } from './delete';
 export { loadRule } from './get_rule';
 export { loadRuleSummary } from './rule_summary';
 export { muteAlertInstance } from './mute_alert';
