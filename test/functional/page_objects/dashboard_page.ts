@@ -324,6 +324,12 @@ export class DashboardPageObject extends FtrService {
     }
   }
 
+  public async expectUnsavedChangesBadge() {
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+    });
+  }
+
   public async clickNewDashboard(continueEditing = false) {
     const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
     if (!continueEditing && discardButtonExists) {
