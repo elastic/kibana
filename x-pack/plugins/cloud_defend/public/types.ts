@@ -26,10 +26,10 @@ export enum ControlResponseAction {
 }
 
 export enum ControlSelectorCondition {
-  activity = 'activity',
+  operation = 'operation',
   containerImageName = 'containerImageName',
   containerImageTag = 'containerImageTag',
-  filePath = 'filePath',
+  targetFilePath = 'targetFilePath',
   orchestratorClusterId = 'orchestratorClusterId',
   orchestratorClusterName = 'orchestratorClusterName',
   orchestratorNamespace = 'orchestratorNamespace',
@@ -46,15 +46,15 @@ export interface ControlSelectorConditionUIOptions {
 }
 
 export const ControlSelectorConditionUIOptionsMap: ControlSelectorConditionUIOptions = {
-  activity: { values: ['createExecutable', 'modifyExecutable'] },
+  operation: { values: ['createExecutable', 'modifyExecutable', 'execMemFd'] },
 };
 
 export interface ControlSelector {
   name: string;
-  activity?: string[];
+  operation?: string[];
   containerImageName?: string[];
   containerImageTag?: string[];
-  filePath?: string[];
+  targetFilePath?: string[];
   orchestratorClusterId?: string[];
   orchestratorClusterName?: string[];
   orchestratorNamespace?: string[];
@@ -75,7 +75,7 @@ export interface ControlResponse {
 
 export const DefaultSelector: ControlSelector = {
   name: 'Untitled',
-  activity: ControlSelectorConditionUIOptionsMap.activity.values,
+  operation: ControlSelectorConditionUIOptionsMap.operation.values,
 };
 
 export const DefaultResponse: ControlResponse = {

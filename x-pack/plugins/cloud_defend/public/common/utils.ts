@@ -14,14 +14,14 @@ export function getInputFromPolicy(policy: NewPackagePolicy, inputId: string) {
 
 export function getControlSelectorValueForProp(prop: string, selector: ControlSelector) {
   switch (prop as unknown as ControlSelectorCondition) {
-    case ControlSelectorCondition.activity:
-      return selector.activity;
+    case ControlSelectorCondition.operation:
+      return selector.operation;
     case ControlSelectorCondition.containerImageName:
       return selector.containerImageName;
     case ControlSelectorCondition.containerImageTag:
       return selector.containerImageTag;
-    case ControlSelectorCondition.filePath:
-      return selector.filePath;
+    case ControlSelectorCondition.targetFilePath:
+      return selector.targetFilePath;
     case ControlSelectorCondition.orchestratorClusterName:
       return selector.orchestratorClusterName;
     case ControlSelectorCondition.orchestratorClusterId:
@@ -43,8 +43,8 @@ export function setControlSelectorValueForProp(
   selector: ControlSelector
 ) {
   switch (prop as unknown as ControlSelectorCondition) {
-    case ControlSelectorCondition.activity:
-      selector.activity = values;
+    case ControlSelectorCondition.operation:
+      selector.operation = values;
       break;
     case ControlSelectorCondition.containerImageName:
       selector.containerImageName = values;
@@ -52,8 +52,8 @@ export function setControlSelectorValueForProp(
     case ControlSelectorCondition.containerImageTag:
       selector.containerImageTag = values;
       break;
-    case ControlSelectorCondition.filePath:
-      selector.filePath = values;
+    case ControlSelectorCondition.targetFilePath:
+      selector.targetFilePath = values;
       break;
     case ControlSelectorCondition.orchestratorClusterName:
       selector.orchestratorClusterName = values;

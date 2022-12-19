@@ -56,10 +56,10 @@ export const useConfigModel = (configuration: string) => {
                 required: ['name'],
                 additionalProperties: false,
                 anyOf: [
-                  { required: ['activity'] },
+                  { required: ['operation'] },
                   { required: ['containerImageName'] },
                   { required: ['containerImageTag'] },
-                  { required: ['filePath'] },
+                  { required: ['targetFilePath'] },
                   { required: ['orchestratorClusterId'] },
                   { required: ['orchestratorClusterName'] },
                   { required: ['orchestratorNamespace'] },
@@ -71,10 +71,10 @@ export const useConfigModel = (configuration: string) => {
                   name: {
                     type: 'string',
                   },
-                  activity: {
+                  operation: {
                     type: 'array',
                     minItems: 1,
-                    items: { enum: ['createExecutable', 'modifyExecutable'] },
+                    items: { enum: ['createExecutable', 'modifyExecutable', 'execMemFd'] },
                   },
                   containerImageName: {
                     type: 'array',
@@ -86,7 +86,7 @@ export const useConfigModel = (configuration: string) => {
                     minItems: 1,
                     items: { type: 'string' },
                   },
-                  filePath: {
+                  targetFilePath: {
                     type: 'array',
                     minItems: 1,
                     items: { type: 'string' },

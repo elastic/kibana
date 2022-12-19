@@ -79,9 +79,9 @@ export const errorInvalidName = i18n.translate('xpack.cloudDefend.errorInvalidNa
 
 export const getConditionLabel = (prop: string) => {
   switch (prop) {
-    case ControlSelectorCondition.activity:
-      return i18n.translate('xpack.cloudDefend.activity', {
-        defaultMessage: 'Activity',
+    case ControlSelectorCondition.operation:
+      return i18n.translate('xpack.cloudDefend.operation', {
+        defaultMessage: 'Operation',
       });
     case ControlSelectorCondition.containerImageName:
       return i18n.translate('xpack.cloudDefend.containerImageName', {
@@ -91,9 +91,9 @@ export const getConditionLabel = (prop: string) => {
       return i18n.translate('xpack.cloudDefend.containerImageTag', {
         defaultMessage: 'Container image tag',
       });
-    case ControlSelectorCondition.filePath:
-      return i18n.translate('xpack.cloudDefend.filePath', {
-        defaultMessage: 'File path',
+    case ControlSelectorCondition.targetFilePath:
+      return i18n.translate('xpack.cloudDefend.targetFilePath', {
+        defaultMessage: 'Target file path',
       });
     case ControlSelectorCondition.orchestratorClusterId:
       return i18n.translate('xpack.cloudDefend.orchestratorClusterId', {
