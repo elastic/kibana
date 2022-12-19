@@ -455,7 +455,7 @@ export const getSingleColorAnnotationConfig = (
   const icon = annotationIcon?.icon ?? annotationIcon?.value;
   return {
     columnId: annotation.id,
-    triggerIconType: annotation.isHidden ? 'invisible' : icon ? 'custom' : ('color' as const),
+    triggerIconType: annotation.isHidden ? 'invisible' : icon ? 'custom' : 'color',
     customIcon: icon,
     color:
       annotation?.color ||

@@ -168,9 +168,9 @@ export const getPieVisualization = ({
     const getPrimaryGroupConfig = (): VisualizationDimensionGroupConfig => {
       const originalOrder = getSortedGroups(datasource, layer);
       // When we add a column it could be empty, and therefore have no order
-      const accessors: AccessorConfig[] = originalOrder.map((accessor) => ({
+      const accessors = originalOrder.map<AccessorConfig>((accessor) => ({
         columnId: accessor,
-        triggerIconType: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
+        triggerIconType: isCollapsed(accessor, layer) ? 'aggregate' : undefined,
       }));
 
       const firstNonCollapsedColumnId = layer.primaryGroups.find((id) => !isCollapsed(id, layer));
@@ -273,9 +273,9 @@ export const getPieVisualization = ({
 
     const getSecondaryGroupConfig = (): VisualizationDimensionGroupConfig | undefined => {
       const originalSecondaryOrder = getSortedGroups(datasource, layer, 'secondaryGroups');
-      const accessors = originalSecondaryOrder.map((accessor) => ({
+      const accessors = originalSecondaryOrder.map<AccessorConfig>((accessor) => ({
         columnId: accessor,
-        triggerIconType: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
+        triggerIconType: isCollapsed(accessor, layer) ? 'aggregate' : undefined,
       }));
 
       const secondaryGroupConfigBaseProps = {
