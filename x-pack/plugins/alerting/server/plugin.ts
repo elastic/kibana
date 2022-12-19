@@ -46,12 +46,16 @@ import {
   IEventLogService,
   IEventLogClientService,
 } from '@kbn/event-log-plugin/server';
-import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import {
+  PluginStartContract as FeaturesPluginStart,
+  PluginSetupContract as FeaturesPluginSetup,
+} from '@kbn/features-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
+import { RulesConfigurationClientFactory } from './rules_configuration_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
 import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
 import { defineRoutes } from './routes';
@@ -80,6 +84,7 @@ import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
+import { alertingFeatures } from './feature';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -144,6 +149,7 @@ export interface AlertingPluginsSetup {
   statusService: StatusServiceSetup;
   monitoringCollection: MonitoringCollectionSetup;
   data: DataPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -168,6 +174,7 @@ export class AlertingPlugin {
   private security?: SecurityPluginSetup;
   private readonly rulesClientFactory: RulesClientFactory;
   private readonly alertingAuthorizationClientFactory: AlertingAuthorizationClientFactory;
+  private readonly rulesConfigurationClientFactory: RulesConfigurationClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private eventLogService?: IEventLogService;
@@ -182,6 +189,7 @@ export class AlertingPlugin {
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.rulesClientFactory = new RulesClientFactory();
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
+    this.rulesConfigurationClientFactory = new RulesConfigurationClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
@@ -205,6 +213,8 @@ export class AlertingPlugin {
         },
       };
     });
+
+    plugins.features.registerKibanaFeature(alertingFeatures);
 
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
@@ -364,6 +374,7 @@ export class AlertingPlugin {
       ruleTypeRegistry,
       rulesClientFactory,
       alertingAuthorizationClientFactory,
+      rulesConfigurationClientFactory,
       security,
       licenseState,
     } = this;
@@ -410,6 +421,11 @@ export class AlertingPlugin {
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
+    });
+
+    rulesConfigurationClientFactory.initialize({
+      logger: this.logger,
+      savedObjectsService: core.savedObjects,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {
@@ -477,12 +493,18 @@ export class AlertingPlugin {
   private createRouteHandlerContext = (
     core: CoreSetup<AlertingPluginsStart, unknown>
   ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
-    const { ruleTypeRegistry, rulesClientFactory } = this;
+    const { ruleTypeRegistry, rulesClientFactory, rulesConfigurationClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
       return {
         getRulesClient: () => {
           return rulesClientFactory!.create(request, savedObjects);
+        },
+        getScopedRulesConfigurationClient: () => {
+          return rulesConfigurationClientFactory.asScoped(request);
+        },
+        getInternalRulesConfigurationClient: () => {
+          return rulesConfigurationClientFactory.asInternal();
         },
         listTypes: ruleTypeRegistry!.list.bind(ruleTypeRegistry!),
         getFrameworkHealth: async () =>

@@ -341,3 +341,21 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     },
   },
 };
+
+export const rulesConfigurationMappings: SavedObjectsTypeMappingDefinition = {
+  properties: {
+    flapping: {
+      properties: {
+        enabled: {
+          type: 'boolean',
+        },
+        lookBackWindow: {
+          type: 'long',
+        },
+        statusChangeThreshold: {
+          type: 'long',
+        },
+      },
+    },
+  },
+};

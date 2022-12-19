@@ -23,6 +23,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
+import { RulesConfigurationClient } from './rules_configuration/rules_configuration_client';
 export * from '../common';
 import {
   Rule,
@@ -55,6 +56,8 @@ export type { RuleTypeParams };
  */
 export interface AlertingApiRequestHandlerContext {
   getRulesClient: () => RulesClient;
+  getScopedRulesConfigurationClient: () => RulesConfigurationClient;
+  getInternalRulesConfigurationClient: () => RulesConfigurationClient;
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;

@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { alertMappings } from './mappings';
+import { alertMappings, rulesConfigurationMappings } from './mappings';
 import { getMigrations } from './migrations';
 import { transformRulesForExport } from './transform_rule_for_export';
 import { RawRule } from '../types';
@@ -110,6 +110,13 @@ export function setupSavedObjects(
         },
       },
     },
+  });
+
+  savedObjects.registerType({
+    name: 'rules_configuration',
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: rulesConfigurationMappings,
   });
 
   // Encrypted attributes

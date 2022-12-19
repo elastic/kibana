@@ -229,3 +229,11 @@ export interface RuleMonitoring {
     last_run: RuleMonitoringLastRun;
   };
 }
+
+export interface RulesConfiguration {
+  flapping: {
+    enabled: boolean;
+    lookBackWindow: number;
+    statusChangeThreshold: number;
+  };
+}
