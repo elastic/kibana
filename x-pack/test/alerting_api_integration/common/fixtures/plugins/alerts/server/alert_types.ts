@@ -6,6 +6,7 @@
  */
 
 import uuid from 'uuid';
+import { Logger } from '@kbn/logging';
 import { CoreSetup } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { curry, range, times } from 'lodash';
@@ -16,8 +17,9 @@ import {
   RuleTypeState,
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
-import { ES_TEST_INDEX_NAME } from '../../../../lib';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
+import { ES_TEST_INDEX_NAME } from '../../../../lib';
 
 export const EscapableStrings = {
   escapableBold: '*bold*',
@@ -639,9 +641,80 @@ function getCancellableRuleType() {
   return result;
 }
 
+function getAlwaysFiringAlertAsDataRuleType(
+  logger: Logger,
+  { ruleRegistry }: Pick<FixtureSetupDeps, 'ruleRegistry'>
+) {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+  });
+
+  const ruleDataClient = ruleRegistry.ruleDataService.initializeIndex({
+    feature: AlertConsumers.OBSERVABILITY,
+    registrationContext: 'observability.test.alerts',
+    dataset: ruleRegistry.dataset.alerts,
+    componentTemplateRefs: [],
+    componentTemplates: [
+      {
+        name: 'mappings',
+      },
+    ],
+  });
+
+  const createLifecycleRuleType = ruleRegistry.createLifecycleRuleTypeFactory({
+    logger,
+    ruleDataClient,
+  });
+
+  return createLifecycleRuleType({
+    id: 'test.always-firing-alert-as-data',
+    name: 'Test: Always Firing Alert As Data',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    validate: {
+      params: paramsSchema,
+    },
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor(ruleExecutorOptions) {
+      const { services, params, state, spaceId, namespace, rule } = ruleExecutorOptions;
+      const ruleInfo = { spaceId, namespace, ...rule };
+
+      services
+        .alertWithLifecycle({
+          id: '1',
+          fields: {},
+        })
+        .scheduleActions('default');
+
+      services
+        .alertWithLifecycle({
+          id: '2',
+          fields: {},
+        })
+        .scheduleActions('default');
+
+      await services.scopedClusterClient.asCurrentUser.index({
+        index: params.index,
+        refresh: 'wait_for',
+        body: {
+          state,
+          params,
+          reference: params.reference,
+          source: 'rule:test.always-firing-alert-as-data',
+          ruleInfo,
+        },
+      });
+    },
+  });
+}
+
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
-  { alerting }: Pick<FixtureSetupDeps, 'alerting'>
+  { alerting, ruleRegistry }: Pick<FixtureSetupDeps, 'alerting' | 'ruleRegistry'>,
+  logger: Logger
 ) {
   const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.noop',
@@ -818,4 +891,5 @@ export function defineAlertTypes(
   alerting.registerType(getCancellableRuleType());
   alerting.registerType(getPatternSuccessOrFailureAlertType());
   alerting.registerType(getExceedsAlertLimitRuleType());
+  alerting.registerType(getAlwaysFiringAlertAsDataRuleType(logger, { ruleRegistry }));
 }

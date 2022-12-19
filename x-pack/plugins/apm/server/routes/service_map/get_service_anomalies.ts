@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
@@ -154,7 +154,7 @@ export async function getServiceAnomalies({
 }
 
 export async function getMLJobs(
-  anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
+  anomalyDetectors: MlAnomalyDetectors,
   environment?: string
 ) {
   const jobs = await getMlJobsWithAPMGroup(anomalyDetectors);
@@ -173,7 +173,7 @@ export async function getMLJobs(
 }
 
 export async function getMLJobIds(
-  anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
+  anomalyDetectors: MlAnomalyDetectors,
   environment?: string
 ) {
   const mlJobs = await getMLJobs(anomalyDetectors, environment);
