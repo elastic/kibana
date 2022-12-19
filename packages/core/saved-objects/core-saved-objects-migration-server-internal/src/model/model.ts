@@ -178,19 +178,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           sourceIndex: Option.none,
           targetIndex,
           sourceIndexMappings: sourceMappings,
-          preTransformDocsActions: buildRemoveAliasActions(source!, Object.keys(aliases), [
-            stateP.currentAlias,
-            stateP.versionAlias,
-          ]),
+          preTransformDocsActions: [
+            // Point the version alias to the source index. This let's other Kibana
+            // instances know that a migration for the current version has is "done"
+            // even though we may be waiting for document transformations to finish.
+            { add: { index: source!, alias: stateP.versionAlias } },
+            ...buildRemoveAliasActions(source!, Object.keys(aliases), [
+              stateP.currentAlias,
+              stateP.versionAlias,
+            ]),
+          ],
           targetIndexCurrentMappings: sourceMappings,
           targetIndexMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetIndexMappings,
             indices[source!].mappings
           ),
-          // Point the version alias to the source index
-          versionIndexReadyActions: Option.some<AliasAction[]>([
-            { add: { index: source!, alias: stateP.versionAlias } },
-          ]),
+          versionIndexReadyActions: Option.none,
         };
       } else if (
         // If the `.kibana` alias exists
