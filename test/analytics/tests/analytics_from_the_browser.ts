@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should call flush when using the window-exposed flush method', async () => {
         await browser.execute(() => window.__kbnAnalytics.flush());
-        // @ts-expect-error Property 'getFlushAction' does not exist on type '{ getActionsUntilReportTestPluginLifecycleEvent:
+        // @ts-expect-error
         const action = await browser.execute(() => window.__analyticsPluginA__.getFlushAction());
         expect(action).to.eql({ action: 'flush', meta: {} });
       });
