@@ -2825,10 +2825,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-state-mocks@link:bazel-bin/packages/content-management/state_mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/content-management-state@link:bazel-bin/packages/content-management/state":
   version "0.0.0"
   uid ""
