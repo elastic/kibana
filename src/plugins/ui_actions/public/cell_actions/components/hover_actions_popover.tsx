@@ -103,14 +103,17 @@ export const HoverActionsPopover = React.memo<Props>(
       closePopover();
     }, [closePopover]);
 
-    const content = useMemo(
-      () => (
-        <div ref={contentRef} onMouseEnter={onMouseEnter}>
+    const content = useMemo(() => {
+      return (
+        // Hack - Forces extra actions popover to close when hover content is clicked.
+        // This hack is required because we anchor the popover to the hover content instead
+        // of anchoring it to the button that triggers the popover.
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+        <div ref={contentRef} onMouseEnter={onMouseEnter} onClick={closeExtraActions}>
           {children}
         </div>
-      ),
-      [children, onMouseEnter]
-    );
+      );
+    }, [onMouseEnter, closeExtraActions, children]);
 
     return (
       <>
