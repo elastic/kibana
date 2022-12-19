@@ -13,7 +13,7 @@
  */
 import uuid from 'uuid';
 import { journey, step, expect, after, Page } from '@elastic/synthetics';
-import { monitorManagementPageProvider } from '../page_objects/monitor_management';
+import { monitorManagementPageProvider } from '../../page_objects/uptime/monitor_management';
 
 journey('MonitorDetails', async ({ page, params }: { page: Page; params: any }) => {
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });

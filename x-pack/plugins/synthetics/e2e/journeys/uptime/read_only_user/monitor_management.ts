@@ -7,7 +7,7 @@
 
 import { expect, journey, Page, step } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
-import { monitorManagementPageProvider } from '../../page_objects/monitor_management';
+import { monitorManagementPageProvider } from '../../../page_objects/uptime/monitor_management';
 
 journey(
   'Monitor Management read only user',

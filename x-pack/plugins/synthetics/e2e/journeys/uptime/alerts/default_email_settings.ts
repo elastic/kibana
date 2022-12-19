@@ -19,7 +19,7 @@ import {
   byTestId,
   waitForLoadingToFinish,
 } from '@kbn/observability-plugin/e2e/utils';
-import { settingsPageProvider } from '../../page_objects/settings';
+import { settingsPageProvider } from '../../../page_objects/uptime/settings';
 
 journey('DefaultEmailSettings', async ({ page, params }) => {
   const settings = settingsPageProvider({ page, kibanaUrl: params.kibanaUrl });

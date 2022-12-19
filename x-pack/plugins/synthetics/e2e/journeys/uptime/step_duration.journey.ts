@@ -6,7 +6,7 @@
  */
 
 import { journey, step, expect } from '@elastic/synthetics';
-import { loginPageProvider } from '../page_objects/login';
+import { loginPageProvider } from '../../page_objects/login';
 
 journey('StepsDuration', async ({ page, params }) => {
   const login = loginPageProvider({ page });

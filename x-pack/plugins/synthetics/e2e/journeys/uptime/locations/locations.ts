@@ -6,8 +6,8 @@
  */
 
 import { journey, step, before, Page } from '@elastic/synthetics';
-import { makeChecksWithStatus } from '../../helpers/make_checks';
-import { monitorDetailsPageProvider } from '../../page_objects/monitor_details';
+import { makeChecksWithStatus } from '../../../helpers/make_checks';
+import { monitorDetailsPageProvider } from '../../../page_objects/uptime/monitor_details';
 
 journey('Observer location', async ({ page, params }: { page: Page; params: any }) => {
   const monitorDetails = monitorDetailsPageProvider({ page, kibanaUrl: params.kibanaUrl });

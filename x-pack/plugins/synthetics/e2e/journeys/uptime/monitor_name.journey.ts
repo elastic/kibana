@@ -7,7 +7,7 @@
 import uuid from 'uuid';
 import { journey, step, expect, Page } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
-import { monitorManagementPageProvider } from '../page_objects/monitor_management';
+import { monitorManagementPageProvider } from '../../page_objects/uptime/monitor_management';
 
 journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => {
   const name = `Test monitor ${uuid.v4()}`;

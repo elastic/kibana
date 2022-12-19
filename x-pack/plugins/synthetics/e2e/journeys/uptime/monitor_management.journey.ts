@@ -8,8 +8,8 @@
 import uuid from 'uuid';
 import { journey, step, expect, after, Page } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
-import { monitorManagementPageProvider } from '../page_objects/monitor_management';
-import { DataStream } from '../../common/runtime_types/monitor_management';
+import { monitorManagementPageProvider } from '../../page_objects/uptime/monitor_management';
+import { DataStream } from '../../../common/runtime_types/monitor_management';
 
 const customLocation = process.env.SYNTHETICS_TEST_LOCATION;
 
