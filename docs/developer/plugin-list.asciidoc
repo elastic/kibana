@@ -41,7 +41,8 @@ as uiSettings within the code.
 
 
 |{kib-repo}blob/{branch}/src/plugins/content/README.md[content]
-|A Kibana plugin
+|This plugin exposes the Content Management Service. Content Management service
+provides a unified way to do CRUD+ operations on content.
 
 
 |{kib-repo}blob/{branch}/src/plugins/controls/README.mdx[controls]
