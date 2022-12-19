@@ -17,7 +17,7 @@ import {
 } from '../types';
 import { translations } from '../constants/translations';
 import { RuleRunMetrics } from './rule_run_metrics_store';
-import { RuleLastRunService } from '../monitoring/rule_last_run_service';
+import { RuleLastRunService } from '../monitoring/rule_execution_service';
 
 export interface ILastRun {
   lastRun: RuleLastRun;
@@ -30,8 +30,8 @@ export const lastRunFromState = (
 ): ILastRun => {
   let outcome: RuleLastRunOutcomes = RuleLastRunOutcomeValues[0];
   // Check for warning states
-  let warning = null;
-  let outcomeMsg = '';
+  let warning: RuleLastRun['warning'] = null;
+  const outcomeMsg: string[] = [];
 
   const { errors, warnings, outcomeMessage } = lastRunService.getLastRunResults();
   const { metrics } = stateWithMetrics;
@@ -44,11 +44,11 @@ export const lastRunFromState = (
   if (metrics.hasReachedAlertLimit) {
     outcome = RuleLastRunOutcomeValues[1];
     warning = RuleExecutionStatusWarningReasons.MAX_ALERTS;
-    outcomeMsg = translations.taskRunner.warning.maxAlerts;
+    outcomeMsg.push(translations.taskRunner.warning.maxAlerts);
   } else if (metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL) {
     outcome = RuleLastRunOutcomeValues[1];
     warning = RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS;
-    outcomeMsg = translations.taskRunner.warning.maxExecutableActions;
+    outcomeMsg.push(translations.taskRunner.warning.maxExecutableActions);
   }
 
   // Overwrite outcome to be error if last run reported any errors
@@ -56,17 +56,15 @@ export const lastRunFromState = (
     outcome = RuleLastRunOutcomeValues[2];
   }
 
-  // Optionally merge outcome messages reported by
-  // rule execution to the Framework's outcome message
-  if (outcomeMsg.length > 0 && outcomeMessage.length > 0) {
-    outcomeMsg = `${outcomeMsg} - ${outcomeMessage}`;
-  } else if (outcomeMessage.length > 0) {
-    outcomeMsg = outcomeMessage;
+  // Optionally push outcome message reported by
+  // rule execution to the Framework's outcome message array
+  if (outcomeMessage) {
+    outcomeMsg.push(outcomeMessage);
   }
 
   return {
     lastRun: {
-      outcome: outcome || RuleLastRunOutcomeValues[0],
+      outcome,
       outcomeMsg: outcomeMsg || null,
       warning: warning || null,
       alertsCount: {
@@ -85,7 +83,7 @@ export const lastRunFromError = (error: Error): ILastRun => {
     lastRun: {
       outcome: RuleLastRunOutcomeValues[2],
       warning: getReasonFromError(error),
-      outcomeMsg: getEsErrorMessage(error),
+      outcomeMsg: [getEsErrorMessage(error)],
       alertsCount: {},
     },
     metrics: null,

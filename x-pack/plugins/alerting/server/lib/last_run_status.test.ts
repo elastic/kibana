@@ -8,7 +8,7 @@
 import { lastRunFromState } from './last_run_status';
 import { ActionsCompletion } from '../../common';
 import { RuleRunMetrics } from './rule_run_metrics_store';
-import { RuleLastRunResults, RuleLastRunService } from '../monitoring/rule_last_run_service';
+import { RuleExecutionResults, RuleExecutionService } from '../monitoring/rule_execution_service';
 
 const getMetrics = ({
   hasReachedAlertLimit = false,
@@ -28,12 +28,12 @@ const getMetrics = ({
   };
 };
 
-const getLastRunService = ({
+const getExecutionService = ({
   errors = [],
   warnings = [],
   outcomeMessage = '',
-}: Partial<RuleLastRunResults>) => {
-  const lastRunService = new RuleLastRunService();
+}: Partial<RuleExecutionResults>) => {
+  const lastRunService = new RuleExecutionService();
   const { addLastRunError, addLastRunWarning, setLastRunOutcomeMessage } =
     lastRunService.getLastRunSetters();
   errors.forEach((error) => addLastRunError(error));
@@ -46,11 +46,11 @@ describe('lastRunFromState', () => {
   it('returns successful outcome if no errors or warnings reported', () => {
     const result = lastRunFromState(
       { metrics: getMetrics({}) },
-      getLastRunService({ outcomeMessage: 'Rule executed succesfully' })
+      getExecutionService({ outcomeMessage: 'Rule executed succesfully' })
     );
 
     expect(result.lastRun.outcome).toEqual('succeeded');
-    expect(result.lastRun.outcomeMsg).toEqual('Rule executed succesfully');
+    expect(result.lastRun.outcomeMsg).toEqual(['Rule executed succesfully']);
     expect(result.lastRun.warning).toEqual(null);
 
     expect(result.lastRun.alertsCount).toEqual({
@@ -64,14 +64,14 @@ describe('lastRunFromState', () => {
   it('returns a warning outcome if rules last execution reported one', () => {
     const result = lastRunFromState(
       { metrics: getMetrics({}) },
-      getLastRunService({
+      getExecutionService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
       })
     );
 
     expect(result.lastRun.outcome).toEqual('warning');
-    expect(result.lastRun.outcomeMsg).toEqual('Rule execution reported a warning');
+    expect(result.lastRun.outcomeMsg).toEqual(['Rule execution reported a warning']);
     expect(result.lastRun.warning).toEqual(null);
 
     expect(result.lastRun.alertsCount).toEqual({
@@ -87,13 +87,13 @@ describe('lastRunFromState', () => {
       {
         metrics: getMetrics({ hasReachedAlertLimit: true }),
       },
-      getLastRunService({})
+      getExecutionService({})
     );
 
     expect(result.lastRun.outcome).toEqual('warning');
-    expect(result.lastRun.outcomeMsg).toEqual(
-      'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed'
-    );
+    expect(result.lastRun.outcomeMsg).toEqual([
+      'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed',
+    ]);
     expect(result.lastRun.warning).toEqual('maxAlerts');
 
     expect(result.lastRun.alertsCount).toEqual({
@@ -109,13 +109,13 @@ describe('lastRunFromState', () => {
       {
         metrics: getMetrics({ triggeredActionsStatus: ActionsCompletion.PARTIAL }),
       },
-      getLastRunService({})
+      getExecutionService({})
     );
 
     expect(result.lastRun.outcome).toEqual('warning');
-    expect(result.lastRun.outcomeMsg).toEqual(
-      'The maximum number of actions for this rule type was reached; excess actions were not triggered.'
-    );
+    expect(result.lastRun.outcomeMsg).toEqual([
+      'The maximum number of actions for this rule type was reached; excess actions were not triggered.',
+    ]);
     expect(result.lastRun.warning).toEqual('maxExecutableActions');
 
     expect(result.lastRun.alertsCount).toEqual({
@@ -134,16 +134,17 @@ describe('lastRunFromState', () => {
       {
         metrics: getMetrics({ hasReachedAlertLimit: true }),
       },
-      getLastRunService({
+      getExecutionService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
       })
     );
 
     expect(result.lastRun.outcome).toEqual('warning');
-    expect(result.lastRun.outcomeMsg).toEqual(
-      `${frameworkOutcomeMessage} - ${ruleExecutionOutcomeMessage}`
-    );
+    expect(result.lastRun.outcomeMsg).toEqual([
+      frameworkOutcomeMessage,
+      ruleExecutionOutcomeMessage,
+    ]);
     expect(result.lastRun.warning).toEqual('maxAlerts');
 
     expect(result.lastRun.alertsCount).toEqual({
@@ -162,16 +163,17 @@ describe('lastRunFromState', () => {
       {
         metrics: getMetrics({ triggeredActionsStatus: ActionsCompletion.PARTIAL }),
       },
-      getLastRunService({
+      getExecutionService({
         warnings: ['MOCK_WARNING'],
         outcomeMessage: 'Rule execution reported a warning',
       })
     );
 
     expect(result.lastRun.outcome).toEqual('warning');
-    expect(result.lastRun.outcomeMsg).toEqual(
-      `${frameworkOutcomeMessage} - ${ruleExecutionOutcomeMessage}`
-    );
+    expect(result.lastRun.outcomeMsg).toEqual([
+      frameworkOutcomeMessage,
+      ruleExecutionOutcomeMessage,
+    ]);
     expect(result.lastRun.warning).toEqual('maxExecutableActions');
 
     expect(result.lastRun.alertsCount).toEqual({
@@ -187,16 +189,17 @@ describe('lastRunFromState', () => {
       {
         metrics: getMetrics({ hasReachedAlertLimit: true }),
       },
-      getLastRunService({
+      getExecutionService({
         errors: ['MOCK_ERROR'],
         outcomeMessage: 'Rule execution reported an error',
       })
     );
 
     expect(result.lastRun.outcome).toEqual('failed');
-    expect(result.lastRun.outcomeMsg).toEqual(
-      'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed - Rule execution reported an error'
-    );
+    expect(result.lastRun.outcomeMsg).toEqual([
+      'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed',
+      'Rule execution reported an error',
+    ]);
     expect(result.lastRun.warning).toEqual('maxAlerts');
 
     expect(result.lastRun.alertsCount).toEqual({
