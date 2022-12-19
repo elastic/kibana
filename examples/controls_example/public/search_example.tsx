@@ -119,10 +119,10 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           dateRangeTo={timeRange.to}
           filters={filters}
           indexPatterns={[dataView]}
-          onFiltersUpdated={(filters) => {
+          onFiltersUpdated={(newFilters) => {
             // filterManager.setFilters populates filter.meta so filter pill has pretty title
-            data.query.filterManager.setFilters(filters);
-            setFilters(filters);
+            data.query.filterManager.setFilters(newFilters);
+            setFilters(newFilters);
           }}
           onQuerySubmit={({ dateRange, query: newQuery }) => {
             setQuery(newQuery);
