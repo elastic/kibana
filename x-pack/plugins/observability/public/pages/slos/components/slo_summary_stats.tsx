@@ -12,11 +12,11 @@ import { SLO } from '../../../typings';
 import { isSloHealthy } from '../helpers/is_slo_healthy';
 import { getSloDifference } from '../helpers/get_slo_difference';
 
-export interface SloListItemSummaryStatsProps {
+export interface SloSummaryStatsProps {
   slo: SLO;
 }
 
-export function SloListItemSummaryStats({ slo }: SloListItemSummaryStatsProps) {
+export function SloSummaryStats({ slo }: SloSummaryStatsProps) {
   const isHealthy = isSloHealthy(slo);
   const { label } = getSloDifference(slo);
 

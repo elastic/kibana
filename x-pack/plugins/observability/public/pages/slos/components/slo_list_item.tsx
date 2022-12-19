@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import { useKibana } from '../../../utils/kibana_react';
-import { SloListItemSummaryStats } from './slo_list_item_summary_stats';
+import { SloSummaryStats } from './slo_summary_stats';
 import { DeleteConfirmationModal } from './slo_list_item_delete_confirmation_modal';
 import { paths } from '../../../config';
 import { SLO } from '../../../typings';
@@ -105,7 +105,7 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <SloListItemSummaryStats slo={slo} />
+              <SloSummaryStats slo={slo} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

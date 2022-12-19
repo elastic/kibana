@@ -9,18 +9,15 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { anSLO } from '../../../../common/data/slo';
-import {
-  SloListItemSummaryStats as Component,
-  SloListItemSummaryStatsProps,
-} from './slo_list_item_summary_stats';
+import { SloSummaryStats as Component, SloSummaryStatsProps } from './slo_summary_stats';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/SloListItemSummaryStats',
+  title: 'app/SLO/ListPage/SloSummaryStats',
   argTypes: {},
 };
 
-const Template: ComponentStory<typeof Component> = (props: SloListItemSummaryStatsProps) => (
+const Template: ComponentStory<typeof Component> = (props: SloSummaryStatsProps) => (
   <Component {...props} />
 );
 
@@ -28,5 +25,5 @@ const defaultProps = {
   slo: anSLO,
 };
 
-export const SloListItemSummaryStats = Template.bind({});
-SloListItemSummaryStats.args = defaultProps;
+export const SloSummaryStats = Template.bind({});
+SloSummaryStats.args = defaultProps;
