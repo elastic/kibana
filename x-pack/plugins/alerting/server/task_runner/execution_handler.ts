@@ -205,7 +205,6 @@ export class ExecutionHandler<
             action,
             spaceId,
             ruleId,
-            excludedAlertInstanceIds: this.rule.mutedInstanceIds,
           });
           const actionToRun = {
             ...action,
@@ -514,12 +513,10 @@ export class ExecutionHandler<
     action,
     ruleId,
     spaceId,
-    excludedAlertInstanceIds,
   }: {
     action: RuleAction;
     ruleId: string;
     spaceId: string;
-    excludedAlertInstanceIds: string[];
   }) {
     let options;
 
@@ -532,14 +529,14 @@ export class ExecutionHandler<
         end: new Date(),
         ruleId,
         spaceId,
-        excludedAlertInstanceIds,
+        excludedAlertInstanceIds: this.rule.mutedInstanceIds,
       };
     } else {
       options = {
         executionUuid: this.executionId,
         ruleId,
         spaceId,
-        excludedAlertInstanceIds,
+        excludedAlertInstanceIds: this.rule.mutedInstanceIds,
       };
     }
 
