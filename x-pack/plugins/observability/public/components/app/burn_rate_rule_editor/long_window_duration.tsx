@@ -85,5 +85,5 @@ const getTooltipText = (shortWindowDuration: Duration) =>
   });
 
 const valueLabel = i18n.translate('xpack.observability.slo.rules.longWindow.valueLabel', {
-  defaultMessage: 'Enter a duration value for the long window',
+  defaultMessage: 'Enter the lookback period in hours',
 });
