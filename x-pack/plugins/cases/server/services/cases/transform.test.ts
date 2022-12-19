@@ -17,12 +17,15 @@ import {
   transformUpdateResponseToExternalModel,
 } from './transform';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { ConnectorTypes } from '../../../common/api';
+import { CaseSeverity, ConnectorTypes } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
+  SEVERITY_ESMODEL_TO_EXTERNAL,
+  SEVERITY_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
+import { ESCaseSeverity } from './types';
 
 describe('case transforms', () => {
   describe('transformUpdateResponseToExternalModel', () => {
@@ -341,6 +344,28 @@ describe('case transforms', () => {
       expect(transformedAttributes.attributes.connector).not.toHaveProperty('id');
       expect(transformedAttributes.referenceHandler.build()).toEqual([]);
     });
+
+    it.each([
+      [CaseSeverity.LOW],
+      [CaseSeverity.MEDIUM],
+      [CaseSeverity.HIGH],
+      [CaseSeverity.CRITICAL],
+    ])('properly converts "%s" severity to corresponding ES Value', (externalSeverityValue) => {
+      const transformedAttributes = transformAttributesToESModel({
+        severity: externalSeverityValue,
+      });
+
+      expect(transformedAttributes.attributes).toHaveProperty('severity');
+      expect(transformedAttributes.attributes.severity).toBe(
+        SEVERITY_EXTERNAL_TO_ESMODEL[externalSeverityValue]
+      );
+    });
+
+    it('does not return the severity when it is undefined', () => {
+      expect(transformAttributesToESModel({ severity: undefined }).attributes).not.toHaveProperty(
+        'severity'
+      );
+    });
   });
 
   describe('transformSavedObjectToExternalModel', () => {
@@ -409,6 +434,36 @@ describe('case transforms', () => {
           },
         }
       `);
+    });
+
+    it.each([
+      [ESCaseSeverity.LOW],
+      [ESCaseSeverity.MEDIUM],
+      [ESCaseSeverity.HIGH],
+      [ESCaseSeverity.CRITICAL],
+    ])(
+      'properly converts "%s" severity to corresponding external value',
+      (internalSeverityValue) => {
+        const caseSO = createCaseSavedObjectResponse({
+          overrides: { severity: internalSeverityValue },
+        });
+
+        expect(caseSO.attributes).toHaveProperty('severity');
+        expect(caseSO.attributes.severity).toBe(internalSeverityValue);
+
+        const transformedSO = transformSavedObjectToExternalModel(caseSO);
+
+        expect(transformedSO.attributes).toHaveProperty('severity');
+        expect(transformedSO.attributes.severity).toBe(
+          SEVERITY_ESMODEL_TO_EXTERNAL[internalSeverityValue]
+        );
+      }
+    );
+
+    it('does not return the severity when it is undefined', () => {
+      expect(transformAttributesToESModel({ severity: undefined }).attributes).not.toHaveProperty(
+        'severity'
+      );
     });
   });
 });

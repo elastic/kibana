@@ -1055,7 +1055,10 @@ export const RulesList = ({
   const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
 
   useEffect(() => {
-    setIsDeleteModalVisibility(rulesToDelete.length > 0 || Boolean(rulesToDeleteFilter));
+    setIsDeleteModalVisibility(
+      (!isAllSelected && rulesToDelete.length > 0) ||
+        (isAllSelected && Boolean(rulesToDeleteFilter))
+    );
   }, [rulesToDelete, rulesToDeleteFilter]);
 
   const { showToast } = useBulkOperationToast({ onSearchPopulate });
@@ -1090,22 +1093,29 @@ export const RulesList = ({
     setIsDeleteModalVisibility(false);
     clearRulesToDelete();
   };
+
   const onDeleteConfirm = useCallback(async () => {
     setIsDeleteModalVisibility(false);
     setIsDeletingRules(true);
 
-    const { errors, total } = await bulkDeleteRules({
-      filter: rulesToDeleteFilter,
-      ids: rulesToDelete,
-      http,
-    });
+    const bulkDeleteRulesArguments =
+      isAllSelected && rulesToDeleteFilter
+        ? {
+            filter: rulesToDeleteFilter,
+            http,
+          }
+        : {
+            ids: rulesToDelete,
+            http,
+          };
+    const { errors, total } = await bulkDeleteRules(bulkDeleteRulesArguments);
 
     setIsDeletingRules(false);
     showToast({ action: 'DELETE', errors, total });
     await refreshRules();
     clearRulesToDelete();
     onClearSelection();
-  }, [http, rulesToDelete, rulesToDeleteFilter, setIsDeletingRules, toasts]);
+  }, [http, rulesToDelete, rulesToDeleteFilter]);
 
   const numberRulesToDelete = rulesToDelete.length || numberOfSelectedItems;
 

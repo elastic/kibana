@@ -112,8 +112,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       const { loaded, remainingFieldCandidates, groupsMissing } = data;
 
       if (
-        (Array.isArray(remainingFieldCandidates) && remainingFieldCandidates.length > 0) ||
-        groupsMissing
+        loaded < 1 &&
+        ((Array.isArray(remainingFieldCandidates) && remainingFieldCandidates.length > 0) ||
+          groupsMissing)
       ) {
         setOverrides({ loaded, remainingFieldCandidates, changePoints: data.changePoints });
       } else {
