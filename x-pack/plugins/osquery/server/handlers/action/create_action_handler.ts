@@ -9,9 +9,8 @@ import uuid from 'uuid';
 import moment from 'moment';
 import { filter, flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { Ecs, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { Ecs } from '../../../common/ecs';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { getInternalSavedObjectsClient } from '../../routes/utils';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
@@ -56,6 +55,7 @@ export const createActionHandler = async (
     policiesSelected: agent_policy_ids,
   });
 
+  console.log('1111', ecsData);
   if (!selectedAgents.length) {
     throw new Error('No agents found for selection');
   }
@@ -106,13 +106,13 @@ export const createActionHandler = async (
           )
         )
       : params.queries?.length
-      ? map(params.queries, (query) => {
-          const replacedQuery = replacedQueries(query.query, ecsData);
+      ? map(params.queries, ({ query, ...restQuery }) => {
+          const replacedQuery = replacedQueries(query, ecsData);
 
           return pickBy(
             {
-              ...query,
               ...replacedQuery,
+              ...restQuery,
               action_id: uuid.v4(),
               agents: selectedAgents,
             },
@@ -185,7 +185,10 @@ export const createActionHandler = async (
   };
 };
 
-const replacedQueries = (query: string | undefined, ecsData?: object) => {
+const replacedQueries = (
+  query: string | undefined,
+  ecsData?: Ecs
+): { query: string | undefined; error?: string } => {
   if (ecsData && query) {
     const { result, skipped } = replaceParamsQuery(query, ecsData);
 

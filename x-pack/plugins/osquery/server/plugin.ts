@@ -11,6 +11,7 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  Ecs,
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -92,7 +93,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
     return {
-      osqueryCreateAction: (params: CreateLiveQueryRequestBodySchema, ecsData?: object) =>
+      osqueryCreateAction: (params: CreateLiveQueryRequestBodySchema, ecsData?: Ecs) =>
         createActionHandler(osqueryContext, params, { ecsData }).catch((error) =>
           // eslint-disable-next-line no-console
           console.log(error)

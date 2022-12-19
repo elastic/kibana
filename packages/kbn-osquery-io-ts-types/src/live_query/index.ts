@@ -104,7 +104,8 @@ export const arrayQueries = t.array(
     ecs_mapping: ecsMappingOrUndefined,
     version: versionOrUndefined,
     platform: platformOrUndefined,
-    skipped: skippedOrUndefined,
+    removed: removedOrUndefined,
+    snapshot: snapshotOrUndefined,
   })
 );
 export type ArrayQueries = t.TypeOf<typeof arrayQueries>;
@@ -117,7 +118,8 @@ export const objectQueries = t.record(
     version: versionOrUndefined,
     platform: platformOrUndefined,
     saved_query_id: savedQueryIdOrUndefined,
-    skipped: skippedOrUndefined,
+    removed: removedOrUndefined,
+    snapshot: snapshotOrUndefined,
   })
 );
 export type ObjectQueries = t.TypeOf<typeof objectQueries>;

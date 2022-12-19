@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { find, map, uniq } from 'lodash';
+import type { Ecs } from '@kbn/ecs';
+import { find, map, uniq, reduce } from 'lodash';
 import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type { SetupPlugins } from '../../../plugin_contract';
@@ -15,21 +16,29 @@ interface ScheduleNotificationActions {
   responseActions: RuleResponseAction[];
 }
 
-interface IAlert {
-  agent: {
-    id: string;
-  };
-}
-
 export const scheduleNotificationResponseActions = (
   { signals, responseActions }: ScheduleNotificationActions,
   osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction']
 ) => {
-  const filteredAlerts = (signals as IAlert[]).filter((alert) => alert.agent?.id);
-  const agentIds = uniq(filteredAlerts.map((alert: IAlert) => alert.agent?.id));
+  const filteredAlerts = (signals as Ecs[]).filter((alert) => {
+    return alert.agent?.id;
+  });
+
+  const alertsWithAgent = reduce(
+    filteredAlerts,
+    (acc: string[], alert) => {
+      const agentId = alert.agent?.id;
+      if (agentId !== undefined) {
+        acc.push(agentId);
+      }
+      return acc;
+    },
+    []
+  );
+  const agentIds = uniq(alertsWithAgent);
   const alertIds = map(filteredAlerts, '_id');
 
-  const foundAlert = find(filteredAlerts, (alert) => alert.agent.id === agentIds?.[0]);
+  const foundAlert = find(filteredAlerts, (alert) => alert.agent?.id === agentIds?.[0]);
 
   responseActions.forEach((responseAction) => {
     if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {

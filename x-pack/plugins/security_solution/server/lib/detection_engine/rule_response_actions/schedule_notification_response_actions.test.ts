@@ -9,10 +9,9 @@ import { scheduleNotificationResponseActions } from './schedule_notification_res
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 
 describe('ScheduleNotificationResponseActions', () => {
-  const signals = [
-    { agent: { id: 'agent-id-1' }, _id: 'alert-id-1', user: { id: 'S-1-5-20' } },
-    { agent: { id: 'agent-id-2' }, _id: 'alert-id-2' },
-  ];
+  const signalOne = { agent: { id: 'agent-id-1' }, _id: 'alert-id-1', user: { id: 'S-1-5-20' } };
+  const signalTwo = { agent: { id: 'agent-id-2' }, _id: 'alert-id-2' };
+  const signals = [signalOne, signalTwo];
   it('should handle osquery response actions and convert params', async () => {
     const osqueryActionMock = jest.fn();
 
@@ -20,7 +19,6 @@ describe('ScheduleNotificationResponseActions', () => {
       ecs_mapping: undefined,
       platform: 'windows',
       version: '1.0.0',
-      skipped: false,
     };
 
     const defaultQueryParams = {
@@ -115,30 +113,41 @@ describe('ScheduleNotificationResponseActions', () => {
         },
       },
     ];
+
+    // @ts-expect-error we don't need to pass in the full context
     scheduleNotificationResponseActions({ signals, responseActions }, osqueryActionMock);
 
-    expect(osqueryActionMock).toHaveBeenCalledWith({
-      ...defaultQueryResultParams,
-      query: simpleQuery,
-    });
-    expect(osqueryActionMock).toHaveBeenCalledWith({
-      ...defaultQueryResultParams,
-      query: complexQueryReplaced,
-    });
+    expect(osqueryActionMock).toHaveBeenCalledWith(
+      {
+        ...defaultQueryResultParams,
+        query: simpleQuery,
+      },
+      signalOne
+    );
+    expect(osqueryActionMock).toHaveBeenCalledWith(
+      {
+        ...defaultQueryResultParams,
+        query: complexQueryReplaced,
+      },
+      signalOne
+    );
     expect(osqueryActionMock).toHaveBeenCalledWith({
       ...defaultPackResultParams,
       queries: [{ ...defaultQueries, id: 'query-1', query: simpleQuery }],
     });
-    expect(osqueryActionMock).toHaveBeenCalledWith({
-      ...defaultPackResultParams,
-      queries: [
-        {
-          ...defaultQueries,
-          id: 'query-1',
-          query: complexQueryReplaced,
-        },
-        { ...defaultQueries, id: 'query-2', query: agentQueryReplaced },
-      ],
-    });
+    expect(osqueryActionMock).toHaveBeenCalledWith(
+      {
+        ...defaultPackResultParams,
+        queries: [
+          {
+            ...defaultQueries,
+            id: 'query-1',
+            query: complexQueryReplaced,
+          },
+          { ...defaultQueries, id: 'query-2', query: agentQueryReplaced },
+        ],
+      },
+      {}
+    );
   });
 });
