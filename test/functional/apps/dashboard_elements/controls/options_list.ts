@@ -322,7 +322,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         describe('dashboard filters', async () => {
           before(async () => {
-            await filterBar.addFilter('sound.keyword', 'is one of', ['bark', 'bow ow ow', 'ruff']);
+            await filterBar.addFilter({
+              field: 'sound.keyword',
+              operation: 'is one of',
+              value: ['bark', 'bow ow ow', 'ruff'],
+            });
             await dashboard.waitForRenderComplete();
             await header.waitUntilLoadingHasFinished();
           });
@@ -611,7 +615,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('Can mark multiple selections invalid with Filter', async () => {
-          await filterBar.addFilter('sound.keyword', 'is', ['hiss']);
+          await filterBar.addFilter({ field: 'sound.keyword', operation: 'is', value: 'hiss' });
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
           await ensureAvailableOptionsEql(['hiss', 'Ignored selections', 'meow', 'bark']);
@@ -641,7 +645,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('Does not mark multiple selections invalid with Filter', async () => {
-          await filterBar.addFilter('sound.keyword', 'is', ['hiss']);
+          await filterBar.addFilter({ field: 'sound.keyword', operation: 'is', value: 'hiss' });
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
           await ensureAvailableOptionsEql(['hiss']);
