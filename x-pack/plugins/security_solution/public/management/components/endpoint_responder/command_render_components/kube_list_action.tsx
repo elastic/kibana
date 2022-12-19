@@ -8,15 +8,41 @@
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
+import _ from 'lodash';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
-  GetProcessesActionOutputContent,
-  ProcessesRequestBody,
+  KubeListActionOutputContent,
+  KubeRequestBody,
 } from '../../../../../common/endpoint/types';
 import { useSendGetKubeListRequest } from '../../../hooks/response_actions/use_send_get_kube_list_request';
 import type { ActionRequestComponentProps } from '../types';
+
+const startTimeToAge = (startTime: string) => {
+  const diffInDays = moment(moment.now()).diff(moment(startTime), 'days');
+  const diffInHours = moment(moment.now()).diff(moment(startTime), 'hours');
+  const remainingHours = diffInHours - diffInDays * 24;
+
+  if (diffInDays > 0) {
+    return `${diffInDays}d${remainingHours > 0 ? `${remainingHours}h` : ''}`;
+  }
+  const diffInMinutes = moment(moment.now()).diff(moment(startTime), 'minutes');
+  const remainingMinutes = diffInMinutes - diffInHours * 60;
+
+  if (diffInHours > 0) {
+    return `${diffInHours}h${remainingMinutes > 0 ? `${remainingMinutes}m` : ''}`;
+  }
+
+  const diffInSeconds = moment(moment.now()).diff(moment(startTime), 'seconds');
+  const remainingSeconds = diffInSeconds - diffInMinutes * 60;
+
+  if (diffInMinutes > 0) {
+    return `${diffInMinutes}m${remainingSeconds > 0 ? `${remainingSeconds}s` : ''}`;
+  }
+
+  return `${diffInSeconds}s`;
+};
 
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
@@ -40,133 +66,196 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
   }
 `;
 
-export const KubeListActionResult = memo<ActionRequestComponentProps>(
-  ({ command, setStore, store, status, setStatus, ResultComponent }) => {
-    const endpointId = command.commandDefinition?.meta?.endpointId;
-    const actionCreator = useSendGetKubeListRequest();
+const COLUMNS_TO_RESOURCE_MAPPING = {
+  pod: [
+    {
+      field: 'name',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.name',
+        { defaultMessage: 'NAME' }
+      ),
+      width: '20%',
+    },
+    {
+      field: 'ready',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.ready',
+        { defaultMessage: 'READY' }
+      ),
+      width: '10%',
+    },
+    {
+      field: 'status',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.status',
+        { defaultMessage: 'STATUS' }
+      ),
+      width: '10%',
+    },
+    {
+      field: 'restarts',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.restarts',
+        { defaultMessage: 'RESTARTS' }
+      ),
+      width: '10%',
+    },
+    {
+      field: 'age',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.age',
+        { defaultMessage: 'AGE' }
+      ),
+      width: '10%',
+    },
+    {
+      field: 'ip',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.ip',
+        { defaultMessage: 'IP' }
+      ),
+      width: '15%',
+    },
+    {
+      field: 'node',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.node',
+        { defaultMessage: 'NODE' }
+      ),
+      width: '25%',
+    },
+  ],
+  deployment: [
+    {
+      field: 'name',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.name',
+        { defaultMessage: 'NAME' }
+      ),
+      width: '20%',
+    },
+    {
+      field: 'ready',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.ready',
+        { defaultMessage: 'READY' }
+      ),
+      width: '10%',
+    },
+    {
+      field: 'upToDate',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.upToDate',
+        { defaultMessage: 'UP-TO-DATE' }
+      ),
+      width: '10%',
+    },
+    {
+      field: 'available',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.available',
+        { defaultMessage: 'AVAILABLE' }
+      ),
+      width: '10%',
+    },
+    {
+      field: 'age',
+      name: i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.age',
+        { defaultMessage: 'AGE' }
+      ),
+      width: '10%',
+    },
+  ],
+};
 
-    const actionRequestBody = useMemo(() => {
-      return endpointId
-        ? {
-            endpoint_ids: [endpointId],
-            comment: command.args.args?.comment?.[0],
-            parameters: {
-              resource: command.args.args?.resource?.[0],
-            },
-          }
-        : undefined;
-    }, [command.args.args?.comment, endpointId]);
+export const KubeListActionResult = memo<
+  ActionRequestComponentProps<{
+    resource: string[];
+  }>
+>(({ command, setStore, store, status, setStatus, ResultComponent }) => {
+  const actionCreator = useSendGetKubeListRequest();
 
-    const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
-      ProcessesRequestBody,
-      GetProcessesActionOutputContent
-    >({
-      ResultComponent,
-      setStore,
-      store,
-      status,
-      setStatus,
-      actionCreator,
-      actionRequestBody,
-      dataTestSubj: 'getKubeList',
-    });
+  const endpointId = command.commandDefinition?.meta?.endpointId;
 
-    const columns = useMemo(
-      () => [
-        {
-          field: 'name',
-          name: i18n.translate(
-            'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.name',
-            { defaultMessage: 'NAME' }
-          ),
-          width: '20%',
-        },
-        {
-          field: 'ready',
-          name: i18n.translate(
-            'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.ready',
-            { defaultMessage: 'READY' }
-          ),
-          width: '10%',
-        },
-        {
-          field: 'status',
-          name: i18n.translate(
-            'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.status',
-            { defaultMessage: 'STATUS' }
-          ),
-          width: '10%',
-        },
-        {
-          field: 'restarts',
-          name: i18n.translate(
-            'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.restarts',
-            { defaultMessage: 'RESTARTS' }
-          ),
-          width: '10%',
-        },
-        {
-          field: 'age',
-          name: i18n.translate(
-            'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.age',
-            { defaultMessage: 'AGE' }
-          ),
-          width: '10%',
-        },
-        {
-          field: 'ip',
-          name: i18n.translate(
-            'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.ip',
-            { defaultMessage: 'IP' }
-          ),
-          width: '15%',
-        },
-        {
-          field: 'node',
-          name: i18n.translate(
-            'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.node',
-            { defaultMessage: 'NODE' }
-          ),
-          width: '25%',
-        },
-      ],
-      []
-    );
+  const actionRequestBody = useMemo(() => {
+    const { resource, comment } = command.args.args;
 
-    console.log(completedActionDetails);
-
-    const tableEntries = useMemo(() => {
-      if (endpointId) {
-        const result = completedActionDetails?.outputs?.[endpointId]?.content.result;
-        if (result) {
-          return [
-            {
-              name: result.metadata.name,
-              ready: '1/1',
-              status: result.status.phase,
-              restarts: '0',
-              age: moment(result.status.startTime).fromNow(true),
-              ip: result.status.podIP,
-              node: result.spec.nodeName,
-            },
-          ];
+    return endpointId
+      ? {
+          endpoint_ids: [endpointId],
+          comment: comment?.[0],
+          parameters: {
+            resource: resource[0],
+          },
         }
-      }
-      return [];
-    }, [completedActionDetails?.outputs, endpointId]);
+      : undefined;
+  }, [command.args.args, endpointId]);
 
-    if (!completedActionDetails || !completedActionDetails.wasSuccessful) {
-      return result;
+  const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
+    KubeRequestBody,
+    KubeListActionOutputContent
+  >({
+    ResultComponent,
+    setStore,
+    store,
+    status,
+    setStatus,
+    actionCreator,
+    actionRequestBody,
+    dataTestSubj: 'getKubeList',
+  });
+
+  const tableProps = useMemo(() => {
+    if (endpointId) {
+      const entries = completedActionDetails?.outputs?.[endpointId]?.content.entries;
+
+      if (entries?.resource === 'deployment') {
+        return {
+          columns: COLUMNS_TO_RESOURCE_MAPPING.deployment,
+          items: entries.items.map(({ metadata, status: kubeStatus }) => ({
+            name: metadata.name,
+            ready: `${kubeStatus.readyReplicas}/${kubeStatus.replicas}`,
+            upToDate: kubeStatus.updatedReplicas,
+            available: kubeStatus.availableReplicas,
+            age: startTimeToAge(metadata.creationTimestamp),
+          })),
+        };
+      }
+      if (entries?.resource === 'pod') {
+        return {
+          columns: COLUMNS_TO_RESOURCE_MAPPING.pod,
+          items: entries.items.map(({ metadata, status: kubeStatus, spec }) => ({
+            name: metadata.name,
+            ready:
+              kubeStatus.containerStatuses.filter(({ ready }) => ready).length +
+              '/' +
+              kubeStatus.containerStatuses.length,
+            status: kubeStatus.phase,
+            restarts: _.sumBy(kubeStatus.containerStatuses, 'restartCount'),
+            age: startTimeToAge(metadata.creationTimestamp),
+            ip: kubeStatus.podIP,
+            node: spec.nodeName,
+          })),
+        };
+      }
     }
 
-    console.log(tableEntries);
+    return {
+      columns: [],
+      items: [],
+    };
+  }, [completedActionDetails?.outputs, endpointId]);
 
-    // Show results
-    return (
-      <ResultComponent data-test-subj="getProcessesSuccessCallout" showTitle={false}>
-        <StyledEuiBasicTable items={tableEntries} columns={columns} />
-      </ResultComponent>
-    );
+  if (!completedActionDetails || !completedActionDetails.wasSuccessful) {
+    return result;
   }
-);
+
+  // Show results
+  return (
+    <ResultComponent data-test-subj="getKubeListSuccessCallout" showTitle={false}>
+      <StyledEuiBasicTable {...tableProps} />
+    </ResultComponent>
+  );
+});
 KubeListActionResult.displayName = 'KubeListActionResult';
