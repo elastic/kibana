@@ -33,6 +33,13 @@ export const NO_CASES_READ_ONLY = i18n.translate('xpack.cases.recentCases.noCase
   defaultMessage: 'No cases have been created yet.',
 });
 
+export const NO_CASES_ASSIGNED_TO_ME = i18n.translate(
+  'xpack.cases.recentCases.noCasesMessageAssignedToMe',
+  {
+    defaultMessage: 'No cases have been recently assigned to you.',
+  }
+);
+
 export const RECENT_CASES = i18n.translate('xpack.cases.recentCases.recentCasesSidebarTitle', {
   defaultMessage: 'Recent cases',
 });

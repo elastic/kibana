@@ -17,6 +17,7 @@ import { NoCases } from './no_cases';
 import type { FilterOptions } from '../../containers/types';
 import { TruncatedText } from '../truncated_text';
 import { initialData as initialGetCasesData, useGetCases } from '../../containers/use_get_cases';
+import type { FilterMode as RecentCasesFilterMode } from './types';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
@@ -29,9 +30,14 @@ const MarkdownContainer = styled.div`
 export interface RecentCasesProps {
   filterOptions: Partial<FilterOptions>;
   maxCasesToShow: number;
+  recentCasesFilterBy: RecentCasesFilterMode;
 }
 
-export const RecentCasesComp = ({ filterOptions, maxCasesToShow }: RecentCasesProps) => {
+export const RecentCasesComp = ({
+  filterOptions,
+  maxCasesToShow,
+  recentCasesFilterBy,
+}: RecentCasesProps) => {
   const { owner } = useCasesContext();
   const availableSolutions = useAvailableCasesOwners(['read']);
   const hasOwner = !!owner.length;
@@ -44,7 +50,7 @@ export const RecentCasesComp = ({ filterOptions, maxCasesToShow }: RecentCasesPr
   return isLoadingCases ? (
     <LoadingPlaceholders lines={2} placeholders={3} />
   ) : !isLoadingCases && data.cases.length === 0 ? (
-    <NoCases />
+    <NoCases recentCasesFilterBy={recentCasesFilterBy} />
   ) : (
     <>
       {data.cases.map((c, i) => (

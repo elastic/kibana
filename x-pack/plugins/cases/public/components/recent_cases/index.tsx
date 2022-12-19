@@ -93,7 +93,11 @@ const RecentCasesWithoutQueryProvider = React.memo(({ maxCasesToShow }: RecentCa
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
       <EuiText color="subdued" size="s">
-        <RecentCasesComp filterOptions={recentCasesFilterOptions} maxCasesToShow={maxCasesToShow} />
+        <RecentCasesComp
+          filterOptions={recentCasesFilterOptions}
+          maxCasesToShow={maxCasesToShow}
+          recentCasesFilterBy={recentCasesFilterBy}
+        />
         <EuiHorizontalRule margin="s" />
         <EuiText size="xs">
           <LinkAnchor onClick={navigateToAllCasesClick} href={getAllCasesUrl()}>
