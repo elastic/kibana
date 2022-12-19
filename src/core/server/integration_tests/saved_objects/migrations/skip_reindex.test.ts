@@ -54,8 +54,8 @@ describe('skip reindexing', () => {
     await delay(10);
     await fs.unlink(logFilePath).catch(() => void 0);
 
-    const nextMinor = new SemVer(currentVersion).inc('patch').format();
-    root = createRoot(nextMinor);
+    const nextPatch = new SemVer(currentVersion).inc('patch').format();
+    root = createRoot(nextPatch);
     await root.preboot();
     await root.setup();
     await root.start();
