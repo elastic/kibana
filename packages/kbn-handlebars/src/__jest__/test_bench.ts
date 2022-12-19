@@ -64,12 +64,12 @@ class HandlebarsTestBench {
     return this;
   }
 
-  withHelper(name: string, helper?: Handlebars.HelperDelegate) {
+  withHelper<F extends Handlebars.HelperDelegate>(name: string, helper?: F) {
     this.helpers[name] = helper;
     return this;
   }
 
-  withHelpers(helperFunctions: { [name: string]: Handlebars.HelperDelegate }) {
+  withHelpers<F extends Handlebars.HelperDelegate>(helperFunctions: { [name: string]: F }) {
     for (const [name, helper] of Object.entries(helperFunctions)) {
       this.withHelper(name, helper);
     }

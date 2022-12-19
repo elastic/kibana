@@ -98,9 +98,17 @@ describe('helpers', () => {
     expect(toHaveProperties.calls).toEqual(blockTemplates.length * 2 * factor);
   });
 
-  it('should pass expected "this" and arguments to helper functions', () => {
+  it('should pass expected "this" to helper functions (without input)', () => {
     expectTemplate('{{hello "world" 12 true false}}')
-      .withHelper('hello', function (this: any, ...args) {
+      .withHelper('hello', function (this: any, ...args: any[]) {
+        expect(this).toMatchInlineSnapshot(`Object {}`);
+      })
+      .toCompileTo('');
+  });
+
+  it('should pass expected "this" to helper functions (with input)', () => {
+    expectTemplate('{{hello "world" 12 true false}}')
+      .withHelper('hello', function (this: any, ...args: any[]) {
         expect(this).toMatchInlineSnapshot(`
           Object {
             "people": Array [
@@ -115,6 +123,19 @@ describe('helpers', () => {
             ],
           }
         `);
+      })
+      .withInput({
+        people: [
+          { name: 'Alan', id: 1 },
+          { name: 'Yehuda', id: 2 },
+        ],
+      })
+      .toCompileTo('');
+  });
+
+  it('should pass expected "this" and arguments to helper functions (non-block helper)', () => {
+    expectTemplate('{{hello "world" 12 true false}}')
+      .withHelper('hello', function (this: any, ...args: any[]) {
         expect(args).toMatchInlineSnapshot(`
           Array [
             "world",
@@ -140,6 +161,58 @@ describe('helpers', () => {
               "loc": Object {
                 "end": Object {
                   "column": 31,
+                  "line": 1,
+                },
+                "start": Object {
+                  "column": 0,
+                  "line": 1,
+                },
+              },
+              "lookupProperty": [Function],
+              "name": "hello",
+            },
+          ]
+        `);
+      })
+      .withInput({
+        people: [
+          { name: 'Alan', id: 1 },
+          { name: 'Yehuda', id: 2 },
+        ],
+      })
+      .toCompileTo('');
+  });
+
+  it('should pass expected "this" and arguments to helper functions (block helper)', () => {
+    expectTemplate('{{#hello "world" 12 true false}}{{/hello}}')
+      .withHelper('hello', function (this: any, ...args: any[]) {
+        expect(args).toMatchInlineSnapshot(`
+          Array [
+            "world",
+            12,
+            true,
+            false,
+            Object {
+              "data": Object {
+                "root": Object {
+                  "people": Array [
+                    Object {
+                      "id": 1,
+                      "name": "Alan",
+                    },
+                    Object {
+                      "id": 2,
+                      "name": "Yehuda",
+                    },
+                  ],
+                },
+              },
+              "fn": [Function],
+              "hash": Object {},
+              "inverse": [Function],
+              "loc": Object {
+                "end": Object {
+                  "column": 42,
                   "line": 1,
                 },
                 "start": Object {
@@ -190,11 +263,11 @@ describe('blocks', () => {
         const render = compile('{{*decorator}}');
 
         let calls = 0;
-        expect(render({})).toEqual('');
+        expect(render()).toEqual('');
         expect(calls).toEqual(1);
 
         calls = 0;
-        expect(render({})).toEqual('');
+        expect(render()).toEqual('');
         expect(calls).toEqual(1);
 
         global.kbnHandlebarsEnv = null;

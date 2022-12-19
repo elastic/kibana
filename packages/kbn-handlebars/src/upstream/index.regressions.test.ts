@@ -5,6 +5,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
+import Handlebars from '../..';
 import { expectTemplate } from '../__jest__/test_bench';
 
 describe('Regressions', () => {
@@ -236,7 +237,7 @@ describe('Regressions', () => {
         '{{/each}}'
     )
       .withInput({ array: [1], name: 'John' })
-      .withHelpers({
+      .withHelpers<Handlebars.HelperDelegate1Param>({
         myif(conditional, options) {
           if (conditional) {
             return options.fn(this);
@@ -260,7 +261,7 @@ describe('Regressions', () => {
   it('should allow hash with protected array names', () => {
     expectTemplate('{{helpa length="foo"}}')
       .withInput({ array: [1], name: 'John' })
-      .withHelpers({
+      .withHelpers<Handlebars.HelperDelegate0Param>({
         helpa(options) {
           return options.hash.length;
         },

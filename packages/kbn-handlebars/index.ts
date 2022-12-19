@@ -3,8 +3,8 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-// The handlebars module uses `export =`, so we should technically use `import OriginalHandlebars = require('handlebars')`, but Babel will not allow this.
-import OriginalHandlebars from 'handlebars';
+// The handlebars module uses `export =`, so we should technically use `import Handlebars = require('handlebars')`, but Babel will not allow this.
+import Handlebars from 'handlebars';
 import {
   createProtoAccessControl,
   resultIsAllowed,
@@ -17,20 +17,110 @@ import { indexOf, createFrame } from 'handlebars/dist/cjs/handlebars/utils';
 // @ts-expect-error: Could not find a declaration file for module
 import { moveHelperToHooks } from 'handlebars/dist/cjs/handlebars/helpers';
 
-const originalCreate = OriginalHandlebars.create;
+const originalCreate = Handlebars.create;
 
 /**
- * A custom version of the Handlesbars module with an extra `compileAST` function.
+ * A custom version of the Handlesbars module with an extra `compileAST` function and fixed typings.
  */
-const Handlebars: typeof ExtendedHandlebars & typeof OriginalHandlebars = OriginalHandlebars as any;
+declare module 'handlebars' {
+  export function compileAST(
+    input: string | hbs.AST.Program,
+    options?: ExtendedCompileOptions
+  ): (context?: any, options?: ExtendedRuntimeOptions) => string;
+
+  // --------------------------------------------------------
+  // Override/Extend inherited types below that are incorrect
+  // --------------------------------------------------------
+
+  export interface TemplateDelegate<T = any> {
+    (context?: T, options?: RuntimeOptions): string; // Override to ensure `context` is optional
+    blockParams?: number; // TODO: Can this really be optional?
+  }
+
+  export interface HelperOptions {
+    name: string;
+    loc: { start: hbs.AST.SourceLocation['start']; end: hbs.AST.SourceLocation['end'] };
+    lookupProperty: LookupProperty;
+  }
+
+  export interface HelperDelegate {
+    // eslint-disable-next-line @typescript-eslint/prefer-function-type
+    (...params: any[]): any;
+  }
+  export type HelperDelegate0Param = (options: BlockHelperOptions | HelperOptions) => any;
+  export type HelperDelegate1Param = (
+    param1: any,
+    options: BlockHelperOptions | HelperOptions
+  ) => any;
+  export type HelperDelegate2Param = (
+    param1: any,
+    param2: any,
+    options: BlockHelperOptions | HelperOptions
+  ) => any;
+  export type HelperDelegate3Param = (
+    param1: any,
+    param2: any,
+    param3: any,
+    options: BlockHelperOptions | HelperOptions
+  ) => any;
+  export type HelperDelegate4Param = (
+    param1: any,
+    param2: any,
+    param3: any,
+    param4: any,
+    options: BlockHelperOptions | HelperOptions
+  ) => any;
+  export type HelperDelegate5Param = (
+    param1: any,
+    param2: any,
+    param3: any,
+    param4: any,
+    param5: any,
+    options: BlockHelperOptions | HelperOptions
+  ) => any;
+  export type HelperDelegate6Param = (
+    param1: any,
+    param2: any,
+    param3: any,
+    param4: any,
+    param5: any,
+    param6: any,
+    options: BlockHelperOptions | HelperOptions
+  ) => any;
+  export type HelperDelegate7Param = (
+    param1: any,
+    param2: any,
+    param3: any,
+    param4: any,
+    param5: any,
+    param6: any,
+    param7: any,
+    options: BlockHelperOptions | HelperOptions
+  ) => any;
+}
 
 const kHelper = Symbol('helper');
 const kAmbiguous = Symbol('ambiguous');
 const kSimple = Symbol('simple');
 type NodeType = typeof kHelper | typeof kAmbiguous | typeof kSimple;
 
-type ProcessableNode = hbs.AST.MustacheStatement | hbs.AST.BlockStatement | hbs.AST.SubExpression;
+type LookupProperty = <T = any>(parent: { [name: string]: any }, propertyName: string) => T;
+
+type ProcessableStatementNode = hbs.AST.MustacheStatement | hbs.AST.SubExpression;
+type ProcessableBlockStatementNode = hbs.AST.BlockStatement | hbs.AST.PartialBlockStatement;
+type ProcessableNode = ProcessableStatementNode | ProcessableBlockStatementNode;
 type ProcessableNodeWithPathParts = ProcessableNode & { path: hbs.AST.PathExpression };
+type ProcessableNodeWithPathPartsOrLiteral = ProcessableNode & {
+  path: hbs.AST.PathExpression | hbs.AST.Literal;
+};
+
+type HelperOptions = Omit<Handlebars.HelperOptions, 'fn' | 'inverse'>;
+interface BlockHelperOptions
+  extends HelperOptions,
+    Pick<Handlebars.HelperOptions, 'fn' | 'inverse'> {}
+interface DecoratorOptions extends Omit<BlockHelperOptions, 'lookupProperties'> {
+  args?: any[];
+}
 
 /**
  * If the `unsafe-eval` CSP is set, this string constant will be `compile`,
@@ -83,19 +173,6 @@ export interface HelpersHash {
 
 export interface DecoratorsHash {
   [name: string]: DecoratorFunction;
-}
-
-/**
- * Normally this namespace isn't used directly. It's required to be present by
- * TypeScript when calling the `Handlebars.create()` function.
- */
-// eslint-disable-next-line @typescript-eslint/no-namespace
-export declare namespace ExtendedHandlebars {
-  export function compileAST(
-    input: string | hbs.AST.Program,
-    options?: ExtendedCompileOptions
-  ): (context: any, options?: ExtendedRuntimeOptions) => string;
-  export function create(): typeof Handlebars; // eslint-disable-line @typescript-eslint/no-shadow
 }
 
 // The handlebars module uses `export =`, so it can't be re-exported using `export *`.
@@ -151,7 +228,7 @@ interface Container {
   helpers: HelpersHash;
   decorators: DecoratorsHash;
   strict: (obj: { [name: string]: any }, name: string, loc: hbs.AST.SourceLocation) => any;
-  lookupProperty: <T = any>(parent: { [name: string]: any }, propertyName: string) => T;
+  lookupProperty: LookupProperty;
   lambda: (current: any, context: any) => any;
   data: (value: any, depth: number) => any;
   hooks: {
@@ -172,8 +249,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private blockParamValues: any[][] = [];
   private ast?: hbs.AST.Program;
   private container: Container;
-  // @ts-expect-error
-  private defaultHelperOptions: Handlebars.HelperOptions = {};
+  private defaultHelperOptions: Partial<HelperOptions> = {};
   private processedRootDecorators = false; // Root decorators should not have access to input arguments. This flag helps us detect them.
   private processedDecoratorsForProgram = new Set(); // It's important that a given program node only has its decorators run once, we use this Map to keep track of them
 
@@ -257,7 +333,6 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       hooks: {},
     });
 
-    // @ts-expect-error
     this.defaultHelperOptions.lookupProperty = container.lookupProperty;
   }
 
@@ -397,16 +472,15 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
     const result = this.container.lookupProperty<DecoratorFunction>(
       this.container.decorators,
-      // @ts-expect-error: Property 'name' does not exist on type 'HelperOptions' - The types are wrong
       options.name
     )(prog, props, this.container, options);
 
     Object.assign(result || prog, props);
   }
 
-  private processStatementOrExpression(node: ProcessableNode) {
+  private processStatementOrExpression(node: ProcessableNodeWithPathPartsOrLiteral) {
     // Calling `transformLiteralToPath` has side-effects!
-    // It converts a node from type `ProcessableNode` to `ProcessableNodeWithPathParts`
+    // It converts a node from type `ProcessableNodeWithPathPartsOrLiteral` to `ProcessableNodeWithPathParts`
     transformLiteralToPath(node);
 
     switch (this.classifyNode(node as ProcessableNodeWithPathParts)) {
@@ -534,7 +608,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const name = node.path.parts[0];
     const helper = this.setupHelper(node, name);
     // TypeScript: `helper.fn` might be `undefined` at this point, but to match the upstream behavior we call it without any guards
-    const result = helper.fn.apply(helper.context, helper.params);
+    const result = helper.fn!.call(helper.context, ...helper.params, helper.options);
     this.output.push(result);
   }
 
@@ -560,7 +634,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     }
 
     // TypeScript: `helper.fn` might be `undefined` at this point, but to match the upstream behavior we call it without any guards
-    const result = helper.fn.apply(helper.context, helper.params);
+    const result = helper.fn!.call(helper.context, ...helper.params, helper.options);
 
     this.output.push(result);
   }
@@ -613,7 +687,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     }
 
     return typeof helper.fn === 'function'
-      ? helper.fn.apply(helper.context, helper.params)
+      ? helper.fn.call(helper.context, ...helper.params, helper.options)
       : helper.fn;
   }
 
@@ -623,70 +697,78 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
     if (!helper.fn) {
       const context = this.scopes[0];
-      const options = helper.params[helper.params.length - 1];
-      value = this.container.hooks.blockHelperMissing!.call(context, value, options);
+      value = this.container.hooks.blockHelperMissing!.call(context, value, helper.options);
     }
 
     return value;
   }
 
-  private setupHelper(node: ProcessableNodeWithPathParts, helperName: string) {
+  private setupHelper(
+    node: ProcessableNode,
+    helperName: string
+  ): {
+    fn?: Handlebars.HelperDelegate;
+    context: any[];
+    params: any[];
+    options: HelperOptions | BlockHelperOptions;
+  } {
     return {
       fn: this.container.lookupProperty(this.container.helpers, helperName),
       context: this.scopes[0],
-      params: [...this.resolveNodes(node.params), this.setupParams(node, helperName)],
+      params: this.resolveNodes(node.params),
+      options: this.setupParams(node, helperName),
     };
   }
 
-  private setupDecoratorOptions(
-    decorator: hbs.AST.Decorator | hbs.AST.DecoratorBlock
-  ): Handlebars.HelperOptions {
+  private setupDecoratorOptions(decorator: hbs.AST.Decorator | hbs.AST.DecoratorBlock) {
     // TypeScript: The types indicate that `decorator.path` technically can be an `hbs.AST.Literal`. However, the upstream codebase always treats it as an `hbs.AST.PathExpression`, so we do too.
     const name = (decorator.path as hbs.AST.PathExpression).original;
-    const options = this.setupParams(decorator as hbs.AST.DecoratorBlock, name);
+    const options = toDecoratorOptions(this.setupParams(decorator, name));
 
     if (decorator.params.length > 0) {
       if (!this.processedRootDecorators) {
         // When processing the root decorators, temporarily remove the root context so it's not accessible to the decorator
         const context = this.scopes.shift();
-        // @ts-expect-error: Property 'args' does not exist on type 'HelperOptions'. The 'args' property is expected in decorators
         options.args = this.resolveNodes(decorator.params);
         this.scopes.unshift(context);
       } else {
-        // @ts-expect-error: Property 'args' does not exist on type 'HelperOptions'. The 'args' property is expected in decorators
         options.args = this.resolveNodes(decorator.params);
       }
     }
 
-    // @ts-expect-error: Property 'lookupProperty' does not exist on type 'HelperOptions'
-    delete options.lookupProperty; // There's really no tests/documentation on this, but to match the upstream codebase we'll remove `lookupProperty` from the decorator context
-
     return options;
   }
 
-  private setupParams(
-    node: ProcessableNodeWithPathParts,
-    helperName: string
-  ): Handlebars.HelperOptions {
-    const options: Handlebars.HelperOptions = {
-      // @ts-expect-error: Name should be on there, but the offical types doesn't know this
-      name: helperName,
+  private setupParams(node: ProcessableBlockStatementNode, name: string): BlockHelperOptions;
+  private setupParams(node: ProcessableStatementNode, name: string): HelperOptions;
+  private setupParams(node: ProcessableNode, name: string): HelperOptions | BlockHelperOptions;
+  private setupParams(node: ProcessableNode, name: string): HelperOptions | BlockHelperOptions {
+    // TODO: Is this the way to type `options` based on `node`?
+    type OptionsReturnType = typeof node extends hbs.AST.BlockStatement
+      ? BlockHelperOptions
+      : HelperOptions;
+    // TODO: I have to use `Partial` because `lookupProperty` (which is a required property of `OptionsReturnType`) isn't defined when the `options` object is first constructed.
+    // But it's added via the `Object.assign` at the end. But is this way to do make TypeScript happy in this scenario?
+    const options: Partial<OptionsReturnType> = {
+      name,
       hash: this.getHash(node),
       data: this.runtimeOptions!.data,
       loc: { start: node.loc.start, end: node.loc.end },
     };
 
     if (isBlock(node)) {
-      options.fn = this.generateProgramFunction(node.program);
-      if (node.program) this.processDecorators(node.program, options.fn);
-      options.inverse = this.generateProgramFunction(node.inverse);
-      if (node.inverse) this.processDecorators(node.inverse, options.inverse);
+      // TODO: Is there a way in TypeScript to infer that `options` is `BlockHelperOptions` inside this if-statement. If not, is there a way to just cast once?
+      (options as BlockHelperOptions).fn = this.generateProgramFunction(node.program);
+      if (node.program) this.processDecorators(node.program, (options as BlockHelperOptions).fn);
+      (options as BlockHelperOptions).inverse = this.generateProgramFunction(node.inverse);
+      if (node.inverse)
+        this.processDecorators(node.inverse, (options as BlockHelperOptions).inverse);
     }
 
-    return Object.assign(options, this.defaultHelperOptions);
+    return Object.assign(options, this.defaultHelperOptions) as OptionsReturnType;
   }
 
-  private generateProgramFunction(program?: hbs.AST.Program) {
+  private generateProgramFunction(program: hbs.AST.Program) {
     if (!program) return noop;
 
     const prog: Handlebars.TemplateDelegate = (
@@ -722,7 +804,6 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       return result;
     };
 
-    // @ts-expect-error: Property 'blockParams' does not exist on type 'TemplateDelegate<any>' - The types are too strict
     prog.blockParams = program.blockParams?.length ?? 0;
     return prog;
   }
@@ -793,6 +874,13 @@ function isBlock(node: hbs.AST.Node): node is hbs.AST.BlockStatement {
 
 function isDecorator(node: hbs.AST.Node): node is hbs.AST.Decorator | hbs.AST.DecoratorBlock {
   return node.type === 'Decorator' || node.type === 'DecoratorBlock';
+}
+
+function toDecoratorOptions(options: HelperOptions | BlockHelperOptions) {
+  // There's really no tests/documentation on this, but to match the upstream codebase we'll remove `lookupProperty` from the decorator context
+  delete (options as any).lookupProperty;
+
+  return options as DecoratorOptions;
 }
 
 function noop() {
