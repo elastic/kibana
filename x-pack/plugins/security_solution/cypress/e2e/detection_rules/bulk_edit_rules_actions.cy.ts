@@ -99,7 +99,6 @@ describe('Detection rules, bulk edit of rule actions', () => {
           name: ruleNameToAssert,
         },
         '1',
-        '100m',
         500,
         actions
       );
