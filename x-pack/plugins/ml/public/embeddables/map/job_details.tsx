@@ -10,6 +10,7 @@ import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { QuickJobCreator } from '../../application/jobs/new_job/job_from_map';
+import { redirectToGeoJobWizard } from '../../application/jobs/new_job/job_from_lens';
 import { useMlFromLensKibanaContext } from '../lens/context';
 import { MlJobAdditionalSettings } from '../common/ml_job_additional_settings';
 
@@ -18,9 +19,16 @@ interface Props {
   sourceDataView: DataView;
   geoField: string;
   splitField: string | null;
+  layerIndex: number;
 }
 
-export const JobDetails: FC<Props> = ({ embeddable, sourceDataView, geoField, splitField }) => {
+export const JobDetails: FC<Props> = ({
+  embeddable,
+  sourceDataView,
+  geoField,
+  splitField,
+  layerIndex,
+}) => {
   const {
     services: {
       data,
@@ -37,7 +45,8 @@ export const JobDetails: FC<Props> = ({ embeddable, sourceDataView, geoField, sp
   );
 
   function createGeoJobInWizard() {
-    // redirectToGeoJobWizard(embeddable, share);
+    // TODO: remove bucketSpan hardcoding
+    redirectToGeoJobWizard(embeddable, sourceDataView, geoField, splitField, '15m', share);
   }
 
   async function createADJob({

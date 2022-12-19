@@ -125,6 +125,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex, sour
         ) : null}
         {sourceDataView ? (
           <JobDetails
+            layerIndex={layerIndex}
             embeddable={embeddable}
             sourceDataView={sourceDataView}
             geoField={layer.getGeoFieldNames()[0]}

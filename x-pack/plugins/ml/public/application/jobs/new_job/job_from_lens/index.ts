@@ -13,4 +13,5 @@ export {
   getJobsItemsFromEmbeddable,
   isCompatibleVisualizationType,
   redirectToADJobWizards,
+  redirectToGeoJobWizard,
 } from './utils';

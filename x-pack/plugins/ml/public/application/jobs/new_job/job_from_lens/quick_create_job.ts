@@ -63,8 +63,7 @@ export class QuickJobCreator extends QuickJobCreatorBase {
     }
 
     const { jobConfig, datafeedConfig, start, end, jobType } = await this.createJob(
-      // @ts-ignore
-      chartInfo,
+      chartInfo!,
       from,
       to,
       query,
@@ -91,7 +90,6 @@ export class QuickJobCreator extends QuickJobCreatorBase {
     return result;
   }
 
-  // MOVE TO PARENT CLASS?
   public async createAndStashADJob(
     vis: LensSavedObjectAttributes,
     startString: string,

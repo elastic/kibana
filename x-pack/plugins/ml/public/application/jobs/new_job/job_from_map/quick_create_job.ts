@@ -16,7 +16,10 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { MlApiServices } from '../../../services/ml_api_service';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../common/constants/new_job';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
-import { getJobsItemsFromEmbeddable } from '../job_from_lens/utils'; // move this utils to the jobs_from_dashboard common directory or create util file for map dir
+import type { JobCreatorType } from '../common/job_creator';
+import { stashJobForCloning } from '../common/job_creator/util/general';
+// move this utils to the jobs_from_dashboard common directory or create util file for map dir
+import { getJobsItemsFromEmbeddable } from '../job_from_lens/utils';
 import { QuickJobCreatorBase, CreateState } from '../job_from_dashboard';
 
 export class QuickJobCreator extends QuickJobCreatorBase {
@@ -68,6 +71,52 @@ export class QuickJobCreator extends QuickJobCreatorBase {
       runInRealTime,
     });
     return result;
+  }
+
+  public async createAndStashGeoJob(
+    embeddable: MapEmbeddable,
+    dataView: DataView,
+    startString: string,
+    endString: string,
+    query: Query,
+    filters: Filter[],
+    bucketSpan: string,
+    geoField: string,
+    splitField: string | null = null
+  ) {
+    const { dashboard } = await getJobsItemsFromEmbeddable(embeddable);
+    try {
+      const { jobConfig, datafeedConfig, start, end, includeTimeRange } = await this.createGeoJob(
+        dataView,
+        startString,
+        endString,
+        query,
+        filters,
+        bucketSpan,
+        geoField,
+        splitField,
+        dashboard
+      );
+
+      // add job config and start and end dates to the
+      // job cloning stash, so they can be used
+      // by the new job wizards
+      stashJobForCloning(
+        {
+          jobConfig,
+          datafeedConfig,
+          createdBy: CREATED_BY_LABEL.GEO,
+          start,
+          end,
+        } as JobCreatorType,
+        true,
+        includeTimeRange,
+        !includeTimeRange
+      );
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
   }
 
   async createGeoJob(

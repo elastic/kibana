@@ -33,9 +33,16 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
 
   useEffect(() => {
     if (embeddable !== undefined) {
-      const currentLayers = embeddable
-        .getLayerList()
-        .filter((layer) => layer.getGeoFieldNames().length && layer.getIndexPatternIds().length);
+      // Keep track of geoFields for layers as they can be repeated
+      const layerGeoFields: Record<string, any> = {};
+      const currentLayers = embeddable.getLayerList().filter((layer) => {
+        const geoField = layer.getGeoFieldNames().length ? layer.getGeoFieldNames()[0] : undefined;
+        if (geoField && layerGeoFields[geoField] === undefined && layer.getIndexPatternIds().length) {
+          layerGeoFields[geoField] = true;
+          return true;
+        }
+        return false;
+      });
       setLayers(currentLayers);
     }
   }, [embeddable]);

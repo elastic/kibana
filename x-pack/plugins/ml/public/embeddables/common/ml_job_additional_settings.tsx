@@ -316,8 +316,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={createADJobInWizard}
-                // onClick={createADJobInWizard.bind(null, layerIndex)}
+                onClick={createADJobInWizard.bind(null, layerIndex)}
                 size="s"
                 iconType="popout"
                 iconSide="right"
