@@ -78,23 +78,10 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
 
   ${TIMELINE_OVERRIDES_CSS_STYLESHEET}
 
-  .euiDataGridRowCell .euiDataGridRowCell__expandActions .euiDataGridRowCell__actionButtonIcon {
-    display: none;
-
-    &:first-child,
-    &:nth-child(2),
-    &:nth-child(3),
-    &:last-child {
-      display: inline-flex;
-    }
-
-  }
-
   /*
     overrides the default styling of EuiDataGrid expand popover footer to
     make it a column of actions instead of the default actions row
   */
-
   .euiDataGridRowCell__popover {
 
     max-width: 815px !important;
@@ -109,26 +96,16 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
       }
     }
 
-
     &.euiPopover__panel[data-popover-open] {
       padding: 8px 0;
       min-width: 65px;
     }
-
 
     .euiPopoverFooter {
       border: 0;
       margin-top: 0 !important;
       .euiFlexGroup {
         flex-direction: column;
-      }
-    }
-
-    // Hide EUI's 'Filter in' and 'Filter out' footer buttons - replaced with our own buttons
-    .euiPopoverFooter:nth-child(2) {
-      .euiFlexItem:first-child,
-      .euiFlexItem:nth-child(2) {
-          display: none;
       }
     }
   }
