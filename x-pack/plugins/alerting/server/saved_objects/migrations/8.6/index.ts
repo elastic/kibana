@@ -36,7 +36,8 @@ const getLastRun = (attributes: RawRule) => {
 
   return {
     outcome,
-    outcomeMsg: warning?.message || error?.message || null,
+    outcomeMsg:
+      (error?.message && [error?.message]) || (warning?.message && [warning?.message]) || null,
     warning: warning?.reason || error?.reason || null,
     alertsCount: {},
   };

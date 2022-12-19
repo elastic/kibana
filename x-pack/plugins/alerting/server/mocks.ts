@@ -17,7 +17,7 @@ import { Alert, AlertFactoryDoneUtils } from './alert';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  PublicRuleLastRunService,
+  PublicRuleExecutionService,
   PublicRuleMonitoringService,
 } from './types';
 
@@ -120,7 +120,7 @@ const createRuleLastRunServiceMock = () => {
     getLastRunOutcomeMessages: jest.fn(),
     getLastRunResults: jest.fn(),
     getLastRunSetters: jest.fn(),
-  } as unknown as jest.Mocked<PublicRuleLastRunService>;
+  } as unknown as jest.Mocked<PublicRuleExecutionService>;
 
   return mock;
 };
