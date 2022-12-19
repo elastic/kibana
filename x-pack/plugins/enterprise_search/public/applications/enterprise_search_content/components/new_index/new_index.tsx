@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { TECHNICAL_PREVIEW_LABEL } from '../../../shared/constants';
+import { BETA_LABEL } from '../../../shared/constants/labels';
 import { parseQueryParams } from '../../../shared/query_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
@@ -40,9 +40,9 @@ export enum IngestionMethodId {
   native_connector = 'native_connector',
 }
 
-const technicalPreviewBadge = (
+const betaBadge = (
   <EuiBadge iconType="beaker">
-    <EuiText size="xs">{TECHNICAL_PREVIEW_LABEL}</EuiText>
+    <EuiText size="xs">{BETA_LABEL}</EuiText>
   </EuiBadge>
 );
 
@@ -64,7 +64,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
     }),
   },
   {
-    badge: technicalPreviewBadge,
+    badge: betaBadge,
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.description',
       {
@@ -104,7 +104,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
     }),
   },
   {
-    badge: technicalPreviewBadge,
+    badge: betaBadge,
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
       {
