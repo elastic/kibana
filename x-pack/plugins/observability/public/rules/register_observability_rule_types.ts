@@ -38,7 +38,10 @@ export const registerObservabilityRuleTypes = (
       requiresAppContext: false,
       defaultActionMessage: i18n.translate(
         'xpack.observability.slo.rules.burnRate.defaultActionMessage',
-        { defaultMessage: `\\{\\{alert\\}\\} - \\{\\{context\\}\\}` }
+        {
+          defaultMessage: `\\{\\{rule.name\\}\\} is firing:
+- Reason: \\{\\{context.reason\\}\\}`,
+        }
       ),
     });
   }
