@@ -10,6 +10,7 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getMobileFilters } from './get_mobile_filters';
+import { getMobileStats } from './get_mobile_stats';
 
 const mobileFilters = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -50,6 +51,49 @@ const mobileFilters = createApmServerRoute({
   },
 });
 
+const mobileStats = createApmServerRoute({
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/stats',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      environmentRt,
+      t.partial({
+        transactionType: t.string,
+        device: t.string,
+        osVersion: t.string,
+        appVersion: t.string,
+        netConnectionType: t.string,
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<Awaited<ReturnType<typeof getMobileStats>>> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end, transactionType } = params.query;
+
+    const mobileMetrics = await getMobileStats({
+      kuery,
+      environment,
+      transactionType,
+      start,
+      end,
+      serviceName,
+      apmEventClient,
+    });
+
+    return mobileMetrics;
+  },
+});
+
 export const mobileRouteRepository = {
   ...mobileFilters,
+  ...mobileStats,
 };
