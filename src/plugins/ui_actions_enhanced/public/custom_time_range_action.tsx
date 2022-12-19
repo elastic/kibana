@@ -84,8 +84,16 @@ export class CustomTimeRangeAction implements Action<TimeRangeActionContext> {
     const isMarkdown =
       isVisualizeEmbeddable(embeddable) &&
       (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
+
+    const isImage = embeddable.type === 'image';
+
     return Boolean(
-      embeddable && embeddable.parent && hasTimeRange(embeddable) && !isInputControl && !isMarkdown
+      embeddable &&
+        embeddable.parent &&
+        hasTimeRange(embeddable) &&
+        !isInputControl &&
+        !isMarkdown &&
+        !isImage
     );
   }
 
