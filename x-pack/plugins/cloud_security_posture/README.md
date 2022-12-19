@@ -21,7 +21,7 @@ node scripts/type_check.js --project=x-pack/plugins/cloud_security_posture/tscon
 Run **ESLint**:
 
 ```bash
-yarn lint:es
+yarn lint:es x-pack/plugins/cloud_security_posture
 ```
 
 Run **Unit Tests**:
