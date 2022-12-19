@@ -51,6 +51,9 @@ const ALERT_SUPPRESSION_START = `${ALERT_SUPPRESSION_META}.start` as const;
 const ALERT_SUPPRESSION_END = `${ALERT_SUPPRESSION_META}.end` as const;
 const ALERT_SUPPRESSION_DOCS_COUNT = `${ALERT_SUPPRESSION_META}.docs_count` as const;
 
+// Fields pertaining to the cases associated with the alert
+const ALERT_CASE_IDS = `${ALERT_NAMESPACE}.case_ids` as const;
+
 // Fields pertaining to the rule associated with the alert
 const ALERT_RULE_AUTHOR = `${ALERT_RULE_NAMESPACE}.author` as const;
 const ALERT_RULE_CREATED_AT = `${ALERT_RULE_NAMESPACE}.created_at` as const;
@@ -129,6 +132,7 @@ const fields = {
   ALERT_RULE_PRODUCER,
   ALERT_REASON,
   ALERT_RISK_SCORE,
+  ALERT_CASE_IDS,
   ALERT_RULE_AUTHOR,
   ALERT_RULE_CREATED_AT,
   ALERT_RULE_CREATED_BY,
@@ -203,6 +207,7 @@ export {
   ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_USER,
+  ALERT_CASE_IDS,
   ALERT_RULE_AUTHOR,
   ALERT_RULE_CREATED_AT,
   ALERT_RULE_CREATED_BY,
