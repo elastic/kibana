@@ -187,6 +187,10 @@ export interface DiscoverGridProps {
    * Saved search id used for links to single doc and surrounding docs in the flyout
    */
   savedSearchId?: string;
+  /**
+   * Document detail view component
+   */
+  DocumentView?: typeof DiscoverGridFlyout;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -226,6 +230,7 @@ export const DiscoverGrid = ({
   rowsPerPageState,
   onUpdateRowsPerPage,
   onFieldEdited,
+  DocumentView,
 }: DiscoverGridProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const services = useDiscoverServices();
@@ -445,9 +450,13 @@ export const DiscoverGrid = ({
     }
     return { columns: sortingColumns, onSort: () => {} };
   }, [sortingColumns, onTableSort, isSortEnabled]);
+
+  const canSetExpandedDoc = Boolean(setExpandedDoc && DocumentView);
+
   const lead = useMemo(
-    () => getLeadControlColumns(setExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
-    [controlColumnIds, setExpandedDoc]
+    () =>
+      getLeadControlColumns(canSetExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
+    [controlColumnIds, canSetExpandedDoc]
   );
 
   const additionalControls = useMemo(
@@ -625,8 +634,8 @@ export const DiscoverGrid = ({
             </p>
           </EuiScreenReaderOnly>
         )}
-        {setExpandedDoc && expandedDoc && (
-          <DiscoverGridFlyout
+        {setExpandedDoc && expandedDoc && DocumentView && (
+          <DocumentView
             dataView={dataView}
             hit={expandedDoc}
             hits={displayedRows}
