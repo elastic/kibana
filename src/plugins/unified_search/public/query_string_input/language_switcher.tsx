@@ -16,9 +16,16 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { DocLinksStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+
+export const strings = {
+  getSwitchLanguageButtonText: () =>
+    i18n.translate('unifiedSearch.switchLanguage.buttonText', {
+      defaultMessage: 'Switch language button.',
+    }),
+};
 
 export interface QueryLanguageSwitcherProps {
   language: string;
@@ -51,9 +58,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       className="euiFormControlLayout__append kqlQueryBar__languageSwitcherButton"
       data-test-subj={'switchQueryLanguageButton'}
-      aria-label={i18n.translate('unifiedSearch.switchLanguage.buttonText', {
-        defaultMessage: 'Switch language button.',
-      })}
+      aria-label={strings.getSwitchLanguageButtonText()}
       disabled={isDisabled}
     />
   );
