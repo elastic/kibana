@@ -26,7 +26,6 @@ const agentStatusList: readonly AgentStatus[] = [
   'error',
   'online',
   'inactive',
-  'warning',
   'enrolling',
   'unenrolling',
   'updating',
@@ -237,10 +236,6 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
       case 'updating':
         fleetServerAgent.upgrade_started_at = fleetServerAgent.updated_at;
         fleetServerAgent.upgraded_at = undefined;
-        break;
-
-      case 'warning':
-        // NOt able to find anything in fleet
         break;
 
       // default is `online`, which is also the default returned by `generateEsHit()`

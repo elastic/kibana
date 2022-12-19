@@ -12,4 +12,6 @@ export {
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
   validateTimeWindowUnits,
+  validateAggType,
+  validateGroupBy,
 } from './core_query_types';
