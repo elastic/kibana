@@ -71,10 +71,8 @@ export const editException = (updatedField: string, itemIndex = 0, fieldIndex = 
 export const addExceptionFlyoutItemName = (name: string) => {
   cy.get(EXCEPTION_ITEM_NAME_INPUT).should('exist');
   cy.get(EXCEPTION_ITEM_NAME_INPUT).should('be.visible');
-  cy.get(EXCEPTION_ITEM_NAME_INPUT, { timeout: 10000 }).first().focus();
-  cy.get(EXCEPTION_ITEM_NAME_INPUT, { timeout: 10000 })
-    .type(`${name}{enter}`)
-    .should('have.value', name);
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).first().focus();
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`${name}{enter}`).should('have.value', name);
 };
 
 export const editExceptionFlyoutItemName = (name: string) => {
@@ -88,8 +86,8 @@ export const editExceptionFlyoutItemName = (name: string) => {
 };
 
 export const selectBulkCloseAlerts = () => {
-  cy.get(CLOSE_ALERTS_CHECKBOX, { timeout: 10000 }).should('exist');
-  cy.get(CLOSE_ALERTS_CHECKBOX, { timeout: 10000 }).click({ force: true });
+  cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
+  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
 };
 
 export const selectCloseSingleAlerts = () => {
@@ -102,15 +100,15 @@ export const addExceptionConditions = (exception: Exception) => {
       return $el.find(FIELD_INPUT);
     })
     .type(`${exception.field}{downArrow}{enter}`);
-  cy.get(OPERATOR_INPUT, { timeout: 10000 }).type(`${exception.operator}{enter}`);
+  cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
   exception.values.forEach((value) => {
-    cy.get(VALUES_INPUT, { timeout: 10000 }).type(`${value}{enter}`);
+    cy.get(VALUES_INPUT).type(`${value}{enter}`);
   });
 };
 
 export const submitNewExceptionItem = () => {
-  cy.get(CONFIRM_BTN, { timeout: 10000 }).click();
-  cy.get(CONFIRM_BTN, { timeout: 10000 }).should('not.exist');
+  cy.get(CONFIRM_BTN).click();
+  cy.get(CONFIRM_BTN).should('not.exist');
 };
 
 export const submitEditedExceptionItem = () => {
