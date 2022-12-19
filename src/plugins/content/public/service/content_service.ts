@@ -6,28 +6,26 @@
  * Side Public License, v 1.
  */
 
-// import { ContentRegistry, ContentCache } from "@kbn/content-management-state";
+import { ContentRegistry, ContentCache } from "@kbn/content-management-state";
 
 export class ContentService {
-  // private readonly registry: ContentRegistry;
-  // private readonly cache: ContentCache;
-  // constructor() {
-  //   this.registry = new ContentRegistry();
-  //   this.cache = new ContentCache(this.registry);
-  // }
-  // public setup() {
-  //   return {
-  //     registry: this.registry,
-  //     cache: this.cache,
-  //   };
-  // }
-  // public start() {
-  //   return {
-  //     registry: this.registry,
-  //     cache: this.cache,
-  //   };
-  // }
-  // public stop() {
-  //   // nothing to do here yet
-  // }
+  public readonly registry: ContentRegistry;
+  public readonly cache: ContentCache;
+
+  constructor() {
+    this.registry = new ContentRegistry();
+    this.cache = new ContentCache(this.registry);
+  }
+
+  public setup(): this {
+    return this;
+  }
+
+  public start(): this {
+    return this;
+  }
+
+  public stop() {
+    // nothing to do here yet
+  }
 }

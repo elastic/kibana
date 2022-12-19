@@ -6,11 +6,15 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContentPluginSetup {}
+import type {ContentService} from "./service/content_service";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContentPluginStart {}
+export interface ContentPluginSetup {
+  content: ReturnType<ContentService['setup']>;
+}
+
+export interface ContentPluginStart {
+  content: ReturnType<ContentService['start']>;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AppPluginStartDependencies {}

@@ -8,12 +8,15 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { ContentPluginSetup, ContentPluginStart } from './types';
-// import { ContentService } from './service/content_service';
+import { ContentService } from './service/content_service';
 
 export class ContentPlugin implements Plugin<ContentPluginSetup, ContentPluginStart> {
-  // private readonly content = new ContentService();
+  private content?: ContentService;
 
   public setup(core: CoreSetup): ContentPluginSetup {
+    this.content = new ContentService();
+    const content = this.content.setup();
+
     // content.registry.register({
     //   id: 'dashboard',
     //   name: i18n.translate('content.dashboard.name', {
@@ -57,12 +60,20 @@ export class ContentPlugin implements Plugin<ContentPluginSetup, ContentPluginSt
     //   },
     // });
 
-    return {};
+    return {
+      content,
+    };
   }
 
   public start(core: CoreStart): ContentPluginStart {
-    return {};
+    const content = this.content!.start();
+
+    return {
+      content,
+    };
   }
 
-  public stop() {}
+  public stop() {
+    this.content!.stop();
+  }
 }

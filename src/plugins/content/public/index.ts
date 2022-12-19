@@ -15,4 +15,5 @@ import { ContentPlugin } from './plugin';
 export function plugin() {
   return new ContentPlugin();
 }
-export { ContentPluginSetup, ContentPluginStart } from './types';
+
+export type { ContentPluginSetup, ContentPluginStart } from './types';
