@@ -16,7 +16,7 @@ import { CommentType } from '@kbn/cases-plugin/common';
 
 import type { ResponseActionBodySchema } from '../../../../common/endpoint/schema/actions';
 import {
-  KubeRequestSchema,
+  ResponseActionKubeRequestSchema,
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
   EndpointActionGetFileSchema,
@@ -181,11 +181,11 @@ export function registerResponseActionRoutes(
   router.post(
     {
       path: GET_KUBE_LIST_ROUTE,
-      validate: KubeRequestSchema,
+      validate: ResponseActionKubeRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { all: ['canGetRunningProcesses'] },
+      { all: ['canExecuteKubernetesCommands'] },
       logger,
       responseActionRequestHandler(endpointContext, 'kube-list')
     )

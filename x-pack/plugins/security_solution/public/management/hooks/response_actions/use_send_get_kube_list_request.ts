@@ -9,9 +9,9 @@ import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-quer
 import { useMutation } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
-  ProcessesRequestBody,
+  KubeRequestBody,
   ResponseActionApiResponse,
-  GetProcessesActionOutputContent,
+  KubeListActionOutputContent,
 } from '../../../../common/endpoint/types/actions';
 import { GET_KUBE_LIST_ROUTE } from '../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -22,24 +22,25 @@ import { KibanaServices } from '../../../common/lib/kibana';
  */
 export const useSendGetKubeListRequest = (
   customOptions?: UseMutationOptions<
-    ResponseActionApiResponse<GetProcessesActionOutputContent>,
+    ResponseActionApiResponse<KubeListActionOutputContent>,
     IHttpFetchError,
-    ProcessesRequestBody
+    KubeRequestBody
   >
 ): UseMutationResult<
-  ResponseActionApiResponse<GetProcessesActionOutputContent>,
+  ResponseActionApiResponse<KubeListActionOutputContent>,
   IHttpFetchError,
-  ProcessesRequestBody
+  KubeRequestBody
 > => {
   return useMutation<
-    ResponseActionApiResponse<GetProcessesActionOutputContent>,
+    ResponseActionApiResponse<KubeListActionOutputContent>,
     IHttpFetchError,
-    ProcessesRequestBody
-  >((data: ProcessesRequestBody) => {
-    return KibanaServices.get().http.post<
-      ResponseActionApiResponse<GetProcessesActionOutputContent>
-    >(GET_KUBE_LIST_ROUTE, {
-      body: JSON.stringify(data),
-    });
+    KubeRequestBody
+  >((data: KubeRequestBody) => {
+    return KibanaServices.get().http.post<ResponseActionApiResponse<KubeListActionOutputContent>>(
+      GET_KUBE_LIST_ROUTE,
+      {
+        body: JSON.stringify(data),
+      }
+    );
   }, customOptions);
 };

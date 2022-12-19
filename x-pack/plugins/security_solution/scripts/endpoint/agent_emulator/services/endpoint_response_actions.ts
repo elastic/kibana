@@ -29,6 +29,8 @@ import type {
   GetProcessesActionOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  KubeListActionOutputContent,
+  ResponseActionKubeParameters,
 } from '../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -272,12 +274,12 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
           type: 'json',
           content: {
             entries: endpointActionGenerator.randomResponseActionKubeList(
-              3,
-              action.parameters.resource
+              (action as ActionDetails<KubeListActionOutputContent, ResponseActionKubeParameters>)
+                .parameters?.resource
             ),
           },
         },
-      } as ResponseOutput<GetProcessesActionOutputContent>;
+      } as ResponseOutput<KubeListActionOutputContent>;
     case 'running-processes':
       return {
         output: {
