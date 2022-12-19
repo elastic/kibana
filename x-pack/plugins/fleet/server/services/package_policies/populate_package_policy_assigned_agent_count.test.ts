@@ -18,7 +18,7 @@ describe('When using populatePackagePolicyAssignedAgentCount()', () => {
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClientMock.search.mockImplementation(async (args) => {
+    esClientMock.search.mockImplementation(async () => {
       return {
         took: 3,
         timed_out: false,
