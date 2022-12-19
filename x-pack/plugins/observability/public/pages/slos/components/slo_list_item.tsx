@@ -22,7 +22,7 @@ import { euiLightVars } from '@kbn/ui-theme';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { SloSummaryStats } from './slo_summary_stats';
-import { DeleteConfirmationModal } from './slo_list_item_delete_confirmation_modal';
+import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
 import { paths } from '../../../config';
 import { SLO } from '../../../typings';
 import { isSloHealthy } from '../helpers/is_slo_healthy';
@@ -143,7 +143,7 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
       </EuiFlexGroup>
 
       {isDeleteConfirmationModalOpen ? (
-        <DeleteConfirmationModal
+        <SloDeleteConfirmationModal
           slo={slo}
           onCancel={handleDeleteCancel}
           onDeleting={onDeleting}
