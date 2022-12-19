@@ -251,7 +251,10 @@ export class TaskStore {
    * @param {Array<TaskDoc>} docs
    * @returns {Promise<Array<TaskDoc>>}
    */
-  public async bulkUpdate(docs: ConcreteTaskInstance[]): Promise<BulkUpdateResult[]> {
+  public async bulkUpdate(
+    docs: ConcreteTaskInstance[],
+    retries: number = 0
+  ): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
       attrsById.set(doc.id, taskInstanceToAttributes(doc));
       return attrsById;
@@ -272,6 +275,7 @@ export class TaskStore {
           options: {
             refresh: false,
           },
+          retries,
         }));
     } catch (e) {
       this.errors$.next(e);
