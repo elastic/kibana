@@ -25,7 +25,8 @@ import type { SavedObjectsFindOptionsReference, SimpleSavedObject } from '@kbn/c
 import { TableListView, type UserContentCommonSchema } from '@kbn/content-management-table-list';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { SAVED_OBJECT_LOADED_TIME } from '../../events';
+import { SAVED_OBJECT_LOADED_TIME } from '../../dashboard_constants';
+
 import {
   getDashboardBreadcrumb,
   dashboardListingTableStrings,
