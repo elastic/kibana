@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { LruMap } from '@kbn/content-management-utils';
 import { CachedContentItem } from './cached_content_item';
 import { CachedContentType } from './cached_content_type';
 import type { ContentRegistry } from '../registry/content_registry';
@@ -13,7 +14,7 @@ import type { CmCache } from './types';
 
 export class ContentCache implements CmCache {
   protected readonly typeCache: Map<string, CachedContentType> = new Map();
-  protected readonly itemCache: Map<string, CachedContentItem> = new Map();
+  protected readonly itemCache: LruMap<string, CachedContentItem> = new LruMap(5000);
 
   constructor(public readonly registry: ContentRegistry) {}
 
