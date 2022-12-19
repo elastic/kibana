@@ -4,22 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { syntheticsServiceAPIKeySavedObject } from '../../legacy_uptime/lib/saved_objects/service_api_key';
 import {
   SyntheticsRestApiRouteFactory,
   UMRestApiRouteFactory,
 } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { SyntheticsForbiddenError } from '../../synthetics_service/get_api_key';
+import {
+  generateAndSaveServiceAPIKey,
+  SyntheticsForbiddenError,
+} from '../../synthetics_service/get_api_key';
 
 export const getSyntheticsEnablementRoute: UMRestApiRouteFactory = (libs) => ({
   method: 'GET',
   path: API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
-  handler: async ({ request, response, server }): Promise<any> => {
+  handler: async ({ response, server }): Promise<any> => {
     try {
       return response.ok({
         body: await libs.requests.getSyntheticsEnablement({
-          request,
           server,
         }),
       });
@@ -38,25 +41,21 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => (
     response,
     request,
     server,
-    savedObjectsClient,
     syntheticsMonitorClient,
+    savedObjectsClient,
   }): Promise<any> => {
     const { security } = server;
     const { syntheticsService } = syntheticsMonitorClient;
     try {
-      const { canEnable } = await libs.requests.getSyntheticsEnablement({ request, server });
+      const { canEnable } = await libs.requests.getSyntheticsEnablement({ server });
       if (!canEnable) {
         return response.forbidden();
       }
       await syntheticsService.deleteAllConfigs();
-      const apiKey = await libs.requests.getAPIKeyForSyntheticsService({
+      const { apiKey } = await libs.requests.getAPIKeyForSyntheticsService({
         server,
       });
-      await libs.requests.deleteServiceApiKey({
-        request,
-        server,
-        savedObjectsClient,
-      });
+      await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
       await security.authc.apiKeys?.invalidate(request, { ids: [apiKey?.id || ''] });
       return response.ok({});
     } catch (e) {
@@ -71,15 +70,18 @@ export const enableSyntheticsRoute: UMRestApiRouteFactory = (libs) => ({
   path: API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
   handler: async ({ request, response, server }): Promise<any> => {
-    const { authSavedObjectsClient, logger, security } = server;
+    const { authSavedObjectsClient, logger } = server;
     try {
-      await libs.requests.generateAndSaveServiceAPIKey({
+      await generateAndSaveServiceAPIKey({
         request,
         authSavedObjectsClient,
-        security,
         server,
       });
-      return response.ok({});
+      return response.ok({
+        body: await libs.requests.getSyntheticsEnablement({
+          server,
+        }),
+      });
     } catch (e) {
       logger.error(e);
       if (e instanceof SyntheticsForbiddenError) {

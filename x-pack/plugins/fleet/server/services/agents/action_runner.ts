@@ -113,18 +113,30 @@ export abstract class ActionRunner {
             if (this.retryParams.retryCount === 3) {
               const errorMessage = 'Stopping after 3rd retry. Error: ' + error.message;
               appContextService.getLogger().warn(errorMessage);
+
+              // clean up tasks after 3rd retry reached
+              await Promise.all([
+                this.bulkActionsResolver!.removeIfExists(this.checkTaskId!),
+                this.bulkActionsResolver!.removeIfExists(this.retryParams.taskId!),
+              ]);
+
               return;
             }
           } else {
             appContextService.getLogger().error(`Action failed: ${error.message}`);
           }
-          const taskId = await this.bulkActionsResolver!.run(
+          const taskId = this.bulkActionsResolver!.getTaskId(
+            this.actionParams.actionId!,
+            this.getTaskType()
+          );
+          await this.bulkActionsResolver!.run(
             this.actionParams,
             {
               ...this.retryParams,
               retryCount: (this.retryParams.retryCount ?? 0) + 1,
             },
-            this.getTaskType()
+            this.getTaskType(),
+            taskId
           );
 
           appContextService.getLogger().info(`Retrying in task: ${taskId}`);
@@ -135,6 +147,10 @@ export abstract class ActionRunner {
   }
 
   private async createCheckResultTask() {
+    const taskId = this.bulkActionsResolver!.getTaskId(
+      this.actionParams.actionId!,
+      this.getTaskType() + ':check'
+    );
     return await this.bulkActionsResolver!.run(
       this.actionParams,
       {
@@ -142,6 +158,7 @@ export abstract class ActionRunner {
         retryCount: 1,
       },
       this.getTaskType(),
+      taskId,
       moment(new Date()).add(5, 'm').toDate()
     );
   }

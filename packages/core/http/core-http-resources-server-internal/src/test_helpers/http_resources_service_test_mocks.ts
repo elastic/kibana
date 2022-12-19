@@ -14,7 +14,10 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 export function createCoreRequestHandlerContextMock() {
   return {
     core: {
-      uiSettings: { client: uiSettingsServiceMock.createClient() },
+      uiSettings: {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      },
     },
   };
 }
@@ -25,6 +28,7 @@ export function createHttpResourcesResponseFactory() {
     renderCoreApp: jest.fn(),
     renderAnonymousCoreApp: jest.fn(),
     renderHtml: jest.fn(),
+    renderCss: jest.fn(),
     renderJs: jest.fn(),
   };
 

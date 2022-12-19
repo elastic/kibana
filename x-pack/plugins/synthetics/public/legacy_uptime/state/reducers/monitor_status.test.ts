@@ -25,6 +25,7 @@ describe('selectedFiltersReducer', () => {
             us: 1,
           },
           type: 'browser',
+          check_group: 'test-group',
         },
       },
     };
@@ -42,6 +43,7 @@ describe('selectedFiltersReducer', () => {
             us: 1,
           },
           type: 'browser',
+          check_group: 'test-group',
         },
       };
       expect(

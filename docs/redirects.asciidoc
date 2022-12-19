@@ -420,3 +420,8 @@ This page has been deleted. Refer to <<osquery>>.
 == Sync machine learning objects API
 
 This page has been deleted. Refer to <<machine-learning-api-sync>>.
+
+[role="exclude",id="managing-alerts-and-actions"]
+== Alerts and Actions
+
+This page has been deleted. Refer to <<alerting-getting-started>>.

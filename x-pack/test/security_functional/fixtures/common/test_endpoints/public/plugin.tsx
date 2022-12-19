@@ -19,6 +19,17 @@ export interface PluginStartDependencies {
 export class TestEndpointsPlugin implements Plugin<void, void, object, PluginStartDependencies> {
   public setup(core: CoreSetup<PluginStartDependencies>) {
     // Prevent auto-logout on server `401` errors.
+    core.http.anonymousPaths.register('/app/expired_session_test');
+    core.application.register({
+      id: 'expired_session_test',
+      title: 'Expired Session Test',
+      async mount({ element }) {
+        (window as any).kibanaFetch = core.http.fetch;
+        return () => ReactDOM.unmountComponentAtNode(element);
+      },
+    });
+
+    // Prevent auto-logout on server `401` errors.
     core.http.anonymousPaths.register('/authentication/app');
 
     const networkIdle$ = core.http.getLoadingCount$().pipe(

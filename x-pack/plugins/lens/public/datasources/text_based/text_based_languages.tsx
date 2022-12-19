@@ -14,9 +14,11 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
@@ -25,6 +27,7 @@ import {
   DataType,
   TableChangeType,
   DatasourceDimensionTriggerProps,
+  DataSourceInfo,
 } from '../../types';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
@@ -89,7 +92,9 @@ export function getTextBasedDatasource({
     indexPatterns: IndexPatternMap
   ) => {
     const context = state.initialContext;
-    if (context && 'dataViewSpec' in context && context.dataViewSpec.title) {
+    // on text based mode we offer suggestions for the query and not for a specific field
+    if (fieldName) return [];
+    if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
       const newLayerId = generateId();
       const indexPattern = indexPatterns[indexPatternId];
 
@@ -208,6 +213,12 @@ export function getTextBasedDatasource({
         initialContext: context,
       };
     },
+
+    syncColumns({ state }) {
+      // TODO implement this for real
+      return state;
+    },
+
     onRefreshIndexPattern() {},
 
     getUsedDataViews: (state) => {
@@ -274,18 +285,24 @@ export function getTextBasedDatasource({
       };
 
       return {
-        ...state,
-        layers: newLayers,
-        fieldList: state.fieldList,
+        removedLayerIds: [layerId],
+        newState: {
+          ...state,
+          layers: newLayers,
+          fieldList: state.fieldList,
+        },
       };
     },
 
     clearLayer(state: TextBasedPrivateState, layerId: string) {
       return {
-        ...state,
-        layers: {
-          ...state.layers,
-          [layerId]: { ...state.layers[layerId], columns: [] },
+        removedLayerIds: [],
+        newState: {
+          ...state,
+          layers: {
+            ...state.layers,
+            [layerId]: { ...state.layers[layerId], columns: [] },
+          },
         },
       };
     },
@@ -343,15 +360,17 @@ export function getTextBasedDatasource({
     renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<TextBasedPrivateState>) {
       const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);
       render(
-        <I18nProvider>
-          <TextBasedDataPanel
-            data={data}
-            dataViews={dataViews}
-            expressions={expressions}
-            layerFields={layerFields}
-            {...props}
-          />
-        </I18nProvider>,
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <I18nProvider>
+            <TextBasedDataPanel
+              data={data}
+              dataViews={dataViews}
+              expressions={expressions}
+              layerFields={layerFields}
+              {...props}
+            />
+          </I18nProvider>
+        </KibanaThemeProvider>,
         domElement
       );
     },
@@ -368,11 +387,9 @@ export function getTextBasedDatasource({
         customLabel = selectedField?.fieldName;
       }
 
-      const columnExists = props.state.fieldList.some((f) => f.name === customLabel);
-
       render(
         <EuiButtonEmpty
-          color={columnExists ? 'primary' : 'danger'}
+          color={customLabel && selectedField ? 'primary' : 'danger'}
           onClick={() => {}}
           data-test-subj="lns-dimensionTrigger-textBased"
         >
@@ -397,61 +414,89 @@ export function getTextBasedDatasource({
       const selectedField = props.state.layers[props.layerId]?.allColumns?.find(
         (column) => column.columnId === props.columnId
       );
+
+      const updatedFields = fields.map((f) => {
+        return {
+          ...f,
+          compatible: props.isMetricDimension
+            ? props.filterOperations({
+                dataType: f.meta.type as DataType,
+                isBucketed: Boolean(f?.meta?.type !== 'number'),
+                scale: 'ordinal',
+              })
+            : true,
+        };
+      });
       render(
-        <EuiFormRow
-          data-test-subj="text-based-languages-field-selection-row"
-          label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
-            defaultMessage: 'Field',
-          })}
-          fullWidth
-          className="lnsIndexPatternDimensionEditor--padded"
-        >
-          <FieldSelect
-            existingFields={fields}
-            selectedField={selectedField}
-            onChoose={(choice) => {
-              const meta = fields.find((f) => f.name === choice.field)?.meta;
-              const newColumn = {
-                columnId: props.columnId,
-                fieldName: choice.field,
-                meta,
-              };
-              return props.setState(
-                !selectedField
-                  ? {
-                      ...props.state,
-                      layers: {
-                        ...props.state.layers,
-                        [props.layerId]: {
-                          ...props.state.layers[props.layerId],
-                          columns: [...props.state.layers[props.layerId].columns, newColumn],
-                          allColumns: [...props.state.layers[props.layerId].allColumns, newColumn],
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <EuiFormRow
+            data-test-subj="text-based-languages-field-selection-row"
+            label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
+              defaultMessage: 'Field',
+            })}
+            fullWidth
+            className="lnsIndexPatternDimensionEditor--padded"
+          >
+            <FieldSelect
+              existingFields={updatedFields}
+              selectedField={selectedField}
+              onChoose={(choice) => {
+                const meta = fields.find((f) => f.name === choice.field)?.meta;
+                const newColumn = {
+                  columnId: props.columnId,
+                  fieldName: choice.field,
+                  meta,
+                };
+                return props.setState(
+                  !selectedField
+                    ? {
+                        ...props.state,
+                        layers: {
+                          ...props.state.layers,
+                          [props.layerId]: {
+                            ...props.state.layers[props.layerId],
+                            columns: [...props.state.layers[props.layerId].columns, newColumn],
+                            allColumns: [
+                              ...props.state.layers[props.layerId].allColumns,
+                              newColumn,
+                            ],
+                          },
                         },
-                      },
-                    }
-                  : {
-                      ...props.state,
-                      layers: {
-                        ...props.state.layers,
-                        [props.layerId]: {
-                          ...props.state.layers[props.layerId],
-                          columns: props.state.layers[props.layerId].columns.map((col) =>
-                            col.columnId !== props.columnId
-                              ? col
-                              : { ...col, fieldName: choice.field }
-                          ),
-                          allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
-                            col.columnId !== props.columnId
-                              ? col
-                              : { ...col, fieldName: choice.field }
-                          ),
+                      }
+                    : {
+                        ...props.state,
+                        layers: {
+                          ...props.state.layers,
+                          [props.layerId]: {
+                            ...props.state.layers[props.layerId],
+                            columns: props.state.layers[props.layerId].columns.map((col) =>
+                              col.columnId !== props.columnId
+                                ? col
+                                : { ...col, fieldName: choice.field, meta }
+                            ),
+                            allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
+                              col.columnId !== props.columnId
+                                ? col
+                                : { ...col, fieldName: choice.field, meta }
+                            ),
+                          },
                         },
-                      },
-                    }
-              );
-            }}
-          />
-        </EuiFormRow>,
+                      }
+                );
+              }}
+            />
+          </EuiFormRow>
+          {props.dataSectionExtra && (
+            <div
+              style={{
+                paddingLeft: euiThemeVars.euiSize,
+                paddingRight: euiThemeVars.euiSize,
+              }}
+            >
+              {props.dataSectionExtra}
+            </div>
+          )}
+        </KibanaThemeProvider>,
         domElement
       );
     },
@@ -461,9 +506,11 @@ export function getTextBasedDatasource({
       props: DatasourceLayerPanelProps<TextBasedPrivateState>
     ) => {
       render(
-        <I18nProvider>
-          <LayerPanel {...props} />
-        </I18nProvider>,
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <I18nProvider>
+            <LayerPanel {...props} />
+          </I18nProvider>
+        </KibanaThemeProvider>,
         domElement
       );
     },
@@ -500,9 +547,15 @@ export function getTextBasedDatasource({
     },
 
     getDropProps: (props) => {
-      const { source } = props;
+      const { source, target, state } = props;
       if (!source) {
         return;
+      }
+      if (target && target.isMetricDimension) {
+        const layerId = target.layerId;
+        const currentLayer = state.layers[layerId];
+        const field = currentLayer.allColumns.find((f) => f.columnId === source.id);
+        if (field?.meta?.type !== 'number') return;
       }
       const label = source.field as string;
       return { dropTypes: ['field_add'], nextLabel: label };
@@ -571,6 +624,7 @@ export function getTextBasedDatasource({
               label: columnLabelMap[columnId] ?? column?.fieldName,
               isBucketed: Boolean(column?.meta?.type !== 'number'),
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -596,6 +650,7 @@ export function getTextBasedDatasource({
             },
           };
         },
+        hasDefaultTimeField: () => false,
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
@@ -654,6 +709,41 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
     isEqual: () => true,
+    getDatasourceInfo: async (state, references, dataViewsService) => {
+      const indexPatterns: DataView[] = [];
+      for (const { index } of Object.values(state.layers)) {
+        const dataView = await dataViewsService?.get(index);
+        if (dataView) {
+          indexPatterns.push(dataView);
+        }
+      }
+      return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
+        const columns = Object.entries(layer.columns).map(([colId, col]) => {
+          return {
+            id: colId,
+            role: col.meta?.type !== 'number' ? ('split' as const) : ('metric' as const),
+            operation: {
+              dataType: col?.meta?.type as DataType,
+              label: col.fieldName,
+              isBucketed: Boolean(col?.meta?.type !== 'number'),
+              hasTimeShift: false,
+              hasReducedTimeRange: false,
+              fields: [col.fieldName],
+              type: col.meta?.type || 'unknown',
+              filter: undefined,
+            },
+          };
+        });
+
+        acc.push({
+          layerId: key,
+          columns,
+          dataView: indexPatterns?.find((dataView) => dataView.id === layer.index),
+        });
+
+        return acc;
+      }, []);
+    },
   };
 
   return TextBasedDatasource;

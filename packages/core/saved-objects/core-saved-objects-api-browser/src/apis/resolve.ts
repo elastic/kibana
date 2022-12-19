@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
-import { SimpleSavedObject } from '../simple_saved_object';
+import type { SimpleSavedObject } from '../simple_saved_object';
 
 /**
  * This interface is a very simple wrapper for SavedObjects resolved from the server

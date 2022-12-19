@@ -8,7 +8,7 @@
 
 import { createAutoRefreshLoop, AutoRefreshDoneFn } from './auto_refresh_loop';
 
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 test('triggers refresh with interval', () => {
   const { loop$, start, stop } = createAutoRefreshLoop();

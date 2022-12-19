@@ -27,6 +27,8 @@ export interface AggregatedTransactionsCounts {
 export interface APMPerService {
   service_id: string;
   timed_out: boolean;
+  num_service_nodes: number;
+  num_transaction_types: number;
   cloud: {
     availability_zones: string[];
     regions: string[];
@@ -99,7 +101,6 @@ export interface APMUsage {
     span: TimeframeMap;
     error: TimeframeMap;
     metric: TimeframeMap;
-    sourcemap: TimeframeMap;
     onboarding: TimeframeMap;
     agent_configuration: TimeframeMapAll;
     max_transaction_groups_per_service: TimeframeMap;
@@ -123,7 +124,7 @@ export interface APMUsage {
     };
   };
   retainment: Record<
-    'span' | 'transaction' | 'error' | 'metric' | 'sourcemap' | 'onboarding',
+    'span' | 'transaction' | 'error' | 'metric' | 'onboarding',
     { ms: number }
   >;
   integrations: {
@@ -157,6 +158,36 @@ export interface APMUsage {
     }
   >;
   indices: {
+    traces: {
+      shards: {
+        total: number;
+      };
+      all: {
+        total: {
+          docs: {
+            count: number;
+          };
+          store: {
+            size_in_bytes: number;
+          };
+        };
+      };
+    };
+    metric: {
+      shards: {
+        total: number;
+      };
+      all: {
+        total: {
+          docs: {
+            count: number;
+          };
+          store: {
+            size_in_bytes: number;
+          };
+        };
+      };
+    };
     shards: {
       total: number;
     };

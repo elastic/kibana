@@ -31,6 +31,7 @@ import {
 } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
+import { BfetchRequestError } from '@kbn/bfetch-plugin/public';
 
 import {
   ApplicationStart,
@@ -60,7 +61,6 @@ import {
 import { SearchUsageCollector } from '../collectors';
 import {
   EsError,
-  getHttpError,
   isEsError,
   isPainlessError,
   PainlessError,
@@ -72,6 +72,7 @@ import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash } from './utils';
 import { SearchAbortController } from './search_abort_controller';
+import { SearchConfigSchema } from '../../../config';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
@@ -83,6 +84,7 @@ export interface SearchInterceptorDeps {
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
   theme: ThemeServiceSetup;
+  searchConfig: SearchConfigSchema;
 }
 
 const MAX_CACHE_ITEMS = 50;
@@ -193,8 +195,8 @@ export class SearchInterceptor {
       // The timeout error is shown any time a request times out, or once per session, if the request is part of a session.
       this.showTimeoutError(err, options?.sessionId);
       return err;
-    } else if (e instanceof AbortError) {
-      // In the case an application initiated abort, throw the existing AbortError.
+    } else if (e instanceof AbortError || e instanceof BfetchRequestError) {
+      // In the case an application initiated abort, throw the existing AbortError, same with BfetchRequestErrors
       return e;
     } else if (isEsError(e)) {
       if (isPainlessError(e)) {
@@ -302,6 +304,7 @@ export class SearchInterceptor {
     });
 
     return pollSearch(search, cancel, {
+      pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
       ...options,
       abortSignal: searchAbortController.getSignal(),
     }).pipe(
@@ -522,12 +525,18 @@ export class SearchInterceptor {
         }),
         text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
       });
-    } else if (e.constructor.name === 'HttpFetchError') {
+    } else if (e.constructor.name === 'HttpFetchError' || e instanceof BfetchRequestError) {
+      const defaultMsg = i18n.translate('data.errors.fetchError', {
+        defaultMessage: 'Check your network connection and try again.',
+      });
+
       this.deps.toasts.addDanger({
         title: i18n.translate('data.search.httpErrorTitle', {
-          defaultMessage: 'Cannot retrieve your data',
+          defaultMessage: 'Unable to connect to the Kibana server',
         }),
-        text: toMountPoint(getHttpError(e.message), { theme$: this.deps.theme.theme$ }),
+        text: toMountPoint(e.message || defaultMsg, {
+          theme$: this.deps.theme.theme$,
+        }),
       });
     } else {
       this.deps.toasts.addError(e, {

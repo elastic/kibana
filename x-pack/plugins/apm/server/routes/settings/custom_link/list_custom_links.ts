@@ -11,18 +11,18 @@ import {
   CustomLink,
   CustomLinkES,
 } from '../../../../common/custom_link/custom_link_types';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { fromESFormat } from './helper';
 import { filterOptionsRt } from './custom_link_types';
+import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { APM_CUSTOM_LINK_INDEX } from '../apm_indices/get_apm_indices';
 
 export async function listCustomLinks({
-  setup,
+  internalESClient,
   filters = {},
 }: {
-  setup: Setup;
+  internalESClient: APMInternalESClient;
   filters?: t.TypeOf<typeof filterOptionsRt>;
 }): Promise<CustomLink[]> {
-  const { internalClient, indices } = setup;
   const esFilters = Object.entries(filters).map(([key, value]) => {
     return {
       bool: {
@@ -36,7 +36,7 @@ export async function listCustomLinks({
   });
 
   const params = {
-    index: indices.apmCustomLinkIndex,
+    index: APM_CUSTOM_LINK_INDEX,
     size: 500,
     body: {
       query: {
@@ -53,7 +53,7 @@ export async function listCustomLinks({
       ],
     },
   };
-  const resp = await internalClient.search<CustomLinkES>(
+  const resp = await internalESClient.search<CustomLinkES>(
     'list_custom_links',
     params
   );

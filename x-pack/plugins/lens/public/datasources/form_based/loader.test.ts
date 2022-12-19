@@ -401,7 +401,7 @@ describe('loader', () => {
   });
 
   describe('changeLayerIndexPattern', () => {
-    it('loads the index pattern and then changes the specified layer', async () => {
+    it('loads the index pattern and then changes the specified layers', async () => {
       const state: FormBasedPrivateState = {
         currentIndexPatternId: '1',
         layers: {
@@ -434,7 +434,7 @@ describe('loader', () => {
       const newState = changeLayerIndexPattern({
         state,
         indexPatternId: '2',
-        layerId: 'l1',
+        layerIds: ['l0', 'l1'],
         storage,
         indexPatterns: sampleIndexPatterns,
         replaceIfPossible: true,
@@ -444,9 +444,9 @@ describe('loader', () => {
         currentIndexPatternId: '2',
         layers: {
           l0: {
-            columnOrder: ['col1'],
+            columnOrder: [],
             columns: {},
-            indexPatternId: '1',
+            indexPatternId: '2',
           },
           l1: {
             columnOrder: ['col2'],

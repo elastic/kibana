@@ -20,5 +20,6 @@
   "namespace": "testnamespace",
   "origin": "ui",
   "form_monitor_type": "icmp",
-  "id": ""
+  "id": "",
+  "hash": ""
 }

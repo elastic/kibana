@@ -7,7 +7,7 @@
 
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 import { buildFilter } from '../../client/utils';
-import { CasesTelemetry, CollectTelemetryDataParams } from '../types';
+import type { CasesTelemetry, CollectTelemetryDataParams } from '../types';
 import { getCountsAndMaxData } from './utils';
 
 export const getUserCommentsTelemetryData = async ({

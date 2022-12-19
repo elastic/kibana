@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../../../../../common/mock';
-import { TimelineId } from '../../../../../../../../../common/types';
+import { TableId } from '../../../../../../../../../common/types';
 import { AlertFieldBadge } from '.';
 
 const contextId = 'test';
@@ -27,7 +27,7 @@ describe('AlertFieldBadge', () => {
           field={field}
           isDraggable={false}
           showSeparator={false}
-          timelineId={TimelineId.detectionsPage}
+          scopeId={TableId.alertsOnAlertsPage}
           value={value}
         />
       </TestProviders>
@@ -47,7 +47,7 @@ describe('AlertFieldBadge', () => {
           field={field}
           isDraggable={false}
           showSeparator={showSeparator}
-          timelineId={TimelineId.detectionsPage}
+          scopeId={TableId.alertsOnAlertsPage}
           value={value}
         />
       </TestProviders>
@@ -67,7 +67,7 @@ describe('AlertFieldBadge', () => {
           field={field}
           isDraggable={false}
           showSeparator={showSeparator}
-          timelineId={TimelineId.detectionsPage}
+          scopeId={TableId.alertsOnAlertsPage}
           value={value}
         />
       </TestProviders>

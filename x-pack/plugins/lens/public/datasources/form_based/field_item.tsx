@@ -190,6 +190,9 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         initialFocus=".lnsFieldItem__fieldPanel"
         className="lnsFieldItem__popoverAnchor"
         data-test-subj="lnsFieldListPanelField"
+        panelProps={{
+          'data-test-subj': 'lnsFieldListPanelFieldContent',
+        }}
         container={document.querySelector<HTMLElement>('.application') || undefined}
         button={
           <DragDrop
@@ -236,9 +239,9 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
                   field: value.field.name,
                 },
               })
-            : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceDisabled', {
+            : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceNotAvailable', {
                 defaultMessage:
-                  "This field can't be added to the workspace automatically. You can still use it directly in the configuration panel.",
+                  'To visualize this field, please add it directly to the desired layer. Adding this field to the workspace is not supported based on your current configuration.',
               });
 
           return (
@@ -306,10 +309,11 @@ function FieldItemPopoverContents(
       [indexPattern],
       getEsQueryConfig(services.uiSettings)
     );
-    if (!services.discover || !services.application.capabilities.discover.show) {
+    const discoverLocator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
+    if (!discoverLocator || !services.application.capabilities.discover.show) {
       return;
     }
-    return services.discover.locator!.getRedirectUrl({
+    return discoverLocator.getRedirectUrl({
       dataViewSpec: indexPattern?.spec,
       timeRange: services.data.query.timefilter.timefilter.getTime(),
       filters: newFilters,
@@ -331,26 +335,30 @@ function FieldItemPopoverContents(
         field={dataViewField}
         data-test-subj="lnsFieldListPanel"
         overrideMissingContent={(params) => {
-          if (params?.noDataFound) {
+          if (params.reason === 'no-data') {
             // TODO: should we replace this with a default message "Analysis is not available for this field?"
             const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
             return (
-              <>
-                <EuiText size="s">
-                  {isUsingSampling
-                    ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
-                        defaultMessage:
-                          'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
-                      })
-                    : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-                        defaultMessage:
-                          'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
-                      })}
-                </EuiText>
-              </>
+              <EuiText size="s" data-test-subj="lnsFieldListPanel-missingFieldStats">
+                {isUsingSampling
+                  ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
+                      defaultMessage:
+                        'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
+                    })
+                  : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
+                      defaultMessage:
+                        'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
+                    })}
+              </EuiText>
             );
           }
-
+          if (params.reason === 'unsupported') {
+            return (
+              <EuiText data-test-subj="lnsFieldListPanel-missingFieldStats">
+                {params.element}
+              </EuiText>
+            );
+          }
           return params.element;
         }}
       />
@@ -375,7 +383,7 @@ function FieldItemPopoverContents(
             data-test-subj={`lnsFieldListPanel-exploreInDiscover-${dataViewField.name}`}
           >
             {i18n.translate('xpack.lens.indexPattern.fieldExploreInDiscover', {
-              defaultMessage: 'Explore values in Discover',
+              defaultMessage: 'Explore in Discover',
             })}
           </EuiButton>
         </EuiPopoverFooter>

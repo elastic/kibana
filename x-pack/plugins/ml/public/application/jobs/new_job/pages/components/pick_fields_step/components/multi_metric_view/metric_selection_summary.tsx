@@ -59,8 +59,7 @@ export const MultiMetricDetectorsSummary: FC = () => {
     return () => {
       subscription.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [chartLoader, resultsLoader, jobCreator]);
 
   useEffect(() => {
     if (allDataReady()) {

@@ -17,15 +17,15 @@ export async function getSessionStatus(
   deps: { internalClient: ElasticsearchClient },
   session: SearchSessionSavedObjectAttributes,
   config: SearchSessionsConfigSchema
-): Promise<SearchSessionStatus> {
+): Promise<{ status: SearchSessionStatus; errors?: string[] }> {
   if (session.isCanceled === true) {
-    return SearchSessionStatus.CANCELLED;
+    return { status: SearchSessionStatus.CANCELLED };
   }
 
   const now = moment();
 
   if (moment(session.expires).isBefore(now)) {
-    return SearchSessionStatus.EXPIRED;
+    return { status: SearchSessionStatus.EXPIRED };
   }
 
   const searches = Object.values(session.idMapping);
@@ -40,13 +40,15 @@ export async function getSessionStatus(
   );
 
   if (searchStatuses.some((item) => item.status === SearchStatus.ERROR)) {
-    return SearchSessionStatus.ERROR;
+    const erroredSearches = searchStatuses.filter((s) => s.status === SearchStatus.ERROR);
+    const errors = erroredSearches.map((s) => s.error).filter((error) => !!error) as string[];
+    return { status: SearchSessionStatus.ERROR, errors };
   } else if (
     searchStatuses.length > 0 &&
     searchStatuses.every((item) => item.status === SearchStatus.COMPLETE)
   ) {
-    return SearchSessionStatus.COMPLETE;
+    return { status: SearchSessionStatus.COMPLETE };
   } else {
-    return SearchSessionStatus.IN_PROGRESS;
+    return { status: SearchSessionStatus.IN_PROGRESS };
   }
 }

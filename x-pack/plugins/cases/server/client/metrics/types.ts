@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CasesClient } from '../client';
-import { CasesClientArgs } from '../types';
+import type { CasesClient } from '../client';
+import type { CasesClientArgs } from '../types';
 
 export interface MetricsHandler<R> {
   getFeatures(): Set<string>;

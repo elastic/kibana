@@ -18,6 +18,8 @@ import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './bucket_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
+import { estypes } from '@elastic/elasticsearch';
+import { isSamplingEnabled } from '../utils/sampler';
 
 const indexPattern = {
   id: '1234',
@@ -281,344 +283,386 @@ const nestedOtherResponse = {
 describe('Terms Agg Other bucket helper', () => {
   const typesRegistry = mockAggTypesRegistry();
 
-  const getAggConfigs = (aggs: CreateAggConfigParams[] = []) => {
-    return new AggConfigs(indexPattern, [...aggs], { typesRegistry }, jest.fn());
-  };
-
-  describe('buildOtherBucketAgg', () => {
-    test('returns a function', () => {
-      const aggConfigs = getAggConfigs(singleTerm.aggs);
-      const agg = buildOtherBucketAgg(
-        aggConfigs,
-        aggConfigs.aggs[0] as IBucketAggConfig,
-        singleTermResponse
-      );
-      expect(typeof agg).toBe('function');
-    });
-
-    test('correctly builds query with single terms agg', () => {
-      const aggConfigs = getAggConfigs(singleTerm.aggs);
-      const agg = buildOtherBucketAgg(
-        aggConfigs,
-        aggConfigs.aggs[0] as IBucketAggConfig,
-        singleTermResponse
-      );
-      const expectedResponse = {
-        aggs: undefined,
-        filters: {
-          filters: {
-            '': {
-              bool: {
-                must: [],
-                filter: [{ exists: { field: 'machine.os.raw' } }],
-                should: [],
-                must_not: [
-                  { match_phrase: { 'machine.os.raw': 'ios' } },
-                  { match_phrase: { 'machine.os.raw': 'win xp' } },
-                ],
-              },
-            },
+  for (const probability of [1, 0.5, undefined]) {
+    function getTitlePostfix() {
+      if (!isSamplingEnabled(probability)) {
+        return '';
+      }
+      return ` - with sampling (probability = ${probability})`;
+    }
+    function enrichResponseWithSampling(response: any) {
+      if (!isSamplingEnabled(probability)) {
+        return response;
+      }
+      return {
+        ...response,
+        aggregations: {
+          sampling: {
+            ...response.aggregations,
           },
         },
       };
-      expect(agg).toBeDefined();
-      if (agg) {
-        expect(agg()['other-filter']).toEqual(expectedResponse);
-      }
-    });
+    }
 
-    test('correctly builds query for nested terms agg', () => {
-      const aggConfigs = getAggConfigs(nestedTerm.aggs);
-      const agg = buildOtherBucketAgg(
-        aggConfigs,
-        aggConfigs.aggs[1] as IBucketAggConfig,
-        nestedTermResponse
-      );
-      const expectedResponse = {
-        'other-filter': {
-          aggs: undefined,
-          filters: {
-            filters: {
-              [`${SEP}IN-with-dash`]: {
-                bool: {
-                  must: [],
-                  filter: [
-                    { match_phrase: { 'geo.src': 'IN-with-dash' } },
-                    { exists: { field: 'machine.os.raw' } },
-                  ],
-                  should: [],
-                  must_not: [
-                    { match_phrase: { 'machine.os.raw': 'ios' } },
-                    { match_phrase: { 'machine.os.raw': 'win xp' } },
-                  ],
-                },
-              },
-              [`${SEP}US-with-dash`]: {
-                bool: {
-                  must: [],
-                  filter: [
-                    { match_phrase: { 'geo.src': 'US-with-dash' } },
-                    { exists: { field: 'machine.os.raw' } },
-                  ],
-                  should: [],
-                  must_not: [
-                    { match_phrase: { 'machine.os.raw': 'ios' } },
-                    { match_phrase: { 'machine.os.raw': 'win xp' } },
-                  ],
-                },
-              },
-            },
-          },
-        },
-      };
-      expect(agg).toBeDefined();
-      if (agg) {
-        expect(agg()).toEqual(expectedResponse);
-      }
-    });
+    function getAggConfigs(aggs: CreateAggConfigParams[] = []) {
+      return new AggConfigs(indexPattern, [...aggs], { typesRegistry, probability }, jest.fn());
+    }
 
-    test('correctly builds query for nested terms agg with one disabled', () => {
-      const oneDisabledNestedTerms = {
-        aggs: [
-          {
-            id: '2',
-            type: BUCKET_TYPES.TERMS,
-            enabled: false,
-            params: {
-              field: {
-                name: 'machine.os.raw',
-                indexPattern,
-                filterable: true,
-              },
-              size: 2,
-              otherBucket: false,
-              missingBucket: true,
-            },
-          },
-          {
-            id: '1',
-            type: BUCKET_TYPES.TERMS,
-            params: {
-              field: {
-                name: 'geo.src',
-                indexPattern,
-                filterable: true,
-              },
-              size: 2,
-              otherBucket: true,
-              missingBucket: false,
-            },
-          },
-        ],
-      };
-      const aggConfigs = getAggConfigs(oneDisabledNestedTerms.aggs);
-      const agg = buildOtherBucketAgg(
-        aggConfigs,
-        aggConfigs.aggs[1] as IBucketAggConfig,
-        singleTermResponse
-      );
-      const expectedResponse = {
-        'other-filter': {
+    function getTopAggregations(updatedResponse: estypes.SearchResponse<any>) {
+      return !isSamplingEnabled(probability)
+        ? updatedResponse.aggregations!
+        : (updatedResponse.aggregations!.sampling as Record<string, estypes.AggregationsAggregate>);
+    }
+
+    describe(`buildOtherBucketAgg${getTitlePostfix()}`, () => {
+      test('returns a function', () => {
+        const aggConfigs = getAggConfigs(singleTerm.aggs);
+        const agg = buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[0] as IBucketAggConfig,
+          enrichResponseWithSampling(singleTermResponse)
+        );
+        expect(typeof agg).toBe('function');
+      });
+
+      test('correctly builds query with single terms agg', () => {
+        const aggConfigs = getAggConfigs(singleTerm.aggs);
+        const agg = buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[0] as IBucketAggConfig,
+          enrichResponseWithSampling(singleTermResponse)
+        );
+        const expectedResponse = {
           aggs: undefined,
           filters: {
             filters: {
               '': {
                 bool: {
-                  filter: [
-                    {
-                      exists: {
-                        field: 'geo.src',
-                      },
-                    },
-                  ],
                   must: [],
-                  must_not: [
-                    {
-                      match_phrase: {
-                        'geo.src': 'ios',
-                      },
-                    },
-                    {
-                      match_phrase: {
-                        'geo.src': 'win xp',
-                      },
-                    },
-                  ],
+                  filter: [{ exists: { field: 'machine.os.raw' } }],
                   should: [],
+                  must_not: [
+                    { match_phrase: { 'machine.os.raw': 'ios' } },
+                    { match_phrase: { 'machine.os.raw': 'win xp' } },
+                  ],
                 },
               },
             },
           },
-        },
-      };
-      expect(agg).toBeDefined();
-      if (agg) {
-        expect(agg()).toEqual(expectedResponse);
-      }
-    });
+        };
+        expect(agg).toBeDefined();
+        if (agg) {
+          const resp = agg();
+          const topAgg = !isSamplingEnabled(probability) ? resp : resp.sampling!.aggs;
+          expect(topAgg['other-filter']).toEqual(expectedResponse);
+        }
+      });
 
-    test('does not build query if sum_other_doc_count is 0 (exhaustive terms)', () => {
-      const aggConfigs = getAggConfigs(nestedTerm.aggs);
-      expect(
-        buildOtherBucketAgg(
+      test('correctly builds query for nested terms agg', () => {
+        const aggConfigs = getAggConfigs(nestedTerm.aggs);
+        const agg = buildOtherBucketAgg(
           aggConfigs,
           aggConfigs.aggs[1] as IBucketAggConfig,
-          exhaustiveNestedTermResponse
-        )
-      ).toBeFalsy();
-    });
-
-    test('excludes exists filter for scripted fields', () => {
-      const aggConfigs = getAggConfigs(nestedTerm.aggs);
-      aggConfigs.aggs[1].params.field.scripted = true;
-      const agg = buildOtherBucketAgg(
-        aggConfigs,
-        aggConfigs.aggs[1] as IBucketAggConfig,
-        nestedTermResponse
-      );
-      const expectedResponse = {
-        'other-filter': {
-          aggs: undefined,
-          filters: {
+          enrichResponseWithSampling(nestedTermResponse)
+        );
+        const expectedResponse = {
+          'other-filter': {
+            aggs: undefined,
             filters: {
-              [`${SEP}IN-with-dash`]: {
-                bool: {
-                  must: [],
-                  filter: [{ match_phrase: { 'geo.src': 'IN-with-dash' } }],
-                  should: [],
-                  must_not: [
-                    {
-                      script: {
-                        script: {
-                          lang: undefined,
-                          params: { value: 'ios' },
-                          source: '(undefined) == value',
-                        },
-                      },
-                    },
-                    {
-                      script: {
-                        script: {
-                          lang: undefined,
-                          params: { value: 'win xp' },
-                          source: '(undefined) == value',
-                        },
-                      },
-                    },
-                  ],
+              filters: {
+                [`${SEP}IN-with-dash`]: {
+                  bool: {
+                    must: [],
+                    filter: [
+                      { match_phrase: { 'geo.src': 'IN-with-dash' } },
+                      { exists: { field: 'machine.os.raw' } },
+                    ],
+                    should: [],
+                    must_not: [
+                      { match_phrase: { 'machine.os.raw': 'ios' } },
+                      { match_phrase: { 'machine.os.raw': 'win xp' } },
+                    ],
+                  },
                 },
-              },
-              [`${SEP}US-with-dash`]: {
-                bool: {
-                  must: [],
-                  filter: [{ match_phrase: { 'geo.src': 'US-with-dash' } }],
-                  should: [],
-                  must_not: [
-                    {
-                      script: {
-                        script: {
-                          lang: undefined,
-                          params: { value: 'ios' },
-                          source: '(undefined) == value',
-                        },
-                      },
-                    },
-                    {
-                      script: {
-                        script: {
-                          lang: undefined,
-                          params: { value: 'win xp' },
-                          source: '(undefined) == value',
-                        },
-                      },
-                    },
-                  ],
+                [`${SEP}US-with-dash`]: {
+                  bool: {
+                    must: [],
+                    filter: [
+                      { match_phrase: { 'geo.src': 'US-with-dash' } },
+                      { exists: { field: 'machine.os.raw' } },
+                    ],
+                    should: [],
+                    must_not: [
+                      { match_phrase: { 'machine.os.raw': 'ios' } },
+                      { match_phrase: { 'machine.os.raw': 'win xp' } },
+                    ],
+                  },
                 },
               },
             },
           },
-        },
-      };
-      expect(agg).toBeDefined();
-      if (agg) {
-        expect(agg()).toEqual(expectedResponse);
-      }
-    });
+        };
+        expect(agg).toBeDefined();
+        if (agg) {
+          const resp = agg();
+          const topAgg = !isSamplingEnabled(probability) ? resp : resp.sampling!.aggs;
+          // console.log({ probability }, JSON.stringify(topAgg, null, 2));
+          expect(topAgg).toEqual(expectedResponse);
+        }
+      });
 
-    test('returns false when nested terms agg has no buckets', () => {
-      const aggConfigs = getAggConfigs(nestedTerm.aggs);
-      const agg = buildOtherBucketAgg(
-        aggConfigs,
-        aggConfigs.aggs[1] as IBucketAggConfig,
-        nestedTermResponseNoResults
-      );
-
-      expect(agg).toEqual(false);
-    });
-  });
-
-  describe('mergeOtherBucketAggResponse', () => {
-    test('correctly merges other bucket with single terms agg', () => {
-      const aggConfigs = getAggConfigs(singleTerm.aggs);
-      const otherAggConfig = buildOtherBucketAgg(
-        aggConfigs,
-        aggConfigs.aggs[0] as IBucketAggConfig,
-        singleTermResponse
-      );
-
-      expect(otherAggConfig).toBeDefined();
-      if (otherAggConfig) {
-        const mergedResponse = mergeOtherBucketAggResponse(
+      test('correctly builds query for nested terms agg with one disabled', () => {
+        const oneDisabledNestedTerms = {
+          aggs: [
+            {
+              id: '2',
+              type: BUCKET_TYPES.TERMS,
+              enabled: false,
+              params: {
+                field: {
+                  name: 'machine.os.raw',
+                  indexPattern,
+                  filterable: true,
+                },
+                size: 2,
+                otherBucket: false,
+                missingBucket: true,
+              },
+            },
+            {
+              id: '1',
+              type: BUCKET_TYPES.TERMS,
+              params: {
+                field: {
+                  name: 'geo.src',
+                  indexPattern,
+                  filterable: true,
+                },
+                size: 2,
+                otherBucket: true,
+                missingBucket: false,
+              },
+            },
+          ],
+        };
+        const aggConfigs = getAggConfigs(oneDisabledNestedTerms.aggs);
+        const agg = buildOtherBucketAgg(
           aggConfigs,
-          singleTermResponse,
-          singleOtherResponse,
-          aggConfigs.aggs[0] as IBucketAggConfig,
-          otherAggConfig(),
-          constructSingleTermOtherFilter
-        );
-        expect((mergedResponse!.aggregations!['1'] as any).buckets[3].key).toEqual('__other__');
-      }
-    });
-
-    test('correctly merges other bucket with nested terms agg', () => {
-      const aggConfigs = getAggConfigs(nestedTerm.aggs);
-      const otherAggConfig = buildOtherBucketAgg(
-        aggConfigs,
-        aggConfigs.aggs[1] as IBucketAggConfig,
-        nestedTermResponse
-      );
-
-      expect(otherAggConfig).toBeDefined();
-      if (otherAggConfig) {
-        const mergedResponse = mergeOtherBucketAggResponse(
-          aggConfigs,
-          nestedTermResponse,
-          nestedOtherResponse,
           aggConfigs.aggs[1] as IBucketAggConfig,
-          otherAggConfig(),
-          constructSingleTermOtherFilter
+          enrichResponseWithSampling(singleTermResponse)
+        );
+        const expectedResponse = {
+          'other-filter': {
+            aggs: undefined,
+            filters: {
+              filters: {
+                '': {
+                  bool: {
+                    filter: [
+                      {
+                        exists: {
+                          field: 'geo.src',
+                        },
+                      },
+                    ],
+                    must: [],
+                    must_not: [
+                      {
+                        match_phrase: {
+                          'geo.src': 'ios',
+                        },
+                      },
+                      {
+                        match_phrase: {
+                          'geo.src': 'win xp',
+                        },
+                      },
+                    ],
+                    should: [],
+                  },
+                },
+              },
+            },
+          },
+        };
+        expect(agg).toBeDefined();
+        if (agg) {
+          const resp = agg();
+          const topAgg = !isSamplingEnabled(probability) ? resp : resp.sampling!.aggs;
+          expect(topAgg).toEqual(expectedResponse);
+        }
+      });
+
+      test('does not build query if sum_other_doc_count is 0 (exhaustive terms)', () => {
+        const aggConfigs = getAggConfigs(nestedTerm.aggs);
+        expect(
+          buildOtherBucketAgg(
+            aggConfigs,
+            aggConfigs.aggs[1] as IBucketAggConfig,
+            enrichResponseWithSampling(exhaustiveNestedTermResponse)
+          )
+        ).toBeFalsy();
+      });
+
+      test('excludes exists filter for scripted fields', () => {
+        const aggConfigs = getAggConfigs(nestedTerm.aggs);
+        aggConfigs.aggs[1].params.field = {
+          ...aggConfigs.aggs[1].params.field,
+          scripted: true,
+        };
+        const agg = buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[1] as IBucketAggConfig,
+          enrichResponseWithSampling(nestedTermResponse)
+        );
+        const expectedResponse = {
+          'other-filter': {
+            aggs: undefined,
+            filters: {
+              filters: {
+                [`${SEP}IN-with-dash`]: {
+                  bool: {
+                    must: [],
+                    filter: [{ match_phrase: { 'geo.src': 'IN-with-dash' } }],
+                    should: [],
+                    must_not: [
+                      {
+                        script: {
+                          script: {
+                            lang: undefined,
+                            params: { value: 'ios' },
+                            source: '(undefined) == value',
+                          },
+                        },
+                      },
+                      {
+                        script: {
+                          script: {
+                            lang: undefined,
+                            params: { value: 'win xp' },
+                            source: '(undefined) == value',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                [`${SEP}US-with-dash`]: {
+                  bool: {
+                    must: [],
+                    filter: [{ match_phrase: { 'geo.src': 'US-with-dash' } }],
+                    should: [],
+                    must_not: [
+                      {
+                        script: {
+                          script: {
+                            lang: undefined,
+                            params: { value: 'ios' },
+                            source: '(undefined) == value',
+                          },
+                        },
+                      },
+                      {
+                        script: {
+                          script: {
+                            lang: undefined,
+                            params: { value: 'win xp' },
+                            source: '(undefined) == value',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        };
+        expect(agg).toBeDefined();
+        if (agg) {
+          const resp = agg();
+          const topAgg = !isSamplingEnabled(probability) ? resp : resp.sampling!.aggs;
+          expect(topAgg).toEqual(expectedResponse);
+        }
+      });
+
+      test('returns false when nested terms agg has no buckets', () => {
+        const aggConfigs = getAggConfigs(nestedTerm.aggs);
+        const agg = buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[1] as IBucketAggConfig,
+          enrichResponseWithSampling(nestedTermResponseNoResults)
         );
 
-        expect((mergedResponse!.aggregations!['1'] as any).buckets[1]['2'].buckets[3].key).toEqual(
-          '__other__'
-        );
-      }
+        expect(agg).toEqual(false);
+      });
     });
-  });
 
-  describe('updateMissingBucket', () => {
-    test('correctly updates missing bucket key', () => {
-      const aggConfigs = getAggConfigs(nestedTerm.aggs);
-      const updatedResponse = updateMissingBucket(
-        singleTermResponse,
-        aggConfigs,
-        aggConfigs.aggs[0] as IBucketAggConfig
-      );
-      expect(
-        (updatedResponse!.aggregations!['1'] as any).buckets.find(
-          (bucket: Record<string, any>) => bucket.key === '__missing__'
-        )
-      ).toBeDefined();
+    describe(`mergeOtherBucketAggResponse${getTitlePostfix()}`, () => {
+      test('correctly merges other bucket with single terms agg', () => {
+        const aggConfigs = getAggConfigs(singleTerm.aggs);
+        const otherAggConfig = buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[0] as IBucketAggConfig,
+          enrichResponseWithSampling(singleTermResponse)
+        );
+
+        expect(otherAggConfig).toBeDefined();
+        if (otherAggConfig) {
+          const mergedResponse = mergeOtherBucketAggResponse(
+            aggConfigs,
+            enrichResponseWithSampling(singleTermResponse),
+            enrichResponseWithSampling(singleOtherResponse),
+            aggConfigs.aggs[0] as IBucketAggConfig,
+            otherAggConfig(),
+            constructSingleTermOtherFilter
+          );
+
+          const topAgg = getTopAggregations(mergedResponse);
+          expect((topAgg['1'] as any).buckets[3].key).toEqual('__other__');
+        }
+      });
+
+      test('correctly merges other bucket with nested terms agg', () => {
+        const aggConfigs = getAggConfigs(nestedTerm.aggs);
+        const otherAggConfig = buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[1] as IBucketAggConfig,
+          enrichResponseWithSampling(nestedTermResponse)
+        );
+
+        expect(otherAggConfig).toBeDefined();
+        if (otherAggConfig) {
+          const mergedResponse = mergeOtherBucketAggResponse(
+            aggConfigs,
+            enrichResponseWithSampling(nestedTermResponse),
+            enrichResponseWithSampling(nestedOtherResponse),
+            aggConfigs.aggs[1] as IBucketAggConfig,
+            otherAggConfig(),
+            constructSingleTermOtherFilter
+          );
+
+          const topAgg = getTopAggregations(mergedResponse);
+          expect((topAgg['1'] as any).buckets[1]['2'].buckets[3].key).toEqual('__other__');
+        }
+      });
     });
-  });
+
+    describe(`updateMissingBucket${getTitlePostfix()}`, () => {
+      test('correctly updates missing bucket key', () => {
+        const aggConfigs = getAggConfigs(nestedTerm.aggs);
+        const updatedResponse = updateMissingBucket(
+          enrichResponseWithSampling(singleTermResponse),
+          aggConfigs,
+          aggConfigs.aggs[0] as IBucketAggConfig
+        );
+        const topAgg = getTopAggregations(updatedResponse);
+        expect(
+          (topAgg['1'] as any).buckets.find(
+            (bucket: Record<string, any>) => bucket.key === '__missing__'
+          )
+        ).toBeDefined();
+      });
+    });
+  }
 });

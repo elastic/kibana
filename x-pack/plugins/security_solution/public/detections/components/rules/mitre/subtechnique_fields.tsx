@@ -14,15 +14,26 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { camelCase } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { Threats, ThreatSubtechnique } from '@kbn/securitysolution-io-ts-alerting-types';
-import { subtechniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
+import type { MitreSubtechniquesOptions } from '../../../mitre/types';
+
+const lazyMitreConfiguration = () => {
+  /**
+   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+   * See https://webpack.js.org/api/module-methods/#magic-comments
+   */
+  return import(
+    /* webpackChunkName: "lazy_mitre_configuration" */
+    '../../../mitre/mitre_tactics_techniques'
+  );
+};
 
 const SubtechniqueContainer = styled.div`
   margin-left: 48px;
@@ -46,6 +57,15 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   onFieldChange,
 }): JSX.Element => {
   const values = field.value as Threats;
+  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubtechniquesOptions[]>([]);
+
+  useEffect(() => {
+    async function getMitre() {
+      const mitreConfig = await lazyMitreConfiguration();
+      setSubtechniquesOptions(mitreConfig.subtechniquesOptions);
+    }
+    getMitre();
+  }, []);
 
   const technique = useMemo(() => {
     return [...(values[threatIndex].technique ?? [])];
@@ -125,7 +145,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
         ]);
       }
     },
-    [threatIndex, techniqueIndex, onFieldChange, field, technique]
+    [field.value, subtechniquesOptions, technique, techniqueIndex, onFieldChange, threatIndex]
   );
 
   const getSelectSubtechnique = useCallback(
@@ -166,7 +186,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
         </>
       );
     },
-    [field, updateSubtechnique, technique, techniqueIndex]
+    [subtechniquesOptions, field.label, updateSubtechnique, technique, techniqueIndex]
   );
 
   const subtechniques = useMemo(() => {

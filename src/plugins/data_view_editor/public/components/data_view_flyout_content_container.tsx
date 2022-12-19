@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { DataViewSpec, useKibana } from '../shared_imports';
 import { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
 import { DataViewEditorContext, DataViewEditorProps } from '../types';
+import { DataViewEditorService } from '../data_view_editor_service';
 
-const IndexPatternFlyoutContentContainer = ({
+const DataViewFlyoutContentContainer = ({
   onSave,
   onCancel = () => {},
   defaultTypeIsRollup,
@@ -23,8 +25,26 @@ const IndexPatternFlyoutContentContainer = ({
   showManagementLink,
 }: DataViewEditorProps) => {
   const {
-    services: { dataViews, notifications },
+    services: { dataViews, notifications, http },
   } = useKibana<DataViewEditorContext>();
+
+  const [dataViewEditorService] = useState(
+    () =>
+      new DataViewEditorService({
+        services: { http, dataViews },
+        initialValues: {
+          name: editData?.name,
+          type: editData?.type as INDEX_PATTERN_TYPE,
+          indexPattern: editData?.getIndexPattern(),
+        },
+        requireTimestampField,
+      })
+  );
+
+  useEffect(() => {
+    const service = dataViewEditorService;
+    return service.destroy;
+  }, [dataViewEditorService]);
 
   const onSaveClick = async (dataViewSpec: DataViewSpec, persist: boolean = true) => {
     try {
@@ -67,13 +87,13 @@ const IndexPatternFlyoutContentContainer = ({
       onSave={onSaveClick}
       onCancel={onCancel}
       defaultTypeIsRollup={defaultTypeIsRollup}
-      requireTimestampField={requireTimestampField}
       editData={editData}
       showManagementLink={showManagementLink}
       allowAdHoc={allowAdHocDataView || false}
+      dataViewEditorService={dataViewEditorService}
     />
   );
 };
 
 /* eslint-disable import/no-default-export */
-export default IndexPatternFlyoutContentContainer;
+export default DataViewFlyoutContentContainer;

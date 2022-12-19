@@ -6,12 +6,13 @@
  */
 
 import * as t from 'io-ts';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { FetchAndTransformMetrics } from './fetch_and_transform_metrics';
 import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
 import { getServiceNodes } from './get_service_nodes';
+import { metricsServerlessRouteRepository } from './serverless/route';
 
 const metricsChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
@@ -25,7 +26,6 @@ const metricsChartsRoute = createApmServerRoute({
       }),
       t.partial({
         serviceNodeName: t.string,
-        serviceRuntimeName: t.string,
       }),
       environmentRt,
       kueryRt,
@@ -38,29 +38,22 @@ const metricsChartsRoute = createApmServerRoute({
   ): Promise<{
     charts: FetchAndTransformMetrics[];
   }> => {
-    const { params } = resources;
-    const setup = await setupRequest(resources);
+    const { params, config } = resources;
+    const apmEventClient = await getApmEventClient(resources);
     const { serviceName } = params.path;
-    const {
-      agentName,
-      environment,
-      kuery,
-      serviceNodeName,
-      start,
-      end,
-      serviceRuntimeName,
-    } = params.query;
+    const { agentName, environment, kuery, serviceNodeName, start, end } =
+      params.query;
 
     const charts = await getMetricsChartDataByAgent({
       environment,
       kuery,
-      setup,
+      config,
+      apmEventClient,
       serviceName,
       agentName,
       serviceNodeName,
       start,
       end,
-      serviceRuntimeName,
     });
 
     return { charts };
@@ -88,14 +81,14 @@ const serviceMetricsJvm = createApmServerRoute({
       threadCount: number | null;
     }>;
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
     const { kuery, environment, start, end } = params.query;
 
     const serviceNodes = await getServiceNodes({
       kuery,
-      setup,
+      apmEventClient,
       serviceName,
       environment,
       start,
@@ -108,4 +101,5 @@ const serviceMetricsJvm = createApmServerRoute({
 export const metricsRouteRepository = {
   ...metricsChartsRoute,
   ...serviceMetricsJvm,
+  ...metricsServerlessRouteRepository,
 };

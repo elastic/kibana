@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Logger } from '@kbn/logging';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -34,23 +32,15 @@ import {
 import { createExternalService } from './service';
 import { api } from './api';
 
-interface GetConnectorTypeParams {
-  logger: Logger;
-}
-
 const supportedSubActions: string[] = ['pushToService'];
 
 // connector type definition
-export function getConnectorType(
-  params: GetConnectorTypeParams
-): ConnectorType<
+export function getConnectorType(): ConnectorType<
   SwimlanePublicConfigurationType,
   SwimlaneSecretConfigurationType,
   ExecutorParams,
   SwimlaneExecutorResultData | {}
 > {
-  const { logger } = params;
-
   return {
     id: '.swimlane',
     minimumLicenseRequired: 'gold',
@@ -75,19 +65,18 @@ export function getConnectorType(
         schema: ExecutorParamsSchema,
       },
     },
-    executor: curry(executor)({ logger }),
+    executor,
   };
 }
 
 async function executor(
-  { logger }: { logger: Logger },
   execOptions: ConnectorTypeExecutorOptions<
     SwimlanePublicConfigurationType,
     SwimlaneSecretConfigurationType,
     ExecutorParams
   >
 ): Promise<ConnectorTypeExecutorResult<SwimlaneExecutorResultData | {}>> {
-  const { actionId, config, params, secrets, configurationUtilities } = execOptions;
+  const { actionId, config, params, secrets, configurationUtilities, logger } = execOptions;
   const { subAction, subActionParams } = params as ExecutorParams;
   let data: SwimlaneExecutorResultData | null = null;
 

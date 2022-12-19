@@ -6,35 +6,33 @@
  */
 
 import expect from '@kbn/expect';
-
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
-
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import {
-  BulkAction,
+  BulkActionType,
   BulkActionEditType,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/perform_bulk_action_schema';
-import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
+  createLegacyRuleAction,
   createRule,
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
+  getLegacyActionSO,
+  getSimpleMlRule,
   getSimpleRule,
   getSimpleRuleOutput,
-  removeServerGeneratedProperties,
-  createLegacyRuleAction,
-  getLegacyActionSO,
-  installPrePackagedRules,
-  getSimpleMlRule,
-  getWebHookAction,
   getSlackAction,
+  getWebHookAction,
+  installPrePackagedRules,
+  removeServerGeneratedProperties,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -85,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule());
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.export })
+        .send({ query: '', action: BulkActionType.export })
         .expect(200)
         .expect('Content-Type', 'application/ndjson')
         .expect('Content-Disposition', 'attachment; filename="rules_export.ndjson"')
@@ -117,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, testRule);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.delete })
+        .send({ query: '', action: BulkActionType.delete })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -152,7 +150,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.delete })
+        .send({ query: '', action: BulkActionType.delete })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -173,7 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule(ruleId));
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.enable })
+        .send({ query: '', action: BulkActionType.enable })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -209,7 +207,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.enable })
+        .send({ query: '', action: BulkActionType.enable })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -242,7 +240,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule(ruleId, true));
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.disable })
+        .send({ query: '', action: BulkActionType.disable })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -278,7 +276,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.disable })
+        .send({ query: '', action: BulkActionType.disable })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -312,7 +310,11 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, ruleToDuplicate);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.duplicate })
+        .send({
+          query: '',
+          action: BulkActionType.duplicate,
+          duplicate: { include_exceptions: false },
+        })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -354,7 +356,11 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkAction.duplicate })
+        .send({
+          query: '',
+          action: BulkActionType.duplicate,
+          duplicate: { include_exceptions: false },
+        })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
@@ -374,7 +380,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(rulesResponse.total).to.eql(2);
 
-      rulesResponse.data.forEach((rule: FullResponseSchema) => {
+      rulesResponse.data.forEach((rule: RuleResponse) => {
         expect(rule.actions).to.eql([
           {
             action_type_id: '.slack',
@@ -434,8 +440,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body: bulkEditResponse } = await postBulkAction()
               .send({
                 query: '',
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.set_tags,
                     value: tagsToOverwrite,
@@ -508,8 +514,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body: bulkEditResponse } = await postBulkAction()
               .send({
                 query: '',
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.delete_tags,
                     value: tagsToDelete,
@@ -575,8 +581,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body: bulkEditResponse } = await postBulkAction()
               .send({
                 query: '',
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.add_tags,
                     value: addedTags,
@@ -610,8 +616,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: bulkEditResponse } = await postBulkAction()
             .send({
               query: '',
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.set_index_patterns,
                   value: ['initial-index-*'],
@@ -640,8 +646,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: bulkEditResponse } = await postBulkAction()
             .send({
               query: '',
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.add_index_patterns,
                   value: ['index3-*'],
@@ -672,8 +678,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: bulkEditResponse } = await postBulkAction()
             .send({
               query: '',
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.delete_index_patterns,
                   value: ['index2-*'],
@@ -701,8 +707,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               ids: [mlRule.id],
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.add_index_patterns,
                   value: ['index-*'],
@@ -734,8 +740,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               ids: [rule.id],
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.delete_index_patterns,
                   value: ['simple-index-*'],
@@ -767,8 +773,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               ids: [rule.id],
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.set_index_patterns,
                   value: [],
@@ -822,8 +828,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: setTagsBody } = await postBulkAction().send({
           query: '',
-          action: BulkAction.edit,
-          [BulkAction.edit]: [
+          action: BulkActionType.edit,
+          [BulkActionType.edit]: [
             {
               type: BulkActionEditType.set_tags,
               value: ['reset-tag'],
@@ -864,8 +870,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.set_timeline,
                 value: {
@@ -907,8 +913,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.set_timeline,
                 value: {
@@ -939,8 +945,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [mlRule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.add_index_patterns,
                 value: ['index-*'],
@@ -972,8 +978,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.delete_index_patterns,
                 value: ['simple-index-*'],
@@ -1001,8 +1007,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.add_tags,
                 value: ['test'],
@@ -1056,14 +1062,14 @@ export default ({ getService }: FtrProviderContext): void => {
         ];
         cases.forEach(({ type, value }) => {
           it(`should return error when trying to apply "${type}" edit action to prebuilt rule`, async () => {
-            await installPrePackagedRules(supertest, log);
+            await installPrePackagedRules(supertest, es, log);
             const prebuiltRule = await fetchPrebuiltRule();
 
             const { body } = await postBulkAction()
               .send({
                 ids: [prebuiltRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type,
                     value,
@@ -1106,8 +1112,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.set_rule_actions,
                     value: {
@@ -1162,8 +1168,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.set_rule_actions,
                     value: {
@@ -1220,8 +1226,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.set_rule_actions,
                     value: {
@@ -1254,8 +1260,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.add_rule_actions,
                     value: {
@@ -1312,8 +1318,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.add_rule_actions,
                     value: {
@@ -1379,8 +1385,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.add_rule_actions,
                     value: {
@@ -1438,8 +1444,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.add_rule_actions,
                     value: {
@@ -1483,8 +1489,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.add_rule_actions,
                     value: {
@@ -1517,15 +1523,15 @@ export default ({ getService }: FtrProviderContext): void => {
           ];
           cases.forEach(({ type }) => {
             it(`should apply "${type}" rule action to prebuilt rule`, async () => {
-              await installPrePackagedRules(supertest, log);
+              await installPrePackagedRules(supertest, es, log);
               const prebuiltRule = await fetchPrebuiltRule();
               const webHookConnector = await createWebHookConnector();
 
               const { body } = await postBulkAction()
                 .send({
                   ids: [prebuiltRule.id],
-                  action: BulkAction.edit,
-                  [BulkAction.edit]: [
+                  action: BulkActionType.edit,
+                  [BulkActionType.edit]: [
                     {
                       type,
                       value: {
@@ -1571,15 +1577,15 @@ export default ({ getService }: FtrProviderContext): void => {
           // if rule action is applied together with another edit action, that can't be applied to prebuilt rule (for example: tags action)
           // bulk edit request should return error
           it(`should return error if one of edit action is not eligible for prebuilt rule`, async () => {
-            await installPrePackagedRules(supertest, log);
+            await installPrePackagedRules(supertest, es, log);
             const prebuiltRule = await fetchPrebuiltRule();
             const webHookConnector = await createWebHookConnector();
 
             const { body } = await postBulkAction()
               .send({
                 ids: [prebuiltRule.id],
-                action: BulkAction.edit,
-                [BulkAction.edit]: [
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
                   {
                     type: BulkActionEditType.set_rule_actions,
                     value: {
@@ -1643,8 +1649,8 @@ export default ({ getService }: FtrProviderContext): void => {
               const { body } = await postBulkAction()
                 .send({
                   ids: [createdRule.id],
-                  action: BulkAction.edit,
-                  [BulkAction.edit]: [
+                  action: BulkActionType.edit,
+                  [BulkActionType.edit]: [
                     {
                       type: BulkActionEditType.set_rule_actions,
                       value: {
@@ -1699,8 +1705,8 @@ export default ({ getService }: FtrProviderContext): void => {
                   const { body } = await postBulkAction()
                     .send({
                       ids: [createdRule.id],
-                      action: BulkAction.edit,
-                      [BulkAction.edit]: [
+                      action: BulkActionType.edit,
+                      [BulkActionType.edit]: [
                         {
                           type: BulkActionEditType.set_rule_actions,
                           value: {
@@ -1751,8 +1757,8 @@ export default ({ getService }: FtrProviderContext): void => {
               await postBulkAction()
                 .send({
                   ids: [createdRule.id],
-                  action: BulkAction.edit,
-                  [BulkAction.edit]: [
+                  action: BulkActionType.edit,
+                  [BulkActionType.edit]: [
                     {
                       type: BulkActionEditType.set_rule_actions,
                       value: {
@@ -1785,8 +1791,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               query: '',
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.set_schedule,
                   value: {
@@ -1815,8 +1821,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               query: '',
-              action: BulkAction.edit,
-              [BulkAction.edit]: [
+              action: BulkActionType.edit,
+              [BulkActionType.edit]: [
                 {
                   type: BulkActionEditType.set_schedule,
                   value: {
@@ -1853,8 +1859,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: setIndexBody } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.add_index_patterns,
                 value: ['initial-index-*'],
@@ -1889,8 +1895,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: setIndexBody } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.add_index_patterns,
                 value: ['initial-index-*'],
@@ -1926,8 +1932,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: setIndexBody } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.set_index_patterns,
                 value: ['initial-index-*'],
@@ -1962,8 +1968,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.set_index_patterns,
                 value: [],
@@ -1999,8 +2005,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: setIndexBody } = await postBulkAction()
           .send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.set_index_patterns,
                 value: ['initial-index-*'],
@@ -2037,8 +2043,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.delete_index_patterns,
                 value: ['simple-index-*'],
@@ -2073,8 +2079,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.delete_index_patterns,
                 value: ['simple-index-*'],
@@ -2109,8 +2115,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.delete_index_patterns,
                 value: ['simple-index-*'],
@@ -2144,8 +2150,8 @@ export default ({ getService }: FtrProviderContext): void => {
         Array.from({ length: 10 }).map(() =>
           postBulkAction().send({
             query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+            action: BulkActionType.edit,
+            [BulkActionType.edit]: [
               {
                 type: BulkActionEditType.set_timeline,
                 value: {
@@ -2173,8 +2179,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await postBulkAction()
         .send({
           ids: [id],
-          action: BulkAction.edit,
-          [BulkAction.edit]: [
+          action: BulkActionType.edit,
+          [BulkActionType.edit]: [
             {
               type: BulkActionEditType.set_timeline,
               value: {

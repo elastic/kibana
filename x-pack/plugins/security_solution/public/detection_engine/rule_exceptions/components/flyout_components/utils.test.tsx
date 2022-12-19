@@ -17,7 +17,7 @@ import {
   enrichEndpointItems,
   enrichItemsForDefaultRuleList,
   enrichItemsForSharedLists,
-  entrichNewExceptionItems,
+  enrichNewExceptionItems,
 } from './utils';
 
 const getExceptionItems = (): ExceptionsBuilderReturnExceptionItem[] => [
@@ -30,7 +30,7 @@ describe('add_exception_flyout#utils', () => {
       const items = getExceptionItems();
 
       expect(
-        entrichNewExceptionItems({
+        enrichNewExceptionItems({
           itemName: 'My item',
           commentToAdd: 'New comment',
           addToRules: true,
@@ -66,7 +66,7 @@ describe('add_exception_flyout#utils', () => {
       ];
 
       expect(
-        entrichNewExceptionItems({
+        enrichNewExceptionItems({
           itemName: 'My item',
           commentToAdd: 'New comment',
           addToRules: false,
@@ -105,7 +105,7 @@ describe('add_exception_flyout#utils', () => {
       ];
 
       expect(
-        entrichNewExceptionItems({
+        enrichNewExceptionItems({
           itemName: 'My item',
           commentToAdd: 'New comment',
           addToRules: false,

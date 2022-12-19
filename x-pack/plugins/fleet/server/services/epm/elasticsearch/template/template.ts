@@ -58,14 +58,12 @@ const META_PROP_KEYS = ['metric_type', 'unit'];
  */
 export function getTemplate({
   templateIndexPattern,
-  pipelineName,
   packageName,
   composedOfTemplates,
   templatePriority,
   hidden,
 }: {
   templateIndexPattern: string;
-  pipelineName?: string | undefined;
   packageName: string;
   composedOfTemplates: string[];
   templatePriority: number;
@@ -78,9 +76,6 @@ export function getTemplate({
     templatePriority,
     hidden
   );
-  if (pipelineName) {
-    template.template.settings.index.default_pipeline = pipelineName;
-  }
   if (template.template.settings.index.final_pipeline) {
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }

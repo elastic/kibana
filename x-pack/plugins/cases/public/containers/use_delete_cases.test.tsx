@@ -10,7 +10,8 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useDeleteCases } from './use_delete_cases';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
-import { AppMockRenderer, createAppMockRenderer } from '../common/mock';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
 import { casesQueriesKeys } from './constants';
 
 jest.mock('./api');

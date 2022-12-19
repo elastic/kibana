@@ -8,8 +8,9 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { Actions, TagsUserAction } from '../../../common/api';
-import { UserActionBuilder, UserActionResponse } from './types';
+import type { TagsUserAction } from '../../../common/api';
+import { Actions } from '../../../common/api';
+import type { UserActionBuilder, UserActionResponse } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { Tags } from '../tags/tags';
 import * as i18n from './translations';
@@ -24,7 +25,7 @@ const getLabelTitle = (userAction: UserActionResponse<TagsUserAction>) => {
         {userAction.action === Actions.delete && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <Tags tags={tags} gutterSize="xs" />
+        <Tags tags={tags} gutterSize="xs" color="hollow" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

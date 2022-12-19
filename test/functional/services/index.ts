@@ -50,6 +50,7 @@ import { SavedQueryManagementComponentService } from './saved_query_management_c
 import { KibanaSupertestProvider } from './supertest';
 import { MenuToggleService } from './menu_toggle';
 import { MonacoEditorService } from './monaco_editor';
+import { UsageCollectionService } from './usage_collection';
 
 export const services = {
   ...commonServiceProviders,
@@ -90,4 +91,5 @@ export const services = {
   monacoEditor: MonacoEditorService,
   menuToggle: MenuToggleService,
   retryOnStale: RetryOnStaleProvider,
+  usageCollection: UsageCollectionService,
 };

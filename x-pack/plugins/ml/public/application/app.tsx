@@ -93,6 +93,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     cases: deps.cases,
     unifiedSearch: deps.unifiedSearch,
     licensing: deps.licensing,
+    lens: deps.lens,
     ...coreStart,
   };
 
@@ -146,17 +147,17 @@ export const renderApp = (
     dataVisualizer: deps.dataVisualizer,
     dataViews: deps.data.dataViews,
     share: deps.share,
+    lens: deps.lens,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());
 
-  const mlLicense = setLicenseCache(deps.licensing, coreStart.application, [
-    () =>
-      ReactDOM.render(
-        <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
-        appMountParams.element
-      ),
-  ]);
+  const mlLicense = setLicenseCache(deps.licensing, coreStart.application, () =>
+    ReactDOM.render(
+      <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
+      appMountParams.element
+    )
+  );
 
   return () => {
     mlLicense.unsubscribe();

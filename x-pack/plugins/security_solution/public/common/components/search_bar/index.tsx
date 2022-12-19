@@ -36,9 +36,9 @@ import {
 } from './selectors';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
-import { usersActions } from '../../../users/store';
-import { hostsActions } from '../../../hosts/store';
-import { networkActions } from '../../../network/store';
+import { usersActions } from '../../../explore/users/store';
+import { hostsActions } from '../../../explore/hosts/store';
+import { networkActions } from '../../../explore/network/store';
 import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';
 import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
 
@@ -311,7 +311,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           savedQuery={savedQuery}
           showFilterBar={!hideFilterBar}
           showDatePicker={true}
-          showQueryBar={true}
           showQueryInput={!hideQueryInput}
           showSaveQuery={true}
           dataTestSubj={dataTestSubj}

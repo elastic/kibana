@@ -33,6 +33,7 @@ export const savedObjectsTaggingServiceFactory: SavedObjectsTaggingServiceFactor
       updateTagsReferences,
       getTagIdsFromReferences,
       getTableColumnDefinition,
+      getTagList,
     },
   } = taggingApi;
 
@@ -45,5 +46,6 @@ export const savedObjectsTaggingServiceFactory: SavedObjectsTaggingServiceFactor
     updateTagsReferences,
     getTagIdsFromReferences,
     getTableColumnDefinition,
+    getTagList,
   };
 };

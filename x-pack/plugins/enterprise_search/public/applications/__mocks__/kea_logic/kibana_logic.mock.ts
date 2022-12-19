@@ -23,6 +23,7 @@ export const mockKibanaValues = {
     isCloudEnabled: false,
     deployment_url: 'https://cloud.elastic.co/deployments/some-id',
   },
+  guidedOnboarding: {},
   history: mockHistory,
   isCloud: false,
   navigateToUrl: jest.fn(),

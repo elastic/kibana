@@ -10,8 +10,6 @@ import { last } from 'lodash';
 
 import { calculateLabel } from '../../../../../common/calculate_label';
 import { SERIES_SEPARATOR } from '../../../../../common/constants';
-
-// @ts-expect-error no typed yet
 import { SeriesAgg } from './_series_agg';
 
 import type { TableResponseProcessorsFunction } from './types';
@@ -33,7 +31,7 @@ export const seriesAgg: TableResponseProcessorsFunction =
         }
         return true;
       });
-
+      // @ts-expect-error no typed yet
       const fn = SeriesAgg[series.aggregate_function];
       const data = fn(targetSeries);
       const fieldsForSeries = meta.dataViewId ? await extractFields({ id: meta.dataViewId }) : [];

@@ -5,32 +5,72 @@
  * 2.0.
  */
 
+import type { SavedObjectsImportSuccess } from '@kbn/core-saved-objects-common';
 import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constants';
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import type { KibanaAssetType } from '../../../../../common';
+import { appContextService } from '../../../app_context';
 
 import type { ArchiveAsset } from './install';
+import { KibanaSavedObjectTypeMapping } from './install';
 
 const TAG_COLOR = '#FFFFFF';
 const MANAGED_TAG_NAME = 'Managed';
-const MANAGED_TAG_ID = 'managed';
+const LEGACY_MANAGED_TAG_ID = 'managed';
 
-export async function tagKibanaAssets({
-  savedObjectTagAssignmentService,
-  savedObjectTagClient,
-  kibanaAssets,
-  pkgTitle,
-  pkgName,
-}: {
+const getManagedTagId = (spaceId: string) => `fleet-managed-${spaceId}`;
+const getPackageTagId = (spaceId: string, pkgName: string) => `fleet-pkg-${pkgName}-${spaceId}`;
+const getLegacyPackageTagId = (pkgName: string) => pkgName;
+
+interface TagAssetsParams {
   savedObjectTagAssignmentService: IAssignmentService;
   savedObjectTagClient: ITagsClient;
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
   pkgTitle: string;
   pkgName: string;
-}) {
-  const taggableAssets = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
-    if (!taggableTypes.includes(assetType as KibanaAssetType)) {
+  spaceId: string;
+  importedAssets: SavedObjectsImportSuccess[];
+}
+
+export async function tagKibanaAssets(opts: TagAssetsParams) {
+  const { savedObjectTagAssignmentService, kibanaAssets, importedAssets } = opts;
+  const getNewId = (assetId: string) =>
+    importedAssets.find((imported) => imported.id === assetId)?.destinationId ?? assetId;
+  const taggableAssets = getTaggableAssets(kibanaAssets).map((asset) => ({
+    ...asset,
+    id: getNewId(asset.id),
+  }));
+
+  // no assets to tag
+  if (taggableAssets.length === 0) {
+    return;
+  }
+
+  const [managedTagId, packageTagId] = await Promise.all([
+    ensureManagedTag(opts),
+    ensurePackageTag(opts),
+  ]);
+
+  try {
+    await savedObjectTagAssignmentService.updateTagAssignments({
+      tags: [managedTagId, packageTagId],
+      assign: taggableAssets,
+      unassign: [],
+      refresh: false,
+    });
+  } catch (error) {
+    if (error.status === 404) {
+      appContextService.getLogger().warn(error.message);
+      return;
+    }
+    throw error;
+  }
+}
+
+function getTaggableAssets(kibanaAssets: TagAssetsParams['kibanaAssets']) {
+  return Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
+    if (!taggableTypes.includes(KibanaSavedObjectTypeMapping[assetType as KibanaAssetType])) {
       return [];
     }
 
@@ -40,41 +80,57 @@ export async function tagKibanaAssets({
 
     return assets;
   });
+}
 
-  // no assets to tag
-  if (taggableAssets.length === 0) {
-    return;
-  }
+async function ensureManagedTag(
+  opts: Pick<TagAssetsParams, 'spaceId' | 'savedObjectTagClient'>
+): Promise<string> {
+  const { spaceId, savedObjectTagClient } = opts;
 
-  const allTags = await savedObjectTagClient.getAll();
-  let managedTag = allTags.find((tag) => tag.name === MANAGED_TAG_NAME);
-  if (!managedTag) {
-    managedTag = await savedObjectTagClient.create(
-      {
-        name: MANAGED_TAG_NAME,
-        description: '',
-        color: TAG_COLOR,
-      },
-      { id: MANAGED_TAG_ID, overwrite: true, refresh: false }
-    );
-  }
+  const managedTagId = getManagedTagId(spaceId);
+  const managedTag = await savedObjectTagClient.get(managedTagId).catch(() => {});
 
-  let packageTag = allTags.find((tag) => tag.name === pkgTitle);
-  if (!packageTag) {
-    packageTag = await savedObjectTagClient.create(
-      {
-        name: pkgTitle,
-        description: '',
-        color: TAG_COLOR,
-      },
-      { id: pkgName, overwrite: true, refresh: false }
-    );
-  }
+  if (managedTag) return managedTagId;
 
-  await savedObjectTagAssignmentService.updateTagAssignments({
-    tags: [managedTag.id, packageTag.id],
-    assign: taggableAssets,
-    unassign: [],
-    refresh: false,
-  });
+  const legacyManagedTag = await savedObjectTagClient.get(LEGACY_MANAGED_TAG_ID).catch(() => {});
+
+  if (legacyManagedTag) return LEGACY_MANAGED_TAG_ID;
+
+  await savedObjectTagClient.create(
+    {
+      name: MANAGED_TAG_NAME,
+      description: '',
+      color: TAG_COLOR,
+    },
+    { id: managedTagId, overwrite: true, refresh: false }
+  );
+
+  return managedTagId;
+}
+
+async function ensurePackageTag(
+  opts: Pick<TagAssetsParams, 'spaceId' | 'savedObjectTagClient' | 'pkgName' | 'pkgTitle'>
+): Promise<string> {
+  const { spaceId, savedObjectTagClient, pkgName, pkgTitle } = opts;
+
+  const packageTagId = getPackageTagId(spaceId, pkgName);
+  const packageTag = await savedObjectTagClient.get(packageTagId).catch(() => {});
+
+  if (packageTag) return packageTagId;
+
+  const legacyPackageTagId = getLegacyPackageTagId(pkgName);
+  const legacyPackageTag = await savedObjectTagClient.get(legacyPackageTagId).catch(() => {});
+
+  if (legacyPackageTag) return legacyPackageTagId;
+
+  await savedObjectTagClient.create(
+    {
+      name: pkgTitle,
+      description: '',
+      color: TAG_COLOR,
+    },
+    { id: packageTagId, overwrite: true, refresh: false }
+  );
+
+  return packageTagId;
 }

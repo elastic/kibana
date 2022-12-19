@@ -46,9 +46,7 @@ let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
-  connectorType = getConnectorType({
-    logger: mockedLogger,
-  });
+  connectorType = getConnectorType();
 });
 
 describe('connectorType', () => {
@@ -271,6 +269,7 @@ describe('execute()', () => {
       secrets: { user: 'abc', password: '123' },
       params: { body: 'some data' },
       configurationUtilities,
+      logger: mockedLogger,
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
@@ -304,6 +303,7 @@ describe('execute()', () => {
           "fatal": [MockFunction],
           "get": [MockFunction],
           "info": [MockFunction],
+          "isLevelEnabled": [MockFunction],
           "log": [MockFunction],
           "trace": [MockFunction],
           "warn": [MockFunction],
@@ -336,6 +336,7 @@ describe('execute()', () => {
       secrets: { user: 'abc', password: '123' },
       params: { body: 'some data' },
       configurationUtilities,
+      logger: mockedLogger,
     });
     expect(mockedLogger.error).toBeCalledWith(
       'error on some-id webhook event: maxContentLength size of 1000000 exceeded'
@@ -359,6 +360,7 @@ describe('execute()', () => {
       secrets,
       params: { body: 'some data' },
       configurationUtilities,
+      logger: mockedLogger,
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
@@ -388,6 +390,7 @@ describe('execute()', () => {
           "fatal": [MockFunction],
           "get": [MockFunction],
           "info": [MockFunction],
+          "isLevelEnabled": [MockFunction],
           "log": [MockFunction],
           "trace": [MockFunction],
           "warn": [MockFunction],

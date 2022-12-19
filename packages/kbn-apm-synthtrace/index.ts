@@ -8,6 +8,7 @@
 
 export { timerange } from './src/lib/timerange';
 export { apm } from './src/lib/apm';
+export { dedot } from './src/lib/utils/dedot';
 export { stackMonitoring } from './src/lib/stack_monitoring';
 export { observer } from './src/lib/agent_config';
 export { cleanWriteTargets } from './src/lib/utils/clean_write_targets';

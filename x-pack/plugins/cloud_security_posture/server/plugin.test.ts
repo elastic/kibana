@@ -222,7 +222,7 @@ describe('Cloud Security Posture Plugin', () => {
       expect(spy).toHaveBeenCalledTimes(0);
     });
 
-    it('packagePolicyPostCreate should return the updated packagePolicy', async () => {
+    it('packagePolicyPostCreate should return the same received policy', async () => {
       fleetMock.packageService.asInternalUser.getInstallation.mockImplementationOnce(
         async (): Promise<Installation | undefined> => {
           return;
@@ -272,13 +272,9 @@ describe('Cloud Security Posture Plugin', () => {
           contextMock,
           httpServerMock.createKibanaRequest()
         );
-        if (fleetMock.packagePolicyService.update.mock.calls.length) {
-          expect(updatedPackagePolicy).toHaveProperty('vars');
-          expect(updatedPackagePolicy.vars).toHaveProperty('runtimeCfg');
-          expect(updatedPackagePolicy.vars!.runtimeCfg).toHaveProperty('value');
-        }
+        expect(updatedPackagePolicy).toEqual(packageMock);
       }
-      expect(fleetMock.packagePolicyService.update).toHaveBeenCalledTimes(1);
+      expect(fleetMock.packagePolicyService.update).toHaveBeenCalledTimes(0);
     });
 
     it('should uninstall resources when package is removed', async () => {

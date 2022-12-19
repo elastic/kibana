@@ -107,6 +107,10 @@ describe('FeatureTable', () => {
             primaryFeaturePrivilege: 'none',
             subFeaturePrivileges: [],
           },
+          with_require_all_spaces_sub_features: {
+            primaryFeaturePrivilege: 'none',
+            subFeaturePrivileges: [],
+          },
         });
       });
 
@@ -154,6 +158,14 @@ describe('FeatureTable', () => {
                     'with_sub_features_cool_toggle_2',
                     'cool_all',
                   ],
+                }
+              : { subFeaturePrivileges: [] }),
+          },
+          with_require_all_spaces_sub_features: {
+            primaryFeaturePrivilege: 'all',
+            ...(canCustomizeSubFeaturePrivileges
+              ? {
+                  subFeaturePrivileges: ['cool_toggle_1'],
                 }
               : { subFeaturePrivileges: [] }),
           },
@@ -207,6 +219,10 @@ describe('FeatureTable', () => {
                   ],
                 }
               : { subFeaturePrivileges: [] }),
+          },
+          with_require_all_spaces_sub_features: {
+            primaryFeaturePrivilege: 'none',
+            subFeaturePrivileges: [],
           },
         });
       });
@@ -301,6 +317,10 @@ describe('FeatureTable', () => {
       with_sub_features: {
         primaryFeaturePrivilege: 'read',
         subFeaturePrivileges: ['cool_all'],
+      },
+      with_require_all_spaces_sub_features: {
+        primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
       },
     });
   });
@@ -684,6 +704,10 @@ describe('FeatureTable', () => {
           'cool_all',
         ],
       },
+      with_require_all_spaces_sub_features: {
+        primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
+      },
     });
   });
 
@@ -722,6 +746,10 @@ describe('FeatureTable', () => {
         primaryFeaturePrivilege: 'all',
         subFeaturePrivileges: [],
       },
+      with_require_all_spaces_sub_features: {
+        primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
+      },
     });
   });
 
@@ -758,6 +786,10 @@ describe('FeatureTable', () => {
       },
       with_sub_features: {
         primaryFeaturePrivilege: 'read',
+        subFeaturePrivileges: [],
+      },
+      with_require_all_spaces_sub_features: {
+        primaryFeaturePrivilege: 'none',
         subFeaturePrivileges: [],
       },
     });
@@ -885,6 +917,10 @@ describe('FeatureTable', () => {
         subFeaturePrivileges: [],
       },
       with_sub_features: {
+        primaryFeaturePrivilege: 'none',
+        subFeaturePrivileges: [],
+      },
+      with_require_all_spaces_sub_features: {
         primaryFeaturePrivilege: 'none',
         subFeaturePrivileges: [],
       },

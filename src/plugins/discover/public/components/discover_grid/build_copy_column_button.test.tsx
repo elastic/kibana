@@ -30,7 +30,7 @@ describe('Build a column button to copy to clipboard', () => {
       </EuiButton>
     );
 
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find('button').simulate('click');
 
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(warn).not.toHaveBeenCalled();
@@ -60,7 +60,7 @@ describe('Build a column button to copy to clipboard', () => {
       </EuiButton>
     );
 
-    await wrapper.find(EuiButton).simulate('click');
+    await wrapper.find('button').simulate('click');
 
     // first row out of 3 rows does not have a value
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('"custom_extension"\n\njpg\ngif');
@@ -83,7 +83,7 @@ describe('Build a column button to copy to clipboard', () => {
       </EuiButton>
     );
 
-    await wrapperSource.find(EuiButton).simulate('click');
+    await wrapperSource.find('button').simulate('click');
 
     // first row out of 3 rows does not have a value
     expect(navigator.clipboard.writeText).toHaveBeenNthCalledWith(
@@ -111,7 +111,7 @@ describe('Build a column button to copy to clipboard', () => {
       </EuiButton>
     );
 
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find('button').simulate('click');
 
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(warn).toHaveBeenCalledWith('Unable to copy to clipboard.');

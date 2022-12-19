@@ -7,7 +7,7 @@
 
 import { getMapping } from './mapping';
 import { format } from './format';
-import { JiraCaseConnector } from './types';
+import type { JiraCaseConnector } from './types';
 
 export const getCaseConnector = (): JiraCaseConnector => ({
   getMapping,

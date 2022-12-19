@@ -128,13 +128,13 @@ Object {
   "baseElement": <body>
     <div>
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <div
-          css="[object Object]"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <button
-            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
             type="button"
           >
             <span
@@ -150,13 +150,13 @@ Object {
   </body>,
   "container": <div>
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <div
-        css="[object Object]"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <button
-          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
           type="button"
         >
           <span
@@ -229,11 +229,11 @@ Object {
   "baseElement": <body>
     <div>
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
           aria-label="Filter Out"
-          class="euiButtonEmpty euiButtonEmpty--primary"
+          class="euiButtonEmpty css-9t7nyf-empty-primary"
           data-test-subj="abc"
           type="button"
         >
@@ -257,11 +257,11 @@ Object {
   </body>,
   "container": <div>
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <button
         aria-label="Filter Out"
-        class="euiButtonEmpty euiButtonEmpty--primary"
+        class="euiButtonEmpty css-9t7nyf-empty-primary"
         data-test-subj="abc"
         type="button"
       >
@@ -342,11 +342,11 @@ Object {
   "baseElement": <body>
     <div>
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
           aria-label="Filter Out"
-          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
           data-test-subj="abc"
           type="button"
         >
@@ -362,11 +362,11 @@ Object {
   </body>,
   "container": <div>
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <button
         aria-label="Filter Out"
-        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+        class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
         data-test-subj="abc"
         type="button"
       >

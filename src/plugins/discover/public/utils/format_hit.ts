@@ -12,6 +12,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord } from '../types';
 import { formatFieldValue } from './format_value';
+import { type ShouldShowFieldInTableHandler } from './get_should_show_field_handler';
 
 const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();
 
@@ -23,12 +24,12 @@ type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
  * it's formatted using field formatters.
  * @param hit The hit to format
  * @param dataView The corresponding data view
- * @param fieldsToShow A list of fields that should be included in the document summary.
+ * @param shouldShowFieldHandler A function to check a field.
  */
 export function formatHit(
   hit: DataTableRecord,
   dataView: DataView,
-  fieldsToShow: string[],
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
   fieldFormats: FieldFormatsStart
 ): FormattedHit {
@@ -62,7 +63,7 @@ export function formatHit(
     // If the field was a mapped field, we validate it against the fieldsToShow list, if not
     // we always include it into the result.
     if (displayKey) {
-      if (fieldsToShow.includes(key)) {
+      if (shouldShowFieldHandler(key)) {
         pairs.push([displayKey, formattedValue]);
       }
     } else {

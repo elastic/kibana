@@ -7,7 +7,7 @@
 
 import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { VFC } from 'react';
-import { useKibana } from '../../../../../../hooks/use_kibana';
+import { useKibana } from '../../../../../../hooks';
 
 export interface IndicatorsFieldBrowserProps {
   browserFields: Readonly<Record<string, Partial<BrowserField>>>;
@@ -30,7 +30,7 @@ export const IndicatorsFieldBrowser: VFC<IndicatorsFieldBrowserProps> = ({
     onResetColumns,
     onToggleColumn,
     options: {
-      preselectedCategoryIds: ['threat'],
+      preselectedCategoryIds: ['threat', 'base', 'event', 'agent'],
     },
   });
 };

@@ -51,7 +51,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "DeprecationRegistryProvider",
+              {
+                "pluginId": "@kbn/core-deprecations-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                "section": "def-server.DeprecationRegistryProvider",
+                "text": "DeprecationRegistryProvider"
+              },
               ">"
             ],
             "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
@@ -69,7 +75,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "DeprecationsServiceSetup",
+              {
+                "pluginId": "@kbn/core-deprecations-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                "section": "def-server.DeprecationsServiceSetup",
+                "text": "DeprecationsServiceSetup"
+              },
               ">"
             ],
             "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
@@ -87,7 +99,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "InternalDeprecationsServiceStart",
+              {
+                "pluginId": "@kbn/core-deprecations-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreDeprecationsServerInternalPluginApi",
+                "section": "def-server.InternalDeprecationsServiceStart",
+                "text": "InternalDeprecationsServiceStart"
+              },
               ">"
             ],
             "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
@@ -105,7 +123,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "DeprecationsClient",
+              {
+                "pluginId": "@kbn/core-deprecations-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                "section": "def-server.DeprecationsClient",
+                "text": "DeprecationsClient"
+              },
               ">"
             ],
             "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",

@@ -22,7 +22,6 @@ export function FieldInput({
   selectedColumn,
   columnId,
   indexPattern,
-  existingFields,
   operationSupportMatrix,
   updateLayer,
   onDeleteColumn,
@@ -62,7 +61,6 @@ export function FieldInput({
       <FieldSelect
         fieldIsInvalid={currentFieldIsInvalid}
         currentIndexPattern={indexPattern}
-        existingFields={existingFields[indexPattern.title]}
         operationByField={operationSupportMatrix.operationByField}
         selectedOperationType={
           // Allows operation to be selected before creating a valid column

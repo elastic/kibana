@@ -860,12 +860,13 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createAndRunAnomalyDetectionLookbackJob(
       jobConfig: Job,
       datafeedConfig: Datafeed,
-      space?: string
+      options: { space?: string; end?: string } = {}
     ) {
+      const { space = undefined, end = `${Date.now()}` } = options;
       await this.createAnomalyDetectionJob(jobConfig, space);
       await this.createDatafeed(datafeedConfig, space);
       await this.openAnomalyDetectionJob(jobConfig.job_id);
-      await this.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end: `${Date.now()}` });
+      await this.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end });
       await this.waitForDatafeedState(datafeedConfig.datafeed_id, DATAFEED_STATE.STOPPED);
       await this.waitForJobState(jobConfig.job_id, JOB_STATE.CLOSED);
     },
@@ -1006,6 +1007,19 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       await this.waitForFilterToNotExist(filterId, `expected filter '${filterId}' to be deleted`);
       log.debug('> Filter deleted.');
+    },
+
+    async assertModelMemoryLimitForJob(jobId: string, expectedMml: string) {
+      const {
+        body: {
+          jobs: [job],
+        },
+      } = await this.getAnomalyDetectionJob(jobId);
+      const mml = job.analysis_limits.model_memory_limit;
+      expect(mml).to.eql(
+        expectedMml,
+        `Expected model memory limit to be  ${expectedMml}, got  ${mml}`
+      );
     },
 
     async waitForFilterToExist(filterId: string, errorMsg?: string) {

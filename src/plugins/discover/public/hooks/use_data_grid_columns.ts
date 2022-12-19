@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
+import { isEqual } from 'lodash';
 import {
   AppState as DiscoverState,
   GetStateReturn as DiscoverGetStateReturn,
@@ -39,6 +40,14 @@ export const useColumns = ({
   state,
   useNewFieldsApi,
 }: UseColumnsProps) => {
+  const [usedColumns, setUsedColumns] = useState(getColumns(state.columns, useNewFieldsApi));
+  useEffect(() => {
+    const nextColumns = getColumns(state.columns, useNewFieldsApi);
+    if (isEqual(usedColumns, nextColumns)) {
+      return;
+    }
+    setUsedColumns(nextColumns);
+  }, [state.columns, useNewFieldsApi, usedColumns]);
   const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
     () =>
       getStateColumnActions({
@@ -47,24 +56,34 @@ export const useColumns = ({
         dataView,
         dataViews,
         setAppState,
-        state,
         useNewFieldsApi,
+        columns: usedColumns,
+        sort: state.sort,
       }),
-    [capabilities, config, dataView, dataViews, setAppState, state, useNewFieldsApi]
+    [
+      capabilities,
+      config,
+      dataView,
+      dataViews,
+      setAppState,
+      state.sort,
+      useNewFieldsApi,
+      usedColumns,
+    ]
   );
 
-  const columns = useMemo(() => {
-    if (!state.columns) {
-      return [];
-    }
-    return useNewFieldsApi ? state.columns.filter((col) => col !== '_source') : state.columns;
-  }, [state, useNewFieldsApi]);
-
   return {
-    columns,
+    columns: usedColumns,
     onAddColumn,
     onRemoveColumn,
     onMoveColumn,
     onSetColumns,
   };
 };
+
+function getColumns(columns: string[] | undefined, useNewFieldsApi: boolean) {
+  if (!columns) {
+    return [];
+  }
+  return useNewFieldsApi ? columns.filter((col) => col !== '_source') : columns;
+}

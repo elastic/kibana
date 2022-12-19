@@ -7,19 +7,19 @@
 
 /* eslint-disable complexity */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEqual, uniq } from 'lodash';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
-import { CaseSeverity } from '../../../../common/api';
+import type { CaseSeverity } from '../../../../common/api';
 import { useCaseViewNavigation } from '../../../common/navigation';
-import { UseFetchAlertData } from '../../../../common/ui/types';
-import { Case, CaseStatuses } from '../../../../common';
+import type { UseFetchAlertData } from '../../../../common/ui/types';
+import type { Case, CaseStatuses } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
-import { CasesNavigation } from '../../links';
+import type { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';
 import { EditTags } from './edit_tags';
 import { UserActions } from '../../user_actions';
@@ -32,7 +32,7 @@ import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { AssignUsers } from './assign_users';
-import { Assignee } from '../../user_profiles/types';
+import type { Assignee } from '../../user_profiles/types';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -189,59 +189,60 @@ export const CaseViewActivity = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        {caseAssignmentAuthorized ? (
-          <>
-            <AssignUsers
-              caseAssignees={caseData.assignees}
-              currentUserProfile={currentUserProfile}
-              onAssigneesChanged={onUpdateAssignees}
-              isLoading={isLoadingAssigneeData}
-              userProfiles={userProfiles ?? new Map()}
-            />
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
-        <SeveritySidebarSelector
-          isDisabled={!permissions.update}
-          isLoading={isLoading}
-          selectedSeverity={caseData.severity}
-          onSeverityChange={onUpdateSeverity}
-        />
-        <UserList
-          dataTestSubj="case-view-user-list-reporter"
-          email={emailContent}
-          headline={i18n.REPORTER}
-          users={[caseData.createdBy]}
-          userProfiles={userProfiles}
-        />
-        {userActionsData?.participants ? (
+        <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
+          {caseAssignmentAuthorized ? (
+            <>
+              <AssignUsers
+                caseAssignees={caseData.assignees}
+                currentUserProfile={currentUserProfile}
+                onAssigneesChanged={onUpdateAssignees}
+                isLoading={isLoadingAssigneeData}
+                userProfiles={userProfiles ?? new Map()}
+              />
+            </>
+          ) : null}
+          <SeveritySidebarSelector
+            isDisabled={!permissions.update}
+            isLoading={isLoading}
+            selectedSeverity={caseData.severity}
+            onSeverityChange={onUpdateSeverity}
+          />
           <UserList
-            dataTestSubj="case-view-user-list-participants"
+            dataTestSubj="case-view-user-list-reporter"
             email={emailContent}
-            headline={i18n.PARTICIPANTS}
-            loading={isLoadingUserActions}
-            users={userActionsData.participants}
+            headline={i18n.REPORTER}
+            users={[caseData.createdBy]}
             userProfiles={userProfiles}
           />
-        ) : null}
-        <EditTags
-          tags={caseData.tags}
-          onSubmit={onSubmitTags}
-          isLoading={isLoading && loadingKey === 'tags'}
-        />
-        {pushToServiceAuthorized && userActionsData ? (
-          <EditConnector
-            caseData={caseData}
-            caseServices={userActionsData.caseServices}
-            connectorName={connectorName}
-            connectors={connectors}
-            hasDataToPush={userActionsData.hasDataToPush}
-            isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
-            isValidConnector={isLoadingConnectors ? true : isValidConnector}
-            onSubmit={onSubmitConnector}
-            userActions={userActionsData.caseUserActions}
+          {userActionsData?.participants ? (
+            <UserList
+              dataTestSubj="case-view-user-list-participants"
+              email={emailContent}
+              headline={i18n.PARTICIPANTS}
+              loading={isLoadingUserActions}
+              users={userActionsData.participants}
+              userProfiles={userProfiles}
+            />
+          ) : null}
+          <EditTags
+            tags={caseData.tags}
+            onSubmit={onSubmitTags}
+            isLoading={isLoading && loadingKey === 'tags'}
           />
-        ) : null}
+          {pushToServiceAuthorized && userActionsData ? (
+            <EditConnector
+              caseData={caseData}
+              caseServices={userActionsData.caseServices}
+              connectorName={connectorName}
+              connectors={connectors}
+              hasDataToPush={userActionsData.hasDataToPush}
+              isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
+              isValidConnector={isLoadingConnectors ? true : isValidConnector}
+              onSubmit={onSubmitConnector}
+              userActions={userActionsData.caseUserActions}
+            />
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlexItem>
     </>
   );

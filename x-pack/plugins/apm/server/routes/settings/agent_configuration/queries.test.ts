@@ -24,11 +24,11 @@ describe('agent configuration queries', () => {
 
   describe('getAllEnvironments', () => {
     it('fetches all environments', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams(({ mockApmEventClient }) =>
         getAllEnvironments({
           searchAggregatedTransactions: false,
           serviceName: 'foo',
-          setup,
+          apmEventClient: mockApmEventClient,
           size: 50,
         })
       );
@@ -39,10 +39,10 @@ describe('agent configuration queries', () => {
 
   describe('getExistingEnvironmentsForService', () => {
     it('fetches unavailable environments', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
         getExistingEnvironmentsForService({
           serviceName: 'foo',
-          setup,
+          internalESClient: mockInternalESClient,
           size: 50,
         })
       );
@@ -53,10 +53,8 @@ describe('agent configuration queries', () => {
 
   describe('listConfigurations', () => {
     it('fetches configurations', async () => {
-      mock = await inspectSearchParams((setup) =>
-        listConfigurations({
-          setup,
-        })
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
+        listConfigurations(mockInternalESClient)
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -65,12 +63,12 @@ describe('agent configuration queries', () => {
 
   describe('searchConfigurations', () => {
     it('fetches filtered configurations without an environment', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
         searchConfigurations({
           service: {
             name: 'foo',
           },
-          setup,
+          internalESClient: mockInternalESClient,
         })
       );
 
@@ -78,13 +76,13 @@ describe('agent configuration queries', () => {
     });
 
     it('fetches filtered configurations with an environment', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
         searchConfigurations({
           service: {
             name: 'foo',
             environment: 'bar',
           },
-          setup,
+          internalESClient: mockInternalESClient,
         })
       );
 
@@ -94,10 +92,10 @@ describe('agent configuration queries', () => {
 
   describe('findExactConfiguration', () => {
     it('find configuration by service.name', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
         findExactConfiguration({
           service: { name: 'foo' },
-          setup,
+          internalESClient: mockInternalESClient,
         })
       );
 
@@ -105,10 +103,10 @@ describe('agent configuration queries', () => {
     });
 
     it('find configuration by service.environment', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
         findExactConfiguration({
           service: { environment: 'bar' },
-          setup,
+          internalESClient: mockInternalESClient,
         })
       );
 
@@ -116,10 +114,10 @@ describe('agent configuration queries', () => {
     });
 
     it('find configuration by service.name and service.environment', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams(({ mockInternalESClient }) =>
         findExactConfiguration({
           service: { name: 'foo', environment: 'bar' },
-          setup,
+          internalESClient: mockInternalESClient,
         })
       );
 
