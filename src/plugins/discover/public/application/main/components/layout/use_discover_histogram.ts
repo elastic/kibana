@@ -258,8 +258,12 @@ export const useDiscoverHistogram = ({
     [field, isPlainRecord, isTimeBased]
   );
 
-  // Don't render the unified histogram layout until the first search has been requested
-  return searchSessionId
+  // Initialized when the first search has been requested or
+  // when in SQL mode since search sessions are not supported
+  const isInitialized = Boolean(searchSessionId) || isPlainRecord;
+
+  // Don't render the unified histogram layout until initialized
+  return isInitialized
     ? {
         topPanelHeight,
         request,

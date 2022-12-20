@@ -15,7 +15,6 @@ import {
   MetricsAPIRow,
 } from '../../../../common/http_api';
 import { META_KEY } from './constants';
-import { InfraSource } from '../../../lib/sources';
 
 export const isIPv4 = (subject: string) => /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(subject);
 
@@ -26,8 +25,7 @@ type RowWithMetadata = MetricsAPIRow & {
 export const applyMetadataToLastPath = (
   series: MetricsAPISeries,
   node: SnapshotNode,
-  snapshotRequest: SnapshotRequest,
-  source: InfraSource
+  snapshotRequest: SnapshotRequest
 ): SnapshotNodePath[] => {
   // First we need to find a row with metadata
   const rowWithMeta = series.rows.find(

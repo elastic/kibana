@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertSummaryTimeRange } from '../../hooks/use_load_rule_alerts_aggregations';
+import { AlertSummaryTimeRange } from '../../hooks/use_load_alert_summary';
 import { Rule } from '../../../types';
 
 export const mockRule = (): Rule => {
