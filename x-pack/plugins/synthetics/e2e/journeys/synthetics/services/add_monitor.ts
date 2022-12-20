@@ -86,6 +86,18 @@ export const cleanPrivateLocations = async (params: Record<string, any>) => {
   }
 };
 
+export const cleanTestParams = async (params: Record<string, any>) => {
+  const getService = params.getService;
+  const server = getService('kibanaServer');
+
+  try {
+    await server.savedObjects.clean({ types: ['synthetics-param'] });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(e);
+  }
+};
+
 const data = {
   type: 'browser',
   form_monitor_type: 'single',

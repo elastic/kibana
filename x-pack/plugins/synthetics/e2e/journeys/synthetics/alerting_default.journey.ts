@@ -7,7 +7,7 @@
 
 import { journey, step, expect, before, after } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 import { cleanSettings } from './services/settings';
 
 journey('AlertingDefaults', async ({ page, params }) => {
