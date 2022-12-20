@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
+
 export interface CustomBranding {
   /**
    * Custom replacement for the Elastic logo in the top lef *
@@ -28,7 +30,8 @@ export interface CustomBranding {
 export interface CustomBrandingStart {
   get: () => CustomBranding;
   set: (customBranding: CustomBranding) => void;
-  hasCustomBrandingSet(): boolean;
+  customBranding$: Observable<CustomBranding>;
+  hasCustomBranding$: Observable<boolean>;
 }
 
 export interface CustomBrandingSetup {

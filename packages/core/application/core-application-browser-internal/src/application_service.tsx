@@ -107,7 +107,7 @@ export class ApplicationService {
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
-  private hasCustomBrandingSet: boolean | undefined;
+  private hasCustomBranding$: Observable<boolean> | undefined;
 
   public setup({
     http: { basePath },
@@ -218,12 +218,11 @@ export class ApplicationService {
     }
 
     this.overlayStart$.next(overlays);
-
+    this.hasCustomBranding$ = customBranding.hasCustomBranding$.pipe(takeUntil(this.stop$));
     const httpLoadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(httpLoadingCount$);
 
     this.registrationClosed = true;
-    this.hasCustomBrandingSet = customBranding.hasCustomBrandingSet();
     window.addEventListener('beforeunload', this.onBeforeUnload);
 
     const { capabilities } = await this.capabilities.start({
@@ -354,7 +353,7 @@ export class ApplicationService {
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
-            showPlainSpinner={this.hasCustomBrandingSet}
+            hasCustomBranding$={this.hasCustomBranding$}
           />
         );
       },

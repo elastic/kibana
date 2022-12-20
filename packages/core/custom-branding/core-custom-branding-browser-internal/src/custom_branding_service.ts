@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import type {
   CustomBranding,
   CustomBrandingStart,
@@ -17,30 +19,33 @@ const CUSTOM_BRANDING_PLUGIN = 'customBranding';
 export class CustomBrandingService {
   private customBranding: CustomBranding;
   private registeredPlugin?: string;
+  private hasCustomBranding$: BehaviorSubject<boolean>;
+  private customBranding$: BehaviorSubject<CustomBranding>;
+  private stop$ = new Subject<void>();
 
   constructor() {
     this.customBranding = {};
+    this.hasCustomBranding$ = new BehaviorSubject<boolean>(false);
+    this.customBranding$ = new BehaviorSubject<CustomBranding>(this.customBranding);
   }
 
   private set(customBranding: CustomBranding) {
     if (!this.registeredPlugin || this.registeredPlugin !== CUSTOM_BRANDING_PLUGIN) {
       throw new Error('Plugin needs to register before setting custom branding');
     }
-    if (!this.customBranding) {
-      this.customBranding = customBranding;
-    } else {
-      Object.keys(customBranding).forEach((key) => {
-        this.customBranding[key as keyof CustomBranding] =
-          customBranding[key as keyof CustomBranding];
-      });
-    }
+    Object.keys(customBranding).forEach((key) => {
+      this.customBranding[key as keyof CustomBranding] =
+        customBranding[key as keyof CustomBranding];
+    });
+    this.customBranding$.next(this.customBranding);
+    this.hasCustomBranding$.next(this.hasCustomBranding());
   }
 
   private get() {
     return this.customBranding;
   }
 
-  private hasCustomBrandingSet() {
+  private hasCustomBranding() {
     return Object.keys(this.customBranding).length > 0;
   }
 
@@ -58,7 +63,8 @@ export class CustomBrandingService {
     return {
       get: this.get,
       set: this.set,
-      hasCustomBrandingSet: this.hasCustomBrandingSet,
+      customBranding$: this.customBranding$.pipe(takeUntil(this.stop$)),
+      hasCustomBranding$: this.hasCustomBranding$.pipe(takeUntil(this.stop$)),
     };
   }
 
@@ -69,5 +75,9 @@ export class CustomBrandingService {
     return {
       register: this.register,
     };
+  }
+
+  public stop() {
+    this.stop$.next();
   }
 }

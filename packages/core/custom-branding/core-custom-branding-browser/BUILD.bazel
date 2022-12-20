@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "custom-branding-browser-mocks"
-PKG_REQUIRE_NAME = "@kbn/core-custom-branding-browser-mocks"
+PKG_DIRNAME = "core-custom-branding-browser"
+PKG_REQUIRE_NAME = "@kbn/core-custom-branding-browser"
 
 SOURCE_FILES = glob(
   [
@@ -12,6 +12,7 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
     "**/__snapshots__/**",
@@ -44,9 +45,7 @@ NPM_MODULE_EXTRA_FILES = [
 #  To reference a NPM package use:
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
-RUNTIME_DEPS = [
-  "@npm//react"
-]
+RUNTIME_DEPS = []
 
 # In this array place dependencies necessary to build the types, which will include the
 # :npm_module_types target of other packages and packages from NPM, including @types/*
@@ -60,9 +59,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react",
-  "//packages/core/custom-branding/core-custom-branding-browser-internal",
-  "//packages/core/custom-branding/core-custom-branding-browser",
+  "@npm//rxjs",
 ]
 
 jsts_transpiler(

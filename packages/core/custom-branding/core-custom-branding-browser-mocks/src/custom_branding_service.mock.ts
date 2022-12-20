@@ -7,6 +7,16 @@
  */
 
 import { serviceContractMock } from './service_contract.mock';
+import { CustomBranding } from '@kbn/core-custom-branding-browser';
+import { of } from 'rxjs';
+
+const mockCustomBranding: CustomBranding = {
+  logo: 'img.jpg',
+};
+
+const createCustomBrandingMock = (): CustomBranding => {
+  return { ...mockCustomBranding };
+};
 
 const createSetupContractMock = () => {
   return {
@@ -18,7 +28,8 @@ const createStartContractMock = () => {
   return {
     get: jest.fn(),
     set: jest.fn(),
-    hasCustomBrandingSet: jest.fn(),
+    customBranding$: of(createCustomBrandingMock()),
+    hasCustomBranding$: of(false),
   };
 };
 

@@ -67,86 +67,30 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
       "thrownError": null,
     }
   }
-  history={
-    Object {
-      "push": [MockFunction],
-      "replace": [MockFunction],
-    }
-  }
-  mounters={Map {}}
-  setAppActionMenu={[Function]}
-  setAppLeaveHandler={[Function]}
-  setIsMounting={[Function]}
-  theme$={
-    Observable {
-      "_subscribe": [Function],
-    }
-  }
-/>
-`;
-
-exports[`#start() getComponent returns renderable JSX tree with showPlainSpinner set 1`] = `
-<AppRouter
-  appStatuses$={
+  hasCustomBranding$={
     AnonymousSubject {
       "closed": false,
       "currentObservers": null,
-      "destination": AnonymousSubject {
+      "destination": BehaviorSubject {
+        "_value": false,
         "closed": false,
         "currentObservers": null,
-        "destination": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": Array [],
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
         "hasError": false,
         "isStopped": false,
         "observers": Array [],
-        "operator": [Function],
-        "source": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": Array [],
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
         "thrownError": null,
       },
       "hasError": false,
       "isStopped": false,
       "observers": Array [],
       "operator": [Function],
-      "source": AnonymousSubject {
+      "source": BehaviorSubject {
+        "_value": false,
         "closed": false,
         "currentObservers": null,
-        "destination": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": Array [],
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
         "hasError": false,
         "isStopped": false,
         "observers": Array [],
-        "operator": [Function],
-        "source": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": Array [],
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
         "thrownError": null,
       },
       "thrownError": null,
@@ -162,7 +106,6 @@ exports[`#start() getComponent returns renderable JSX tree with showPlainSpinner
   setAppActionMenu={[Function]}
   setAppLeaveHandler={[Function]}
   setIsMounting={[Function]}
-  showPlainSpinner={true}
   theme$={
     Observable {
       "_subscribe": [Function],

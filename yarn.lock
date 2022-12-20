@@ -2945,15 +2945,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-browser-internal@link:bazel-bin/packages/core/custom-branding/custom-branding-browser-internal":
+"@kbn/core-custom-branding-browser-internal@link:bazel-bin/packages/core/custom-branding/core-custom-branding-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-browser-mocks@link:bazel-bin/packages/core/custom-branding/custom-branding-browser-mocks":
+"@kbn/core-custom-branding-browser-mocks@link:bazel-bin/packages/core/custom-branding/core-custom-branding-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-custom-branding-browser@link:bazel-bin/packages/core/custom-branding/custom-branding-browser":
+"@kbn/core-custom-branding-browser@link:bazel-bin/packages/core/custom-branding/core-custom-branding-browser":
   version "0.0.0"
   uid ""
 

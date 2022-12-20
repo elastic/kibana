@@ -572,18 +572,6 @@ describe('#start()', () => {
       expect(() => shallow(createElement(getComponent))).not.toThrow();
       expect(getComponent()).toMatchSnapshot();
     });
-
-    it('returns renderable JSX tree with showPlainSpinner set', async () => {
-      service.setup(setupDeps);
-
-      const startDepsCopy = { ...startDeps };
-      startDepsCopy.customBranding.hasCustomBrandingSet.mockReturnValue(true);
-
-      const { getComponent } = await service.start(startDepsCopy);
-
-      expect(() => shallow(createElement(getComponent))).not.toThrow();
-      expect(getComponent()).toMatchSnapshot();
-    });
   });
 
   describe('getUrlForApp', () => {

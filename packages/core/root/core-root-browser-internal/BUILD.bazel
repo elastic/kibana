@@ -99,8 +99,8 @@ TYPES_DEPS = [
   "//packages/core/apps/core-apps-browser-internal:npm_module_types",
   "//packages/core/lifecycle/core-lifecycle-browser-internal:npm_module_types",
   "//packages/core/plugins/core-plugins-browser-internal:npm_module_types",
-  "//packages/core/plugins/core-custom-branding-browser-internal:npm_module_types",
-  "//packages/core/plugins/core-custom-branding-browser-mocks:npm_module_types",
+  "//packages/core/custom-branding/core-custom-branding-browser-internal:npm_module_types",
+  "//packages/core/custom-branding/core-custom-branding-browser-mocks:npm_module_types",
 ]
 
 jsts_transpiler(

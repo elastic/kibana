@@ -27,6 +27,7 @@ import type {
   ChromeHelpExtension,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
@@ -49,6 +50,7 @@ export interface StartDeps {
   http: HttpStart;
   injectedMetadata: InternalInjectedMetadataStart;
   notifications: NotificationsStart;
+  customBranding: CustomBrandingStart;
 }
 
 /** @internal */

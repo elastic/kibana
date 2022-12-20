@@ -322,6 +322,7 @@ export class CoreSystem {
         http,
         injectedMetadata,
         notifications,
+        customBranding,
       });
       const deprecations = this.deprecations.start({ http });
 

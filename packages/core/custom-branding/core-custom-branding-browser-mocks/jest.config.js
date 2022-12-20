@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/custom-branding/custom-branding-browser-mocks'],
+  roots: ['<rootDir>/packages/core/custom-branding/core-custom-branding-browser-mocks'],
 };
