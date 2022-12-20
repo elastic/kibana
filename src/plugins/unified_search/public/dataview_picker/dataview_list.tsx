@@ -27,11 +27,9 @@ import { DataViewListItem } from '@kbn/data-views-plugin/public';
 
 import { css } from '@emotion/react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { optionsListStrings } from './dataview_list_strings';
 
 import { ALPHABETICALLY, Sorting, SortingService } from './sorting_service';
-import { IUnifiedSearchPluginServices } from '../types';
 import { handleSortingByDirection } from './suggestions_sorting';
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
@@ -69,13 +67,10 @@ export function DataViewsList({
 }: DataViewsListProps) {
   const { euiTheme } = useEuiTheme();
   const popoverStyle = euiTheme.base * 13;
-  const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { storage } = kibana.services;
+
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
 
-  const sortingService = useMemo(() => {
-    return new SortingService(storage);
-  }, [storage]);
+  const sortingService = useMemo(() => new SortingService(), []);
 
   const [dataViewSortSettings, setDataViewSortSettings] = useState(sortingService.getSorting());
   const [sortedDataViewsList, setSortedDataViewsList] = useState(

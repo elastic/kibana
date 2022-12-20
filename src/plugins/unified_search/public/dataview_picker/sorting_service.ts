@@ -7,7 +7,7 @@
  */
 
 import { Direction, SortDirection } from '@elastic/eui';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 const storageKey = 'unified_search_sorting';
 export const ALPHABETICALLY = 'alphabetically';
@@ -18,7 +18,8 @@ export interface Sorting {
 }
 
 export class SortingService {
-  constructor(private storage: IStorageWrapper) {}
+  private storage = new Storage(window.localStorage);
+  constructor() {}
 
   getSorting(): Sorting {
     let parsedSorting: Sorting | undefined;
