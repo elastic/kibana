@@ -34,15 +34,17 @@ export function getAlertsForNotification<
       alert.incrementPendingRecoveredCount();
 
       if (alert.getPendingRecoveredCount() < MAX_FLAP_COUNT) {
+        // keep the context and previous actionGroupId if available
+        const context = alert.getContext();
+        const lastActionGroupId = alert.getLastScheduledActions()?.group;
+
         const newAlert = new Alert<State, Context, ActionGroupIds>(id, alert.toRaw());
         // unset the end time in the alert state
         const state = newAlert.getState();
-        newAlert.replaceState({ ...state, ...{ end: undefined } });
+        delete state.end;
+        newAlert.replaceState(state);
 
         // schedule actions for the new active alert
-        // but keep the context and previous actionGroupId if available
-        const context = alert.getContext();
-        const lastActionGroupId = alert.getLastScheduledActions()?.group;
         newAlert.scheduleActions(
           lastActionGroupId ? (lastActionGroupId as ActionGroupIds) : actionGroupId,
           context
