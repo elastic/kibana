@@ -165,6 +165,10 @@
               },
               {
                 "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_combined_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
                 "path": "packages/kbn-es-query/src/es_query/from_filters.test.ts"
               },
               {
@@ -177,11 +181,7 @@
               },
               {
                 "plugin": "@kbn/es-query",
-                "path": "packages/kbn-es-query/src/es_query/handle_combined_filter.test.ts"
-              },
-              {
-                "plugin": "@kbn/es-query",
-                "path": "packages/kbn-es-query/src/es_query/handle_nested_filter.test.ts"
+                "path": "packages/kbn-es-query/src/es_query/from_nested_filter.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -206,6 +206,18 @@
               {
                 "plugin": "@kbn/es-query",
                 "path": "packages/kbn-es-query/src/filters/build_filters/phrases_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -8466,6 +8478,10 @@
               },
               {
                 "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_combined_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
                 "path": "packages/kbn-es-query/src/es_query/from_filters.test.ts"
               },
               {
@@ -8478,11 +8494,7 @@
               },
               {
                 "plugin": "@kbn/es-query",
-                "path": "packages/kbn-es-query/src/es_query/handle_combined_filter.test.ts"
-              },
-              {
-                "plugin": "@kbn/es-query",
-                "path": "packages/kbn-es-query/src/es_query/handle_nested_filter.test.ts"
+                "path": "packages/kbn-es-query/src/es_query/from_nested_filter.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -8507,6 +8519,18 @@
               {
                 "plugin": "@kbn/es-query",
                 "path": "packages/kbn-es-query/src/filters/build_filters/phrases_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -15848,6 +15872,10 @@
               },
               {
                 "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_combined_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
                 "path": "packages/kbn-es-query/src/es_query/from_filters.test.ts"
               },
               {
@@ -15860,11 +15888,7 @@
               },
               {
                 "plugin": "@kbn/es-query",
-                "path": "packages/kbn-es-query/src/es_query/handle_combined_filter.test.ts"
-              },
-              {
-                "plugin": "@kbn/es-query",
-                "path": "packages/kbn-es-query/src/es_query/handle_nested_filter.test.ts"
+                "path": "packages/kbn-es-query/src/es_query/from_nested_filter.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -15889,6 +15913,18 @@
               {
                 "plugin": "@kbn/es-query",
                 "path": "packages/kbn-es-query/src/filters/build_filters/phrases_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",

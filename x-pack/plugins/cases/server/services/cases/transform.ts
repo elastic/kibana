@@ -20,9 +20,11 @@ import type { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './typ
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
+  SEVERITY_ESMODEL_TO_EXTERNAL,
+  SEVERITY_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
 import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
-import { NONE_CONNECTOR_ID } from '../../../common/api';
+import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
 import {
   findConnectorIdReference,
   transformFieldsToESModel,
@@ -47,7 +49,8 @@ export function transformUpdateResponsesToExternalModels(
 export function transformUpdateResponseToExternalModel(
   updatedCase: SavedObjectsUpdateResponse<ESCaseAttributes>
 ): SavedObjectsUpdateResponse<CaseAttributes> {
-  const { connector, external_service, ...restUpdateAttributes } = updatedCase.attributes ?? {};
+  const { connector, external_service, severity, ...restUpdateAttributes } =
+    updatedCase.attributes ?? {};
 
   const transformedConnector = transformESConnectorToExternalModel({
     // if the saved object had an error the attributes field will not exist
@@ -68,6 +71,7 @@ export function transformUpdateResponseToExternalModel(
     ...updatedCase,
     attributes: {
       ...restUpdateAttributes,
+      ...((severity || severity === 0) && { severity: SEVERITY_ESMODEL_TO_EXTERNAL[severity] }),
       ...(transformedConnector && { connector: transformedConnector }),
       // if externalService is null that means we intentionally updated it to null within ES so return that as a valid value
       ...(externalService !== undefined && { external_service: externalService }),
@@ -87,7 +91,7 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseAttribu
   attributes: Partial<ESCaseAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {
-  const { connector, external_service, ...restAttributes } = caseAttributes;
+  const { connector, external_service, severity, ...restAttributes } = caseAttributes;
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
 
   const transformedConnector = {
@@ -113,6 +117,7 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseAttribu
       ...restAttributes,
       ...transformedConnector,
       ...transformedExternalService,
+      ...(severity && { severity: SEVERITY_EXTERNAL_TO_ESMODEL[severity] }),
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };
@@ -178,10 +183,14 @@ export function transformSavedObjectToExternalModel(
     caseSavedObject.references
   );
 
+  const severity =
+    SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObject.attributes?.severity] ?? CaseSeverity.LOW;
+
   return {
     ...caseSavedObject,
     attributes: {
       ...caseSavedObject.attributes,
+      severity,
       connector,
       external_service: externalService,
     },
