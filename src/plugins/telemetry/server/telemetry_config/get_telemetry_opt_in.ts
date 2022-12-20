@@ -8,7 +8,7 @@
 
 import type SemVer from 'semver/classes/semver';
 import semverParse from 'semver/functions/parse';
-import { TelemetrySavedObject } from './types';
+import type { TelemetrySavedObject } from '../saved_objects';
 
 interface GetTelemetryOptInConfig {
   telemetrySavedObject: TelemetrySavedObject;
@@ -29,11 +29,7 @@ export const getTelemetryOptIn: GetTelemetryOptIn = ({
     return configTelemetryOptIn;
   }
 
-  if (telemetrySavedObject === false) {
-    return false;
-  }
-
-  if (telemetrySavedObject === null || typeof telemetrySavedObject.enabled !== 'boolean') {
+  if (typeof telemetrySavedObject.enabled !== 'boolean') {
     return configTelemetryOptIn;
   }
 
@@ -41,6 +37,8 @@ export const getTelemetryOptIn: GetTelemetryOptIn = ({
 
   // if enabled is true, return it
   if (savedOptIn === true) return savedOptIn;
+
+  // TODO: Should we split the logic below into another OptIn getter?
 
   // Additional check if they've already opted out (enabled: false):
   // - if the Kibana version has changed by at least a minor version,
