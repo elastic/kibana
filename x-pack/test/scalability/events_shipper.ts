@@ -7,27 +7,9 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import fetch from 'node-fetch';
+import { MetricEvent } from './types';
 
-export interface Event {
-  eventName: string;
-  eventType: string;
-  journeyName: string;
-  kibanaVersion: string;
-  branch: string | undefined;
-  ciBuildId: string | undefined;
-  ciBuildJobId: string | undefined;
-  ciBuildName: string | undefined;
-  ciBuildNumber: number;
-  gitRev: string | undefined;
-  rpsAtSLA: number;
-  rpsAtResponseTimeWarmupAvg: number;
-  rpsAtResponseTime10XAvg: number;
-  rpsAtResponseTime100XAvg: number;
-  rpsAtRequestsToActiveUsers: number;
-  thresholdSLA: number;
-}
-
-function eventsToNDJSON(events: Event[]): string {
+function eventsToNDJSON(events: MetricEvent[]): string {
   return `${events.map((event) => JSON.stringify(event)).join('\n')}\n`;
 }
 
@@ -52,7 +34,7 @@ export class EventsShipper {
     this.log = log;
   }
 
-  async send(events: Event[]) {
+  async send(events: MetricEvent[]) {
     const body = eventsToNDJSON(events);
     this.log.debug(`Sending telemetry data: ${JSON.stringify(eventsToNDJSON)}`);
 
@@ -65,6 +47,8 @@ export class EventsShipper {
 
       if (!response.ok) {
         throw new Error(`Telemetry sending error: ${response.status} - ${await response.text()}`);
+      } else {
+        this.log.debug(`Telemetry cluster response status: ${response.status}`);
       }
 
       return `${response.status}`;

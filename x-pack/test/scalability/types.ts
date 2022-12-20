@@ -29,6 +29,19 @@ export interface CapacityMetrics {
   rpsAtThreshold3: number;
 }
 
+export interface MetricEvent extends CapacityMetrics {
+  eventName: string;
+  eventType: string;
+  journeyName: string;
+  kibanaVersion: string;
+  branch: string | undefined;
+  ciBuildId: string | undefined;
+  ciBuildJobId: string | undefined;
+  ciBuildName: string | undefined;
+  ciBuildNumber: number;
+  gitRev: string | undefined;
+}
+
 export interface RpsMetric {
   timestamp: number;
   value: number;
@@ -39,4 +52,9 @@ export interface ResponseMetric {
   metrics: {
     [k: string]: number;
   };
+}
+
+export interface DataPoint {
+  timestamp: number;
+  values: number[];
 }

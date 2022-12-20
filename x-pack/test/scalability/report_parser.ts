@@ -8,9 +8,29 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import { ScalabilitySetup } from '@kbn/journeys';
-import { CapacityMetrics, ResponseMetric, RpsMetric } from './types';
+import { CapacityMetrics, DataPoint, ResponseMetric, RpsMetric } from './types';
 
-const responseTimeMetrics = ['min', '25%', '50%', '75%', '80%', '85%', '90%', '95%', '99%', 'max'];
+const RESPONSE_METRICS_NAMES = [
+  'min',
+  '25%',
+  '50%',
+  '75%',
+  '80%',
+  '85%',
+  '90%',
+  '95%',
+  '99%',
+  'max',
+];
+const DEFAULT_THRESHOLD = {
+  threshold1: 3000,
+  threshold2: 9000,
+  threshold3: 15000,
+};
+const METRIC_NAME = '85%';
+const REQUESTS_REGEXP = /(?<=var requests = unpack\(\[)(.*)(?=\]\);)/g;
+const RESPONSES_PERCENTILES_REGEXP =
+  /(?<=var responsetimepercentilesovertimeokPercentiles = unpack\(\[)(.*)(?=\]\);)/g;
 
 const getRPSByResponseTime = (
   rpsData: RpsMetric[],
@@ -21,31 +41,14 @@ const getRPSByResponseTime = (
 ) => {
   const timestamp = getTimePoint(responseTimeData, metricName, responseTimeThreshold);
   if (timestamp === -1) {
-    // data point was not found, probably 'responseTimeThreshold' is too high or maxRps is too low for the api
-    // returning the max rps value
+    // Data point was not found, probably 'responseTimeThreshold' is too high or maxRps is too low for the api
     return defaultRpsValue;
   } else {
     const rps = rpsData.find((i) => i.timestamp === timestamp)?.value;
-    // in edge case Gatling might fail to report requests for specific timestamp, returning '-1' as invalid result
+    // In edge case Gatling might fail to report requests for specific timestamp, returning '-1' as invalid result
     return !rps ? -1 : rps;
   }
 };
-
-const defaultThreshold = {
-  threshold1: 3000,
-  threshold2: 9000,
-  threshold3: 15000,
-};
-const collectedPct = '85%';
-
-interface DataPoint {
-  timestamp: number;
-  values: number[];
-}
-
-const REQUESTS_REGEXP = /(?<=var requests = unpack\(\[)(.*)(?=\]\);)/g;
-const RESPONSES_PERCENTILES_REGEXP =
-  /(?<=var responsetimepercentilesovertimeokPercentiles = unpack\(\[)(.*)(?=\]\);)/g;
 
 const findDataSet = (str: string, regex: RegExp) => {
   const found = str.match(regex);
@@ -106,11 +109,11 @@ export function getCapacityMetrics(
 
   const warmupData = mapValuesWithMetrics(
     responsePercentiles.slice(0, warmupDuration),
-    responseTimeMetrics
+    RESPONSE_METRICS_NAMES
   );
   const testData = mapValuesWithMetrics(
     responsePercentiles.slice(warmupDuration, responsePercentiles.length - 1),
-    responseTimeMetrics
+    RESPONSE_METRICS_NAMES
   );
 
   const rpsData = requests.map((r) => {
@@ -122,7 +125,7 @@ export function getCapacityMetrics(
 
   const warmupAvgResponseTime = Math.round(
     warmupData
-      .map((i) => i.metrics[collectedPct])
+      .map((i) => i.metrics[METRIC_NAME])
       .reduce((avg, value, _, { length }) => {
         return avg + value / length;
       }, 0)
@@ -133,18 +136,17 @@ export function getCapacityMetrics(
     }, 0)
   );
   log.info(
-    `Warmup: Avg ${collectedPct} pct response time - ${warmupAvgResponseTime} ms, avg rps=${rpsAtWarmup}`
+    `Warmup: Avg ${METRIC_NAME} pct response time - ${warmupAvgResponseTime} ms, avg rps=${rpsAtWarmup}`
   );
 
-  // Collected response time metrics
-  // 3 pre-defined thresholds
-  const thresholds = scalabilitySetup.responseTimeThreshold || defaultThreshold;
+  // Collected response time metrics: 3 pre-defined thresholds
+  const thresholds = scalabilitySetup.responseTimeThreshold || DEFAULT_THRESHOLD;
 
   const rpsAtThreshold1 = getRPSByResponseTime(
     rpsData,
     testData,
     thresholds.threshold1,
-    collectedPct,
+    METRIC_NAME,
     rpsMax
   );
 
@@ -152,7 +154,7 @@ export function getCapacityMetrics(
     rpsData,
     testData,
     thresholds.threshold2,
-    collectedPct,
+    METRIC_NAME,
     rpsMax
   );
 
@@ -160,7 +162,7 @@ export function getCapacityMetrics(
     rpsData,
     testData,
     thresholds.threshold3,
-    collectedPct,
+    METRIC_NAME,
     rpsMax
   );
 

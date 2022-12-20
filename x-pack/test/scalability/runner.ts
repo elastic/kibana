@@ -12,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from './ftr_provider_context';
 import { EventsShipper } from './events_shipper';
 import { getCapacityMetrics } from './report_parser';
-import { ScalabilityJourney } from './types';
+import { ScalabilityJourney, MetricEvent } from './types';
 
 const telemetryChannel = 'scalability-metrics';
 
@@ -30,7 +30,7 @@ async function sendReportMetricsToTelemetry(
 
     const journey: ScalabilityJourney = JSON.parse(fs.readFileSync(scalabilityJsonPath, 'utf8'));
     const metrics = getCapacityMetrics(journeyHtmlReportPath, journey.scalabilitySetup, log);
-    const events = [
+    const events: MetricEvent[] = [
       {
         ...metrics,
         eventType: 'scalability_metric',
