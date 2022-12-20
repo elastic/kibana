@@ -135,7 +135,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.refreshIndex({ client, targetIndex: state.targetIndex }),
     CHECK_TARGET_MAPPINGS: (state: CheckTargetMappingsState) =>
       Actions.checkTargetMappings({
-        actualMappings: state.targetIndexCurrentMappings,
+        actualMappings: state.targetIndexRawMappings,
         expectedMappings: state.targetIndexMappings,
       }),
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
