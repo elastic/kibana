@@ -177,7 +177,7 @@ export const createCaseSavedObjectType = (
         },
       },
       severity: {
-        type: 'keyword',
+        type: 'short',
       },
     },
   },
