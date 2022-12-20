@@ -22,6 +22,8 @@
       "@kbn/content-management-content-editor/*": ["packages/content-management/content_editor/*"],
       "@kbn/content-management-table-list": ["packages/content-management/table_list"],
       "@kbn/content-management-table-list/*": ["packages/content-management/table_list/*"],
+      "@kbn/content-management-utils": ["packages/content-management/utils"],
+      "@kbn/content-management-utils/*": ["packages/content-management/utils/*"],
       "@kbn/core-analytics-browser": ["packages/core/analytics/core-analytics-browser"],
       "@kbn/core-analytics-browser/*": ["packages/core/analytics/core-analytics-browser/*"],
       "@kbn/core-analytics-browser-internal": ["packages/core/analytics/core-analytics-browser-internal"],
