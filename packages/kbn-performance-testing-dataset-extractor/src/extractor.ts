@@ -33,7 +33,7 @@ const saveFile = async (output: any, outputDir: string, fileName: string, log: T
     await fs.mkdir(outputDir, { recursive: true });
   }
   await fs.writeFile(filePath, JSON.stringify(output, null, 2), 'utf8');
-  log.info(`Output file saved: ${filePath}`);
+  log.debug(`Output file saved: ${filePath}`);
 };
 
 export const extractor = async ({ param, client, log }: CLIParams) => {
@@ -80,33 +80,30 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   const esStreams = requestsToStreams<Request>(esRequests);
   const kibanaStreams = requestsToStreams<Request>(kibanaRequests);
 
-  const outputDir = path.resolve('target/scalability_traces');
-  const fileName = `${journeyName.replace(/ /g, '')}-${buildId}.json`;
+  const outputDir = path.resolve('target/scalability-traces');
 
   if (scalabilitySetup) {
-    await saveFile(
-      {
-        journeyName,
-        kibanaVersion,
-        scalabilitySetup,
-        testData,
-        streams: kibanaStreams,
-      },
-      path.resolve(outputDir, 'server'),
-      fileName,
-      log
-    );
-  }
-
-  await saveFile(
-    {
+    const kibanaOutputDir = path.resolve(outputDir, 'kibana');
+    const kibanaOutputFileName = `${journeyName.replace(/ /g, '')}.json`;
+    const kibanaOutput = {
       journeyName,
       kibanaVersion,
+      scalabilitySetup,
       testData,
-      streams: esStreams,
-    },
-    path.resolve(outputDir, 'es'),
-    fileName,
-    log
-  );
+      streams: kibanaStreams,
+    };
+    await saveFile(kibanaOutput, kibanaOutputDir, kibanaOutputFileName, log);
+  }
+
+  const esOutputDir = path.resolve(outputDir, 'es', kibanaVersion, journeyName);
+  const esOutputFileName = 'journey.json';
+  const esOutput = {
+    journeyName,
+    kibanaVersion,
+    testData,
+    streams: esStreams,
+  };
+
+  await saveFile(esOutput, path.join(esOutputDir, buildId), esOutputFileName, log);
+  await saveFile(esOutput, path.join(esOutputDir, 'latest'), esOutputFileName, log);
 };
