@@ -6,7 +6,7 @@
  */
 
 import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
-import type { CspRuleMetadata } from './schemas/csp_rule_metadata';
+import { CspRuleMetadata } from './schemas';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 /** number between 1-100 */
@@ -90,18 +90,12 @@ interface CspSetupInstalledStatus extends BaseCspSetupStatus {
 
 export type CspSetupStatus = CspSetupInstalledStatus | CspSetupNotInstalledStatus;
 
-export interface CspRulesStatus {
-  all: number;
-  enabled: number;
-  disabled: number;
-}
-
 export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
 
 export interface Benchmark {
   package_policy: PackagePolicy;
   agent_policy: AgentPolicyStatus;
-  rules: CspRulesStatus;
+  number_of_rules: number;
 }
 
 export type BenchmarkId = CspRuleMetadata['benchmark']['id'];
