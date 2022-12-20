@@ -335,3 +335,8 @@ export const topNavStrings = {
     }),
   },
 };
+
+export const getControlButtonTitle = () =>
+  i18n.translate('dashboard.editingToolbar.controlsButtonTitle', {
+    defaultMessage: 'Controls',
+  });

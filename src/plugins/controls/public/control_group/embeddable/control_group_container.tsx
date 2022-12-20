@@ -12,12 +12,10 @@ import ReactDOM from 'react-dom';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import _ from 'lodash';
-import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
   ReduxEmbeddablePackage,
   ReduxEmbeddableTools,
-  SolutionToolbarPopover,
 } from '@kbn/presentation-util-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -36,7 +34,6 @@ import {
   controlOrdersAreEqual,
 } from './control_group_chaining_system';
 import { pluginServices } from '../../services';
-import { ControlGroupStrings } from '../control_group_strings';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
@@ -195,33 +192,6 @@ export class ControlGroupContainer extends Container<
       <ControlsServicesProvider>
         <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />
       </ControlsServicesProvider>
-    );
-  };
-
-  /**
-   * Returns the toolbar button that is used for creating controls and managing control settings
-   * @return `SolutionToolbarPopover` button for input controls
-   */
-  public getToolbarButtons = () => {
-    return (
-      <SolutionToolbarPopover
-        ownFocus
-        label={ControlGroupStrings.getControlButtonTitle()}
-        iconType="arrowDown"
-        iconSide="right"
-        panelPaddingSize="none"
-        data-test-subj="dashboard-controls-menu-button"
-      >
-        {({ closePopover }: { closePopover: () => void }) => (
-          <EuiContextMenuPanel
-            items={[
-              this.getCreateControlButton('toolbar', closePopover),
-              this.getCreateTimeSliderControlButton(closePopover),
-              this.getEditControlGroupButton(closePopover),
-            ]}
-          />
-        )}
-      </SolutionToolbarPopover>
     );
   };
 

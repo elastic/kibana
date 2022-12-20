@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
@@ -15,6 +15,7 @@ import {
   QuickButtonGroup,
   QuickButtonProps,
   SolutionToolbar,
+  SolutionToolbarPopover,
 } from '@kbn/presentation-util-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import React from 'react';
@@ -25,6 +26,7 @@ import { useDashboardContainerContext } from '../../dashboard_container/dashboar
 import { pluginServices } from '../../services/plugin_services';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
+import { getControlButtonTitle } from '../_dashboard_app_strings';
 
 export function DashboardEditingToolbar() {
   const {
@@ -165,6 +167,39 @@ export function DashboardEditingToolbar() {
     .map(getVisTypeQuickButton)
     .filter((button) => button) as QuickButtonProps[];
 
+  const extraButtons = [
+    <EditorMenu
+      createNewVisType={createNewVisType}
+      createNewEmbeddable={createNewEmbeddable}
+    />,
+    <AddFromLibraryButton
+      onClick={() => dashboardContainer.addFromLibrary()}
+      data-test-subj="dashboardAddPanelButton"
+    />,
+  ];
+  if (dashboardContainer.controlGroup) {
+    extraButtons.push(
+      <SolutionToolbarPopover
+        ownFocus
+        label={getControlButtonTitle()}
+        iconType="arrowDown"
+        iconSide="right"
+        panelPaddingSize="none"
+        data-test-subj="dashboard-controls-menu-button"
+      >
+        {({ closePopover }: { closePopover: () => void }) => (
+          <EuiContextMenuPanel
+            items={[
+              dashboardContainer.controlGroup.getCreateControlButton('toolbar', closePopover),
+              dashboardContainer.controlGroup.getCreateTimeSliderControlButton(closePopover),
+              dashboardContainer.controlGroup.getEditControlGroupButton(closePopover),
+            ]}
+          />
+        )}
+      </SolutionToolbarPopover>
+    );
+  }
+
   return (
     <>
       <EuiHorizontalRule margin="none" />
@@ -180,17 +215,7 @@ export function DashboardEditingToolbar() {
             />
           ),
           quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-          extraButtons: [
-            <EditorMenu
-              createNewVisType={createNewVisType}
-              createNewEmbeddable={createNewEmbeddable}
-            />,
-            <AddFromLibraryButton
-              onClick={() => dashboardContainer.addFromLibrary()}
-              data-test-subj="dashboardAddPanelButton"
-            />,
-            dashboardContainer.controlGroup?.getToolbarButtons(),
-          ],
+          extraButtons,
         }}
       </SolutionToolbar>
     </>
