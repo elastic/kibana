@@ -250,7 +250,7 @@
           "\nSupported Handlebars compile options.\n\nThis is a subset of all the compile options supported by the upstream\nHandlebars module."
         ],
         "signature": [
-          "{ data?: boolean | undefined; strict?: boolean | undefined; knownHelpers?: KnownHelpers | undefined; knownHelpersOnly?: boolean | undefined; assumeObjects?: boolean | undefined; noEscape?: boolean | undefined; }"
+          "{ data?: boolean | undefined; strict?: boolean | undefined; knownHelpers?: KnownHelpers | undefined; knownHelpersOnly?: boolean | undefined; noEscape?: boolean | undefined; assumeObjects?: boolean | undefined; }"
         ],
         "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
@@ -267,7 +267,7 @@
           "\nSupported Handlebars runtime options\n\nThis is a subset of all the runtime options supported by the upstream\nHandlebars module."
         ],
         "signature": [
-          "{ data?: any; helpers?: { [name: string]: Function; } | undefined; blockParams?: any[] | undefined; decorators?: { [name: string]: Function; } | undefined; }"
+          "{ data?: any; helpers?: { [name: string]: Function; } | undefined; decorators?: { [name: string]: Function; } | undefined; blockParams?: any[] | undefined; }"
         ],
         "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
