@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function canvasExpressionTest({ getService, getPageObjects }: FtrProviderContext) {
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
+  const browser = getService('browser');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
@@ -89,7 +90,8 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
         expect(elements.length).to.be(0);
       });
 
-      await monacoEditor.typeCodeEditorValue(' ', 'canvasExpressionInput');
+      await testSubjects.click('canvasExpressionInput');
+      await browser.pressKeys(browser.keys.SPACE);
 
       // checks that suggestions are rendered after typing
       await retry.try(async () => {
