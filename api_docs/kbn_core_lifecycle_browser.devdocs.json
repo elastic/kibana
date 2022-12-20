@@ -209,10 +209,12 @@
             "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-common.CoreSetup.uiSettings",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "Deprecated"
+            ],
             "label": "uiSettings",
             "description": [
-              "{@link IUiSettingsClient}"
+              "{@link IUiSettingsClient}\n"
             ],
             "signature": [
               {
@@ -221,6 +223,28 @@
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [
+              "{@link SettingsStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.SettingsStart",
+                "text": "SettingsStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
@@ -571,10 +595,12 @@
             "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-common.CoreStart.uiSettings",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "Deprecated"
+            ],
             "label": "uiSettings",
             "description": [
-              "{@link IUiSettingsClient}"
+              "{@link IUiSettingsClient}\n"
             ],
             "signature": [
               {
@@ -583,6 +609,28 @@
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [
+              "{@link SettingsStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.SettingsStart",
+                "text": "SettingsStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",

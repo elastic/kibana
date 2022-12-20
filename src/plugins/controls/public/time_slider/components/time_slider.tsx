@@ -7,12 +7,12 @@
  */
 
 import React, { FC, useRef } from 'react';
-import { EuiInputPopover, EuiDualRange } from '@elastic/eui';
+import { EuiInputPopover } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
 import { TimeSliderPopoverButton } from './time_slider_popover_button';
-import { TimeSliderPopoverContent } from './time_slider_popover_content';
+import { TimeSliderPopoverContent, EuiDualRangeRef } from './time_slider_popover_content';
 import { FROM_INDEX, TO_INDEX } from '../time_utils';
 import { getRoundedTimeRangeBounds } from '../time_slider_selectors';
 
@@ -46,7 +46,7 @@ export const TimeSlider: FC<Props> = (props: Props) => {
     return state.componentState.isOpen;
   });
 
-  const rangeRef = useRef<EuiDualRange>(null);
+  const rangeRef = useRef<EuiDualRangeRef>(null);
 
   const onPanelResize = (width?: number) => {
     rangeRef.current?.onResize(width);

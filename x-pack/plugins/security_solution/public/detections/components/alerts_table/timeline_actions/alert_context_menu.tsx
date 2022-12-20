@@ -426,7 +426,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||
     enrichedAlert == null ||
-    memoRuleIndices == null;
+    (memoRuleIndices == null && memoDataViewId == null);
 
   return (
     <AddExceptionFlyout

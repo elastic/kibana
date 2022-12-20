@@ -221,48 +221,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.controlEditorCancel(true);
       });
 
-      it('can create control with non-default sorting', async () => {
-        await dashboardControls.createControl({
-          controlType: OPTIONS_LIST_CONTROL,
-          dataViewTitle: 'animals-*',
-          fieldName: 'sound.keyword',
-          additionalSettings: {
-            hideSort: true,
-            defaultSortType: { by: '_key', direction: 'asc' },
-          },
-        });
-        controlId = (await dashboardControls.getAllControlIds())[1];
-        expect(await dashboardControls.getControlsCount()).to.be(2);
-
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await ensureAvailableOptionsEql([...animalSoundAvailableOptions].sort(), true);
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-      });
-
-      it('can edit default sorting method', async () => {
-        await dashboardControls.editExistingControl(controlId);
-        expect(await testSubjects.getVisibleText('optionsListControl__chooseSortBy')).to.equal(
-          'Alphabetically'
-        );
-        const ascendingButtonSelected = await (
-          await testSubjects.find('optionsListEditor__sortOrder_asc')
-        ).elementHasClass('uiButtonGroupButton-isSelected');
-        expect(ascendingButtonSelected).to.be(true);
-        const descendingButtonSelected = await (
-          await testSubjects.find('optionsListEditor__sortOrder_desc')
-        ).elementHasClass('uiButtonGroupButton-isSelected');
-        expect(descendingButtonSelected).to.be(false);
-
-        await dashboardControls.optionsListSetAdditionalSettings({
-          defaultSortType: { by: '_key', direction: 'desc' },
-        });
-        await dashboardControls.controlEditorSave();
-
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await ensureAvailableOptionsEql([...animalSoundAvailableOptions].sort().reverse(), true);
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-      });
-
       after(async () => {
         await dashboardControls.clearAllControls();
       });
@@ -364,7 +322,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         describe('dashboard filters', async () => {
           before(async () => {
-            await filterBar.addFilter('sound.keyword', 'is one of', ['bark', 'bow ow ow', 'ruff']);
+            await filterBar.addFilter({
+              field: 'sound.keyword',
+              operation: 'is one of',
+              value: ['bark', 'bow ow ow', 'ruff'],
+            });
             await dashboard.waitForRenderComplete();
             await header.waitUntilLoadingHasFinished();
           });
@@ -476,6 +438,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           expect(await pieChart.getPieSliceCount()).to.be(2);
           await dashboard.clearUnsavedChanges();
+        });
+
+        it('changes to selections can be discarded', async () => {
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await dashboardControls.optionsListPopoverSelectOption('bark');
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+          let selections = await dashboardControls.optionsListGetSelectionsString(controlId);
+          expect(selections).to.equal('hiss, grr, bark');
+
+          await dashboard.clickCancelOutOfEditMode();
+          selections = await dashboardControls.optionsListGetSelectionsString(controlId);
+          expect(selections).to.equal('hiss, grr');
+        });
+
+        it('dashboard does not load with unsaved changes when changes are discarded', async () => {
+          await dashboard.switchToEditMode();
+          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
         });
       });
 
@@ -653,7 +632,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('Can mark multiple selections invalid with Filter', async () => {
-          await filterBar.addFilter('sound.keyword', 'is', ['hiss']);
+          await filterBar.addFilter({ field: 'sound.keyword', operation: 'is', value: 'hiss' });
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
           await ensureAvailableOptionsEql(['hiss', 'Ignored selections', 'meow', 'bark']);
@@ -683,7 +662,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('Does not mark multiple selections invalid with Filter', async () => {
-          await filterBar.addFilter('sound.keyword', 'is', ['hiss']);
+          await filterBar.addFilter({ field: 'sound.keyword', operation: 'is', value: 'hiss' });
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
           await ensureAvailableOptionsEql(['hiss']);

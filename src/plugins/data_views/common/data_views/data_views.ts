@@ -497,12 +497,8 @@ export class DataViewsService {
   getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
     const metaFields = await this.config.get<string[]>(META_FIELDS);
     const { fields } = await this.apiClient.getFieldsForWildcard({
-      pattern: options.pattern,
+      ...options,
       metaFields,
-      type: options.type,
-      rollupIndex: options.rollupIndex,
-      allowNoIndex: options.allowNoIndex,
-      filter: options.filter,
     });
     return fields;
   };
@@ -543,7 +539,7 @@ export class DataViewsService {
       type: options.type,
       rollupIndex: options.rollupIndex,
       allowNoIndex: options.allowNoIndex,
-      filter: options.filter,
+      indexFilter: options.indexFilter,
     });
   };
 
