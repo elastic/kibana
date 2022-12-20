@@ -144,6 +144,7 @@ const processTransformAssetsPerModule = (
   const transforms: TransformInstallation[] = [];
   const aliasesRefs: string[] = [];
   const transformsToRemove: EsAssetReference[] = [];
+  const transformsToRemoveWithDestIndex: EsAssetReference[] = [];
   const indicesToAddRefs: EsAssetReference[] = [];
 
   transformPaths.forEach((path: string) => {
@@ -232,9 +233,8 @@ const processTransformAssetsPerModule = (
         `default-${transformVersion}`
       );
 
-      const currentTransformSameAsPrev = previousInstalledTransformEsAssets.find(
-        (t) => t.id === installationName
-      );
+      const currentTransformSameAsPrev =
+        previousInstalledTransformEsAssets.find((t) => t.id === installationName) !== undefined;
       if (previousInstalledTransformEsAssets.length === 0) {
         aliasesRefs.push(allIndexAliasName, latestIndexAliasName);
         transforms.push({
@@ -246,7 +246,24 @@ const processTransformAssetsPerModule = (
         });
         transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', true);
       } else {
-        if (currentTransformSameAsPrev === undefined) {
+        if (!currentTransformSameAsPrev) {
+          // If upgrading from old json schema to new yml schema
+          // We need to make sure to delete those transforms by matching the legacy naming convention
+          const versionFromOldJsonSchema = previousInstalledTransformEsAssets.find((t) =>
+            t.id.startsWith(
+              getLegacyTransformNameForInstallation(
+                installablePackage,
+                `${transformModuleId}/default.json`
+              )
+            )
+          );
+
+          if (versionFromOldJsonSchema !== undefined) {
+            transformsToRemoveWithDestIndex.push(versionFromOldJsonSchema);
+          }
+
+          // If upgrading from yml to newer version of yaml
+          // Match using new naming convention
           const installNameWithoutVersion = installationName.split(transformVersion)[0];
           const prevVersion = previousInstalledTransformEsAssets.find((t) =>
             t.id.startsWith(installNameWithoutVersion)
@@ -342,6 +359,7 @@ const processTransformAssetsPerModule = (
     transformsSpecifications,
     aliasesRefs,
     transformsToRemove,
+    transformsToRemoveWithDestIndex,
   };
 };
 
@@ -367,6 +385,7 @@ const installTransformsAssets = async (
       transformsSpecifications,
       aliasesRefs,
       transformsToRemove,
+      transformsToRemoveWithDestIndex,
     } = processTransformAssetsPerModule(
       installablePackage,
       installNameSuffix,
@@ -383,10 +402,20 @@ const installTransformsAssets = async (
     );
 
     // delete all previous transform
-    await deleteTransforms(
-      esClient,
-      transformsToRemove.map((asset) => asset.id)
-    );
+    await Promise.all([
+      deleteTransforms(
+        esClient,
+        transformsToRemoveWithDestIndex.map((asset) => asset.id),
+        // Delete destination indices if specified or if from old json schema
+        true
+      ),
+      deleteTransforms(
+        esClient,
+        transformsToRemove.map((asset) => asset.id),
+        // Else, keep destination indices by default
+        false
+      ),
+    ]);
 
     // get and save refs associated with the transforms before installing
     esReferences = await updateEsAssetReferences(
@@ -400,7 +429,7 @@ const installTransformsAssets = async (
           ...componentTemplatesRefs,
           ...transformRefs,
         ],
-        assetsToRemove: transformsToRemove,
+        assetsToRemove: [...transformsToRemove, ...transformsToRemoveWithDestIndex],
       }
     );
 
@@ -687,12 +716,12 @@ async function handleTransformInstall({
 const getLegacyTransformNameForInstallation = (
   installablePackage: InstallablePackage,
   path: string,
-  suffix: string
+  suffix?: string
 ) => {
   const pathPaths = path.split('/');
   const filename = pathPaths?.pop()?.split('.')[0];
   const folderName = pathPaths?.pop();
-  return `${installablePackage.name}.${folderName}-${filename}-${suffix}`;
+  return `${installablePackage.name}.${folderName}-${filename}${suffix ? '-' + suffix : ''}`;
 };
 
 const getTransformAssetNameForInstallation = (
