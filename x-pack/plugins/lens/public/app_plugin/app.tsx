@@ -32,8 +32,12 @@ import { SaveModalContainer, runSaveLensVisualization } from './save_modal_conta
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
-import { IndexPatternServiceAPI, createIndexPatternService } from '../data_views_service/service';
+import {
+  type IndexPatternServiceAPI,
+  createIndexPatternService,
+} from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
+import type { LensAppLocatorParams } from '../../common/locator/locator';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -77,6 +81,8 @@ export function App({
     executionContext,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
+    locator,
+    share,
   } = lensAppServices;
 
   const saveAndExit = useRef<() => void>();
@@ -108,6 +114,8 @@ export function App({
   const currentDoc = useLensSelector((state) =>
     selectSavedObjectFormat(state, selectorDependencies)
   );
+
+  const shortUrls = useMemo(() => share?.url.shortUrls.get(null), [share]);
 
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
@@ -427,6 +435,38 @@ export function App({
     };
   }, []);
 
+  const shortUrlService = useCallback(
+    async (params: LensAppLocatorParams) => {
+      if (locator && shortUrls) {
+        // This is a stripped down version of what the share URL plugin is doing
+        const relativeUrl = await shortUrls.create({ locator, params });
+        const absoluteShortUrl = application.getUrlForApp('', {
+          path: `/s/r/${relativeUrl.data.slug}`,
+          absolute: true,
+        });
+        // Another version (does not work) #1
+        // const res = await shortUrls.createWithLocator({ locator, params });
+        // const absoluteShortUrl = res.locator.getRedirectUrl(res.params);
+
+        // Another version (does not work) #2
+        // const absoluteShortUrl = await locator.getUrl(
+        //   { url: `/s/r/${relativeUrl}` },
+        //   { absolute: true }
+        // );
+
+        // Yet another version (does not work) #3
+        // const result = await shortUrls.createWithLocator({
+        //   locator: legacyLocator,
+        //   params: { url: `/s/r/${relativeUrl}` },
+        // });
+        // const absoluteShortUrl = await result.locator.getUrl(result.params, { absolute: true });
+        return absoluteShortUrl;
+      }
+      return '';
+    },
+    [locator, application, shortUrls]
+  );
+
   const returnToOriginSwitchLabelForContext =
     initialContext &&
     'isEmbeddable' in initialContext &&
@@ -465,6 +505,7 @@ export function App({
           theme$={theme$}
           indexPatternService={indexPatternService}
           onTextBasedSavedAndExit={onTextBasedSavedAndExit}
+          shortUrlService={shortUrlService}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (

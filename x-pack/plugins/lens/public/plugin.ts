@@ -110,6 +110,8 @@ import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import { ChartInfoApi } from './chart_info_api';
+import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
+import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -250,6 +252,7 @@ export class LensPlugin {
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
   private initDependenciesForApi: () => void = () => {};
+  private locator?: LensAppLocator;
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
@@ -324,6 +327,18 @@ export class LensPlugin {
       embeddable.registerEmbeddableFactory('lens', new EmbeddableFactory(getStartServices));
     }
 
+    if (share) {
+      // const useHash = core.uiSettings.get('state:storeInSessionStorage');
+      this.locator = share.url.locators.create(new LensAppLocatorDefinition({}));
+
+      share.register(
+        downloadCsvShareProvider({
+          uiSettings: core.uiSettings,
+          formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
+        })
+      );
+    }
+
     visualizations.registerAlias(getLensAliasConfig());
 
     uiActionsEnhanced.registerDrilldown(
@@ -384,6 +399,7 @@ export class LensPlugin {
           attributeService: getLensAttributeService(coreStart, deps),
           getPresentationUtilContext,
           topNavMenuEntryGenerators: this.topNavMenuEntries,
+          locator: this.locator,
         });
       },
     });
@@ -429,6 +445,8 @@ export class LensPlugin {
       registerTopNavMenuEntryGenerator: (menuEntryGenerator: LensTopNavMenuEntryGenerator) => {
         this.topNavMenuEntries.push(menuEntryGenerator);
       },
+      // @TODO: write custom function here for export short url
+      getShortUrl() {},
     };
   }
 
@@ -578,6 +596,7 @@ export class LensPlugin {
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
         };
       },
+      // getShortUrl: async () => {},
     };
   }
 

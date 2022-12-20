@@ -52,12 +52,14 @@ import {
 } from '../state_management';
 import { getPreloadedState, setState } from '../state_management/lens_slice';
 import { getLensInspectorService } from '../lens_inspector_service';
+import type { LensAppLocator } from '../../common/locator/locator';
 
 export async function getLensServices(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
   attributeService: LensAttributeService,
-  initialContext?: VisualizeFieldContext | VisualizeEditorContext
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext,
+  locator?: LensAppLocator
 ): Promise<LensAppServices> {
   const {
     data,
@@ -112,6 +114,7 @@ export async function getLensServices(
     share,
     unifiedSearch,
     docLinks: coreStart.docLinks,
+    locator,
   };
 }
 
@@ -123,6 +126,7 @@ export async function mountApp(
     attributeService: LensAttributeService;
     getPresentationUtilContext: () => FC;
     topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
+    locator?: LensAppLocator;
   }
 ) {
   const {
@@ -130,6 +134,7 @@ export async function mountApp(
     attributeService,
     getPresentationUtilContext,
     topNavMenuEntryGenerators,
+    locator,
   } = mountProps;
   const [[coreStart, startDependencies], instance] = await Promise.all([
     core.getStartServices(),
@@ -149,7 +154,8 @@ export async function mountApp(
     coreStart,
     startDependencies,
     attributeService,
-    initialContext
+    initialContext,
+    locator
   );
 
   const { stateTransfer, data } = lensServices;
