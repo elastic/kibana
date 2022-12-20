@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { compareFilters, Filter } from '@kbn/es-query';
+import { compareFilters, Filter, FILTERS } from '@kbn/es-query';
 import React, { FC, useCallback, useState } from 'react';
 import { CloseFilterEditorConfirmModal } from './close_confirm_modal';
 
@@ -42,7 +42,8 @@ export function withCloseFilterEditorConfirmModal<
           !compareFilters(current, updated, {
             index: true,
             alias: true,
-          })
+          }) ||
+          updated.meta.type === FILTERS.CUSTOM
         ) {
           setShowConfirmModal(true);
           setActionsOnClose(actions);
