@@ -91,9 +91,7 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
   const customBranding = useObservable(observables.customBranding$, {});
-  const { customizedLogo } = customBranding;
-  const hasCustomBranding = Object.keys(customBranding).length > 0;
-
+  const { customizedLogo, logo } = customBranding;
   return (
     <a
       onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
@@ -104,7 +102,7 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
         defaultMessage: 'Elastic home',
       })}
     >
-      <LoadingIndicator loadingCount$={loadingCount$!} hasCustomBranding={hasCustomBranding} />
+      <LoadingIndicator loadingCount$={loadingCount$!} customLogo={logo} />
       {customizedLogo ? (
         <img src={customizedLogo} width="200" height="84" alt="custom mark" />
       ) : (

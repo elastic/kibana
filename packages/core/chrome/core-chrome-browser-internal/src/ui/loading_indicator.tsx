@@ -18,7 +18,7 @@ import './loading_indicator.scss';
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   showAsBar?: boolean;
-  hasCustomBranding?: boolean;
+  customLogo?: string;
 }
 
 export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
@@ -68,25 +68,24 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       defaultMessage: 'Loading content',
     });
 
-    const logo =
-      this.state.visible || this.props.hasCustomBranding ? (
-        <EuiLoadingSpinner
-          size="l"
-          data-test-subj={testSubj}
-          aria-hidden={false}
-          aria-label={ariaLabel}
-        />
-      ) : (
-        <EuiIcon
-          type="logoElastic"
-          size="l"
-          data-test-subj={testSubj}
-          className="chrHeaderLogo__cluster"
-          aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
-            defaultMessage: 'Elastic Logo',
-          })}
-        />
-      );
+    const logo = this.state.visible ? (
+      <EuiLoadingSpinner
+        size="l"
+        data-test-subj={testSubj}
+        aria-hidden={false}
+        aria-label={ariaLabel}
+      />
+    ) : (
+      <EuiIcon
+        type={this.props.customLogo ?? 'logoElastic'}
+        size="l"
+        data-test-subj={testSubj}
+        className="chrHeaderLogo__cluster"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
+          defaultMessage: 'Elastic Logo',
+        })}
+      />
+    );
 
     return !this.props.showAsBar ? (
       logo
