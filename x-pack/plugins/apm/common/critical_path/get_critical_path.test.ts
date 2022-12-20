@@ -12,6 +12,8 @@ import { getCriticalPath } from './get_critical_path';
 
 describe('getCriticalPath', () => {
   function getCriticalPathFromEvents(events: ApmFields[]) {
+    events = events.filter((event) => event['processor.event'] !== 'metric');
+
     const entryTransaction = dedot(events[0]!, {}) as Transaction;
     const waterfall = getWaterfall({
       traceItems: {

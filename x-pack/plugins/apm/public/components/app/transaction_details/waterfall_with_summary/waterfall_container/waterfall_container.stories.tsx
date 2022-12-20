@@ -73,9 +73,9 @@ export const Example: Story<any> = () => {
 
   const errorDocs = events.splice(errorEventId, 1);
 
-  const traceDocs = events.map(
-    (event) => dedot(event, {}) as WaterfallTransaction | WaterfallSpan
-  );
+  const traceDocs = events
+    .filter((event) => event['processor.event'] !== 'metric')
+    .map((event) => dedot(event, {}) as WaterfallTransaction | WaterfallSpan);
   const traceItems = {
     exceedsMax: false,
     traceDocs,
