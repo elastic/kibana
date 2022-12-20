@@ -120,6 +120,7 @@ describe('stripNonEcsFields', () => {
       });
 
       expect(result).toEqual({
+        agent: [],
         message: 'test message',
       });
       expect(removed).toEqual([
@@ -141,7 +142,7 @@ describe('stripNonEcsFields', () => {
       });
 
       expect(result).toEqual({
-        agent: { type: 'filebeat' },
+        agent: { type: 'filebeat', name: [] },
         message: 'test message',
       });
       expect(removed).toEqual([
@@ -288,6 +289,7 @@ describe('stripNonEcsFields', () => {
 
       expect(result).toEqual({
         threat: {
+          enrichments: [],
           'indicator.port': 443,
         },
       });
@@ -465,7 +467,7 @@ describe('stripNonEcsFields', () => {
   describe('boolean field', () => {
     it('should strip invalid boolean fields', () => {
       const { result, removed } = stripNonEcsFields({
-        'dll.code_signature.trusted': ['true', 'conflict', 'True', 5],
+        'dll.code_signature.trusted': ['conflict', 'true', 5, 'False', 'ee', 'True'],
       });
 
       expect(result).toEqual({
@@ -478,11 +480,33 @@ describe('stripNonEcsFields', () => {
         },
         {
           key: 'dll.code_signature.trusted',
-          value: 'True',
+          value: 5,
         },
         {
           key: 'dll.code_signature.trusted',
-          value: 5,
+          value: 'False',
+        },
+        {
+          key: 'dll.code_signature.trusted',
+          value: 'ee',
+        },
+        {
+          key: 'dll.code_signature.trusted',
+          value: 'True',
+        },
+      ]);
+    });
+
+    it('should strip invalid boolean True', () => {
+      const { result, removed } = stripNonEcsFields({
+        'dll.code_signature.trusted': 'True',
+      });
+
+      expect(result).toEqual({});
+      expect(removed).toEqual([
+        {
+          key: 'dll.code_signature.trusted',
+          value: 'True',
         },
       ]);
     });
