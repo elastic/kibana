@@ -189,6 +189,7 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
 
 export interface BulkActionSummary {
   failed: number;
+  skipped: number;
   succeeded: number;
   total: number;
 }
@@ -197,6 +198,7 @@ export interface BulkActionResult {
   updated: Rule[];
   created: Rule[];
   deleted: Rule[];
+  skipped: Rule[];
 }
 
 export interface BulkActionAggregatedError {

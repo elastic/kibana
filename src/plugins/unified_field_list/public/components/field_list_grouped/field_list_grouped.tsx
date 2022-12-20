@@ -34,7 +34,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   fieldsExistInIndex: boolean;
   renderFieldItem: FieldsAccordionProps<T>['renderFieldItem'];
   scrollToTopResetCounter: number;
-  screenReaderDescriptionForSearchInputId?: string;
+  screenReaderDescriptionId?: string;
   'data-test-subj'?: string;
 }
 
@@ -44,7 +44,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   fieldsExistInIndex,
   renderFieldItem,
   scrollToTopResetCounter,
-  screenReaderDescriptionForSearchInputId,
+  screenReaderDescriptionId,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
   const hasSyncedExistingFields =
@@ -118,11 +118,11 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       onScroll={throttle(lazyScroll, 100)}
     >
       <div className="unifiedFieldList__fieldListGrouped__container">
-        {Boolean(screenReaderDescriptionForSearchInputId) && (
+        {Boolean(screenReaderDescriptionId) && (
           <EuiScreenReaderOnly>
             <div
               aria-live="polite"
-              id={screenReaderDescriptionForSearchInputId}
+              id={screenReaderDescriptionId}
               data-test-subj={`${dataTestSubject}__ariaDescription`}
             >
               {hasSyncedExistingFields
@@ -203,7 +203,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
         {hasSpecialFields && (
           <>
             <ul>
-              {fieldGroupsToCollapse.flatMap(([key, { fields }]) =>
+              {fieldGroupsToCollapse.flatMap(([key, { fields, fieldSearchHighlight }]) =>
                 fields.map((field, index) => (
                   <Fragment key={getFieldKey(field)}>
                     {renderFieldItem({
@@ -212,6 +212,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                       groupIndex: 0,
                       groupName: key as FieldsGroupNames,
                       hideDetails: true,
+                      fieldSearchHighlight,
                     })}
                   </Fragment>
                 ))
@@ -236,6 +237,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                 hasLoaded={hasSyncedExistingFields}
                 fieldsCount={fieldGroup.fields.length}
                 isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
+                fieldSearchHighlight={fieldGroup.fieldSearchHighlight}
                 paginatedFields={paginatedFields[key]}
                 groupIndex={index + 1}
                 groupName={key as FieldsGroupNames}
