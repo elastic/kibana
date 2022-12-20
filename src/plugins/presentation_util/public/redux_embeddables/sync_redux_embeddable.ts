@@ -81,7 +81,7 @@ export const syncReduxEmbeddable = <
 
     if (!inputEqual(reduxExplicitInput, embeddableExplictInput)) {
       store.dispatch(
-        actions.updateEmbeddableReduxInput(cleanInputForRedux(embeddableExplictInput))
+        actions.replaceEmbeddableReduxInput(cleanInputForRedux(embeddableExplictInput))
       );
     }
     embeddableToReduxInProgress = false;
@@ -93,7 +93,7 @@ export const syncReduxEmbeddable = <
     embeddableToReduxInProgress = true;
     const reduxState = store.getState();
     if (!outputEqual(reduxState.output, embeddableOutput)) {
-      store.dispatch(actions.updateEmbeddableReduxOutput(embeddableOutput));
+      store.dispatch(actions.replaceEmbeddableReduxOutput(embeddableOutput));
     }
     embeddableToReduxInProgress = false;
   });

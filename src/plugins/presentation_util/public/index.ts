@@ -90,3 +90,5 @@ export function plugin() {
 }
 
 export const useLabs = () => (() => pluginServices.getHooks().labs.useService())();
+
+export const getContextProvider = () => pluginServices.getContextProvider();

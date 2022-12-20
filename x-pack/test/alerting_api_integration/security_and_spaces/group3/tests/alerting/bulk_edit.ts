@@ -102,6 +102,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                   },
                 ],
                 rules: [],
+                skipped: [],
                 total: 1,
               });
               expect(response.statusCode).to.eql(200);
@@ -241,7 +242,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.body).to.eql({ errors: [], rules: [], total: 0 });
+              expect(response.body).to.eql({ errors: [], rules: [], skipped: [], total: 0 });
               expect(response.statusCode).to.eql(200);
               break;
             case 'global_read at space1':
@@ -382,7 +383,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.body).to.eql({ errors: [], rules: [], total: 0 });
+              expect(response.body).to.eql({ errors: [], rules: [], skipped: [], total: 0 });
               expect(response.statusCode).to.eql(200);
               break;
             case 'global_read at space1':
@@ -587,7 +588,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'superuser at space1':
             case 'global_read at space1':
-              expect(response.body).to.eql({ rules: [], errors: [], total: 0 });
+              expect(response.body).to.eql({ rules: [], skipped: [], errors: [], total: 0 });
               expect(response.statusCode).to.eql(200);
               break;
             case 'no_kibana_privileges at space1':
