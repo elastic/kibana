@@ -36,7 +36,6 @@ export const OsqueryRenderer = ({
   const [showFlyout, setShowFlyout] = useState(false);
   const { agentId, alertId, data } = useContext(BasicAlertDataContext);
 
-  console.log({ agentId, alertId, data });
   const handleOpen = useCallback(() => setShowFlyout(true), [setShowFlyout]);
 
   const handleClose = useCallback(() => setShowFlyout(false), [setShowFlyout]);
