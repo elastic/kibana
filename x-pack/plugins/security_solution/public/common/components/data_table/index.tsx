@@ -223,6 +223,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
         isLoading,
         unitCountText,
         additionalControls,
+        isEventRenderedView,
         getFieldBrowser,
         browserFields,
         fieldBrowserOptions,
@@ -348,6 +349,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
         disabledCellActions,
         dispatch,
         id,
+        isEventRenderedView,
         pagination.pageSize,
       ]
     );

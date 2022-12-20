@@ -156,7 +156,7 @@ const eventRenderedViewColumns: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
-    initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,
+    // initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,
     actions: false,
     isExpandable: false,
     isResizable: true,
@@ -170,7 +170,7 @@ const eventRenderedViewColumns: ColumnHeaderOptions[] = [
       }
     ),
     id: 'kibana.alert.rule.name',
-    initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
+    // initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
     linkField: 'kibana.alert.rule.uuid',
     actions: false,
     isExpandable: false,
@@ -184,7 +184,7 @@ const eventRenderedViewColumns: ColumnHeaderOptions[] = [
     }),
     actions: false,
     isExpandable: false,
-    isResizable: true,
+    isResizable: false,
   },
 ];
 

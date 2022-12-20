@@ -505,7 +505,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   if (tableView === 'eventRenderedView') {
     rowHeightsOptions = {
       defaultHeight: 'auto' as const,
-      scrollAnchorRow: 'start',
     };
   }
 
