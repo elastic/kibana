@@ -16,7 +16,6 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ChangeDataView } from './change_dataview';
 import { DataViewPickerPropsExtended, TextBasedLanguages } from '.';
-import { SortDirection } from '@elastic/eui';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
@@ -60,11 +59,6 @@ describe('DataView component', () => {
     const services = {
       data: dataMock,
       storage: getStorage(storageValue),
-      sortingService: {
-        getSorting: () => {
-          return { by: 'alphabetically', direction: SortDirection.ASC };
-        },
-      },
       dataViewEditor: dataViewEditorMock,
       uiSettings: {
         get: jest.fn(() => uiSettingValue),

@@ -45,7 +45,6 @@ describe('DataView list component', () => {
     },
   ];
   const changeDataViewSpy = jest.fn();
-  const onChangeSortDataViewList = jest.fn();
   let props: DataViewsListProps;
   beforeEach(() => {
     props = {
@@ -53,11 +52,6 @@ describe('DataView list component', () => {
       onChangeDataView: changeDataViewSpy,
       dataViewsList: list,
       isTextBasedLangSelected: false,
-      onChangeSortDataViewList,
-      dataViewSortSettings: {
-        by: 'alphabetically',
-        direction: 'asc',
-      },
     };
   });
   it('should trigger the onChangeDataView if a new dataview is selected', async () => {

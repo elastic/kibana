@@ -88,7 +88,6 @@ export function ChangeDataView({
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { application, data, storage, dataViews, dataViewEditor } = kibana.services;
-
   const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))

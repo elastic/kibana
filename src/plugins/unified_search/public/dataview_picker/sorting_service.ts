@@ -13,15 +13,22 @@ const storageKey = 'unified_search_sorting';
 export const ALPHABETICALLY = 'alphabetically';
 
 export interface Sorting {
-  by: typeof ALPHABETICALLY;
+  column: typeof ALPHABETICALLY;
   direction: Direction;
 }
 
 export class SortingService {
   private storage = new Storage(window.localStorage);
-  constructor() {}
+  public column: Sorting['column'];
+  public direction: Sorting['direction'];
 
-  getSorting(): Sorting {
+  constructor() {
+    const { column, direction } = this.getSorting();
+    this.column = column;
+    this.direction = direction;
+  }
+
+  private getSorting(): Sorting {
     let parsedSorting: Sorting | undefined;
 
     try {
@@ -30,10 +37,24 @@ export class SortingService {
       parsedSorting = undefined;
     }
 
-    return parsedSorting ?? { by: ALPHABETICALLY, direction: SortDirection.ASC };
+    return parsedSorting ?? { column: ALPHABETICALLY, direction: SortDirection.ASC };
   }
 
-  setSorting(data: Sorting) {
-    this.storage.set(storageKey, data);
+  setDirection(direction: Sorting['direction']) {
+    this.direction = direction;
+    this.storage.set(storageKey, { direction, column: this.column });
+  }
+
+  setColumn(column: Sorting['column']) {
+    this.column = column;
+    this.storage.set(storageKey, { column, direction: this.direction });
+  }
+
+  getOrderDirections(): Array<Sorting['direction']> {
+    return [SortDirection.ASC, SortDirection.DESC];
+  }
+
+  getColums(): Array<Sorting['column']> {
+    return [ALPHABETICALLY];
   }
 }
