@@ -7,7 +7,6 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { getBenchmarkInputType } from '../../fleet_integration/fleet_integration';
 import { CspRuleTemplate } from '../../../common/schemas';
 import { CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
@@ -16,7 +15,11 @@ import {
 } from '../../../common/constants';
 import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
 import type { Benchmark } from '../../../common/types';
-import { getBenchmarkTypeFilter, isNonNullable } from '../../../common/utils/helpers';
+import {
+  extractBenchmarkFromPackagePolicy,
+  getBenchmarkTypeFilterFromBenchmarkId,
+  isNonNullable,
+} from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
 import {
   getAgentStatusesByAgentPolicies,
@@ -34,7 +37,7 @@ export const getRulesCountForPolicy = async (
 ): Promise<number> => {
   const rules = await soClient.find<CspRuleTemplate>({
     type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-    filter: getBenchmarkTypeFilter(benchmarkName),
+    filter: getBenchmarkTypeFilterFromBenchmarkId(benchmarkName),
     perPage: 0,
   });
 
@@ -61,7 +64,7 @@ const createBenchmarks = (
           .filter(isNonNullable) ?? [];
 
       const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
-        const benchmarkId = getBenchmarkInputType(cspPackage.inputs);
+        const benchmarkId = extractBenchmarkFromPackagePolicy(cspPackage.inputs);
         const rulesCount = await getRulesCountForPolicy(soClient, benchmarkId);
         const agentPolicyStatus = {
           id: agentPolicy.id,

@@ -37,7 +37,7 @@ import { setupRoutes } from './routes/setup_routes';
 import { setupSavedObjects } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
-import { isCspPackageInstalled } from './fleet_integration/fleet_integration';
+import { isCspPackagePolicyInstalled } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import {
   removeFindingsStatsTask,
@@ -143,7 +143,7 @@ export class CspPlugin
           for (const deletedPackagePolicy of deletedPackagePolicies) {
             if (isCspPackage(deletedPackagePolicy.package?.name)) {
               const soClient = core.savedObjects.createInternalRepository();
-              const isPackageExists = await isCspPackageInstalled(
+              const isPackageExists = await isCspPackagePolicyInstalled(
                 plugins.fleet.packagePolicyService,
                 soClient,
                 this.logger
