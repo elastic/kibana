@@ -54,10 +54,7 @@ import { buildExpression } from '../expression_helpers';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
 import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';
-import {
-  getOriginalRequestErrorMessages,
-  getUnknownVisualizationTypeError,
-} from '../../error_helper';
+import { getOriginalRequestErrorMessages } from '../../error_helper';
 import { getMissingIndexPattern } from '../state_helpers';
 import {
   onActiveDataChange,
@@ -292,13 +289,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       ]
     : [];
 
-  const unknownVisError = visualization.activeId && !activeVisualization;
-
   const configurationValidationErrors = getUserMessages('workspace', 'error');
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
-    if (!configurationValidationErrors?.length && !missingRefsErrors.length && !unknownVisError) {
+    if (!configurationValidationErrors?.length && !missingRefsErrors.length) {
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
@@ -340,19 +335,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         }));
       }
     }
-    if (unknownVisError) {
-      setLocalState((s) => ({
-        ...s,
-        expressionBuildErrors: [getUnknownVisualizationTypeError(visualization.activeId!)],
-      }));
-    }
   }, [
     configurationValidationErrors?.length,
     missingRefsErrors.length,
-    unknownVisError,
     activeVisualization,
     visualization.state,
-    visualization.activeId,
     datasourceMap,
     datasourceStates,
     datasourceLayers,
@@ -663,7 +650,6 @@ export const VisualizationWrapper = ({
   localState: WorkspaceState & {
     configurationValidationErrors?: UserMessage[];
     missingRefsErrors?: Array<{ shortMessage: string; longMessage: React.ReactNode }>;
-    unknownVisError?: Array<{ shortMessage: string; longMessage: React.ReactNode }>;
   };
   ExpressionRendererComponent: ReactExpressionRendererType;
   core: CoreStart;

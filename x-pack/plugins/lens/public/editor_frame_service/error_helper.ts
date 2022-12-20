@@ -10,7 +10,6 @@ import { isEqual, uniqWith } from 'lodash';
 import { ExpressionRenderError } from '@kbn/expressions-plugin/public';
 import { isEsError } from '@kbn/data-plugin/public';
 import type { IEsError, Reason } from '@kbn/data-plugin/public';
-import { UserMessage } from '../types';
 
 type ErrorCause = Required<IEsError>['attributes'];
 
@@ -167,21 +166,4 @@ export function getMissingIndexPatterns(indexPatternIds: string[]) {
     defaultMessage: 'Could not find the {count, plural, one {data view} other {data views}}: {ids}',
     values: { count: indexPatternIds.length, ids: indexPatternIds.join(', ') },
   });
-}
-
-export function getUnknownVisualizationTypeError(visType: string): UserMessage {
-  return {
-    severity: 'error',
-    fixableInEditor: false,
-    displayLocations: [{ id: 'workspace' }],
-    shortMessage: i18n.translate('xpack.lens.unknownVisType.shortMessage', {
-      defaultMessage: `Unknown visualization type`,
-    }),
-    longMessage: i18n.translate('xpack.lens.unknownVisType.longMessage', {
-      defaultMessage: `The visualization type {visType} could not be resolved.`,
-      values: {
-        visType,
-      },
-    }),
-  };
 }
