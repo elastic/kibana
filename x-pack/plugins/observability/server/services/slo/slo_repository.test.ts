@@ -131,7 +131,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
         type: SO_SLO_TYPE,
         page: 1,
         perPage: 25,
-        filter: `slo.attributes.name: availability*`,
+        filter: `slo.attributes.name: *availability*`,
         sortField: 'name',
         sortOrder: 'asc',
       });
@@ -153,7 +153,33 @@ describe('KibanaSavedObjectsSLORepository', () => {
         type: SO_SLO_TYPE,
         page: 1,
         perPage: 25,
-        filter: `slo.attributes.name: availa*`,
+        filter: `slo.attributes.name: *availa*`,
+        sortField: 'name',
+        sortOrder: 'asc',
+      });
+    });
+
+    it('includes the filter on indicator type when provided', async () => {
+      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+      soClientMock.find.mockResolvedValueOnce(aFindResponse(SOME_SLO));
+
+      const result = await repository.find(
+        { indicatorType: 'sli.kql.custom' },
+        DEFAULT_SORTING,
+        DEFAULT_PAGINATION
+      );
+
+      expect(result).toEqual({
+        page: 1,
+        perPage: 25,
+        total: 1,
+        results: [SOME_SLO],
+      });
+      expect(soClientMock.find).toHaveBeenCalledWith({
+        type: SO_SLO_TYPE,
+        page: 1,
+        perPage: 25,
+        filter: `slo.attributes.indicator.type: sli.kql.custom`,
         sortField: 'name',
         sortOrder: 'asc',
       });
