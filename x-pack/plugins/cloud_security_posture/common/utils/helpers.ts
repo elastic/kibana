@@ -6,7 +6,18 @@
  */
 
 import { Truthy } from 'lodash';
-import { CSP_RULE_SAVED_OBJECT_TYPE } from '../constants';
+import {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackagePolicy,
+  PackagePolicyInput,
+} from '@kbn/fleet-plugin/common';
+import {
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  CLOUDBEAT_VANILLA,
+  CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+} from '../constants';
+import { BenchmarkId } from '../types';
 
 /**
  * @example
@@ -25,13 +36,30 @@ export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'
   return defaultMessage; // TODO: i18n
 };
 
-export const createCspRuleSearchFilterByPackagePolicy = ({
-  packagePolicyId,
-  policyId,
-}: {
-  packagePolicyId: string;
-  policyId?: string;
-}): string =>
-  `${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.package_policy_id: "${packagePolicyId}"${
-    policyId ? ` AND ${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.policy_id: "${policyId}"` : ''
-  }`;
+export const getBenchmarkTypeFilterFromBenchmarkId = (type: BenchmarkId): string =>
+  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
+
+export const isEnabledBenchmarkInputType = (input: PackagePolicyInput | NewPackagePolicyInput) =>
+  !!input.type && input.enabled;
+
+export const isCspPackage = (packageName?: string) =>
+  packageName === CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+
+export const extractBenchmarkFromPackagePolicy = (
+  inputs: PackagePolicy['inputs'] | NewPackagePolicy['inputs']
+): BenchmarkId => {
+  const enabledInputs = inputs.filter(isEnabledBenchmarkInputType);
+
+  // Use the only enabled input
+  if (enabledInputs.length === 1) {
+    return getInputType(enabledInputs[0].type);
+  }
+
+  // Use the default benchmark id for multiple/none selected
+  return getInputType(CLOUDBEAT_VANILLA);
+};
+
+const getInputType = (inputType: string): string => {
+  // Get the last part of the input type, input type structure: cloudbeat/<benchmark_id>
+  return inputType.split('/')[1];
+};
