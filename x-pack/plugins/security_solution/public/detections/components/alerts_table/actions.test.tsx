@@ -439,6 +439,7 @@ describe('alert actions', () => {
             queryFields: [],
             resolveTimelineConfig: undefined,
             savedObjectId: null,
+            selectAll: false,
             selectedEventIds: {},
             sessionViewConfig: null,
             show: true,
