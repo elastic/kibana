@@ -479,9 +479,14 @@ export const LensTopNavMenu = ({
     if (!activeDatasourceId || !discoverLocator) {
       return;
     }
+    if (visualization.activeId == null) {
+      return;
+    }
     return getLayerMetaInfo(
       datasourceMap[activeDatasourceId],
       datasourceStates[activeDatasourceId].state,
+      visualizationMap[visualization.activeId],
+      visualization.state,
       activeData,
       dataViews.indexPatterns,
       data.query.timefilter.timefilter.getTime(),
@@ -490,8 +495,10 @@ export const LensTopNavMenu = ({
   }, [
     activeDatasourceId,
     discoverLocator,
+    visualization,
     datasourceMap,
     datasourceStates,
+    visualizationMap,
     activeData,
     dataViews.indexPatterns,
     data.query.timefilter.timefilter,

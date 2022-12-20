@@ -64,20 +64,20 @@ export const ExpressionChart: React.FC<Props> = ({
   });
 
   const options = useWaffleOptionsContext();
-  const { loading, nodes } = useSnapshot(
+  const { loading, nodes } = useSnapshot({
     filterQuery,
-    expression.metric === 'custom'
-      ? [buildCustomMetric(expression.customMetric)]
-      : [{ type: expression.metric }],
-    [],
+    metrics:
+      expression.metric === 'custom'
+        ? [buildCustomMetric(expression.customMetric)]
+        : [{ type: expression.metric }],
+    groupBy: [],
     nodeType,
     sourceId,
-    0,
-    options.accountId,
-    options.region,
-    true,
-    timerange
-  );
+    currentTime: 0,
+    accountId: options.accountId,
+    region: options.region,
+    timerange,
+  });
 
   const { uiSettings } = useKibanaContextForPlugin().services;
 

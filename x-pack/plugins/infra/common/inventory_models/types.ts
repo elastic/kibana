@@ -286,9 +286,15 @@ export const ESSumBucketAggRT = rt.type({
 });
 
 export const ESTopMetricsAggRT = rt.type({
-  top_metrics: rt.type({
-    metrics: rt.union([rt.array(rt.type({ field: rt.string })), rt.type({ field: rt.string })]),
-  }),
+  top_metrics: rt.intersection([
+    rt.type({
+      metrics: rt.union([rt.array(rt.type({ field: rt.string })), rt.type({ field: rt.string })]),
+    }),
+    rt.partial({
+      size: rt.number,
+      sort: rt.record(rt.string, rt.union([rt.literal('desc'), rt.literal('asc')])),
+    }),
+  ]),
 });
 
 export const ESMaxPeriodFilterExistsAggRT = rt.type({
@@ -387,6 +393,7 @@ export interface InventoryModel {
     name: string;
     os?: string;
     ip?: string;
+    cloudProvider?: string;
   };
   crosslinkSupport: {
     details: boolean;
