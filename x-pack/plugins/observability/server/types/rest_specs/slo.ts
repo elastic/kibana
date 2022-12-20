@@ -53,6 +53,7 @@ const findSLOParamsSchema = t.partial({
     name: t.string,
     page: t.string,
     per_page: t.string,
+    sort_by: t.string,
   }),
 });
 

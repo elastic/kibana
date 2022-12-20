@@ -26,6 +26,21 @@ export interface Pagination {
   perPage: number;
 }
 
+export enum SortingDirection {
+  Ascending = 'ascending',
+  Descending = 'descending',
+}
+
+export enum SortingField {
+  Name = 'name',
+  IndicatorType = 'indicator_type',
+}
+
+export interface Sorting {
+  field: SortingField;
+  direction: SortingDirection;
+}
+
 export interface Paginated<T> {
   page: number;
   perPage: number;
@@ -37,7 +52,7 @@ export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
-  find(criteria: Criteria, pagination: Pagination): Promise<Paginated<SLO>>;
+  find(criteria: Criteria, sorting: Sorting, pagination: Pagination): Promise<Paginated<SLO>>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
@@ -75,13 +90,20 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     }
   }
 
-  async find(criteria: Criteria, pagination: Pagination): Promise<Paginated<SLO>> {
+  async find(
+    criteria: Criteria,
+    sorting: Sorting,
+    pagination: Pagination
+  ): Promise<Paginated<SLO>> {
     const filterKuery = buildFilterKuery(criteria);
+    const { sortField, sortOrder } = buildSortQuery(sorting);
     const response = await this.soClient.find<StoredSLO>({
       type: SO_SLO_TYPE,
       page: pagination.page,
       perPage: pagination.perPage,
       filter: filterKuery,
+      sortField,
+      sortOrder,
     });
 
     return {
@@ -99,6 +121,24 @@ function buildFilterKuery(criteria: Criteria): string | undefined {
     filters.push(`slo.attributes.name: ${addWildcardIfAbsent(criteria.name)}`);
   }
   return filters.length > 0 ? filters.join(' and ') : undefined;
+}
+
+function buildSortQuery(sorting: Sorting): { sortField: string; sortOrder: 'asc' | 'desc' } {
+  let sortField: string;
+  switch (sorting.field) {
+    case SortingField.IndicatorType:
+      sortField = 'indicator.type';
+      break;
+    case SortingField.Name:
+    default:
+      sortField = 'name';
+      break;
+  }
+
+  return {
+    sortField,
+    sortOrder: sorting.direction === SortingDirection.Descending ? 'desc' : 'asc',
+  };
 }
 
 function toStoredSLO(slo: SLO): StoredSLO {
