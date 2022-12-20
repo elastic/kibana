@@ -110,6 +110,10 @@ export async function fetchAndCalculateFieldStats({
       : {};
   }
 
+  if (field.type === 'geo_point' || field.type === 'geo_shape') {
+    return await getGeoExamples(searchHandler, field, dataView);
+  }
+
   if (!canProvideAggregatedStatsForField(field)) {
     return {};
   }
@@ -125,9 +129,6 @@ export async function fetchAndCalculateFieldStats({
   if (field.type === 'date') {
     return await getDateHistogram(searchHandler, field, { fromDate, toDate });
   }
-  if (field.type === 'geo_point' || field.type === 'geo_shape') {
-    return await getGeoExamples(searchHandler, field, dataView);
-  }
 
   return await getStringSamples(searchHandler, field, size);
 }
@@ -136,6 +137,8 @@ function canProvideAggregatedStatsForField(field: DataViewField): boolean {
   return !(
     field.type === 'document' ||
     field.type.includes('range') ||
+    field.type === 'geo_point' ||
+    field.type === 'geo_shape' ||
     field.type === 'murmur3' ||
     field.type === 'attachment'
   );
