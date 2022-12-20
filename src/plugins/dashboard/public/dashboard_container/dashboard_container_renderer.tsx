@@ -109,7 +109,7 @@ export const DashboardContainerRenderer = ({
   );
 
   const viewportStyles = css`
-    ${useEuiOverflowScroll('y')}
+    ${useEuiOverflowScroll('y', true)}
   `;
 
   return (
