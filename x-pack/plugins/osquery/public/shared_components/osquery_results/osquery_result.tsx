@@ -13,7 +13,6 @@ import type { OsqueryActionResultsProps } from './types';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import { ATTACHED_QUERY } from '../../agents/translations';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
-import type { ExpandedAlertEcsData } from '../../common/contexts';
 import { AlertAttachmentContext } from '../../common/contexts';
 
 interface OsqueryResultProps extends OsqueryActionResultsProps {
@@ -29,7 +28,7 @@ export const OsqueryResult = React.memo<OsqueryResultProps>(
     });
 
     return (
-      <AlertAttachmentContext.Provider value={ecsData as ExpandedAlertEcsData}>
+      <AlertAttachmentContext.Provider value={ecsData}>
         <EuiSpacer size="s" />
         <EuiComment
           username={ruleName && ruleName[0]}

@@ -29,10 +29,6 @@ export const OsqueryInvestigationGuidePanel: React.FC<OsqueryInvestigationGuideP
   return (
     <EuiPanel color={'primary'} paddingSize={'xs'} css={{ marginBottom: '16px' }}>
       <EuiFlexGroup direction={'row'} alignItems={'center'} css={{ padding: `0 24px` }}>
-        {/* TODO decide if we want the logo*/}
-        {/* <EuiFlexItem grow={false}>*/}
-        {/*  <EuiIcon name="osquery" type="logoOsquery" />*/}
-        {/* </EuiFlexItem>*/}
         <EuiFlexItem grow={true}>
           <EuiText size="s">
             <FormattedMessage

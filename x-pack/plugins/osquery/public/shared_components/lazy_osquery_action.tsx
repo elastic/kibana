@@ -19,7 +19,7 @@ export const getLazyOsqueryAction =
   (props: OsqueryActionProps & { ecsData?: Ecs }) => {
     const { ecsData, ...restProps } = props;
     const renderAction = useMemo(() => {
-      if (ecsData) {
+      if (ecsData && ecsData?._id) {
         return (
           <AlertAttachmentContext.Provider value={ecsData}>
             <OsqueryAction {...restProps} />
