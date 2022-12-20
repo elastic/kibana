@@ -55,7 +55,6 @@ export const createActionHandler = async (
     policiesSelected: agent_policy_ids,
   });
 
-  console.log('1111', ecsData);
   if (!selectedAgents.length) {
     throw new Error('No agents found for selection');
   }
