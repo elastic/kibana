@@ -28,6 +28,7 @@ import {
 } from '../../../components/alerts_kpis/common/config';
 import { AlertsCountPanel } from '../../../components/alerts_kpis/alerts_count_panel';
 import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translations';
+import type { Status } from '../../../../../common/detection_engine/schemas/common';
 
 const TABLE_PANEL_HEIGHT = 330; // px
 const TRENT_CHART_HEIGHT = 127; // px
@@ -50,6 +51,9 @@ export interface Props {
   runtimeMappings: MappingRuntimeFields;
   signalIndexName: string | null;
   updateDateRangeCallback: UpdateDateRange;
+  showBuildingBlockAlerts: boolean;
+  showOnlyThreatIndicatorAlerts: boolean;
+  filterGroup: Status;
 }
 
 const ChartPanelsComponent: React.FC<Props> = ({
@@ -60,6 +64,9 @@ const ChartPanelsComponent: React.FC<Props> = ({
   runtimeMappings,
   signalIndexName,
   updateDateRangeCallback,
+  showBuildingBlockAlerts,
+  filterGroup,
+  showOnlyThreatIndicatorAlerts,
 }: Props) => {
   const {
     alertViewSelection,
@@ -138,6 +145,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
     [alertViewSelection, setAlertViewSelection]
   );
   const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
+
   return (
     <div data-test-subj="chartPanels">
       {alertViewSelection === 'trend' && (
@@ -158,7 +166,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               panelHeight={TREND_CHART_PANEL_HEIGHT}
               query={query}
               showCountsInLegend={true}
-              showGroupByPlaceholder={true}
+              showGroupByPlaceholder={false}
               showTotalAlertsCount={false}
               stackByLabel={GROUP_BY_LABEL}
               title={title}
@@ -166,6 +174,9 @@ const ChartPanelsComponent: React.FC<Props> = ({
               signalIndexName={signalIndexName}
               updateDateRange={updateDateRangeCallback}
               runtimeMappings={runtimeMappings}
+              showBuildingBlockAlerts={showBuildingBlockAlerts}
+              status={filterGroup}
+              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
             />
           )}
         </FullHeightFlexItem>
@@ -194,6 +205,9 @@ const ChartPanelsComponent: React.FC<Props> = ({
               stackByField0={countTableStackBy0}
               stackByField1={countTableStackBy1}
               title={title}
+              showBuildingBlockAlerts={showBuildingBlockAlerts}
+              status={filterGroup}
+              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
             />
           )}
         </FullHeightFlexItem>
@@ -225,6 +239,9 @@ const ChartPanelsComponent: React.FC<Props> = ({
               title={title}
               riskSubAggregationField="kibana.alert.risk_score"
               runtimeMappings={runtimeMappings}
+              showBuildingBlockAlerts={showBuildingBlockAlerts}
+              status={filterGroup}
+              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
             />
           )}
         </FullHeightFlexItem>

@@ -79,11 +79,11 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
                   sourceField: '___records___',
                 },
                 '34919782-4546-43a5-b668-06ac934d3acd': {
-                  label: `Top values of ${stackByField}`, // could be event.dataset or event.module
+                  label: `Top values of ${stackByField}`,
                   dataType: 'string',
                   operationType: 'terms',
                   scale: 'ordinal',
-                  sourceField: `${stackByField}`, // could be event.dataset or event.module
+                  sourceField: `${stackByField}`,
                   isBucketed: true,
                   params: {
                     size: 10,
@@ -91,7 +91,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
                       type: 'column',
                       columnId: 'e09e0380-0740-4105-becc-0a4ca12e3944',
                     },
-                    orderDirection: 'asc',
+                    orderDirection: 'desc',
                     otherBucket: true,
                     missingBucket: false,
                     parentFormat: {

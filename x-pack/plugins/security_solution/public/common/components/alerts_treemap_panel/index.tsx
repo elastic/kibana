@@ -26,6 +26,11 @@ import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from '../alerts_tree
 import type { AlertsTreeMapAggregation } from '../alerts_treemap/types';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
+import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
+import { getAlertsTreemapLensAttributes as getLensAttributes } from '../visualization_actions/lens_attributes/common/alerts/alerts_treemap';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import type { Status } from '../../../../common/detection_engine/schemas/common';
 
 const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 134; // px
 
@@ -56,6 +61,9 @@ export interface Props {
   stackByField1ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByWidth?: number;
   title: React.ReactNode;
+  showBuildingBlockAlerts: boolean;
+  status: Status;
+  showOnlyThreatIndicatorAlerts: boolean;
 }
 
 const AlertsTreemapPanelComponent: React.FC<Props> = ({
@@ -81,6 +89,9 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   stackByField1ComboboxRef,
   stackByWidth,
   title,
+  showBuildingBlockAlerts,
+  showOnlyThreatIndicatorAlerts,
+  status,
 }: Props) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
@@ -146,6 +157,22 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
     to,
   ]);
 
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const timerange = useMemo(() => ({ from, to }), [from, to]);
+  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+    inputId: InputsModelId.global,
+    queryId: uniqueQueryId,
+  });
+  const alertsOptions = useMemo(
+    () => ({
+      showBuildingBlockAlerts,
+      showOnlyThreatIndicatorAlerts,
+      status,
+      breakdownField: stackByField1,
+    }),
+    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, status, stackByField1]
+  );
+
   useInspectButton({
     deleteQuery,
     loading: isLoadingAlerts,
@@ -181,7 +208,9 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
         >
           {isPanelExpanded && (
             <FieldSelection
-              chartOptionsContextMenu={chartOptionsContextMenu}
+              chartOptionsContextMenu={
+                isChartEmbeddablesEnabled ? undefined : chartOptionsContextMenu
+              }
               setStackByField0={setStackByField0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
               setStackByField1={setStackByField1}
@@ -196,21 +225,35 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
           )}
         </HeaderSection>
 
-        {isLoadingAlerts && isPanelExpanded ? (
-          <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
-        ) : (
-          <>
-            {alertsData != null && isPanelExpanded && (
-              <AlertsTreemap
-                addFilter={addFilter}
-                data={alertsData}
-                maxBuckets={DEFAULT_STACK_BY_FIELD0_SIZE}
-                stackByField0={stackByField0}
-                stackByField1={stackByField1}
-              />
-            )}
-          </>
-        )}
+        {isPanelExpanded ? (
+          isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
+            <LensEmbeddable
+              data-test-subj="embeddable-matrix-histogram"
+              getLensAttributes={getLensAttributes}
+              height={`${DEFAULT_MIN_CHART_HEIGHT}px`}
+              id={uniqueQueryId}
+              inspectTitle={inspectTitle}
+              stackByField={stackByField0}
+              timerange={timerange}
+              scopeId={SourcererScopeName.detections}
+              alertsOptions={alertsOptions}
+            />
+          ) : isLoadingAlerts ? (
+            <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
+          ) : (
+            <>
+              {alertsData != null && isPanelExpanded && (
+                <AlertsTreemap
+                  addFilter={addFilter}
+                  data={alertsData}
+                  maxBuckets={DEFAULT_STACK_BY_FIELD0_SIZE}
+                  stackByField0={stackByField0}
+                  stackByField1={stackByField1}
+                />
+              )}
+            </>
+          )
+        ) : null}
       </KpiPanel>
     </InspectButtonContainer>
   );

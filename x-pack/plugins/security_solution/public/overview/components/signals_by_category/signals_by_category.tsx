@@ -86,6 +86,8 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       title={i18n.ALERT_TREND}
       titleSize={onlyField == null ? 'm' : 's'}
       updateDateRange={updateDateRangeCallback}
+      showBuildingBlockAlerts={false}
+      showOnlyThreatIndicatorAlerts={false}
     />
   );
 };

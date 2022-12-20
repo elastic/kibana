@@ -6,10 +6,15 @@
  */
 
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { Status } from '../../../../common/detection_engine/schemas/common';
 import type { InputsModelId } from '../../store/inputs/constants';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
-export type GetLensAttributes = (stackByField?: string) => LensAttributes;
+export type GetLensAttributes = (
+  stackByField?: string,
+  alertsOptions?: AlertsOptions
+) => LensAttributes;
 
 export interface VisualizationActionsProps {
   className?: string;
@@ -33,8 +38,10 @@ export interface LensEmbeddableComponentProps {
   inputsModelId?: InputsModelId.global | InputsModelId.timeline;
   inspectTitle?: string;
   lensAttributes?: LensAttributes;
+  scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
+  alertsOptions?: AlertsOptions;
 }
 
 export enum RequestStatus {
@@ -73,4 +80,11 @@ export interface RequestStatistic {
 export interface Response {
   json?: { rawResponse?: object };
   time?: number;
+}
+
+export interface AlertsOptions {
+  showBuildingBlockAlerts?: boolean;
+  showOnlyThreatIndicatorAlerts?: boolean;
+  status?: Status;
+  breakdownField?: string;
 }

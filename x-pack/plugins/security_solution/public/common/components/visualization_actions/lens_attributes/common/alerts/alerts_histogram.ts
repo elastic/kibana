@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { GetLensAttributes, LensAttributes } from '../../types';
+import type { GetLensAttributes, LensAttributes } from '../../../types';
+import { buildAlertsOptionsFilters } from './utils';
 
 export const getAlertsHistogramLensAttributes: GetLensAttributes = (
-  stackByField = 'kibana.alert.rule.name'
+  stackByField = 'kibana.alert.rule.name',
+  alertsOptions = {
+    showOnlyThreatIndicatorAlerts: false,
+    showBuildingBlockAlerts: false,
+  }
 ) =>
   ({
     title: 'Alerts',
@@ -53,26 +58,7 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
         query: '',
         language: 'kuery',
       },
-      filters: [
-        {
-          meta: {
-            index: '.alerts-security.alerts-id',
-            alias: null,
-            negate: true,
-            disabled: false,
-            type: 'exists',
-            key: 'kibana.alert.building_block_type',
-          },
-          query: {
-            exists: {
-              field: 'kibana.alert.building_block_type',
-            },
-          },
-          $state: {
-            store: 'appState',
-          },
-        },
-      ],
+      filters: buildAlertsOptionsFilters(alertsOptions),
       datasourceStates: {
         formBased: {
           layers: {
@@ -102,10 +88,10 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
                   dataType: 'string',
                   operationType: 'terms',
                   scale: 'ordinal',
-                  sourceField: `${stackByField}`,
+                  sourceField: stackByField,
                   isBucketed: true,
                   params: {
-                    size: 10,
+                    size: 1000,
                     orderBy: {
                       type: 'column',
                       columnId: 'e09e0380-0740-4105-becc-0a4ca12e3944',

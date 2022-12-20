@@ -27,6 +27,13 @@ import { KpiPanel } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { FieldSelection } from '../../../../common/components/field_selection';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
+import { getAlertsTableLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_table';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import type { Status } from '../../../../../common/detection_engine/schemas/common';
+import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 
@@ -49,7 +56,11 @@ interface AlertsCountPanelProps {
   stackByWidth?: number;
   title?: React.ReactNode;
   runtimeMappings?: MappingRuntimeFields;
+  showBuildingBlockAlerts: boolean;
+  status: Status;
+  showOnlyThreatIndicatorAlerts: boolean;
 }
+const ChartHeight = '180px';
 
 export const AlertsCountPanel = memo<AlertsCountPanelProps>(
   ({
@@ -71,6 +82,9 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     stackByField1ComboboxRef,
     stackByWidth,
     title = i18n.COUNT_TABLE_TITLE,
+    showBuildingBlockAlerts,
+    showOnlyThreatIndicatorAlerts,
+    status,
   }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
@@ -100,14 +114,29 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       setQuerySkip(!toggleStatus);
     }, [toggleStatus]);
     const toggleQuery = useCallback(
-      (status: boolean) => {
-        setToggleStatus(status);
+      (newToggleStatus: boolean) => {
+        setToggleStatus(newToggleStatus);
         // toggle on = skipQuery false
-        setQuerySkip(!status);
+        setQuerySkip(!newToggleStatus);
       },
       [setQuerySkip, setToggleStatus]
     );
 
+    const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+    const timerange = useMemo(() => ({ from, to }), [from, to]);
+    const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+      inputId: InputsModelId.global,
+      queryId: uniqueQueryId,
+    });
+    const alertsOptions = useMemo(
+      () => ({
+        showBuildingBlockAlerts,
+        showOnlyThreatIndicatorAlerts,
+        status,
+        breakdownField: stackByField1,
+      }),
+      [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, stackByField1, status]
+    );
     const {
       loading: isLoadingAlerts,
       data: alertsData,
@@ -125,7 +154,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
         runtimeMappings,
       }),
       indexName: signalIndexName,
-      skip: querySkip,
+      skip: querySkip || isChartEmbeddablesEnabled,
       queryName: ALERTS_QUERY_NAMES.COUNT,
     });
 
@@ -154,10 +183,11 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       setQuery,
       response,
       request,
-      refetch,
+      refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
       uniqueQueryId,
       deleteQuery,
       loading: isLoadingAlerts,
+      searchSessionId,
     });
 
     return (
@@ -181,7 +211,9 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
             toggleQuery={toggleQuery}
           >
             <FieldSelection
-              chartOptionsContextMenu={chartOptionsContextMenu}
+              chartOptionsContextMenu={
+                isChartEmbeddablesEnabled ? undefined : chartOptionsContextMenu
+              }
               setStackByField0={setStackByField0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
               setStackByField1={setStackByField1}
@@ -194,14 +226,28 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
               uniqueQueryId={uniqueQueryId}
             />
           </HeaderSection>
-          {toggleStatus && alertsData != null && (
-            <AlertsCount
-              data={alertsData}
-              loading={isLoadingAlerts}
-              stackByField0={stackByField0}
-              stackByField1={stackByField1}
-            />
-          )}
+          {toggleStatus ? (
+            isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
+              <LensEmbeddable
+                data-test-subj="embeddable-matrix-histogram"
+                getLensAttributes={getLensAttributes}
+                height={ChartHeight}
+                id={uniqueQueryId}
+                inspectTitle={inspectTitle}
+                stackByField={stackByField0}
+                timerange={timerange}
+                scopeId={SourcererScopeName.detections}
+                alertsOptions={alertsOptions}
+              />
+            ) : alertsData != null ? (
+              <AlertsCount
+                data={alertsData}
+                loading={isLoadingAlerts}
+                stackByField0={stackByField0}
+                stackByField1={stackByField1}
+              />
+            ) : null
+          ) : null}
         </KpiPanel>
       </InspectButtonContainer>
     );

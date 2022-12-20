@@ -33,8 +33,6 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { HISTOGRAM_ACTIONS_BUTTON_CLASS, VisualizationActions } from '../visualization_actions';
 import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
-import { SecurityPageName } from '../../../../common/constants';
-import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -74,7 +72,6 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 
 const ChartHeight = '150px';
 
-// eslint-disable-next-line complexity
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
   defaultStackByOption,
@@ -191,12 +188,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   };
   const [loading, { data, inspect, totalCount, refetch }] =
     useMatrixHistogramCombined(matrixHistogramRequest);
-  const [{ pageName }] = useRouteSpy();
-
-  const onHostOrNetworkOrUserPage =
-    pageName === SecurityPageName.hosts ||
-    pageName === SecurityPageName.network ||
-    pageName === SecurityPageName.users;
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -282,11 +273,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             toggleQuery={toggleQuery}
             subtitle={subtitleWithCounts}
             inspectMultiple
-            showInspectButton={showInspectButton || !onHostOrNetworkOrUserPage}
+            showInspectButton={showInspectButton && !isChartEmbeddablesEnabled}
             isInspectDisabled={filterQuery === undefined}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
-              {onHostOrNetworkOrUserPage && (getLensAttributes || lensAttributes) && timerange && (
+              {(getLensAttributes || lensAttributes) && timerange && (
                 <EuiFlexItem grow={false}>
                   <VisualizationActions
                     className="histogram-viz-actions"

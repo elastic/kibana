@@ -14,7 +14,7 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import type { LensAttributes, GetLensAttributes } from './types';
+import type { LensAttributes, GetLensAttributes, AlertsOptions } from './types';
 import {
   getHostDetailsPageFilter,
   sourceOrDestinationIpExistsFilter,
@@ -28,12 +28,14 @@ export const useLensAttributes = ({
   stackByField,
   title,
   scopeId = SourcererScopeName.default,
+  alertsOptions,
 }: {
   lensAttributes?: LensAttributes | null;
   getLensAttributes?: GetLensAttributes;
   stackByField?: string;
   title?: string;
   scopeId?: SourcererScopeName;
+  alertsOptions?: AlertsOptions;
 }): LensAttributes | null => {
   const { selectedPatterns, dataViewId } = useSourcererDataView(scopeId);
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
@@ -72,7 +74,9 @@ export const useLensAttributes = ({
     }
     const attrs: LensAttributes =
       lensAttributes ??
-      ((getLensAttributes && stackByField && getLensAttributes(stackByField)) as LensAttributes);
+      ((getLensAttributes &&
+        stackByField &&
+        getLensAttributes(stackByField, alertsOptions)) as LensAttributes);
 
     return {
       ...attrs,
@@ -97,6 +101,7 @@ export const useLensAttributes = ({
     lensAttributes,
     getLensAttributes,
     stackByField,
+    alertsOptions,
     title,
     query,
     filters,

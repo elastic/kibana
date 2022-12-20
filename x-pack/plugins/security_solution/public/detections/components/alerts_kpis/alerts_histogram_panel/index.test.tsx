@@ -101,6 +101,8 @@ describe('AlertsHistogramPanel', () => {
     signalIndexName: 'signalIndexName',
     setQuery: jest.fn(),
     updateDateRange: jest.fn(),
+    showBuildingBlockAlerts: false,
+    showOnlyThreatIndicatorAlerts: false,
   };
 
   const mockSetToggle = jest.fn();

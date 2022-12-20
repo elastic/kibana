@@ -840,6 +840,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         defaultStackByOption={defaultRuleStackByOption}
                         updateDateRange={updateDateRangeCallback}
                         runtimeMappings={runtimeMappings}
+                        showBuildingBlockAlerts={showBuildingBlockAlerts}
+                        status={filterGroup}
+                        showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
                       />
                       <EuiSpacer />
                     </Display>

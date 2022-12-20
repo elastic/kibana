@@ -355,6 +355,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                 runtimeMappings={runtimeMappings}
                 signalIndexName={signalIndexName}
                 updateDateRangeCallback={updateDateRangeCallback}
+                filterGroup={filterGroup}
+                showBuildingBlockAlerts={showBuildingBlockAlerts}
+                showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
               />
 
               <EuiSpacer size="l" />

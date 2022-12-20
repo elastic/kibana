@@ -57,6 +57,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   stackByField,
   timerange,
   inspectTitle,
+  alertsOptions,
 }) => {
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
@@ -70,6 +71,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     stackByField,
     title: '',
     scopeId,
+    alertsOptions,
   });
 
   const LensComponent = lens.EmbeddableComponent;
@@ -129,8 +131,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
       isLoading,
     });
   }, []);
-
-  console.log(id, searchSessionId);
 
   return (
     <>
