@@ -11,7 +11,7 @@ import { FindSLO } from './find_slo';
 import { createSLO, createPaginatedSLO } from './fixtures/slo';
 import { createSLIClientMock, createSLORepositoryMock } from './mocks';
 import { SLIClient } from './sli_client';
-import { SLORepository, SortingDirection, SortingField } from './slo_repository';
+import { SLORepository, SORT_FIELD, SORT_DIRECTION } from './slo_repository';
 
 describe('FindSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
@@ -34,7 +34,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SortingField.Name, direction: SortingDirection.Ascending },
+        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
         { page: 1, perPage: 25 }
       );
 
@@ -96,7 +96,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SortingField.Name, direction: SortingDirection.Ascending },
+        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -110,7 +110,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: 'Availability' },
-        { field: SortingField.Name, direction: SortingDirection.Ascending },
+        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -124,7 +124,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { indicatorType: 'sli.kql.custom' },
-        { field: SortingField.Name, direction: SortingDirection.Ascending },
+        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -138,7 +138,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: 'My SLO*' },
-        { field: SortingField.Name, direction: SortingDirection.Ascending },
+        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
         { page: 2, perPage: 100 }
       );
     });
@@ -152,7 +152,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SortingField.Name, direction: SortingDirection.Ascending },
+        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -166,21 +166,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SortingField.Name, direction: SortingDirection.Ascending },
-        { page: 1, perPage: 25 }
-      );
-    });
-
-    it('sorts by name by default when invalid', async () => {
-      const slo = createSLO();
-      mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
-
-      await findSLO.execute({ sort_by: 'not valid' });
-
-      expect(mockRepository.find).toHaveBeenCalledWith(
-        { name: undefined },
-        { field: SortingField.Name, direction: SortingDirection.Ascending },
+        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -194,12 +180,12 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SortingField.IndicatorType, direction: SortingDirection.Ascending },
+        { field: SORT_FIELD.IndicatorType, direction: SORT_DIRECTION.Asc },
         { page: 1, perPage: 25 }
       );
     });
 
-    it('sorts by indicator type descending', async () => {
+    it('sorts by indicator type in descending order', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
       mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
@@ -208,7 +194,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SortingField.IndicatorType, direction: SortingDirection.Descending },
+        { field: SORT_FIELD.IndicatorType, direction: SORT_DIRECTION.Desc },
         { page: 1, perPage: 25 }
       );
     });

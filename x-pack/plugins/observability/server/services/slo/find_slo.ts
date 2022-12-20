@@ -14,9 +14,9 @@ import {
   Paginated,
   Pagination,
   SLORepository,
-  Sorting,
-  SortingDirection,
-  SortingField,
+  Sort,
+  SORT_FIELD,
+  SORT_DIRECTION,
 } from './slo_repository';
 
 const DEFAULT_PAGE = 1;
@@ -28,11 +28,11 @@ export class FindSLO {
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
     const pagination: Pagination = toPagination(params);
     const criteria: Criteria = toCriteria(params);
-    const sorting: Sorting = toSorting(params);
+    const sort: Sort = toSort(params);
 
     const { results: sloList, ...resultMeta }: Paginated<SLO> = await this.repository.find(
       criteria,
-      sorting,
+      sort,
       pagination
     );
     const indicatorDataBySlo = await this.sliClient.fetchCurrentSLIData(sloList);
@@ -84,20 +84,9 @@ function toCriteria(params: FindSLOParams): Criteria {
   return { name: params.name, indicatorType: params.indicator_type };
 }
 
-function toSorting(params: FindSLOParams): Sorting {
+function toSort(params: FindSLOParams): Sort {
   return {
-    field: toSortingField(params.sort_by),
-    direction:
-      params?.sort_direction === 'desc' ? SortingDirection.Descending : SortingDirection.Ascending,
+    field: params.sort_by === 'indicator_type' ? SORT_FIELD.IndicatorType : SORT_FIELD.Name,
+    direction: params.sort_direction === 'desc' ? SORT_DIRECTION.Desc : SORT_DIRECTION.Asc,
   };
-}
-
-function toSortingField(sortBy: string | undefined): SortingField {
-  switch (sortBy) {
-    case 'indicator_type':
-      return SortingField.IndicatorType;
-    case 'name':
-    default:
-      return SortingField.Name;
-  }
 }

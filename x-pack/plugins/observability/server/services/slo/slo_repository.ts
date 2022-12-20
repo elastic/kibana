@@ -17,6 +17,8 @@ import { SO_SLO_TYPE } from '../../saved_objects';
 import { SLONotFound } from '../../errors';
 import { sloSchema } from '../../types/schema';
 
+type ObjectValues<T> = T[keyof T];
+
 export interface Criteria {
   name?: string;
   indicatorType?: string;
@@ -27,19 +29,23 @@ export interface Pagination {
   perPage: number;
 }
 
-export enum SortingDirection {
-  Ascending = 'ascending',
-  Descending = 'descending',
-}
+export const SORT_DIRECTION = {
+  Asc: 'Asc',
+  Desc: 'Desc',
+} as const;
 
-export enum SortingField {
-  Name = 'name',
-  IndicatorType = 'indicator_type',
-}
+type SortDirection = ObjectValues<typeof SORT_DIRECTION>;
 
-export interface Sorting {
-  field: SortingField;
-  direction: SortingDirection;
+export const SORT_FIELD = {
+  Name: 'Name',
+  IndicatorType: 'IndicatorType',
+};
+
+type SortField = ObjectValues<typeof SORT_FIELD>;
+
+export interface Sort {
+  field: SortField;
+  direction: SortDirection;
 }
 
 export interface Paginated<T> {
@@ -53,7 +59,7 @@ export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
-  find(criteria: Criteria, sorting: Sorting, pagination: Pagination): Promise<Paginated<SLO>>;
+  find(criteria: Criteria, sort: Sort, pagination: Pagination): Promise<Paginated<SLO>>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
@@ -91,13 +97,9 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     }
   }
 
-  async find(
-    criteria: Criteria,
-    sorting: Sorting,
-    pagination: Pagination
-  ): Promise<Paginated<SLO>> {
+  async find(criteria: Criteria, sort: Sort, pagination: Pagination): Promise<Paginated<SLO>> {
     const filterKuery = buildFilterKuery(criteria);
-    const { sortField, sortOrder } = buildSortQuery(sorting);
+    const { sortField, sortOrder } = buildSortQuery(sort);
     const response = await this.soClient.find<StoredSLO>({
       type: SO_SLO_TYPE,
       page: pagination.page,
@@ -127,13 +129,13 @@ function buildFilterKuery(criteria: Criteria): string | undefined {
   return filters.length > 0 ? filters.join(' and ') : undefined;
 }
 
-function buildSortQuery(sorting: Sorting): { sortField: string; sortOrder: 'asc' | 'desc' } {
+function buildSortQuery(sort: Sort): { sortField: string; sortOrder: 'asc' | 'desc' } {
   let sortField: string;
-  switch (sorting.field) {
-    case SortingField.IndicatorType:
+  switch (sort.field) {
+    case SORT_FIELD.IndicatorType:
       sortField = 'indicator.type';
       break;
-    case SortingField.Name:
+    case SORT_FIELD.Name:
     default:
       sortField = 'name';
       break;
@@ -141,7 +143,7 @@ function buildSortQuery(sorting: Sorting): { sortField: string; sortOrder: 'asc'
 
   return {
     sortField,
-    sortOrder: sorting.direction === SortingDirection.Descending ? 'desc' : 'asc',
+    sortOrder: sort.direction === SORT_DIRECTION.Desc ? 'desc' : 'asc',
   };
 }
 

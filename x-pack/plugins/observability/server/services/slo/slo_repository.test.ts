@@ -17,9 +17,9 @@ import { SO_SLO_TYPE } from '../../saved_objects';
 import {
   KibanaSavedObjectsSLORepository,
   Pagination,
-  Sorting,
-  SortingDirection,
-  SortingField,
+  Sort,
+  SORT_DIRECTION,
+  SORT_FIELD,
 } from './slo_repository';
 import { createAPMTransactionDurationIndicator, createSLO, aStoredSLO } from './fixtures/slo';
 import { SLONotFound } from '../../errors';
@@ -106,9 +106,9 @@ describe('KibanaSavedObjectsSLORepository', () => {
 
   describe('find', () => {
     const DEFAULT_PAGINATION: Pagination = { page: 1, perPage: 25 };
-    const DEFAULT_SORTING: Sorting = {
-      field: SortingField.Name,
-      direction: SortingDirection.Ascending,
+    const DEFAULT_SORTING: Sort = {
+      field: SORT_FIELD.Name,
+      direction: SORT_DIRECTION.Asc,
     };
 
     it('includes the filter on name with wildcard when provided', async () => {
@@ -227,7 +227,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
 
       await repository.find(
         {},
-        { field: SortingField.Name, direction: SortingDirection.Descending },
+        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Desc },
         DEFAULT_PAGINATION
       );
 
@@ -246,7 +246,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
 
       await repository.find(
         {},
-        { field: SortingField.IndicatorType, direction: SortingDirection.Ascending },
+        { field: SORT_FIELD.IndicatorType, direction: SORT_DIRECTION.Asc },
         DEFAULT_PAGINATION
       );
 
