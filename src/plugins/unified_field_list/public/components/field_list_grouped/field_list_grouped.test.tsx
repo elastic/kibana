@@ -14,6 +14,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ReactWrapper } from 'enzyme';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import FieldListGrouped, { type FieldListGroupedProps } from './field_list_grouped';
 import { ExistenceFetchStatus } from '../../types';
 import { FieldsAccordion } from './fields_accordion';
@@ -35,6 +36,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     const dataViews = dataViewPluginMocks.createStartContract();
     mockedServices = {
       dataViews,
+      core: coreMock.createStart(),
     };
 
     dataViews.get.mockImplementation(async (id: string) => {
@@ -46,7 +48,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
       scrollToTopResetCounter: 0,
       fieldsExistInIndex: true,
-      screenReaderDescriptionForSearchInputId: 'testId',
+      screenReaderDescriptionId: 'testId',
       renderFieldItem: jest.fn(({ field, itemIndex, groupIndex }) => (
         <EuiText
           data-test-subj="testFieldItem"
@@ -65,7 +67,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
 
   async function mountGroupedList({ listProps, hookParams }: WrapperProps): Promise<ReactWrapper> {
     const Wrapper: React.FC<WrapperProps> = (props) => {
-      const { fieldGroups } = useGroupedFields({
+      const {
+        fieldListGroupedProps: { fieldGroups },
+      } = useGroupedFields({
         ...props.hookParams,
         services: mockedServices,
       });
@@ -93,9 +97,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       />
     );
 
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe('');
   });
 
   it('renders correctly in loading state', async () => {
@@ -113,9 +115,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     expect(wrapper.find(FieldListGrouped).prop('fieldsExistenceStatus')).toBe(
       ExistenceFetchStatus.unknown
     );
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe('');
     expect(wrapper.find(FieldsAccordion)).toHaveLength(3);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(3);
     expect(
@@ -136,9 +136,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     expect(wrapper.find(FieldListGrouped).prop('fieldsExistenceStatus')).toBe(
       ExistenceFetchStatus.succeeded
     );
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('25 available fields. 0 empty fields. 3 meta fields.');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+      '25 available fields. 0 empty fields. 3 meta fields.'
+    );
     expect(wrapper.find(FieldsAccordion)).toHaveLength(3);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(
@@ -165,9 +165,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     expect(wrapper.find(FieldListGrouped).prop('fieldsExistenceStatus')).toBe(
       ExistenceFetchStatus.failed
     );
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('25 available fields. 0 empty fields. 3 meta fields.');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+      '25 available fields. 0 empty fields. 3 meta fields.'
+    );
     expect(wrapper.find(FieldsAccordion)).toHaveLength(3);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(
@@ -191,9 +191,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       },
     });
 
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('0 available fields. 0 empty fields. 0 meta fields.');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+      '0 available fields. 0 empty fields. 0 meta fields.'
+    );
     expect(wrapper.find(FieldsAccordion)).toHaveLength(3);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(
@@ -214,9 +214,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       },
     });
 
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('1 selected field. 28 available fields.');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+      '1 selected field. 28 available fields.'
+    );
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
     ).toStrictEqual([1, 28]);
@@ -234,9 +234,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       },
     });
 
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('25 available fields. 0 empty fields. 3 meta fields.');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+      '25 available fields. 0 empty fields. 3 meta fields.'
+    );
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
     ).toStrictEqual([25, 0, 0]);
@@ -267,9 +267,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       },
     });
 
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+      '25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.'
+    );
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
     ).toStrictEqual([25, 0, 0, 0]);
@@ -314,9 +314,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       hookParams,
     });
 
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+      '25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.'
+    );
 
     await act(async () => {
       await wrapper.setProps({
@@ -328,9 +328,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       await wrapper.update();
     });
 
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('2 available fields. 8 unmapped fields. 0 empty fields. 0 meta fields.');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+      '2 available fields. 8 unmapped fields. 0 empty fields. 0 meta fields.'
+    );
 
     await act(async () => {
       await wrapper.setProps({
@@ -342,9 +342,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       await wrapper.update();
     });
 
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('0 available fields. 12 unmapped fields. 0 empty fields. 3 meta fields.');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+      '0 available fields. 12 unmapped fields. 0 empty fields. 3 meta fields.'
+    );
   });
 
   it('renders correctly when non-supported fields are filtered out', async () => {
@@ -360,9 +360,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       hookParams,
     });
 
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+      '25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.'
+    );
 
     await act(async () => {
       await wrapper.setProps({
@@ -374,9 +374,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       await wrapper.update();
     });
 
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('23 available fields. 104 unmapped fields. 0 empty fields. 3 meta fields.');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+      '23 available fields. 104 unmapped fields. 0 empty fields. 3 meta fields.'
+    );
   });
 
   it('renders correctly when selected fields are present', async () => {
@@ -392,9 +392,9 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       hookParams,
     });
 
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.');
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+      '25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.'
+    );
 
     await act(async () => {
       await wrapper.setProps({
@@ -407,9 +407,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       await wrapper.update();
     });
 
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe(
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
       '2 selected fields. 25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.'
     );
   });
@@ -429,9 +427,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       hookParams,
     });
 
-    expect(
-      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe(
+    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
       '2 selected fields. 10 popular fields. 25 available fields. 112 unmapped fields. 0 empty fields. 3 meta fields.'
     );
   });

@@ -33,6 +33,7 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
   isFiltered: boolean;
   groupIndex: number;
   groupName: FieldsGroupNames;
+  fieldSearchHighlight?: string;
   paginatedFields: T[];
   renderFieldItem: (params: {
     field: T;
@@ -40,6 +41,7 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
     itemIndex: number;
     groupIndex: number;
     groupName: FieldsGroupNames;
+    fieldSearchHighlight?: string;
   }) => JSX.Element;
   renderCallout: () => JSX.Element;
   showExistenceFetchError?: boolean;
@@ -58,6 +60,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   isFiltered,
   groupIndex,
   groupName,
+  fieldSearchHighlight,
   paginatedFields,
   renderFieldItem,
   renderCallout,
@@ -153,7 +156,14 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
             {paginatedFields &&
               paginatedFields.map((field, index) => (
                 <Fragment key={getFieldKey(field)}>
-                  {renderFieldItem({ field, itemIndex: index, groupIndex, groupName, hideDetails })}
+                  {renderFieldItem({
+                    field,
+                    itemIndex: index,
+                    groupIndex,
+                    groupName,
+                    hideDetails,
+                    fieldSearchHighlight,
+                  })}
                 </Fragment>
               ))}
           </ul>
