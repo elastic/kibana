@@ -199,6 +199,7 @@ const kibanaFeatureSchema = schema.object({
   }),
   name: schema.string(),
   category: appCategorySchema,
+  description: schema.maybe(schema.string()),
   order: schema.maybe(schema.number()),
   excludeFromBasePrivileges: schema.maybe(schema.boolean()),
   minimumLicense: schema.maybe(validLicenseSchema),

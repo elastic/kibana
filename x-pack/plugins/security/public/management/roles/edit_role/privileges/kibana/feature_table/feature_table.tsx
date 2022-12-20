@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { Component } from 'react';
@@ -241,22 +242,35 @@ export class FeatureTable extends Component<Props, State> {
                 });
               }}
             >
-              <div className="subFeaturePrivilegeExpandedRegion">
-                <FeatureTableExpandedRow
-                  feature={feature}
-                  privilegeIndex={this.props.privilegeIndex}
-                  onChange={this.props.onChange}
-                  privilegeCalculator={this.props.privilegeCalculator}
-                  selectedFeaturePrivileges={
-                    this.props.role.kibana[this.props.privilegeIndex].feature[feature.id] ?? []
-                  }
-                  allSpacesSelected={this.props.allSpacesSelected}
-                  disabled={this.props.disabled}
-                  licenseAllowsSubFeatPrivCustomization={
-                    this.props.canCustomizeSubFeaturePrivileges
-                  }
-                />
-              </div>
+              <>
+                {feature.description && (
+                  <div className="featurePrivilegeDescription">
+                    <EuiToolTip content={feature.description} anchorClassName="eui-textTruncate">
+                      <EuiText color="subdued" size="xs">
+                        <p className="eui-displayInlineBlock eui-textTruncate">
+                          {feature.description}
+                        </p>
+                      </EuiText>
+                    </EuiToolTip>
+                  </div>
+                )}
+                <div className="subFeaturePrivilegeExpandedRegion">
+                  <FeatureTableExpandedRow
+                    feature={feature}
+                    privilegeIndex={this.props.privilegeIndex}
+                    onChange={this.props.onChange}
+                    privilegeCalculator={this.props.privilegeCalculator}
+                    selectedFeaturePrivileges={
+                      this.props.role.kibana[this.props.privilegeIndex].feature[feature.id] ?? []
+                    }
+                    allSpacesSelected={this.props.allSpacesSelected}
+                    disabled={this.props.disabled}
+                    licenseAllowsSubFeatPrivCustomization={
+                      this.props.canCustomizeSubFeaturePrivileges
+                    }
+                  />
+                </div>
+              </>
             </EuiAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>
