@@ -28,7 +28,6 @@ import { css } from '@emotion/react';
 
 import { optionsListStrings } from './dataview_list_strings';
 import { SortingService } from './sorting_service';
-import { handleSortingByDirection } from './suggestions_sorting';
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
@@ -64,10 +63,16 @@ export function DataViewsList({
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
 
-  const sortingService = useMemo(() => new SortingService(), []);
+  const sortingService = useMemo(
+    () =>
+      new SortingService<DataViewListItemEnhanced>({
+        alphabetically: (item) => item.name ?? item.title,
+      }),
+    []
+  );
 
   const [sortedDataViewsList, setSortedDataViewsList] = useState(
-    handleSortingByDirection(dataViewsList, sortingService.direction)
+    sortingService.sortData(dataViewsList)
   );
 
   const [sortByOptions, setSortByOptions] = useState<EuiSelectableOption[]>(() => {
@@ -99,7 +104,7 @@ export function DataViewsList({
         const key = selectedOption.data.key;
 
         sortingService.setDirection(key);
-        setSortedDataViewsList((dataViews) => handleSortingByDirection(dataViews, key));
+        setSortedDataViewsList((dataViews) => sortingService.sortData(dataViews));
       }
     },
     [sortingService]

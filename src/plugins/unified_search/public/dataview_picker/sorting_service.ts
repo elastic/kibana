@@ -7,7 +7,12 @@
  */
 
 import { Direction, SortDirection } from '@elastic/eui';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+
+export interface DataViewListItemEnhanced extends DataViewListItem {
+  isAdhoc?: boolean;
+}
 
 const storageKey = 'unified_search_sorting';
 export const ALPHABETICALLY = 'alphabetically';
@@ -17,12 +22,12 @@ export interface Sorting {
   direction: Direction;
 }
 
-export class SortingService {
+export class SortingService<T = unknown> {
   private storage = new Storage(window.localStorage);
   public column: Sorting['column'];
   public direction: Sorting['direction'];
 
-  constructor() {
+  constructor(private callbacks: Record<Sorting['column'], (arg: T) => string>) {
     const { column, direction } = this.getSorting();
     this.column = column;
     this.direction = direction;
@@ -56,5 +61,20 @@ export class SortingService {
 
   getColums(): Array<Sorting['column']> {
     return [ALPHABETICALLY];
+  }
+
+  sortData(data: T[]) {
+    const compare = (a: string, b: string) => a.localeCompare(b);
+
+    return data.sort((a, b) => {
+      const firstComparableField = this.callbacks[this.column](a);
+      const secondComparableField = this.callbacks[this.column](b);
+
+      if (this.direction === SortDirection.ASC) {
+        return compare(firstComparableField, secondComparableField);
+      } else {
+        return compare(secondComparableField, firstComparableField);
+      }
+    });
   }
 }
