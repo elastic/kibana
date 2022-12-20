@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
-import { DataViewsList, Sorting } from '@kbn/unified-search-plugin/public';
+import { DataViewsList } from '@kbn/unified-search-plugin/public';
 import { IndexPatternRef } from '../../types';
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
@@ -25,8 +25,6 @@ export function ChangeIndexPattern({
   onChangeIndexPattern,
   trigger,
   selectableProps,
-  onChangeSortDataViewList,
-  dataViewSortSettings,
 }: {
   trigger: ChangeIndexPatternTriggerProps;
   indexPatternRefs: IndexPatternRef[];
@@ -35,8 +33,6 @@ export function ChangeIndexPattern({
   indexPatternId?: string;
   selectableProps?: EuiSelectableProps;
   onCreateDefaultAdHocDataView?: (pattern: string) => void;
-  onChangeSortDataViewList: (selectedOption: EuiSelectableOption) => void;
-  dataViewSortSettings: Sorting;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
@@ -91,8 +87,6 @@ export function ChangeIndexPattern({
             }}
             currentDataViewId={indexPatternId}
             selectableProps={selectableProps}
-            onChangeSortDataViewList={onChangeSortDataViewList}
-            dataViewSortSettings={dataViewSortSettings}
           />
         </div>
       </EuiPopover>

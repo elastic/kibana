@@ -8,7 +8,6 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { SortDirection } from '@elastic/eui';
 import { DatasourceLayerPanelProps } from '../../types';
 import { TextBasedPrivateState } from './types';
 import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
@@ -38,8 +37,6 @@ export function LayerPanel({ state, layerId, dataViews }: TextBasedLayerPanelPro
         indexPatternRefs={dataViews.indexPatternRefs}
         isMissingCurrent={!dataView}
         onChangeIndexPattern={() => {}}
-        onChangeSortDataViewList={() => {}}
-        dataViewSortSettings={{ by: 'alphabetically', direction: SortDirection.ASC }}
       />
     </I18nProvider>
   );

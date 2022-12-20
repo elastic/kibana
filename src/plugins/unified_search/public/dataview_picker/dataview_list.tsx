@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiSelectable,
   EuiSelectableProps,
@@ -27,9 +27,12 @@ import { DataViewListItem } from '@kbn/data-views-plugin/public';
 
 import { css } from '@emotion/react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { optionsListStrings } from './dataview_list_strings';
 
-import { ALPHABETICALLY, Sorting } from './sorting_service';
+import { ALPHABETICALLY, Sorting, SortingService } from './sorting_service';
+import { IUnifiedSearchPluginServices } from '../types';
+import { handleSortingByDirection } from './suggestions_sorting';
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
@@ -42,8 +45,6 @@ export interface DataViewsListProps {
   currentDataViewId?: string;
   selectableProps?: EuiSelectableProps;
   searchListInputId?: string;
-  onChangeSortDataViewList: (selectedOption: EuiSelectableOption) => void;
-  dataViewSortSettings: Sorting;
 }
 
 function toSelectableOption(key: string, isChecked: boolean, label: string): EuiSelectableOption {
@@ -65,13 +66,21 @@ export function DataViewsList({
   currentDataViewId,
   selectableProps,
   searchListInputId,
-  onChangeSortDataViewList,
-  dataViewSortSettings,
 }: DataViewsListProps) {
   const { euiTheme } = useEuiTheme();
   const popoverStyle = euiTheme.base * 13;
-
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
+  const { storage } = kibana.services;
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
+
+  const sortingService = useMemo(() => {
+    return new SortingService(storage);
+  }, [storage]);
+
+  const [dataViewSortSettings, setDataViewSortSettings] = useState(sortingService.getSorting());
+  const [sortedDataViewsList, setSortedDataViewsList] = useState(
+    handleSortingByDirection(dataViewsList, dataViewSortSettings.direction)
+  );
 
   const [sortByOptions, setSortByOptions] = useState<EuiSelectableOption[]>(() => {
     return getColums().map((key) => {
@@ -100,9 +109,22 @@ export function DataViewsList({
     []
   );
 
+  const onChangeSortDataViewList = useCallback(
+    (selectedOption: EuiSelectableOption) => {
+      sortingService.setSorting({ ...dataViewSortSettings, direction: selectedOption.data?.key });
+      setDataViewSortSettings((settings) => {
+        return { ...settings, direction: selectedOption.data?.key };
+      });
+    },
+    [dataViewSortSettings, sortingService]
+  );
+
   const handleChangesDataViewListOrder = useCallback(
     (selectedOption: EuiSelectableOption) => {
       onChangeSortDataViewList(selectedOption);
+      setSortedDataViewsList((dataViews) =>
+        handleSortingByDirection(dataViews, selectedOption.data?.key)
+      );
     },
     [onChangeSortDataViewList]
   );
@@ -129,7 +151,7 @@ export function DataViewsList({
       data-test-subj="indexPattern-switcher"
       searchable
       singleSelection="always"
-      options={dataViewsList?.map(({ title, id, name, isAdhoc }) => ({
+      options={sortedDataViewsList?.map(({ title, id, name, isAdhoc }) => ({
         key: id,
         label: name ? name : title,
         value: id,

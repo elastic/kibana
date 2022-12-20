@@ -7,14 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiIcon,
-  EuiPopover,
-  EuiSelectable,
-  EuiText,
-  EuiPopoverTitle,
-  SortDirection,
-} from '@elastic/eui';
+import { EuiIcon, EuiPopover, EuiSelectable, EuiText, EuiPopoverTitle } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import type {
@@ -99,8 +92,6 @@ function AnnotationLayerHeaderContent({
       indexPatternRefs={frame.dataViews.indexPatternRefs}
       isMissingCurrent={!currentIndexPattern}
       onChangeIndexPattern={onChangeIndexPattern}
-      onChangeSortDataViewList={() => {}}
-      dataViewSortSettings={{ by: 'alphabetically', direction: SortDirection.ASC }}
     />
   );
 }

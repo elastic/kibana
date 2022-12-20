@@ -7,13 +7,12 @@
  */
 
 import React, { Fragment, useEffect, useRef, useState } from 'react';
-import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import type { EuiSelectableProps } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewsList } from './dataview_list';
 import { IUnifiedSearchPluginServices } from '../types';
 import { ExploreMatchingButton } from './explore_matching_button';
-import { Sorting } from './sorting_service';
 
 interface DataViewSelectorProps {
   currentDataViewId?: string;
@@ -24,8 +23,6 @@ interface DataViewSelectorProps {
   setPopoverIsOpen: (isOpen: boolean) => void;
   onChangeDataView: (dataViewId: string) => void;
   onCreateDefaultAdHocDataView?: (pattern: string) => void;
-  onChangeSortDataViewList: (selectedOption: EuiSelectableOption) => void;
-  dataViewSortSettings: Sorting;
 }
 
 export const DataViewSelector = ({
@@ -37,8 +34,6 @@ export const DataViewSelector = ({
   setPopoverIsOpen,
   onChangeDataView,
   onCreateDefaultAdHocDataView,
-  onChangeSortDataViewList,
-  dataViewSortSettings,
 }: DataViewSelectorProps) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { dataViews } = kibana.services;
@@ -75,8 +70,6 @@ export const DataViewSelector = ({
         dataViewsList={dataViewsList}
         onChangeDataView={onChangeDataView}
         currentDataViewId={currentDataViewId}
-        onChangeSortDataViewList={onChangeSortDataViewList}
-        dataViewSortSettings={dataViewSortSettings}
         selectableProps={{
           ...(selectableProps || {}),
           // @ts-expect-error Some EUI weirdness

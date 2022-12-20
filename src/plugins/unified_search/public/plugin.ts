@@ -26,7 +26,6 @@ import { createUpdateFilterReferencesAction } from './actions/update_filter_refe
 import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
 
 import './index.scss';
-import { SortingService } from './dataview_picker/sorting_service';
 
 export class UnifiedSearchPublicPlugin
   implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
@@ -34,13 +33,11 @@ export class UnifiedSearchPublicPlugin
   private readonly storage: IStorageWrapper;
   private readonly autocomplete: AutocompleteService;
   private usageCollection: UsageCollectionSetup | undefined;
-  private sortingService: SortingService;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.storage = new Storage(window.localStorage);
 
     this.autocomplete = new AutocompleteService(initializerContext);
-    this.sortingService = new SortingService(this.storage);
   }
 
   public setup(
@@ -79,7 +76,6 @@ export class UnifiedSearchPublicPlugin
       core,
       data,
       storage: this.storage,
-      sortingService: this.sortingService,
       usageCollection: this.usageCollection,
       isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
       unifiedSearch: {
