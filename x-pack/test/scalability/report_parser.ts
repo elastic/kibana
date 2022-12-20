@@ -7,7 +7,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
-import { ScalabilitySetup } from '@kbn/journeys';
+import { ScalabilitySetup, ResponseTimeMetric } from '@kbn/journeys';
 import { CapacityMetrics, DataPoint, ResponseMetric, RpsMetric } from './types';
 
 const RESPONSE_METRICS_NAMES = [
@@ -27,7 +27,7 @@ const DEFAULT_THRESHOLD = {
   threshold2: 9000,
   threshold3: 15000,
 };
-const METRIC_NAME = '85%';
+const DEFAULT_METRIC = '85%';
 const REQUESTS_REGEXP = /(?<=var requests = unpack\(\[)(.*)(?=\]\);)/g;
 const RESPONSES_PERCENTILES_REGEXP =
   /(?<=var responsetimepercentilesovertimeokPercentiles = unpack\(\[)(.*)(?=\]\);)/g;
@@ -36,7 +36,7 @@ const getRPSByResponseTime = (
   rpsData: RpsMetric[],
   responseTimeData: ResponseMetric[],
   responseTimeThreshold: number,
-  metricName: 'min' | '25%' | '50%' | '75%' | '80%' | '85%' | '90%' | '95%' | '99%' | 'max',
+  metricName: ResponseTimeMetric,
   defaultRpsValue: number
 ) => {
   const timestamp = getTimePoint(responseTimeData, metricName, responseTimeThreshold);
@@ -50,7 +50,7 @@ const getRPSByResponseTime = (
   }
 };
 
-const findDataSet = (str: string, regex: RegExp) => {
+const parseData = (str: string, regex: RegExp) => {
   const found = str.match(regex);
   if (found == null) {
     throw Error('Failed to parse Html string');
@@ -70,7 +70,11 @@ const findDataSet = (str: string, regex: RegExp) => {
     });
 };
 
-const getTimePoint = (data: ResponseMetric[], metricName: string, responseTimeValue: number) => {
+const getTimePoint = (
+  data: ResponseMetric[],
+  metricName: ResponseTimeMetric,
+  responseTimeValue: number
+) => {
   const resultsAboveThreshold = data.filter((i) => i.metrics[metricName] >= responseTimeValue);
   if (resultsAboveThreshold.length > 0) {
     return resultsAboveThreshold[0].timestamp;
@@ -95,10 +99,11 @@ export function getCapacityMetrics(
 ): CapacityMetrics {
   const htmlContent = fs.readFileSync(htmlReportPath, 'utf-8');
   // [timestamp, [activeUsers,requests,0]], e.g. [1669026394,[6,6,0]]
-  const requests = findDataSet(htmlContent, REQUESTS_REGEXP);
+  const requests = parseData(htmlContent, REQUESTS_REGEXP);
   // [timestamp, [min, 25%, 50%, 75%, 80%, 85%, 90%, 95%, 99%, max]], e.g. 1669026394,[9,11,11,12,13,13,14,15,15,16]
-  const responsePercentiles = findDataSet(htmlContent, RESPONSES_PERCENTILES_REGEXP);
+  const responsePercentiles = parseData(htmlContent, RESPONSES_PERCENTILES_REGEXP);
 
+  const metricName = scalabilitySetup.responseTimeMetric || DEFAULT_METRIC;
   // warmup phase duration in seconds
   const warmupDuration = scalabilitySetup.warmup
     .map((action) => {
@@ -120,11 +125,10 @@ export function getCapacityMetrics(
   });
 
   const rpsMax = Math.max(...rpsData.map((i) => i.value));
-  log.info(`rpsMax=${rpsMax}`);
 
   const warmupAvgResponseTime = Math.round(
     warmupData
-      .map((i) => i.metrics[METRIC_NAME])
+      .map((i) => i.metrics[metricName])
       .reduce((avg, value, _, { length }) => {
         return avg + value / length;
       }, 0)
@@ -135,7 +139,7 @@ export function getCapacityMetrics(
     }, 0)
   );
   log.info(
-    `Warmup: Avg ${METRIC_NAME} pct response time - ${warmupAvgResponseTime} ms, avg rps=${rpsAtWarmup}`
+    `Warmup: Avg ${metricName} pct response time - ${warmupAvgResponseTime} ms, avg rps=${rpsAtWarmup}`
   );
 
   // Collected response time metrics: 3 pre-defined thresholds
@@ -145,7 +149,7 @@ export function getCapacityMetrics(
     rpsData,
     testData,
     thresholds.threshold1,
-    METRIC_NAME,
+    metricName,
     rpsMax
   );
 
@@ -153,7 +157,7 @@ export function getCapacityMetrics(
     rpsData,
     testData,
     thresholds.threshold2,
-    METRIC_NAME,
+    metricName,
     rpsMax
   );
 
@@ -161,7 +165,7 @@ export function getCapacityMetrics(
     rpsData,
     testData,
     thresholds.threshold3,
-    METRIC_NAME,
+    metricName,
     rpsMax
   );
 
@@ -169,7 +173,7 @@ export function getCapacityMetrics(
     warmupAvgResponseTime,
     rpsAtWarmup,
     warmupDuration,
-    responseTimeMetric: METRIC_NAME,
+    responseTimeMetric: metricName,
     threshold1ResponseTime: thresholds.threshold1,
     rpsAtThreshold1,
     threshold2ResponseTime: thresholds.threshold2,

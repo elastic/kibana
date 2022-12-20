@@ -9,17 +9,17 @@ import { ToolingLog } from '@kbn/tooling-log';
 import fetch from 'node-fetch';
 import { MetricEvent } from './types';
 
-function eventsToNDJSON(events: MetricEvent[]): string {
+const eventsToNDJSON = (events: MetricEvent[]) => {
   return `${events.map((event) => JSON.stringify(event)).join('\n')}\n`;
-}
+};
 
-function buildHeaders(clusterUuid: string, version: string) {
+const buildHeaders = (clusterUuid: string, version: string) => {
   return {
     'content-type': 'application/x-ndjson',
     'x-elastic-cluster-id': clusterUuid,
     'x-elastic-stack-version': version,
   };
-}
+};
 
 export class EventsShipper {
   url: string;

@@ -1,12 +1,16 @@
 {
   "journeyName": "POST /api/metrics/vis/data",
   "scalabilitySetup": {
-    "thresholdSLA": [3000, 9000, 18000],
+    "responseTimeThreshold": {
+      "threshold1": 5000,
+      "threshold2": 10000,
+      "threshold3": 30000
+    },
     "warmup": [
       {
         "action": "constantUsersPerSec",
         "userCount": 10,
-        "duration": "10s"
+        "duration": "30s"
       }
     ],
     "test": [
