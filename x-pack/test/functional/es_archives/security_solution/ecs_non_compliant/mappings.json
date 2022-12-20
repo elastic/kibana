@@ -37,6 +37,17 @@
                 "type": "keyword"
               }
             }
+          },
+          "dll": {
+            "properties": {
+              "code_signature": {
+                "properties": {
+                  "valid": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
           }
         }
       },

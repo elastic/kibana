@@ -6,26 +6,22 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 interface IndexDocumentsParams {
   es: Client;
   documents: Array<Record<string, unknown>>;
   index: string;
 }
 
-type IndexDocuments = (params: IndexDocumentsParams) => Promise<void>;
+type IndexDocuments = (params: IndexDocumentsParams) => Promise<BulkResponse>;
 
 /**
  * Indexes documents into provided index
  */
-export const indexDocuments: IndexDocuments = async ({ es, documents, index }): Promise<void> => {
-  const operations = documents.flatMap((doc: object) => [
-    { index: { _index: index } },
-    { '@timestamp': new Date().toISOString(), ...doc },
-  ]);
+export const indexDocuments: IndexDocuments = async ({ es, documents, index }) => {
+  const operations = documents.flatMap((doc: object) => [{ index: { _index: index } }, doc]);
 
-  await es.bulk({ refresh: true, operations });
-  return;
+  return es.bulk({ refresh: true, operations });
 };
 
 export const indexDocumentsFactory = ({ es, index }: Omit<IndexDocumentsParams, 'documents'>) => {

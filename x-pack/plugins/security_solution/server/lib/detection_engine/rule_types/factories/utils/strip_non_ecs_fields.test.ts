@@ -461,4 +461,52 @@ describe('stripNonEcsFields', () => {
       expect(removed).toEqual([]);
     });
   });
+
+  describe('boolean field', () => {
+    it('should strip invalid boolean fields', () => {
+      const { result, removed } = stripNonEcsFields({
+        'dll.code_signature.trusted': ['true', 'conflict', 'True', 5],
+      });
+
+      expect(result).toEqual({
+        'dll.code_signature.trusted': ['true'],
+      });
+      expect(removed).toEqual([
+        {
+          key: 'dll.code_signature.trusted',
+          value: 'conflict',
+        },
+        {
+          key: 'dll.code_signature.trusted',
+          value: 'True',
+        },
+        {
+          key: 'dll.code_signature.trusted',
+          value: 5,
+        },
+      ]);
+    });
+
+    it('should not strip valid boolean fields', () => {
+      const { result, removed } = stripNonEcsFields({
+        'dll.code_signature.trusted': ['true', 'false', true, false, ''],
+      });
+
+      expect(result).toEqual({
+        'dll.code_signature.trusted': ['true', 'false', true, false, ''],
+      });
+      expect(removed).toEqual([]);
+    });
+
+    it('should not strip valid boolean fields nested in array', () => {
+      const { result, removed } = stripNonEcsFields({
+        'dll.code_signature.trusted': [[true, false], ''],
+      });
+
+      expect(result).toEqual({
+        'dll.code_signature.trusted': [[true, false], ''],
+      });
+      expect(removed).toEqual([]);
+    });
+  });
 });

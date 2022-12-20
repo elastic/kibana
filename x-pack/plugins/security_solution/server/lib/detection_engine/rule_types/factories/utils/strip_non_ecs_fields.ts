@@ -13,6 +13,7 @@ import type { SearchTypes } from '../../../../../../common/detection_engine/type
 import { isValidIpType } from './ecs_types_validators/is_valid_ip_type';
 import { isValidDateType } from './ecs_types_validators/is_valid_date_type';
 import { isValidNumericType } from './ecs_types_validators/is_valid_numeric_type';
+import { isValidBooleanType } from './ecs_types_validators/is_valid_boolean_type';
 
 type SourceFieldRecord = Record<string, SearchTypes>;
 type SourceField = SearchTypes | SourceFieldRecord;
@@ -115,6 +116,15 @@ const computeIsEcsCompliant = (value: SourceField, path: string) => {
   const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
   const isEcsFieldObject = getIsEcsFieldObject(path);
 
+  // validate if value is a numeric type
+  if (
+    ecsField?.type === 'long' ||
+    ecsField?.type === 'float' ||
+    ecsField?.type === 'scaled_float'
+  ) {
+    return isValidNumericType(value);
+  }
+
   // validate if value is a valid ip type
   if (ecsField?.type === 'ip') {
     return isValidIpType(value);
@@ -125,13 +135,9 @@ const computeIsEcsCompliant = (value: SourceField, path: string) => {
     return isValidDateType(value);
   }
 
-  // validate if value is a numeric type
-  if (
-    ecsField?.type === 'long' ||
-    ecsField?.type === 'float' ||
-    ecsField?.type === 'scaled_float'
-  ) {
-    return isValidNumericType(value);
+  // validate if value is a valid boolean
+  if (ecsField?.type === 'boolean') {
+    return isValidBooleanType(value);
   }
 
   // if ECS mapping is JS object and source value also JS object then they are compliant

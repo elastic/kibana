@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   deleteAllAlerts,
@@ -25,6 +25,7 @@ const getQueryRule = (docIdToQuery: string) => ({
 
 const getDocument = (id: string, doc: Record<string, unknown>) => ({
   id,
+  '@timestamp': new Date().toISOString(),
   ...doc,
 });
 
@@ -40,7 +41,27 @@ export default ({ getService }: FtrProviderContext) => {
     index: 'ecs_non_compliant',
   });
 
-  const previewRuleAndGetAlertSource = async (documentId: string) => {
+  /**
+   * test helper:
+   * 1. index document with auto generated ID
+   * 2. run preview query rule that targets document by ID
+   * 3. return created preview alert and errors logs
+   */
+  const indexAndCreatePreviewAlert = async (document: Record<string, unknown>) => {
+    const documentId = uuidv4();
+
+    const { items } = await indexDocuments([getDocument(documentId, document)]);
+
+    // trow error if document wasn't indexed, so test will be terminated earlier and no false positives can happen
+    items.some(({ index } = {}) => {
+      if (index?.error) {
+        log.error(
+          `Failed to index document in non_ecs_fields test suits: "${index.error?.reason}"`
+        );
+        throw Error(index.error.message);
+      }
+    });
+
     const { previewId, logs } = await previewRule({
       supertest,
       rule: getQueryRule(documentId),
@@ -70,115 +91,111 @@ export default ({ getService }: FtrProviderContext) => {
 
     // source agent.name is object, ECS mapping for agent.name is keyword
     it('should remove source object field from alert if ECS field mapping is keyword', async () => {
-      const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['ecs_non_compliant']),
-        query: `id: "agent.name is object"`,
+      const document = {
+        agent: {
+          name: {
+            first: 'test name 1',
+          },
+          version: 'test-1',
+        },
       };
-      const { previewId } = await previewRule({ supertest, rule });
-      const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+      const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+      expect(errors).toEqual([]);
 
       // valid ECS field is not getting removed
-      expect(previewAlerts[0]._source).toHaveProperty('agent.version', 'test-1');
+      expect(alertSource).toHaveProperty('agent.version', 'test-1');
 
       // invalid ECS field 'agent.name' is getting removed
-      expect(previewAlerts[0]._source).not.toHaveProperty('agent.name');
+      expect(alertSource).not.toHaveProperty('agent.name');
     });
 
     // source container.image is keyword, ECS mapping for container.image is object
     it('should remove source keyword field from alert if ECS field mapping is object', async () => {
-      const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['ecs_non_compliant']),
-        query: `id: "container.image is keyword"`,
+      const document = {
+        container: {
+          name: 'test-image',
+          image: 'test-1',
+        },
       };
-      const { previewId } = await previewRule({ supertest, rule });
-      const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+      const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+      expect(errors).toEqual([]);
 
       // invalid ECS field 'container.image' is getting removed
-      expect(previewAlerts[0]._source).not.toHaveProperty('container.image');
+      expect(alertSource).not.toHaveProperty('container.image');
+
+      expect(alertSource).toHaveProperty('container.name', 'test-image');
     });
 
     // source agent.type is long, ECS mapping for agent.type is keyword
     it('should not remove source long field from alert if ECS field mapping is keyword', async () => {
-      const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['ecs_non_compliant']),
-        query: `id: "agent.type is long"`,
+      const document = {
+        agent: {
+          type: 13,
+        },
       };
-      const { previewId, logs } = await previewRule({ supertest, rule });
-      const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-      expect(logs[0].errors).toEqual([]);
+      const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+      expect(errors).toEqual([]);
 
       // long value should be indexed as keyword
-      expect(previewAlerts[0]._source).toHaveProperty('agent.type', 13);
+      expect(alertSource).toHaveProperty('agent.type', 13);
     });
 
     // source client.ip is keyword, ECS mapping for client.ip is ip
     it('should remove source non ip field from alert if ECS field mapping is ip', async () => {
-      const documentId = 'client.ip is keyword';
-
-      await indexDocuments([
-        {
-          id: documentId,
-          client: {
-            ip: 'non-valid-ip',
-            name: 'test name',
-          },
+      const document = {
+        client: {
+          ip: 'non-valid-ip',
+          name: 'test name',
         },
-      ]);
-
-      const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['ecs_non_compliant']),
-        query: `id: "${documentId}"`,
       };
-      const { previewId, logs } = await previewRule({ supertest, rule });
-      const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-      expect(logs[0].errors).toEqual([]);
+      const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+      expect(errors).toEqual([]);
 
       // invalid ECS field is getting removed
-      expect(previewAlerts[0]._source).not.toHaveProperty('client.ip');
+      expect(alertSource).not.toHaveProperty('client.ip');
 
-      expect(previewAlerts[0]._source).toHaveProperty('client.name', 'test name');
+      expect(alertSource).toHaveProperty('client.name', 'test name');
     });
 
     // source event.created is text, ECS mapping for client.created is date
     it('should remove source non date field from alert if ECS field mapping is date', async () => {
-      const documentId = 'event.created is keyword';
-      await indexDocuments([
-        getDocument(documentId, {
-          event: {
-            created: 'non-valid-date',
-            end: '2022-12-19',
-          },
-        }),
-      ]);
+      const document = {
+        event: {
+          created: 'non-valid-date',
+          end: '2022-12-19',
+        },
+      };
 
-      const { previewId, logs } = await previewRule({ supertest, rule: getQueryRule(documentId) });
-      const previewAlerts = await getPreviewAlerts({ es, previewId });
+      const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
 
-      expect(logs[0].errors).toEqual([]);
+      expect(errors).toEqual([]);
 
       // invalid ECS field is getting removed
       // event properties getting flattened, so we make sure event.created was removed
-      expect(previewAlerts[0]._source).not.toHaveProperty(['event.created']);
-      expect(previewAlerts[0]._source).not.toHaveProperty('event.created');
+      expect(alertSource).not.toHaveProperty(['event.created']);
+      expect(alertSource).not.toHaveProperty('event.created');
 
-      expect(previewAlerts[0]._source).toHaveProperty(['event.end'], '2022-12-19');
+      expect(alertSource).toHaveProperty(['event.end'], '2022-12-19');
     });
 
     // source threat.enrichments is keyword, ECS mapping for threat.enrichments is nested
     it('should remove source array of keywords field from alert if ECS field mapping is nested', async () => {
-      const documentId = 'threat.enrichments is keyword array';
-      await indexDocuments([
-        getDocument(documentId, {
-          threat: {
-            enrichments: ['non-valid-threat-1', 'non-valid-threat-2'],
-            'indicator.port': 443,
-          },
-        }),
-      ]);
+      const document = {
+        threat: {
+          enrichments: ['non-valid-threat-1', 'non-valid-threat-2'],
+          'indicator.port': 443,
+        },
+      };
 
-      const { errors, alertSource } = await previewRuleAndGetAlertSource(documentId);
+      const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
 
       expect(errors).toEqual([]);
 
@@ -190,19 +207,16 @@ export default ({ getService }: FtrProviderContext) => {
 
     // source client.bytes is text, ECS mapping for client.bytes is long
     it('should remove source text field from alert if ECS field mapping is long', async () => {
-      const documentId = 'client.bytes is text';
-      await indexDocuments([
-        getDocument(documentId, {
-          client: {
-            nat: {
-              port: '3000',
-            },
-            bytes: 'conflict',
+      const document = {
+        client: {
+          nat: {
+            port: '3000',
           },
-        }),
-      ]);
+          bytes: 'conflict',
+        },
+      };
 
-      const { errors, alertSource } = await previewRuleAndGetAlertSource(documentId);
+      const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
 
       expect(errors).toEqual([]);
 
@@ -216,23 +230,60 @@ export default ({ getService }: FtrProviderContext) => {
     // we don't validate it because geo_point is very complex type with many various representations: array, different object, string with few valid patterns
     // more on geo_point type https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html
     it('should fail creating alert when ECS field mapping is geo_point', async () => {
-      const documentId = 'client.geo.location is keyword';
-      await indexDocuments([
-        getDocument(documentId, {
-          client: {
-            geo: {
-              name: 'test',
-              location: 'test test',
-            },
+      const document = {
+        client: {
+          geo: {
+            name: 'test',
+            location: 'test test',
           },
-        }),
-      ]);
+        },
+      };
 
-      const { errors } = await previewRuleAndGetAlertSource(documentId);
+      const { errors } = await indexAndCreatePreviewAlert(document);
 
       expect(errors).toContain(
         'Bulk Indexing of signals failed: failed to parse field [client.geo.location] of type [geo_point]'
       );
+    });
+
+    it('should strip invalid boolean values and left valid ones', async () => {
+      const document = {
+        dll: {
+          code_signature: {
+            valid: ['non-valid', 'true', 'false', [true, false], '', 'False', 'True', 1],
+          },
+        },
+      };
+
+      const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+      expect(errors).toEqual([]);
+
+      // invalid ECS values is getting removed
+      expect(alertSource).toHaveProperty('dll.code_signature.valid', [
+        'true',
+        'false',
+        [true, false],
+        '',
+      ]);
+    });
+
+    // dll.code_signature.valid is boolean in ECS mapping
+    it('should strip conflicting ECS mappings boolean field', async () => {
+      const document = {
+        dll: {
+          code_signature: {
+            valid: 'False',
+          },
+        },
+      };
+
+      const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+      expect(errors).toEqual([]);
+
+      // invalid ECS field is getting removed
+      expect(alertSource).not.toHaveProperty('dll.code_signature.valid');
     });
   });
 };
