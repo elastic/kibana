@@ -35,7 +35,7 @@
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },
-          ">({ tableListTitle, tableListDescription, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, customTableColumn, emptyPrompt, findItems, createItem, editItem, deleteItems, getDetailViewLink, onClickTitle, id, contentEditor, children, titleColumnName, additionalRightSideActions, withoutPageTemplateWrapper, }: ",
+          ">({ tableListTitle, tableListDescription, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, findItems, createItem, editItem, deleteItems, getDetailViewLink, onClickTitle, id: listingId, contentEditor, children, titleColumnName, additionalRightSideActions, withoutPageTemplateWrapper, }: ",
           "Props",
           "<T>) => JSX.Element | null"
         ],
@@ -305,11 +305,11 @@
               "Tag",
               ") => void) | undefined; tagRender?: ((tag: ",
               "Tag",
-              ") => JSX.Element) | undefined; }>; SavedObjectSaveModalTagSelector: React.FC<{ initialSelection: string[]; onTagsSelected: (ids: string[]) => void; }>; }; parseSearchQuery: (query: string, options?: { useName?: boolean | undefined; tagField?: string | undefined; } | undefined) => { searchTerm: string; tagReferences: ",
+              ") => JSX.Element) | undefined; }>; SavedObjectSaveModalTagSelector: React.FC<{ initialSelection: string[]; onTagsSelected: (ids: string[]) => void; }>; }; parseSearchQuery: (query: string, options?: { useName?: boolean | undefined; tagField?: string | undefined; } | undefined) => Promise<{ searchTerm: string; tagReferences: ",
               "SavedObjectsFindOptionsReference",
               "[]; tagReferencesToExclude: ",
               "SavedObjectsFindOptionsReference",
-              "[]; valid: boolean; }; getTagList: () => ",
+              "[]; valid: boolean; }>; getTagList: () => ",
               "Tag",
               "[]; getTagIdsFromReferences: (references: ",
               "SavedObjectsReference",

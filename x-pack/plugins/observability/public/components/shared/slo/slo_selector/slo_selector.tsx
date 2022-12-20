@@ -21,7 +21,7 @@ function SloSelector({ onSelected }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
-  const { loading, sloList } = useFetchSloList(searchValue);
+  const { loading, sloList } = useFetchSloList({ name: searchValue, refetch: false });
 
   useEffect(() => {
     const isLoadedWithData = !loading && sloList !== undefined;
