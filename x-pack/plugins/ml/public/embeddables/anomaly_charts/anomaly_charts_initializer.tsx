@@ -53,12 +53,12 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h1>
+          <h2>
             <FormattedMessage
               id="xpack.ml.anomalyChartsEmbeddable.setupModal.title"
               defaultMessage="Anomaly explorer charts configuration"
             />
-          </h1>
+          </h2>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 

@@ -289,7 +289,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           <EuiFlexGroup justifyContent={'spaceBetween'}>
             <EuiFlexItem grow={false}>
               <EuiTitle size={'s'}>
-                <h1>
+                <h2>
                   {isUpdate ? (
                     <FormattedMessage
                       id="xpack.ml.trainedModels.modelsList.updateDeployment.modalTitle"
@@ -303,7 +303,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
                       values={{ modelId }}
                     />
                   )}
-                </h1>
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
 
