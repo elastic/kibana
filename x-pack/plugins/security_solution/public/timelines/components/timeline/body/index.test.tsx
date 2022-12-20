@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import type { Store, Action } from 'redux';
+import { mount } from 'enzyme';
+import { waitFor, render, fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { RenderResult } from '@testing-library/react';
+import type { DroppableProps, DraggableProps } from 'react-beautiful-dnd';
+import { asyncForEach } from '@kbn/std';
 
 import { useCurrentUser } from '../../../../common/lib/kibana/hooks';
 
@@ -37,11 +43,18 @@ import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
-import { mount } from 'enzyme';
 import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../common/lib/kibana/hooks');
+jest.mock('../../../../common/lib/kibana/hooks', () => {
+  const originalModule = jest.requireActual('../../../../common/lib/kibana/hooks');
+  return {
+    ...originalModule,
+    useAppUrl: () => {
+      return { getAppUrl: jest.fn() };
+    },
+  };
+});
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
 );
@@ -70,7 +83,9 @@ const useAddToTimeline = () => ({
   hasDraggableLock: jest.fn(),
   startDragToTimeline: jest.fn(),
 });
-
+// const mockUser = securityMock.createMockAuthenticatedUser({
+//   roles: ['superuser'],
+// });
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
   const mockCasesContract = jest.requireActual('@kbn/cases-plugin/public/mocks');
@@ -104,7 +119,11 @@ jest.mock('../../../../common/lib/kibana', () => {
           getUseAddToTimeline: () => useAddToTimeline,
         },
       },
+      useNavigateTo: jest.fn().mockReturnValue({
+        navigateTo: jest.fn(),
+      }),
     }),
+    useCurrentUser: jest.fn().mockReturnValue({ username: 'user', roles: ['superuser'] }),
   };
 });
 
@@ -127,7 +146,48 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../common/components/link_to');
+jest.mock('../../../../common/components/link_to', () => {
+  const originalModule = jest.requireActual('../../../../common/components/link_to');
+  return {
+    ...originalModule,
+    useGetSecuritySolutionUrl: () =>
+      jest.fn(({ deepLinkId }: { deepLinkId: string }) => `/${deepLinkId}`),
+    useNavigateTo: () => {
+      return { navigateTo: jest.fn() };
+    },
+    useAppUrl: () => {
+      return { getAppUrl: jest.fn() };
+    },
+  };
+});
+
+jest.mock('../../../../common/components/links', () => {
+  const originalModule = jest.requireActual('../../../../common/components/links');
+  return {
+    ...originalModule,
+    useGetSecuritySolutionUrl: () =>
+      jest.fn(({ deepLinkId }: { deepLinkId: string }) => `/${deepLinkId}`),
+    useNavigateTo: () => {
+      return { navigateTo: jest.fn() };
+    },
+    useAppUrl: () => {
+      return { getAppUrl: jest.fn() };
+    },
+  };
+});
+
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_open_alert_details',
+  () => {
+    return {
+      useOpenAlertDetailsAction: () => {
+        return {
+          alertDetailsActionItems: [],
+        };
+      },
+    };
+  }
+);
 
 // Prevent Resolver from rendering
 jest.mock('../../graph_overlay');
@@ -155,31 +215,58 @@ jest.mock('suricata-sid-db', () => {
     db: [],
   };
 });
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions',
+  () => {
+    return {
+      useAddToCaseActions: () => {
+        return {
+          addToCaseActionItems: [],
+        };
+      },
+    };
+  }
+);
+
 jest.mock('react-beautiful-dnd', () => {
   const original = jest.requireActual('react-beautiful-dnd');
   return {
     ...original,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Droppable: ({ children }: { children: any }) =>
+    Droppable: ({ children }: { children: DroppableProps['children'] }) =>
       children(
         {
-          draggableProps: {
-            style: {},
+          droppableProps: {
+            'data-rbd-droppable-context-id': '',
+            'data-rbd-droppable-id': '',
           },
           innerRef: jest.fn(),
         },
-        {}
+        {
+          isDraggingOver: false,
+          isUsingPlaceholder: false,
+        }
       ),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Draggable: ({ children }: { children: any }) =>
+    Draggable: ({ children }: { children: DraggableProps['children'] }) =>
       children(
         {
           draggableProps: {
-            style: {},
+            'data-rbd-draggable-context-id': '',
+            'data-rbd-draggable-id': '',
           },
           innerRef: jest.fn(),
         },
-        {}
+        {
+          isDragging: false,
+          isDropAnimating: false,
+        },
+        {
+          draggableId: '',
+          mode: 'SNAP',
+          source: {
+            droppableId: '',
+            index: 0,
+          },
+        }
       ),
     DraggableProvided: () => <></>,
     DraggableStateSnapshot: () => <></>,
@@ -196,6 +283,8 @@ describe('Body', () => {
       wrappingComponentProps: store ?? {},
     });
     await waitFor(() => wrapper.find('[data-test-subj="suricataRefs"]').exists());
+
+    // await wrapper.findByTestId('suricataRefs');
     return wrapper;
   };
   const mockRefetch = jest.fn();
@@ -203,10 +292,10 @@ describe('Body', () => {
   let authenticatedUser: AuthenticatedUser;
 
   beforeEach(() => {
-    (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
-    authenticatedUser = securityMock.createMockAuthenticatedUser({
-      roles: ['superuser'],
-    });
+    // (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
+    // authenticatedUser = securityMock.createMockAuthenticatedUser({
+    //   roles: ['superuser'],
+    // });
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
@@ -228,8 +317,7 @@ describe('Body', () => {
     trailingControlColumns: [],
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/145187
-  describe.skip('rendering', () => {
+  describe('rendering', () => {
     beforeEach(() => {
       mockDispatch.mockClear();
     });
@@ -248,7 +336,6 @@ describe('Body', () => {
       const wrapper = await getWrapper(<StatefulBody {...props} />);
       expect(wrapper.find('[data-test-subj="events"]').first().exists()).toEqual(true);
     });
-
     test('it renders a tooltip for timestamp', async () => {
       const { storage } = createSecuritySolutionStorageMock();
       const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
@@ -285,12 +372,15 @@ describe('Body', () => {
     const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
       wrapper.find('[data-test-subj="add-note"]').first().find('button').simulate('click');
       wrapper.update();
+      console.log(wrapper.find('[data-test-subj="add-note"]').first().find('button').debug());
       wrapper
         .find('[data-test-subj="new-note-tabs"] textarea')
         .simulate('change', { target: { value: note } });
       wrapper.update();
+      console.log(wrapper.find('[data-test-subj="new-note-tabs"] textarea').debug());
       wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
       wrapper.update();
+      console.log(wrapper.find('button[data-test-subj="add-note"]').first().debug());
     };
 
     beforeEach(() => {
@@ -302,8 +392,9 @@ describe('Body', () => {
 
       addaNoteToEvent(wrapper, 'hello world');
       wrapper.update();
+      console.log(mockDispatch.mock.calls);
       expect(mockDispatch).toHaveBeenNthCalledWith(
-        3,
+        2,
         expect.objectContaining({
           payload: {
             eventId: '1',
@@ -318,7 +409,7 @@ describe('Body', () => {
         })
       );
       expect(mockDispatch).toHaveBeenNthCalledWith(
-        4,
+        3,
         timelineActions.pinEvent({
           eventId: '1',
           id: 'timeline-test',
@@ -386,8 +477,8 @@ describe('Body', () => {
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(2);
-      expect(mockDispatch.mock.calls[1][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(1);
+      expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
           id: 'timeline-test',
           panelView: 'eventDetail',
@@ -407,8 +498,8 @@ describe('Body', () => {
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(2);
-      expect(mockDispatch.mock.calls[1][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(1);
+      expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
           id: 'timeline-test',
           panelView: 'eventDetail',
@@ -428,8 +519,8 @@ describe('Body', () => {
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(2);
-      expect(mockDispatch.mock.calls[1][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(1);
+      expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
           id: 'timeline-test',
           panelView: 'eventDetail',
