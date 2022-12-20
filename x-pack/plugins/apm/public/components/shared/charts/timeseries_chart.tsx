@@ -26,7 +26,7 @@ import {
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
@@ -51,6 +51,9 @@ interface TimeseriesChartProps extends TimeseriesChartWithContextProps {
   comparisonEnabled: boolean;
   offset?: string;
   timeZone: string;
+  rectsAndAnnotations?: Array<
+    ReactElement<typeof RectAnnotation | typeof LineAnnotation>
+  >;
 }
 export function TimeseriesChart({
   id,
@@ -67,6 +70,7 @@ export function TimeseriesChart({
   comparisonEnabled,
   offset,
   timeZone,
+  rectsAndAnnotations,
 }: TimeseriesChartProps) {
   const history = useHistory();
   const { annotations } = useAnnotationsContext();
@@ -219,7 +223,7 @@ export function TimeseriesChart({
           tickFormat={yTickFormat ? yTickFormat : yLabelFormat}
           labelFormat={yLabelFormat}
         />
-
+        {rectsAndAnnotations}
         {showAnnotations && (
           <LineAnnotation
             id="annotations"
@@ -250,7 +254,6 @@ export function TimeseriesChart({
           ]}
           style={endZoneRectAnnotationStyle}
         />
-
         {allSeries.map((serie) => {
           const Series = getChartType(serie.type);
 

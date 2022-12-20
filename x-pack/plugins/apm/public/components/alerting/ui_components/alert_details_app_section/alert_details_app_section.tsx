@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiPanel } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
-import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION,
+  ALERT_END,
+  ALERT_EVALUATION_THRESHOLD,
+} from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
@@ -44,6 +48,10 @@ import {
 import { getAggsTypeFromRule } from './helpers';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
+import {
+  AlertAnnotation,
+  AlertThresholdRect,
+} from './latency_chart_components';
 
 export function AlertDetailsAppSection({
   rule,
@@ -289,7 +297,6 @@ export function AlertDetailsAppSection({
       }),
     },
   ];
-
   /* Error Rate */
 
   return (
@@ -313,6 +320,12 @@ export function AlertDetailsAppSection({
             </EuiFlexGroup>
             <TimeseriesChart
               id="latencyChart"
+              rectsAndAnnotations={[
+                <AlertThresholdRect
+                  threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
+                />,
+                <AlertAnnotation alertStart={alert.start} />,
+              ]}
               height={200}
               comparisonEnabled={comparisonEnabled}
               offset={offset}
