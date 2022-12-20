@@ -36,7 +36,6 @@ export class EventsShipper {
 
   async send(events: MetricEvent[]) {
     const body = eventsToNDJSON(events);
-    this.log.debug(`Sending telemetry data: ${JSON.stringify(eventsToNDJSON)}`);
 
     if (process.env.BUILDKITE_BUILD_ID) {
       const response = await fetch(this.url, {
