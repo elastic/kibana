@@ -41,7 +41,7 @@ import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './
 import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
-import { useUrlState } from './use_url_state';
+import { useInRouterContext, useUrlState } from './use_url_state';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -273,6 +273,14 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   } = useServices();
 
   const openContentEditor = useOpenContentEditor();
+
+  const isInRouterContext = useInRouterContext();
+
+  if (!isInRouterContext) {
+    throw new Error(
+      `<TableListView/> requires a React Router context. Ensure your component or React root is being rendered in the context of a <Router>.`
+    );
+  }
 
   const [urlState, setUrlState] = useUrlState<URLState, URLQueryParams>({
     queryParamsDeserializer: urlStateDeserializer,
