@@ -116,6 +116,7 @@ export type SyntheticsRouteHandler = ({
   response,
   server,
   savedObjectsClient,
+  // @ts-expect-error
   subject: Subject,
 }: {
   uptimeEsClient: UptimeEsClient;
@@ -134,6 +135,7 @@ export type SyntheticsStreamingRouteHandler = ({
   request,
   server,
   savedObjectsClient,
+  // @ts-expect-error
   subject: Subject,
 }: {
   uptimeEsClient: UptimeEsClient;

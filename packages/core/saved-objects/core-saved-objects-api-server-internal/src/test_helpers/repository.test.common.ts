@@ -482,7 +482,7 @@ export const mockUpdateResponse = (
   );
 };
 
-export const updateSuccess = async <T>(
+export const updateSuccess = async <T extends Partial<unknown>>(
   client: ElasticsearchClientMock,
   repository: SavedObjectsRepository,
   registry: SavedObjectTypeRegistry,

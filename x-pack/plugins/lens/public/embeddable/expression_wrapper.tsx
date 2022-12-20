@@ -141,6 +141,7 @@ export function ExpressionWrapper({
             interactive={interactive}
             searchContext={searchContext}
             searchSessionId={searchSessionId}
+            // @ts-expect-error
             onData$={onData$}
             onRender$={onRender$}
             inspectorAdapters={lensInspector.adapters}

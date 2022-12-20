@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+export function omit<T extends {}, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   const result: any = {};
   for (const [key, value] of Object.entries(obj) as any) {
     if (!keys.includes(key)) {

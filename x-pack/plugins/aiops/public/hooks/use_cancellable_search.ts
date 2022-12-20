@@ -25,6 +25,7 @@ export function useCancellableSearch() {
     ): Promise<ResponseType | null> => {
       return new Promise((resolve, reject) => {
         data.search
+          // @ts-expect-error
           .search<RequestBody, ResponseType>(requestBody, {
             abortSignal: abortController.current.signal,
           })

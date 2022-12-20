@@ -109,6 +109,7 @@ async function esQuery<T>(
   dataStartPlugin: DataPublicPluginStart,
   query: IKibanaSearchRequest<T> & { params: { index?: string } }
 ) {
+  // @ts-expect-error
   return new Promise<ESSearchResponse<{}, T>>((resolve, reject) => {
     const search$ = dataStartPlugin.search.search(query).subscribe({
       next: (result) => {

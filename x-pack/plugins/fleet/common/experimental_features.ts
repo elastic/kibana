@@ -40,6 +40,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
       throw new FleetInvalidExperimentalValue(`[${value}] is not a supported experimental feature`);
     }
 
+    // @ts-expect-error
     enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 

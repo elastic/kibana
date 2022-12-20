@@ -48,6 +48,7 @@ const determineFieldPhase = (fieldPath: string): keyof Phases | 'other' => {
 };
 
 export const EnhancedUseField = <T, F = FormData, I = T>(
+  // @ts-expect-error
   props: UseFieldProps<T, F, I>
 ): React.ReactElement<any, any> | null => {
   const { path } = props;
@@ -85,5 +86,6 @@ export const EnhancedUseField = <T, F = FormData, I = T>(
     };
   }, [phase, path, clearError]);
 
+  // @ts-expect-error
   return <UseField {...props} onError={onError} />;
 };

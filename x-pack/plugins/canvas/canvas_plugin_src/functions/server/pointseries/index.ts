@@ -28,6 +28,7 @@ const columnExists = (cols: string[], colName: string): boolean =>
   cols.includes(unquoteString(colName));
 
 function keysOf<T, K extends keyof T>(obj: T): K[] {
+  // @ts-expect-error
   return Object.keys(obj) as K[];
 }
 

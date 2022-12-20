@@ -33,6 +33,7 @@ export const SubSection: FunctionComponent<SubSectionProps> = ({
   const childrenWithProps = Children.map(children, (child) => {
     if (isValidElement(child)) {
       return cloneElement(child, {
+        // @ts-expect-error
         metric,
         id,
         onChangeRangeTime,

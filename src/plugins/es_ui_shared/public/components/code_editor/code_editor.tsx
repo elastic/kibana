@@ -16,7 +16,7 @@ import './_index.scss';
 /**
  * Wraps Object.keys with proper typescript definition of the resulting array
  */
-function keysOf<T, K extends keyof T>(obj: T): K[] {
+function keysOf<T extends {}, K extends keyof T>(obj: T): K[] {
   return Object.keys(obj) as K[];
 }
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// @ts-ignore
+
 import React, { Suspense } from 'react';
 import { EuiLoadingSpinnerSize } from '@elastic/eui/src/components/loading/loading_spinner';
 import { CenterJustifiedSpinner } from '../components/center_justified_spinner';
@@ -15,6 +17,7 @@ export function suspendedComponentWithProps<T = unknown>(
 ) {
   return (props: T) => (
     <Suspense fallback={<CenterJustifiedSpinner size={size ?? 'm'} />}>
+      {/* @ts-expect-error */}
       <ComponentToSuspend {...props} />
     </Suspense>
   );

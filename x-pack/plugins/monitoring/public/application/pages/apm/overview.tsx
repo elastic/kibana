@@ -70,7 +70,10 @@ export const ApmOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
       getPageData={getPageData}
       data-test-subj="apmOverviewPage"
     >
-      {data && <ApmOverview {...data} onBrush={onBrush} zoomInfo={zoomInfo} />}
+      {
+        // @ts-expect-error
+        data && <ApmOverview {...data} onBrush={onBrush} zoomInfo={zoomInfo} />
+      }
     </ApmTemplate>
   );
 };

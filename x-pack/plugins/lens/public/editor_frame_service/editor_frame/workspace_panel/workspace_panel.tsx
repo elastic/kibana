@@ -891,6 +891,7 @@ export const VisualizationWrapper = ({
         searchSessionId={searchSessionId}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
+        // @ts-expect-error
         onData$={onData$}
         onRender$={onRender$}
         inspectorAdapters={lensInspector.adapters}

@@ -146,6 +146,7 @@ export class ApmSynthtraceEsClient {
   }
 
   async index<TFields>(
+    // @ts-expect-error
     events: EntityIterable<TFields> | Array<EntityIterable<TFields>>,
     options?: StreamToBulkOptions,
     streamProcessor?: StreamProcessor
@@ -186,6 +187,7 @@ export class ApmSynthtraceEsClient {
       flushBytes: 500000,
       // TODO https://github.com/elastic/elasticsearch-js/issues/1610
       // having to map here is awkward, it'd be better to map just before serialization.
+      // @ts-expect-error
       datasource: sp.streamToDocumentAsync((e) => sp.toDocument(e), dataStream),
       onDrop: (doc) => {
         this.logger.info(JSON.stringify(doc, null, 2));
