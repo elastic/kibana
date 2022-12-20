@@ -316,6 +316,10 @@ describe('blocks', () => {
         global.kbnHandlebarsEnv = Handlebars.create();
       });
 
+      afterEach(() => {
+        global.kbnHandlebarsEnv = null;
+      });
+
       it('unregisters', () => {
         // @ts-expect-error: Cannot assign to 'decorators' because it is a read-only property.
         kbnHandlebarsEnv!.decorators = {};
