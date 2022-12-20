@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const testRunner = getTestRunner({
-    testName: 'Overview',
+    testName: 'Instance',
     archiveRoot: 'x-pack/test/monitoring_api_integration/archives/apm',
     getService,
   });
