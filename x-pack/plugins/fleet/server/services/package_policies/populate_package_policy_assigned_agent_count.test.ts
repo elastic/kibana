@@ -10,7 +10,7 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 
 import type { PackagePolicy } from '../../../common';
 
-import { populatePackagePolicyAssignedAgentsCount } from './populate_package_policy__assigned_agents_count';
+import { populatePackagePolicyAssignedAgentsCount } from './populate_package_policy_assigned_agents_count';
 
 describe('When using populatePackagePolicyAssignedAgentCount()', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -32,6 +32,22 @@ describe('When using populatePackagePolicyAssignedAgentCount()', () => {
           total: 100,
           max_score: 0,
           hits: [],
+        },
+        aggregations: {
+          agent_counts: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'agent-policy-id-a',
+                doc_count: 100,
+              },
+              {
+                key: 'agent-policy-id-b',
+                doc_count: 50,
+              },
+            ],
+          },
         },
       };
     });
@@ -64,13 +80,10 @@ describe('When using populatePackagePolicyAssignedAgentCount()', () => {
   it('should add `agents` property to each package policy', async () => {
     await populatePackagePolicyAssignedAgentsCount(esClientMock, packagePolicies);
 
-    for (const packagePolicy of packagePolicies) {
-      expect(packagePolicy.agents).toEqual(100);
-    }
-  });
+    packagePolicies.forEach((packagePolicy, index) => {
+      const expectedCount = index % 2 > 0 ? 100 : 50;
 
-  it('should only make 1 api call per agent policy to get agent count', async () => {
-    await populatePackagePolicyAssignedAgentsCount(esClientMock, packagePolicies);
-    expect(esClientMock.search).toHaveBeenCalledTimes(2);
+      expect(packagePolicy.agents).toEqual(expectedCount);
+    });
   });
 });
