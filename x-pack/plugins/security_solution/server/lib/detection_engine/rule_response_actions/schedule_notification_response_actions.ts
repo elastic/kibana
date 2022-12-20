@@ -42,7 +42,7 @@ export const scheduleNotificationResponseActions = (
 
   responseActions.forEach((responseAction) => {
     if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {
-      const { savedQueryId, packId, queries, ecsMapping, ...rest } = responseAction.params;
+      const { savedQueryId, packId, queries, ecsMapping, query, ...rest } = responseAction.params;
 
       if (packId) {
         return osqueryCreateAction(
@@ -58,6 +58,7 @@ export const scheduleNotificationResponseActions = (
       return osqueryCreateAction(
         {
           ...rest,
+          query,
           ecs_mapping: ecsMapping,
           saved_query_id: savedQueryId,
           agent_ids: agentIds,

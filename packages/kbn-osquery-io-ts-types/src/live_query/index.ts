@@ -92,11 +92,6 @@ export type ECSMappingOrUndefined = t.TypeOf<typeof ecsMappingOrUndefined>;
 export const stringArrayOrUndefined = t.union([t.array(t.string), t.undefined]);
 export type StringArrayOrUndefined = t.TypeOf<typeof stringArrayOrUndefined>;
 
-export const skipped = t.boolean;
-export type Skipped = t.TypeOf<typeof skipped>;
-export const skippedOrUndefined = t.union([skipped, t.undefined]);
-export type SkippedOrUndefined = t.TypeOf<typeof skippedOrUndefined>;
-
 export const arrayQueries = t.array(
   t.type({
     id,
