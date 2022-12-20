@@ -153,12 +153,7 @@ export const EmbeddedMapComponent = ({
           services.embeddable
         );
         if (isSubscribed) {
-          if (mapIndexPatterns.length === 0) {
-            setIsIndexError(true);
-          } else {
-            setEmbeddable(embeddableObject);
-            setIsIndexError(false);
-          }
+          setEmbeddable(embeddableObject);
         }
       } catch (e) {
         if (isSubscribed) {
