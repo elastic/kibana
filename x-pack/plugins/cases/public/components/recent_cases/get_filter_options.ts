@@ -12,7 +12,7 @@ import type { FilterMode as RecentCasesFilterMode } from './types';
 
 export interface ReporterFiler {
   currentUserProfile?: UserProfile;
-  currentUser: AuthenticatedElasticUser | null;
+  currentUser: Partial<AuthenticatedElasticUser> | null;
   isLoadingCurrentUserProfile: boolean;
   recentCasesFilterBy: RecentCasesFilterMode;
 }
