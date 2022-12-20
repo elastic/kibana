@@ -193,15 +193,12 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     [handleQueryFlyoutOpen]
   );
 
-  const renderDocsColumn = useCallback(
-    (item: PackQueryStatusItem) => (
-      <DocsColumnResults
-        count={item?.docs ?? 0}
-        isLive={!!item.error || (item?.status !== 'running' && item?.pending === 0)}
-      />
-    ),
-    []
-  );
+  const renderDocsColumn = useCallback((item: PackQueryStatusItem) => {
+    const isLive =
+      !item?.status || !!item.error || (item?.status !== 'running' && item?.pending === 0);
+
+    return <DocsColumnResults count={item?.docs ?? 0} isLive={isLive} />;
+  }, []);
 
   const renderAgentsColumn = useCallback((item) => {
     if (!item.action_id) return;
