@@ -56,7 +56,6 @@ import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useCheckSignalIndex } from '../../../containers/detection_engine/alerts/use_check_signal_index';
 import type { Status } from '../../../../../common/detection_engine/schemas/common';
 
 const defaultTotalAlertsObj: AlertsTotal = {
