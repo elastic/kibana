@@ -7,8 +7,8 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/enterprise_search'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/plugins/enterprise_search/common'],
   collectCoverage: true,
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
