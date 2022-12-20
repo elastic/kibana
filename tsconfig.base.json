@@ -20,6 +20,8 @@
       "@kbn/analytics-shippers-gainsight/*": ["packages/analytics/shippers/gainsight/*"],
       "@kbn/content-management-content-editor": ["packages/content-management/content_editor"],
       "@kbn/content-management-content-editor/*": ["packages/content-management/content_editor/*"],
+      "@kbn/content-management-state": ["packages/content-management/state"],
+      "@kbn/content-management-state/*": ["packages/content-management/state/*"],
       "@kbn/content-management-table-list": ["packages/content-management/table_list"],
       "@kbn/content-management-table-list/*": ["packages/content-management/table_list/*"],
       "@kbn/content-management-utils": ["packages/content-management/utils"],
