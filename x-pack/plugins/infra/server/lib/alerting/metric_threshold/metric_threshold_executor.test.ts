@@ -81,6 +81,7 @@ const mockOptions = {
         started: '2020-01-01T12:00:00.000Z',
         flappingHistory: [],
         flapping: false,
+        pendingRecoveredCount: 0,
       },
       TEST_ALERT_1: {
         alertId: 'TEST_ALERT_1',
@@ -88,6 +89,7 @@ const mockOptions = {
         started: '2020-01-02T12:00:00.000Z',
         flappingHistory: [],
         flapping: false,
+        pendingRecoveredCount: 0,
       },
     },
     trackedAlertsRecovered: {},
