@@ -726,6 +726,38 @@
     "objects": [
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.monacoeditoresmvseditoreditor.api",
+        "type": "Object",
+        "tags": [],
+        "label": "'monaco-editor/esm/vs/editor/editor.api'",
+        "description": [],
+        "signature": [
+          "typeof ",
+          "node_modules/monaco-editor/esm/vs/editor/editor.api"
+        ],
+        "path": "node_modules/monaco-yaml/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.monacoeditoresmvseditoreditor.api",
+        "type": "Object",
+        "tags": [],
+        "label": "'monaco-editor/esm/vs/editor/editor.api'",
+        "description": [],
+        "signature": [
+          "typeof ",
+          "node_modules/monaco-editor/esm/vs/editor/editor.api"
+        ],
+        "path": "node_modules/monaco-yaml/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.PainlessLang",
         "type": "Object",
         "tags": [],

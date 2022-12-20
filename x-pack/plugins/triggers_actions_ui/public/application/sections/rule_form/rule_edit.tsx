@@ -102,6 +102,7 @@ export const RuleEdit = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
+
   const setRule = (value: Rule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
   };

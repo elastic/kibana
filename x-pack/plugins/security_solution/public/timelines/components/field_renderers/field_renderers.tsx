@@ -24,7 +24,7 @@ import { defaultToEmptyTag, getEmptyTagValue } from '../../../common/components/
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
-import * as i18n from '../../../network/components/details/translations';
+import * as i18n from '../../../explore/network/components/details/translations';
 import type { QueryOperator } from '../../../../common/types';
 import { IS_OPERATOR } from '../../../../common/types';
 import { DraggableWrapper } from '../../../common/components/drag_and_drop/draggable_wrapper';

@@ -154,6 +154,11 @@ export interface AppContextTestRender {
    * @param flags
    */
   setExperimentalFlag: (flags: Partial<ExperimentalFeatures>) => void;
+
+  /**
+   * The React Query client (setup to support jest testing)
+   */
+  queryClient: QueryClient;
 }
 
 // Defined a private custom reducer that reacts to an action that enables us to update the
@@ -310,6 +315,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     renderHook,
     renderReactQueryHook,
     setExperimentalFlag,
+    queryClient,
   };
 };
 

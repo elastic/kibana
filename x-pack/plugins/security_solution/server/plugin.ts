@@ -30,10 +30,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
-import {
-  securityGuideId,
-  securityGuideConfig,
-} from '../common/guided_onboarding/security_guide_config';
+import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
   createIndicatorMatchAlertType,
@@ -405,7 +402,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     /**
      * Register a config for the security guide
      */
-    plugins.guidedOnboarding.registerGuideConfig(securityGuideId, securityGuideConfig);
+    plugins.guidedOnboarding.registerGuideConfig(siemGuideId, siemGuideConfig);
 
     return {};
   }

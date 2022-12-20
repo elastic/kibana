@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useHistory, useParams, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -25,7 +26,7 @@ import {
 } from '@elastic/eui';
 
 import {
-  deleteRules,
+  bulkDeleteRules,
   useLoadRuleTypes,
   RuleType,
   getNotifyWhenOptions,
@@ -41,6 +42,8 @@ import { fromQuery, toQuery } from '../../utils/url';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
+import { getDefaultAlertSummaryTimeRange } from './helpers';
+
 import {
   EXECUTION_TAB,
   ALERTS_TAB,
@@ -108,9 +111,15 @@ export function RuleDetailsPage() {
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const ruleQuery = useRef([
+  const [defaultAlertTimeRange] = useState(getDefaultAlertSummaryTimeRange);
+  const ruleQuery = useRef<Query[]>([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
-  ] as Query[]);
+  ]);
+  const alertSummaryWidgetFilter = useRef<estypes.QueryDslQueryContainer>({
+    term: {
+      'kibana.alert.rule.uuid': ruleId,
+    },
+  });
   const tabsRef = useRef<HTMLDivElement>(null);
 
   const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
@@ -379,6 +388,8 @@ export function RuleDetailsPage() {
             rule={rule}
             filteredRuleTypes={filteredRuleTypes}
             onClick={(status) => onAlertSummaryWidgetClick(status)}
+            timeRange={defaultAlertTimeRange}
+            filter={alertSummaryWidgetFilter.current}
           />
         </EuiFlexItem>
         <EuiSpacer size="m" />
@@ -413,7 +424,7 @@ export function RuleDetailsPage() {
           navigateToUrl(http.basePath.prepend(paths.observability.rules));
         }}
         onCancel={() => setRuleToDelete([])}
-        apiDeleteCall={deleteRules}
+        apiDeleteCall={bulkDeleteRules}
         idsToDelete={ruleToDelete}
         singleTitle={rule.name}
         multipleTitle={rule.name}

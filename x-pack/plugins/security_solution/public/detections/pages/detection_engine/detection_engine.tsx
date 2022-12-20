@@ -51,7 +51,7 @@ import * as i18n from './translations';
 import { SecuritySolutionLinkButton } from '../../../common/components/links';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
-import { Display } from '../../../hosts/pages/display';
+import { Display } from '../../../explore/hosts/pages/display';
 import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,
