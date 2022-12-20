@@ -159,6 +159,7 @@ const bulkDisableRulesWithOCC = async (
         const updatedAttributes = updateMeta(context, {
           ...rule.attributes,
           enabled: false,
+          running: false,
           scheduledTaskId:
             rule.attributes.scheduledTaskId === rule.id ? rule.attributes.scheduledTaskId : null,
           updatedBy: username,
