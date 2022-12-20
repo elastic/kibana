@@ -6,6 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { EuiComboBox } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
 import type { Filter, Query } from '@kbn/es-query';
@@ -64,6 +65,7 @@ export interface Props {
   showBuildingBlockAlerts: boolean;
   status: Status;
   showOnlyThreatIndicatorAlerts: boolean;
+  extraActions?: Action[];
 }
 
 const AlertsTreemapPanelComponent: React.FC<Props> = ({
@@ -92,6 +94,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   showBuildingBlockAlerts,
   showOnlyThreatIndicatorAlerts,
   status,
+  extraActions,
 }: Props) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
@@ -237,6 +240,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
               timerange={timerange}
               scopeId={SourcererScopeName.detections}
               alertsOptions={alertsOptions}
+              extraActions={extraActions}
             />
           ) : isLoadingAlerts ? (
             <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />

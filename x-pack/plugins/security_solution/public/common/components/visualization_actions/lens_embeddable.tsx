@@ -58,6 +58,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   timerange,
   inspectTitle,
   alertsOptions,
+  extraActions,
 }) => {
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
@@ -90,6 +91,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     attributes,
     timeRange: timerange,
     inspectActionProps,
+    extraActions,
   });
 
   const handleCloseModal = useCallback(() => {

@@ -6,6 +6,7 @@
  */
 
 import type { EuiComboBox } from '@elastic/eui';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import React, { memo, useMemo, useState, useEffect, useCallback } from 'react';
 import uuid from 'uuid';
@@ -59,6 +60,7 @@ interface AlertsCountPanelProps {
   showBuildingBlockAlerts: boolean;
   status: Status;
   showOnlyThreatIndicatorAlerts: boolean;
+  extraActions?: Action[];
 }
 const ChartHeight = '180px';
 
@@ -85,6 +87,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     showBuildingBlockAlerts,
     showOnlyThreatIndicatorAlerts,
     status,
+    extraActions,
   }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
@@ -238,6 +241,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
                 timerange={timerange}
                 scopeId={SourcererScopeName.detections}
                 alertsOptions={alertsOptions}
+                extraActions={extraActions}
               />
             ) : alertsData != null ? (
               <AlertsCount

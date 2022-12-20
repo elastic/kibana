@@ -6,6 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
@@ -29,6 +30,7 @@ import {
 import { AlertsCountPanel } from '../../../components/alerts_kpis/alerts_count_panel';
 import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translations';
 import type { Status } from '../../../../../common/detection_engine/schemas/common';
+import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 
 const TABLE_PANEL_HEIGHT = 330; // px
 const TRENT_CHART_HEIGHT = 127; // px
@@ -119,6 +121,35 @@ const ChartPanelsComponent: React.FC<Props> = ({
     onResetStackByField1();
   }, [onResetStackByField0, onResetStackByField1]);
 
+  const resetGroupByFieldAction = useMemo(
+    () => [
+      {
+        id: 'resetGroupByField',
+
+        getDisplayName(context: ActionExecutionContext<object>): string {
+          return RESET_GROUP_BY_FIELDS;
+        },
+        getIconType(context: ActionExecutionContext<object>): string | undefined {
+          return 'editorRedo';
+        },
+        type: 'actionButton',
+        async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
+          return true;
+        },
+        async execute(context: ActionExecutionContext<object>): Promise<void> {
+          onReset();
+          updateCommonStackBy0(DEFAULT_STACK_BY_FIELD);
+
+          if (updateCommonStackBy1 != null) {
+            updateCommonStackBy1(DEFAULT_STACK_BY_FIELD1);
+          }
+        },
+        order: 0,
+      },
+    ],
+    [onReset, updateCommonStackBy0, updateCommonStackBy1]
+  );
+
   const chartOptionsContextMenu = useCallback(
     (queryId: string) => (
       <ChartContextMenu
@@ -177,6 +208,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               showBuildingBlockAlerts={showBuildingBlockAlerts}
               status={filterGroup}
               showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+              extraActions={resetGroupByFieldAction}
             />
           )}
         </FullHeightFlexItem>
@@ -208,6 +240,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               showBuildingBlockAlerts={showBuildingBlockAlerts}
               status={filterGroup}
               showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+              extraActions={resetGroupByFieldAction}
             />
           )}
         </FullHeightFlexItem>
@@ -242,6 +275,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               showBuildingBlockAlerts={showBuildingBlockAlerts}
               status={filterGroup}
               showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+              extraActions={resetGroupByFieldAction}
             />
           )}
         </FullHeightFlexItem>

@@ -6,6 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { Position } from '@elastic/charts';
 import type { EuiComboBox, EuiTitleSize } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
@@ -113,6 +114,7 @@ interface AlertsHistogramPanelProps {
   showBuildingBlockAlerts: boolean;
   status?: Status;
   showOnlyThreatIndicatorAlerts: boolean;
+  extraActions?: Action[];
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -152,6 +154,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     showBuildingBlockAlerts,
     showOnlyThreatIndicatorAlerts,
     status,
+    extraActions,
   }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
@@ -445,6 +448,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 timerange={timerange}
                 scopeId={SourcererScopeName.detections}
                 alertsOptions={alertsOptions}
+                extraActions={extraActions}
               />
             ) : isInitialLoading ? (
               <MatrixLoader />

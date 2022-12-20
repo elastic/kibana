@@ -6,6 +6,8 @@
  */
 
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { SourcererScopeName } from '../../store/sourcerer/model';
@@ -42,6 +44,7 @@ export interface LensEmbeddableComponentProps {
   stackByField?: string;
   timerange: { from: string; to: string };
   alertsOptions?: AlertsOptions;
+  extraActions?: Action[];
 }
 
 export enum RequestStatus {
