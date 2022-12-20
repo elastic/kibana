@@ -468,14 +468,19 @@ export const convertPatchAPIToInternalSchema = (
           const notifyWhen = nextParams.throttle
             ? transformToNotifyWhen(nextParams.throttle)
             : existingRule.notifyWhen ?? null;
-          const throttle = nextParams.throttle
+          let throttle = nextParams.throttle
             ? transformToAlertThrottle(nextParams.throttle)
             : existingRule.throttle ?? null;
+
+          // Uses the schedule interval as throttle when the throttle interval is null
+          if (!throttle && notifyWhen === 'onActiveAlert') {
+            throttle = nextParams.interval ?? existingRule.schedule.interval;
+          }
           return {
             ...alertAction,
             frequency: {
-              summary: throttle !== null,
-              notifyWhen,
+              summary: true,
+              notifyWhen: 'onThrottleInterval',
               throttle: throttle === '1h' ? '5m' : throttle,
             },
           };
@@ -540,12 +545,17 @@ export const convertCreateAPIToInternalSchema = (
       input.actions?.map((action) => {
         const alertAction = transformRuleToAlertAction(action);
         const notifyWhen = transformToNotifyWhen(input.throttle);
-        const throttle = transformToAlertThrottle(input.throttle);
+        let throttle = transformToAlertThrottle(input.throttle);
+
+        // Uses the schedule interval as throttle when the throttle interval is null
+        if (!throttle && notifyWhen === 'onActiveAlert') {
+          throttle = input.interval ?? '5m';
+        }
         return {
           ...alertAction,
           frequency: {
-            summary: throttle !== null,
-            notifyWhen,
+            summary: true,
+            notifyWhen: 'onThrottleInterval',
             throttle: throttle === '1h' ? '5m' : throttle,
           },
         };

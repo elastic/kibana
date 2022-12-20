@@ -81,12 +81,17 @@ export const updateRules = async ({
         ? ruleUpdate.actions?.map((action) => {
             const alertAction = transformRuleToAlertAction(action);
             const notifyWhen = transformToNotifyWhen(ruleUpdate.throttle);
-            const throttle = transformToAlertThrottle(ruleUpdate.throttle);
+            let throttle = transformToAlertThrottle(ruleUpdate.throttle);
+
+            // Uses the schedule interval as throttle when the throttle interval is null
+            if (!throttle && notifyWhen === 'onActiveAlert') {
+              throttle = ruleUpdate.interval ?? '5m';
+            }
             return {
               ...alertAction,
               frequency: {
-                summary: throttle !== null,
-                notifyWhen,
+                summary: true,
+                notifyWhen: 'onThrottleInterval',
                 throttle: throttle === '1h' ? '5m' : throttle,
               },
             };
