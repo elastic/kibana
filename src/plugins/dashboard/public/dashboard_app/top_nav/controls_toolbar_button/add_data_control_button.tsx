@@ -17,7 +17,7 @@ interface Props {
 
 export const AddDataControlButton = ({ closePopover, controlGroup }: Props) => {
   return (
-    <EuiContextMenuItem 
+    <EuiContextMenuItem
       key="addControl"
       icon="plusInCircle"
       data-test-subj="controls-create-button"
@@ -29,5 +29,5 @@ export const AddDataControlButton = ({ closePopover, controlGroup }: Props) => {
     >
       {getAddControlButtonTitle()}
     </EuiContextMenuItem>
-  )
-}
+  );
+};

@@ -13,10 +13,7 @@ import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/e
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import _ from 'lodash';
 
-import {
-  ReduxEmbeddablePackage,
-  ReduxEmbeddableTools,
-} from '@kbn/presentation-util-plugin/public';
+import { ReduxEmbeddablePackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
 import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -38,8 +35,13 @@ import { ControlEditor } from '../editor/control_editor';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL, TIME_SLIDER_CONTROL } from '../..';
-import { ControlEmbeddable, ControlInput, ControlOutput, IEditableControlFactory } from '../../types';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../..';
+import {
+  ControlEmbeddable,
+  ControlInput,
+  ControlOutput,
+  IEditableControlFactory,
+} from '../../types';
 import { getNextPanelOrder } from './control_group_helpers';
 import type {
   AddDataControlProps,
@@ -150,7 +152,7 @@ export class ControlGroupContainer extends Container<
         }
       });
     };
-    
+
     const flyoutInstance = openFlyout(
       toMountPoint(
         <ControlsServicesProvider>
@@ -162,9 +164,7 @@ export class ControlGroupContainer extends Container<
             grow={this.getInput().defaultControlGrow ?? DEFAULT_CONTROL_GROW}
             updateTitle={(newTitle) => (controlInput.title = newTitle)}
             updateWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-            updateGrow={(defaultControlGrow: boolean) =>
-              this.updateInput({ defaultControlGrow })
-            }
+            updateGrow={(defaultControlGrow: boolean) => this.updateInput({ defaultControlGrow })}
             onSave={(type) => {
               this.closeAllFlyouts();
               if (!type) {
