@@ -53,6 +53,7 @@ import {
   AlertActiveRect,
   AlertAnnotation,
   AlertThresholdRect,
+  AlertThresholdAnnotation,
 } from './latency_chart_components';
 
 export function AlertDetailsAppSection({
@@ -308,8 +309,11 @@ export function AlertDetailsAppSection({
           threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
           alertStarted={alert.start}
         />,
-        <AlertActiveRect alertStarted={alert.start} />,
         <AlertAnnotation alertStarted={alert.start} />,
+        <AlertActiveRect alertStarted={alert.start} />,
+        <AlertThresholdAnnotation
+          threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
+        />,
       ];
     }
   };

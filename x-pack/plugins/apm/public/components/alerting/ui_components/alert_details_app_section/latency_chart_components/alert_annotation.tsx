@@ -35,7 +35,7 @@ export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
       ]}
       style={{
         line: {
-          strokeWidth: 1,
+          strokeWidth: 3,
           stroke: '#f00',
           opacity: 1,
         },
