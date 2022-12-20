@@ -486,7 +486,7 @@ export const getEndpointConsoleCommands = ({
         allowMultiples: false,
         exclusiveOr: false,
         about: i18n.translate(
-          'xpack.securitySolution.endpointConsoleCommands.suspendProcess.pid.arg.comment',
+          'xpack.securitySolution.endpointConsoleCommands.kubeList.resource.arg.about',
           {
             defaultMessage: 'A kubernetes resource to list (pod or deployment)',
           }
