@@ -104,6 +104,14 @@ export const POLICY_ARTIFACT_BLOCKLISTS_LABELS = Object.freeze({
       defaultMessage: 'Manage blocklist entries',
     }
   ),
+  emptyUnassignedNoPrivilegesMessage: (policyName: string): string =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.policy.blocklist.empty.unassigned.noPrivileges.content',
+      {
+        defaultMessage: 'There are currently no blocklist entries assigned to {policyName}.',
+        values: { policyName },
+      }
+    ),
   emptyUnexistingTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklist.empty.unexisting.title',
     { defaultMessage: 'No blocklists entries exist' }

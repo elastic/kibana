@@ -196,6 +196,7 @@ filegroup(
     "//packages/kbn-ace:build",
     "//packages/kbn-alerts:build",
     "//packages/kbn-ambient-common-types:build",
+    "//packages/kbn-ambient-ftr-types:build",
     "//packages/kbn-ambient-storybook-types:build",
     "//packages/kbn-ambient-ui-types:build",
     "//packages/kbn-analytics:build",

@@ -281,6 +281,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
           <AdvancedParamsContent
             disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
             disableId={!!editData}
+            onAllowHiddenChange={() => {
+              form.getFields().title.validate();
+            }}
           />
         </Form>
         <Footer

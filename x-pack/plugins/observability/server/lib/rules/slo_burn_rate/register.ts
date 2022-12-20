@@ -13,8 +13,8 @@ import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
 import { FIRED_ACTION, getRuleExecutor } from './executor';
 
-const windowSchema = schema.object({
-  duration: schema.number(),
+const durationSchema = schema.object({
+  value: schema.number(),
   unit: schema.string(),
 });
 
@@ -24,14 +24,15 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
   return {
     id: SLO_BURN_RATE_RULE_ID,
     name: i18n.translate('xpack.observability.slo.rules.burnRate.name', {
-      defaultMessage: 'SLO Burn Rate',
+      defaultMessage: 'SLO burn rate',
     }),
     validate: {
       params: schema.object({
         sloId: schema.string(),
-        threshold: schema.number(),
-        longWindow: windowSchema,
-        shortWindow: windowSchema,
+        burnRateThreshold: schema.number(),
+        maxBurnRateThreshold: schema.number(),
+        longWindow: durationSchema,
+        shortWindow: durationSchema,
       }),
     },
     defaultActionGroupId: FIRED_ACTION.id,
@@ -45,7 +46,7 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
       context: [
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
-        { name: 'threshold', description: thresholdActionVariableDescription },
+        { name: 'burnRateThreshold', description: thresholdActionVariableDescription },
         { name: 'longWindow', description: windowActionVariableDescription },
         { name: 'shortWindow', description: windowActionVariableDescription },
       ],
@@ -56,7 +57,7 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
 const thresholdActionVariableDescription = i18n.translate(
   'xpack.observability.slo.alerting.thresholdDescription',
   {
-    defaultMessage: 'The threshold value of the burn rate.',
+    defaultMessage: 'The burn rate threshold value.',
   }
 );
 

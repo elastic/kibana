@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { RawRule } from '../../types';
@@ -129,10 +128,12 @@ const bulkDisableRulesWithOCC = async (
   context: RulesClientContext,
   { filter }: { filter: KueryNode | null }
 ) => {
+  const additionalFilter = nodeBuilder.is('alert.attributes.enabled', 'true');
+
   const rulesFinder =
     await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
       {
-        filter,
+        filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
         type: 'alert',
         perPage: 100,
         ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
@@ -142,9 +143,10 @@ const bulkDisableRulesWithOCC = async (
   const rulesToDisable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
+  const username = await context.getUserName();
 
   for await (const response of rulesFinder.find()) {
-    await pMap(response.saved_objects, async (rule) => {
+    response.saved_objects.forEach((rule) => {
       try {
         if (rule.attributes.enabled === false) return;
 
@@ -154,7 +156,6 @@ const bulkDisableRulesWithOCC = async (
           ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
         }
 
-        const username = await context.getUserName();
         const updatedAttributes = updateMeta(context, {
           ...rule.attributes,
           enabled: false,
@@ -195,6 +196,7 @@ const bulkDisableRulesWithOCC = async (
       }
     });
   }
+  await rulesFinder.close();
 
   const result = await context.unsecuredSavedObjectsClient.bulkCreate(rulesToDisable, {
     overwrite: true,
