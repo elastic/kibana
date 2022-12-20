@@ -19,6 +19,7 @@ import { sloSchema } from '../../types/schema';
 
 export interface Criteria {
   name?: string;
+  indicatorType?: string;
 }
 
 export interface Pagination {
@@ -119,6 +120,9 @@ function buildFilterKuery(criteria: Criteria): string | undefined {
   const filters: string[] = [];
   if (!!criteria.name) {
     filters.push(`slo.attributes.name: ${addWildcardIfAbsent(criteria.name)}`);
+  }
+  if (!!criteria.indicatorType) {
+    filters.push(`slo.attributes.indicator.type: ${criteria.indicatorType}`);
   }
   return filters.length > 0 ? filters.join(' and ') : undefined;
 }

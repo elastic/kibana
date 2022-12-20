@@ -11,6 +11,7 @@ import {
   budgetingMethodSchema,
   dateType,
   indicatorSchema,
+  indicatorTypesSchema,
   objectiveSchema,
   optionalSettingsSchema,
   settingsSchema,
@@ -51,6 +52,7 @@ const getSLOParamsSchema = t.type({
 const findSLOParamsSchema = t.partial({
   query: t.partial({
     name: t.string,
+    indicator_type: indicatorTypesSchema,
     page: t.string,
     per_page: t.string,
     sort_by: t.string,

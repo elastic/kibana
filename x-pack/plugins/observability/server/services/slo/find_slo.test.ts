@@ -115,6 +115,20 @@ describe('FindSLO', () => {
       );
     });
 
+    it('calls the repository with the indicator_type filter criteria', async () => {
+      const slo = createSLO();
+      mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+
+      await findSLO.execute({ indicator_type: 'sli.kql.custom' });
+
+      expect(mockRepository.find).toHaveBeenCalledWith(
+        { indicatorType: 'sli.kql.custom' },
+        { field: SortingField.Name, direction: SortingDirection.Ascending },
+        { page: 1, perPage: 25 }
+      );
+    });
+
     it('calls the repository with the pagination', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
