@@ -697,6 +697,7 @@ packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/analytics/shippers/gainsight @elastic/kibana-core
 packages/content-management/content_editor @elastic/kibana-global-experience
+packages/content-management/state @elastic/kibana-global-experience
 packages/content-management/table_list @elastic/kibana-global-experience
 packages/content-management/utils @elastic/kibana-global-experience
 packages/core/analytics/core-analytics-browser @elastic/kibana-core
