@@ -148,7 +148,11 @@ export class TaskRunner<
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
     this.ruleMonitoring = new RuleMonitoringService();
-    this.ruleRunning = new RunningHandler(this.context.internalSavedObjectsRepository, this.logger, loggerId )
+    this.ruleRunning = new RunningHandler(
+      this.context.internalSavedObjectsRepository,
+      this.logger,
+      loggerId
+    );
   }
 
   private async updateRuleSavedObject(
@@ -662,7 +666,7 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
-    this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId))
+    this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
     const runDate = new Date();
     this.logger.debug(`executing rule ${this.ruleType.id}:${ruleId} at ${runDate.toISOString()}`);
 
