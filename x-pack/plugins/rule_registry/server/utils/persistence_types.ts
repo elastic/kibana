@@ -75,6 +75,7 @@ export type PersistenceAlertType<
 export type CreatePersistenceRuleTypeWrapper = (options: {
   ruleDataClient: IRuleDataClient;
   logger: Logger;
+  formatAlert?: (alert: unknown) => unknown;
 }) => <
   TParams extends RuleTypeParams,
   TState extends RuleTypeState,

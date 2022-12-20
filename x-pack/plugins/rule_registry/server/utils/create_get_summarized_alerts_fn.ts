@@ -21,6 +21,7 @@ import {
   QueryDslQueryContainer,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { merge } from 'lodash';
 import { ParsedTechnicalFields } from '../../common';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { IRuleDataClient, IRuleDataReader } from '../rule_data_client';
@@ -32,6 +33,7 @@ interface CreateGetSummarizedAlertsFnOpts {
   ruleDataClient: PublicContract<IRuleDataClient>;
   useNamespace: boolean;
   isLifecycleAlert: boolean;
+  formatAlert?: (alert: unknown) => unknown;
 }
 
 export const createGetSummarizedAlertsFn =
@@ -72,6 +74,7 @@ export const createGetSummarizedAlertsFn =
         ruleId,
         executionUuid: executionUuid!,
         isLifecycleAlert: opts.isLifecycleAlert,
+        formatAlert: opts.formatAlert,
         excludedAlertInstanceIds,
       });
     }
@@ -82,6 +85,7 @@ export const createGetSummarizedAlertsFn =
       start: start!,
       end: end!,
       isLifecycleAlert: opts.isLifecycleAlert,
+      formatAlert: opts.formatAlert,
       excludedAlertInstanceIds,
     });
   };
@@ -91,6 +95,7 @@ interface GetAlertsByExecutionUuidOpts {
   ruleId: string;
   ruleDataClientReader: IRuleDataReader;
   isLifecycleAlert: boolean;
+  formatAlert?: (alert: unknown) => unknown;
   excludedAlertInstanceIds: string[];
 }
 
@@ -99,6 +104,7 @@ const getAlertsByExecutionUuid = async ({
   ruleId,
   ruleDataClientReader,
   isLifecycleAlert,
+  formatAlert,
   excludedAlertInstanceIds,
 }: GetAlertsByExecutionUuidOpts) => {
   if (isLifecycleAlert) {
@@ -106,6 +112,7 @@ const getAlertsByExecutionUuid = async ({
       executionUuid,
       ruleId,
       ruleDataClientReader,
+      formatAlert,
       excludedAlertInstanceIds,
     });
   }
@@ -114,6 +121,7 @@ const getAlertsByExecutionUuid = async ({
     executionUuid,
     ruleId,
     ruleDataClientReader,
+    formatAlert,
     excludedAlertInstanceIds,
   });
 };
@@ -122,6 +130,7 @@ interface GetAlertsByExecutionUuidHelperOpts {
   executionUuid: string;
   ruleId: string;
   ruleDataClientReader: IRuleDataReader;
+  formatAlert?: (alert: unknown) => unknown;
   excludedAlertInstanceIds: string[];
 }
 
@@ -129,6 +138,7 @@ const getPersistentAlertsByExecutionUuid = async <TSearchRequest extends ESSearc
   executionUuid,
   ruleId,
   ruleDataClientReader,
+  formatAlert,
   excludedAlertInstanceIds,
 }: GetAlertsByExecutionUuidHelperOpts) => {
   // persistent alerts only create new alerts so query by execution UUID to
@@ -140,7 +150,7 @@ const getPersistentAlertsByExecutionUuid = async <TSearchRequest extends ESSearc
   >;
 
   return {
-    new: getHitsWithCount(response),
+    new: getHitsWithCount(response, formatAlert),
     ongoing: {
       count: 0,
       data: [],
@@ -156,6 +166,7 @@ const getLifecycleAlertsByExecutionUuid = async ({
   executionUuid,
   ruleId,
   ruleDataClientReader,
+  formatAlert,
   excludedAlertInstanceIds,
 }: GetAlertsByExecutionUuidHelperOpts) => {
   // lifecycle alerts assign a different action to an alert depending
@@ -173,19 +184,52 @@ const getLifecycleAlertsByExecutionUuid = async ({
   );
 
   return {
-    new: getHitsWithCount(responses[0]),
-    ongoing: getHitsWithCount(responses[1]),
-    recovered: getHitsWithCount(responses[2]),
+    new: getHitsWithCount(responses[0], formatAlert),
+    ongoing: getHitsWithCount(responses[1], formatAlert),
+    recovered: getHitsWithCount(responses[2], formatAlert),
   };
 };
 
+const expandDottedField = (dottedFieldName: string, val: unknown): object => {
+  const parts = dottedFieldName.split('.');
+  if (parts.length === 1) {
+    return { [parts[0]]: val };
+  } else {
+    return { [parts[0]]: expandDottedField(parts.slice(1).join('.'), val) };
+  }
+};
+
+const expandFlattenedAlert = (alert: object) => {
+  if (Array.isArray(alert)) {
+    return alert;
+  }
+  return Object.entries(alert).reduce(
+    (acc, [key, val]) => merge(acc, expandDottedField(key, val)),
+    {}
+  );
+};
+
 const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
-  response: ESSearchResponse<AlertDocument, TSearchRequest>
+  response: ESSearchResponse<AlertDocument, TSearchRequest>,
+  formatAlert?: (alert: unknown) => unknown
 ) => {
-  return {
+  const toReturn = {
     count: (response.hits.total as SearchTotalHits).value,
-    data: response.hits.hits.map((r) => r._source),
+    data: response.hits.hits.map((r) => {
+      const { _id, _index, _source } = r;
+
+      const rawAlert = {
+        _id,
+        _index,
+        ..._source,
+      };
+
+      const formattedAlert = formatAlert ? formatAlert(rawAlert) : rawAlert;
+      return expandFlattenedAlert(formattedAlert as object);
+    }),
   };
+  console.log(`${JSON.stringify(toReturn.data[0])}`);
+  return toReturn;
 };
 
 const getQueryByExecutionUuid = (
@@ -244,6 +288,7 @@ interface GetAlertsByTimeRangeOpts {
   ruleId: string;
   ruleDataClientReader: IRuleDataReader;
   isLifecycleAlert: boolean;
+  formatAlert?: (alert: unknown) => unknown;
   excludedAlertInstanceIds: string[];
 }
 
@@ -253,6 +298,7 @@ const getAlertsByTimeRange = async ({
   ruleId,
   ruleDataClientReader,
   isLifecycleAlert,
+  formatAlert,
   excludedAlertInstanceIds,
 }: GetAlertsByTimeRangeOpts) => {
   if (isLifecycleAlert) {
@@ -261,6 +307,7 @@ const getAlertsByTimeRange = async ({
       end,
       ruleId,
       ruleDataClientReader,
+      formatAlert,
       excludedAlertInstanceIds,
     });
   }
@@ -270,6 +317,7 @@ const getAlertsByTimeRange = async ({
     end,
     ruleId,
     ruleDataClientReader,
+    formatAlert,
     excludedAlertInstanceIds,
   });
 };
@@ -279,6 +327,7 @@ interface GetAlertsByTimeRangeHelperOpts {
   end: Date;
   ruleId: string;
   ruleDataClientReader: IRuleDataReader;
+  formatAlert?: (alert: unknown) => unknown;
   excludedAlertInstanceIds: string[];
 }
 
@@ -293,6 +342,7 @@ const getPersistentAlertsByTimeRange = async <TSearchRequest extends ESSearchReq
   end,
   ruleId,
   ruleDataClientReader,
+  formatAlert,
   excludedAlertInstanceIds,
 }: GetAlertsByTimeRangeHelperOpts) => {
   // persistent alerts only create new alerts so query for all alerts within the time
@@ -304,7 +354,7 @@ const getPersistentAlertsByTimeRange = async <TSearchRequest extends ESSearchReq
   >;
 
   return {
-    new: getHitsWithCount(response),
+    new: getHitsWithCount(response, formatAlert),
     ongoing: {
       count: 0,
       data: [],
@@ -321,6 +371,7 @@ const getLifecycleAlertsByTimeRange = async ({
   end,
   ruleId,
   ruleDataClientReader,
+  formatAlert,
   excludedAlertInstanceIds,
 }: GetAlertsByTimeRangeHelperOpts) => {
   const requests = [
@@ -334,9 +385,9 @@ const getLifecycleAlertsByTimeRange = async ({
   );
 
   return {
-    new: getHitsWithCount(responses[0]),
-    ongoing: getHitsWithCount(responses[1]),
-    recovered: getHitsWithCount(responses[2]),
+    new: getHitsWithCount(responses[0], formatAlert),
+    ongoing: getHitsWithCount(responses[1], formatAlert),
+    recovered: getHitsWithCount(responses[2], formatAlert),
   };
 };
 

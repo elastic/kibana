@@ -36,13 +36,19 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 import { getInputIndex, DataViewError } from '../signals/get_input_output_index';
 import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
+// eslint-disable-next-line no-restricted-imports
+import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
   ({ lists, logger, config, ruleDataClient, ruleExecutionLoggerFactory, version, isPreview }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
-    const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
+    const persistenceRuleType = createPersistenceRuleTypeWrapper({
+      ruleDataClient,
+      logger,
+      formatAlert: formatAlertForNotificationActions,
+    });
     return persistenceRuleType({
       ...type,
       cancelAlertsOnRuleTimeout: false,

@@ -7,14 +7,14 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { chunk } from 'lodash';
-import { ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
+import { ALERT_RULE_TYPE, ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
 import { createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
-  ({ logger, ruleDataClient }) =>
+  ({ logger, ruleDataClient, formatAlert }) =>
   (type) => {
     return {
       ...type,
@@ -161,6 +161,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
         ruleDataClient,
         useNamespace: true,
         isLifecycleAlert: false,
+        formatAlert,
       })(),
     };
   };
