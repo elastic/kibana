@@ -16,15 +16,15 @@ import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_DATE_FORMAT } from '../constants';
 
-export function AlertAnnotation({ alertStart }: { alertStart: number }) {
+export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
   return (
     <LineAnnotation
       id="annotation_alert_started"
       domainType={AnnotationDomainType.XDomain}
       dataValues={[
         {
-          dataValue: alertStart,
-          header: moment(alertStart).format(DEFAULT_DATE_FORMAT),
+          dataValue: alertStarted,
+          header: moment(alertStarted).format(DEFAULT_DATE_FORMAT),
           details: i18n.translate(
             'xpack.apm.latency.chart.alertDetails.alertStarted',
             {

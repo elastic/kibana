@@ -50,6 +50,7 @@ import { getAggsTypeFromRule, isLatencyThresholdRuleType } from './helpers';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 import {
+  AlertActiveRect,
   AlertAnnotation,
   AlertThresholdRect,
 } from './latency_chart_components';
@@ -305,8 +306,10 @@ export function AlertDetailsAppSection({
       return [
         <AlertThresholdRect
           threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
+          alertStarted={alert.start}
         />,
-        <AlertAnnotation alertStart={alert.start} />,
+        <AlertActiveRect alertStarted={alert.start} />,
+        <AlertAnnotation alertStarted={alert.start} />,
       ];
     }
   };

@@ -7,3 +7,4 @@
 
 export { AlertAnnotation } from './alert_annotation';
 export { AlertThresholdRect } from './alert_threshold_rect';
+export { AlertActiveRect } from './alert_active_rect';
