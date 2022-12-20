@@ -20,7 +20,7 @@ import { agentPolicyService } from '../agent_policy';
 
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 
-import { ActionRunner } from './action_runner';
+import { ActionRunner, MAX_RETRY_COUNT } from './action_runner';
 
 import { BulkActionTaskType } from './bulk_actions_resolver';
 import { filterHostedPolicies } from './filter_hosted_agents';
@@ -175,13 +175,13 @@ export async function updateTagsBatch(
   }
 
   // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
-  const getArray = (count: number) => Array.from({ length: count }, () => uuid());
+  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuid());
 
   // writing successful action results
   if (res.updated ?? 0 > 0) {
     await bulkCreateAgentActionResults(
       esClient,
-      (options.kuery === undefined ? agentIds : getArray(res.updated!)).map((id) => ({
+      (options.kuery === undefined ? agentIds : getUuidArray(res.updated!)).map((id) => ({
         agentId: id,
         actionId,
       }))
@@ -202,10 +202,10 @@ export async function updateTagsBatch(
 
   if (res.version_conflicts ?? 0 > 0) {
     // write out error results on last retry, so action is not stuck in progress
-    if (options.retryCount === 3) {
+    if (options.retryCount === MAX_RETRY_COUNT) {
       await bulkCreateAgentActionResults(
         esClient,
-        getArray(res.version_conflicts!).map((id) => ({
+        getUuidArray(res.version_conflicts!).map((id) => ({
           agentId: id,
           actionId,
           error: 'version conflict on 3rd retry',
