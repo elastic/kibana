@@ -115,7 +115,6 @@ export function getCapacityMetrics(
     responsePercentiles.slice(warmupDuration, responsePercentiles.length - 1),
     RESPONSE_METRICS_NAMES
   );
-
   const rpsData = requests.map((r) => {
     return { timestamp: r.timestamp, value: r.values.length > 0 ? r.values[0] : 0 };
   });
@@ -170,6 +169,7 @@ export function getCapacityMetrics(
     warmupAvgResponseTime,
     rpsAtWarmup,
     warmupDuration,
+    responseTimeMetric: METRIC_NAME,
     threshold1ResponseTime: thresholds.threshold1,
     rpsAtThreshold1,
     threshold2ResponseTime: thresholds.threshold2,
