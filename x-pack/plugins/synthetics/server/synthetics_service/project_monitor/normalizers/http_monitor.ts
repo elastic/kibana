@@ -23,6 +23,7 @@ import {
   getOptionalArrayField,
   getUnsupportedKeysError,
   getMultipleUrlsOrHostsError,
+  getNoUrlsOrHostsError,
 } from './common_fields';
 
 export const getNormalizeHTTPFields = ({
@@ -49,6 +50,10 @@ export const getNormalizeHTTPFields = ({
   const urls = getOptionalListField(monitor.urls);
   if (urls.length > 1) {
     errors.push(getMultipleUrlsOrHostsError(monitor, 'urls', version));
+  }
+
+  if (urls.length === 0) {
+    errors.push(getNoUrlsOrHostsError(monitor, 'url', version));
   }
 
   if (unsupportedKeys.length) {

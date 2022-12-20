@@ -143,6 +143,16 @@ export const getMultipleUrlsOrHostsError = (
   )} per monitor. You monitor was not created or updated.`,
 });
 
+export const getNoUrlsOrHostsError = (
+  monitor: ProjectMonitor,
+  key: 'host' | 'url',
+  version: string
+) => ({
+  id: monitor.id,
+  reason: 'Unsupported Heartbeat option',
+  details: `Monitor must specify 1 ${key} for ${monitor.type} project monitors in ${version}. You monitor was not created or updated.`,
+});
+
 export const getValueInSeconds = (value: string) => {
   const keyMap = {
     h: 60 * 60,
@@ -174,7 +184,7 @@ export const getOptionalListField = (value?: string[] | string): string[] => {
  * @param {Array | string} [value]
  * @returns {string} Returns first item when the value is an array, or the value itself
  */
-export const getOptionalArrayField = (value: string[] | string = '') => {
+export const getOptionalArrayField = (value: string[] | string = ''): string | undefined => {
   const array = getOptionalListField(value);
   return array[0];
 };
