@@ -9,6 +9,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SearchHit } from '@kbn/es-types';
 
+import { appContextService } from '..';
+
 import type { Agent, AgentSOAttributes, AgentStatus, FleetServerAgent } from '../../types';
 
 type FleetServerAgentESResponse =
@@ -34,9 +36,14 @@ export function searchHitToAgent(
   };
 
   if (!hit.fields?.status?.length) {
-    throw new Error('Agent status runtime field is missing, unable to get agent status');
+    appContextService
+      .getLogger()
+      .error(
+        'Agent status runtime field is missing, unable to get agent status for agent ' + agent.id
+      );
+  } else {
+    agent.status = hit.fields.status[0];
   }
-  agent.status = hit.fields.status[0];
 
   return agent;
 }
