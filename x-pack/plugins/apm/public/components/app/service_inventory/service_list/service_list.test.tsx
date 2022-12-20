@@ -290,7 +290,7 @@ describe('ServiceList', () => {
         showAlertsColumn: true,
         link: apmRouter.link,
       }).map((c) => c.field);
-      expect(renderedColumns.includes('alertsCount')).toBeFalsy();
+      expect(renderedColumns.includes('alertsCount')).toBeTruthy();
     });
   });
 });
