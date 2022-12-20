@@ -93,13 +93,6 @@ export function DiscoverMainRoute(props: Props) {
           return;
         }
 
-        const defaultDataView = await data.dataViews.getDefaultDataView();
-
-        if (!defaultDataView) {
-          setShowNoDataPage(true);
-          return;
-        }
-
         const { appStateContainer } = getState({ history, savedSearch: nextSavedSearch, services });
         const { index } = appStateContainer.getState();
         const ip = await loadDataView(
@@ -111,7 +104,6 @@ export function DiscoverMainRoute(props: Props) {
 
         const ipList = ip.list;
         const dataViewData = resolveDataView(ip, nextSavedSearch.searchSource, toastNotifications);
-        await data.dataViews.refreshFields(dataViewData);
         setDataViewList(ipList);
 
         return dataViewData;

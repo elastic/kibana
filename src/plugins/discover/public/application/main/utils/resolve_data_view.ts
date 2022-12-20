@@ -38,9 +38,6 @@ export function findDataViewById(
   dataViews: DataViewListItem[],
   id: string
 ): DataViewListItem | undefined {
-  if (!Array.isArray(dataViews) || !id) {
-    return;
-  }
   return dataViews.find((o) => o.id === id);
 }
 
@@ -104,9 +101,10 @@ export async function loadDataView(
     fetchId = dataViewSpec.id!;
   }
 
+  let fetchedDataView: DataView | undefined;
   // try to fetch adhoc data view first
   try {
-    const fetchedDataView = fetchId ? await dataViews.get(fetchId) : undefined;
+    fetchedDataView = fetchId ? await dataViews.get(fetchId) : undefined;
     if (fetchedDataView && !fetchedDataView.isPersisted()) {
       return {
         list: dataViewList || [],
@@ -122,12 +120,14 @@ export async function loadDataView(
   } catch (e) {}
 
   // fetch persisted data view
-  const actualId = getDataViewId(fetchId, dataViewList, config.get('defaultIndex'));
   return {
     list: dataViewList || [],
-    loaded: await dataViews.get(actualId),
+    loaded: fetchedDataView
+      ? fetchedDataView
+      : // we can be certain that the data view exists due to an earlier hasData check
+        ((await dataViews.getDefaultDataView()) as DataView),
     stateVal: fetchId,
-    stateValFound: !!fetchId && actualId === fetchId,
+    stateValFound: !!fetchId && !!fetchedDataView,
   };
 }
 
