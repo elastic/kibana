@@ -58,6 +58,7 @@ export const RecentCasesComp = React.memo<RecentCasesProps>(
                   <TruncatedText text={c.title} />
                 </CaseDetailsLink>
               </EuiText>
+              <EuiSpacer size="xs" />
               {c.description && c.description.length && (
                 <MarkdownContainer>
                   <EuiText color="subdued" size="xs">
@@ -65,13 +66,19 @@ export const RecentCasesComp = React.memo<RecentCasesProps>(
                   </EuiText>
                 </MarkdownContainer>
               )}
+              <EuiSpacer size="xs" />
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" data-test-subj="recent-cases-creation-relative-time">
+                  <EuiText
+                    size="xs"
+                    color="default"
+                    data-test-subj="recent-cases-creation-relative-time"
+                  >
                     <UserActionTimestamp createdAt={c.createdAt} />
                   </EuiText>
                 </EuiFlexItem>
                 <IconWithCount
+                  color="default"
                   count={c.totalComment}
                   icon={'editorComment'}
                   tooltip={i18n.COMMENTS}

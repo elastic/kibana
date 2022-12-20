@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FilterMode } from './types';
 import type { User } from '../../../common/api';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { getReporterFilter, getAssigneeFilter } from './get_filter_options';
@@ -18,18 +17,19 @@ describe('filter options', () => {
     fullName: 'Elastic',
     username: 'elastic',
   };
-  const recentCasesFilterBy: FilterMode = 'recentlyCreated';
+
+  const props: ReporterFiler = {
+    currentUserProfile,
+    currentUser,
+    isLoadingCurrentUserProfile: false,
+    recentCasesFilterBy: 'myRecentlyReported',
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('returns reporters filters using currentUserProfile', () => {
-    const props: ReporterFiler = {
-      currentUserProfile,
-      currentUser,
-      isLoadingCurrentUserProfile: false,
-      recentCasesFilterBy: 'myRecentlyReported',
-    };
     const expected: { reporters: User[] } = {
       reporters: [
         {
@@ -46,12 +46,6 @@ describe('filter options', () => {
   });
 
   it('returns reporters filters using current user when currentUserProfile is null or loading', () => {
-    const props: ReporterFiler = {
-      currentUserProfile: undefined,
-      currentUser,
-      isLoadingCurrentUserProfile: false,
-      recentCasesFilterBy: 'myRecentlyReported',
-    };
     const expected: { reporters: User[] } = {
       reporters: [
         {
@@ -61,7 +55,7 @@ describe('filter options', () => {
         },
       ],
     };
-    const result = getReporterFilter({ ...props });
+    const result = getReporterFilter({ ...props, currentUserProfile: undefined });
 
     expect(result).toEqual(expected);
 
@@ -70,34 +64,27 @@ describe('filter options', () => {
     expect(newResult).toEqual(expected);
   });
 
-  it('returns empty reporters filters when filter is not myRecentlyReported', () => {
-    const props: ReporterFiler = {
-      currentUserProfile,
-      currentUser,
-      isLoadingCurrentUserProfile: false,
-      recentCasesFilterBy,
-    };
-    const result = getReporterFilter({ ...props });
+  it('returns empty reporters filters when filter is recentlyCreated', () => {
+    const result = getReporterFilter({ ...props, recentCasesFilterBy: 'recentlyCreated' });
 
     expect(result).toEqual({ reporters: [] });
   });
 
   it('returns assignees filters', () => {
-    const props: AssigneeFilter = {
+    const assigneeProps: AssigneeFilter = {
       currentUserProfile,
       isLoadingCurrentUserProfile: false,
     };
-    const result = getAssigneeFilter({ ...props });
+    const result = getAssigneeFilter({ ...assigneeProps });
 
     expect(result).toEqual({ assignees: [currentUserProfile.uid] });
   });
 
   it('returns empty assignees filters when when currentUserProfile is null or loading', () => {
-    const props: AssigneeFilter = {
+    const result = getAssigneeFilter({
       currentUserProfile: undefined,
       isLoadingCurrentUserProfile: false,
-    };
-    const result = getAssigneeFilter({ ...props });
+    });
 
     expect(result).toEqual({ assignees: [] });
 

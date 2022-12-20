@@ -30,7 +30,7 @@ const NoCasesComponent = ({ recentCasesFilterBy }: NoCasesComp) => {
     [navigateToCreateCase]
   );
 
-  const getCasesMessage = (): ReactElement => {
+  const getNoCasesMessage = (): ReactElement => {
     if (recentCasesFilterBy === 'myRecentlyAssigned') {
       return <span data-test-subj="no-cases-assigned-to-me">{i18n.NO_CASES_ASSIGNED_TO_ME}</span>;
     }
@@ -49,7 +49,7 @@ const NoCasesComponent = ({ recentCasesFilterBy }: NoCasesComp) => {
   };
 
   return permissions.create ? (
-    getCasesMessage()
+    getNoCasesMessage()
   ) : (
     <span data-test-subj="no-cases-readonly">{i18n.NO_CASES_READ_ONLY}</span>
   );
