@@ -25,6 +25,7 @@ export function createClientMock() {
   };
   const agentInHostedDoc2 = {
     _id: 'agent-in-hosted-policy2',
+    _index: 'index',
     _source: {
       policy_id: 'hosted-agent-policy',
       local_metadata: { elastic: { agent: { version: '8.4.0', upgradeable: true } } },
