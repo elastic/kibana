@@ -92,9 +92,6 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
                     />
                   </Title>
                 </EuiFlexItem>
-                {/* <EuiFlexItem>*/}
-                {/*  <FieldStatsFlyout />*/}
-                {/* </EuiFlexItem>*/}
               </EuiFlexGroup>
               <PickFieldsStep
                 isCurrentStep={currentStep === WIZARD_STEPS.PICK_FIELDS}
