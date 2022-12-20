@@ -143,8 +143,9 @@ export class CspPlugin
           for (const deletedPackagePolicy of deletedPackagePolicies) {
             if (isCspPackage(deletedPackagePolicy.package?.name)) {
               const soClient = core.savedObjects.createInternalRepository();
+              const packagePolicyService = plugins.fleet.packagePolicyService;
               const isPackageExists = await isCspPackagePolicyInstalled(
-                plugins.fleet.packagePolicyService,
+                packagePolicyService,
                 soClient,
                 this.logger
               );

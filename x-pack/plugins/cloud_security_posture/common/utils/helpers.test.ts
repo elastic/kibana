@@ -11,7 +11,7 @@ import {
   getBenchmarkTypeFilterFromBenchmarkId,
 } from './helpers';
 
-describe('create CSP rules with post package create callback', () => {
+describe('test helper methods', () => {
   it('get default integration type from inputs with multiple enabled types', () => {
     const mockPackagePolicy = createPackagePolicyMock();
 

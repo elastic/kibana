@@ -54,7 +54,6 @@ const getWrapper =
 const getRuleMock = ({
   savedObjectId = chance.guid(),
   id = chance.guid(),
-  enabled,
 }: {
   savedObjectId?: string;
   id?: string;
@@ -69,6 +68,7 @@ const getRuleMock = ({
         benchmark: {
           name: chance.word(),
           version: chance.sentence(),
+          id: chance.word(),
         },
         default_value: chance.sentence(),
         description: chance.sentence(),
@@ -84,13 +84,11 @@ const getRuleMock = ({
         tags: [chance.word(), chance.word()],
         version: chance.sentence(),
       },
-      enabled,
       muted: false,
     },
   } as RuleSavedObject);
 
 const params = {
-  policyId: chance.guid(),
   packagePolicyId: chance.guid(),
 };
 
@@ -112,6 +110,7 @@ describe('<RulesContainer />', () => {
         total: 1,
         savedObjects: [rule1],
       },
+      policyId: params.packagePolicyId,
     });
 
     render(

@@ -259,7 +259,7 @@ describe('benchmarks API', () => {
     });
 
     describe('test addPackagePolicyCspRules', () => {
-      it('should return the total number and filtered by the relevant benchmark', async () => {
+      it('should return filtered by the relevant benchmark and return the total number of csp rule template of this exact benchmark', async () => {
         const benchmark = 'cis_k8s';
         mockSoClient.find.mockResolvedValueOnce({
           aggregations: { enabled_status: { doc_count: 2 } },
