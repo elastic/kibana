@@ -49,51 +49,118 @@ Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 
   }
 });
 
-it('Only provide options.fn/inverse to block helpers', () => {
-  function toHaveProperties(...args: any[]) {
-    toHaveProperties.calls++;
-    const options = args[args.length - 1];
-    expect(options).toHaveProperty('fn');
-    expect(options).toHaveProperty('inverse');
-    return 42;
-  }
-  toHaveProperties.calls = 0;
+// Extra "helpers" tests
+describe('helpers', () => {
+  it('Only provide options.fn/inverse to block helpers', () => {
+    function toHaveProperties(...args: any[]) {
+      toHaveProperties.calls++;
+      const options = args[args.length - 1];
+      expect(options).toHaveProperty('fn');
+      expect(options).toHaveProperty('inverse');
+      return 42;
+    }
+    toHaveProperties.calls = 0;
 
-  function toNotHaveProperties(...args: any[]) {
-    toNotHaveProperties.calls++;
-    const options = args[args.length - 1];
-    expect(options).not.toHaveProperty('fn');
-    expect(options).not.toHaveProperty('inverse');
-    return 42;
-  }
-  toNotHaveProperties.calls = 0;
+    function toNotHaveProperties(...args: any[]) {
+      toNotHaveProperties.calls++;
+      const options = args[args.length - 1];
+      expect(options).not.toHaveProperty('fn');
+      expect(options).not.toHaveProperty('inverse');
+      return 42;
+    }
+    toNotHaveProperties.calls = 0;
 
-  const nonBlockTemplates = ['{{foo}}', '{{foo 1 2}}'];
-  const blockTemplates = ['{{#foo}}42{{/foo}}', '{{#foo 1 2}}42{{/foo}}'];
+    const nonBlockTemplates = ['{{foo}}', '{{foo 1 2}}'];
+    const blockTemplates = ['{{#foo}}42{{/foo}}', '{{#foo 1 2}}42{{/foo}}'];
 
-  for (const template of nonBlockTemplates) {
-    expectTemplate(template)
-      .withInput({
-        foo: toNotHaveProperties,
+    for (const template of nonBlockTemplates) {
+      expectTemplate(template)
+        .withInput({
+          foo: toNotHaveProperties,
+        })
+        .toCompileTo('42');
+
+      expectTemplate(template).withHelper('foo', toNotHaveProperties).toCompileTo('42');
+    }
+
+    for (const template of blockTemplates) {
+      expectTemplate(template)
+        .withInput({
+          foo: toHaveProperties,
+        })
+        .toCompileTo('42');
+
+      expectTemplate(template).withHelper('foo', toHaveProperties).toCompileTo('42');
+    }
+
+    const factor = process.env.AST || process.env.EVAL ? 1 : 2;
+    expect(toNotHaveProperties.calls).toEqual(nonBlockTemplates.length * 2 * factor);
+    expect(toHaveProperties.calls).toEqual(blockTemplates.length * 2 * factor);
+  });
+
+  it('should pass expected "this" and arguments to helper functions', () => {
+    expectTemplate('{{hello "world" 12 true false}}')
+      .withHelper('hello', function (this: any, ...args) {
+        expect(this).toMatchInlineSnapshot(`
+          Object {
+            "people": Array [
+              Object {
+                "id": 1,
+                "name": "Alan",
+              },
+              Object {
+                "id": 2,
+                "name": "Yehuda",
+              },
+            ],
+          }
+        `);
+        expect(args).toMatchInlineSnapshot(`
+          Array [
+            "world",
+            12,
+            true,
+            false,
+            Object {
+              "data": Object {
+                "root": Object {
+                  "people": Array [
+                    Object {
+                      "id": 1,
+                      "name": "Alan",
+                    },
+                    Object {
+                      "id": 2,
+                      "name": "Yehuda",
+                    },
+                  ],
+                },
+              },
+              "hash": Object {},
+              "loc": Object {
+                "end": Object {
+                  "column": 31,
+                  "line": 1,
+                },
+                "start": Object {
+                  "column": 0,
+                  "line": 1,
+                },
+              },
+              "lookupProperty": [Function],
+              "name": "hello",
+            },
+          ]
+        `);
       })
-      .toCompileTo('42');
-
-    expectTemplate(template).withHelper('foo', toNotHaveProperties).toCompileTo('42');
-  }
-
-  for (const template of blockTemplates) {
-    expectTemplate(template)
       .withInput({
-        foo: toHaveProperties,
+        people: [
+          { name: 'Alan', id: 1 },
+          { name: 'Yehuda', id: 2 },
+        ],
       })
-      .toCompileTo('42');
-
-    expectTemplate(template).withHelper('foo', toHaveProperties).toCompileTo('42');
-  }
-
-  const factor = process.env.AST || process.env.EVAL ? 1 : 2;
-  expect(toNotHaveProperties.calls).toEqual(nonBlockTemplates.length * 2 * factor);
-  expect(toHaveProperties.calls).toEqual(blockTemplates.length * 2 * factor);
+      .toCompileTo('');
+  });
 });
 
 // Extra "blocks" tests

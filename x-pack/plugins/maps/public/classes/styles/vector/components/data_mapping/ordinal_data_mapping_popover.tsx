@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import React, { ChangeEvent, Fragment, MouseEvent } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiFormRow,
   EuiHorizontalRule,
@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import type { _SingleRangeChangeEvent } from '@elastic/eui/src/components/form/range/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_SIGMA } from '../../vector_style_defaults';
@@ -95,7 +96,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
     });
   }
 
-  function onSigmaChange(event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) {
+  function onSigmaChange(event: _SingleRangeChangeEvent) {
     // @ts-expect-error
     props.onChange({
       fieldMetaOptions: {

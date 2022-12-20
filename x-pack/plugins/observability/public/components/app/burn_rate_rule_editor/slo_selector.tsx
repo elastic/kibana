@@ -23,7 +23,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
-  const { loading, sloList } = useFetchSloList(searchValue);
+  const { loading, sloList } = useFetchSloList({ name: searchValue, refetch: false });
   const hasError = errors !== undefined && errors.length > 0;
 
   useEffect(() => {
