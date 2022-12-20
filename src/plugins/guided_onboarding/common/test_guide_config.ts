@@ -14,6 +14,7 @@ export const testGuideConfig: GuideConfig = {
   title: 'Test guide for development',
   description: `This guide is used to test the guided onboarding UI while in development and to run automated tests for the API and UI components.`,
   guideName: 'Testing example',
+  telemetryId: 'testGuide',
   completedGuideRedirectLocation: {
     appID: 'guidedOnboardingExample',
     path: '/',
@@ -41,7 +42,13 @@ export const testGuideConfig: GuideConfig = {
       title: 'Step 2 (manual completion after navigation)',
       descriptionList: [
         'This step is set to ready_to_complete on page navigation.',
-        'After that click the popover on the guide button in the header and mark the step done',
+        {
+          descriptionText:
+            'After that click the popover on the guide button in the header and mark the step done.',
+          linkText: 'Example link',
+          linkUrl: 'https://www.elastic.co',
+          isLinkExternal: true,
+        },
       ],
       location: {
         appID: 'guidedOnboardingExample',

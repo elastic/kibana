@@ -11,6 +11,7 @@ import { noop } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
+import { siemGuideId } from '../../../../../../../common/guided_onboarding/siem_guide_config';
 import { BulkActionType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFindRulesQuery } from '../../../../../rule_management/api/hooks/use_find_rules_query';
@@ -48,7 +49,7 @@ export const RulesManagementTour = () => {
   const { actions } = useRulesTableContext();
 
   const isRulesStepActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$('security', 'rules') ?? of(false),
+    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, 'rules') ?? of(false),
     false
   );
 
@@ -105,7 +106,7 @@ export const RulesManagementTour = () => {
   // Synchronize the current "internal" tour step with the global one
   useEffect(() => {
     if (isRulesStepActive && tourStatus === GuidedOnboardingRulesStatus.completed) {
-      guidedOnboardingApi?.completeGuideStep('security', 'rules');
+      guidedOnboardingApi?.completeGuideStep('siem', 'rules');
     }
   }, [guidedOnboardingApi, isRulesStepActive, tourStatus]);
 

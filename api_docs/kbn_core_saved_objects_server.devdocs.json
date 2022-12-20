@@ -58,9 +58,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/logging",
+                "pluginId": "@kbn/ecs",
                 "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
+                "docId": "kibKbnEcsPluginApi",
                 "section": "def-server.EcsEventOutcome",
                 "text": "EcsEventOutcome"
               },
@@ -968,12 +968,12 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-server.ISavedObjectsSecurityExtension.checkAuthorization",
+            "id": "def-server.ISavedObjectsSecurityExtension.performAuthorization",
             "type": "Function",
             "tags": [],
-            "label": "checkAuthorization",
+            "label": "performAuthorization",
             "description": [
-              "\nChecks authorization of actions on specified types in specified spaces."
+              "\nPerforms authorization (check & enforce) of actions on specified types in specified spaces."
             ],
             "signature": [
               "<T extends string>(params: ",
@@ -981,8 +981,8 @@
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.CheckAuthorizationParams",
-                "text": "CheckAuthorizationParams"
+                "section": "def-server.PerformAuthorizationParams",
+                "text": "PerformAuthorizationParams"
               },
               "<T>) => Promise<",
               {
@@ -1000,20 +1000,20 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-server.ISavedObjectsSecurityExtension.checkAuthorization.$1",
+                "id": "def-server.ISavedObjectsSecurityExtension.performAuthorization.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
                 "description": [
-                  "- types, spaces, and actions to check"
+                  "- actions, types & spaces map, audit callback, options (enforce bypassed if enforce map is undefined)"
                 ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
                     "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.CheckAuthorizationParams",
-                    "text": "CheckAuthorizationParams"
+                    "section": "def-server.PerformAuthorizationParams",
+                    "text": "PerformAuthorizationParams"
                   },
                   "<T>"
                 ],
@@ -2032,6 +2032,146 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.PerformAuthorizationParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "PerformAuthorizationParams",
+        "description": [
+          "\nThe PerformAuthorizationParams interface contains settings for checking\n& enforcing authorization via the ISavedObjectsSecurityExtension."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.PerformAuthorizationParams",
+            "text": "PerformAuthorizationParams"
+          },
+          "<A>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.PerformAuthorizationParams.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [
+              "\nA set of actions to check."
+            ],
+            "signature": [
+              "Set<A>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.PerformAuthorizationParams.types",
+            "type": "Object",
+            "tags": [],
+            "label": "types",
+            "description": [
+              "\nA set of types to check."
+            ],
+            "signature": [
+              "Set<string>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.PerformAuthorizationParams.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [
+              "\nA set of spaces to check (types to check comes from the typesAndSpaces map)."
+            ],
+            "signature": [
+              "Set<string>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.PerformAuthorizationParams.enforceMap",
+            "type": "Object",
+            "tags": [],
+            "label": "enforceMap",
+            "description": [
+              "\nA map of types (key) to spaces (value) that will be affected by the action(s).\nIf undefined, enforce with be bypassed."
+            ],
+            "signature": [
+              "Map<string, Set<string>> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.PerformAuthorizationParams.auditCallback",
+            "type": "Function",
+            "tags": [],
+            "label": "auditCallback",
+            "description": [
+              "\nA callback intended to handle adding audit events in\nboth error (unauthorized), or success (authorized)\ncases"
+            ],
+            "signature": [
+              "((error?: Error | undefined) => void) | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.PerformAuthorizationParams.auditCallback.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.PerformAuthorizationParams.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "\nAuthorization options\nallowGlobalResource - whether or not to allow global resources, false if options are undefined"
+            ],
+            "signature": [
+              "{ allowGlobalResource: boolean; } | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3059,11 +3199,11 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_to_730/migrations_730.ts"
+                "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_to_730/migrations_730.ts"
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_to_730/migrations_730.ts"
+                "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_to_730/migrations_730.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",

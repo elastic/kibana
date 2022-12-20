@@ -36,7 +36,7 @@ describe('GuidedOnboarding ApiService helpers', () => {
     it('returns undefined if the config is not found', () => {
       const config = findGuideConfigByGuideId(
         { testGuide: testGuideConfig } as GuidesConfig,
-        'security'
+        'siem'
       );
       expect(config).toBeUndefined();
     });
@@ -119,7 +119,7 @@ describe('GuidedOnboarding ApiService helpers', () => {
     });
 
     it('returns false if guide is not in progress', () => {
-      const isActive = isGuideActive(mockPluginStateInProgress, 'security');
+      const isActive = isGuideActive(mockPluginStateInProgress, 'siem');
       expect(isActive).toBe(false);
     });
 
@@ -138,7 +138,7 @@ describe('GuidedOnboarding ApiService helpers', () => {
     it('returns false if guide is not active', () => {
       const isInProgress = isStepInProgress(
         testGuideStep1InProgressState,
-        'security',
+        'siem',
         testGuideFirstStep
       );
       expect(isInProgress).toBe(false);
@@ -172,7 +172,7 @@ describe('GuidedOnboarding ApiService helpers', () => {
     it('returns false if guide is not active', () => {
       const isReadyToComplete = isStepReadyToComplete(
         testGuideStep1InProgressState,
-        'security',
+        'siem',
         testGuideFirstStep
       );
       expect(isReadyToComplete).toBe(false);
