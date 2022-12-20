@@ -212,18 +212,8 @@ export type {
   LoggerConfigType,
   AppenderConfigType,
 } from '@kbn/core-logging-server';
-export type {
-  Logger,
-  LoggerFactory,
-  Ecs,
-  EcsEventCategory,
-  EcsEventKind,
-  EcsEventOutcome,
-  EcsEventType,
-  LogMeta,
-  LogRecord,
-  LogLevel,
-} from '@kbn/logging';
+export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
+export type { Ecs, EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from '@kbn/ecs';
 
 export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 
@@ -366,7 +356,7 @@ export type {
   SavedObjectsRequestHandlerContext,
   EncryptedObjectDescriptor,
   ISavedObjectsEncryptionExtension,
-  CheckAuthorizationParams,
+  PerformAuthorizationParams,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
@@ -429,7 +419,11 @@ export type {
   DeprecationsClient,
   DeprecationsRequestHandlerContext,
 } from '@kbn/core-deprecations-server';
-export type { DeprecationsDetails } from '@kbn/core-deprecations-common';
+export type {
+  DeprecationsDetails,
+  DomainDeprecationDetails,
+  DeprecationsGetResponse,
+} from '@kbn/core-deprecations-common';
 
 export type { AppCategory } from '@kbn/core-application-common';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';

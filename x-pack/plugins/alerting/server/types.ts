@@ -131,6 +131,7 @@ export interface GetSummarizedAlertsFnOpts {
   executionUuid?: string;
   ruleId: string;
   spaceId: string;
+  excludedAlertInstanceIds: string[];
 }
 
 // TODO - add type for these alerts when we determine which alerts-as-data
@@ -138,15 +139,15 @@ export interface GetSummarizedAlertsFnOpts {
 export interface SummarizedAlerts {
   new: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
   ongoing: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
   recovered: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;

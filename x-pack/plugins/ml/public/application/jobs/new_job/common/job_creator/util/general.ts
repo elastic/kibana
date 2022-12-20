@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { NavigateToPath } from '../../../../../contexts/kibana';
@@ -322,6 +322,10 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
     case JOB_TYPE.RARE:
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.rare', {
         defaultMessage: 'Rare',
+      });
+    case JOB_TYPE.GEO:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.geo', {
+        defaultMessage: 'Geo',
       });
     default:
       return '';

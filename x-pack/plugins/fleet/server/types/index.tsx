@@ -87,6 +87,7 @@ export type {
   PackageVerificationStatus,
   BulkInstallPackageInfo,
   PackageAssetReference,
+  ExperimentalDataStreamFeature,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';

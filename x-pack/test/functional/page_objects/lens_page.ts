@@ -38,7 +38,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Clicks the index pattern filters toggle.
      */
     async toggleIndexPatternFiltersPopover() {
-      await testSubjects.click('lnsIndexPatternFiltersToggle');
+      await testSubjects.click('lnsIndexPatternFieldTypeFilterToggle');
     },
 
     async findAllFields() {
@@ -710,6 +710,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async saveAndReturn() {
       await testSubjects.click('lnsApp_saveAndReturnButton');
+    },
+
+    async replaceInDashboard() {
+      await testSubjects.click('lnsApp_replaceInDashboardButton');
     },
 
     async expectSaveAndReturnButtonDisabled() {

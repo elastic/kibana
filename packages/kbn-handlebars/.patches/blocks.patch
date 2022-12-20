@@ -420,7 +420,7 @@
 <       equals(run, true);
 ---
 >       expect(run).toEqual(true);
-406,408c314,321
+406,408c314,317
 <     describe('registration', function() {
 <       it('unregisters', function() {
 <         handlebarsEnv.decorators = {};
@@ -429,15 +429,19 @@
 >       beforeEach(() => {
 >         global.kbnHandlebarsEnv = Handlebars.create();
 >       });
+410c319,327
+<         handlebarsEnv.registerDecorator('foo', function() {
+---
+>       afterEach(() => {
+>         global.kbnHandlebarsEnv = null;
+>       });
 > 
 >       it('unregisters', () => {
 >         // @ts-expect-error: Cannot assign to 'decorators' because it is a read-only property.
 >         kbnHandlebarsEnv!.decorators = {};
-410c323
-<         handlebarsEnv.registerDecorator('foo', function() {
----
+> 
 >         kbnHandlebarsEnv!.registerDecorator('foo', function () {
-414,416c327,329
+414,416c331,333
 <         equals(!!handlebarsEnv.decorators.foo, true);
 <         handlebarsEnv.unregisterDecorator('foo');
 <         equals(handlebarsEnv.decorators.foo, undefined);
@@ -445,23 +449,23 @@
 >         expect(!!kbnHandlebarsEnv!.decorators.foo).toEqual(true);
 >         kbnHandlebarsEnv!.unregisterDecorator('foo');
 >         expect(kbnHandlebarsEnv!.decorators.foo).toBeUndefined();
-419,424c332,339
+419,420c336,338
 <       it('allows multiple globals', function() {
 <         handlebarsEnv.decorators = {};
-< 
-<         handlebarsEnv.registerDecorator({
-<           foo: function() {},
-<           bar: function() {}
 ---
 >       it('allows multiple globals', () => {
 >         // @ts-expect-error: Cannot assign to 'decorators' because it is a read-only property.
 >         kbnHandlebarsEnv!.decorators = {};
-> 
+422,424c340,343
+<         handlebarsEnv.registerDecorator({
+<           foo: function() {},
+<           bar: function() {}
+---
 >         // @ts-expect-error: Expected 2 arguments, but got 1.
 >         kbnHandlebarsEnv!.registerDecorator({
 >           foo() {},
 >           bar() {},
-427,432c342,347
+427,432c346,351
 <         equals(!!handlebarsEnv.decorators.foo, true);
 <         equals(!!handlebarsEnv.decorators.bar, true);
 <         handlebarsEnv.unregisterDecorator('foo');
@@ -475,7 +479,7 @@
 >         kbnHandlebarsEnv!.unregisterDecorator('bar');
 >         expect(kbnHandlebarsEnv!.decorators.foo).toBeUndefined();
 >         expect(kbnHandlebarsEnv!.decorators.bar).toBeUndefined();
-435,445c350,356
+435,445c354,360
 <       it('fails with multiple and args', function() {
 <         shouldThrow(
 <           function() {
@@ -495,7 +499,7 @@
 >             {
 >               world() {
 >                 return 'world!';
-447,452c358,364
+447,452c362,368
 <               {}
 <             );
 <           },

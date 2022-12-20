@@ -11,7 +11,7 @@ import {
   cleanTestMonitors,
   enableMonitorManagedViaApi,
 } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey('Overview Scrolling', async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
@@ -20,9 +20,11 @@ journey('Overview Scrolling', async ({ page, params }) => {
     await enableMonitorManagedViaApi(params.kibanaUrl);
     await cleanTestMonitors(params);
 
+    const allPromises = [];
     for (let i = 0; i < 100; i++) {
-      await addTestMonitor(params.kibanaUrl, `test monitor ${i}`);
+      allPromises.push(addTestMonitor(params.kibanaUrl, `test monitor ${i}`));
     }
+    await Promise.all(allPromises);
 
     await syntheticsApp.waitForLoadingToFinish();
   });

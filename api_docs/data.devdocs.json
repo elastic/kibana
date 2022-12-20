@@ -7776,14 +7776,28 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.GetFieldsOptions.filter",
+            "id": "def-public.GetFieldsOptions.indexFilter",
             "type": "Object",
             "tags": [],
-            "label": "filter",
+            "label": "indexFilter",
             "description": [],
             "signature": [
               "QueryDslQueryContainer",
               " | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.GetFieldsOptions.includeUnmapped",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeUnmapped",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -12923,6 +12937,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
               },
               {
@@ -12995,6 +13013,10 @@
               },
               {
                 "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_combined_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
                 "path": "packages/kbn-es-query/src/es_query/from_filters.test.ts"
               },
               {
@@ -13007,11 +13029,7 @@
               },
               {
                 "plugin": "@kbn/es-query",
-                "path": "packages/kbn-es-query/src/es_query/handle_combined_filter.test.ts"
-              },
-              {
-                "plugin": "@kbn/es-query",
-                "path": "packages/kbn-es-query/src/es_query/handle_nested_filter.test.ts"
+                "path": "packages/kbn-es-query/src/es_query/from_nested_filter.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -13036,6 +13054,18 @@
               {
                 "plugin": "@kbn/es-query",
                 "path": "packages/kbn-es-query/src/filters/build_filters/phrases_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -13320,10 +13350,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
               },
               {
                 "plugin": "ml",
@@ -17008,7 +17034,7 @@
               "\n Get a list of field objects for an index pattern that may contain wildcards\n"
             ],
             "signature": [
-              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; filter?: ",
+              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
               " | undefined; }) => Promise<{ fields: ",
               {
@@ -17071,7 +17097,7 @@
                     "label": "fieldCapsOptions",
                     "description": [],
                     "signature": [
-                      "{ allow_no_indices: boolean; } | undefined"
+                      "{ allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined"
                     ],
                     "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                     "deprecated": false,
@@ -17107,10 +17133,10 @@
                   },
                   {
                     "parentPluginId": "data",
-                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.filter",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.indexFilter",
                     "type": "Object",
                     "tags": [],
-                    "label": "filter",
+                    "label": "indexFilter",
                     "description": [],
                     "signature": [
                       "QueryDslQueryContainer",
@@ -20625,6 +20651,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
               },
               {
@@ -20697,6 +20727,10 @@
               },
               {
                 "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/es_query/from_combined_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
                 "path": "packages/kbn-es-query/src/es_query/from_filters.test.ts"
               },
               {
@@ -20709,11 +20743,7 @@
               },
               {
                 "plugin": "@kbn/es-query",
-                "path": "packages/kbn-es-query/src/es_query/handle_combined_filter.test.ts"
-              },
-              {
-                "plugin": "@kbn/es-query",
-                "path": "packages/kbn-es-query/src/es_query/handle_nested_filter.test.ts"
+                "path": "packages/kbn-es-query/src/es_query/from_nested_filter.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -20738,6 +20768,18 @@
               {
                 "plugin": "@kbn/es-query",
                 "path": "packages/kbn-es-query/src/filters/build_filters/phrases_filter.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
+              },
+              {
+                "plugin": "@kbn/es-query",
+                "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -21022,10 +21064,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
               },
               {
                 "plugin": "ml",
@@ -26647,14 +26685,28 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.GetFieldsOptions.filter",
+            "id": "def-common.GetFieldsOptions.indexFilter",
             "type": "Object",
             "tags": [],
-            "label": "filter",
+            "label": "indexFilter",
             "description": [],
             "signature": [
               "QueryDslQueryContainer",
               " | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.GetFieldsOptions.includeUnmapped",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeUnmapped",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
