@@ -25,6 +25,7 @@ export const DatasourceSelector = ({ onSelect, datasources, current }) => (
           isSelected: d.name === current ? true : false,
           onClick: () => onSelect(d.name),
         }}
+        data-test-subj={`canvasDatasourceCard__${d.name}`}
       />
     ))}
   </div>
