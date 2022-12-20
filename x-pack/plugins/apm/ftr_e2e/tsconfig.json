@@ -14,7 +14,8 @@
       "cypress",
       "node",
       "cypress-real-events"
-    ]
+    ],
+    "isolatedModules": false
   },
   "kbn_references": [
     { "path": "../../../test/tsconfig.json" },
