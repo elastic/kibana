@@ -25,7 +25,6 @@ import {
   FieldsGroupNames,
   GroupedFieldsParams,
   triggerVisualizeActionsTextBasedLanguages,
-  useExistingFieldsReader,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
@@ -132,7 +131,7 @@ export function DiscoverSidebarComponent({
   showFieldList,
   isAffectedByGlobalFilter,
 }: DiscoverSidebarProps) {
-  const { uiSettings, dataViewFieldEditor, dataViews } = useDiscoverServices();
+  const { uiSettings, dataViewFieldEditor, dataViews, core } = useDiscoverServices();
   const isPlainRecord = useAppStateSelector(
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
@@ -268,16 +267,15 @@ export function DiscoverSidebarComponent({
         };
       }
     }, []);
-  const fieldsExistenceReader = useExistingFieldsReader();
-  const fieldListGroupedProps = useGroupedFields({
+  const { fieldListGroupedProps } = useGroupedFields({
     dataViewId: (!isPlainRecord && selectedDataView?.id) || null, // passing `null` for text-based queries
-    fieldsExistenceReader: !isPlainRecord ? fieldsExistenceReader : undefined,
     allFields,
     popularFieldsLimit: !isPlainRecord ? popularFieldsLimit : 0,
     sortedSelectedFields: selectedFieldsState.selectedFields,
     isAffectedByGlobalFilter,
     services: {
       dataViews,
+      core,
     },
     onFilterField,
     onSupportedFieldFilter,
@@ -378,7 +376,7 @@ export function DiscoverSidebarComponent({
             <FieldListGrouped
               {...fieldListGroupedProps}
               renderFieldItem={renderFieldItem}
-              screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
+              screenReaderDescriptionId={fieldSearchDescriptionId}
             />
           )}
         </EuiFlexItem>
