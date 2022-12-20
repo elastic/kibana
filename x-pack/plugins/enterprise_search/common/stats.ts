@@ -13,3 +13,6 @@ export interface SyncJobsStats {
   orphaned_jobs: number;
   stuck: number;
 }
+export interface CloudHealth {
+  has_min_connector_memory: boolean;
+}
