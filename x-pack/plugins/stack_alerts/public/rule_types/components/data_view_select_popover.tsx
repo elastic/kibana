@@ -18,6 +18,7 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiText,
+  SortDirection,
   useEuiPaddingCSS,
 } from '@elastic/eui';
 import type { DataViewListItem, DataView } from '@kbn/data-views-plugin/public';
@@ -197,6 +198,8 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           onChangeDataView={onChangeDataView}
           onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
           isTextBasedLangSelected={false}
+          onChangeSortDataViewList={() => {}}
+          dataViewSortSettings={{ by: 'alphabetically', direction: SortDirection.ASC }}
         />
         {createDataView ? (
           <EuiPopoverFooter paddingSize="none">
