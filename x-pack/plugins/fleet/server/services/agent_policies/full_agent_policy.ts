@@ -12,6 +12,7 @@ import type {
   FullAgentPolicy,
   PackagePolicy,
   Output,
+  ShipperOutput,
   FullAgentPolicyOutput,
   FleetProxy,
   FleetServerHost,
@@ -202,41 +203,42 @@ export function transformOutputToFullPolicyOutput(
   proxy?: FleetProxy,
   standalone = false
 ): FullAgentPolicyOutput {
-  /* eslint-disable @typescript-eslint/naming-convention */
-  const {
-    config_yaml,
-    type,
-    hosts,
-    ca_sha256,
-    ca_trusted_fingerprint,
-    ssl,
-    loadbalance,
-    compression_level,
-    queue_flush_timeout,
-    max_batch_bytes,
-    mem_queue_events,
-  } = output;
-  /* eslint-enable @typescript-eslint/naming-convention */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl, shipper } = output;
 
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
 
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
   let shipperDiskQueueData = {};
-  if (!isShipperDisabled) {
-    shipperDiskQueueData = buildShipperQueueData(output);
+  let generalShipperData;
+
+  if (shipper) {
+    if (!isShipperDisabled) {
+      shipperDiskQueueData = buildShipperQueueData(shipper);
+    }
+    /*
+      TODO: Once the Elastic-Shipper is ready,
+      Verify that these parameters have the correct names and structure
+    */
+    /* eslint-disable @typescript-eslint/naming-convention */
+    const {
+      loadbalance,
+      compression_level,
+      queue_flush_timeout,
+      max_batch_bytes,
+      mem_queue_events,
+    } = shipper;
+    /* eslint-enable @typescript-eslint/naming-convention */
+
+    generalShipperData = {
+      loadbalance,
+      compression_level,
+      queue_flush_timeout,
+      max_batch_bytes,
+      mem_queue_events,
+    };
   }
-  /*
-    TODO: Once the Elastic-Shipper is ready,
-    Verify that these parameters have the correct names and structure
-  */
-  const generalShipperData = {
-    loadbalance,
-    compression_level,
-    queue_flush_timeout,
-    max_batch_bytes,
-    mem_queue_events,
-  };
 
   const newOutput: FullAgentPolicyOutput = {
     ...configJs,
@@ -299,13 +301,13 @@ function getOutputIdForAgentPolicy(output: Output) {
 }
 
 /* eslint-disable @typescript-eslint/naming-convention */
-function buildShipperQueueData(output: Output) {
+function buildShipperQueueData(shipper: ShipperOutput) {
   const {
     disk_queue_enabled,
     disk_queue_path,
     disk_queue_max_size,
     disk_queue_compression_enabled,
-  } = output;
+  } = shipper;
   if (!disk_queue_enabled) return {};
 
   return {

@@ -26,18 +26,7 @@ export interface NewOutput {
     key?: string;
   } | null;
   proxy_id?: string | null;
-  shipper?: {
-    disk_queue_enabled?: boolean;
-    disk_queue_path?: string;
-    disk_queue_max_size?: number;
-    disk_queue_encryption_enabled?: boolean;
-    disk_queue_compression_enabled?: boolean;
-    compression_level?: number;
-    loadbalance?: boolean;
-    mem_queue_events?: number;
-    queue_flush_timeout?: number;
-    max_batch_bytes?: number;
-  } | null;
+  shipper?: ShipperOutput | null;
 }
 
 export type OutputSOAttributes = NewOutput & {
@@ -48,3 +37,16 @@ export type OutputSOAttributes = NewOutput & {
 export type Output = NewOutput & {
   id: string;
 };
+
+export interface ShipperOutput {
+  disk_queue_enabled?: boolean;
+  disk_queue_path?: string;
+  disk_queue_max_size?: number;
+  disk_queue_encryption_enabled?: boolean;
+  disk_queue_compression_enabled?: boolean;
+  compression_level?: number;
+  loadbalance?: boolean;
+  mem_queue_events?: number;
+  queue_flush_timeout?: number;
+  max_batch_bytes?: number;
+}

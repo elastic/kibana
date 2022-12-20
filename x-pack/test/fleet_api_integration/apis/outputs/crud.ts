@@ -82,6 +82,62 @@ export default function (providerContext: FtrProviderContext) {
           .send({ hosts: ['https://test.fr'] })
           .expect(404);
       });
+      it('should allow to update an output with the shipper values', async function () {
+        await supertest
+          .put(`/api/fleet/outputs/${defaultOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+          })
+          .expect(200);
+
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const newOutput = outputs.filter((o: any) => o.id === defaultOutputId);
+
+        expect(newOutput[0].shipper).to.eql({
+          disk_queue_enabled: true,
+          disk_queue_path: 'path/to/disk/queue',
+          disk_queue_encryption_enabled: true,
+        });
+      });
+
+      it('should discard the shipper values when shipper is disabled', async function () {
+        await supertest
+          .put(`/api/fleet/outputs/${defaultOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'default monitoring output 1',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            is_default_monitoring: true,
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+          })
+          .expect(200);
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const newOutput = outputs.filter((o: any) => o.id === defaultOutputId);
+        expect(newOutput[0].shipper).to.equal(null);
+      });
     });
 
     describe('POST /outputs', () => {
@@ -222,7 +278,35 @@ export default function (providerContext: FtrProviderContext) {
         expect(defaultOutputs[0].id).eql(output2.id);
       });
 
-      it('should allow to create an ES output with the shipper values', async function () {
+      it('should allow to create an ES output with the shipper values when shipper is enabled', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'default monitoring output 1',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            is_default_monitoring: true,
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+          })
+          .expect(200);
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const newOutput = outputs.filter((o: any) => o.name === 'My Logstash Output');
+        expect(newOutput.shipper).to.equal({
+          disk_queue_enabled: true,
+          disk_queue_path: 'path/to/disk/queue',
+          disk_queue_encryption_enabled: true,
+        });
+      });
+
+      it('should discard the shipper values when shipper is disabled', async function () {
         await supertest
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
@@ -238,6 +322,11 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const defaultOutputs = outputs.filter((o: any) => o.is_default_monitoring);
+        expect(defaultOutputs.shipper).to.equal(undefined);
       });
 
       it('should allow to create a logstash output with the shipper values', async function () {
@@ -245,8 +334,41 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'default monitoring output 1',
+            name: 'My Logstash Output',
             type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+          })
+          .expect(200);
+
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const newOutput = outputs.filter((o: any) => o.name === 'My Logstash Output');
+        expect(newOutput.shipper).to.equal({
+          disk_queue_enabled: true,
+          disk_queue_path: 'path/to/disk/queue',
+          disk_queue_encryption_enabled: true,
+        });
+      });
+
+      it('should discard the shipper values when shipper is disabled', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'default monitoring output 1',
+            type: 'elasticsearch',
             hosts: ['https://test.fr'],
             is_default_monitoring: true,
             shipper: {
@@ -256,6 +378,11 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const defaultOutputs = outputs.filter((o: any) => o.is_default_monitoring);
+        expect(defaultOutputs.shipper).to.equal(undefined);
       });
     });
 
