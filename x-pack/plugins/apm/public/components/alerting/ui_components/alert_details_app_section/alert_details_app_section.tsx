@@ -16,6 +16,7 @@ import {
   ALERT_DURATION,
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
@@ -45,7 +46,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from './types';
-import { getAggsTypeFromRule } from './helpers';
+import { getAggsTypeFromRule, isLatencyThresholdRuleType } from './helpers';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 import {
@@ -299,6 +300,17 @@ export function AlertDetailsAppSection({
   ];
   /* Error Rate */
 
+  const getRectsAndAnnotationsLatencyChart = () => {
+    if (isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID])) {
+      return [
+        <AlertThresholdRect
+          threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
+        />,
+        <AlertAnnotation alertStart={alert.start} />,
+      ];
+    }
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <ChartPointerEventContextProvider>
@@ -320,12 +332,7 @@ export function AlertDetailsAppSection({
             </EuiFlexGroup>
             <TimeseriesChart
               id="latencyChart"
-              rectsAndAnnotations={[
-                <AlertThresholdRect
-                  threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
-                />,
-                <AlertAnnotation alertStart={alert.start} />,
-              ]}
+              rectsAndAnnotations={getRectsAndAnnotationsLatencyChart()}
               height={200}
               comparisonEnabled={comparisonEnabled}
               offset={offset}
