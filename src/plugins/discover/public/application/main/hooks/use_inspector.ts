@@ -19,7 +19,6 @@ import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 export interface InspectorAdapters {
   requests: RequestAdapter;
   lensRequests?: RequestAdapter;
-  tables?: unknown;
 }
 
 export function useInspector({
@@ -44,7 +43,7 @@ export function useInspector({
       : [inspectorAdapters.requests];
 
     const session = inspector.open(
-      { requests: new AggregateRequestAdapter(requestAdapters), tables: inspectorAdapters.tables },
+      { requests: new AggregateRequestAdapter(requestAdapters) },
       { title: savedSearch.title }
     );
 
@@ -53,7 +52,6 @@ export function useInspector({
     setExpandedDoc,
     inspectorAdapters.lensRequests,
     inspectorAdapters.requests,
-    inspectorAdapters.tables,
     inspector,
     savedSearch.title,
   ]);

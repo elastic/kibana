@@ -13,7 +13,6 @@ import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { TablesAdapter } from '@kbn/expressions-plugin/common';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
@@ -116,10 +115,7 @@ export const useSavedSearch = ({
 
   const recordRawType = useMemo(() => getRawRecordType(query), [query]);
 
-  const inspectorAdapters = useMemo(
-    () => ({ requests: new RequestAdapter(), tables: new TablesAdapter() }),
-    []
-  );
+  const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
 
   /**
    * The observables the UI (aka React component) subscribes to get notified about

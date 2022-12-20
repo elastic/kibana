@@ -10,7 +10,6 @@ import { DataView, DataViewAttributes, SavedObject } from '@kbn/data-views-plugi
 import { SearchSource } from '@kbn/data-plugin/common';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { TablesAdapter } from '@kbn/expressions-plugin/common';
 import { action } from '@storybook/addon-actions';
 import { FetchStatus } from '../../../../types';
 import {
@@ -84,7 +83,7 @@ const getCommonProps = (dataView: DataView) => {
   return {
     dataView,
     dataViewList,
-    inspectorAdapters: { requests: new RequestAdapter(), stables: new TablesAdapter() },
+    inspectorAdapters: { requests: new RequestAdapter() },
     navigateTo: action('navigate to somewhere nice'),
     onChangeDataView: action('change the data view'),
     onUpdateQuery: action('update the query'),
