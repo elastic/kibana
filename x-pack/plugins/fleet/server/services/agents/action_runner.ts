@@ -22,6 +22,8 @@ import { getAgentActions } from './actions';
 import { closePointInTime, getAgentsByKuery } from './crud';
 import type { BulkActionsResolver } from './bulk_actions_resolver';
 
+export const MAX_RETRY_COUNT = 3;
+
 export interface ActionParams {
   kuery: string;
   showInactive?: boolean;
@@ -110,8 +112,8 @@ export abstract class ActionRunner {
                 `Retry #${this.retryParams.retryCount} of task ${this.retryParams.taskId} failed: ${error.message}`
               );
 
-            if (this.retryParams.retryCount === 3) {
-              const errorMessage = 'Stopping after 3rd retry. Error: ' + error.message;
+            if (this.retryParams.retryCount === MAX_RETRY_COUNT) {
+              const errorMessage = `Stopping after ${MAX_RETRY_COUNT}rd retry. Error: ${error.message}`;
               appContextService.getLogger().warn(errorMessage);
 
               // clean up tasks after 3rd retry reached
