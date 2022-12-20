@@ -8,6 +8,7 @@
 import { pluck } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
 import { Query, AggregateQuery, Filter } from '@kbn/es-query';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -27,6 +28,7 @@ export function fetchSql(
   dataViewsService: DataViewsContract,
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
+  inspectorAdapters: Adapters,
   filters?: Filter[],
   inputQuery?: Query
 ) {
@@ -40,7 +42,9 @@ export function fetchSql(
   })
     .then((ast) => {
       if (ast) {
-        const execution = expressions.run(ast, null);
+        const execution = expressions.run(ast, null, {
+          inspectorAdapters,
+        });
         let finalData: DataTableRecord[] = [];
         let error: string | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {

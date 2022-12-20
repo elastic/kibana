@@ -25,6 +25,7 @@ import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
+import type { FieldValuePair } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
@@ -112,8 +113,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       const { loaded, remainingFieldCandidates, groupsMissing } = data;
 
       if (
-        (Array.isArray(remainingFieldCandidates) && remainingFieldCandidates.length > 0) ||
-        groupsMissing
+        loaded < 1 &&
+        ((Array.isArray(remainingFieldCandidates) && remainingFieldCandidates.length > 0) ||
+          groupsMissing)
       ) {
         setOverrides({ loaded, remainingFieldCandidates, changePoints: data.changePoints });
       } else {
@@ -162,15 +164,15 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       const sortedGroup = group.sort((a, b) =>
         a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
       );
-      const dedupedGroup: Record<string, any> = {};
-      const repeatedValues: Record<string, any> = {};
+      const dedupedGroup: FieldValuePair[] = [];
+      const repeatedValues: FieldValuePair[] = [];
 
       sortedGroup.forEach((pair) => {
         const { fieldName, fieldValue } = pair;
         if (pair.duplicate === false) {
-          dedupedGroup[fieldName] = fieldValue;
+          dedupedGroup.push({ fieldName, fieldValue });
         } else {
-          repeatedValues[fieldName] = fieldValue;
+          repeatedValues.push({ fieldName, fieldValue });
         }
       });
 
@@ -196,7 +198,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
 
   const showSpikeAnalysisTable = data?.changePoints.length > 0;
   const groupItemCount = groupTableItems.reduce((p, c) => {
-    return p + Object.keys(c.group).length;
+    return p + c.group.length;
   }, 0);
   const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
 
