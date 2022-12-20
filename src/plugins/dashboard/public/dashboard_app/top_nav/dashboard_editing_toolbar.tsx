@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
@@ -15,7 +15,6 @@ import {
   QuickButtonGroup,
   QuickButtonProps,
   SolutionToolbar,
-  SolutionToolbarPopover,
 } from '@kbn/presentation-util-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import React from 'react';
@@ -26,7 +25,7 @@ import { useDashboardContainerContext } from '../../dashboard_container/dashboar
 import { pluginServices } from '../../services/plugin_services';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
-import { getControlButtonTitle } from '../_dashboard_app_strings';
+import { ControlsToolbarButton } from './controls_toolbar_button';
 
 export function DashboardEditingToolbar() {
   const {
@@ -179,24 +178,9 @@ export function DashboardEditingToolbar() {
   ];
   if (dashboardContainer.controlGroup) {
     extraButtons.push(
-      <SolutionToolbarPopover
-        ownFocus
-        label={getControlButtonTitle()}
-        iconType="arrowDown"
-        iconSide="right"
-        panelPaddingSize="none"
-        data-test-subj="dashboard-controls-menu-button"
-      >
-        {({ closePopover }: { closePopover: () => void }) => (
-          <EuiContextMenuPanel
-            items={[
-              dashboardContainer.controlGroup.getCreateControlButton('toolbar', closePopover),
-              dashboardContainer.controlGroup.getCreateTimeSliderControlButton(closePopover),
-              dashboardContainer.controlGroup.getEditControlGroupButton(closePopover),
-            ]}
-          />
-        )}
-      </SolutionToolbarPopover>
+      <ControlsToolbarButton
+        controlGroup={dashboardContainer.controlGroup}
+      />
     );
   }
 
