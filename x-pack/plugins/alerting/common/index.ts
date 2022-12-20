@@ -17,6 +17,7 @@ export * from './rule_navigation';
 export * from './alert_instance';
 export * from './alert_summary';
 export * from './builtin_action_groups';
+export * from './bulk_edit';
 export * from './disabled_action_groups';
 export * from './rule_notify_when_type';
 export * from './parse_duration';
