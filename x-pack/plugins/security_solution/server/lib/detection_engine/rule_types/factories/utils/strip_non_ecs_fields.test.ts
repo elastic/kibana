@@ -387,4 +387,78 @@ describe('stripNonEcsFields', () => {
       expect(removed).toEqual([]);
     });
   });
+
+  describe('numeric field', () => {
+    it('should strip invalid long field', () => {
+      const { result, removed } = stripNonEcsFields({
+        client: {
+          bytes: 'non-valid',
+        },
+      });
+
+      expect(result).toEqual({ client: {} });
+      expect(removed).toEqual([
+        {
+          key: 'client.bytes',
+          value: 'non-valid',
+        },
+      ]);
+    });
+
+    it('should strip invalid float field', () => {
+      const { result, removed } = stripNonEcsFields({
+        'user.risk.calculated_score': 'non-valid',
+      });
+
+      expect(result).toEqual({});
+      expect(removed).toEqual([
+        {
+          key: 'user.risk.calculated_score',
+          value: 'non-valid',
+        },
+      ]);
+    });
+
+    it('should strip invalid scaled_float field', () => {
+      const { result, removed } = stripNonEcsFields({
+        host: {
+          'cpu.usage': 'non-valid',
+        },
+      });
+
+      expect(result).toEqual({ host: {} });
+      expect(removed).toEqual([
+        {
+          key: 'host.cpu.usage',
+          value: 'non-valid',
+        },
+      ]);
+    });
+
+    it('should not strip valid number in string field', () => {
+      const { result, removed } = stripNonEcsFields({
+        host: {
+          'cpu.usage': '1234',
+        },
+      });
+
+      expect(result).toEqual({
+        host: {
+          'cpu.usage': '1234',
+        },
+      });
+      expect(removed).toEqual([]);
+    });
+
+    it('should not strip valid float field', () => {
+      const { result, removed } = stripNonEcsFields({
+        'user.risk.calculated_score': 458.3333,
+      });
+
+      expect(result).toEqual({
+        'user.risk.calculated_score': 458.3333,
+      });
+      expect(removed).toEqual([]);
+    });
+  });
 });

@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
     const previewAlerts = await getPreviewAlerts({ es, previewId });
 
     return {
-      alertSource: previewAlerts[0]._source,
+      alertSource: previewAlerts?.[0]?._source,
       errors: logs[0].errors,
     };
   };
@@ -186,6 +186,53 @@ export default ({ getService }: FtrProviderContext) => {
       expect(alertSource).not.toHaveProperty('threat.enrichments');
 
       expect(alertSource).toHaveProperty('threat.indicator.port', 443);
+    });
+
+    // source client.bytes is text, ECS mapping for client.bytes is long
+    it('should remove source text field from alert if ECS field mapping is long', async () => {
+      const documentId = 'client.bytes is text';
+      await indexDocuments([
+        getDocument(documentId, {
+          client: {
+            nat: {
+              port: '3000',
+            },
+            bytes: 'conflict',
+          },
+        }),
+      ]);
+
+      const { errors, alertSource } = await previewRuleAndGetAlertSource(documentId);
+
+      expect(errors).toEqual([]);
+
+      // invalid ECS field is getting removed
+      expect(alertSource).not.toHaveProperty('client.bytes');
+
+      // ensures string numeric field is indexed
+      expect(alertSource).toHaveProperty('client.nat.port', '3000');
+    });
+
+    // we don't validate it because geo_point is very complex type with many various representations: array, different object, string with few valid patterns
+    // more on geo_point type https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html
+    it('should fail creating alert when ECS field mapping is geo_point', async () => {
+      const documentId = 'client.geo.location is keyword';
+      await indexDocuments([
+        getDocument(documentId, {
+          client: {
+            geo: {
+              name: 'test',
+              location: 'test test',
+            },
+          },
+        }),
+      ]);
+
+      const { errors } = await previewRuleAndGetAlertSource(documentId);
+
+      expect(errors).toContain(
+        'Bulk Indexing of signals failed: failed to parse field [client.geo.location] of type [geo_point]'
+      );
     });
   });
 };
