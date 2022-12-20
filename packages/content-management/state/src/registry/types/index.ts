@@ -1,3 +1,4 @@
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,4 +7,5 @@
  * Side Public License, v 1.
  */
 
-export * from './src';
+export * from './content_items';
+export * from './content_types';
