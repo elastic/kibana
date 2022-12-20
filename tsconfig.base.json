@@ -392,6 +392,8 @@
       "@kbn/apm-config-loader/*": ["packages/kbn-apm-config-loader/*"],
       "@kbn/apm-synthtrace": ["packages/kbn-apm-synthtrace"],
       "@kbn/apm-synthtrace/*": ["packages/kbn-apm-synthtrace/*"],
+      "@kbn/apm-synthtrace-client": ["packages/kbn-apm-synthtrace-client"],
+      "@kbn/apm-synthtrace-client/*": ["packages/kbn-apm-synthtrace-client/*"],
       "@kbn/apm-utils": ["packages/kbn-apm-utils"],
       "@kbn/apm-utils/*": ["packages/kbn-apm-utils/*"],
       "@kbn/axe-config": ["packages/kbn-axe-config"],
