@@ -4,7 +4,7 @@ This Kibana plugin contains components and services for field list UI (as in fie
 
 ---
 
-## Field Stats nad Field Popover Components
+## Field Stats and Field Popover Components
 
 * `<FieldStats .../>` - loads and renders stats (Top values, Distribution) for a data view field.
 
