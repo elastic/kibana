@@ -283,7 +283,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'default monitoring output 1',
+            name: 'output 1',
             type: 'elasticsearch',
             hosts: ['https://test.fr'],
             is_default_monitoring: true,
@@ -298,8 +298,8 @@ export default function (providerContext: FtrProviderContext) {
         const {
           body: { items: outputs },
         } = await supertest.get(`/api/fleet/outputs`).expect(200);
-        const newOutput = outputs.filter((o: any) => o.name === 'My Logstash Output');
-        expect(newOutput.shipper).to.equal({
+        const newOutput = outputs.filter((o: any) => o.name === 'output 1');
+        expect(newOutput[0].shipper).to.eql({
           disk_queue_enabled: true,
           disk_queue_path: 'path/to/disk/queue',
           disk_queue_encryption_enabled: true,
@@ -326,7 +326,7 @@ export default function (providerContext: FtrProviderContext) {
           body: { items: outputs },
         } = await supertest.get(`/api/fleet/outputs`).expect(200);
         const defaultOutputs = outputs.filter((o: any) => o.is_default_monitoring);
-        expect(defaultOutputs.shipper).to.equal(undefined);
+        expect(defaultOutputs[0].shipper).to.equal(null);
       });
 
       it('should allow to create a logstash output with the shipper values', async function () {
@@ -334,7 +334,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'My Logstash Output',
+            name: 'Logstash Output',
             type: 'logstash',
             hosts: ['test.fr:443'],
             ssl: {
@@ -354,8 +354,8 @@ export default function (providerContext: FtrProviderContext) {
         const {
           body: { items: outputs },
         } = await supertest.get(`/api/fleet/outputs`).expect(200);
-        const newOutput = outputs.filter((o: any) => o.name === 'My Logstash Output');
-        expect(newOutput.shipper).to.equal({
+        const newOutput = outputs.filter((o: any) => o.name === 'Logstash Output');
+        expect(newOutput[0].shipper).to.eql({
           disk_queue_enabled: true,
           disk_queue_path: 'path/to/disk/queue',
           disk_queue_encryption_enabled: true,
@@ -382,7 +382,7 @@ export default function (providerContext: FtrProviderContext) {
           body: { items: outputs },
         } = await supertest.get(`/api/fleet/outputs`).expect(200);
         const defaultOutputs = outputs.filter((o: any) => o.is_default_monitoring);
-        expect(defaultOutputs.shipper).to.equal(undefined);
+        expect(defaultOutputs[0].shipper).to.equal(null);
       });
     });
 
