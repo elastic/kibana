@@ -14,10 +14,10 @@ import { paths } from '../../config';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
-import { isSloFeatureEnabled } from '../slos/helpers';
-import PageNotFound from '../404';
-import { useFetchSlo } from '../../hooks/slo/use_fetch_slo';
+import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { SloEditForm } from './components/slo_edit_form';
+import PageNotFound from '../404';
+import { isSloFeatureEnabled } from '../slos/helpers';
 
 export function SloEditPage() {
   const { http } = useKibana<ObservabilityAppServices>().services;
@@ -34,8 +34,7 @@ export function SloEditPage() {
     },
   ]);
 
-  console.log('sloId', sloId);
-  const { slo, loading } = useFetchSlo({ id: sloId });
+  const { slo, loading } = useFetchSloDetails(sloId);
 
   if (!isSloFeatureEnabled(config)) {
     return <PageNotFound />;
