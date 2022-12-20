@@ -23,6 +23,7 @@ export interface UseAllLiveQueriesConfig {
   sortField: string;
   filterQuery?: ESTermQuery | ESExistsQuery | string;
   skip?: boolean;
+  alertId?: string;
 }
 
 export const useAllLiveQueries = ({
@@ -32,12 +33,13 @@ export const useAllLiveQueries = ({
   sortField,
   filterQuery,
   skip = false,
+  alertId,
 }: UseAllLiveQueriesConfig) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   return useQuery(
-    ['actions', { activePage, direction, limit, sortField }],
+    ['actions', { activePage, direction, limit, sortField, ...(alertId ? { alertId } : {}) }],
     () =>
       http.get<{ data: Omit<ActionsStrategyResponse, 'edges'> & { items: ActionEdges } }>(
         '/api/osquery/live_queries',

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { EuiFlyout, EuiFlyoutFooter, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Ecs } from '../../../../common/ecs';
 import { useKibana } from '../../../common/lib/kibana';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
@@ -19,7 +20,9 @@ const OsqueryActionWrapper = styled.div`
 
 export interface OsqueryFlyoutProps {
   agentId?: string;
-  defaultValues?: {};
+  defaultValues?: {
+    alertIds?: string[];
+  };
   onClose: () => void;
   ecsData?: Ecs;
 }
@@ -33,6 +36,13 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
   const {
     services: { osquery },
   } = useKibana();
+  const queryClient = useQueryClient();
+
+  const invalidateQueries = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: ['actions', { alertId: defaultValues?.alertIds?.[0] }],
+    });
+  }, [defaultValues?.alertIds, queryClient]);
 
   if (osquery?.OsqueryAction) {
     return (
@@ -54,6 +64,7 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
               formType="steps"
               defaultValues={defaultValues}
               ecsData={ecsData}
+              onSuccess={invalidateQueries}
             />
           </OsqueryActionWrapper>
         </EuiFlyoutBody>

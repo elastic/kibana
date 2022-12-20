@@ -112,6 +112,7 @@ export const useOsqueryTab = ({
     activePage: 0,
     limit: 100,
     sortField: '@timestamp',
+    alertId,
   });
   const actionItems = actionsData?.data.items || [];
 
