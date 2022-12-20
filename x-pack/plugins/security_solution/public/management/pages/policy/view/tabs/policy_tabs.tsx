@@ -24,7 +24,7 @@ import {
   getBlocklistsListPath,
   getPolicyBlocklistsPath,
 } from '../../../../common/routing';
-import { useHttp } from '../../../../../common/lib/kibana';
+import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
 import {
   isOnHostIsolationExceptionsView,
@@ -51,7 +51,6 @@ import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../e
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
 import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
-import { useListArtifact } from '../../../../hooks/artifacts';
 
 enum PolicyTabKeys {
   SETTINGS = 'settings',
@@ -70,40 +69,57 @@ interface PolicyTab {
 export const PolicyTabs = React.memo(() => {
   const history = useHistory();
   const http = useHttp();
+  const toasts = useToasts();
+
   const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyFormView);
   const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsView);
-  const isInEventFilters = usePolicyDetailsSelector(isOnPolicyEventFiltersView);
+  const isInEventFiltersTab = usePolicyDetailsSelector(isOnPolicyEventFiltersView);
   const isInHostIsolationExceptionsTab = usePolicyDetailsSelector(isOnHostIsolationExceptionsView);
   const isInBlocklistsTab = usePolicyDetailsSelector(isOnBlocklistsView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
   const policyItem = usePolicyDetailsSelector(policyDetails);
-  const privileges = useUserPrivileges().endpointPrivileges;
+  const {
+    canReadTrustedApplications,
+    canWriteTrustedApplications,
+    canReadEventFilters,
+    canWriteEventFilters,
+    canReadHostIsolationExceptions,
+    canWriteHostIsolationExceptions,
+    canReadBlocklist,
+    canWriteBlocklist,
+    loading: privilegesLoading,
+  } = useUserPrivileges().endpointPrivileges;
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
-  const allPolicyHostIsolationExceptionsListRequest = useListArtifact(
-    HostIsolationExceptionsApiClient.getInstance(http),
-    {
-      page: 1,
-      perPage: 100,
-      policies: [policyId, 'all'],
-    },
-    HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS,
-    {
-      enabled: !privileges.loading && !privileges.canIsolateHost,
-    }
-  );
-
-  const canSeeHostIsolationExceptions =
-    privileges.canIsolateHost ||
-    (allPolicyHostIsolationExceptionsListRequest.isFetched &&
-      allPolicyHostIsolationExceptionsListRequest.data?.total !== 0);
-
-  // move the use out of this route if they can't access it
+  // move the user out of this route if they can't access it
   useEffect(() => {
-    if (isInHostIsolationExceptionsTab && !canSeeHostIsolationExceptions) {
+    if (
+      (isInTrustedAppsTab && !canReadTrustedApplications) ||
+      (isInEventFiltersTab && !canReadEventFilters) ||
+      (isInHostIsolationExceptionsTab && !canReadHostIsolationExceptions) ||
+      (isInBlocklistsTab && !canReadBlocklist)
+    ) {
       history.replace(getPolicyDetailPath(policyId));
+      toasts.addDanger(
+        i18n.translate('xpack.securitySolution.policyDetails.missingArtifactAccess', {
+          defaultMessage:
+            'You do not have the required Kibana permissions to use the given artifact.',
+        })
+      );
     }
-  }, [canSeeHostIsolationExceptions, history, isInHostIsolationExceptionsTab, policyId]);
+  }, [
+    canReadBlocklist,
+    canReadEventFilters,
+    canReadHostIsolationExceptions,
+    canReadTrustedApplications,
+    history,
+    isInBlocklistsTab,
+    isInEventFiltersTab,
+    isInHostIsolationExceptionsTab,
+    isInTrustedAppsTab,
+    policyId,
+    toasts,
+  ]);
 
   const getTrustedAppsApiClientInstance = useCallback(
     () => TrustedAppsApiClient.getInstance(http),
@@ -183,45 +199,57 @@ export const PolicyTabs = React.memo(() => {
           </>
         ),
       },
-      [PolicyTabKeys.TRUSTED_APPS]: {
-        id: PolicyTabKeys.TRUSTED_APPS,
-        name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.trustedApps', {
-          defaultMessage: 'Trusted applications',
-        }),
-        content: (
-          <>
-            <EuiSpacer />
-            <PolicyArtifactsLayout
-              policyItem={policyItem}
-              labels={trustedAppsLabels}
-              getExceptionsListApiClient={getTrustedAppsApiClientInstance}
-              searchableFields={TRUSTED_APPS_SEARCHABLE_FIELDS}
-              getArtifactPath={getTrustedAppsListPath}
-              getPolicyArtifactsPath={getPolicyDetailsArtifactsListPath}
-            />
-          </>
-        ),
-      },
-      [PolicyTabKeys.EVENT_FILTERS]: {
-        id: PolicyTabKeys.EVENT_FILTERS,
-        name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.eventFilters', {
-          defaultMessage: 'Event filters',
-        }),
-        content: (
-          <>
-            <EuiSpacer />
-            <PolicyArtifactsLayout
-              policyItem={policyItem}
-              labels={eventFiltersLabels}
-              getExceptionsListApiClient={getEventFiltersApiClientInstance}
-              searchableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
-              getArtifactPath={getEventFiltersListPath}
-              getPolicyArtifactsPath={getPolicyEventFiltersPath}
-            />
-          </>
-        ),
-      },
-      [PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS]: canSeeHostIsolationExceptions
+      [PolicyTabKeys.TRUSTED_APPS]: canReadTrustedApplications
+        ? {
+            id: PolicyTabKeys.TRUSTED_APPS,
+            name: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.tabs.trustedApps',
+              {
+                defaultMessage: 'Trusted applications',
+              }
+            ),
+            content: (
+              <>
+                <EuiSpacer />
+                <PolicyArtifactsLayout
+                  policyItem={policyItem}
+                  labels={trustedAppsLabels}
+                  getExceptionsListApiClient={getTrustedAppsApiClientInstance}
+                  searchableFields={TRUSTED_APPS_SEARCHABLE_FIELDS}
+                  getArtifactPath={getTrustedAppsListPath}
+                  getPolicyArtifactsPath={getPolicyDetailsArtifactsListPath}
+                  canWriteArtifact={canWriteTrustedApplications}
+                />
+              </>
+            ),
+          }
+        : undefined,
+      [PolicyTabKeys.EVENT_FILTERS]: canReadEventFilters
+        ? {
+            id: PolicyTabKeys.EVENT_FILTERS,
+            name: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.tabs.eventFilters',
+              {
+                defaultMessage: 'Event filters',
+              }
+            ),
+            content: (
+              <>
+                <EuiSpacer />
+                <PolicyArtifactsLayout
+                  policyItem={policyItem}
+                  labels={eventFiltersLabels}
+                  getExceptionsListApiClient={getEventFiltersApiClientInstance}
+                  searchableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
+                  getArtifactPath={getEventFiltersListPath}
+                  getPolicyArtifactsPath={getPolicyEventFiltersPath}
+                  canWriteArtifact={canWriteEventFilters}
+                />
+              </>
+            ),
+          }
+        : undefined,
+      [PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS]: canReadHostIsolationExceptions
         ? {
             id: PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS,
             name: i18n.translate(
@@ -240,40 +268,49 @@ export const PolicyTabs = React.memo(() => {
                   searchableFields={HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS}
                   getArtifactPath={getHostIsolationExceptionsListPath}
                   getPolicyArtifactsPath={getPolicyHostIsolationExceptionsPath}
-                  externalPrivileges={privileges.canIsolateHost}
+                  canWriteArtifact={canWriteHostIsolationExceptions}
                 />
               </>
             ),
           }
         : undefined,
-      [PolicyTabKeys.BLOCKLISTS]: {
-        id: PolicyTabKeys.BLOCKLISTS,
-        name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.blocklists', {
-          defaultMessage: 'Blocklist',
-        }),
-        content: (
-          <>
-            <EuiSpacer />
-            <PolicyArtifactsLayout
-              policyItem={policyItem}
-              labels={blocklistsLabels}
-              getExceptionsListApiClient={getBlocklistsApiClientInstance}
-              searchableFields={BLOCKLISTS_SEARCHABLE_FIELDS}
-              getArtifactPath={getBlocklistsListPath}
-              getPolicyArtifactsPath={getPolicyBlocklistsPath}
-            />
-          </>
-        ),
-      },
+      [PolicyTabKeys.BLOCKLISTS]: canReadBlocklist
+        ? {
+            id: PolicyTabKeys.BLOCKLISTS,
+            name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.blocklists', {
+              defaultMessage: 'Blocklist',
+            }),
+            content: (
+              <>
+                <EuiSpacer />
+                <PolicyArtifactsLayout
+                  policyItem={policyItem}
+                  labels={blocklistsLabels}
+                  getExceptionsListApiClient={getBlocklistsApiClientInstance}
+                  searchableFields={BLOCKLISTS_SEARCHABLE_FIELDS}
+                  getArtifactPath={getBlocklistsListPath}
+                  getPolicyArtifactsPath={getPolicyBlocklistsPath}
+                  canWriteArtifact={canWriteBlocklist}
+                />
+              </>
+            ),
+          }
+        : undefined,
     };
   }, [
-    canSeeHostIsolationExceptions,
+    canReadTrustedApplications,
+    canWriteTrustedApplications,
+    canReadEventFilters,
+    canWriteEventFilters,
+    canReadHostIsolationExceptions,
+    canWriteHostIsolationExceptions,
+    canReadBlocklist,
+    canWriteBlocklist,
     getEventFiltersApiClientInstance,
     getHostIsolationExceptionsApiClientInstance,
     getBlocklistsApiClientInstance,
     getTrustedAppsApiClientInstance,
     policyItem,
-    privileges.canIsolateHost,
   ]);
 
   // convert tabs object into an array EuiTabbedContent can understand
@@ -290,7 +327,7 @@ export const PolicyTabs = React.memo(() => {
       selectedTab = tabs[PolicyTabKeys.SETTINGS];
     } else if (isInTrustedAppsTab) {
       selectedTab = tabs[PolicyTabKeys.TRUSTED_APPS];
-    } else if (isInEventFilters) {
+    } else if (isInEventFiltersTab) {
       selectedTab = tabs[PolicyTabKeys.EVENT_FILTERS];
     } else if (isInHostIsolationExceptionsTab) {
       selectedTab = tabs[PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS];
@@ -303,7 +340,7 @@ export const PolicyTabs = React.memo(() => {
     tabs,
     isInSettingsTab,
     isInTrustedAppsTab,
-    isInEventFilters,
+    isInEventFiltersTab,
     isInHostIsolationExceptionsTab,
     isInBlocklistsTab,
   ]);
@@ -334,11 +371,8 @@ export const PolicyTabs = React.memo(() => {
   );
 
   // show loader for privileges validation
-  if (
-    isInHostIsolationExceptionsTab &&
-    (privileges.loading || allPolicyHostIsolationExceptionsListRequest.isFetching)
-  ) {
-    return <ManagementPageLoader data-test-subj="policyHostIsolationExceptionsTabLoading" />;
+  if (privilegesLoading) {
+    return <ManagementPageLoader data-test-subj="privilegesLoading" />;
   }
 
   return (
