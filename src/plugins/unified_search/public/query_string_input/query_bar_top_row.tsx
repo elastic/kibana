@@ -27,8 +27,8 @@ import {
   useIsWithinBreakpoints,
   EuiSuperUpdateButton,
 } from '@elastic/eui';
-import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -47,6 +47,21 @@ import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_butt
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { TextBasedLanguagesEditor } from './text_based_languages_editor';
 import './query_bar.scss';
+
+export const strings = {
+  getNeedsUpdatingLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
+      defaultMessage: 'Needs updating',
+    }),
+  getRefreshQueryLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refresh', {
+      defaultMessage: 'Refresh query',
+    }),
+  getRunQueryLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
+      defaultMessage: 'Run query',
+    }),
+};
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -405,19 +420,9 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
       }
-      const buttonLabelUpdate = i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
-        defaultMessage: 'Needs updating',
-      });
-      const buttonLabelRefresh = i18n.translate(
-        'unifiedSearch.queryBarTopRow.submitButton.refresh',
-        {
-          defaultMessage: 'Refresh query',
-        }
-      );
-
-      const buttonLabelRun = i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
-        defaultMessage: 'Run query',
-      });
+      const buttonLabelUpdate = strings.getNeedsUpdatingLabel();
+      const buttonLabelRefresh = strings.getRefreshQueryLabel();
+      const buttonLabelRun = strings.getRunQueryLabel();
 
       const iconDirty = Boolean(isQueryLangSelected) ? 'play' : 'kqlFunction';
       const tooltipDirty = Boolean(isQueryLangSelected) ? buttonLabelRun : buttonLabelUpdate;
