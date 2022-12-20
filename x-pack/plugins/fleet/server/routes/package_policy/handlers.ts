@@ -13,7 +13,7 @@ import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
 
-import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy__assigned_agents_count';
+import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
 
 import { agentPolicyService, appContextService, packagePolicyService } from '../../services';
 import type {
