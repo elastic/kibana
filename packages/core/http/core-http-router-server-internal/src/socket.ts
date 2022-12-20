@@ -20,10 +20,6 @@ export class KibanaSocket implements IKibanaSocket {
     return this.socket instanceof TLSSocket ? this.socket.authorizationError : undefined;
   }
 
-  public get remoteAddress() {
-    return this.socket.remoteAddress;
-  }
-
   constructor(private readonly socket: Socket) {}
 
   getPeerCertificate(detailed: true): DetailedPeerCertificate | null;

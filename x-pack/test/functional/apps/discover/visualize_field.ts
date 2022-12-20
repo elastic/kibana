@@ -74,7 +74,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should preserve app filters in lens', async () => {
-      await filterBar.addFilter('bytes', 'is between', '3500', '4000');
+      await filterBar.addFilter({
+        field: 'bytes',
+        operation: 'is between',
+        value: { from: '3500', to: '4000' },
+      });
       await PageObjects.discover.findFieldByName('geo.src');
       await PageObjects.discover.clickFieldListItemVisualize('geo.src');
       await PageObjects.header.waitUntilLoadingHasFinished();
