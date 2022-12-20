@@ -17,10 +17,12 @@ import { EmbeddedMapComponent } from './embedded_map';
 import { createEmbeddable } from './create_embeddable';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getLayerList } from './map_config';
+import { useIsFieldInIndexPattern } from '../../../containers/fields';
 
 jest.mock('./create_embeddable');
 jest.mock('./map_config');
 jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../containers/fields');
 jest.mock('./index_patterns_missing_prompt', () => ({
   IndexPatternsMissingPrompt: jest.fn(() => <div data-test-subj="IndexPatternsMissingPrompt" />),
 }));
@@ -46,6 +48,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
 
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const mockCreateEmbeddable = createEmbeddable as jest.Mock;
+const mockUseIsFieldInIndexPattern = useIsFieldInIndexPattern as jest.Mock;
 const mockGetStorage = jest.fn();
 const mockSetStorage = jest.fn();
 const setQuery: jest.Mock = jest.fn();
@@ -96,6 +99,7 @@ describe('EmbeddedMapComponent', () => {
     jest.spyOn(redux, 'useSelector').mockReturnValue(mockSelector);
     mockUseSourcererDataView.mockReturnValue({ selectedPatterns: ['filebeat-*', 'packetbeat-*'] });
     mockCreateEmbeddable.mockResolvedValue(embeddableValue);
+    mockUseIsFieldInIndexPattern.mockReturnValue({ isFieldInIndexPattern: () => [true, true] });
   });
 
   afterEach(() => {
@@ -201,8 +205,8 @@ describe('EmbeddedMapComponent', () => {
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
-    const dataViewArg = mockCreateEmbeddable.mock.calls[0][1];
     await waitFor(() => {
+      const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][0];
       expect(dataViewArg).toEqual([filebeatDataView]);
     });
   });
@@ -217,8 +221,7 @@ describe('EmbeddedMapComponent', () => {
       </TestProviders>
     );
     await waitFor(() => {
-      // data view is initially set with createEmbeddable
-      const dataViewArg = mockCreateEmbeddable.mock.calls[0][1];
+      const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][0];
       expect(dataViewArg).toEqual([filebeatDataView]);
     });
     rerender(
@@ -228,7 +231,7 @@ describe('EmbeddedMapComponent', () => {
     );
     await waitFor(() => {
       // data view is updated with the returned embeddable.setLayerList callback, which is passesd getLayerList(dataViews)
-      const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][0];
+      const dataViewArg = (getLayerList as jest.Mock).mock.calls[1][0];
       expect(dataViewArg).toEqual([filebeatDataView, auditbeatDataView]);
     });
   });

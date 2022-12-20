@@ -14,6 +14,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
+import { useIsFieldInIndexPattern } from '../../../containers/fields';
 import { Loader } from '../../../../common/components/loader';
 import { displayErrorToast, useStateToaster } from '../../../../common/components/toasters';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
@@ -23,8 +24,9 @@ import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getLayerList } from './map_config';
+import { getLayerList, getRequiredMapsFields } from './map_config';
 import { sourcererSelectors } from '../../../../common/store/sourcerer';
+import type { SourcererDataView } from '../../../../common/store/sourcerer/model';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -118,17 +120,48 @@ export const EmbeddedMapComponent = ({
   const { kibanaDataViews } = useDeepEqualSelector((state) => getDataViewsSelector(state));
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.default);
 
-  // const isFieldInIndexPattern = useIsFieldInIndexPattern(mapIndexPatterns);
+  const { isFieldInIndexPattern } = useIsFieldInIndexPattern();
 
-  const mapIndexPatterns = useMemo(() => {
-    const newIndexPatterns = kibanaDataViews.filter((dataView) =>
+  const [mapDataViews, setMapDataViews] = useState<SourcererDataView[]>([]);
+
+  const availableDataViews = useMemo(() => {
+    const dataViews = kibanaDataViews.filter((dataView) =>
       selectedPatterns.includes(dataView.title)
     );
-    if (selectedPatterns.length > 0 && newIndexPatterns.length === 0) {
+    if (selectedPatterns.length > 0 && dataViews.length === 0) {
       setIsIndexError(true);
     }
-    return newIndexPatterns;
+    return dataViews;
   }, [kibanaDataViews, selectedPatterns]);
+
+  useEffect(() => {
+    let canceled = false;
+
+    const fetchData = async () => {
+      try {
+        const apiResponse = await Promise.all(
+          availableDataViews.map(async ({ title }) =>
+            isFieldInIndexPattern(title, getRequiredMapsFields(title))
+          )
+        );
+        // ensures only index patterns with maps fields are passed
+        const goodDataViews = availableDataViews.filter((_, i) => apiResponse[i] ?? false);
+        if (!canceled) {
+          setMapDataViews(goodDataViews);
+        }
+      } catch {
+        if (!canceled) {
+          setMapDataViews([]);
+        }
+      }
+    };
+    if (availableDataViews.length) {
+      fetchData();
+    }
+    return () => {
+      canceled = true;
+    };
+  }, [availableDataViews, isFieldInIndexPattern]);
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
   // own component tree instead of the embeddables (default). This is necessary to have access to
@@ -144,7 +177,7 @@ export const EmbeddedMapComponent = ({
       try {
         const embeddableObject = await createEmbeddable(
           filters,
-          mapIndexPatterns,
+          mapDataViews,
           query,
           startDate,
           endDate,
@@ -175,7 +208,7 @@ export const EmbeddedMapComponent = ({
     endDate,
     embeddable,
     filters,
-    mapIndexPatterns,
+    mapDataViews,
     query,
     portalNode,
     services.embeddable,
@@ -188,16 +221,16 @@ export const EmbeddedMapComponent = ({
   // update layer with new index patterns
   useEffect(() => {
     const setLayerList = async () => {
-      if (embeddable != null) {
+      if (embeddable != null && mapDataViews.length) {
         // @ts-expect-error
-        await embeddable.setLayerList(getLayerList(mapIndexPatterns));
+        await embeddable.setLayerList(getLayerList(mapDataViews));
         embeddable.reload();
       }
     };
     if (embeddable != null && !isErrorEmbeddable(embeddable)) {
       setLayerList();
     }
-  }, [embeddable, mapIndexPatterns]);
+  }, [embeddable, mapDataViews]);
 
   // queryExpression updated useEffect
   useEffect(() => {

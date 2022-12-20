@@ -6,9 +6,22 @@
  */
 
 import { useCallback } from 'react';
-import type { SourcererDataView } from '../../../common/store/sourcerer/model';
+import { useKibana } from '../../../common/lib/kibana';
 
-export const useIsFieldInIndexPattern = (indexPatterns: SourcererDataView[]) => {
-  const isFieldInIndexPattern = useCallback(() => {}, []);
-  return isFieldInIndexPattern;
+export const useIsFieldInIndexPattern = (): {
+  isFieldInIndexPattern: (pattern: string, fieldsList: string[]) => Promise<boolean>;
+} => {
+  const { dataViews } = useKibana().services.data;
+  const isFieldInIndexPattern = useCallback(
+    async (pattern: string, fieldsList: string[]) => {
+      const fields = await dataViews.getFieldsForWildcard({
+        pattern,
+        fields: fieldsList,
+      });
+      const fieldNames = fields.map((f) => f.name);
+      return fieldsList.every((field) => fieldNames.includes(field));
+    },
+    [dataViews]
+  );
+  return { isFieldInIndexPattern };
 };

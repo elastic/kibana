@@ -97,6 +97,16 @@ export const lmc: LayerMappingCollection = {
   'traces-apm*,logs-apm*,metrics-apm*,apm-*': APM_LAYER_FIELD_MAPPING,
 };
 
+export const getRequiredMapsFields = (title: string): string[] => {
+  const fieldMappings = lmc[title] ?? lmc.default;
+  return [
+    fieldMappings.source.metricField,
+    fieldMappings.source.geoField,
+    fieldMappings.destination.metricField,
+    fieldMappings.destination.geoField,
+  ];
+};
+
 /**
  * Returns `Source/Destination Point-to-point` Map LayerList configuration, with a source,
  * destination, and line layer for each of the provided indexPatterns
@@ -117,15 +127,6 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
       type: LAYER_TYPE.EMS_VECTOR_TILE,
     },
     ...indexPatternIds.reduce((acc: object[], { title, id }) => {
-      // we should maybe do our field validation here
-      // the below getXLayer functions are field specific queries, need to make sure each of
-      // these data views supports the fields we're going to be querying
-      // found in lmc.default
-      console.log('layer details', {
-        title,
-        lewkup: lmc[title],
-        default: lmc.default,
-      });
       const layerGroupDescriptor = {
         id: uuid.v4(),
         label: title,
