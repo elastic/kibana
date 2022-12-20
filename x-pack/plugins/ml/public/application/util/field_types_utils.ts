@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 
 // convert kibana types to ML Job types

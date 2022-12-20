@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFormRow, EuiIconTip, EuiRange, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiRange, EuiRangeProps, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useMount from 'react-use/lib/useMount';
@@ -40,9 +40,8 @@ function RadiusRatioOptionControl({ editorStateParams, setStateParamValue }: Agg
     }
   });
 
-  const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) =>
-      setStateParamValue(PARAM_NAME, parseFloat(e.currentTarget.value)),
+  const onChange: EuiRangeProps['onChange'] = useCallback(
+    (e) => setStateParamValue(PARAM_NAME, parseFloat(e.currentTarget.value)),
     [setStateParamValue]
   );
 

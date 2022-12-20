@@ -8,12 +8,14 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
+import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloList as Component } from './slo_list';
 
 export default {
   component: Component,
   title: 'app/SLO/ListPage/SloList',
   argTypes: {},
+  decorators: [KibanaReactStorybookDecorator],
 };
 
 const Template: ComponentStory<typeof Component> = () => <Component />;
