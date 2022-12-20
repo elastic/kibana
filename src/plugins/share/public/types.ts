@@ -99,4 +99,5 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   embedUrlParamExtensions?: UrlParamExtension[];
   snapshotShareWarning?: string;
   onClose?: () => void;
+  panelTitle?: string;
 }

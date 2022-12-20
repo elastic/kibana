@@ -583,7 +583,6 @@ export const LensTopNavMenu = ({
               activeData,
               csvEnabled,
               title: title || unsavedTitle,
-              type: 'lens_visualization',
             };
 
             const visualizationStateSerialized = visualization as LensAppState['visualization'] &
@@ -606,7 +605,10 @@ export const LensTopNavMenu = ({
               allowShortUrl: false, // we'll manage this implicitly via the new service
               shareableUrl,
               objectId: currentDoc?.savedObjectId,
-              objectType: 'Lens visualization',
+              objectType: 'lens_visualization',
+              panelTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
+                defaultMessage: 'Lens visualization',
+              }),
               sharingData,
               isDirty: false,
               showPublicUrlSwitch: () => false,
