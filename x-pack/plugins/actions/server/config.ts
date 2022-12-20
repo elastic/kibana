@@ -16,7 +16,7 @@ export enum EnabledActionTypes {
   Any = '*',
 }
 
-const MAX_MAX_ATTEMPTS = 100;
+const MAX_MAX_ATTEMPTS = 10;
 
 const preconfiguredActionSchema = schema.object({
   name: schema.string({ minLength: 1 }),
