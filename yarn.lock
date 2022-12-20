@@ -7018,7 +7018,7 @@
     "@types/tough-cookie" "*"
     parse5 "^7.0.0"
 
-"@types/json-schema@*", "@types/json-schema@^7", "@types/json-schema@^7.0.4", "@types/json-schema@^7.0.5", "@types/json-schema@^7.0.6", "@types/json-schema@^7.0.7", "@types/json-schema@^7.0.8", "@types/json-schema@^7.0.9":
+"@types/json-schema@*", "@types/json-schema@^7", "@types/json-schema@^7.0.0", "@types/json-schema@^7.0.4", "@types/json-schema@^7.0.5", "@types/json-schema@^7.0.6", "@types/json-schema@^7.0.7", "@types/json-schema@^7.0.8", "@types/json-schema@^7.0.9":
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.11.tgz#d421b6c527a3037f7c84433fd2c4229e016863d3"
   integrity sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==
@@ -12871,7 +12871,22 @@ elastic-apm-http-client@11.0.3, elastic-apm-http-client@^11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.38.0, elastic-apm-node@^3.40.1:
+elastic-apm-http-client@11.0.4:
+  version "11.0.4"
+  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.0.4.tgz#3e44e56fa42235b1b16a33c6a7656cfde595f9ff"
+  integrity sha512-449Qj/STi9hgnIk2KQ7719E7lpM3/i4Afs7NUhSOX8wV3sxn/+ItIHx9kKJthzhDDezxIfQcH83v83AF67GspQ==
+  dependencies:
+    agentkeepalive "^4.2.1"
+    breadth-filter "^2.0.0"
+    end-of-stream "^1.4.4"
+    fast-safe-stringify "^2.0.7"
+    fast-stream-to-buffer "^1.0.0"
+    object-filter-sequence "^1.0.0"
+    readable-stream "^3.4.0"
+    semver "^6.3.0"
+    stream-chopper "^3.0.1"
+
+elastic-apm-node@^3.38.0:
   version "3.40.1"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.40.1.tgz#ae3669d480fdacf62ace40d12a6f1a3c46b37940"
   integrity sha512-vdyEZ7BPKJP2a1PkCsg350XXGZj03bwOiGrZdqgflocYxns5QwFbhvMKaVq7hWWWS8/sACesrLLELyQgdOpFsw==
@@ -12885,6 +12900,44 @@ elastic-apm-node@^3.38.0, elastic-apm-node@^3.40.1:
     cookie "^0.5.0"
     core-util-is "^1.0.2"
     elastic-apm-http-client "11.0.3"
+    end-of-stream "^1.4.4"
+    error-callsites "^2.0.4"
+    error-stack-parser "^2.0.6"
+    escape-string-regexp "^4.0.0"
+    fast-safe-stringify "^2.0.7"
+    http-headers "^3.0.2"
+    is-native "^1.0.1"
+    lru-cache "^6.0.0"
+    measured-reporting "^1.51.1"
+    monitor-event-loop-delay "^1.0.0"
+    object-filter-sequence "^1.0.0"
+    object-identity-map "^1.0.2"
+    original-url "^1.2.3"
+    pino "^6.11.2"
+    relative-microtime "^2.0.0"
+    require-in-the-middle "^5.2.0"
+    semver "^6.3.0"
+    set-cookie-serde "^1.0.0"
+    shallow-clone-shim "^2.0.0"
+    source-map "^0.8.0-beta.0"
+    sql-summary "^1.0.1"
+    traverse "^0.6.6"
+    unicode-byte-truncate "^1.0.0"
+
+elastic-apm-node@^3.41.0:
+  version "3.41.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.41.0.tgz#ff0b5ecf6d126a2eb312ecc936bd55bc3f1e3ce6"
+  integrity sha512-cX745ryAwQCFEhkYttLrdjQDO0vCHspCbKg6bCguvBURZUHkLnZcP5z5m3R20dnGfTDXGg2q6nMi65iIVMCYFA==
+  dependencies:
+    "@elastic/ecs-pino-format" "^1.2.0"
+    "@opentelemetry/api" "^1.1.0"
+    after-all-results "^2.0.0"
+    async-cache "^1.1.0"
+    async-value-promise "^1.1.1"
+    basic-auth "^2.0.1"
+    cookie "^0.5.0"
+    core-util-is "^1.0.2"
+    elastic-apm-http-client "11.0.4"
     end-of-stream "^1.4.4"
     error-callsites "^2.0.4"
     error-stack-parser "^2.0.6"
@@ -17962,7 +18015,7 @@ js-yaml@3.14.1, js-yaml@^3.13.1, js-yaml@^3.14.1:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
-js-yaml@4.1.0, js-yaml@^4.1.0:
+js-yaml@4.1.0, js-yaml@^4.0.0, js-yaml@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-4.1.0.tgz#c1fb65f8f5017901cdd2c951864ba18458a10602"
   integrity sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==
@@ -19911,6 +19964,19 @@ monaco-editor@*, monaco-editor@^0.24.0:
   resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.24.0.tgz#990b55096bcc95d08d8d28e55264c6eb17707269"
   integrity sha512-o1f0Lz6ABFNTtnEqqqvlY9qzNx24rQZx1RgYNQ8SkWkE+Ka63keHH/RqxQ4QhN4fs/UYOnvAtEUZsPrzccH++A==
 
+monaco-yaml@3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/monaco-yaml/-/monaco-yaml-3.2.1.tgz#45ce9f7f8140dc26249ac99eb0a9e5a9ab9beb87"
+  integrity sha512-2geAd5I7H1SMgwTHBuyPAPK9WTAzxbl9XwDl5h6NY6n9j4qnlLLQKK1i0P9cAmUiV2uaiViz69RLNWqVU5BVsg==
+  dependencies:
+    "@types/json-schema" "^7.0.0"
+    js-yaml "^4.0.0"
+    path-browserify "^1.0.0"
+    prettier "2.0.5"
+    vscode-languageserver-textdocument "^1.0.0"
+    vscode-languageserver-types "^3.0.0"
+    yaml-language-server-parser "^0.1.0"
+
 monitor-event-loop-delay@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/monitor-event-loop-delay/-/monitor-event-loop-delay-1.0.0.tgz#b5ab78165a3bb93f2b275c50d01430c7f155d1f7"
@@ -21217,7 +21283,7 @@ path-browserify@0.0.1:
   resolved "https://registry.yarnpkg.com/path-browserify/-/path-browserify-0.0.1.tgz#e6c4ddd7ed3aa27c68a20cc4e50e1a4ee83bbc4a"
   integrity sha512-BapA40NHICOS+USX9SN4tyhq+A2RrN/Ws5F0Z5aMHDp98Fl86lX8Oti8B7uN93L4Ifv4fHOEA+pQw87gmMO/lQ==
 
-path-browserify@^1.0.1:
+path-browserify@^1.0.0, path-browserify@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/path-browserify/-/path-browserify-1.0.1.tgz#d98454a9c3753d5790860f16f68867b9e46be1fd"
   integrity sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==
@@ -21951,6 +22017,11 @@ prettier-linter-helpers@^1.0.0:
   integrity sha512-GbK2cP9nraSSUF9N2XwUwqfzlAFlMNYYl+ShE/V+H8a9uNl/oUqB1w2EL54Jh0OlyRSd8RfWYJ3coVS4TROP2w==
   dependencies:
     fast-diff "^1.1.2"
+
+prettier@2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.0.5.tgz#d6d56282455243f2f92cc1716692c08aa31522d4"
+  integrity sha512-7PtVymN48hGcO4fGjybyBSIWDsLU4H4XlvOHfq91pz9kkGlonzwTfYkaIEwiRg/dAJF9YlbsduBAgtYLi+8cFg==
 
 "prettier@>=2.2.1 <=2.3.0":
   version "2.2.1"
@@ -27544,6 +27615,16 @@ vm-browserify@^1.0.1:
   resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
 
+vscode-languageserver-textdocument@^1.0.0:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/vscode-languageserver-textdocument/-/vscode-languageserver-textdocument-1.0.7.tgz#16df468d5c2606103c90554ae05f9f3d335b771b"
+  integrity sha512-bFJH7UQxlXT8kKeyiyu41r22jCZXG8kuuVVA33OEJn1diWOZK5n8zBSPZFHVBOu8kXZ6h0LIRhf5UnCo61J4Hg==
+
+vscode-languageserver-types@^3.0.0:
+  version "3.17.2"
+  resolved "https://registry.yarnpkg.com/vscode-languageserver-types/-/vscode-languageserver-types-3.17.2.tgz#b2c2e7de405ad3d73a883e91989b850170ffc4f2"
+  integrity sha512-zHhCWatviizPIq9B7Vh9uvrH6x3sK8itC84HkamnBWoDFJtzBf7SWlpLCZUit72b3os45h6RWQNC9xHRDF8dRA==
+
 vt-pbf@^3.1.3:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/vt-pbf/-/vt-pbf-3.1.3.tgz#68fd150756465e2edae1cc5c048e063916dcfaac"
@@ -28317,6 +28398,11 @@ yallist@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/yallist/-/yallist-4.0.0.tgz#9bb92790d9c0effec63be73519e11a35019a3a72"
   integrity sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==
+
+yaml-language-server-parser@^0.1.0:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/yaml-language-server-parser/-/yaml-language-server-parser-0.1.3.tgz#f0e9082068291c7c330eefa1f3c9f1b4c3c54183"
+  integrity sha512-xD2I+6M/vqQvcy4ded8JpXUaDHXmZMdhIO3OpuiFxstutwnW4whrfDzNcrsfXVdgMWqOUpdv3747Q081PFN1+g==
 
 yaml@^1.10.0, yaml@^1.10.2, yaml@^1.7.2:
   version "1.10.2"
