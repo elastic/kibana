@@ -146,6 +146,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
         addElement(element);
         closePopover();
       },
+      'data-test-subj': `canvasAddElementMenu__${element.name}`,
     });
 
     const elementListToMenuItems = (elementList: ElementSpec[]) => {
@@ -161,6 +162,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
             title: name,
             items: elementList.map(elementToMenuItem),
           },
+          'data-test-subj': `canvasAddElementMenu__${name}`,
         };
       }
 

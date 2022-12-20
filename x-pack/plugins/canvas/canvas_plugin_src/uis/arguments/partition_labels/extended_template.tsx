@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, MouseEvent, FunctionComponent, useCallback, useEffect } from 'react';
+import React, {
+  ChangeEvent,
+  MouseEvent,
+  KeyboardEvent,
+  FunctionComponent,
+  useCallback,
+  useEffect,
+} from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFormRow,
@@ -80,7 +87,10 @@ export const ExtendedTemplate: FunctionComponent<Props> = ({ onValueChange, argV
   const onCommonFieldChange = useCallback(
     (field: Fields) =>
       (
-        event: ChangeEvent<HTMLInputElement | HTMLSelectElement> | MouseEvent<HTMLButtonElement>
+        event:
+          | ChangeEvent<HTMLInputElement | HTMLSelectElement>
+          | KeyboardEvent<HTMLInputElement>
+          | MouseEvent<HTMLButtonElement>
       ) => {
         onChangeField(field, event.currentTarget.value);
       },
