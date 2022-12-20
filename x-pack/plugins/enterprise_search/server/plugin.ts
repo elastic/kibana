@@ -63,6 +63,7 @@ import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/t
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
 import { ConfigType } from '.';
+import { registerStatsRoutes } from './routes/enterprise_search/stats';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -182,6 +183,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerConnectorRoutes(dependencies);
     registerCrawlerRoutes(dependencies);
     registerAnalyticsRoutes(dependencies);
+    registerStatsRoutes(dependencies);
 
     getStartServices().then(([, { security: securityStart }]) => {
       registerCreateAPIKeyRoute(dependencies, securityStart);

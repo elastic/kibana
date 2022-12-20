@@ -11,3 +11,6 @@ export class FileNotFoundError extends Error {
     Error.captureStackTrace(this);
   }
 }
+export interface CloudHealth {
+  has_min_connector_memory: boolean;
+}
