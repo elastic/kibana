@@ -1,10 +1,10 @@
 .subFeaturePrivilegeExpandedRegion {
   background-color: $euiColorLightestShade;
-  padding-left: $euiSizeXXL;
-  padding-top: $euiSizeS;
+  padding: $euiSizeS $euiSizeS $euiSizeS $euiSizeXXL;
+  margin-top: $euiSizeS;
 }
 
 .featurePrivilegeDescription {
-  padding: 0 $euiSizeXXL $euiSizeS;
+  padding-left: $euiSizeXXL;
   max-width: 70%;
 }

@@ -68,7 +68,7 @@ export const SubFeatureForm = (props: Props) => {
   return (
     <>
       <EuiFlexGroup>
-        <EuiFlexItem className="eui-textTruncate">
+        <EuiFlexItem className="eui-textTruncate" grow={3}>
           <EuiFlexGroup gutterSize="s" direction="column">
             <EuiFlexItem>
               <EuiText size="s">
@@ -91,7 +91,7 @@ export const SubFeatureForm = (props: Props) => {
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
+        <EuiFlexItem grow={2}>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
@@ -177,6 +177,7 @@ export const SubFeatureForm = (props: Props) => {
         key={index}
         buttonSize="compressed"
         data-test-subj="mutexSubFeaturePrivilegeControl"
+        isFullWidth
         options={options}
         idSelected={firstSelectedPrivilege?.id ?? NO_PRIVILEGE_VALUE}
         isDisabled={props.disabled}
