@@ -20,9 +20,7 @@ export const scheduleNotificationResponseActions = (
   { signals, responseActions }: ScheduleNotificationActions,
   osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction']
 ) => {
-  const filteredAlerts = (signals as Ecs[]).filter((alert) => {
-    return alert.agent?.id;
-  });
+  const filteredAlerts = (signals as Ecs[]).filter((alert) => alert.agent?.id);
 
   const alertsWithAgent = reduce(
     filteredAlerts,

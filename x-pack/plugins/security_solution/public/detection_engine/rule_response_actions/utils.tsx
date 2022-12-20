@@ -12,8 +12,8 @@ import uuid from 'uuid';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import type { RuleResponseAction } from '../../../common/detection_engine/rule_response_actions/schemas';
-import { parser as osqueryParser } from '../../common/components/markdown_editor/plugins/osquery';
 import { RESPONSE_ACTION_TYPES } from '../../../common/detection_engine/rule_response_actions/schemas';
+import { OsqueryParser } from '../../common/components/markdown_editor/plugins/osquery/parser';
 
 interface OsqueryNoteQuery {
   configuration: {
@@ -25,7 +25,7 @@ interface OsqueryNoteQuery {
 
 export const getOsqueryQueriesFromNote = (note: string): OsqueryNoteQuery[] => {
   const parsedAlertInvestigationGuide = unified()
-    .use([[markdown, {}], osqueryParser])
+    .use([[markdown, {}], OsqueryParser])
     .parse(note);
   return filter(parsedAlertInvestigationGuide?.children as object, ['type', 'osquery']);
 };
