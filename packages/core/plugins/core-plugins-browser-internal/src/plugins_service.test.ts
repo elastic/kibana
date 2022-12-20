@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { omit, pick } from 'lodash';
+import { omit } from 'lodash';
 
 import {
   type MockedPluginInitializer,
@@ -98,10 +98,9 @@ describe('PluginsService', () => {
       theme: themeServiceMock.createSetupContract(),
     };
     mockSetupContext = {
-      ...mockSetupDeps,
+      ...omit(mockSetupDeps, 'injectedMetadata'),
       application: expect.any(Object),
       getStartServices: expect.any(Function),
-      injectedMetadata: pick(mockSetupDeps.injectedMetadata, 'getInjectedVar'),
     };
     mockStartDeps = {
       analytics: analyticsServiceMock.createAnalyticsServiceStart(),
@@ -121,10 +120,9 @@ describe('PluginsService', () => {
       theme: themeServiceMock.createStartContract(),
     };
     mockStartContext = {
-      ...mockStartDeps,
+      ...omit(mockStartDeps, 'injectedMetadata'),
       application: expect.any(Object),
       chrome: omit(mockStartDeps.chrome, 'getComponent'),
-      injectedMetadata: pick(mockStartDeps.injectedMetadata, 'getInjectedVar'),
     };
 
     // Reset these for each test.
