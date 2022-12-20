@@ -50,8 +50,6 @@ export class EventsShipper {
       } else {
         this.log.debug(`Telemetry cluster response status: ${response.status}`);
       }
-
-      return `${response.status}`;
     }
   }
 }

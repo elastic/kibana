@@ -53,8 +53,7 @@ async function sendReportMetricsToTelemetry(
       log
     );
 
-    const responseStatus = await shipper.send(events);
-    log.info(`Telemetry events were sent, 'responseStatus' = ${responseStatus}`);
+    await shipper.send(events);
   }
 }
 
