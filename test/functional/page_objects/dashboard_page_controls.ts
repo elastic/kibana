@@ -615,4 +615,21 @@ export class DashboardPageControls extends FtrService {
       await this.testSubjects.click('timeSlider-popoverToggleButton');
     }
   }
+
+  public async getTimeSliceFromTimeSlider() {
+    const isOpen = await this.testSubjects.exists('timeSlider-popoverContents');
+    if (!isOpen) {
+      await this.testSubjects.click('timeSlider-popoverToggleButton');
+      await this.retry.try(async () => {
+        await this.testSubjects.existOrFail('timeSlider-popoverContents');
+      });
+    }
+    const popover = await this.testSubjects.find('timeSlider-popoverContents');
+    const dualRangeSlider = await this.find.descendantDisplayedByCssSelector(
+      '.euiRangeDraggable',
+      popover
+    );
+    const value = await dualRangeSlider.getAttribute('aria-valuetext');
+    return value;
+  }
 }
