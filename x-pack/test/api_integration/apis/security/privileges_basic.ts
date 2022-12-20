@@ -107,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_read',
               'process_operations_all',
               'read',
+              'kubernetes_commands_all',
             ],
             uptime: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_delete'],
