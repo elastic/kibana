@@ -1258,23 +1258,7 @@
             "label": "kibana",
             "description": [],
             "signature": [
-              "AuditKibana",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.AuditEvent.http",
-            "type": "Object",
-            "tags": [],
-            "label": "http",
-            "description": [],
-            "signature": [
-              "AuditHttp",
-              " | undefined"
+              "{ space_id?: string | undefined; session_id?: string | undefined; saved_object?: { type: string; id: string; } | undefined; authentication_provider?: string | undefined; authentication_type?: string | undefined; authentication_realm?: string | undefined; lookup_realm?: string | undefined; add_to_spaces?: readonly string[] | undefined; delete_from_spaces?: readonly string[] | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/security/server/audit/audit_events.ts",
             "deprecated": false,
