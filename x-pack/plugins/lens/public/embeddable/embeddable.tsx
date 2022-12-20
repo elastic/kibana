@@ -52,8 +52,11 @@ import {
   ReferenceOrValueEmbeddable,
   SelfStyledEmbeddable,
   FilterableEmbeddable,
+  cellValueTrigger,
+  CELL_VALUE_TRIGGER,
+  type CellValueContext,
 } from '@kbn/embeddable-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type {
   Capabilities,
@@ -79,6 +82,7 @@ import {
   DatasourceMap,
   Datasource,
   IndexPatternMap,
+  GetCompatibleCellValueActions,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -732,6 +736,7 @@ export class Embeddable
           syncTooltips={input.syncTooltips}
           syncCursor={input.syncCursor}
           hasCompatibleActions={this.hasCompatibleActions}
+          getCompatibleCellValueActions={this.getCompatibleCellValueActions}
           className={input.className}
           style={input.style}
           executionContext={this.getExecutionContext()}
@@ -777,6 +782,27 @@ export class Embeddable
     }
 
     return false;
+  };
+
+  private readonly getCompatibleCellValueActions: GetCompatibleCellValueActions = async (data) => {
+    const { getTriggerCompatibleActions } = this.deps;
+    if (getTriggerCompatibleActions) {
+      const embeddable = this;
+      const actions: Array<Action<CellValueContext>> = await getTriggerCompatibleActions(
+        CELL_VALUE_TRIGGER,
+        { data, embeddable }
+      );
+      return actions
+        .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
+        .map((action) => ({
+          id: action.id,
+          iconType: action.getIconType({ embeddable, data, trigger: cellValueTrigger })!,
+          displayName: action.getDisplayName({ embeddable, data, trigger: cellValueTrigger }),
+          execute: (cellData) =>
+            action.execute({ embeddable, data: cellData, trigger: cellValueTrigger }),
+        }));
+    }
+    return [];
   };
 
   /**

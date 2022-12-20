@@ -47,6 +47,7 @@ RUNTIME_DEPS = [
   "@npm//antlr4ts",
   "@npm//babel-loader",
   "@npm//monaco-editor",
+  "@npm//monaco-yaml",
   "@npm//raw-loader",
   "@npm//rxjs",
 ]

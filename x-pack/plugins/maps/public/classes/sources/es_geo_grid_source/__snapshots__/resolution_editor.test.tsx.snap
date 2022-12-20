@@ -10,19 +10,12 @@ exports[`should render 3 tick slider when renderAs is HEX 1`] = `
     label="Resolution"
     labelType="label"
   >
-    <EuiRange
+    <EuiRangeClass
       compressed={true}
-      isLoading={false}
-      levels={Array []}
       max={3}
       min={1}
       onChange={[Function]}
-      showInput={false}
-      showLabels={false}
-      showRange={false}
       showTicks={true}
-      showValue={false}
-      step={1}
       tickInterval={1}
       ticks={
         Array [
@@ -56,19 +49,12 @@ exports[`should render 4 tick slider when renderAs is GRID 1`] = `
     label="Resolution"
     labelType="label"
   >
-    <EuiRange
+    <EuiRangeClass
       compressed={true}
-      isLoading={false}
-      levels={Array []}
       max={4}
       min={1}
       onChange={[Function]}
-      showInput={false}
-      showLabels={false}
-      showRange={false}
       showTicks={true}
-      showValue={false}
-      step={1}
       tickInterval={1}
       ticks={
         Array [
@@ -106,19 +92,12 @@ exports[`should render 4 tick slider when renderAs is HEATMAP 1`] = `
     label="Resolution"
     labelType="label"
   >
-    <EuiRange
+    <EuiRangeClass
       compressed={true}
-      isLoading={false}
-      levels={Array []}
       max={4}
       min={1}
       onChange={[Function]}
-      showInput={false}
-      showLabels={false}
-      showRange={false}
       showTicks={true}
-      showValue={false}
-      step={1}
       tickInterval={1}
       ticks={
         Array [
@@ -156,19 +135,12 @@ exports[`should render 4 tick slider when renderAs is POINT 1`] = `
     label="Resolution"
     labelType="label"
   >
-    <EuiRange
+    <EuiRangeClass
       compressed={true}
-      isLoading={false}
-      levels={Array []}
       max={4}
       min={1}
       onChange={[Function]}
-      showInput={false}
-      showLabels={false}
-      showRange={false}
       showTicks={true}
-      showValue={false}
-      step={1}
       tickInterval={1}
       ticks={
         Array [

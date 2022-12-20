@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { Context } from 'mocha';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../api_integration/ftr_provider_context';
 
-export function warnAndSkipTest(mochaContext: Context, log: ToolingLog) {
+export function warnAndSkipTest(mochaContext: Mocha.Context, log: ToolingLog) {
   log.warning(
     'disabling tests because DockerServers service is not enabled, set FLEET_PACKAGE_REGISTRY_PORT to run them'
   );
