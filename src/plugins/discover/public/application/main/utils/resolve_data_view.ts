@@ -34,43 +34,6 @@ interface DataViewData {
   stateValFound: boolean;
 }
 
-export function findDataViewById(
-  dataViews: DataViewListItem[],
-  id: string
-): DataViewListItem | undefined {
-  return dataViews.find((o) => o.id === id);
-}
-
-/**
- * Checks if the given defaultIndex exists and returns
- * the first available data view id if not
- */
-export function getFallbackDataViewId(
-  dataViews: DataViewListItem[],
-  defaultIndex: string = ''
-): string {
-  if (defaultIndex && findDataViewById(dataViews, defaultIndex)) {
-    return defaultIndex;
-  }
-  return dataViews && dataViews[0]?.id ? dataViews[0].id : '';
-}
-
-/**
- * A given data view id is checked for existence and a fallback is provided if it doesn't exist
- * The provided defaultIndex is usually configured in Advanced Settings, if it's also invalid
- * the first entry of the given list of dataViews is used
- */
-export function getDataViewId(
-  id: string = '',
-  dataViews: DataViewListItem[] = [],
-  defaultIndex: string = ''
-): string {
-  if (!id || !findDataViewById(dataViews, id)) {
-    return getFallbackDataViewId(dataViews, defaultIndex);
-  }
-  return id;
-}
-
 /**
  * Function to load the given data view by id, providing a fallback if it doesn't exist
  */

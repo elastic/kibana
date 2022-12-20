@@ -153,6 +153,14 @@ describe('IndexPatterns', () => {
     SOClientGetDelay = 0;
   });
 
+  test('force field refresh', async () => {
+    const id = '1';
+    await indexPatterns.get(id);
+    expect(apiClient.getFieldsForWildcard).toBeCalledTimes(1);
+    await indexPatterns.get(id, undefined, true);
+    expect(apiClient.getFieldsForWildcard).toBeCalledTimes(2);
+  });
+
   test('does cache ad-hoc data views', async () => {
     const id = '1';
 

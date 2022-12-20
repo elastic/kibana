@@ -23,6 +23,7 @@ export function createDiscoverDataViewsMock() {
         return Promise.reject('Invald');
       }
     },
+    getDefaultDataView: jest.fn(() => dataViewMock),
     updateSavedObject: jest.fn(),
     getIdsWithTitle: jest.fn(() => {
       return Promise.resolve([dataViewMock, dataViewComplexMock, dataViewWithTimefieldMock]);
