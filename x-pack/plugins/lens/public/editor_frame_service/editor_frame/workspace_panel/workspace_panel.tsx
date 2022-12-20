@@ -30,13 +30,14 @@ import type {
   ExpressionRenderError,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
-import { getSearchWarningMessages } from '../../../utils';
+import { getSearchWarningMessages, popularizeField } from '../../../utils';
 import {
   FramePublicAPI,
   isLensBrushEvent,
@@ -48,7 +49,7 @@ import {
   Suggestion,
   DatasourceLayers,
 } from '../../../types';
-import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
+import { DragDrop, DragContext, DragDropIdentifier, DragContextState } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
@@ -84,6 +85,7 @@ import {
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
+import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -91,9 +93,14 @@ export interface WorkspacePanelProps {
   framePublicAPI: FramePublicAPI;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart;
-  plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
+  plugins: {
+    uiActions?: UiActionsStart;
+    data: DataPublicPluginStart;
+    dataViews: DataViewsPublicPluginStart;
+  };
   getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
   lensInspector: LensInspector;
+  indexPatternService: IndexPatternServiceAPI;
 }
 
 interface WorkspaceState {
@@ -137,7 +144,11 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
   );
 
   return (
-    <InnerWorkspacePanel {...restProps} suggestionForDraggedField={suggestionForDraggedField} />
+    <InnerWorkspacePanel
+      {...restProps}
+      suggestionForDraggedField={suggestionForDraggedField}
+      dragDropCtx={dragDropContext}
+    />
   );
 });
 
@@ -151,8 +162,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   ExpressionRenderer: ExpressionRendererComponent,
   suggestionForDraggedField,
   lensInspector,
+  indexPatternService,
+  dragDropCtx,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
+  dragDropCtx: DragContextState;
 }) {
   const dispatchLens = useLensDispatch();
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
@@ -475,11 +489,31 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   }, [expressionExists, localState.expressionBuildError]);
 
   const onDrop = useCallback(() => {
-    if (suggestionForDraggedField) {
+    if (suggestionForDraggedField && dragDropCtx.dragging) {
+      popularizeField(
+        dragDropCtx.dragging.indexPatternId as string,
+        dragDropCtx.dragging.id,
+        plugins.dataViews,
+        core.application.capabilities,
+        indexPatternService,
+        framePublicAPI.dataViews.indexPatterns,
+        datasourceStates,
+        datasourceMap
+      );
       trackUiCounterEvents('drop_onto_workspace');
       switchToSuggestion(dispatchLens, suggestionForDraggedField, { clearStagedPreview: true });
     }
-  }, [suggestionForDraggedField, dispatchLens]);
+  }, [
+    suggestionForDraggedField,
+    dragDropCtx.dragging,
+    plugins.dataViews,
+    core.application.capabilities,
+    dispatchLens,
+    datasourceStates,
+    indexPatternService,
+    framePublicAPI.dataViews.indexPatterns,
+    datasourceMap,
+  ]);
 
   const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
 

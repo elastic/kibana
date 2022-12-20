@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
@@ -23,6 +24,7 @@ export interface ConfigPanelWrapperProps {
   core: DatasourceDimensionEditorProps['core'];
   indexPatternService: IndexPatternServiceAPI;
   uiActions: UiActionsStart;
+  dataViewsService: DataViewsPublicPluginStart;
 }
 
 export interface LayerPanelProps {
@@ -31,6 +33,7 @@ export interface LayerPanelProps {
   activeVisualization: Visualization;
   framePublicAPI: FramePublicAPI;
   core: DatasourceDimensionEditorProps['core'];
+  dataViewsService: DataViewsPublicPluginStart;
 }
 
 export interface LayerDatasourceDropProps {

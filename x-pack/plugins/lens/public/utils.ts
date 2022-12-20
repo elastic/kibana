@@ -10,8 +10,12 @@ import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
 
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { Capabilities, IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
+import type {
+  DataView,
+  DataViewsContract,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -328,3 +332,48 @@ export const getSearchWarningMessages = (
 
   return [...warningsMap.values()].flat();
 };
+
+export async function popularizeField(
+  indexPatternId: string,
+  fieldName: string,
+  dataViewsService: DataViewsPublicPluginStart,
+  capabilities: Capabilities,
+  indexPatternService: IndexPatternServiceAPI,
+  indexPatternsCache: IndexPatternMap,
+  datasourceStates: DatasourceStates,
+  datasourceMap: DatasourceMap
+) {
+  if (!indexPatternId || !capabilities?.indexPatterns?.save) return;
+  const dataView = await dataViewsService.get(indexPatternId);
+  const field = dataView.fields.getByName(fieldName);
+  if (!field) {
+    return;
+  }
+
+  field.count++;
+
+  const refreshIndexPatternsListArgs = {
+    activeDatasources: Object.keys(datasourceStates).reduce(
+      (acc, datasourceId) => ({
+        ...acc,
+        [datasourceId]: datasourceMap[datasourceId],
+      }),
+      {}
+    ),
+    indexPatternId,
+    indexPatternService,
+    indexPatternsCache,
+  };
+
+  if (!dataView.isPersisted()) {
+    refreshIndexPatternsList(refreshIndexPatternsListArgs);
+    return;
+  }
+
+  // Catch 409 errors caused by user adding columns in a higher frequency that the changes can be persisted to Elasticsearch
+  try {
+    await dataViewsService.updateSavedObject(dataView, 0, true);
+    refreshIndexPatternsList(refreshIndexPatternsListArgs);
+    // eslint-disable-next-line no-empty
+  } catch {}
+}
