@@ -9,7 +9,7 @@ import { omit } from 'lodash/fp';
 import { render } from '@testing-library/react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { mockBrowserFields } from '../../mock';
-import { getFieldColumns, getFieldItems } from './field_items';
+import { getFieldColumns, getFieldItemsData } from './field_items';
 
 const timestampFieldId = '@timestamp';
 const columnIds = [timestampFieldId];
@@ -19,7 +19,7 @@ describe('field_items', () => {
     const timestampField = mockBrowserFields.base.fields![timestampFieldId];
 
     it('should return browser field item format', () => {
-      const fieldItems = getFieldItems({
+      const { fieldItems } = getFieldItemsData({
         selectedCategoryIds: ['base'],
         browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
         columnIds: [],
@@ -37,7 +37,7 @@ describe('field_items', () => {
     });
 
     it('should return selected item', () => {
-      const fieldItems = getFieldItems({
+      const { fieldItems } = getFieldItemsData({
         selectedCategoryIds: ['base'],
         browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
         columnIds,
@@ -49,7 +49,7 @@ describe('field_items', () => {
     });
 
     it('should return isRuntime field', () => {
-      const fieldItems = getFieldItems({
+      const { fieldItems } = getFieldItemsData({
         selectedCategoryIds: ['base'],
         browserFields: {
           base: {
@@ -75,7 +75,7 @@ describe('field_items', () => {
         0
       );
 
-      const fieldItems = getFieldItems({
+      const { fieldItems } = getFieldItemsData({
         selectedCategoryIds: [],
         browserFields: mockBrowserFields,
         columnIds: [],
@@ -92,13 +92,54 @@ describe('field_items', () => {
         0
       );
 
-      const fieldItems = getFieldItems({
+      const { fieldItems } = getFieldItemsData({
         selectedCategoryIds,
         browserFields: mockBrowserFields,
         columnIds: [],
       });
 
       expect(fieldItems.length).toBe(fieldCount);
+    });
+
+    it('should show description field', () => {
+      const { fieldItems, showDescriptionColumn } = getFieldItemsData({
+        selectedCategoryIds: ['base'],
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        columnIds: [],
+      });
+
+      expect(fieldItems[0]).toEqual({
+        name: timestampFieldId,
+        description: timestampField.description,
+        category: 'base',
+        selected: false,
+        type: timestampField.type,
+        example: timestampField.example,
+        isRuntime: false,
+      });
+      expect(showDescriptionColumn).toEqual(true);
+    });
+
+    it('should not show description field', () => {
+      const { description, ...timestampFieldWithoutDescription } = timestampField;
+      const { fieldItems, showDescriptionColumn } = getFieldItemsData({
+        selectedCategoryIds: ['base'],
+        browserFields: {
+          base: { fields: { [timestampFieldId]: timestampFieldWithoutDescription } },
+        },
+        columnIds: [],
+      });
+
+      expect(fieldItems[0]).toEqual({
+        name: timestampFieldId,
+        description: '',
+        category: 'base',
+        selected: false,
+        type: timestampField.type,
+        example: timestampField.example,
+        isRuntime: false,
+      });
+      expect(showDescriptionColumn).toEqual(false);
     });
   });
 
@@ -175,7 +216,7 @@ describe('field_items', () => {
 
     it('should call toggle callback on checkbox click', () => {
       const timestampField = mockBrowserFields.base.fields![timestampFieldId];
-      const fieldItems = getFieldItems({
+      const { fieldItems } = getFieldItemsData({
         selectedCategoryIds: ['base'],
         browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
         columnIds: [],
@@ -192,7 +233,7 @@ describe('field_items', () => {
 
     it('should render default columns with description column', () => {
       const timestampField = mockBrowserFields.base.fields![timestampFieldId];
-      const fieldItems = getFieldItems({
+      const { fieldItems } = getFieldItemsData({
         selectedCategoryIds: ['base'],
         browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
         columnIds: [],
@@ -219,7 +260,7 @@ describe('field_items', () => {
 
     it('should render default columns without description column', () => {
       const timestampField = mockBrowserFields.base.fields![timestampFieldId];
-      const fieldItems = getFieldItems({
+      const { fieldItems } = getFieldItemsData({
         selectedCategoryIds: ['base'],
         browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
         columnIds: [],
