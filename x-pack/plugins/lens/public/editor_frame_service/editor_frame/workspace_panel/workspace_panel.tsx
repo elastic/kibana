@@ -818,21 +818,34 @@ export const VisualizationWrapper = ({
         <EuiFlexItem>
           <EuiEmptyPrompt
             actions={
-              isManagementEnabled && isIndexPatternManagementEnabled ? (
-                <RedirectAppLinks coreStart={core}>
-                  <a
-                    href={core.application.getUrlForApp('management', {
-                      path: '/kibana/indexPatterns/create',
-                    })}
-                    style={{ width: '100%' }}
-                    data-test-subj="configuration-failure-reconfigure-indexpatterns"
-                  >
-                    {i18n.translate('xpack.lens.editorFrame.dataViewReconfigure', {
-                      defaultMessage: `Recreate it in the data view management page`,
-                    })}
-                  </a>
-                </RedirectAppLinks>
-              ) : null
+              isManagementEnabled && isIndexPatternManagementEnabled
+                ? [
+                    <RedirectAppLinks coreStart={core}>
+                      <a
+                        href={core.application.getUrlForApp('management', {
+                          path: '/kibana/indexPatterns/create',
+                        })}
+                        data-test-subj="configuration-failure-reconfigure-indexpatterns"
+                      >
+                        {i18n.translate('xpack.lens.editorFrame.dataViewReconfigure', {
+                          defaultMessage: `Recreate it in the data view management page`,
+                        })}
+                      </a>
+                    </RedirectAppLinks>,
+                    <RedirectAppLinks coreStart={core}>
+                      <a
+                        href={core.application.getUrlForApp('management', {
+                          path: '/kibana/indexPatterns',
+                        })}
+                        data-test-subj="configuration-failure-switch-indexpatterns"
+                      >
+                        {i18n.translate('xpack.lens.editorFrame.dataViewSwitch', {
+                          defaultMessage: `Switch to another data view`,
+                        })}
+                      </a>
+                    </RedirectAppLinks>,
+                  ]
+                : null
             }
             body={
               <>
