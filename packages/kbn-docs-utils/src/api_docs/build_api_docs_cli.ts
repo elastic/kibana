@@ -40,7 +40,9 @@ export function runBuildApiDocsCli() {
       const collectReferences = flags.references as boolean;
       const stats = flags.stats && typeof flags.stats === 'string' ? [flags.stats] : flags.stats;
       const pluginFilter =
-        flags.plugin && typeof flags.plugin === 'string' ? [flags.plugin] : flags.plugin;
+        flags.plugin && typeof flags.plugin === 'string'
+          ? [flags.plugin]
+          : (flags.plugin as string[] | undefined);
 
       if (pluginFilter && !isStringArray(pluginFilter)) {
         throw createFlagError('expected --plugin must only contain strings');
@@ -68,7 +70,7 @@ export function runBuildApiDocsCli() {
 
       const plugins = findPlugins();
 
-      // if the output folder already exists and we don't have a plugin filter, delete all the files in the output folder
+      // if the output folder already exists, and we don't have a plugin filter, delete all the files in the output folder
       if (Fs.existsSync(outputFolder) && !pluginFilter) {
         await Fsp.rm(outputFolder, { recursive: true });
       }
@@ -84,10 +86,7 @@ export function runBuildApiDocsCli() {
         unreferencedDeprecations,
         referencedDeprecations,
         adoptionTrackedAPIs,
-      } = getPluginApiMap(project, plugins, log, {
-        collectReferences,
-        pluginFilter: pluginFilter as string[],
-      });
+      } = getPluginApiMap(project, plugins, log, { collectReferences, pluginFilter });
 
       const reporter = CiStatsReporter.fromEnv(log);
 
@@ -117,7 +116,7 @@ export function runBuildApiDocsCli() {
         // be parsed in order to correctly determine reference links, and ensure that `removeBrokenLinks`
         // doesn't remove more links than necessary.
         if (pluginFilter && !pluginFilter.includes(plugin.manifest.id)) {
-          return;
+          continue;
         }
 
         const id = plugin.manifest.id;
@@ -210,7 +209,7 @@ export function runBuildApiDocsCli() {
             d.label
           )}`;
 
-        if (collectReferences && pluginFilter === plugin.manifest.id) {
+        if (collectReferences && pluginFilter?.includes(plugin.manifest.id)) {
           if (referencedDeprecations[id] && pluginStats.deprecatedAPIsReferencedCount > 0) {
             log.info(`${referencedDeprecations[id].length} deprecated APIs used`);
             // eslint-disable-next-line no-console

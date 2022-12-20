@@ -225,6 +225,8 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       onClick={() => setIsStatusFilterOpen(!isStatusFilterOpen)}
                       isSelected={isStatusFilterOpen}
                       hasActiveFilters={selectedStatus.length > 0}
+                      numActiveFilters={selectedStatus.length}
+                      numFilters={statusFilters.length}
                       disabled={agentPolicies.length === 0}
                       data-test-subj="agentList.statusFilter"
                     >

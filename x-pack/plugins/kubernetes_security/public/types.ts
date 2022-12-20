@@ -33,11 +33,19 @@ export interface GlobalFilter {
   endDate: string;
 }
 
+export interface ResponseActionButtonProps {
+  tooltip: React.ReactNode;
+  canAccessResponseConsole: boolean;
+  isDisabled: boolean;
+}
 export interface KubernetesSecurityDeps {
   filter: React.ReactNode;
   renderSessionsView: (sessionsFilterQuery: string | undefined) => JSX.Element;
   indexPattern?: IndexPattern;
   globalFilter: GlobalFilter;
+  responseActionClick: () => void;
+  handleTreeNavSelection: (agentId: string) => void;
+  responseActionButtonProps: ResponseActionButtonProps;
 }
 
 export interface KubernetesSecurityStart {

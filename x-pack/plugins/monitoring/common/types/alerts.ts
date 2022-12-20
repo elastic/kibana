@@ -286,3 +286,7 @@ export interface AlertVersions {
   ccs?: string;
   versions: string[];
 }
+
+export interface ExpressionConfig {
+  showDuration?: boolean;
+}

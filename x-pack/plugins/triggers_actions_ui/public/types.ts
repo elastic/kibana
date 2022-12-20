@@ -171,11 +171,6 @@ export enum ActionConnectorMode {
   ActionForm = 'actionForm',
 }
 
-export interface BulkDeleteResponse {
-  errors: BulkOperationError[];
-  total: number;
-}
-
 export interface BulkOperationResponse {
   rules: Rule[];
   errors: BulkOperationError[];
@@ -210,6 +205,7 @@ export interface ActionParamsProps<TParams> {
   isDisabled?: boolean;
   showEmailSubjectAndMessage?: boolean;
   executionMode?: ActionConnectorMode;
+  onBlur?: (field?: string) => void;
 }
 
 export interface Pagination {
