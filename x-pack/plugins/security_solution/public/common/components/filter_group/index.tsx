@@ -17,13 +17,11 @@ import type { PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  EuiButton,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingChart,
   EuiPopover,
 } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
@@ -37,7 +35,8 @@ import type { FilterContextType, FilterGroupProps, FilterItemObj } from './types
 import { useFilterUpdatesToUrlSync } from './hooks/use_filter_update_to_url_sync';
 import { APP_ID } from '../../../../common/constants';
 import './index.scss';
-import { useSpaceId } from '../../hooks/use_space_id';
+import { FilterGroupLoading } from './loading';
+import { withSpaceId } from '../with_space_id';
 
 type ControlGroupBuilder = typeof controlGroupInputBuilder;
 
@@ -57,7 +56,7 @@ const FilterWrapper = styled.div.attrs((props) => ({
   }
 `;
 
-export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
+const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   const {
     dataViewId,
     onFilterChange,
@@ -66,14 +65,13 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     query,
     chainingSystem = 'HIERARCHICAL',
     initialControls,
+    spaceId,
   } = props;
 
   const filterChangedSubscription = useRef<Subscription>();
   const inputChangedSubscription = useRef<Subscription>();
 
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
-
-  const spaceId = useSpaceId() ?? 'default';
 
   const localStoragePageFilterKey = useMemo(
     () => `${APP_ID}.${spaceId}.${URL_PARAM_KEY.pageFilter}`,
@@ -265,7 +263,9 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
           hideExclude: true,
           hideSort: true,
           hidePanelTitles: true,
-          dataViewId,
+          // option List controls will handle an invalid dataview
+          // & display an appropriate message
+          dataViewId: dataViewId ?? '',
           ...control,
         });
       });
@@ -305,6 +305,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
         fieldName: initialControls[idx].fieldName,
       });
     });
+    controlGroup?.reload();
   }, [controlGroupInputUpdates, controlGroup, initialControls]);
 
   const resetButton = useMemo(
@@ -330,11 +331,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
             onLoadComplete={onControlGroupLoadHandler}
             getInitialInput={setOptions}
           />
-          {!controlGroup ? (
-            <EuiButton color="text">
-              <EuiLoadingChart data-test-subj="filter-group__loading" />
-            </EuiButton>
-          ) : null}
+          {!controlGroup ? <FilterGroupLoading /> : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
@@ -361,3 +358,10 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     </FilterWrapper>
   );
 };
+
+// FilterGroupNeeds spaceId to be invariant because it is being used in localstorage
+// Hence we will render component only when spaceId has a value.
+export const FilterGroup = withSpaceId<FilterGroupProps>(
+  FilterGroupComponent,
+  <FilterGroupLoading />
+);

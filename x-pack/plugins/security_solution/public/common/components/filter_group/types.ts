@@ -26,7 +26,8 @@ export type FilterItemObj = Omit<AddOptionsListControlProps, 'controlId' | 'data
   Pick<OptionsListEmbeddableInput, 'existsSelected' | 'exclude'>;
 
 export type FilterGroupProps = {
-  dataViewId: string;
+  dataViewId: string | null;
   onFilterChange?: (newFilters: Filter[]) => void;
   initialControls: FilterItemObj[];
+  spaceId: string;
 } & Pick<ControlGroupInput, 'timeRange' | 'filters' | 'query' | 'chainingSystem'>;

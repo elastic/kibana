@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { ComponentProps } from 'react';
 import React, { useState, useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
-import type { FilterGroupProps } from '../../../common/components/filter_group/types';
 import { FilterGroup } from '../../../common/components/filter_group';
 
-type FilterItemSetProps = Omit<FilterGroupProps, 'initialControls'>;
+type FilterItemSetProps = Omit<ComponentProps<typeof FilterGroup>, 'initialControls'>;
 
 const FilterItemSetComponent = (props: FilterItemSetProps) => {
   const { dataViewId, onFilterChange, ...restFilterItemGroupProps } = props;

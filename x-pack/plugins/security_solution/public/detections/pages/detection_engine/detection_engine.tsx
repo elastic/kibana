@@ -308,7 +308,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                 </SecuritySolutionLinkButton>
               </HeaderPage>
               <DetectionPageFilterSet
-                dataViewId={dataViewId as string}
+                dataViewId={dataViewId}
                 onFilterChange={pageFiltersUpdateHandler}
                 filters={filters}
                 query={query}

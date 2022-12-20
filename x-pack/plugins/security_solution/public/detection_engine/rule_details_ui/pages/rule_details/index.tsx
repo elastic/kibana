@@ -804,7 +804,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = () => 
                     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                       <EuiFlexItem grow={true}>
                         <DetectionPageFilterSet
-                          dataViewId={dataViewId as string}
+                          dataViewId={dataViewId}
                           onFilterChange={pageFiltersUpdateHandler}
                           filters={filters}
                           query={query}
