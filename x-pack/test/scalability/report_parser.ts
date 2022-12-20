@@ -8,19 +8,34 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import { ScalabilitySetup } from '@kbn/journeys';
-
-interface CapacityMetrics {
-  rpsAtResponseTimeWarmupAvg: number;
-  rpsAtSLA: number;
-  rpsAtResponseTime10XAvg: number;
-  rpsAtResponseTime100XAvg: number;
-  rpsAtRequestsToActiveUsers: number;
-  thresholdSLA: number;
-}
+import { CapacityMetrics, ResponseMetric, RpsMetric } from './types';
 
 const responseTimeMetrics = ['min', '25%', '50%', '75%', '80%', '85%', '90%', '95%', '99%', 'max'];
-const rpsMetrics = ['activeUsers', 'requests', 'ground'];
-const responseTimeThresholds = 3000;
+
+const getRPSByResponseTime = (
+  rpsData: RpsMetric[],
+  responseTimeData: ResponseMetric[],
+  responseTimeThreshold: number,
+  metricName: 'min' | '25%' | '50%' | '75%' | '80%' | '85%' | '90%' | '95%' | '99%' | 'max',
+  defaultRpsValue: number
+) => {
+  const timestamp = getTimePoint(responseTimeData, metricName, responseTimeThreshold);
+  if (timestamp === -1) {
+    // data point was not found, probably 'responseTimeThreshold' is too high or maxRps is too low for the api
+    // returning the max rps value
+    return defaultRpsValue;
+  } else {
+    const rps = rpsData.find((i) => i.timestamp === timestamp)?.value;
+    // in edge case Gatling might fail to report requests for specific timestamp, returning '-1' as invalid result
+    return !rps ? -1 : rps;
+  }
+};
+
+const defaultThreshold = {
+  threshold1: 3000,
+  threshold2: 9000,
+  threshold3: 15000,
+};
 const collectedPct = '85%';
 
 interface DataPoint {
@@ -52,32 +67,12 @@ const findDataSet = (str: string, regex: RegExp) => {
     });
 };
 
-const getThresholdTimePoint = (
-  data: Array<{
-    timestamp: number;
-    metrics: {
-      [k: string]: number;
-    };
-  }>,
-  metricName: string,
-  thresholdInMs: number
-) => {
-  const resultsAboveThreshold = data.filter((i) => i.metrics[metricName] >= thresholdInMs);
+const getTimePoint = (data: ResponseMetric[], metricName: string, responseTimeValue: number) => {
+  const resultsAboveThreshold = data.filter((i) => i.metrics[metricName] >= responseTimeValue);
   if (resultsAboveThreshold.length > 0) {
     return resultsAboveThreshold[0].timestamp;
   } else return -1;
 };
-
-const getRPS = (
-  time: number,
-  data: Array<{
-    timestamp: number;
-    metrics: {
-      [k: string]: number;
-    };
-  }>,
-  rpsMax: number
-) => (time === -1 ? rpsMax : data.find((i) => i.timestamp === time)?.metrics.requests || 0);
 
 const mapValuesWithMetrics = (data: DataPoint[], metrics: string[]) => {
   return data
@@ -117,34 +112,67 @@ export function getCapacityMetrics(
     responsePercentiles.slice(warmupDuration, responsePercentiles.length - 1),
     responseTimeMetrics
   );
-  const rpsData = mapValuesWithMetrics(requests, rpsMetrics);
 
-  const rpsMax = Math.max(...rpsData.map((i) => i.metrics.requests));
+  const rpsData = requests.map((r) => {
+    return { timestamp: r.timestamp, value: r.values.length > 0 ? r.values[0] : 0 };
+  });
+
+  const rpsMax = Math.max(...rpsData.map((i) => i.value));
   log.info(`rpsMax=${rpsMax}`);
 
-  const avgWarmupResponseTime = Math.round(
+  const warmupAvgResponseTime = Math.round(
     warmupData
       .map((i) => i.metrics[collectedPct])
       .reduce((avg, value, _, { length }) => {
         return avg + value / length;
       }, 0)
   );
-  log.info(`Warmup: Avg ${collectedPct} percentile response time - ${avgWarmupResponseTime} ms`);
+  const rpsAtWarmup = Math.round(
+    rpsData.slice(0, warmupDuration).reduce((avg, rps, _, { length }) => {
+      return avg + rps.value / length;
+    }, 0)
+  );
+  log.info(
+    `Warmup: Avg ${collectedPct} pct response time - ${warmupAvgResponseTime} ms, avg rps=${rpsAtWarmup}`
+  );
 
-  const responseThresholdSLA = scalabilitySetup.thresholds || responseTimeThresholds;
-  const avgWarmupResponseTimeX10 = avgWarmupResponseTime * 10;
-  const avgWarmupResponseTimeX100 = avgWarmupResponseTime * 100;
+  // Collected response time metrics
+  // 3 pre-defined thresholds
+  const thresholds = scalabilitySetup.responseTimeThreshold || defaultThreshold;
 
-  const timeSLA = getThresholdTimePoint(testData, collectedPct, responseThresholdSLA);
-  const timeX10 = getThresholdTimePoint(testData, collectedPct, avgWarmupResponseTimeX10);
-  const timeX100 = getThresholdTimePoint(testData, collectedPct, avgWarmupResponseTimeX100);
+  const rpsAtThreshold1 = getRPSByResponseTime(
+    rpsData,
+    testData,
+    thresholds.threshold1,
+    collectedPct,
+    rpsMax
+  );
+
+  const rpsAtThreshold2 = getRPSByResponseTime(
+    rpsData,
+    testData,
+    thresholds.threshold2,
+    collectedPct,
+    rpsMax
+  );
+
+  const rpsAtThreshold3 = getRPSByResponseTime(
+    rpsData,
+    testData,
+    thresholds.threshold3,
+    collectedPct,
+    rpsMax
+  );
 
   return {
-    rpsAtResponseTimeWarmupAvg: avgWarmupResponseTime,
-    rpsAtSLA: getRPS(timeSLA, rpsData, rpsMax),
-    rpsAtResponseTime10XAvg: getRPS(timeX10, rpsData, rpsMax),
-    rpsAtResponseTime100XAvg: getRPS(timeX100, rpsData, rpsMax),
-    rpsAtRequestsToActiveUsers: 0,
-    thresholdSLA: responseThresholdSLA,
+    warmupAvgResponseTime,
+    rpsAtWarmup,
+    warmupDuration,
+    threshold1ResponseTime: thresholds.threshold1,
+    rpsAtThreshold1,
+    threshold2ResponseTime: thresholds.threshold2,
+    rpsAtThreshold2,
+    threshold3ResponseTime: thresholds.threshold3,
+    rpsAtThreshold3,
   };
 }

@@ -1,8 +1,6 @@
 {
   "journeyName": "GET /api/saved_objects_tagging/tags",
-  "kibanaVersion": "8.7.0-SNAPSHOT",
   "scalabilitySetup": {
-    "thresholdSLA": 1000,
     "warmup": [
       {
         "action": "constantUsersPerSec",

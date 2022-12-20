@@ -1,8 +1,6 @@
 {
   "journeyName": "GET /internal/security/session",
-  "kibanaVersion": "8.6.0-SNAPSHOT",
   "scalabilitySetup": {
-    "thresholdSLA": 3000,
     "warmup": [
       {
         "action": "constantUsersPerSec",
@@ -12,10 +10,10 @@
     ],
     "test": [
       {
-        "action": "incrementUsersPerSec",
-        "userCount": 20,
-        "times": 40,
-        "duration": "2s"
+        "action": "rampUsersPerSec",
+        "minUsersCount": 10,
+        "maxUsersCount": 700,
+        "duration": "345s"
       }
     ],
     "maxDuration": "10m"
@@ -28,13 +26,12 @@
     {
       "requests": [
         {
-          "date": "2022-11-14T09:31:49.963Z",
           "http": {
             "method": "GET",
             "path": "/internal/security/session",
             "headers": {
-              "Cookie": "sid=Fe26.2**b4f51707bfe081641d5680f3564a6294e67",
-              "Kbn-Version": "8.6.0-SNAPSHOT",
+              "Cookie": "",
+              "Kbn-Version": "",
               "Accept-Encoding": "gzip, deflate, br",
               "Content-Type": "application/json"
             },

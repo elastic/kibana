@@ -1,13 +1,12 @@
 {
   "journeyName": "POST /api/metrics/vis/data",
-  "kibanaVersion": "8.7.0-SNAPSHOT",
   "scalabilitySetup": {
-    "thresholdSLA": 3000,
+    "thresholdSLA": [3000, 9000, 18000],
     "warmup": [
       {
         "action": "constantUsersPerSec",
         "userCount": 10,
-        "duration": "30s"
+        "duration": "10s"
       }
     ],
     "test": [
@@ -28,16 +27,12 @@
     {
       "requests": [
         {
-          "date": "2022-12-14T17:17:10.517Z",
           "http": {
             "method": "POST",
             "path": "/api/metrics/vis/data",
             "headers": {
-              "Origin": "http://localhost:5620",
-              "Cookie": "sid=Fe26.2**b4f51707bfe081641d5680f3564a6294e67",
-              "Kbn-Version": "8.7.0-SNAPSHOT",
-              "Referer": "http://localhost:5620/app/dashboards",
-              "Host": "localhost:5620",
+              "Cookie": "",
+              "Kbn-Version": "",
               "Accept-Encoding": "gzip, deflate, br",
               "Content-Type": "application/json"
             },

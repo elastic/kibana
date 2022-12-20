@@ -16,3 +16,27 @@ export interface ScalabilityJourney {
     kbnArchives: string[];
   };
 }
+
+export interface CapacityMetrics {
+  warmupAvgResponseTime: number;
+  rpsAtWarmup: number;
+  warmupDuration: number;
+  threshold1ResponseTime: number;
+  rpsAtThreshold1: number;
+  threshold2ResponseTime: number;
+  rpsAtThreshold2: number;
+  threshold3ResponseTime: number;
+  rpsAtThreshold3: number;
+}
+
+export interface RpsMetric {
+  timestamp: number;
+  value: number;
+}
+
+export interface ResponseMetric {
+  timestamp: number;
+  metrics: {
+    [k: string]: number;
+  };
+}

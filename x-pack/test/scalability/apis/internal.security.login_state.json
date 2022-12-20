@@ -1,8 +1,6 @@
 {
   "journeyName": "GET /internal/security/login_state",
-  "kibanaVersion": "8.6.0-SNAPSHOT",
   "scalabilitySetup": {
-    "thresholdSLA": 3000,
     "warmup": [
       {
         "action": "constantUsersPerSec",
@@ -28,12 +26,11 @@
     {
       "requests": [
         {
-          "date": "2022-11-14T09:31:49.963Z",
           "http": {
             "method": "GET",
             "path": "/internal/security/login_state",
             "headers": {
-              "Kbn-Version": "8.6.0-SNAPSHOT",
+              "Kbn-Version": "",
               "Accept-Encoding": "gzip, deflate, br",
               "Content-Type": "application/json"
             },

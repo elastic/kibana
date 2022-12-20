@@ -1,8 +1,6 @@
 {
   "journeyName": "GET /internal/security/user_profile",
-  "kibanaVersion": "8.6.0-SNAPSHOT",
   "scalabilitySetup": {
-    "thresholdSLA": 3000,
     "warmup": [
       {
         "action": "constantUsersPerSec",
@@ -28,14 +26,13 @@
     {
       "requests": [
         {
-          "date": "2022-11-14T09:31:49.963Z",
           "http": {
             "method": "GET",
             "path": "/internal/security/user_profile",
             "query": "?dataPath=avatar",
             "headers": {
-              "Cookie": "sid=Fe26.2**b4f51707bfe081641d5680f3564a6294e67",
-              "Kbn-Version": "8.6.0-SNAPSHOT",
+              "Cookie": "",
+              "Kbn-Version": "",
               "Accept-Encoding": "gzip, deflate, br",
               "Content-Type": "application/json"
             },

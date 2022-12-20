@@ -1,8 +1,6 @@
 {
   "journeyName": "POST /api/core/capabilities",
-  "kibanaVersion": "8.6.0-SNAPSHOT",
   "scalabilitySetup": {
-    "thresholdSLA": 3000,
     "warmup": [
       {
         "action": "constantUsersPerSec",
@@ -15,7 +13,7 @@
         "action": "rampUsersPerSec",
         "minUsersCount": 10,
         "maxUsersCount": 250,
-        "duration": "6m"
+        "duration": "4m"
       }
     ],
     "maxDuration": "10m"
@@ -28,15 +26,14 @@
     {
       "requests": [
         {
-          "date": "2022-11-14T09:31:49.963Z",
           "http": {
             "method": "POST",
             "path": "/api/core/capabilities",
             "query": "?useDefaultCapabilities=true",
             "body": "{\"applications\":[\"error\",\"status\",\"kibana\",\"dev_tools\",\"r\",\"short_url_redirect\",\"home\",\"management\",\"space_selector\",\"security_access_agreement\",\"security_capture_url\",\"security_login\",\"security_logout\",\"security_logged_out\",\"security_overwritten_session\",\"security_account\",\"reportingRedirect\",\"graph\",\"discover\",\"integrations\",\"fleet\",\"ingestManager\",\"visualize\",\"canvas\",\"dashboards\",\"lens\",\"maps\",\"osquery\",\"observability-overview\",\"ml\",\"uptime\",\"synthetics\",\"securitySolutionUI\",\"siem\",\"logs\",\"metrics\",\"infra\",\"monitoring\",\"enterpriseSearch\",\"enterpriseSearchContent\",\"enterpriseSearchAnalytics\",\"elasticsearch\",\"appSearch\",\"workplaceSearch\",\"searchExperiences\",\"apm\",\"ux\",\"kibanaOverview\"]}",
             "headers": {
-              "Cookie": "sid=Fe26.2**b4f51707bfe081641d5680f3564a6294e67",
-              "Kbn-Version": "8.6.0-SNAPSHOT",
+              "Cookie": "",
+              "Kbn-Version": "",
               "Accept-Encoding": "gzip, deflate, br",
               "Content-Type": "application/json"
             },
