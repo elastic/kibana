@@ -40,6 +40,7 @@ export const AddTimeSliderControlButton = ({
 
   return (
     <EuiContextMenuItem
+      key="addTimeSliderControl"
       icon="plusInCircle"
       onClick={() => {
         controlGroup.addTimeSliderControl();

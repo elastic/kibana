@@ -340,3 +340,8 @@ export const getControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.controlsButtonTitle', {
     defaultMessage: 'Controls',
   });
+
+export const getAddControlButtonTitle = () =>
+  i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
+    defaultMessage: 'Add control',
+  });
