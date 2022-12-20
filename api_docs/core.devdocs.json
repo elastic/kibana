@@ -1826,7 +1826,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/types.ts"
+                "path": "src/plugins/dashboard/public/dashboard_app/types.ts"
               },
               {
                 "plugin": "dashboard",
@@ -4565,10 +4565,12 @@
             "parentPluginId": "core",
             "id": "def-public.CoreSetup.uiSettings",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "Deprecated"
+            ],
             "label": "uiSettings",
             "description": [
-              "{@link IUiSettingsClient}"
+              "{@link IUiSettingsClient}\n"
             ],
             "signature": [
               {
@@ -4577,6 +4579,28 @@
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.CoreSetup.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [
+              "{@link SettingsStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.SettingsStart",
+                "text": "SettingsStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
@@ -4927,10 +4951,12 @@
             "parentPluginId": "core",
             "id": "def-public.CoreStart.uiSettings",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "Deprecated"
+            ],
             "label": "uiSettings",
             "description": [
-              "{@link IUiSettingsClient}"
+              "{@link IUiSettingsClient}\n"
             ],
             "signature": [
               {
@@ -4939,6 +4965,28 @@
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.CoreStart.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [
+              "{@link SettingsStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.SettingsStart",
+                "text": "SettingsStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
@@ -7874,6 +7922,10 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
                 "plugin": "fleet",
@@ -13278,11 +13330,11 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_extract_panel_references.ts"
+            "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_extract_panel_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_extract_panel_references.ts"
+            "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_extract_panel_references.ts"
           },
           {
             "plugin": "dashboard",
@@ -13330,35 +13382,35 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "ml",
@@ -23332,9 +23384,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/logging",
+                "pluginId": "@kbn/ecs",
                 "scope": "server",
-                "docId": "kibKbnLoggingPluginApi",
+                "docId": "kibKbnEcsPluginApi",
                 "section": "def-server.EcsEventOutcome",
                 "text": "EcsEventOutcome"
               },
@@ -24437,96 +24489,6 @@
               }
             ],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.CheckAuthorizationParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "CheckAuthorizationParams",
-        "description": [
-          "\nThe CheckAuthorizationParams interface contains settings for checking\nauthorization via the ISavedObjectsSecurityExtension."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.CheckAuthorizationParams",
-            "text": "CheckAuthorizationParams"
-          },
-          "<A>"
-        ],
-        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CheckAuthorizationParams.types",
-            "type": "Object",
-            "tags": [],
-            "label": "types",
-            "description": [
-              "\nA set of types to check."
-            ],
-            "signature": [
-              "Set<string>"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CheckAuthorizationParams.spaces",
-            "type": "Object",
-            "tags": [],
-            "label": "spaces",
-            "description": [
-              "\nA set of spaces to check."
-            ],
-            "signature": [
-              "Set<string>"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CheckAuthorizationParams.actions",
-            "type": "Object",
-            "tags": [],
-            "label": "actions",
-            "description": [
-              "\nAn set of actions to check."
-            ],
-            "signature": [
-              "Set<A>"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CheckAuthorizationParams.options",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [
-              "\nAuthorization options - whether or not to allow global resources, false if options are undefined"
-            ],
-            "signature": [
-              "{ allowGlobalResource: boolean; } | undefined"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -31997,6 +31959,10 @@
                 "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
               },
@@ -38960,12 +38926,12 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.ISavedObjectsSecurityExtension.checkAuthorization",
+            "id": "def-server.ISavedObjectsSecurityExtension.performAuthorization",
             "type": "Function",
             "tags": [],
-            "label": "checkAuthorization",
+            "label": "performAuthorization",
             "description": [
-              "\nChecks authorization of actions on specified types in specified spaces."
+              "\nPerforms authorization (check & enforce) of actions on specified types in specified spaces."
             ],
             "signature": [
               "<T extends string>(params: ",
@@ -38973,8 +38939,8 @@
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.CheckAuthorizationParams",
-                "text": "CheckAuthorizationParams"
+                "section": "def-server.PerformAuthorizationParams",
+                "text": "PerformAuthorizationParams"
               },
               "<T>) => Promise<",
               {
@@ -38992,20 +38958,20 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-server.ISavedObjectsSecurityExtension.checkAuthorization.$1",
+                "id": "def-server.ISavedObjectsSecurityExtension.performAuthorization.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
                 "description": [
-                  "- types, spaces, and actions to check"
+                  "- actions, types & spaces map, audit callback, options (enforce bypassed if enforce map is undefined)"
                 ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
                     "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.CheckAuthorizationParams",
-                    "text": "CheckAuthorizationParams"
+                    "section": "def-server.PerformAuthorizationParams",
+                    "text": "PerformAuthorizationParams"
                   },
                   "<T>"
                 ],
@@ -45485,6 +45451,146 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.PerformAuthorizationParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "PerformAuthorizationParams",
+        "description": [
+          "\nThe PerformAuthorizationParams interface contains settings for checking\n& enforcing authorization via the ISavedObjectsSecurityExtension."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.PerformAuthorizationParams",
+            "text": "PerformAuthorizationParams"
+          },
+          "<A>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PerformAuthorizationParams.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [
+              "\nA set of actions to check."
+            ],
+            "signature": [
+              "Set<A>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PerformAuthorizationParams.types",
+            "type": "Object",
+            "tags": [],
+            "label": "types",
+            "description": [
+              "\nA set of types to check."
+            ],
+            "signature": [
+              "Set<string>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PerformAuthorizationParams.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [
+              "\nA set of spaces to check (types to check comes from the typesAndSpaces map)."
+            ],
+            "signature": [
+              "Set<string>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PerformAuthorizationParams.enforceMap",
+            "type": "Object",
+            "tags": [],
+            "label": "enforceMap",
+            "description": [
+              "\nA map of types (key) to spaces (value) that will be affected by the action(s).\nIf undefined, enforce with be bypassed."
+            ],
+            "signature": [
+              "Map<string, Set<string>> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PerformAuthorizationParams.auditCallback",
+            "type": "Function",
+            "tags": [],
+            "label": "auditCallback",
+            "description": [
+              "\nA callback intended to handle adding audit events in\nboth error (unauthorized), or success (authorized)\ncases"
+            ],
+            "signature": [
+              "((error?: Error | undefined) => void) | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.PerformAuthorizationParams.auditCallback.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PerformAuthorizationParams.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "\nAuthorization options\nallowGlobalResource - whether or not to allow global resources, false if options are undefined"
+            ],
+            "signature": [
+              "{ allowGlobalResource: boolean; } | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.Plugin",
         "type": "Interface",
         "tags": [],
@@ -49177,11 +49283,11 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_extract_panel_references.ts"
+            "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_extract_panel_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_extract_panel_references.ts"
+            "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_extract_panel_references.ts"
           },
           {
             "plugin": "dashboard",
@@ -49229,35 +49335,35 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts"
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
           },
           {
             "plugin": "ml",
@@ -55201,11 +55307,11 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_to_730/migrations_730.ts"
+                "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_to_730/migrations_730.ts"
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/saved_objects/migrations/migrate_to_730/migrations_730.ts"
+                "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_to_730/migrations_730.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",
@@ -61235,7 +61341,7 @@
           "EcsVulnerability",
           " | undefined; }"
         ],
-        "path": "packages/kbn-logging/src/ecs/index.ts",
+        "path": "packages/kbn-ecs/src/ecs/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -61250,7 +61356,7 @@
         "signature": [
           "\"host\" | \"database\" | \"email\" | \"package\" | \"network\" | \"web\" | \"file\" | \"session\" | \"registry\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
         ],
-        "path": "packages/kbn-logging/src/ecs/event.ts",
+        "path": "packages/kbn-ecs/src/ecs/event.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -61265,7 +61371,7 @@
         "signature": [
           "\"metric\" | \"alert\" | \"signal\" | \"state\" | \"event\" | \"pipeline_error\""
         ],
-        "path": "packages/kbn-logging/src/ecs/event.ts",
+        "path": "packages/kbn-ecs/src/ecs/event.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -61280,7 +61386,7 @@
         "signature": [
           "\"success\" | \"unknown\" | \"failure\""
         ],
-        "path": "packages/kbn-logging/src/ecs/event.ts",
+        "path": "packages/kbn-ecs/src/ecs/event.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -61295,7 +61401,7 @@
         "signature": [
           "\"start\" | \"error\" | \"connection\" | \"user\" | \"info\" | \"group\" | \"end\" | \"admin\" | \"protocol\" | \"access\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
         ],
-        "path": "packages/kbn-logging/src/ecs/event.ts",
+        "path": "packages/kbn-ecs/src/ecs/event.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

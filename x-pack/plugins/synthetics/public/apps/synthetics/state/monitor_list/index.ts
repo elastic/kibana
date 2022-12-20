@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { createReducer } from '@reduxjs/toolkit';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 
@@ -47,7 +48,9 @@ const initialState: MonitorListState = {
 export const monitorListReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(fetchMonitorListAction.get, (state, action) => {
-      state.pageState = action.payload;
+      if (!isEqual(state.pageState, action.payload)) {
+        state.pageState = action.payload;
+      }
       state.loading = true;
       state.loaded = false;
     })

@@ -122,7 +122,7 @@ interface IWaterfallItemProps {
     width: number;
     color: string;
   }>;
-  onClick: () => unknown;
+  onClick: (flyoutDetailTab: string) => unknown;
 }
 
 function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
@@ -254,6 +254,8 @@ export function WaterfallItem({
   const isServerlessColdstart =
     item.docType === 'transaction' && item.doc.faas?.coldstart;
 
+  const waterfallItemFlyoutTab = 'metadata';
+
   return (
     <Container
       ref={waterfallItemRef}
@@ -263,7 +265,7 @@ export function WaterfallItem({
       hasToggle={hasToggle}
       onClick={(e: React.MouseEvent) => {
         e.stopPropagation();
-        onClick();
+        onClick(waterfallItemFlyoutTab);
       }}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item
@@ -304,6 +306,7 @@ export function WaterfallItem({
           linkedParents={item.spanLinksCount.linkedParents}
           linkedChildren={item.spanLinksCount.linkedChildren}
           id={item.id}
+          onClick={onClick}
         />
         {isServerlessColdstart && <ColdStartBadge />}
       </ItemText>

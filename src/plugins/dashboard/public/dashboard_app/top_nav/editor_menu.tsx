@@ -8,31 +8,25 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
   EuiContextMenuItemIcon,
+  EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
 } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
-import type {
-  EmbeddableFactory,
-  EmbeddableFactoryDefinition,
-  EmbeddableInput,
-} from '@kbn/embeddable-plugin/public';
-
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
-import { getPanelAddedSuccessString } from '../_dashboard_app_strings';
-import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
-import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
+import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 
 interface Props {
   /** Handler for creating new visualization of a specified type */
   createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
+  /** Handler for creating a new embeddable of a specified type */
+  createNewEmbeddable: (embeddableFactory: EmbeddableFactory) => void;
 }
 
 interface FactoryGroup {
@@ -40,7 +34,7 @@ interface FactoryGroup {
   appName: string;
   icon: EuiContextMenuItemIcon;
   panelId: number;
-  factories: EmbeddableFactoryDefinition[];
+  factories: EmbeddableFactory[];
 }
 
 interface UnwrappedEmbeddableFactory {
@@ -48,20 +42,16 @@ interface UnwrappedEmbeddableFactory {
   isEditable: boolean;
 }
 
-export const EditorMenu = ({ createNewVisType }: Props) => {
+export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => {
   const {
     embeddable,
-    notifications: { toasts },
     settings: { uiSettings },
-    usageCollection,
     visualizations: {
       getAliases: getVisTypeAliases,
       getByGroup: getVisTypesByGroup,
       showNewVisModal,
     },
   } = pluginServices.getServices();
-
-  const { embeddableInstance: dashboardContainer } = useDashboardContainerContext();
 
   const embeddableFactories = useMemo(
     () => Array.from(embeddable.getEmbeddableFactories()),
@@ -83,11 +73,6 @@ export const EditorMenu = ({ createNewVisType }: Props) => {
   }, [embeddableFactories]);
 
   const LABS_ENABLED = uiSettings.get('visualize:enableLabs');
-
-  const trackUiMetric = usageCollection.reportUiCounter?.bind(
-    usageCollection,
-    DASHBOARD_UI_METRIC_ID
-  );
 
   const createNewAggsBasedVis = useCallback(
     (visType?: BaseVisType) => () =>
@@ -129,7 +114,7 @@ export const EditorMenu = ({ createNewVisType }: Props) => {
   );
 
   const factoryGroupMap: Record<string, FactoryGroup> = {};
-  const ungroupedFactories: EmbeddableFactoryDefinition[] = [];
+  const ungroupedFactories: EmbeddableFactory[] = [];
   const aggBasedPanelID = 1;
 
   let panelCount = 1 + aggBasedPanelID;
@@ -211,7 +196,7 @@ export const EditorMenu = ({ createNewVisType }: Props) => {
   };
 
   const getEmbeddableFactoryMenuItem = (
-    factory: EmbeddableFactoryDefinition,
+    factory: EmbeddableFactory,
     closePopover: () => void
   ): EuiContextMenuPanelItemDescriptor => {
     const icon = factory?.getIconType ? factory.getIconType() : 'empty';
@@ -224,23 +209,7 @@ export const EditorMenu = ({ createNewVisType }: Props) => {
       toolTipContent,
       onClick: async () => {
         closePopover();
-        if (trackUiMetric) {
-          trackUiMetric(METRIC_TYPE.CLICK, factory.type);
-        }
-        let newEmbeddable;
-        if (factory.getExplicitInput) {
-          const explicitInput = await factory.getExplicitInput();
-          newEmbeddable = await dashboardContainer.addNewEmbeddable(factory.type, explicitInput);
-        } else {
-          newEmbeddable = await factory.create({} as EmbeddableInput, dashboardContainer);
-        }
-
-        if (newEmbeddable) {
-          toasts.addSuccess({
-            title: getPanelAddedSuccessString(`'${newEmbeddable.getInput().title}'` || ''),
-            'data-test-subj': 'addEmbeddableToDashboardSuccess',
-          });
-        }
+        createNewEmbeddable(factory);
       },
       'data-test-subj': `createNew-${factory.type}`,
     };

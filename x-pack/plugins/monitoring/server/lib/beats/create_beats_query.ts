@@ -7,6 +7,7 @@
 
 import { BeatsMetric, BeatsMetricFields } from '../metrics';
 import { createQuery } from '../create_query';
+import { getBeatDataset } from '../cluster/get_index_patterns';
 
 /**
  * {@code createQuery} for all Beats instances.
@@ -31,7 +32,7 @@ export function createBeatsQuery(options: {
     metric: BeatsMetric.getMetricFields(),
     type: 'beats_stats',
     metricset: 'stats',
-    dsDataset: 'beats.stats',
+    dsDataset: getBeatDataset('stats'),
     ...(options ?? {}),
   };
 

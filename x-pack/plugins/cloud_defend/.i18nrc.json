@@ -1,0 +1,7 @@
+{
+  "prefix": "cloudDefend",
+  "paths": {
+    "cloudDefend": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
