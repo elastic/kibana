@@ -137,22 +137,22 @@ export const ControlFrame = ({
   const anchorRef = useRef<HTMLSpanElement>(null);
 
   const anchorBoundingRect = anchorRef.current?.getBoundingClientRect();
+  const hiddenActionsStyles = `visibility: hidden;
+  opacity: 0;
+
+  // slower transition on hover leave in case the user accidentally stops hover
+  transition: visibility .3s, opacity .3s;`;
+  const visibleActionsStyles = `transition: visibility .1s, opacity .1s;
+  visibility: visible;
+  opacity: 1;`;
   const floatingActionStyles = anchorBoundingRect
     ? css`
         top: ${anchorBoundingRect.top -
         (usingTwoLineLayout ? parseInt(euiTheme.size.xs, 10) : parseInt(euiTheme.size.l, 10))}px;
         left: ${anchorBoundingRect.right - parseInt(euiTheme.size.xxxxl, 10)}px;
-        ${areFloatingActionsVisible
-          ? `transition: visibility .1s, opacity .1s;
-          visibility: visible;
-          opacity: 1;`
-          : `visibility: hidden;
-          opacity: 0;
-  
-          // slower transition on hover leave in case the user accidentally stops hover
-          transition: visibility .3s, opacity .3s;`}
+        ${areFloatingActionsVisible ? visibleActionsStyles : hiddenActionsStyles}
       `
-    : css``;
+    : undefined;
 
   const floatingActions = (
     <div
