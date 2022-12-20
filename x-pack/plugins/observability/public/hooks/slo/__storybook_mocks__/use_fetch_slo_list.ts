@@ -11,6 +11,7 @@ import { UseFetchSloListResponse } from '../use_fetch_slo_list';
 export const useFetchSloList = (name?: string): UseFetchSloListResponse => {
   return {
     loading: false,
+    error: false,
     sloList,
   };
 };

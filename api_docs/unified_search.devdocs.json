@@ -108,6 +108,42 @@
       },
       {
         "parentPluginId": "unifiedSearch",
+        "id": "def-public.FilterBadgeGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "FilterBadgeGroup",
+        "description": [
+          "\nA `FilterBadgeGroup` component that is wrapped by the `withSuspense` HOC. This component can\nbe used directly by consumers and will load the `FilterBadgeGroupLazy` component lazily with\na predefined fallback and error boundary."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "FilterBadgeGroupProps",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/plugins/unified_search/public/filter_badge/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterBadgeGroup.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
         "id": "def-public.FilterItem",
         "type": "Function",
         "tags": [],
@@ -200,43 +236,6 @@
                 "text": "FilterItemsProps"
               },
               ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
-            ],
-            "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "unifiedSearch",
-        "id": "def-public.FilterLabel",
-        "type": "Function",
-        "tags": [],
-        "label": "FilterLabel",
-        "description": [
-          "\nRenders the label for a single filter pill"
-        ],
-        "signature": [
-          "(props: ",
-          "FilterLabelProps",
-          ") => JSX.Element"
-        ],
-        "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.FilterLabel.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "FilterLabelProps"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
             "deprecated": false,
@@ -365,15 +364,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; savedQuery?: ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.SavedQuery",
-                "text": "SavedQuery"
-              },
-              " | undefined; refreshInterval?: number | undefined; placeholder?: string | undefined; iconType?: ",
+              "[] | undefined; refreshInterval?: number | undefined; placeholder?: string | undefined; iconType?: ",
               "IconType",
               " | undefined; indexPatterns?: ",
               {
@@ -393,7 +384,15 @@
               },
               " | undefined; customSubmitButton?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; hiddenFilterPanelOptions?: ",
               "FilterPanelOption",
-              "[] | undefined; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSaveQuery?: boolean | undefined; onQueryChange?: ((payload: { dateRange: ",
+              "[] | undefined; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSaveQuery?: boolean | undefined; savedQuery?: ",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.SavedQuery",
+                "text": "SavedQuery"
+              },
+              " | undefined; onQueryChange?: ((payload: { dateRange: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
