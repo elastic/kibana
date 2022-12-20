@@ -27,6 +27,7 @@ import {
   initializeFromUrl,
   updateQueryInUrl,
   updateFiltersInUrl,
+  subscribeToUrlStateStorageChanges,
 } from './url_state_storage_service';
 import {
   subscribeToQuerySearchBarChanges,
@@ -95,25 +96,26 @@ export const createPureLogStreamQueryStateMachine = (
             },
           },
           on: {
-            QUERY_FROM_URL_CHANGED: {
+            STATE_FROM_URL_KEY_CHANGED: {
               target: '.validating',
-              actions: ['storeQuery', 'updateQueryInSearchBar'],
+              actions: [
+                'storeQuery',
+                'storeFilters',
+                'updateQueryInSearchBar',
+                'updateFiltersInSearchBar',
+              ],
+            },
+            QUERY_FROM_SEARCH_BAR_CHANGED: {
+              target: '.validating',
+              actions: ['storeQuery', 'updateQueryInUrl'],
             },
             FILTERS_FROM_SEARCH_BAR_CHANGED: {
               target: '.validating',
               actions: ['storeFilters', 'updateFiltersInUrl'],
             },
-            FILTERS_FROM_URL_CHANGED: {
-              target: '.validating',
-              actions: ['updateFiltersInUi', 'storeFilters'],
-            },
             DATA_VIEWS_CHANGED: {
               target: '.validating',
               actions: 'storeDataViews',
-            },
-            QUERY_FROM_SEARCH_BAR_CHANGED: {
-              target: '.validating',
-              actions: ['storeQuery', 'updateQueryInUrl'],
             },
           },
         },
@@ -204,6 +206,7 @@ export const createLogStreamQueryStateMachine = (
       subscribeToFilterSearchBarChanges: subscribeToFilterSearchBarChanges({
         filterManagerService,
       }),
+      subscribeToUrlStateStorageChanges: subscribeToUrlStateStorageChanges({ urlStateStorage }),
     },
   });
 

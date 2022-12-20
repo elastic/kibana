@@ -18,7 +18,7 @@ export interface LogStreamQueryContextWithDataViews {
 }
 
 export interface LogStreamQueryContextWithQuery {
-  query: AnyQuery; // TODO: support filters
+  query: AnyQuery;
 }
 
 export interface LogStreamQueryContextWithParsedQuery {
@@ -66,19 +66,11 @@ export type LogStreamQueryStateValue = LogStreamQueryTypestate['value'];
 
 export type LogStreamQueryEvent =
   | {
-      type: 'QUERY_FROM_URL_CHANGED';
-      query: AnyQuery;
-    }
-  | {
       type: 'QUERY_FROM_SEARCH_BAR_CHANGED';
       query: AnyQuery;
     }
   | {
       type: 'FILTERS_FROM_SEARCH_BAR_CHANGED';
-      filters: Filter[];
-    }
-  | {
-      type: 'FILTERS_FROM_URL_CHANGED';
       filters: Filter[];
     }
   | {
@@ -92,4 +84,9 @@ export type LogStreamQueryEvent =
   | {
       type: 'VALIDATION_FAILED';
       error: Error;
+    }
+  | {
+      type: 'STATE_FROM_URL_KEY_CHANGED';
+      query: AnyQuery;
+      filters: Filter[];
     };

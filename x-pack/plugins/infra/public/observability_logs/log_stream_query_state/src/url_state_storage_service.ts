@@ -7,6 +7,7 @@
 
 import { IToasts } from '@kbn/core-notifications-browser';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { map } from 'rxjs/operators';
 import * as Either from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/function';
 import * as rt from 'io-ts';
@@ -52,9 +53,20 @@ export const subscribeToUrlStateStorageChanges =
   > =>
   (context) =>
   (send) => {
-    const urlFilterState$ = urlStateStorage.change$(filterStateKey);
+    const urlFilterState$ = urlStateStorage.change$(filterStateKey).pipe(
+      map(() => urlStateStorage.get(filterStateKey)),
+      map((urlLogFilter) => {
+        // TODO: probably better to do a deep comparison here than have the services terminate infinite loops
+        const { query, filters } = urlLogFilter;
+        send({ type: 'STATE_FROM_URL_KEY_CHANGED', query, filters });
+      })
+    );
 
-    // TODO: send() the proper change events
+    const subscription = urlFilterState$.subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   };
 
 export const updateQueryInUrl =
@@ -82,22 +94,14 @@ export const updateFiltersInUrl =
     filterStateKey = defaultFilterStateKey,
   }: LogStreamQueryUrlStateDependencies) =>
   (context: LogStreamQueryContext, event: LogStreamQueryEvent) => {
-    console.log(context);
     if (!('filters' in context)) {
       throw new Error();
     }
 
-    console.log(
-      filterStateInUrlRT.encode({
-        query: context.query,
-        filters: context.filters,
-      })
-    );
-
     urlStateStorage.set(
       filterStateKey,
       filterStateInUrlRT.encode({
-        query: context.query,
+        query: context.query, // TODO: Possibly revisit. set() sets an entire key, so we'll need to add query / filters to the opposite update function I think.
         filters: context.filters,
       })
     );
@@ -112,8 +116,6 @@ export const initializeFromUrl = ({
 }) =>
   actions.pure<LogStreamQueryContext, LogStreamQueryEvent>(() => {
     const queryValueFromUrl = urlStateStorage.get(filterStateKey) ?? defaultFilterStateValue;
-    console.log(queryValueFromUrl);
-    console.log(filterStateInUrlRT.decode(queryValueFromUrl));
     return pipe(
       legacyFilterStateInUrlRT.decode(queryValueFromUrl),
       Either.map((legacyQuery) => ({ query: legacyQuery })),

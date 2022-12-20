@@ -18,7 +18,6 @@ export const validateQuery =
   }): InvokeCreator<LogStreamQueryContext, LogStreamQueryEvent> =>
   (context) =>
   (send) => {
-    console.log(context);
     if (!('query' in context)) {
       throw new Error('Failed to validate query: no query in context');
     }

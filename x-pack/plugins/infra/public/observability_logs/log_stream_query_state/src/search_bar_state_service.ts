@@ -47,7 +47,6 @@ export const subscribeToFilterSearchBarChanges =
     filterManagerService.getUpdates$().pipe(
       map(() => filterManagerService.getFilters()),
       map((filters): LogStreamQueryEvent => {
-        console.log(filters);
         return {
           type: 'FILTERS_FROM_SEARCH_BAR_CHANGED',
           filters,

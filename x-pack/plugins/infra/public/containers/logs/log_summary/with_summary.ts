@@ -31,7 +31,6 @@ export const WithSummary = ({
   const serializedQuery = useSerializedParsedQuery(
     useLogStreamQueryChildService(useLogStreamPageStateContext())
   );
-  console.log('serializedQuery', serializedQuery);
   const { startTimestamp, endTimestamp } = useLogPositionStateContext();
 
   // Keep it reasonably updated for the `now` case, but don't reload all the time when the user scrolls
