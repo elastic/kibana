@@ -70,6 +70,7 @@ import { getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
+import { RunningHandler } from './running_handler';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -113,6 +114,7 @@ export class TaskRunner<
   private cancelled: boolean;
   private stackTraceLog: StackTraceLog | null;
   private ruleMonitoring: RuleMonitoringService;
+  private ruleRunning: RunningHandler;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -146,6 +148,7 @@ export class TaskRunner<
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
     this.ruleMonitoring = new RuleMonitoringService();
+    this.ruleRunning = new RunningHandler(this.context.internalSavedObjectsRepository, this.logger, loggerId )
   }
 
   private async updateRuleSavedObject(
@@ -159,6 +162,9 @@ export class TaskRunner<
     }
   ) {
     const client = this.context.internalSavedObjectsRepository;
+    try {
+      await this.ruleRunning.waitFor();
+    } catch {}
     try {
       await partiallyUpdateAlert(client, ruleId, attributes, {
         ignore404: true,
@@ -656,6 +662,7 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
+    this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId))
     const runDate = new Date();
     this.logger.debug(`executing rule ${this.ruleType.id}:${ruleId} at ${runDate.toISOString()}`);
 
