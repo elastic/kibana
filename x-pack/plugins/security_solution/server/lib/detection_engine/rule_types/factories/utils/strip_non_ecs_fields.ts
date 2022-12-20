@@ -54,7 +54,7 @@ const getEcsObjectFields = () => {
 const ecsObjectFields = getEcsObjectFields();
 
 /**
- * checks if path is a valid Ecs object type
+ * checks if path is a valid Ecs object type (object or flattened)
  */
 const getIsEcsFieldObject = (path: string) => {
   const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
@@ -62,7 +62,7 @@ const getIsEcsFieldObject = (path: string) => {
 };
 
 /**
- * checks if path is Ecs mapping
+ * checks if path is in Ecs mapping
  */
 const getIsEcsField = (path: string) => {
   const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
@@ -97,10 +97,10 @@ const validateDottedPathInEcsMappings = (path: string): boolean => {
 };
 
 /**
- * check whether field is value is ECS compliant
+ * check whether source field value is ECS compliant
  */
 const computeIsEcsCompliant = (value: SourceField, path: string) => {
-  // if path consists of dot-notation, ensure each path within it is ECS compliant
+  // if path consists of dot-notation, ensure each path within it is ECS compliant (object or flattened)
   if (path.includes('.') && !validateDottedPathInEcsMappings(path)) {
     return false;
   }
@@ -114,11 +114,6 @@ const computeIsEcsCompliant = (value: SourceField, path: string) => {
 
   const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
   const isEcsFieldObject = getIsEcsFieldObject(path);
-
-  if (isPlainObject(value)) {
-    // if checked value is object but ECS mapping not, it's not compliant
-    return isEcsFieldObject;
-  }
 
   // validate if value is a valid ip type
   if (ecsField?.type === 'ip') {
@@ -139,8 +134,9 @@ const computeIsEcsCompliant = (value: SourceField, path: string) => {
     return isValidNumericType(value);
   }
 
-  // checked value is not object and if ECS mapping is not as well, it compliant
-  return !isEcsFieldObject;
+  // if ECS mapping is JS object and source value also JS object then they are compliant
+  // otherwise not
+  return isEcsFieldObject ? isPlainObject(value) : !isPlainObject(value);
 };
 
 interface StripNonEcsFieldsReturn {
@@ -169,7 +165,7 @@ export const stripNonEcsFields = (doc: SourceFieldRecord): StripNonEcsFieldsRetu
     parentPath?: string
   ) => {
     const fullPath = [parentPath, documentKey].filter(Boolean).join('.');
-    // if document array, traverse through each item w/o changing documentKey/parent/parentPath
+    // if document array, traverse through each item w/o changing documentKey, parent, parentPath
     if (isArray(document)) {
       document.forEach((value) => {
         traverseAndDeleteInObj(value, documentKey, parent, parentPath);

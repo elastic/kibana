@@ -450,13 +450,13 @@ describe('stripNonEcsFields', () => {
       expect(removed).toEqual([]);
     });
 
-    it('should not strip valid float field', () => {
+    it('should not strip array of valid numeric fields', () => {
       const { result, removed } = stripNonEcsFields({
-        'user.risk.calculated_score': 458.3333,
+        'user.risk.calculated_score': [458.3333, '45.3', 10, 0, -667.23],
       });
 
       expect(result).toEqual({
-        'user.risk.calculated_score': 458.3333,
+        'user.risk.calculated_score': [458.3333, '45.3', 10, 0, -667.23],
       });
       expect(removed).toEqual([]);
     });
