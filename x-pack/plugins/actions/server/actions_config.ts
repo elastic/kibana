@@ -209,9 +209,9 @@ export function getActionsConfigurationUtilities(
       );
 
       return (
-        connectorTypeConfig?.maxAttempts ??
-        config.run?.maxAttempts ??
-        actionTypeMaxAttempts ??
+        connectorTypeConfig?.maxAttempts ||
+        config.run?.maxAttempts ||
+        actionTypeMaxAttempts ||
         DEFAULT_MAX_ATTEMPTS
       );
     },
