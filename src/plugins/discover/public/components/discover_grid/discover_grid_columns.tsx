@@ -20,7 +20,6 @@ import { SelectButton } from './discover_grid_document_selection';
 import { defaultTimeColumnWidth } from './constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { DiscoverServices } from '../../build_services';
-import { DataTableRecord } from '../../types';
 import { buildEditFieldButton } from './build_edit_field_button';
 
 const openDetails = {
@@ -53,8 +52,8 @@ const select = {
   ),
 };
 
-export function getLeadControlColumns(setExpandedDoc?: (doc?: DataTableRecord) => void) {
-  if (!setExpandedDoc) {
+export function getLeadControlColumns(canSetExpandedDoc: boolean) {
+  if (!canSetExpandedDoc) {
     return [select];
   }
   return [openDetails, select];

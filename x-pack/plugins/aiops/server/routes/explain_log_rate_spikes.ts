@@ -58,6 +58,7 @@ import {
   getSimpleHierarchicalTreeLeaves,
   markDuplicates,
 } from './queries/get_simple_hierarchical_tree';
+import { getGroupFilter } from './queries/get_group_filter';
 
 // 10s ping frequency to keep the stream alive.
 const PING_FREQUENCY = 10000;
@@ -639,12 +640,7 @@ export const defineExplainLogRateSpikesRoute = (
                   }
 
                   if (overallTimeSeries !== undefined) {
-                    const histogramQuery = getHistogramQuery(
-                      request.body,
-                      cpg.group.map((d) => ({
-                        term: { [d.fieldName]: d.fieldValue },
-                      }))
-                    );
+                    const histogramQuery = getHistogramQuery(request.body, getGroupFilter(cpg));
 
                     let cpgTimeSeries: NumericChartData;
                     try {
