@@ -37,7 +37,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     },
   };
 
-  describe('Home page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/141868
+  describe.skip('Home page', function () {
     before(async () => {
       await clearAllApiKeys(es, log);
       await security.testUser.setRoles(['kibana_admin']);

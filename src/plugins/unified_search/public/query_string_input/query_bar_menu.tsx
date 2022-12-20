@@ -15,6 +15,7 @@ import {
   useGeneratedHtmlId,
   EuiButtonIconProps,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -22,6 +23,14 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import { QueryBarMenuPanels, QueryBarMenuPanelsProps } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
+import { popoverDragAndDropCss } from './add_filter_popover.styles';
+
+export const strings = {
+  getFilterSetButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.filterSetButtonLabel', {
+      defaultMessage: 'Saved query menu',
+    }),
+};
 
 export interface QueryBarMenuProps {
   language: string;
@@ -79,6 +88,7 @@ export function QueryBarMenu({
   isDisabled,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
+  const euiTheme = useEuiTheme();
 
   useEffect(() => {
     if (openQueryBarMenu) {
@@ -97,20 +107,17 @@ export function QueryBarMenu({
     toggleFilterBarMenuPopover(false);
   };
 
-  const buttonLabel = i18n.translate('unifiedSearch.filter.options.filterSetButtonLabel', {
-    defaultMessage: 'Saved query menu',
-  });
-
   const button = (
-    <EuiToolTip delay="long" content={buttonLabel}>
+    <EuiToolTip delay="long" content={strings.getFilterSetButtonLabel()}>
       <EuiButtonIcon
         size="m"
         display="empty"
         onClick={onButtonClick}
         isDisabled={isDisabled}
         {...buttonProps}
+        style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
         iconType="filter"
-        aria-label={buttonLabel}
+        aria-label={strings.getFilterSetButtonLabel()}
         data-test-subj="showQueryBarMenu"
       />
     </EuiToolTip>
@@ -184,6 +191,9 @@ export function QueryBarMenu({
         anchorPosition="downLeft"
         repositionOnScroll
         data-test-subj="queryBarMenuPopover"
+        panelProps={{
+          css: popoverDragAndDropCss(euiTheme),
+        }}
       >
         {renderComponent()}
       </EuiPopover>
