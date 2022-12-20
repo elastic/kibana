@@ -156,6 +156,7 @@ exports[`Header renders 1`] = `
         >
           <li
             class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+            data-test-subj="euiBreadcrumb"
           >
             <span
               aria-current="page"

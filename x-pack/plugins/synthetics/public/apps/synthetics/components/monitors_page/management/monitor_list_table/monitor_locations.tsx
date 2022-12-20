@@ -82,7 +82,7 @@ function getLocationStatusColor(
   overviewStatus: OverviewStatusState | null
 ) {
   const {
-    eui: { euiColorVis9, euiColorVis0, euiSideNavDisabledTextcolor },
+    eui: { euiColorVis9, euiColorVis0, euiColorDisabled },
   } = euiTheme;
 
   const locById = `${monitorId}-${locationLabel}`;
@@ -93,5 +93,5 @@ function getLocationStatusColor(
     return euiColorVis0;
   }
 
-  return euiSideNavDisabledTextcolor;
+  return euiColorDisabled;
 }
