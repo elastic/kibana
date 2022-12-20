@@ -22,6 +22,10 @@ export const AddDataControlButton = ({ closePopover, controlGroup }: Props) => {
       icon="plusInCircle"
       data-test-subj="controls-create-button"
       aria-label={getAddControlButtonTitle()}
+      onClick={() => {
+        controlGroup.openAddDataControlFlyout();
+        closePopover();
+      }}
     >
       {getAddControlButtonTitle()}
     </EuiContextMenuItem>
