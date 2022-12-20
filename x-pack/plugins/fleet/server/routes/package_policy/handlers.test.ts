@@ -491,6 +491,18 @@ describe('When calling package policy', () => {
             max_score: 0,
             hits: [],
           },
+          aggregations: {
+            agent_counts: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'agent-policy-id-a',
+                  doc_count: 100,
+                },
+              ],
+            },
+          },
         };
       });
 
