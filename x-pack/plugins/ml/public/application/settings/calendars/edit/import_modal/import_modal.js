@@ -147,10 +147,12 @@ export class ImportModal extends Component {
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
                 <EuiModalHeaderTitle>
-                  <FormattedMessage
-                    id="xpack.ml.calendarsEdit.eventsTable.importEventsTitle"
-                    defaultMessage="Import events"
-                  />
+                  <h1>
+                    <FormattedMessage
+                      id="xpack.ml.calendarsEdit.eventsTable.importEventsTitle"
+                      defaultMessage="Import events"
+                    />
+                  </h1>
                 </EuiModalHeaderTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
