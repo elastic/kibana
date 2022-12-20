@@ -40,7 +40,6 @@ import { controlGroupReducers } from '../state/control_group_reducers';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL, TIME_SLIDER_CONTROL } from '../..';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
-import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
 import { getNextPanelOrder } from './control_group_helpers';
 import type {
   AddDataControlProps,
@@ -165,23 +164,6 @@ export class ControlGroupContainer extends Container<
           setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
         />
       </ControlsServicesProvider>
-    );
-  };
-
-  public getCreateTimeSliderControlButton = (closePopover?: () => void) => {
-    const childIds = this.getChildIds();
-    const hasTimeSliderControl = childIds.some((id) => {
-      const child = this.getChild(id);
-      return child.type === TIME_SLIDER_CONTROL;
-    });
-    return (
-      <CreateTimeSliderControlButton
-        onCreate={() => {
-          this.addTimeSliderControl();
-        }}
-        closePopover={closePopover}
-        hasTimeSliderControl={hasTimeSliderControl}
-      />
     );
   };
 

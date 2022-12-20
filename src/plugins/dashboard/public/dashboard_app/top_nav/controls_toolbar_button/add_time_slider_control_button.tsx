@@ -7,28 +7,43 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/public';
 
 interface Props {
-  onCreate: () => void;
-  closePopover?: () => void;
-  hasTimeSliderControl: boolean;
+  closePopover: () => void;
+  controlGroup: ControlGroupContainer;
 }
 
-export const CreateTimeSliderControlButton = ({
-  onCreate,
+export const AddTimeSliderControlButton = ({
   closePopover,
-  hasTimeSliderControl,
+  controlGroup,
 }: Props) => {
+  const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
+  
+  useEffect(() => {
+    const subscription = controlGroup.getInput$().subscribe(() => {
+      const childIds = controlGroup.getChildIds();
+      const nextHasTimeSliderControl = childIds.some((id) => {
+        const child = controlGroup.getChild(id);
+        return child.type === TIME_SLIDER_CONTROL;
+      });
+      if (nextHasTimeSliderControl !== hasTimeSliderControl) {
+        setHasTimeSliderControl(nextHasTimeSliderControl);
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [controlGroup, setHasTimeSliderControl]);
+
   return (
     <EuiContextMenuItem
       icon="plusInCircle"
       onClick={() => {
-        onCreate();
-        if (closePopover) {
-          closePopover();
-        }
+        controlGroup.addTimeSliderControl();
+        closePopover();
       }}
       data-test-subj="controls-create-timeslider-button"
       disabled={hasTimeSliderControl}
