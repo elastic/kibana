@@ -189,6 +189,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
       iconType="pencil"
       onClick={() => editControl()}
       color="text"
+      tabIndex={0}
     />
   );
 };

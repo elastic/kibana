@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import classNames from 'classnames';
 import {
   EuiButtonIcon,
@@ -17,13 +17,17 @@ import {
   EuiLink,
   EuiLoadingChart,
   EuiPopover,
+  EuiPortal,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+import { euiThemeAmsterdam } from '@elastic/eui/src/themes/amsterdam/theme';
 import { ControlGroupReduxState } from '../types';
 import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
@@ -85,7 +89,11 @@ export const ControlFrame = ({
   embeddableType,
 }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
+  const { euiTheme } = useEuiTheme();
   const [fatalError, setFatalError] = useState<Error>();
+  const [areFloatingActionsVisible, setFloatingActionsVisible] = useState<boolean>(false);
+  const showFloatingActions = () => setFloatingActionsVisible(true);
+  const hideFloatingActions = () => setFloatingActionsVisible(false);
 
   const { useEmbeddableSelector: select, embeddableInstance: controlGroup } =
     useReduxEmbeddableContext<
@@ -127,12 +135,35 @@ export const ControlFrame = ({
     };
   }, [embeddable, embeddableRoot]);
 
+  const anchorRef = useRef<HTMLSpanElement>(null);
+
+  const anchorBoundingRect = anchorRef.current?.getBoundingClientRect();
+  const floatingActionStyles = anchorBoundingRect
+    ? css`
+        top: ${anchorBoundingRect.top -
+        (usingTwoLineLayout ? parseInt(euiTheme.size.xs, 10) : parseInt(euiTheme.size.l, 10))}px;
+        left: ${anchorBoundingRect.right - parseInt(euiTheme.size.xxxl, 10)}px;
+        ${areFloatingActionsVisible
+          ? `transition: visibility .1s, opacity .1s;
+          visibility: visible;
+          opacity: 1;`
+          : `visibility: hidden;
+          opacity: 0;
+  
+          // slower transition on hover leave in case the user accidentally stops hover
+          transition: visibility .3s, opacity .3s;`}
+      `
+    : css``;
+
   const floatingActions = (
     <div
       className={classNames('controlFrameFloatingActions', {
         'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
+      css={floatingActionStyles}
+      onMouseOver={showFloatingActions}
+      onFocus={showFloatingActions}
     >
       {!fatalError && embeddableType !== TIME_SLIDER_CONTROL && (
         <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
@@ -157,6 +188,7 @@ export const ControlFrame = ({
           }
           iconType="cross"
           color="danger"
+          tabIndex={0}
         />
       </EuiToolTip>
     </div>
@@ -221,18 +253,24 @@ export const ControlFrame = ({
 
   return (
     <>
-      {embeddable && enableActions && floatingActions}
-      <EuiFormRow
-        data-test-subj="control-frame-title"
-        fullWidth
-        label={
-          usingTwoLineLayout
-            ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
-            : undefined
-        }
-      >
-        {form}
-      </EuiFormRow>
+      {embeddable && enableActions && <EuiPortal>{floatingActions}</EuiPortal>}
+      <span ref={anchorRef} onMouseOver={showFloatingActions} onFocus={showFloatingActions}>
+        <EuiFormRow
+          data-test-subj="control-frame-title"
+          fullWidth
+          label={
+            usingTwoLineLayout
+              ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
+              : undefined
+          }
+          onMouseOver={showFloatingActions}
+          onFocus={showFloatingActions}
+          onMouseLeave={hideFloatingActions}
+          onBlur={hideFloatingActions}
+        >
+          {form}
+        </EuiFormRow>
+      </span>
     </>
   );
 };
