@@ -8,9 +8,9 @@
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('APM', () => {
+  describe('Beats', () => {
     loadTestFile(require.resolve('./overview'));
-    loadTestFile(require.resolve('./instances'));
-    loadTestFile(require.resolve('./instance'));
+    loadTestFile(require.resolve('./beats'));
+    loadTestFile(require.resolve('./beat'));
   });
 }

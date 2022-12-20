@@ -6,31 +6,30 @@
  */
 
 import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { getTestRunner } from '../../utils/test_runner';
 
-import response from './fixtures/instance.json';
+import response from './fixtures/beats.json';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const testRunner = getTestRunner({
     testName: 'Overview',
-    archiveRoot: 'x-pack/test/monitoring_api_integration/archives/apm',
+    archiveRoot: 'x-pack/test/monitoring_api_integration/archives/beats',
     getService,
   });
 
   const timeRange = {
-    min: '2022-12-20T16:28:00.000Z',
-    max: '2022-12-20T16:32:00.000Z',
+    min: '2022-12-20T17:19:00.000Z',
+    max: '2022-12-20T17:22:00.000Z',
   };
 
   testRunner((variant: string) => {
-    it(`should load individual apm server - ${variant}`, async () => {
+    it(`should load beats - ${variant}`, async () => {
       const { body } = await supertest
-        .post(
-          '/api/monitoring/v1/clusters/3_pOMySBSkCwdyxxBdDbvA/apm/503d57eb-6f1f-4991-89c3-34250cef80d1'
-        )
+        .post('/api/monitoring/v1/clusters/3_pOMySBSkCwdyxxBdDbvA/beats/beats')
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
