@@ -103,7 +103,7 @@ export const PolicyTabs = React.memo(() => {
       toasts.addDanger(
         i18n.translate('xpack.securitySolution.policyDetails.missingArtifactAccess', {
           defaultMessage:
-            'You do not have the required Kibana permissions to use artifacts by policy',
+            'You do not have the required Kibana permissions to use the given artifact.',
         })
       );
     }

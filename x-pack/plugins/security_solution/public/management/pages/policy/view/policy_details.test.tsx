@@ -264,7 +264,7 @@ describe('Policy Details', () => {
           expect(history.location.pathname).toBe(policyDetailsPathUrl);
           expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
           expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-            'You do not have the required Kibana permissions to use artifacts by policy'
+            'You do not have the required Kibana permissions to use the given artifact.'
           );
         }
       );
