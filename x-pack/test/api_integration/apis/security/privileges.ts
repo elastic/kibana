@@ -79,6 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         'packs_read',
       ],
       filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
+      filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
   };

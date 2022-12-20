@@ -114,10 +114,6 @@ export const parseIntervalAsSecond = memoize((interval: Interval): number => {
   return Math.round(parseIntervalAsMillisecond(interval) / 1000);
 });
 
-export const parseIntervalAsMinute = memoize((interval: Interval): number => {
-  return parseIntervalAsMillisecond(interval) / (1000 * 60);
-});
-
 export const parseIntervalAsMillisecond = memoize((interval: Interval): number => {
   const numericAsStr: string = interval.slice(0, -1);
   const numeric: number = parseInt(numericAsStr, 10);

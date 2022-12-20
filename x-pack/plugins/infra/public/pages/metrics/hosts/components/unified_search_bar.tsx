@@ -10,8 +10,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQuery } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
+import { ControlsContent } from './controls_content';
 
 interface Props {
   dataView: DataView;
@@ -28,6 +30,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
     onSubmit,
     saveQuery,
     clearSavedQuery,
+    setPanelFilters,
   } = useUnifiedSearchContext();
 
   const { SearchBar } = unifiedSearch.ui;
@@ -59,20 +62,33 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   };
 
   return (
-    <SearchBar
-      appName={'Infra Hosts'}
-      indexPatterns={[dataView]}
-      query={unifiedSearchQuery}
-      dateRangeFrom={unifiedSearchDateRange.from}
-      dateRangeTo={unifiedSearchDateRange.to}
-      filters={unifiedSearchFilters}
-      onQuerySubmit={onQuerySubmit}
-      onSaved={onQuerySave}
-      onSavedQueryUpdated={onQuerySave}
-      onClearSavedQuery={onClearSavedQuery}
-      showSaveQuery
-      showQueryInput
-      onFiltersUpdated={onFilterChange}
-    />
+    <>
+      <SearchBar
+        appName={'Infra Hosts'}
+        placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
+          defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
+        })}
+        indexPatterns={[dataView]}
+        query={unifiedSearchQuery}
+        dateRangeFrom={unifiedSearchDateRange.from}
+        dateRangeTo={unifiedSearchDateRange.to}
+        filters={unifiedSearchFilters}
+        onQuerySubmit={onQuerySubmit}
+        onSaved={onQuerySave}
+        onSavedQueryUpdated={onQuerySave}
+        onClearSavedQuery={onClearSavedQuery}
+        showSaveQuery
+        showQueryInput
+        onFiltersUpdated={onFilterChange}
+        displayStyle="inPage"
+      />
+      <ControlsContent
+        timeRange={unifiedSearchDateRange}
+        dataViewId={dataView.id ?? ''}
+        query={unifiedSearchQuery}
+        filters={unifiedSearchFilters}
+        setPanelFilters={setPanelFilters}
+      />
+    </>
   );
 };

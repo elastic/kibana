@@ -860,12 +860,13 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createAndRunAnomalyDetectionLookbackJob(
       jobConfig: Job,
       datafeedConfig: Datafeed,
-      space?: string
+      options: { space?: string; end?: string } = {}
     ) {
+      const { space = undefined, end = `${Date.now()}` } = options;
       await this.createAnomalyDetectionJob(jobConfig, space);
       await this.createDatafeed(datafeedConfig, space);
       await this.openAnomalyDetectionJob(jobConfig.job_id);
-      await this.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end: `${Date.now()}` });
+      await this.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end });
       await this.waitForDatafeedState(datafeedConfig.datafeed_id, DATAFEED_STATE.STOPPED);
       await this.waitForJobState(jobConfig.job_id, JOB_STATE.CLOSED);
     },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateAlertParams } from './types';
+import { CloseAlertParams, CreateAlertParams } from './types';
 
 export const ValidCreateAlertSchema: CreateAlertParams = {
   message: 'a message',
@@ -93,4 +93,15 @@ export const OpsgenieCreateAlertExample: CreateAlertParams = {
   details: { key1: 'value1', key2: 'value2' },
   entity: 'An example entity',
   priority: 'P1',
+};
+
+/**
+ * This example is pulled from the sample curl request here: https://docs.opsgenie.com/docs/alert-api#close-alert
+ * with the addition of the alias field.
+ */
+export const OpsgenieCloseAlertExample: CloseAlertParams = {
+  alias: '123',
+  user: 'Monitoring Script',
+  source: 'AWS Lambda',
+  note: 'Action executed via Alert API',
 };

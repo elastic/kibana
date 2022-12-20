@@ -46,6 +46,13 @@ export const slo: SavedObjectsType = {
           timeslice_window: { type: 'keyword' },
         },
       },
+      settings: {
+        properties: {
+          timestamp_field: { type: 'keyword' },
+          sync_delay: { type: 'keyword' },
+          frequency: { type: 'keyword' },
+        },
+      },
       revision: { type: 'short' },
       created_at: { type: 'date' },
       updated_at: { type: 'date' },

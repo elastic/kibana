@@ -28,6 +28,11 @@ export const MESSAGE_IS_REQUIRED = i18n.translate(
   }
 );
 
+export const MESSAGE_NON_WHITESPACE = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.messageNotWhitespaceForm',
+  { defaultMessage: 'Message must be populated with a value other than just whitespace' }
+);
+
 export const ACTION_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.actionLabel',
   {

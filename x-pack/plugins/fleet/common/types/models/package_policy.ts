@@ -34,6 +34,7 @@ export interface NewPackagePolicyInputStream {
         indices?: string[];
       };
       index_mode?: string;
+      source_mode?: string;
     };
   };
   release?: RegistryRelease;

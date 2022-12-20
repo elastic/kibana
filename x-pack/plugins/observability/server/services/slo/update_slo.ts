@@ -52,6 +52,10 @@ export class UpdateSLO {
       hasBreakingChange = true;
     }
 
+    if (!deepEqual(originalSlo.settings, updatedSlo.settings)) {
+      hasBreakingChange = true;
+    }
+
     if (hasBreakingChange) {
       updatedSlo.revision++;
     }
@@ -87,6 +91,7 @@ export class UpdateSLO {
       budgeting_method: slo.budgeting_method,
       time_window: slo.time_window,
       objective: slo.objective,
+      settings: slo.settings,
       created_at: slo.created_at,
       updated_at: slo.updated_at,
     });

@@ -532,6 +532,79 @@
       },
       {
         "parentPluginId": "unifiedFieldList",
+        "id": "def-public.hasQuerySubscriberData",
+        "type": "Function",
+        "tags": [],
+        "label": "hasQuerySubscriberData",
+        "description": [
+          "\nChecks if query result is ready to be used"
+        ],
+        "signature": [
+          "(result: ",
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.QuerySubscriberResult",
+            "text": "QuerySubscriberResult"
+          },
+          ") => result is { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; fromDate: string; toDate: string; }"
+        ],
+        "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.hasQuerySubscriberData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.QuerySubscriberResult",
+                "text": "QuerySubscriberResult"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
         "id": "def-public.loadFieldExisting",
         "type": "Function",
         "tags": [],
@@ -975,7 +1048,7 @@
         "label": "useGroupedFields",
         "description": [],
         "signature": [
-          "({\n  dataViewId,\n  allFields,\n  services,\n  fieldsExistenceReader,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  onFilterField,\n}: ",
+          "({\n  dataViewId,\n  allFields,\n  services,\n  fieldsExistenceReader,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  onFilterField,\n}: ",
           {
             "pluginId": "unifiedFieldList",
             "scope": "public",
@@ -1002,7 +1075,7 @@
             "id": "def-public.useGroupedFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  dataViewId,\n  allFields,\n  services,\n  fieldsExistenceReader,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  onFilterField,\n}",
+            "label": "{\n  dataViewId,\n  allFields,\n  services,\n  fieldsExistenceReader,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  onFilterField,\n}",
             "description": [],
             "signature": [
               {
@@ -1015,6 +1088,62 @@
               "<T>"
             ],
             "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.useQuerySubscriber",
+        "type": "Function",
+        "tags": [],
+        "label": "useQuerySubscriber",
+        "description": [
+          "\nMemorizes current query, filters and absolute date range"
+        ],
+        "signature": [
+          "({ data }: ",
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.QuerySubscriberParams",
+            "text": "QuerySubscriberParams"
+          },
+          ") => ",
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.QuerySubscriberResult",
+            "text": "QuerySubscriberResult"
+          }
+        ],
+        "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.useQuerySubscriber.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ data }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.QuerySubscriberParams",
+                "text": "QuerySubscriberParams"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1127,6 +1256,20 @@
         "children": [
           {
             "parentPluginId": "unifiedFieldList",
+            "id": "def-public.ExistingFieldsFetcherParams.disableAutoFetching",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableAutoFetching",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
             "id": "def-public.ExistingFieldsFetcherParams.dataViews",
             "type": "Array",
             "tags": [],
@@ -1153,6 +1296,9 @@
             "tags": [],
             "label": "fromDate",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1164,6 +1310,9 @@
             "tags": [],
             "label": "toDate",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1190,7 +1339,8 @@
                 "docId": "kibKbnEsQueryPluginApi",
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
-              }
+              },
+              " | undefined"
             ],
             "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts",
             "deprecated": false,
@@ -1211,7 +1361,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]"
+              "[] | undefined"
             ],
             "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts",
             "deprecated": false,
@@ -1528,11 +1678,15 @@
               "FieldsGroup",
               "<T> | undefined; SelectedFields?: ",
               "FieldsGroup",
+              "<T> | undefined; PopularFields?: ",
+              "FieldsGroup",
               "<T> | undefined; AvailableFields?: ",
               "FieldsGroup",
               "<T> | undefined; EmptyFields?: ",
               "FieldsGroup",
               "<T> | undefined; MetaFields?: ",
+              "FieldsGroup",
+              "<T> | undefined; UnmappedFields?: ",
               "FieldsGroup",
               "<T> | undefined; }"
             ],
@@ -1579,7 +1733,15 @@
             "label": "renderFieldItem",
             "description": [],
             "signature": [
-              "(params: { field: T; hideDetails?: boolean | undefined; itemIndex: number; groupIndex: number; }) => JSX.Element"
+              "(params: { field: T; hideDetails?: boolean | undefined; itemIndex: number; groupIndex: number; groupName: ",
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.FieldsGroupNames",
+                "text": "FieldsGroupNames"
+              },
+              "; }) => JSX.Element"
             ],
             "path": "src/plugins/unified_field_list/public/components/field_list/field_list_grouped.tsx",
             "deprecated": false,
@@ -1594,13 +1756,32 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ field: T; hideDetails?: boolean | undefined; itemIndex: number; groupIndex: number; }"
+                  "{ field: T; hideDetails?: boolean | undefined; itemIndex: number; groupIndex: number; groupName: ",
+                  {
+                    "pluginId": "unifiedFieldList",
+                    "scope": "public",
+                    "docId": "kibUnifiedFieldListPluginApi",
+                    "section": "def-public.FieldsGroupNames",
+                    "text": "FieldsGroupNames"
+                  },
+                  "; }"
                 ],
                 "path": "src/plugins/unified_field_list/public/components/field_list/fields_accordion.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldListGroupedProps.scrollToTopResetCounter",
+            "type": "number",
+            "tags": [],
+            "label": "scrollToTopResetCounter",
+            "description": [],
+            "path": "src/plugins/unified_field_list/public/components/field_list/field_list_grouped.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -2896,12 +3077,12 @@
           {
             "parentPluginId": "unifiedFieldList",
             "id": "def-public.GroupedFieldsParams.allFields",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "allFields",
             "description": [],
             "signature": [
-              "T[]"
+              "T[] | null"
             ],
             "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
             "deprecated": false,
@@ -2945,6 +3126,48 @@
                 "text": "ExistingFieldsReader"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.GroupedFieldsParams.isAffectedByGlobalFilter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isAffectedByGlobalFilter",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.GroupedFieldsParams.popularFieldsLimit",
+            "type": "number",
+            "tags": [],
+            "label": "popularFieldsLimit",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.GroupedFieldsParams.sortedSelectedFields",
+            "type": "Array",
+            "tags": [],
+            "label": "sortedSelectedFields",
+            "description": [],
+            "signature": [
+              "T[] | undefined"
             ],
             "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
             "deprecated": false,
@@ -3136,14 +3359,60 @@
               "FieldsGroup",
               "<T> | undefined; SelectedFields?: ",
               "FieldsGroup",
+              "<T> | undefined; PopularFields?: ",
+              "FieldsGroup",
               "<T> | undefined; AvailableFields?: ",
               "FieldsGroup",
               "<T> | undefined; EmptyFields?: ",
               "FieldsGroup",
               "<T> | undefined; MetaFields?: ",
               "FieldsGroup",
+              "<T> | undefined; UnmappedFields?: ",
+              "FieldsGroup",
               "<T> | undefined; }"
             ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.GroupedFieldsResult.scrollToTopResetCounter",
+            "type": "number",
+            "tags": [],
+            "label": "scrollToTopResetCounter",
+            "description": [],
+            "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.GroupedFieldsResult.fieldsExistenceStatus",
+            "type": "Enum",
+            "tags": [],
+            "label": "fieldsExistenceStatus",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.ExistenceFetchStatus",
+                "text": "ExistenceFetchStatus"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.GroupedFieldsResult.fieldsExistInIndex",
+            "type": "boolean",
+            "tags": [],
+            "label": "fieldsExistInIndex",
+            "description": [],
             "path": "src/plugins/unified_field_list/public/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3200,6 +3469,136 @@
               "<number>"
             ],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.QuerySubscriberParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "QuerySubscriberParams",
+        "description": [
+          "\nHook params"
+        ],
+        "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.QuerySubscriberParams.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.QuerySubscriberResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "QuerySubscriberResult",
+        "description": [
+          "\nResult from the hook"
+        ],
+        "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.QuerySubscriberResult.query",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.QuerySubscriberResult.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.QuerySubscriberResult.fromDate",
+            "type": "string",
+            "tags": [],
+            "label": "fromDate",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.QuerySubscriberResult.toDate",
+            "type": "string",
+            "tags": [],
+            "label": "toDate",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3409,11 +3808,15 @@
           "FieldsGroup",
           "<T> | undefined; SelectedFields?: ",
           "FieldsGroup",
+          "<T> | undefined; PopularFields?: ",
+          "FieldsGroup",
           "<T> | undefined; AvailableFields?: ",
           "FieldsGroup",
           "<T> | undefined; EmptyFields?: ",
           "FieldsGroup",
           "<T> | undefined; MetaFields?: ",
+          "FieldsGroup",
+          "<T> | undefined; UnmappedFields?: ",
           "FieldsGroup",
           "<T> | undefined; }"
         ],

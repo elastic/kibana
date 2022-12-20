@@ -309,7 +309,6 @@ export function ccrRoute(server: MonitoringCore) {
                 error: readExceptions.length ? readExceptions[0].exception?.type : null,
                 opsSynced: get(shardBucket, 'ops_synced.value'),
                 syncLagTime:
-                  // @ts-ignore
                   fullLegacyStat?.ccr_stats?.time_since_last_read_millis ??
                   fullMbStat?.elasticsearch?.ccr?.follower?.time_since_last_read?.ms,
                 syncLagOps: get(shardBucket, 'lag_ops.value'),

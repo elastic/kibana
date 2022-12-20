@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
-  const kibanaServer = getService('kibanaServer');
   const config = getService('config');
   const esNode = config.get('esTestCluster.ccs')
     ? getService('remoteEsArchiver' as 'esArchiver')
@@ -24,25 +23,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     after(async function () {
       await esNode.unload('test/functional/fixtures/es_archiver/getting_started/shakespeare');
-    });
-
-    // TODO: Remove when vislib is removed
-    describe('old charts library', function () {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyPieChartsLibrary': true,
-        });
-        await browser.refresh();
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyPieChartsLibrary': false,
-        });
-        await browser.refresh();
-      });
-
-      loadTestFile(require.resolve('./_shakespeare'));
     });
 
     describe('new charts library', () => {

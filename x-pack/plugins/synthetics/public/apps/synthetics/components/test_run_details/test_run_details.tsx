@@ -65,7 +65,7 @@ export const TestRunDetails = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <StepScreenshotDetails stepIndex={stepIndex} />
+          <StepScreenshotDetails stepIndex={stepIndex} step={step} />
           <EuiSpacer size="m" />
           <StepTabs stepsData={stepsData} step={step} loading={stepsLoading} />
         </EuiPanel>

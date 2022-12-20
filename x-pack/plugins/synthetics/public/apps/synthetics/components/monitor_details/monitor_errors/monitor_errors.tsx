@@ -12,11 +12,11 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { FailedTestsCount } from './failed_tests_count';
-import { useGetUrlParams } from '../../../hooks';
+import { useAbsoluteDate, useGetUrlParams } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
 import { ErrorsList } from './errors_list';
@@ -27,18 +27,15 @@ export const MonitorErrors = () => {
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
-  const time = useMemo(
-    () => ({ from: dateRangeStart, to: dateRangeEnd }),
-    [dateRangeEnd, dateRangeStart]
-  );
+  const time = useAbsoluteDate({ from: dateRangeStart, to: dateRangeEnd });
 
   const monitorId = useMonitorQueryId();
 
   return (
     <>
       <SyntheticsDatePicker fullWidth={true} />
-      <EuiSpacer />
-      <EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
           <EuiPanel hasBorder>
             <EuiTitle size="xs">
@@ -47,15 +44,11 @@ export const MonitorErrors = () => {
             <EuiFlexGroup>
               <EuiFlexItem>
                 {monitorId && (
-                  <MonitorErrorsCount
-                    to={dateRangeEnd}
-                    from={dateRangeStart}
-                    monitorId={[monitorId]}
-                  />
+                  <MonitorErrorsCount from={time.from} to={time.to} monitorId={[monitorId]} />
                 )}
               </EuiFlexItem>
               <EuiFlexItem>
-                <FailedTestsCount to={dateRangeEnd} from={dateRangeStart} />
+                <FailedTestsCount from={time.from} to={time.to} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -69,7 +62,8 @@ export const MonitorErrors = () => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={2}>
           <EuiPanel hasBorder>
             <EuiTitle size="xs">

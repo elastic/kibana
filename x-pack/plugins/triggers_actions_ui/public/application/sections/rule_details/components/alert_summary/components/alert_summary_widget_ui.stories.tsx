@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { action } from '@storybook/addon-actions';
 import { AlertsSummaryWidgetUI as Component } from './alert_summary_widget_ui';
 
 export default {
@@ -16,6 +17,7 @@ export const Overview = {
   args: {
     active: 15,
     recovered: 53,
-    timeRange: 'Last 30 days',
+    timeRangeTitle: 'Last 30 days',
+    onClick: action('clicked'),
   },
 };

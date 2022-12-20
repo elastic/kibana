@@ -30,6 +30,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
@@ -244,7 +245,7 @@ function LocationSelect({
   );
 }
 
-function LoadingState() {
+export function LoadingState() {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
       <EuiFlexItem grow={false}>
@@ -348,19 +349,23 @@ export function MonitorDetailFlyout(props: Props) {
                 compressed
                 listItems={
                   [
-                    {
-                      title: URL_HEADER_TEXT,
-                      description: monitorDetail.data?.url?.full ? (
-                        <EuiLink external href={monitorDetail.data.url.full}>
-                          {monitorDetail.data.url.full}
-                        </EuiLink>
-                      ) : (
-                        ''
-                      ),
-                    },
+                    monitorDetail.data?.url?.full
+                      ? {
+                          title: URL_HEADER_TEXT,
+                          description: (
+                            <EuiLink external href={monitorDetail.data.url.full}>
+                              {monitorDetail.data.url.full}
+                            </EuiLink>
+                          ),
+                        }
+                      : undefined,
                     {
                       title: LAST_RUN_HEADER_TEXT,
-                      description: <Time timestamp={monitorDetail.data?.timestamp} />,
+                      description: monitorDetail.data?.timestamp ? (
+                        <Time timestamp={monitorDetail.data.timestamp} />
+                      ) : (
+                        <EuiText color="subdued">--</EuiText>
+                      ),
                     },
                     {
                       title: LAST_MODIFIED_HEADER_TEXT,

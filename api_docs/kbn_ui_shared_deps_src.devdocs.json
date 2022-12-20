@@ -474,10 +474,10 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-server.externals.risonnode",
+            "id": "def-server.externals.kbnrison",
             "type": "string",
             "tags": [],
-            "label": "'rison-node'",
+            "label": "'@kbn/rison'",
             "description": [],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,

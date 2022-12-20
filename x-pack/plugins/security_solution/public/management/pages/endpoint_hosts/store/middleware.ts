@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { DataViewBase, Query } from '@kbn/es-query';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
+import type {
+  IndexFieldsStrategyRequest,
+  IndexFieldsStrategyResponse,
+} from '@kbn/timelines-plugin/common';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
   HOST_METADATA_GET_ROUTE,
@@ -16,6 +21,7 @@ import {
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
   METADATA_TRANSFORMS_STATUS_ROUTE,
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
 } from '../../../../../common/endpoint/constants';
 import type {
   GetHostPolicyResponse,
@@ -94,13 +100,19 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       ? METADATA_UNITED_INDEX
       : metadataCurrentIndexPattern;
 
-    const { indexPatterns } = depsStart.data;
-    const fields = await indexPatterns.getFieldsForWildcard({
-      pattern: indexPatternToFetch,
-    });
+    const res$ = depsStart.data.search.search<
+      IndexFieldsStrategyRequest<'indices'>,
+      IndexFieldsStrategyResponse
+    >(
+      { indices: [indexPatternToFetch], onlyCheckIfIndicesExist: false },
+      {
+        strategy: ENDPOINT_FIELDS_SEARCH_STRATEGY,
+      }
+    );
+    const response = await firstValueFrom(res$);
     const indexPattern: DataViewBase = {
       title: indexPatternToFetch,
-      fields,
+      fields: response.indexFields,
     };
     return [indexPattern];
   }

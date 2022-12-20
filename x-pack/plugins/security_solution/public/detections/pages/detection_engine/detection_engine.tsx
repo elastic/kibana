@@ -25,13 +25,14 @@ import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 
 import { isTab } from '@kbn/timelines-plugin/public';
+import type { DocLinks } from '@kbn/doc-links';
+import { FILTER_OPEN, TableId } from '../../../../common/types';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
-import { TableId } from '../../../../common/types/timeline';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -50,7 +51,7 @@ import * as i18n from './translations';
 import { SecuritySolutionLinkButton } from '../../../common/components/links';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
-import { Display } from '../../../hosts/pages/display';
+import { Display } from '../../../explore/hosts/pages/display';
 import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,
@@ -70,11 +71,8 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  AlertsTableFilterGroup,
-  FILTER_OPEN,
-} from '../../components/alerts_table/alerts_filter_group';
-import { EmptyPage } from '../../../common/components/empty_page';
+import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
+import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 
@@ -144,7 +142,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     application: { navigateToUrl },
     timelines: timelinesUi,
     data,
-    docLinks,
   } = useKibana().services;
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
@@ -261,18 +258,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const emptyPageActions = useMemo(
-    () => ({
-      feature: {
-        icon: 'documents',
-        label: i18n.GO_TO_DOCUMENTATION,
-        url: `${docLinks.links.siem.privileges}`,
-        target: '_blank',
-      },
-    }),
-    [docLinks]
-  );
-
   if (loading) {
     return (
       <SecuritySolutionPageWrapper>
@@ -310,11 +295,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
       {!signalIndexNeedsInit && (hasIndexRead === false || canUserREAD === false) ? (
-        <EmptyPage
-          actions={emptyPageActions}
-          message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
-          data-test-subj="no_feature_permissions-alerts"
-          title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
+        <NoPrivileges
+          pageName={i18n.PAGE_TITLE.toLowerCase()}
+          docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges}
         />
       ) : !signalIndexNeedsInit && hasIndexRead && canUserREAD ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>

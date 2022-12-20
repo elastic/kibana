@@ -124,7 +124,11 @@ export const getDocumentCountStats = async (
     },
   });
 
-  const hasTimeField = timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0;
+  const hasTimeField =
+    timeFieldName !== undefined &&
+    timeFieldName !== '' &&
+    intervalMs !== undefined &&
+    intervalMs > 0;
 
   const getSearchParams = (aggregations: unknown, trackTotalHits = false) => ({
     index,
@@ -159,7 +163,7 @@ export const getDocumentCountStats = async (
 
   // If time field is not defined, no need to show the document count chart
   // Just need to return the tracked total hits
-  if (timeFieldName === undefined) {
+  if (!hasTimeField) {
     const trackedTotalHits =
       typeof firstResp.rawResponse.hits.total === 'number'
         ? firstResp.rawResponse.hits.total

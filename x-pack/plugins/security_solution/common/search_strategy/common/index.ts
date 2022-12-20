@@ -19,6 +19,23 @@ export type Maybe<T> = T | null;
 
 export type SearchHit = IEsSearchResponse<object>['rawResponse']['hits']['hits'][0];
 
+export interface KpiHistogramData {
+  x?: Maybe<number>;
+  y?: Maybe<number>;
+}
+
+export interface KpiHistogram<T> {
+  key_as_string: string;
+  key: number;
+  doc_count: number;
+  count: T;
+}
+
+export interface KpiGeneralHistogramCount {
+  value?: number;
+  doc_count?: number;
+}
+
 export interface PageInfoPaginated {
   activePage: number;
   fakeTotalCount: number;

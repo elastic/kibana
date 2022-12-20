@@ -41,6 +41,18 @@ export function validateSLO(slo: SLO) {
       throw new IllegalArgumentError('Invalid objective.timeslice_window');
     }
   }
+
+  validateSettings(slo);
+}
+
+function validateSettings(slo: SLO) {
+  if (!isValidFrequencySettings(slo.settings.frequency)) {
+    throw new IllegalArgumentError('Invalid settings.frequency');
+  }
+
+  if (!isValidSyncDelaySettings(slo.settings.sync_delay)) {
+    throw new IllegalArgumentError('Invalid settings.sync_delay');
+  }
 }
 
 function isValidTargetNumber(value: number): boolean {
@@ -61,5 +73,25 @@ function isValidTimesliceWindowDuration(timesliceWindow: Duration, timeWindow: D
   return (
     [DurationUnit.Minute, DurationUnit.Hour].includes(timesliceWindow.unit) &&
     timesliceWindow.isShorterThan(timeWindow)
+  );
+}
+
+/**
+ * validate that 1 minute <= frequency < 1 hour
+ */
+function isValidFrequencySettings(frequency: Duration): boolean {
+  return (
+    frequency.isLongerOrEqualThan(new Duration(1, DurationUnit.Minute)) &&
+    frequency.isShorterThan(new Duration(1, DurationUnit.Hour))
+  );
+}
+
+/**
+ * validate that 1 minute <= sync_delay < 6 hour
+ */
+function isValidSyncDelaySettings(syncDelay: Duration): boolean {
+  return (
+    syncDelay.isLongerOrEqualThan(new Duration(1, DurationUnit.Minute)) &&
+    syncDelay.isShorterThan(new Duration(6, DurationUnit.Hour))
   );
 }
