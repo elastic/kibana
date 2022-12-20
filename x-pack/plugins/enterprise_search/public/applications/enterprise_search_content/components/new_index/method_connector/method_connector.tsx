@@ -48,16 +48,19 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
   const { fullIndexName, language } = useValues(NewSearchIndexLogic);
   const { isCloud, cloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
-  const { data } = useValues(FetchCloudHealthApiLogic);
+  const { data: cloudHealthData } = useValues(FetchCloudHealthApiLogic);
 
   const isGated = isNative && !isCloud && !hasPlatinumLicense;
-  const hasLowMemory = isNative && isCloud && data && !data.has_min_connector_memory;
+  const hasLowMemory =
+    isNative && isCloud && cloudHealthData && !cloudHealthData.has_min_connector_memory;
 
   const { makeRequest: fetchCloudHealth } = useActions(FetchCloudHealthApiLogic);
 
   useEffect(() => {
-    fetchCloudHealth({});
-  }, []);
+    if (isCloud) {
+      fetchCloudHealth({});
+    }
+  }, [isCloud]);
 
   return (
     <EuiFlexGroup direction="column">
