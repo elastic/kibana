@@ -13,7 +13,6 @@ export const REQUEST_NAMES = {
   ENABLE_RISK_SCORE: `${APP_UI_ID} fetch enable risk score`,
   REFRESH_RISK_SCORE: `${APP_UI_ID} fetch refresh risk score`,
   UPGRADE_RISK_SCORE: `${APP_UI_ID} fetch upgrade risk score`,
-  FIELDS_IN_INDEX: `${APP_UI_ID} fetch upgrade risk score`,
 } as const;
 
 export type RequestName = typeof REQUEST_NAMES[keyof typeof REQUEST_NAMES];

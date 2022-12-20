@@ -326,7 +326,6 @@ export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
 export const RISK_SCORE_INDEX_STATUS_API_URL = '/internal/risk_score/index_status' as const;
-export const FIELDS_IN_INDEX_API_URL = '/internal/security_solution/fields_in_index' as const;
 
 /**
  * Default signals index key for kibana.dev.yml

@@ -6,7 +6,6 @@
  */
 
 import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
@@ -15,7 +14,6 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
-import { REQUEST_NAMES, useFetch } from '../../../../common/hooks/use_fetch';
 import { Loader } from '../../../../common/components/loader';
 import { displayErrorToast, useStateToaster } from '../../../../common/components/toasters';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
@@ -30,7 +28,6 @@ import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { getIsFieldInIndexPattern } from '../../../containers/fields/api';
 
 export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
 
@@ -120,43 +117,24 @@ export const EmbeddedMapComponent = ({
   );
   const { kibanaDataViews } = useDeepEqualSelector((state) => getDataViewsSelector(state));
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.default);
-  const { fetch, data, isLoading, error } = useFetch(
-    REQUEST_NAMES.FIELDS_IN_INDEX,
-    getIsFieldInIndexPattern
-  );
 
-  const searchFieldsInIndex = useCallback(
-    (indexName: string, fields: string[]) => {
-      fetch({
-        query: { indexName, fields },
-      });
-    },
-    [fetch]
-  );
-  const [mapIndexPatterns, setMapIndexPatterns] = useState(
-    kibanaDataViews.filter((dataView) => selectedPatterns.includes(dataView.title))
-  );
+  // const isFieldInIndexPattern = useIsFieldInIndexPattern(mapIndexPatterns);
+
+  const mapIndexPatterns = useMemo(() => {
+    const newIndexPatterns = kibanaDataViews.filter((dataView) =>
+      selectedPatterns.includes(dataView.title)
+    );
+    if (selectedPatterns.length > 0 && newIndexPatterns.length === 0) {
+      setIsIndexError(true);
+    }
+    return newIndexPatterns;
+  }, [kibanaDataViews, selectedPatterns]);
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
   // own component tree instead of the embeddables (default). This is necessary to have access to
   // the Redux store, theme provider, etc, which is required to register and un-register the draggable
   // Search InPortal/OutPortal for implementation touch points
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
-
-  useEffect(() => {
-    setMapIndexPatterns((prevMapIndexPatterns) => {
-      const newIndexPatterns = kibanaDataViews.filter((dataView) =>
-        selectedPatterns.includes(dataView.title)
-      );
-      if (!deepEqual(newIndexPatterns, prevMapIndexPatterns)) {
-        if (newIndexPatterns.length === 0) {
-          setIsError(true);
-        }
-        return newIndexPatterns;
-      }
-      return prevMapIndexPatterns;
-    });
-  }, [kibanaDataViews, selectedPatterns]);
 
   // Initial Load useEffect
   useEffect(() => {
@@ -189,7 +167,8 @@ export const EmbeddedMapComponent = ({
         }
       }
     }
-    if (embeddable == null && selectedPatterns.length > 0) {
+
+    if (embeddable == null && selectedPatterns.length > 0 && !isIndexError) {
       setupEmbeddable();
     }
 
@@ -208,6 +187,7 @@ export const EmbeddedMapComponent = ({
     selectedPatterns,
     setQuery,
     startDate,
+    isIndexError,
   ]);
 
   // update layer with new index patterns
@@ -260,7 +240,6 @@ export const EmbeddedMapComponent = ({
     if (!storageValue) {
       return null;
     }
-    console.log('oy', embeddable);
     return (
       <Embeddable>
         <InPortal node={portalNode}>
@@ -282,6 +261,7 @@ export const EmbeddedMapComponent = ({
 
   return isError ? null : (
     <StyledEuiAccordion
+      data-test-subj="EmbeddedMapComponent"
       onToggle={setDefaultMapVisibility}
       id={'network-map'}
       arrowDisplay="right"
