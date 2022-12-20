@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
 
 interface Duration {
@@ -36,4 +38,12 @@ interface SLOList {
   total: number;
 }
 
-export type { Duration, DurationUnit, SLO, SLOList };
+interface BurnRateRuleParams extends RuleTypeParams {
+  sloId: string;
+  burnRateThreshold: number;
+  maxBurnRateThreshold: number;
+  longWindow: Duration;
+  shortWindow: Duration;
+}
+
+export type { BurnRateRuleParams, Duration, DurationUnit, SLO, SLOList };

@@ -54,6 +54,7 @@ import { getExploratoryViewEmbeddable } from './components/shared/exploratory_vi
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
+import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 
 export interface ConfigSchema {
   unsafe: {
@@ -234,6 +235,8 @@ export class Plugin
     };
 
     coreSetup.application.register(app);
+
+    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({

@@ -20,7 +20,7 @@ import PageNotFound from '../404';
 import { isSloFeatureEnabled } from '../slos/helpers';
 import { SLOS_BREADCRUMB_TEXT } from '../slos/translations';
 import { SloDetailsPathParams } from './types';
-import { useFetchSloDetails } from './hooks/use_fetch_slo_details';
+import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { SLO } from '../../typings';
 import { SloDetails } from './components/slo_details';
 import { SLO_DETAILS_BREADCRUMB_TEXT } from './translations';
