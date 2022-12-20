@@ -7,7 +7,7 @@
  */
 
 import { getTelemetryOptIn } from './get_telemetry_opt_in';
-import { TelemetrySavedObject } from './types';
+import type { TelemetrySavedObject } from '../saved_objects';
 
 describe('getTelemetryOptIn', () => {
   it('returns null when saved object not found', () => {
@@ -18,16 +18,6 @@ describe('getTelemetryOptIn', () => {
     const result = callGetTelemetryOptIn(params);
 
     expect(result).toBe(null);
-  });
-
-  it('returns false when saved object forbidden', () => {
-    const params = getCallGetTelemetryOptInParams({
-      savedObjectForbidden: true,
-    });
-
-    const result = callGetTelemetryOptIn(params);
-
-    expect(result).toBe(false);
   });
 
   it('returns null if enabled is null or undefined', () => {
@@ -112,7 +102,6 @@ describe('getTelemetryOptIn', () => {
 
 interface CallGetTelemetryOptInParams {
   savedObjectNotFound: boolean;
-  savedObjectForbidden: boolean;
   lastVersionChecked?: string; // should be a string, but test with non-strings
   currentKibanaVersion: string;
   result?: boolean | null;
@@ -149,12 +138,9 @@ function callGetTelemetryOptIn(params: CallGetTelemetryOptInParams) {
 }
 
 function getMockTelemetrySavedObject(params: CallGetTelemetryOptInParams): TelemetrySavedObject {
-  const { savedObjectNotFound, savedObjectForbidden } = params;
-  if (savedObjectForbidden) {
-    return false;
-  }
+  const { savedObjectNotFound } = params;
   if (savedObjectNotFound) {
-    return null;
+    return {};
   }
 
   return {

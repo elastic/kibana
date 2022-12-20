@@ -6,28 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsErrorHelpers, type SavedObjectsClientContract } from '@kbn/core/server';
-import type { TelemetrySavedObject } from '.';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import type { TelemetrySavedObject } from './types';
+import { TELEMETRY_SAVED_OBJECT_TYPE, TELEMETRY_SAVED_OBJECT_ID } from './constants';
 
 type GetTelemetrySavedObject = (
-  repository: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract
 ) => Promise<TelemetrySavedObject>;
 
 export const getTelemetrySavedObject: GetTelemetrySavedObject = async (
-  repository: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract
 ) => {
   try {
-    const { attributes } = await repository.get<TelemetrySavedObject>('telemetry', 'telemetry');
+    const { attributes } = await soClient.get<TelemetrySavedObject>(
+      TELEMETRY_SAVED_OBJECT_TYPE,
+      TELEMETRY_SAVED_OBJECT_ID
+    );
     return attributes;
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-      return null;
-    }
-
-    // if we aren't allowed to get the telemetry document, we can assume that we won't
-    // be able to opt into telemetry either, so we're returning `false` here instead of null
-    if (SavedObjectsErrorHelpers.isForbiddenError(error)) {
-      return false;
+      return {};
     }
 
     throw error;
