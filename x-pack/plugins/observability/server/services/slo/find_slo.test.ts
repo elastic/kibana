@@ -184,6 +184,20 @@ describe('FindSLO', () => {
         { page: 1, perPage: 25 }
       );
     });
+
+    it('sorts by indicator type descending', async () => {
+      const slo = createSLO();
+      mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
+
+      await findSLO.execute({ sort_by: 'indicator_type', sort_direction: 'desc' });
+
+      expect(mockRepository.find).toHaveBeenCalledWith(
+        { name: undefined },
+        { field: SortingField.IndicatorType, direction: SortingDirection.Descending },
+        { page: 1, perPage: 25 }
+      );
+    });
   });
 });
 

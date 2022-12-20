@@ -85,7 +85,11 @@ function toCriteria(params: FindSLOParams): Criteria {
 }
 
 function toSorting(params: FindSLOParams): Sorting {
-  return { field: toSortingField(params.sort_by), direction: SortingDirection.Ascending };
+  return {
+    field: toSortingField(params.sort_by),
+    direction:
+      params?.sort_direction === 'desc' ? SortingDirection.Descending : SortingDirection.Ascending,
+  };
 }
 
 function toSortingField(sortBy: string | undefined): SortingField {
