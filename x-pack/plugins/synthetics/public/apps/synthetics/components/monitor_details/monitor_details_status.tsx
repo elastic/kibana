@@ -6,7 +6,7 @@
  */
 import React from 'react';
 
-import { MonitorStatus } from '../common/components/monitor_status';
+import { MonitorStatus } from '../monitor_status/monitor_status';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 

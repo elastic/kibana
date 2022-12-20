@@ -59,7 +59,7 @@ import {
 } from '../types';
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
 import { fetchSyntheticsMonitor } from '../../../../state/overview/api';
-import { MonitorStatus } from '../../../common/components/monitor_status';
+import { MonitorStatus } from '../../../monitor_status/monitor_status';
 
 interface Props {
   configId: string;
