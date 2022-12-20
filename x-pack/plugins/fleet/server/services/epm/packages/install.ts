@@ -337,8 +337,6 @@ async function installPackageFromRegistry({
     telemetryEvent.installType = installType;
     telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
-    console.log('latestPackage', latestPackage);
-
     // if the requested version is out-of-date of the latest package version, check if we allow it
     // if we don't allow it, return an error
     if (semverLt(pkgVersion, latestPackage.version)) {

@@ -6,7 +6,9 @@
  */
 
 import * as yaml from 'js-yaml';
+// eslint-disable-next-line import/no-nodejs-modules
 import type { UrlObject } from 'url';
+// eslint-disable-next-line import/no-nodejs-modules
 import Url from 'url';
 import type { ROLES } from '../test';
 
