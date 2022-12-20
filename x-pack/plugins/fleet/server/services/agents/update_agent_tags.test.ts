@@ -64,7 +64,7 @@ describe('update_agent_tags', () => {
           },
         ],
       },
-    });
+    } as any);
     esClient.bulk.mockReset();
     esClient.bulk.mockResolvedValue({
       items: [],
