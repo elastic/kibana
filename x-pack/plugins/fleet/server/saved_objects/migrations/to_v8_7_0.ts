@@ -22,16 +22,18 @@ export const migrateOutputToV870: SavedObjectMigrationFn<Output, Output> = (
   outputDoc,
   migrationContext
 ) => {
-  outputDoc.attributes.disk_queue_enabled = false;
-  outputDoc.attributes.disk_queue_path = '';
-  outputDoc.attributes.disk_queue_max_size = 0;
-  outputDoc.attributes.disk_queue_encryption_enabled = false;
-  outputDoc.attributes.disk_queue_compression_enabled = false;
-  outputDoc.attributes.compression_level = 0;
-  outputDoc.attributes.loadbalance = false;
-  outputDoc.attributes.mem_queue_events = 0;
-  outputDoc.attributes.queue_flush_timeout = 0;
-  outputDoc.attributes.max_batch_bytes = 0;
+  if (outputDoc.attributes.shipper) {
+    outputDoc.attributes.shipper.disk_queue_enabled = false;
+    outputDoc.attributes.shipper.disk_queue_path = '';
+    outputDoc.attributes.shipper.disk_queue_max_size = 0;
+    outputDoc.attributes.shipper.disk_queue_encryption_enabled = false;
+    outputDoc.attributes.shipper.disk_queue_compression_enabled = false;
+    outputDoc.attributes.shipper.compression_level = 0;
+    outputDoc.attributes.shipper.loadbalance = false;
+    outputDoc.attributes.shipper.mem_queue_events = 0;
+    outputDoc.attributes.shipper.queue_flush_timeout = 0;
+    outputDoc.attributes.shipper.max_batch_bytes = 0;
+  }
 
   return outputDoc;
 };

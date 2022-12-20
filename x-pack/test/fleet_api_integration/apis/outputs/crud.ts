@@ -231,9 +231,11 @@ export default function (providerContext: FtrProviderContext) {
             type: 'elasticsearch',
             hosts: ['https://test.fr'],
             is_default_monitoring: true,
-            disk_queue_enabled: true,
-            disk_queue_path: 'path/to/disk/queue',
-            disk_queue_encryption_enabled: true,
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            }
           })
           .expect(200);
       });
@@ -247,9 +249,11 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logstash',
             hosts: ['https://test.fr'],
             is_default_monitoring: true,
-            disk_queue_enabled: true,
-            disk_queue_path: 'path/to/disk/queue',
-            disk_queue_encryption_enabled: true,
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            }
           })
           .expect(200);
       });

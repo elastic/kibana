@@ -144,16 +144,20 @@ const getSavedObjectTypes = (
         is_preconfigured: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
         proxy_id: { type: 'keyword' },
-        disk_queue_enabled: { type: 'boolean', index: false },
-        disk_queue_path: { type: 'keyword', index: false },
-        disk_queue_max_size: { type: 'integer', index: false },
-        disk_queue_encryption_enabled: { type: 'boolean', index: false },
-        disk_queue_compression_enabled: { type: 'boolean', index: false },
-        compression_level: { type: 'integer', index: false },
-        loadbalance: { type: 'boolean' },
-        mem_queue_events: { type: 'integer', index: false },
-        queue_flush_timeout: { type: 'integer', index: false },
-        max_batch_bytes: { type: 'integer', index: false },
+        shipper: {
+          properties: {
+            disk_queue_enabled: { type: 'boolean', index: false },
+            disk_queue_path: { type: 'keyword', index: false },
+            disk_queue_max_size: { type: 'integer', index: false },
+            disk_queue_encryption_enabled: { type: 'boolean', index: false },
+            disk_queue_compression_enabled: { type: 'boolean', index: false },
+            compression_level: { type: 'integer', index: false },
+            loadbalance: { type: 'boolean' },
+            mem_queue_events: { type: 'integer', index: false },
+            queue_flush_timeout: { type: 'integer', index: false },
+            max_batch_bytes: { type: 'integer', index: false },
+          }
+        }
       },
     },
     migrations: {

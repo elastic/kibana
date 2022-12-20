@@ -128,24 +128,24 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const configJs = output?.config_yaml ? safeLoad(output?.config_yaml) : {};
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
-  const diskQueueEnabledInput = useSwitchInput(output?.disk_queue_enabled ?? false);
+  const diskQueueEnabledInput = useSwitchInput(output?.shipper?.disk_queue_enabled ?? false);
   const diskQueuePathInput = useInput(
-    output?.disk_queue_path ?? '',
+    output?.shipper?.disk_queue_path ?? '',
     undefined,
     !diskQueueEnabledInput.value ?? false
   );
   const diskQueueMaxSizeInput = useNumberInput(
-    output?.disk_queue_max_size ?? DEFAULT_QUEUE_MAX_SIZE,
+    output?.shipper?.disk_queue_max_size ?? DEFAULT_QUEUE_MAX_SIZE,
     undefined,
     !diskQueueEnabledInput.value ?? false
   );
   const diskQueueEncryptionEnabled = useSwitchInput(
-    output?.disk_queue_encryption_enabled ?? false,
+    output?.shipper?.disk_queue_encryption_enabled ?? false,
     !diskQueueEnabledInput.value ?? false
   );
-  const loadBalanceEnabledInput = useSwitchInput(output?.disk_queue_enabled ?? false);
+  const loadBalanceEnabledInput = useSwitchInput(output?.shipper?.disk_queue_enabled ?? false);
   const diskQueueCompressionEnabled = useSwitchInput(
-    output?.disk_queue_compression_enabled ?? false
+    output?.shipper?.disk_queue_compression_enabled ?? false
   );
 
   const options = Array.from(Array(10).keys())
@@ -155,14 +155,14 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     });
   const compressionLevelInput = useSelectInput(
     options,
-    `${output?.compression_level}` ?? options[0].value,
+    `${output?.shipper?.compression_level}` ?? options[0].value,
     !diskQueueCompressionEnabled.value ?? false
   );
 
   // These parameters are yet tbd
-  const memQueueEvents = useNumberInput(output?.mem_queue_events);
-  const queueFlushTimeout = useNumberInput(output?.queue_flush_timeout);
-  const maxBatchBytes = useNumberInput(output?.max_batch_bytes);
+  const memQueueEvents = useNumberInput(output?.shipper?.mem_queue_events);
+  const queueFlushTimeout = useNumberInput(output?.shipper?.queue_flush_timeout);
+  const maxBatchBytes = useNumberInput(output?.shipper?.max_batch_bytes);
 
   // Logstash inputs
   const logstashHostsInput = useComboInput(
@@ -267,23 +267,25 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       let shipperParams = {};
       if (!isShipperDisabled) {
         shipperParams = {
-          disk_queue_enabled: diskQueueEnabledInput.value,
-          disk_queue_path:
-            diskQueueEnabledInput.value && diskQueuePathInput.value ? diskQueuePathInput.value : '',
-          disk_queue_max_size:
-            diskQueueEnabledInput.value && diskQueueMaxSizeInput.value
-              ? diskQueueMaxSizeInput.value
+          shipper : {
+            disk_queue_enabled: diskQueueEnabledInput.value,
+            disk_queue_path:
+              diskQueueEnabledInput.value && diskQueuePathInput.value ? diskQueuePathInput.value : '',
+            disk_queue_max_size:
+              diskQueueEnabledInput.value && diskQueueMaxSizeInput.value
+                ? diskQueueMaxSizeInput.value
+                : 0,
+            disk_queue_encryption_enabled:
+              diskQueueEnabledInput.value && diskQueueEncryptionEnabled.value,
+            disk_queue_compression_enabled: diskQueueCompressionEnabled.value,
+            compression_level: diskQueueCompressionEnabled.value
+              ? Number(compressionLevelInput.value)
               : 0,
-          disk_queue_encryption_enabled:
-            diskQueueEnabledInput.value && diskQueueEncryptionEnabled.value,
-          disk_queue_compression_enabled: diskQueueCompressionEnabled.value,
-          compression_level: diskQueueCompressionEnabled.value
-            ? Number(compressionLevelInput.value)
-            : 0,
-          loadbalance: loadBalanceEnabledInput.value,
-          mem_queue_events: memQueueEvents.value ? Number(memQueueEvents.value) : 0,
-          queue_flush_timeout: queueFlushTimeout.value ? Number(queueFlushTimeout.value) : 0,
-          max_batch_bytes: maxBatchBytes.value ? Number(maxBatchBytes.value) : 0,
+            loadbalance: loadBalanceEnabledInput.value,
+            mem_queue_events: memQueueEvents.value ? Number(memQueueEvents.value) : 0,
+            queue_flush_timeout: queueFlushTimeout.value ? Number(queueFlushTimeout.value) : 0,
+            max_batch_bytes: maxBatchBytes.value ? Number(maxBatchBytes.value) : 0,
+          }
         };
       }
 
@@ -304,6 +306,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               ),
             },
             proxy_id: proxyIdValue,
+            ...shipperParams,
           }
         : {
             name: nameInput.value,
