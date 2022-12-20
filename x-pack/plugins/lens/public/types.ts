@@ -89,7 +89,7 @@ export type IndexPatternField = FieldSpec & {
    * Map of fields which can be used, but may fail partially (ranked lower than others)
    */
   partiallyApplicableFunctions?: Partial<Record<string, boolean>>;
-  timeSeriesMetricType?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
   timeSeriesRollup?: boolean;
   meta?: boolean;
   runtime?: boolean;
@@ -571,7 +571,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   showNoDataPopover: () => void;
   core: Pick<
     CoreStart,
-    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'application'
+    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'application' | 'docLinks'
   >;
   query: Query;
   dateRange: DateRange;
@@ -793,7 +793,15 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
 
 export interface AccessorConfig {
   columnId: string;
-  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible' | 'aggregate';
+  triggerIconType?:
+    | 'color'
+    | 'disabled'
+    | 'colorBy'
+    | 'none'
+    | 'invisible'
+    | 'aggregate'
+    | 'custom';
+  customIcon?: IconType;
   color?: string;
   palette?: string[] | Array<{ color: string; stop: number }>;
 }

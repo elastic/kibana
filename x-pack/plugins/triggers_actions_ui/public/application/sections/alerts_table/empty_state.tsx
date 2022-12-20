@@ -45,7 +45,7 @@ export const EmptyState: React.FC<{ height?: keyof typeof heights }> = ({ height
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiImage size="200" alt="" url={icon} />
+                <EuiImage style={{ width: 200, height: 148 }} size="200" alt="" url={icon} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

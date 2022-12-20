@@ -218,7 +218,7 @@ export const calculateEndpointAuthz = (
     canReadSecuritySolution,
     canAccessFleet: fleetAuthz?.fleet.all ?? userRoles.includes('superuser'),
     canAccessEndpointManagement: hasEndpointManagementAccess,
-    canCreateArtifactsByPolicy: hasEndpointManagementAccess && isPlatinumPlusLicense,
+    canCreateArtifactsByPolicy: isPlatinumPlusLicense,
     canWriteEndpointList,
     canReadEndpointList,
     canWritePolicyManagement,
