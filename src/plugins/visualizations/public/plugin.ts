@@ -101,6 +101,7 @@ import {
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
+import { KibanaUtilsStart } from '@kbn/kibana-utils-plugin/public/plugin';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -147,6 +148,7 @@ export interface VisualizationsStartDeps {
   fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
+  kibanaUtils: KibanaUtilsStart;
 }
 
 /**
@@ -171,8 +173,11 @@ export class VisualizationsPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private isLinkedToOriginatingApp: (() => boolean) | undefined = undefined;
+  private readonly kibanaVersion: string;
 
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor(private initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+  }
 
   public setup(
     core: CoreSetup<VisualizationsStartDeps, VisualizationsStart>,
@@ -302,10 +307,10 @@ export class VisualizationsPlugin
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
           presentationUtil: pluginsStart.presentationUtil,
-          getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
           visEditorsRegistry,
           unifiedSearch: pluginsStart.unifiedSearch,
+          getKibanaVersion: () => this.kibanaVersion,
         };
 
         params.element.classList.add('visAppWrapper');

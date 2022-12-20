@@ -8,10 +8,13 @@
 
 import { CoreSetup, Plugin } from '@kbn/core/server';
 import { uiSettings } from './ui_settings';
+import { registerGetRoute } from './routes/get';
 
 export class SavedObjectsServerPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup) {
     core.uiSettings.register(uiSettings);
+    registerGetRoute(core.http.createRouter());
+
     return {};
   }
 

@@ -12,7 +12,7 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsClientContract,
   SavedObjectAttributes,
-  SavedObjectReference,
+  SavedObjectReference, HttpStart,
 } from '@kbn/core/public';
 import type { OverlayStart } from '@kbn/core/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
@@ -212,6 +212,8 @@ export async function getSavedVisualization(
     dataViews: DataPublicPluginStart['dataViews'];
     spaces?: SpacesPluginStart;
     savedObjectsTagging?: SavedObjectsTaggingApi;
+    http: HttpStart;
+    kibanaVersion: string;
   },
   opts?: GetVisOptions | string
 ): Promise<VisSavedObject> {
@@ -234,13 +236,22 @@ export async function getSavedVisualization(
     Object.assign(savedObject, defaultsProps);
     return savedObject;
   }
+  const response = await services.http.get('/api/kibana/saved_objects/get', {
+    query: {
+      id,
+      version: services.kibanaVersion,
+      type: 'visualization',
+    },
+  });
 
   const {
     saved_object: resp,
     outcome,
     alias_target_id: aliasTargetId,
     alias_purpose: aliasPurpose,
-  } = await services.savedObjectsClient.resolve<SavedObjectAttributes>(SAVED_VIS_TYPE, id);
+  } = response as any;
+
+  resp._version = resp.version;
 
   if (!resp._version) {
     throw new SavedObjectNotFound(SAVED_VIS_TYPE, id || '');

@@ -672,14 +672,16 @@ export class VisualizeEmbeddable
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    const { savedObjectsClient, data, spaces, savedObjectsTaggingOss } = await this.deps.start()
-      .plugins;
+    const { core, plugins } = await this.deps.start();
+    const { savedObjectsClient, data, spaces, savedObjectsTaggingOss } = plugins;
     const savedVis = await getSavedVisualization({
       savedObjectsClient,
       search: data.search,
       dataViews: data.dataViews,
       spaces,
       savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+      http: core.http,
+      kibanaVersion: plugins.kibanaUtils.getVersion(),
     });
     if (!savedVis) {
       throw new Error('Error creating a saved vis object');

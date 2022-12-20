@@ -82,7 +82,7 @@ export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
   input: VisualizeInput
 ) => {
-  const { data, savedObjects, spaces, savedObjectsTagging } = visualizeServices;
+  const { data, savedObjects, spaces, savedObjectsTagging, core, getKibanaVersion } = visualizeServices;
   const visState = input.savedVis as SerializedVis;
 
   /**
@@ -95,6 +95,8 @@ export const getVisualizationInstanceFromInput = async (
     dataViews: data.dataViews,
     spaces,
     savedObjectsTagging,
+    http: core.http,
+    kibanaVersion: getKibanaVersion(),
   });
 
   if (visState.uiState && Object.keys(visState.uiState).length !== 0) {
@@ -131,7 +133,7 @@ export const getVisualizationInstance = async (
    */
   opts?: Record<string, unknown> | string
 ) => {
-  const { data, savedObjects, spaces, savedObjectsTagging } = visualizeServices;
+  const { data, savedObjects, spaces, savedObjectsTagging, core, getKibanaVersion } = visualizeServices;
 
   const savedVis: VisSavedObject = await getSavedVisualization(
     {
@@ -140,6 +142,8 @@ export const getVisualizationInstance = async (
       dataViews: data.dataViews,
       spaces,
       savedObjectsTagging,
+      http: core.http,
+      kibanaVersion: getKibanaVersion(),
     },
     opts
   );

@@ -71,6 +71,7 @@ export interface VisualizeEmbeddableFactoryDeps {
       | 'data'
       | 'savedObjectsTaggingOss'
       | 'spaces'
+      | 'kibanaUtils'
     >
   >;
 }
@@ -173,6 +174,8 @@ export class VisualizeEmbeddableFactory
           dataViews: startDeps.plugins.data.dataViews,
           spaces: startDeps.plugins.spaces,
           savedObjectsTagging: startDeps.plugins.savedObjectsTaggingOss?.getTaggingApi(),
+          http: startDeps.core.http,
+          kibanaVersion: startDeps.plugins.kibanaUtils.getVersion(),
         },
         savedObjectId
       );

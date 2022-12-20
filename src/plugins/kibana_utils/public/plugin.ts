@@ -12,9 +12,12 @@ import { setVersion } from './set_version';
 
 export interface KibanaUtilsSetup {
   setVersion: (history: Pick<History, 'location' | 'replace'>) => void;
+  getVersion: () => string;
 }
 
-export type KibanaUtilsStart = undefined;
+export type KibanaUtilsStart = {
+  getVersion: () => string;
+};
 
 export class KibanaUtilsPublicPlugin implements Plugin<KibanaUtilsSetup, KibanaUtilsStart> {
   private readonly version: string;
@@ -26,11 +29,14 @@ export class KibanaUtilsPublicPlugin implements Plugin<KibanaUtilsSetup, KibanaU
   public setup(core: CoreSetup): KibanaUtilsSetup {
     return {
       setVersion: this.setVersion,
+      getVersion: () => this.version,
     };
   }
 
   public start(core: CoreStart): KibanaUtilsStart {
-    return undefined;
+    return {
+      getVersion: () => this.version,
+    };
   }
 
   public stop() {}

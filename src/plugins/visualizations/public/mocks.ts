@@ -24,6 +24,7 @@ import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kibanaUtilsPluginMock } from '@kbn/kibana-utils-plugin/public/mocks';
 import { VisualizationsPlugin } from './plugin';
 import { Schemas } from './vis_types';
 import { Schema, VisualizationsSetup, VisualizationsStart } from '.';
@@ -77,6 +78,7 @@ const createInstance = async () => {
       screenshotMode: screenshotModePluginMock.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      kibanaUtils: kibanaUtilsPluginMock.createStartContract(),
       usageCollection: {
         reportUiCounter: jest.fn(),
       },
