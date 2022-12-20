@@ -128,18 +128,8 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               await rulesClient.create<RuleTypeParams>({
                 data: rewriteBodyReq({
                   ...rule,
-                  actions: rule.actions.map((action) => {
-                    return {
-                      ...action,
-                      frequency: {
-                        summary: true,
-                        throttle: null,
-                        notifyWhen: 'onActiveAlert',
-                      },
-                    };
-                  }),
-                  notify_when: undefined,
-                  throttle: undefined,
+                  actions: rewriteActions(rule.actions),
+                  notify_when: rule.notify_when as RuleNotifyWhenType,
                 }),
                 options: { id: params?.id },
               });
