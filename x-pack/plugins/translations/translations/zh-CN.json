@@ -27778,7 +27778,6 @@
     "xpack.securitySolution.containers.detectionEngine.createPrePackagedRuleSuccesDescription": "已安装 Elastic 的预打包规则",
     "xpack.securitySolution.containers.detectionEngine.createPrePackagedTimelineSuccesDescription": "安装 Elastic 预先打包的时间线模板",
     "xpack.securitySolution.containers.detectionEngine.rulesAndTimelines": "无法提取规则和时间线",
-    "xpack.securitySolution.containers.detectionEngine.tagFetchFailDescription": "无法提取标签",
     "xpack.securitySolution.contextMenuItemByRouter.viewDetails": "查看详情",
     "xpack.securitySolution.createPackagePolicy.stepConfigure.cloudDropdownOption": "云工作负载（Linux 服务器或 Kubernetes 环境）",
     "xpack.securitySolution.createPackagePolicy.stepConfigure.cloudEventFiltersAllEvents": "所有事件",

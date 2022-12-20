@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 
 import type { SLOList } from '../../typings/slo';
 import { useDataFetcher } from '../use_data_fetcher';
 import { toSLO } from '../../utils/slo/slo';
 
-const EMPTY_LIST = {
+const EMPTY_LIST: SLOList = {
   results: [],
   total: 0,
   page: 0,
@@ -21,29 +21,46 @@ const EMPTY_LIST = {
 
 interface SLOListParams {
   name?: string;
+  page?: number;
 }
 
-interface UseFetchSloListResponse {
-  loading: boolean;
+export interface UseFetchSloListResponse {
   sloList: SLOList;
+  loading: boolean;
+  error: boolean;
 }
 
-const useFetchSloList = (name?: string): UseFetchSloListResponse => {
-  const params: SLOListParams = useMemo(() => ({ name }), [name]);
+export function useFetchSloList({
+  name,
+  refetch,
+  page,
+}: {
+  refetch: boolean;
+  name?: string;
+  page?: number;
+}): UseFetchSloListResponse {
+  const [sloList, setSloList] = useState(EMPTY_LIST);
+
+  const params: SLOListParams = useMemo(() => ({ name, page }), [name, page]);
   const shouldExecuteApiCall = useCallback(
-    (apiCallParams: SLOListParams) => apiCallParams.name === params.name,
-    [params]
+    (apiCallParams: SLOListParams) =>
+      apiCallParams.name === params.name || apiCallParams.page === params.page || refetch,
+    [params, refetch]
   );
 
-  const { loading, data: sloList } = useDataFetcher<SLOListParams, SLOList>({
+  const { data, loading, error } = useDataFetcher<SLOListParams, SLOList>({
     paramsForApiCall: params,
-    initialDataState: EMPTY_LIST,
+    initialDataState: sloList,
     executeApiCall: fetchSloList,
     shouldExecuteApiCall,
   });
 
-  return { loading, sloList };
-};
+  useEffect(() => {
+    setSloList(data);
+  }, [data]);
+
+  return { sloList, loading, error };
+}
 
 const fetchSloList = async (
   params: SLOListParams,
@@ -53,6 +70,7 @@ const fetchSloList = async (
   try {
     const response = await http.get<Record<string, unknown>>(`/api/observability/slos`, {
       query: {
+        ...(params.page && { page: params.page }),
         ...(params.name && { name: params.name }),
       },
       signal: abortController.signal,
@@ -73,12 +91,9 @@ function toSLOList(response: Record<string, unknown>): SLOList {
   }
 
   return {
-    results: response.results.map((result) => toSLO(result)),
+    results: response.results.map(toSLO),
     page: Number(response.page),
     perPage: Number(response.per_page),
     total: Number(response.total),
   };
 }
-
-export { useFetchSloList };
-export type { UseFetchSloListResponse };
