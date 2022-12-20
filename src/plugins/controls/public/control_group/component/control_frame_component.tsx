@@ -27,7 +27,6 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { euiThemeAmsterdam } from '@elastic/eui/src/themes/amsterdam/theme';
 import { ControlGroupReduxState } from '../types';
 import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
@@ -142,7 +141,7 @@ export const ControlFrame = ({
     ? css`
         top: ${anchorBoundingRect.top -
         (usingTwoLineLayout ? parseInt(euiTheme.size.xs, 10) : parseInt(euiTheme.size.l, 10))}px;
-        left: ${anchorBoundingRect.right - parseInt(euiTheme.size.xxxl, 10)}px;
+        left: ${anchorBoundingRect.right - parseInt(euiTheme.size.xxxxl, 10)}px;
         ${areFloatingActionsVisible
           ? `transition: visibility .1s, opacity .1s;
           visibility: visible;
