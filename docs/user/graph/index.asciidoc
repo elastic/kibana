@@ -180,7 +180,7 @@ To configure drilldowns, go to *Settings > Drilldowns*. See also
 <<disable-drill-down, Disabling drilldown configuration>>.
 
 
-NOTE: when creating custom drilldowns, make sure to enclose the referenced index pattern in single quotes (`'`) to avoid rison decoding errors.
+NOTE: When creating custom drilldowns to Kibana applications, enclose the referenced data view in single quotes (`'`) to avoid decoding errors.
 
 [float]
 [[graph-run-layout]]
