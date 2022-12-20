@@ -101,7 +101,6 @@ export const fieldMappings = {
   },
   bytes: {
     type: 'long',
-    time_series_metric: 'gauge',
   },
   tags: {
     type: 'text',
