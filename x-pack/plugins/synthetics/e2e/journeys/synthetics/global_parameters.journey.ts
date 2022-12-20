@@ -7,7 +7,7 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { cleanTestParams } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey(`GlobalParameters`, async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
