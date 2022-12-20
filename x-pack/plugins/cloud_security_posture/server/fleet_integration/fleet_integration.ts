@@ -22,7 +22,7 @@ export const isCspPackageInstalled = async (
   logger: Logger
 ): Promise<boolean> => {
   try {
-    const { total, _ } = await packagePolicyClient.list(soClient, {
+    const { total } = await packagePolicyClient.list(soClient, {
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}`,
       page: 1,
     });

@@ -52,14 +52,10 @@ const getWrapper =
   };
 
 const getRuleMock = ({
-  packagePolicyId = chance.guid(),
-  policyId = chance.guid(),
   savedObjectId = chance.guid(),
   id = chance.guid(),
   enabled,
 }: {
-  packagePolicyId?: string;
-  policyId?: string;
   savedObjectId?: string;
   id?: string;
   enabled: boolean;
@@ -88,8 +84,6 @@ const getRuleMock = ({
         tags: [chance.word(), chance.word()],
         version: chance.sentence(),
       },
-      package_policy_id: packagePolicyId,
-      policy_id: policyId,
       enabled,
       muted: false,
     },
