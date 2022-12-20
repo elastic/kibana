@@ -32,7 +32,6 @@ export function ChangeIndexPattern({
   onChangeIndexPattern: (newId: string) => void;
   indexPatternId?: string;
   selectableProps?: EuiSelectableProps;
-  onCreateDefaultAdHocDataView?: (pattern: string) => void;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 

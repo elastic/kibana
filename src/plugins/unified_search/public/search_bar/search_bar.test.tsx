@@ -18,12 +18,7 @@ const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
 import { DataView } from '@kbn/data-views-plugin/public';
-import {
-  EuiSuperDatePicker,
-  EuiSuperUpdateButton,
-  EuiThemeProvider,
-  SortDirection,
-} from '@elastic/eui';
+import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@elastic/eui';
 import { FilterItems } from '../filter_bar';
 import { DataViewPicker } from '..';
 
@@ -98,11 +93,6 @@ function wrapSearchBarInContext(testProps: any) {
     notifications: startMock.notifications,
     http: startMock.http,
     storage: createMockStorage(),
-    sortingService: {
-      getSorting: () => {
-        return { by: 'alphabetically', direction: SortDirection.ASC };
-      },
-    },
     data: {
       query: {
         savedQueries: {
