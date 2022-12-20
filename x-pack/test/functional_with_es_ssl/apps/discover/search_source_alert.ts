@@ -265,6 +265,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await filterBar.getFilterCount()).to.be(0);
     expect(await queryBar.getQueryString()).to.equal('');
     const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
+    const { valid } = await PageObjects.discover.validateDataViewReffsEquality();
+    expect(valid).to.equal(true);
     expect(selectedDataView).to.be.equal(dataView);
     expect(await dataGrid.getDocCount()).to.be(5);
   };

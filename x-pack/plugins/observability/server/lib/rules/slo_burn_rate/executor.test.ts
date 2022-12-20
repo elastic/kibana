@@ -36,6 +36,7 @@ import {
 import { aStoredSLO, createSLO } from '../../../services/slo/fixtures/slo';
 import { SLO } from '../../../domain/models';
 import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 const commonEsResponse = {
   took: 100,
@@ -95,6 +96,7 @@ describe('BurnRateRuleExecutor', () => {
       getAlertUuid: jest.fn(),
       getAlertByAlertUuid: jest.fn(),
       share: {} as SharePluginStart,
+      dataViews: dataViewPluginMocks.createStartContract(),
     };
   });
 

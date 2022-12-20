@@ -11,6 +11,7 @@ import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -157,6 +158,7 @@ export interface AlertingPluginsStart {
   spaces: SpacesPluginStart;
   security?: SecurityPluginStart;
   data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
   share: SharePluginStart;
 }
 
@@ -431,6 +433,7 @@ export class AlertingPlugin {
       logger,
       data: plugins.data,
       share: plugins.share,
+      dataViews: plugins.dataViews,
       savedObjects: core.savedObjects,
       uiSettings: core.uiSettings,
       elasticsearch: core.elasticsearch,

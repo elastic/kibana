@@ -32,7 +32,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     spaceId,
     logger,
   } = options;
-  const { alertFactory, scopedClusterClient, searchSourceClient, share } = services;
+  const { alertFactory, scopedClusterClient, searchSourceClient, share, dataViews } = services;
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
   const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
@@ -74,6 +74,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
           share,
           searchSourceClient,
           logger,
+          dataViews,
         },
       });
 

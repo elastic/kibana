@@ -10,6 +10,7 @@ import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { UsageCollectionSetup as UsageCollectionPluginSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   PluginSetupContract as AlertingPluginSetup,
@@ -67,6 +68,7 @@ export interface SecuritySolutionPluginStartDependencies {
   cases?: CasesPluginStart;
   cloudExperiments?: CloudExperimentsPluginStart;
   data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
   eventLog: IEventLogClientService;
   fleet?: FleetPluginStart;
   licensing: LicensingPluginStart;

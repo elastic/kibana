@@ -8,6 +8,7 @@
 import { buildRangeFilter, Filter } from '@kbn/es-query';
 import {
   DataView,
+  DataViewsContract,
   getTime,
   ISearchSource,
   ISearchStartSearchSource,
@@ -23,6 +24,8 @@ import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { Logger } from '@kbn/core/server';
+import { getFilterReferencesUpdater } from '@kbn/unified-search-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
 
@@ -36,6 +39,7 @@ export interface FetchSearchSourceQueryOpts {
     logger: Logger;
     searchSourceClient: ISearchStartSearchSource;
     share: SharePluginStart;
+    dataViews: DataViewsContract;
   };
 }
 
@@ -70,19 +74,17 @@ export async function fetchSearchSourceQuery({
 
   const searchResult = await searchSource.fetch();
 
-  const discoverLocator = services.share.url.locators.get('DISCOVER_APP_LOCATOR');
-  const redirectUrlParams: DiscoverAppLocatorParams = {
-    dataViewSpec: { ...index.toSpec(false), id: undefined, version: undefined }, // make separate adhoc data view
-    filters: initialSearchSource.getField('filter') as Filter[],
-    query: initialSearchSource.getField('query'),
-    timeRange: { from: dateStart, to: dateEnd },
-    isAlertResults: true,
-  };
-
-  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
-  const [start, end] = redirectUrl.split('/app');
+  const link = await generateLink(
+    initialSearchSource,
+    services.share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!,
+    services.dataViews,
+    index,
+    dateStart,
+    dateEnd,
+    spacePrefix
+  );
   return {
-    link: start + spacePrefix + '/app' + end,
+    link,
     numMatches: Number(searchResult.hits.total),
     searchResult,
     parsedResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: searchResult }),
@@ -152,4 +154,41 @@ export function updateSearchSource(
     dateStart,
     dateEnd,
   };
+}
+
+async function generateLink(
+  searchSource: ISearchSource,
+  discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
+  dataViews: DataViewsContract,
+  dataViewToUpdate: DataView,
+  dateStart: string,
+  dateEnd: string,
+  spacePrefix: string
+) {
+  const prevFilters = searchSource.getField('filter') as Filter[];
+  const getUpdatedFilters = getFilterReferencesUpdater(prevFilters);
+
+  // make new adhoc data view
+  const newDataView = await dataViews.create({
+    ...dataViewToUpdate.toSpec(false),
+    version: undefined,
+    id: undefined,
+  });
+  const updatedFilters = getUpdatedFilters({
+    fromDataView: dataViewToUpdate.id!,
+    toDataView: newDataView.id,
+    usedDataViews: [],
+  });
+
+  const redirectUrlParams: DiscoverAppLocatorParams = {
+    dataViewSpec: newDataView.toSpec(false),
+    filters: updatedFilters,
+    query: searchSource.getField('query'),
+    timeRange: { from: dateStart, to: dateEnd },
+    isAlertResults: true,
+  };
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
+  const [start, end] = redirectUrl.split('/app');
+
+  return start + spacePrefix + '/app' + end;
 }
