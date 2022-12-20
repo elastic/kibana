@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import {
+  ApmSynthtraceKibanaClient,
+  ApmSynthtraceEsClient,
+  createLogger,
+  LogLevel,
+} from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 import del from 'del';
 import { some } from 'lodash';
@@ -15,12 +20,6 @@ export async function setupNodeEvents(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ) {
-  const logger = createLogger(LogLevel.info);
-
-  const apmKibanaClient = new apm.ApmSynthtraceKibanaClient({
-    logger,
-  });
-
   const client = createEsClientForTesting({
     esUrl: config.env.ES_NODE,
     requestTimeout: config.env.ES_REQUEST_TIMEOUT,
@@ -36,12 +35,21 @@ export async function setupNodeEvents(
     })
     .slice(0, -1);
 
-  const synthtraceEsClient = new apm.ApmSynthtraceEsClient({
+  const logger = createLogger(LogLevel.info);
+
+  const apmKibanaClient = new ApmSynthtraceKibanaClient({
+    logger,
+    target: kibanaUrl,
+  });
+
+  const synthtraceEsClient = new ApmSynthtraceEsClient({
     client,
     logger,
     refreshAfterIndex: true,
-    version: await apmKibanaClient.fetchLatestApmPackageVersion(kibanaUrl),
+    version: await apmKibanaClient.fetchLatestApmPackageVersion(),
   });
+
+  synthtraceEsClient.pipeline(synthtraceEsClient.getDefaultPipeline(false));
 
   on('task', {
     // send logs to node process

@@ -8,9 +8,8 @@
 
 import { compact, shuffle } from 'lodash';
 import { Readable } from 'stream';
-import { apm, ApmFields } from '../..';
+import { apm, ApmFields, generateLongId, generateShortId } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
-import { generateLongId, generateShortId } from '../lib/utils/generate_id';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);

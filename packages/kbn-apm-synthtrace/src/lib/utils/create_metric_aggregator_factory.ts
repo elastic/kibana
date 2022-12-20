@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { appendHash, Fields, parseInterval } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
 import { Duplex, PassThrough } from 'stream';
-import { Fields } from '../entity';
-import { parseInterval } from '../interval';
-import { appendHash } from './hash';
 
 export function createMetricAggregatorFactory<TFields extends Fields>() {
   return function <TMetric extends Record<string, any>, TOutput extends Record<string, any>>(

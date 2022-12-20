@@ -5,11 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { apm } from '../..';
+import { ApmFields, apm, Instance } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
-import { ApmFields } from '../lib/apm/apm_fields';
-import { Instance } from '../lib/apm/instance';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import url from 'url';
 import { BaseSpan } from './base_span';
 import { generateShortId } from '../utils/generate_id';
 import { ApmFields, SpanParams } from './apm_fields';
@@ -49,7 +48,7 @@ export function httpExitSpan({
   // host: 'opbeans-go:3000',
   // hostname: 'opbeans-go',
   // port: '3000',
-  const destination = new url.URL(destinationUrl);
+  const destination = new URL(destinationUrl);
 
   const spanType = 'external';
   const spanSubtype = 'http';

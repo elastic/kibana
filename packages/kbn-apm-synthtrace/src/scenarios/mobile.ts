@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { apm } from '../..';
-import { Scenario } from '../cli/scenario';
-import { ApmFields } from '../lib/apm/apm_fields';
-import {
+import { MobileDevice, apm, ApmFields } from '@kbn/apm-synthtrace-client';
+import type {
   DeviceInfo,
   GeoInfo,
-  MobileDevice,
   NetworkConnectionInfo,
   OSInfo,
-} from '../lib/apm/mobile_device';
+} from '@kbn/apm-synthtrace-client';
+import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);

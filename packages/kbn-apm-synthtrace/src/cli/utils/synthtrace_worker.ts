@@ -8,7 +8,7 @@
 import { parentPort, workerData } from 'worker_threads';
 import pidusage from 'pidusage';
 import { memoryUsage } from 'process';
-import { timerange } from '../../lib/timerange';
+import { timerange } from '@kbn/apm-synthtrace-client';
 import { getEsClient } from './get_es_client';
 import { getScenario } from './get_scenario';
 import { loggerProxy } from './logger_proxy';

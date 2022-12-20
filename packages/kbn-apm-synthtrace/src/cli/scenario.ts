@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { SynthtraceGenerator, Timerange } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
-import { ApmSynthtraceEsClient } from '../lib/apm';
-import { Timerange } from '../lib/timerange';
+import { ApmSynthtraceEsClient } from '../lib/apm/client/apm_synthtrace_es_client';
 import { Logger } from '../lib/utils/create_logger';
-import { SynthtraceGenerator } from '../types';
 import { RunOptions } from './utils/parse_run_cli_flags';
 
 type Generate<TFields> = (options: {

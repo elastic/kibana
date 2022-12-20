@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { timerange } from './src/lib/timerange';
-export { apm } from './src/lib/apm';
-export { dedot } from './src/lib/utils/dedot';
-export { observer } from './src/lib/agent_config';
 export { createLogger, LogLevel } from './src/lib/utils/create_logger';
 
-export type { SynthtraceGenerator } from './src/types';
-export type { Fields } from './src/lib/entity';
-export type { ApmFields } from './src/lib/apm/apm_fields';
-export type { ApmException } from './src/lib/apm';
-export type { Serializable } from './src/lib/serializable';
-export type { ApmSynthtraceEsClient, ApmSynthtraceKibanaClient } from './src/lib/apm';
+export { ApmSynthtraceEsClient } from './src/lib/apm/client/apm_synthtrace_es_client';
+export { ApmSynthtraceKibanaClient } from './src/lib/apm/client/apm_synthtrace_kibana_client';

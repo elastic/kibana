@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { ApmFields, appendHash, hashKeysOf } from '@kbn/apm-synthtrace-client';
 import { pick } from 'lodash';
 import { createLosslessHistogram } from '../../utils/create_lossless_histogram';
-import { appendHash, hashKeysOf } from '../../utils/hash';
-import { ApmFields } from '../apm_fields';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
 
 const KEY_FIELDS: Array<keyof ApmFields> = [

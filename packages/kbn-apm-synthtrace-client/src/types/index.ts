@@ -7,7 +7,6 @@
  */
 
 import { BulkCreateOperation, BulkIndexOperation } from '@elastic/elasticsearch/lib/api/types';
-import { Duplex } from 'stream';
 import { Fields } from '../lib/entity';
 import { Serializable } from '../lib/serializable';
 
@@ -23,5 +22,3 @@ export type SynthtraceGenerator<TFields extends Fields> = Generator<Serializable
 export type SynthtraceProcessor<TFields extends Fields> = (
   fields: ESDocumentWithOperation<TFields>
 ) => ESDocumentWithOperation<TFields>;
-
-export type SynthtraceAggregator<TFields extends Fields> = Duplex;

@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { ApmFields } from '@kbn/apm-synthtrace-client';
 import { identity, negate } from 'lodash';
 import { createFilterTransform, fork } from '../../utils/stream_utils';
-import { ApmFields } from '../apm_fields';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
 
 const filter = (event: ApmFields) =>

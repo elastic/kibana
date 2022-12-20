@@ -8,18 +8,16 @@
 
 import { merge, range as lodashRange } from 'lodash';
 import { PassThrough, pipeline, Transform } from 'stream';
-import { apm } from '../..';
+import { apm, ApmFields, ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { createServiceMetricsAggregator } from '../lib/apm/aggregators/create_service_metrics_aggregator';
 import { createTransactionMetricsAggregator } from '../lib/apm/aggregators/create_transaction_metrics_aggregator';
-import { ApmFields } from '../lib/apm/apm_fields';
 import { ComponentTemplateName } from '../lib/apm/client/apm_synthtrace_es_client';
 import { getApmServerMetadataTransform } from '../lib/apm/client/apm_synthtrace_es_client/get_apm_server_metadata_transform';
 import { getDedotTransform } from '../lib/apm/client/apm_synthtrace_es_client/get_dedot_transform';
 import { getIntakeDefaultsTransform } from '../lib/apm/client/apm_synthtrace_es_client/get_intake_defaults_transform';
 import { getSerializeTransform } from '../lib/apm/client/apm_synthtrace_es_client/get_serialize_transform';
 import { fork } from '../lib/utils/stream_utils';
-import { ESDocumentWithOperation } from '../types';
 
 const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
   const {

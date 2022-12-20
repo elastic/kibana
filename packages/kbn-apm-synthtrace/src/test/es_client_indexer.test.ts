@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { before, pick, range, sum } from 'lodash';
-import { PassThrough, pipeline, Readable } from 'stream';
-import { apm } from '../lib/apm';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { pick, range, sum } from 'lodash';
+import { Readable } from 'stream';
 import { ApmSynthtraceEsClient } from '../lib/apm/client/apm_synthtrace_es_client';
-import { timerange } from '../lib/timerange';
-import { sequential } from '../lib/utils/stream_utils';
 
 describe('Synthtrace ES Client indexer', () => {
   let apmEsClient: ApmSynthtraceEsClient;
@@ -93,15 +90,13 @@ describe('Synthtrace ES Client indexer', () => {
       );
     });
 
-    const generator = timerange(
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-01-01T00:59:59.999Z')
-    )
-      .interval('20m')
-      .rate(10)
-      .generator(generatorCallback);
+    const getGenerator = () =>
+      timerange(new Date('2022-01-01T00:00:00.000Z'), new Date('2022-01-01T00:59:59.999Z'))
+        .interval('20m')
+        .rate(10)
+        .generator(generatorCallback);
 
-    await apmEsClient.index(generator);
+    await apmEsClient.index(getGenerator());
 
     const expectedTotalCalls = 30;
 
@@ -117,10 +112,9 @@ describe('Synthtrace ES Client indexer', () => {
 
     generatorCallback.mockClear();
 
-    await apmEsClient.index(generator);
+    await apmEsClient.index(getGenerator());
 
-    for await (const _ of datasource) {
-    }
+    await toArray(datasource);
 
     expect(generatorCallback.mock.calls.length).toBe(expectedTotalCalls);
   });

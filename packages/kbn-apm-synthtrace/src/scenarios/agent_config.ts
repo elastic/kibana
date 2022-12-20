@@ -5,10 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { observer } from '../..';
+import { observer, AgentConfigFields } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
-import { AgentConfigFields } from '../lib/agent_config/agent_config_fields';
 
 const scenario: Scenario<AgentConfigFields> = async ({ logger }) => {
   return {

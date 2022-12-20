@@ -7,21 +7,21 @@
  */
 
 import { Client, estypes } from '@elastic/elasticsearch';
-import { castArray } from 'lodash';
-import { PassThrough, Readable, Transform, pipeline } from 'stream';
-import { isGeneratorObject } from 'util/types';
-import { ValuesType } from 'utility-types';
 import {
+  ApmFields,
   ESDocumentWithOperation,
   SynthtraceESAction,
   SynthtraceGenerator,
-} from '../../../../types';
+} from '@kbn/apm-synthtrace-client';
+import { castArray } from 'lodash';
+import { PassThrough, pipeline, Readable, Transform } from 'stream';
+import { isGeneratorObject } from 'util/types';
+import { ValuesType } from 'utility-types';
 import { Logger } from '../../../utils/create_logger';
 import { fork, sequential } from '../../../utils/stream_utils';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
 import { createSpanMetricsAggregator } from '../../aggregators/create_span_metrics_aggregator';
 import { createTransactionMetricsAggregator } from '../../aggregators/create_transaction_metrics_aggregator';
-import { ApmFields } from '../../apm_fields';
 import { getApmServerMetadataTransform } from './get_apm_server_metadata_transform';
 import { getDedotTransform } from './get_dedot_transform';
 import { getIntakeDefaultsTransform } from './get_intake_defaults_transform';
@@ -58,28 +58,7 @@ export class ApmSynthtraceEsClient {
 
   private readonly version: string;
 
-  private pipelineCallback: (base: Readable) => NodeJS.WritableStream = (base) => {
-    const aggregators = [
-      createTransactionMetricsAggregator('1m'),
-      createSpanMetricsAggregator('1m'),
-    ];
-
-    return pipeline(
-      base,
-      getSerializeTransform(),
-      getIntakeDefaultsTransform(),
-      fork(new PassThrough({ objectMode: true }), ...aggregators),
-      createBreakdownMetricsAggregator('30s'),
-      getApmServerMetadataTransform(this.version),
-      getRoutingTransform(),
-      getDedotTransform(),
-      (err) => {
-        if (err) {
-          this.logger.error(err);
-        }
-      }
-    );
-  };
+  private pipelineCallback: (base: Readable) => NodeJS.WritableStream = this.getDefaultPipeline();
 
   constructor(options: { client: Client; logger: Logger } & ApmSynthtraceEsClientOptions) {
     this.client = options.client;
@@ -133,6 +112,34 @@ export class ApmSynthtraceEsClient {
       allow_no_indices: true,
       ignore_unavailable: true,
     });
+  }
+
+  getDefaultPipeline(includeSerialization?: boolean) {
+    return (base: Readable) => {
+      const aggregators = [
+        createTransactionMetricsAggregator('1m'),
+        createSpanMetricsAggregator('1m'),
+      ];
+
+      const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
+
+      return pipeline(
+        // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
+        base,
+        ...serializationTransform,
+        getIntakeDefaultsTransform(),
+        fork(new PassThrough({ objectMode: true }), ...aggregators),
+        createBreakdownMetricsAggregator('30s'),
+        getApmServerMetadataTransform(this.version),
+        getRoutingTransform(),
+        getDedotTransform(),
+        (err) => {
+          if (err) {
+            this.logger.error(err);
+          }
+        }
+      );
+    };
   }
 
   pipeline(cb: (base: Readable) => NodeJS.WritableStream) {

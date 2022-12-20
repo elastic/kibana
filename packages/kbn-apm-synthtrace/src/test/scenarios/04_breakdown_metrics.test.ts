@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 import { sumBy } from 'lodash';
-import { apm } from '../../lib/apm';
-import { timerange } from '../../lib/timerange';
-import { ApmFields } from '../../lib/apm/apm_fields';
 import { Readable } from 'stream';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import { createBreakdownMetricsAggregator } from '../../lib/apm/aggregators/create_breakdown_metrics_aggregator';
+import { apm, ApmFields, timerange } from '@kbn/apm-synthtrace-client';
 
 describe('breakdown metrics', () => {
   let events: ApmFields[];

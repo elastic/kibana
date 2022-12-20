@@ -7,9 +7,7 @@
  */
 
 import { random } from 'lodash';
-import { apm } from '../..';
-import { ApmFields } from '../lib/apm/apm_fields';
-import { Instance } from '../lib/apm/instance';
+import { apm, Instance, ApmFields } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 
 const scenario: Scenario<ApmFields> = async ({ logger }) => {

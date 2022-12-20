@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { apm, timerange, ApmFields } from '@kbn/apm-synthtrace-client';
 import { sortBy } from 'lodash';
 import { Readable } from 'stream';
-import { apm } from '../../lib/apm';
 import { createTransactionMetricsAggregator } from '../../lib/apm/aggregators/create_transaction_metrics_aggregator';
-import { ApmFields } from '../../lib/apm/apm_fields';
-import { timerange } from '../../lib/timerange';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 
 describe('transaction metrics', () => {

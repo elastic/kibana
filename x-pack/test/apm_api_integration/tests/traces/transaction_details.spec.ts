@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, EntityArrayIterable, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { Readable } from 'stream';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -78,12 +79,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ),
           ];
         });
-      const entities = events.toArray();
+
+      const unserialized = Array.from(events);
+
+      const entities = unserialized.flatMap((event) => event.serialize());
+
       const transaction = entities[0];
       transactionId = transaction?.['transaction.id']!;
       traceId = transaction?.['trace.id']!;
 
-      await synthtraceEsClient.index(new EntityArrayIterable(entities));
+      await synthtraceEsClient.index(Readable.from(unserialized));
     });
 
     after(() => synthtraceEsClient.clean());

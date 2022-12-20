@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ApmFields, ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
 import { Transform } from 'stream';
-import { ESDocumentWithOperation } from '../../../../types';
-import { ApmFields } from '../../apm_fields';
 
 export function getRoutingTransform() {
   return new Transform({

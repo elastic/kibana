@@ -5,7 +5,12 @@
  * 2.0.
  */
 import { APM_TEST_PASSWORD } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
-import { apm, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import {
+  ApmSynthtraceEsClient,
+  ApmSynthtraceKibanaClient,
+  createLogger,
+  LogLevel,
+} from '@kbn/apm-synthtrace';
 import url from 'url';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 
@@ -22,7 +27,7 @@ export async function bootstrapApmSynthtrace(
     })
     .slice(0, -1);
 
-  const kibanaClient = new apm.ApmSynthtraceKibanaClient({
+  const kibanaClient = new ApmSynthtraceKibanaClient({
     target: kibanaServerUrlWithAuth,
     logger: createLogger(LogLevel.debug),
   });
@@ -31,7 +36,7 @@ export async function bootstrapApmSynthtrace(
 
   await kibanaClient.installApmPackage(kibanaVersion);
 
-  const esClient = new apm.ApmSynthtraceEsClient({
+  const esClient = new ApmSynthtraceEsClient({
     client: es,
     logger: createLogger(LogLevel.info),
     version: kibanaVersion,

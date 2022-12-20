@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { ApmFields, Instance, apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
-import { apm } from '../..';
 import { Scenario } from '../cli/scenario';
-import { ApmFields } from '../lib/apm/apm_fields';
-import { Instance } from '../lib/apm/instance';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);

@@ -8,12 +8,10 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
-import { apm } from '../..';
-import { ApmFields } from '../lib/apm/apm_fields';
+import { apm, ApmFields, DistributedTrace } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-import { DistributedTrace } from '../lib/dsl/distributed_trace_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 

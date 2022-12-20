@@ -6,7 +6,7 @@
  */
 
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';

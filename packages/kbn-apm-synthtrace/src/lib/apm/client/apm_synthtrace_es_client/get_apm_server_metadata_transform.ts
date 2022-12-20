@@ -7,7 +7,7 @@
  */
 
 import { Transform } from 'stream';
-import { ApmFields } from '../../apm_fields';
+import { ApmFields } from '@kbn/apm-synthtrace-client';
 
 export function getApmServerMetadataTransform(version: string) {
   const versionMajor = Number(version.split('.')[0]);

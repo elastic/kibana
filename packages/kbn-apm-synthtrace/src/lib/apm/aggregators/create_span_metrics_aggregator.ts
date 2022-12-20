@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 import { pick } from 'lodash';
-import { hashKeysOf } from '../../utils/hash';
-import { ApmFields } from '../apm_fields';
+import { ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
 
 const KEY_FIELDS: Array<keyof ApmFields> = [

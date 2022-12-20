@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { Fields } from '@kbn/apm-synthtrace-client';
 import { Logger } from '../../lib/utils/create_logger';
 import { Scenario } from '../scenario';
-import { Fields } from '../../lib/entity';
 
 export function getScenario({ file, logger }: { file: string; logger: Logger }) {
   logger.debug(`Loading scenario from ${file}`);

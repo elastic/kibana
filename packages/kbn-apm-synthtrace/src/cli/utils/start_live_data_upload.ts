@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { timerange } from '@kbn/apm-synthtrace-client';
 import { castArray } from 'lodash';
 import { PassThrough, Readable, Writable } from 'stream';
 import { isGeneratorObject } from 'util/types';
-import { timerange } from '../../lib/timerange';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';

@@ -4,7 +4,15 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
-    "types": ["node", "jest"]
+    "types": [
+      "jest",
+      "node"
+    ]
   },
-  "include": ["**/*.ts"]
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    
+  ]
 }

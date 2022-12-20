@@ -14,7 +14,6 @@ SOURCE_FILES = glob(
     "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
-    "**/.eslintrc.*",
     "**/__snapshots__/**",
     "**/integration_tests/**",
     "**/mocks/**",
@@ -34,41 +33,49 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md"
 ]
 
+# In this array place runtime dependencies, including other packages and NPM packages
+# which must be available for this code to run.
+#
+#  To reference other packages use:
+#    "//repo/relative/path/to/package"
+#    eg. "//packages/kbn-utils"
+#
+#  To reference a NPM package use:
+#    "@npm//name-of-package"
+#    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "//packages/kbn-datemath",
-  "@npm//@elastic/elasticsearch",
-  "@npm//lodash",
-  "@npm//moment",
-  "@npm//object-hash",
-  "@npm//p-limit",
   "@npm//yargs",
-  "@npm//node-fetch",
-  "@npm//semver",
-  "@npm//elastic-apm-http-client",
   "@npm//async",
+  "@npm//node-fetch",
   "@npm//pidusage",
-  "@npm//multistream"
+  "@npm//multistream",
+  "@npm//utility-types",
+  "//packages/kbn-apm-synthtrace-client",
+  "//packages/kbn-datemath"
 ]
 
+# In this array place dependencies necessary to build the types, which will include the
+# :npm_module_types target of other packages and packages from NPM, including @types/*
+# packages.
+#
+#  To reference the types for another package use:
+#    "//repo/relative/path/to/package:npm_module_types"
+#    eg. "//packages/kbn-utils:npm_module_types"
+#
+#  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "//packages/kbn-datemath:npm_module_types",
-  "@npm//@elastic/elasticsearch",
-  "@npm//@types/jest",
-  "@npm//@types/lodash",
   "@npm//@types/node",
-  "@npm//@types/object-hash",
-  "@npm//moment",
-  "@npm//p-limit",
-  "@npm//@types/node-fetch",
-  "@npm//@types/semver",
+  "@npm//@types/jest",
   "@npm//@types/yargs",
   "@npm//@types/async",
+  "@npm//@types/node-fetch",
   "@npm//@types/pidusage",
   "@npm//@types/multistream",
-  "@npm//utility-types"
+  "@npm//utility-types",
+  "//packages/kbn-apm-synthtrace-client:npm_module_types",
+  "//packages/kbn-datemath:npm_module_types",
 ]
 
 jsts_transpiler(
@@ -95,7 +102,6 @@ ts_project(
   emit_declaration_only = True,
   out_dir = "target_types",
   tsconfig = ":tsconfig",
-  validate = False,
 )
 
 js_library(
@@ -121,9 +127,7 @@ pkg_npm(
 
 filegroup(
   name = "build",
-  srcs = [
-    ":npm_module",
-  ],
+  srcs = [":npm_module"],
   visibility = ["//visibility:public"],
 )
 
