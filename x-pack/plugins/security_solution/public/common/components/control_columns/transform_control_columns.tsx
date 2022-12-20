@@ -139,8 +139,6 @@ export const transformControlColumns = ({
           setCellProps({ style: { display: 'none' } });
         }
 
-        console.warn({ origData: data[pageRowIndex] });
-
         return (
           <RowAction
             columnId={columnId ?? ''}

@@ -58,7 +58,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     props.alertsTableConfiguration;
 
   const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
-    useActionsColumn();
+    useActionsColumn(ecsAlertsData, oldAlertsData);
 
   const {
     isBulkActionsColumnActive,
@@ -175,9 +175,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                   </EuiFlexItem>
                 )}
                 {renderCustomActionsRow &&
-                  alerts[visibleRowIndex] &&
+                  ecsAlertsData[visibleRowIndex] &&
                   renderCustomActionsRow({
-                    alert: alerts[visibleRowIndex],
+                    alert: ecsAlertsData[visibleRowIndex],
                     nonEcsData: oldAlertsData[visibleRowIndex],
                     rowIndex: visibleRowIndex,
                     setFlyoutAlert: handleFlyoutAlert,
@@ -200,7 +200,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   }, [
     actionsColumnWidth,
     oldAlertsData,
-    alerts,
+    ecsAlertsData,
     getBulkActionsLeadingControlColumn,
     handleFlyoutAlert,
     isBulkActionsColumnActive,

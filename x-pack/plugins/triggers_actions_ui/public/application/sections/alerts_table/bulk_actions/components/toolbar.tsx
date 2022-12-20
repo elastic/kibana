@@ -75,6 +75,7 @@ const useBulkActionsToMenuItemMapper = (
             data-test-subj={item['data-test-subj']}
             disabled={isDisabled}
             onClick={() => {
+              debugger;
               const selectedAlertIds = selectedIdsToTimelineItemMapper(alerts, rowSelection);
               item.onClick(selectedAlertIds, isAllSelected);
             }}

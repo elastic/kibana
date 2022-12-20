@@ -12,6 +12,8 @@ import { BulkActionsVerbs } from '../../../../../types';
 import { BulkActionsContext } from '../context';
 
 const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
+  const contextValue = useContext(BulkActionsContext);
+  console.warn({ contextValue });
   const [{ rowSelection }, updateSelectedRows] = useContext(BulkActionsContext);
   const isChecked = rowSelection.has(rowIndex);
 

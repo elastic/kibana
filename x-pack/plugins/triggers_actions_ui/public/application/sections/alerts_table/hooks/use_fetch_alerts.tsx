@@ -207,6 +207,7 @@ const useFetchAlerts = ({
               next: (response) => {
                 if (isCompleteResponse(response)) {
                   const { rawResponse } = response;
+                  debugger;
                   console.warn({ rawResponse });
                   inspectQuery.current = {
                     request: [request],

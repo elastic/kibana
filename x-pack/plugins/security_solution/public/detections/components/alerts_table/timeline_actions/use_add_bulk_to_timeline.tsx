@@ -196,10 +196,17 @@ export const useAddBulkToTimelineAction = ({
   );
 
   const onActionClick = useCallback(
-    (items: TimelineItem[] | undefined) => {
+    (items: TimelineItem[] | undefined, isAllSelected?: boolean) => {
       if (!items) return;
+      /*
+       * Trigger actions table passed isAllSelected param
+       *
+       * and selectAll is used when using DataTable
+       * */
 
-      if (selectAll) {
+      console.warn({ isAllSelected });
+
+      if (isAllSelected || selectAll) {
         dispatch(
           setEventsLoading({
             id: tableId,

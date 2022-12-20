@@ -536,7 +536,7 @@ export type UseCellActions = (props: {
 };
 
 export interface RenderCustomActionsRowProps {
-  alert: EcsFieldsResponse;
+  alert: FetchAlertData['ecsAlertsData'][number];
   nonEcsData: FetchAlertData['oldAlertsData'][number];
   rowIndex: number;
   cveProps: EuiDataGridCellValueElementProps;
@@ -555,7 +555,10 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
-  useActionsColumn?: () => {
+  useActionsColumn?: (
+    ecsData?: FetchAlertData['ecsAlertsData'],
+    oldAlertsData?: FetchAlertData['oldAlertsData']
+  ) => {
     renderCustomActionsRow: (args: RenderCustomActionsRowProps) => JSX.Element;
     width?: number;
   };
