@@ -1225,8 +1225,8 @@ describe('createLifecycleExecutor', () => {
             { index: { _id: 'TEST_ALERT_0_UUID' } },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
-              [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
-              [EVENT_ACTION]: 'close',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [EVENT_ACTION]: 'active',
               [EVENT_KIND]: 'signal',
               [ALERT_FLAPPING]: true,
             }),
@@ -1241,8 +1241,8 @@ describe('createLifecycleExecutor', () => {
             { index: { _id: 'TEST_ALERT_2_UUID' } },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
-              [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
-              [EVENT_ACTION]: 'close',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [EVENT_ACTION]: 'active',
               [EVENT_KIND]: 'signal',
               [ALERT_FLAPPING]: true,
             }),
