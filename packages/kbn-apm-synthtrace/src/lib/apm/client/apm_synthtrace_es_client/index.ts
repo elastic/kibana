@@ -114,7 +114,7 @@ export class ApmSynthtraceEsClient {
     });
   }
 
-  getDefaultPipeline(includeSerialization?: boolean) {
+  getDefaultPipeline(includeSerialization: boolean = true) {
     return (base: Readable) => {
       const aggregators = [
         createTransactionMetricsAggregator('1m'),
