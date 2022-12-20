@@ -11,13 +11,13 @@ export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
  * The Command names that are used in the API payload for the `{ command: '' }` attribute
  */
 export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
+  'kube-list',
   'isolate',
   'unisolate',
   'kill-process',
   'suspend-process',
   'running-processes',
   'get-file',
-  'kube-list',
 ] as const;
 
 export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS_NAMES[number];
