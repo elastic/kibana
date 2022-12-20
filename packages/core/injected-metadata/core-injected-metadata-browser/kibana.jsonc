@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/core-injected-metadata-browser",
-  "owner": "@elastic/kibana-core",
-  "runtimeDeps": [],
-  "typeDeps": []
-}

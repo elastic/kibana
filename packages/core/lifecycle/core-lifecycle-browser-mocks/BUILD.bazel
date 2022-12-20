@@ -36,7 +36,6 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/core/injected-metadata/core-injected-metadata-browser-mocks",
   "//packages/core/doc-links/core-doc-links-browser-mocks",
   "//packages/core/theme/core-theme-browser-mocks",
   "//packages/core/analytics/core-analytics-browser-mocks",
@@ -56,7 +55,6 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "//packages/core/injected-metadata/core-injected-metadata-browser-mocks:npm_module_types",
   "//packages/core/doc-links/core-doc-links-browser-mocks:npm_module_types",
   "//packages/core/theme/core-theme-browser-mocks:npm_module_types",
   "//packages/core/analytics/core-analytics-browser-mocks:npm_module_types",
