@@ -201,7 +201,11 @@ export class ExecutionHandler<
           if (isSummaryActionPerRuleRun(action) && !this.hasAlerts(alerts)) {
             continue;
           }
-          const summarizedAlerts = await this.getSummarizedAlerts({ action, spaceId, ruleId });
+          const summarizedAlerts = await this.getSummarizedAlerts({
+            action,
+            spaceId,
+            ruleId,
+          });
           const actionToRun = {
             ...action,
             params: injectActionParams({
@@ -281,9 +285,7 @@ export class ExecutionHandler<
             alertGroup: action.group,
           });
 
-          if (this.isRecoveredAlert(actionGroup)) {
-            executableAlert.scheduleActions(action.group as ActionGroupIds);
-          } else {
+          if (!this.isRecoveredAlert(actionGroup)) {
             if (isSummaryActionOnInterval(action)) {
               executableAlert.updateLastScheduledActions(
                 action.group as ActionGroupIds,
@@ -527,12 +529,14 @@ export class ExecutionHandler<
         end: new Date(),
         ruleId,
         spaceId,
+        excludedAlertInstanceIds: this.rule.mutedInstanceIds,
       };
     } else {
       options = {
         executionUuid: this.executionId,
         ruleId,
         spaceId,
+        excludedAlertInstanceIds: this.rule.mutedInstanceIds,
       };
     }
 

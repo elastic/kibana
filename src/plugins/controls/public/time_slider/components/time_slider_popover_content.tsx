@@ -7,9 +7,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { Ref } from 'react';
-import { EuiButtonIcon, EuiDualRange, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import React, { Ref, ComponentProps } from 'react';
+import {
+  EuiButtonIcon,
+  EuiDualRange,
+  EuiRangeTick,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
+import type { EuiDualRangeClass } from '@elastic/eui/src/components/form/range/dual_range';
+
+// Unfortunately, wrapping EuiDualRange in `withEuiTheme` has created a super annoying/verbose typing
+export type EuiDualRangeRef = EuiDualRangeClass & ComponentProps<typeof EuiDualRange>;
 
 interface Props {
   value: [number, number];
@@ -19,7 +29,7 @@ interface Props {
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;
-  rangeRef?: Ref<EuiDualRange>;
+  rangeRef?: Ref<EuiDualRangeRef>;
 }
 
 export function TimeSliderPopoverContent(props: Props) {
