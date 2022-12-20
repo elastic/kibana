@@ -68,16 +68,20 @@ upload_test_results() {
   buildkite-agent artifact upload "scalability_traces.tar.gz"
 }
 
-echo "--- Download the latest artifacts from single user performance pipeline"
-download_artifacts
-
 echo "--- Clone kibana-load-testing repo and compile project"
 checkout_and_compile_load_runner
 
-echo "--- Run Scalability Tests"
 cd "$KIBANA_DIR"
-node scripts/run_scalability --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path "x-pack/test/scalability/apis"
-#node scripts/run_scalability --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path "scalability_traces/server"
+
+if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-scalability-benchmarking-1" ]; then
+  echo "--- Download the latest artifacts from single user performance pipeline"
+  download_artifacts
+  echo "--- Run Journey scalability tests"
+  node scripts/run_scalability --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path "scalability_traces/server"
+else
+  echo "--- Run Single APIs Capacity tests"
+  node scripts/run_scalability --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path "x-pack/test/scalability/apis"
+fi
 
 echo "--- Upload test results"
 upload_test_results
