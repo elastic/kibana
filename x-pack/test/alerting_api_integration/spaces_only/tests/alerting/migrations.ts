@@ -579,7 +579,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       expect(alert?.lastRun?.outcome).to.eql('warning');
       expect(alert?.lastRun?.warning).to.eql('warning reason');
-      expect(alert?.lastRun?.outcomeMsg).to.eql(['warning message']);
+      expect(alert?.lastRun?.outcomeMsg).to.eql('warning message');
     });
 
     it('8.7.0 adds aggType and groupBy to ES query rules', async () => {

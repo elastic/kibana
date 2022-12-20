@@ -2458,7 +2458,7 @@ describe('successful migrations', () => {
 
       let migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
       expect(migratedRule.attributes.lastRun.outcome).toEqual('warning');
-      expect(migratedRule.attributes.lastRun.outcomeMsg).toEqual(['warning message']);
+      expect(migratedRule.attributes.lastRun.outcomeMsg).toEqual('warning message');
       expect(migratedRule.attributes.lastRun.warning).toEqual('warning reason');
 
       ruleWithExecutionStatus = getMockData({
@@ -2475,7 +2475,7 @@ describe('successful migrations', () => {
 
       migratedRule = migration860(ruleWithExecutionStatus, migrationContext);
       expect(migratedRule.attributes.lastRun.outcome).toEqual('failed');
-      expect(migratedRule.attributes.lastRun.outcomeMsg).toEqual(['failed message']);
+      expect(migratedRule.attributes.lastRun.outcomeMsg).toEqual('failed message');
       expect(migratedRule.attributes.lastRun.warning).toEqual('failed reason');
     });
 

@@ -86,6 +86,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     schedule,
     actions,
     snoozeSchedule,
+    lastRun,
     ...partialRawRule
   }: Partial<RawRule>,
   references: SavedObjectReference[] | undefined,
@@ -139,6 +140,14 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       ? { monitoring: convertMonitoringFromRawAndVerify(context.logger, id, monitoring) }
       : {}),
     ...(nextRun ? { nextRun: new Date(nextRun) } : {}),
+    ...(lastRun
+      ? {
+          ...lastRun,
+          ...(lastRun.outcomeMsg && !Array.isArray(lastRun.outcomeMsg)
+            ? { outcomeMsg: [lastRun.outcomeMsg] }
+            : { outcomeMsg: lastRun.outcomeMsg }),
+        }
+      : {}),
   };
 
   return includeLegacyId
