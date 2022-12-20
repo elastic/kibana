@@ -56,7 +56,7 @@ export const useColumns = ({
         columns: usedColumns,
         sort,
       }),
-    [capabilities, columns, config, dataView, dataViews, setAppState, sort, useNewFieldsApi]
+    [capabilities, config, dataView, dataViews, setAppState, sort, useNewFieldsApi, usedColumns]
   );
 
   return {
