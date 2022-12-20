@@ -131,8 +131,8 @@ filegroup(
   visibility = ["//visibility:public"],
 )
 
-filegroup(
+pkg_npm(
   name = "build_types",
-  srcs = [":npm_module_types"],
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

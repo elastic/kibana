@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 
 import {
-  deleteRules,
+  bulkDeleteRules,
   useLoadRuleTypes,
   RuleType,
   getNotifyWhenOptions,
@@ -424,7 +424,7 @@ export function RuleDetailsPage() {
           navigateToUrl(http.basePath.prepend(paths.observability.rules));
         }}
         onCancel={() => setRuleToDelete([])}
-        apiDeleteCall={deleteRules}
+        apiDeleteCall={bulkDeleteRules}
         idsToDelete={ruleToDelete}
         singleTitle={rule.name}
         multipleTitle={rule.name}

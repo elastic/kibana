@@ -1781,6 +1781,62 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-server.arrayMapsAreEqual",
+        "type": "Function",
+        "tags": [],
+        "label": "arrayMapsAreEqual",
+        "description": [
+          "\nDetermines if a given map of arrays is equal to another given map of arrays.\nUsed for comparing namespace maps in saved object repo/security extension tests.\n"
+        ],
+        "signature": [
+          "(mapA: Map<T, T[] | undefined>, mapB: Map<T, T[] | undefined>) => boolean"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-server.arrayMapsAreEqual.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "mapA",
+            "description": [
+              "The first map to compare"
+            ],
+            "signature": [
+              "Map<T, T[] | undefined>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-server.arrayMapsAreEqual.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "mapB",
+            "description": [
+              "The second map to compare"
+            ],
+            "signature": [
+              "Map<T, T[] | undefined>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if map A is equal to map B"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
         "id": "def-server.mergeSavedObjectMigrationMaps",
         "type": "Function",
         "tags": [],
@@ -1867,6 +1923,118 @@
         ],
         "returnComment": [
           "The merged map {@link SavedObjectMigrationMap }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-server.setMapsAreEqual",
+        "type": "Function",
+        "tags": [],
+        "label": "setMapsAreEqual",
+        "description": [
+          "\nDetermines if a given Map of Sets is equal to another given Map of Sets.\nUsed for comparing typeMaps and enforceMaps in saved object repo/security extension tests.\n"
+        ],
+        "signature": [
+          "(mapA: Map<T, Set<T>> | undefined, mapB: Map<T, Set<T>> | undefined) => boolean"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-server.setMapsAreEqual.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "mapA",
+            "description": [
+              "The first map to compare"
+            ],
+            "signature": [
+              "Map<T, Set<T>> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-server.setMapsAreEqual.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "mapB",
+            "description": [
+              "The second map to compare"
+            ],
+            "signature": [
+              "Map<T, Set<T>> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "True if map A is equal to map B"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-server.setsAreEqual",
+        "type": "Function",
+        "tags": [],
+        "label": "setsAreEqual",
+        "description": [
+          "\nDetermines if a given Set is equal to another given Set. Set types must be the same, and comparable.\n"
+        ],
+        "signature": [
+          "(setA: Set<T>, setB: Set<T>) => boolean"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-server.setsAreEqual.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "setA",
+            "description": [
+              "The first Set to compare"
+            ],
+            "signature": [
+              "Set<T>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-server.setsAreEqual.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "setB",
+            "description": [
+              "The second Set to compare"
+            ],
+            "signature": [
+              "Set<T>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if Set A is equal to Set B"
         ],
         "initialIsOpen": false
       }

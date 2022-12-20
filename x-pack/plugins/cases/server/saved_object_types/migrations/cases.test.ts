@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectSanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
 import { CaseSeverity, ConnectorTypes, NONE_CONNECTOR_ID } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { SEVERITY_EXTERNAL_TO_ESMODEL } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
+import { ESCaseSeverity } from '../../services/cases/types';
 import type { ESCaseConnectorWithId } from '../../services/test_utils';
 import { createExternalService } from '../../services/test_utils';
 import {
@@ -17,6 +19,7 @@ import {
   addDuration,
   addSeverity,
   caseConnectorIdMigration,
+  convertSeverity,
   removeCaseType,
 } from './cases';
 
@@ -574,6 +577,48 @@ describe('case migrations', () => {
           ...doc.attributes,
           assignees,
         },
+      });
+    });
+  });
+
+  describe('update severity', () => {
+    for (const oldSeverityValue of Object.values(CaseSeverity)) {
+      it(`migrates ${oldSeverityValue} severity string label to matching number`, () => {
+        const doc = {
+          id: '123',
+          type: 'abc',
+          attributes: {
+            severity: oldSeverityValue,
+          },
+          references: [],
+        } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+        expect(convertSeverity(doc)).toEqual({
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            severity: SEVERITY_EXTERNAL_TO_ESMODEL[oldSeverityValue],
+          },
+          references: [],
+        });
+      });
+    }
+
+    it('default value for severity is 0 if it does not exist', () => {
+      const doc = {
+        id: '123',
+        type: 'abc',
+        attributes: {},
+        references: [],
+      } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+      expect(convertSeverity(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          severity: ESCaseSeverity.LOW,
+        },
+        references: [],
       });
     });
   });
