@@ -53,7 +53,7 @@ import {
   bulkCreateSuccess,
   bulkUpdateSuccess,
   findSuccess,
-  setupCheckUnauthorized,
+  setupPerformAuthUnauthorized,
   generateIndexPatternSearchResults,
   bulkDeleteSuccess,
 } from '../test_helpers/repository.test.common';
@@ -912,7 +912,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
 
     describe(`#find`, () => {
       test(`returns empty result if user is unauthorized`, async () => {
-        setupCheckUnauthorized(mockSecurityExt);
+        setupPerformAuthUnauthorized(mockSecurityExt);
         const type = 'index-pattern';
         const spaceOverride = 'ns-4';
         const generatedResults = generateIndexPatternSearchResults(spaceOverride);

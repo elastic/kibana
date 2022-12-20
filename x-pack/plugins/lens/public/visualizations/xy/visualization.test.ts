@@ -17,7 +17,7 @@ import type {
   SeriesType,
 } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { IconChartBar } from '@kbn/chart-icons';
+import { IconChartBar, IconCircle } from '@kbn/chart-icons';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { Datatable } from '@kbn/expressions-plugin/common';
@@ -1983,7 +1983,12 @@ describe('xy_visualization', () => {
           layerId: 'annotations',
         });
         expect(config.groups[0].accessors).toEqual([
-          { color: '#f04e98', columnId: 'an1', triggerIcon: 'color' },
+          {
+            color: '#f04e98',
+            columnId: 'an1',
+            customIcon: IconCircle,
+            triggerIconType: 'custom',
+          },
         ]);
         expect(config.groups[0].invalid).toEqual(false);
       });
@@ -2053,7 +2058,7 @@ describe('xy_visualization', () => {
           },
           'b'
         );
-        expect(accessorConfig.triggerIcon).toEqual('color');
+        expect(accessorConfig.triggerIconType).toEqual('color');
         expect(accessorConfig.color).toEqual('red');
       });
 
@@ -2061,7 +2066,7 @@ describe('xy_visualization', () => {
         const palette = paletteServiceMock.get('default');
         (palette.getCategoricalColor as jest.Mock).mockClear();
         const accessorConfig = callConfigAndFindYConfig({}, 'c');
-        expect(accessorConfig.triggerIcon).toEqual('color');
+        expect(accessorConfig.triggerIconType).toEqual('color');
         // black is the color returned from the palette mock
         expect(accessorConfig.color).toEqual('black');
         expect(palette.getCategoricalColor).toHaveBeenCalledWith(
@@ -2113,7 +2118,7 @@ describe('xy_visualization', () => {
         const yConfigs = callConfigForYConfigs({});
         expect(yConfigs!.accessors.length).toEqual(2);
         yConfigs!.accessors.forEach((accessor) => {
-          expect(accessor.triggerIcon).toBeUndefined();
+          expect(accessor.triggerIconType).toBeUndefined();
         });
       });
 
@@ -2124,7 +2129,7 @@ describe('xy_visualization', () => {
           },
           'b'
         );
-        expect(accessorConfig.triggerIcon).toEqual('disabled');
+        expect(accessorConfig.triggerIconType).toEqual('disabled');
       });
 
       it('should show current palette for breakdown dimension', () => {

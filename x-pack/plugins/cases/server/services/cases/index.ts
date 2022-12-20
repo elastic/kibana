@@ -626,6 +626,7 @@ export class CasesService {
         bulkUpdate,
         { refresh }
       );
+
       return transformUpdateResponsesToExternalModels(updatedCases);
     } catch (error) {
       this.log.error(`Error on UPDATE case ${cases.map((c) => c.caseId).join(', ')}: ${error}`);

@@ -47,6 +47,8 @@ describe('data', () => {
       .withInput({ foo: true })
       .withHelpers(helpers)
       .toCompileTo('Hello world');
+
+    global.kbnHandlebarsEnv = null;
   });
 
   it('parameter data can be looked up via @foo', () => {
